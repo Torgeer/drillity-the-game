@@ -1,5 +1,29 @@
 # DRILLITY I THE GAME — handover
 
+## Continuation 2026-09-05 — photographic mast pass
+
+- Start with `research/20-mast-photo-reference.md`: a real, visually inspected
+  machine photograph, source attribution, implementation limits and next steps.
+  OEM photos are references only; do not present Blender renders as real photos.
+- Added `tools/blender_compact_mast.py` and `compact-feed-mast.glb` (6,152 triangles).
+  Blender MCP generated an isolated scene; existing scenes were preserved.
+  Editable `.blend` is in the task outputs directory.
+- Starter HIGH/MEDIUM now uses the authored mast, with independent lower/upper
+  sections for existing flex. LOW and failed downloads retain procedural fallback.
+- Rails, chain runs, fasteners and an open guide replace the procedural beam.
+  Chain motion and jaw actuation are not simulated; method-specific clearance
+  still needs review before calling the assembly mechanically complete.
+- `npm run build` passes: data/facts, model scale, anchors, repeated method
+  switching and HIGH/LOW selection. Production single-file output: 3,973.24kB.
+- Browser workshop visually checked with the actual rig system: 49 draw calls,
+  about 36,826 triangles in the observed auger view. FPS is view/hardware dependent;
+  this is not a full-game performance certification.
+- Next: tool continuity/guide clearance, chassis UVs and track materials, moving
+  hoses and operator guarding. Keep Three.js while addressing these asset issues.
+- No revised completion percentage: the historical 45% is not a measured release
+  estimate. No full mission regression or mobile benchmark was performed here.
+
+
 ## Continuation 2026-09-05 — Blender pipeline, first module
 
 The historical assessment below remains a baseline, not current verification.

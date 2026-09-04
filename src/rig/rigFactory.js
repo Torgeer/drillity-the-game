@@ -32,7 +32,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { buildTool, TOOL_UTILS, disposeToolLibrary } from './tools.js';
-import { loadReferenceModels, cloneCompactHead, disposeReferenceModels } from './referenceModels.js';
+import { loadReferenceModels, cloneCompactHead, cloneCompactMast, disposeReferenceModels } from './referenceModels.js';
 
 const {
   part, group, G, material, mergeStatic, disposeObject,
@@ -2038,6 +2038,9 @@ function buildCrawlerLite(T, ctx) {
   // mast
   const mastH = 4.2;
   const stack = buildMastStack(T, ctx, boom, { p: [0, -0.14, 1.28], height: mastH });
+  if (q > 0 && ctx.rigModels?.compactMast) {
+    cloneCompactMast(ctx.rigModels.compactMast, stack);
+  } else {
   // The drill axis stays at z=0. Rails sit BEHIND the gearbox, rather than
   // passing through its motor housings. The lower guide reaches back to axis.
   buildFeedBeam(T, ctx, stack.lower, { height: mastH * 0.5, width: 0.34, depth: 0.26, q, topEnd: false, p: [0, 0, -0.26], guideZ: 0.26 });
@@ -2054,6 +2057,7 @@ function buildCrawlerLite(T, ctx) {
     { p: [0, -0.02, 0.25], r: [0, 0, Math.PI / 2] });
   part(T, crown, G.cyl(T, 0.032, 0.032, 0.34, segAt(q, 10)), p.worn,
     { p: [0, -0.02, 0.25], r: [0, 0, Math.PI / 2] });
+  }
   dyn.mastPivot = stack.pivot;
   dyn.mastLower = stack.lower;
   dyn.mastUpper = stack.upper;
