@@ -1716,6 +1716,8 @@ export const TUNING = {
       wearMul: 0.7, heatMul: 0.6, flushK: 0.9, erodeK: 0.7,
       bandMul: 1, driftMul: 1, casing: false, impact: 'grind',
       bitKinds: ['drag'], completeOnProgramme: true,
+      score: { weights: { time: .10, groove: .10, bit: .05, straight: .05,
+        hazard: .10, safety: .10, quality: .50 } },
       stages: [
         { id: 'pre-drill', name: 'Pre-drill', reverse: false },
         { id: 'jet-and-lift', name: 'Jet and lift', reverse: true, jet: true,
@@ -2419,6 +2421,12 @@ export function synthProfile({ regionId = 'nordic', targetDepth = 40, seed = 1, 
 /* ═══════════════════════════════════════════════════════════════════════════
    THE SYSTEM
    ═══════════════════════════════════════════════════════════════════════════ */
+// Relative gameplay response only. Keller's process reference establishes that
+// cohesionless soils are generally more erodible; these factors are not soil tests.
+export function jetErodibility(groundId) {
+  return ({sand: 1, gravel: 1, silt: .85, clay: .70, till: .65, marl: .65})[groundId] ?? .70;
+}
+
 export function createDrillSim(ctx = {}) {
   const bus = ctx.bus || { on: () => () => {}, emit: () => {} };
   const EV = EVENTS;
@@ -5701,7 +5709,7 @@ export function createDrillSim(ctx = {}) {
     /* ── stage 1: the way back ── */
     const st = stages[1];
     if (st.jet) {
-      const coverage = clamp(S.act.flush / Math.max(0.15, S.act.wob * 1.5))
+      const coverage = clamp(S.act.flush * jetErodibility(S.ground.id) / Math.max(0.15, S.act.wob * 1.5))
         * clamp(S.act.rpm / 0.35);
       p.treatedQualityM += Math.min(dBore, S.target - p.passM) * coverage;
     }

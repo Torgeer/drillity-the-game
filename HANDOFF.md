@@ -1,5 +1,19 @@
 # DRILLITY I THE GAME — handover
 
+## Continuation 2026-09-05 — treatment quality and longer jobs
+
+- Fixed a scoring defect: jet treatment quality was calculated but had zero
+  weight in the final grade. It now contributes 50%, with the remaining score
+  covering time, control, wear, straightness, hazards and safety.
+- Added relative soil response to grout delivery versus withdrawal. Sand/gravel
+  receive higher relative erodibility than cohesive/mixed soils. These are
+  explicit game-balance factors, not measured soil properties or design values.
+- Regression tests complete 5, 20 and 60m clay jobs, including rod timing and jam
+  recovery. Identical delivery gives less coverage in clay than sand; excessive
+  withdrawal lowers treatment quality. Existing tests and production build pass.
+- Full graphical column treatment and mobile performance remain open. Long-job
+  verification here is headless; do not claim complete visual or fleet acceptance.
+
 ## Continuation 2026-09-05 — jet-grouting sequence
 
 - Explicit jet-grouting tuning now replaces the generic rotary fallback. The

@@ -44,3 +44,25 @@ for(const fps of [30,120]) {
 }
 snapshots[0].forEach((v,i)=>assert(Math.abs(v-snapshots[1][i])<.001));
 console.log('OK jet grouting: two phases, flow/rotation gates, completion at surface, monitor geometry');
+
+function treatmentRun(depth, ground, feed) {
+  const sim=createDrillSim();
+  sim.startHole({methodId:'jet-grouting',targetDepth:depth,seed:12,ground:[ground]});
+  sim.debug.simulate(3600,t=>{
+    if(t.jam.state!=='free' && t.jam.rescue.goodNow)sim.pulse('jamRescue');
+    if(t.rodAdd && t.rodAdd.t>=t.rodAdd.windowStart && t.rodAdd.t<=t.rodAdd.windowEnd)sim.pulse('rodStab');
+    return {feed:t.jam.state==='free'?feed:.08,rotation:.55,flush:.85};
+  });
+  const t=sim.getTelemetry();
+  assert.equal(t.phase,'complete',`${ground} ${depth}m must finish`);
+  assert.equal(t.actionDepth,0);
+  assert(t.score.weights.quality>=.5,'Treatment must materially affect the grade');
+  sim.dispose();return t;
+}
+for(const depth of [5,20,60])treatmentRun(depth,'clay',.4);
+const rushed=treatmentRun(5,'clay',.65);
+const careful=treatmentRun(5,'clay',.4);
+const sand=treatmentRun(5,'sand',.65);
+assert(careful.score.quality.score>rushed.score.quality.score,'Excessive withdrawal must lower quality');
+assert(sand.score.quality.score>rushed.score.quality.score,'Same delivery must treat sand more readily than clay');
+console.log('OK jet treatment: 5/20/60m completion, soil response, withdrawal penalty, quality-weighted grade');
