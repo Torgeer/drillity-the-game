@@ -12,7 +12,8 @@
     "check:models": "node tools/check-reference-model.mjs",
     "check": "node tools/checkfacts.mjs && node tools/checkdata.mjs && node tools/check-reference-model.mjs && node tools/check-career.mjs && node tools/check-jet.mjs",
     "check:career": "node tools/check-career.mjs",
-    "check:jet": "node tools/check-jet.mjs"
+    "check:jet": "node tools/check-jet.mjs",
+    "blender": "\"C:/Program Files/Blender Foundation/Blender 5.2/blender.exe\" --background --python blender/build.py --"
   },
   "dependencies": {
     "three": "0.169.0"

@@ -295,6 +295,65 @@ which is correct. Verify against pixels.
 
 ---
 
+## 4b. The Blender pipeline — NEW, proven end to end, not yet used
+
+The owner asked for **maximally realistic, non-generic machines**, built in
+Blender from manufacturer information. **Blender 5.2.1 is installed**
+(`C:/Program Files/Blender Foundation/Blender 5.2/blender.exe`; winget left an
+empty 4.5 folder behind, harmless). `npm run blender` runs the build.
+
+**`blender/lib/rig.py` is the whole design.** Read its docstring first — it
+enforces the three contracts that decide whether a `.glb` is usable in this game
+at all, and each was verified against a real exported file:
+
+```
+pivot:mast          -> mast-section           dynamic, correctly excluded from the join
+mount:lamp-1        -> aim:lamp-1             extras={"cone_deg":54,"range_m":26}
+static:paintedSteel [mesh] -> mount:lamp-1    joined, kept its lamp node
+MATERIALS: paintedDark, rubber, paintedSteel  <- names only, zero textures
+```
+
+1. **Named nodes survive export.** `pivot:` (rotated), `slide:` (translated),
+   `mount:` + `aim:` (lamps, carrying `extras`). **`env.js` reads these nodes'
+   world positions every frame** to re-aim spotlights — that is why boom lamps
+   sweep as a machine works. If this breaks, underground lighting breaks.
+2. **Materials are NAMES ONLY**, matching kinds in `assets.js`. The loader must
+   swap each for the live procedural material. Shipping baked maps would lose the
+   wear/dirt system **and** blow the texture budget (55 MB HIGH against ~90 MB).
+3. **Statics join by material before export.** glTF emits one draw call per
+   material per mesh; 300 bolts in one material are 300 draw calls unjoined and
+   1 joined. **So detail sharing a material costs triangles, not draws** — that
+   is the lane to spend in, and it is wide.
+
+**Models are parametric Python, not `.blend` files.** Every dimension is a named
+constant with a datasheet page citation, so a change shows up in `git diff`. A
+binary `.blend` kills that provenance the first time someone nudges a vertex.
+
+### The first machine, and what is left
+
+**`research/rigs/rm20-leader.md`** transcribes the manufacturer's own datasheet
+(**RTG Rammtechnik 905.836.1+2, 12/2019**, 12 pp., saved at
+`research/rigs/source/`) with page citations: height **25.7 m** piling / 24.5 m
+DTH · mast **slides vertically 7 m** · rake **18.5° fwd / 45° back / 18.5° side**
+· crawler **5.20 m**, **4.34 m** sprocket-to-idler, **900 mm** shoes, extendable
+**3.20 → 4.70 m** · **49.5 t** · counterweight **stackable 2 × 1.8 t + 4.9 t** ·
+winches **133 kN** and **80 kN**. §10 lists what is NOT SOURCED.
+
+Badged in game as **"BamBam PD-55 Driveline"** — the owner chose the marque.
+**`DOMAIN.md` §10 still binds: no real manufacturer name or model designation in
+any user-visible string.** Geometry is free; shape is not branding.
+
+**Two tasks were briefed and stopped before writing anything:**
+- `blender/pd55.py` — model the machine from the datasheet drawings (pp. 2, 4, 5,
+  7, 9, 10). `blender/build.py` already lists `pd55`; implement `build(out_path)`.
+- **The loader** (`src/core/gltfRig.js`, new). Its hard problem: **the
+  single-file build inlines everything** (`assetsInlineLimit: 100000000`), so a
+  base64 `.glb` costs +33 % and 18 machines are unshippable. Keep the single-file
+  *shell*, load `.glb` lazily — **only the rig the player owns**. Must fail
+  loudly on a missing model, never fall back to another machine (§8A).
+
+---
+
 ## 5. The reference library — the day's most durable output
 
 `research/rigs/` was built by a fan-out of read-only agents over the owner's own
@@ -445,16 +504,29 @@ property of the section, computed from the actual transform, and show it
 whenever it is not 1:1. This is the same discipline as `sourced: false` on
 numbers — the game already believes in it, just unevenly applied.
 
-### 9.4 The fps mystery — and a harness bug that may explain it
-`m01-auger` 26.9 fps, `m07-core` 26.0, `m04-site-investigation` 24.6, **at 75–78
-draw calls, the same as states running at 143.9.** Before hunting shader cost,
-note what the renderer agent found immediately before it was stopped:
+### 9.4 The fps mystery — SOLVED, and it was pattern C again
+`m01-auger` 26.9 fps, `m07-core` 26.0, `m04-site-investigation` 24.6, at the same
+draw calls as states running at 143.9. **It was the measuring instrument.**
 
-> **`tools/shoot.mjs:899` waits 1.5 s, but warm-up takes 60–100 s.**
+`.perf-fps.mjs` was made crash-safe and run forward-then-reversed **in one page
+load**, reading three independent clocks at every stop (commit `90defe7`,
+`shots/f3-fps.json`):
 
-So the slow states may simply be the ones captured before the GPU clocked up —
-i.e. **the numbers may be an artefact, not a regression.** Fix the harness wait
-first, re-measure, and only then go looking. This is pattern C again.
+```
+stop  state    t+       live fps   rAF       GPU      calls  programs
+#0    auger     29.2 s    26.5      36.9 ms  4.10 ms   221     65
+#5    auger     99.3 s   102.5       8.3 ms  5.88 ms   235     77
+```
+
+**The same state, twice, in the same session: 26.5 → 102.5 fps — while the GPU
+frame got MORE expensive (4.10 → 5.88 ms) and the draw calls went UP (221 → 235),
+and the program count climbed 65 → 77 as shaders compiled.** A cost that vanishes
+as a session warms, on a frame doing more work, is not a cost of that state.
+
+`tools/shoot.mjs:899` waits **1.5 s**; warm-up takes **60–100 s**. The slow states
+were simply the ones captured first. **Fix the harness wait; there is nothing
+wrong with those states.** And treat every fps number in `shots/*-report.json`
+taken before this as suspect.
 
 ### 9.5 Express budgets in the instrument's own terms
 `README.md` listed "≤ 80 surface · ≤ 70 rig" as if disjoint; the harness's
@@ -641,7 +713,8 @@ completeness critic.
 ## 14. What to do next, in order
 
 1. **Fix `tools/shoot.mjs:899`'s 1.5 s wait** (warm-up is 60–100 s) and
-   re-measure — the fps "mystery" may not exist (§9.4).
+   re-measure. **The fps mystery is already disproved** (§9.4) — but every fps
+   figure captured before commit `90defe7` was measured cold and is unreliable.
 2. **Finish the eight stub references** (§5), then unblock the builders.
 3. **The DOM leak** (`ui/`) — the game gets worse the longer it is played.
 4. **The band inset** (`renderer.js`) — half the section is drawn and discarded.
