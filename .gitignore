@@ -5,3 +5,6 @@ shots/*.jpg
 .hudqa/out/
 .hudqa/*.png
 .bak/
+
+__pycache__/
+public/models/*.glb

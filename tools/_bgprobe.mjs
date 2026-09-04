@@ -1,0 +1,15 @@
+import * as THREE from 'three';
+import { createRigSystem } from '../src/rig/rigFactory.js';
+const id = process.argv[2] || 'foundation-bg';
+const ctx = { THREE, quality: { id: 'high' } };
+const sys = createRigSystem(ctx);
+sys.setRig(id);
+const r = sys.group.getObjectByName('rig:' + id);
+const pathOf = (o) => { const s=[]; let n=o; while(n && n!==r){ s.unshift(n.name||n.type); n=n.parent; } return s.join('/'); };
+let d=0,t=0;
+r.traverse((o)=>{ if(!o.isMesh) return; const g=o.geometry; if(!g) return;
+  const idx=g.index?g.index.count:(g.attributes.position?g.attributes.position.count:0);
+  const n=o.isInstancedMesh?o.count:1; d++; t+=(idx/3)*n;
+  console.log(String(Math.round(idx/3*n)).padStart(6), (o.material&&o.material.name||'?').slice(0,44).padEnd(46), pathOf(o));
+});
+console.log('TOTAL draws', d, 'tris', Math.round(t));
