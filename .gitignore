@@ -3,3 +3,5 @@ dist/
 shots/*.png
 shots/*.jpg
 .hudqa/out/
+.hudqa/*.png
+.bak/
