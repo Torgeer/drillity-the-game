@@ -1,0 +1,110 @@
+VFX METHOD VERIFICATION — quality=high  cap=12000
+  ok   vfx.js never reads d.toeDamage — the set gauge keeps its lead
+
+── rc ─────────────────────────────────────────────
+  programme=rc  sectionReturn=inner
+  peak live 1874 / 12000   draw 7   frame avg 8.93 ms (112.0 fps)  worst 8.9 ms
+  size range 0.0450 .. 2.538 m
+  ok   rcChipStream     peak 137
+  ok   rcCycloneDust    peak 42
+  ok   rcRejectDust     peak 173
+  ok   rcInnerTube      peak 255
+  FAIL cuttingChip      emitted 13 — should never run for this method
+  ok   state.drill.sampleBags = 8
+  ok   state.drill.sampleRecovery = 1
+  ok   state.drill.sampleHoldUp = 0.16073707052605105
+  ok   state.drill.sampleWet = 0
+  phases seen: drilling, stuck, rod-add
+
+── tunnel-jumbo ─────────────────────────────────────────────
+  programme=tunnel-jumbo  sectionReturn=annulus
+  peak live 868 / 12000   draw 7   frame avg 7.05 ms (141.9 fps)  worst 7.0 ms
+  size range 0.0406 .. 2.121 m
+  ok   faceSpray        peak 95
+  ok   faceMist         peak 49
+  ok   faceSlurry       peak 48
+  ok   faceWash         peak 59
+  ok   dustPlume        correctly absent
+  ok   cuttingChip      correctly absent
+  ok   state.drill.roundHolesDone = 1
+  ok   state.drill.roundLength = 3
+  ok   state.drill.roundPull = 0.9
+  phases seen: boom-setup, drilling, , idle
+
+── longhole ─────────────────────────────────────────────
+  programme=longhole  sectionReturn=annulus
+  peak live 272 / 12000   draw 6   frame avg 8.32 ms (120.2 fps)  worst 8.3 ms
+  size range 0.0451 .. 2.261 m
+  FAIL cuttingChip      never alive
+  FAIL upholeFlush      never alive
+  FAIL upholeSludge     never alive
+  ok   state.drill.uphole = true
+  ok   state.drill.ringHole = 1
+  ok   state.drill.deviationCue = 0.00003853374603579241
+  phases seen: drilling, , idle
+
+── rockbolt ─────────────────────────────────────────────
+  programme=rockbolt  sectionReturn=annulus
+  peak live 280 / 12000   draw 6   frame avg 7.15 ms (139.9 fps)  worst 7.1 ms
+  size range 0.0450 .. 1.974 m
+  ok   faceWash         peak 9
+  FAIL resinExtrude     never alive during beat 'bolt-install' (beat frames 0)
+  ok   cuttingChip      correctly absent
+  ok   state.drill.boltIndex = 0
+  ok   state.drill.boltType = resin
+  ok   state.drill.boltAnchorage = 1
+  phases seen: drilling, , idle
+
+── driven-pile ─────────────────────────────────────────────
+  programme=driven-pile  sectionReturn=annulus
+  peak live 602 / 12000   draw 6   frame avg 8.78 ms (113.9 fps)  worst 8.8 ms
+  size range 0.0451 .. 2.270 m
+  ok   pileBurst        peak 218
+  ok   cuttingChip      correctly absent
+  ok   cuttingFines     correctly absent
+  ok   dustPlume        correctly absent
+  ok   dustBody         correctly absent
+  FAIL sparkStreak      emitted 92 — should never run for this method
+  ok   state.drill.blows = 625
+  ok   state.drill.setMm = 6.802156408636737
+  ok   state.drill.toeDepth = 0.2988723173357083
+  ok   state.drill.headDamage = 0.012571651780844966
+  ok   state.drill.dollyCondition = 1
+  phases seen: pitch, drilling, , idle
+
+── site-investigation ─────────────────────────────────────────────
+  programme=spt  sectionReturn=annulus
+  peak live 266 / 12000   draw 6   frame avg 7.25 ms (137.9 fps)  worst 7.2 ms
+  size range 0.0450 .. 1.543 m
+  note no SPT blows in the window; sptPuff not exercised
+  ok   state.drill.logQuality = 1
+  phases seen: spt-drive, , idle
+
+CONSOLE ERRORS: 8
+  [error] Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+  [error] [boot] FATAL: game/data.js failed to load — TypeError: Failed to fetch dynamically imported module: http://localhost:5178/src/game/data.js?t=1788505354908
+  [error] [boot] FATAL: game/data.js failed to load — TypeError: Cannot read properties of undefined (reading 'map')
+    at http://localhost:5178/src/game/data.js?t=1788505364792:2946:27
+    at Array.map (<anonymous>)
+    at http://localhost:5178/src/game/data.js?t=1788505364792:2944:47
+  [error] [boot] FATAL: game/data.js failed to load — TypeError: Cannot read properties of undefined (reading 'map')
+    at http://localhost:5178/src/game/data.js?t=1788505374888:2959:27
+    at Array.map (<anonymous>)
+    at http://localhost:5178/src/game/data.js?t=1788505374888:2957:47
+  [error] [boot] FATAL: game/data.js failed to load — TypeError: Cannot read properties of undefined (reading 'map')
+    at http://localhost:5178/src/game/data.js?t=1788505384400:2970:27
+    at Array.map (<anonymous>)
+    at http://localhost:5178/src/game/data.js?t=1788505384400:2968:47
+  [error] [boot] FATAL: game/data.js failed to load — TypeError: Cannot read properties of undefined (reading 'map')
+    at http://localhost:5178/src/game/data.js?t=1788505392700:2981:27
+    at Array.map (<anonymous>)
+    at http://localhost:5178/src/game/data.js?t=1788505392700:2979:47
+  [error] [boot] FATAL: game/data.js failed to load — TypeError: Cannot read properties of undefined (reading 'map')
+    at http://localhost:5178/src/game/data.js?t=1788505415192:3005:27
+    at Array.map (<anonymous>)
+    at http://localhost:5178/src/game/data.js?t=1788505415192:3003:47
+  [error] [boot] FATAL: game/data.js failed to load — TypeError: Cannot read properties of undefined (reading 'map')
+    at http://localhost:5178/src/game/data.js?t=1788505423311:3014:27
+    at Array.map (<anonymous>)
+    at http://localhost:5178/src/game/data.js?t=1788505423311:3012:47
+FAILURES: 6

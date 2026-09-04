@@ -1,0 +1,118 @@
+{
+  "when": "2026-09-04T10:30:58.588Z",
+  "method": "dth",
+  "tiers": {
+    "high": {
+      "tier": "high",
+      "dpr": 2,
+      "canvas": {
+        "w": 2340,
+        "h": 5064
+      },
+      "frameMs": 3.95,
+      "frameFps": 253.2,
+      "drawCalls": 246,
+      "triangles": 411346,
+      "passes": [
+        {
+          "name": "BandRenderPass",
+          "costMs": null,
+          "note": "head pass — the scene itself"
+        },
+        {
+          "name": "DrillityContactAO",
+          "costMs": 0.625,
+          "spread": 1,
+          "pctOfFrame": 15.8
+        },
+        {
+          "name": "_UnrealBloomPass",
+          "costMs": 0.2417,
+          "spread": 1.325,
+          "pctOfFrame": 6.1
+        },
+        {
+          "name": "DrillityGrade",
+          "costMs": -0.025,
+          "spread": 1.0583,
+          "pctOfFrame": -0.6
+        },
+        {
+          "name": "SMAAPass",
+          "costMs": -0.1167,
+          "spread": 0.8833,
+          "pctOfFrame": -3
+        }
+      ],
+      "aoPrepass": "included in DrillityContactAO",
+      "postScaleAB": {
+        "cells": [
+          {
+            "dprMul": 1,
+            "canvasPx": 11849760,
+            "postScale": 1,
+            "smaa": false,
+            "frameMs": 3.5167,
+            "edges": {
+              "hardEdgePctgOf1e4": 35.79,
+              "softEdgePctgOf1e4": 283.6,
+              "meanAbsGrad": 3.1132
+            }
+          },
+          {
+            "dprMul": 1,
+            "canvasPx": 11849760,
+            "postScale": 1,
+            "smaa": true,
+            "frameMs": 3.5583,
+            "edges": {
+              "hardEdgePctgOf1e4": 39.03,
+              "softEdgePctgOf1e4": 293.62,
+              "meanAbsGrad": 3.1584
+            }
+          },
+          {
+            "dprMul": 1,
+            "canvasPx": 11849760,
+            "postScale": 1.15,
+            "smaa": false,
+            "frameMs": 3.6417,
+            "edges": {
+              "hardEdgePctgOf1e4": 28.16,
+              "softEdgePctgOf1e4": 208.85,
+              "meanAbsGrad": 2.2167
+            }
+          },
+          {
+            "dprMul": 1,
+            "canvasPx": 11849760,
+            "postScale": 1.15,
+            "smaa": true,
+            "frameMs": 3.475,
+            "edges": {
+              "hardEdgePctgOf1e4": 27,
+              "softEdgePctgOf1e4": 179.5,
+              "meanAbsGrad": 2.1409
+            }
+          }
+        ],
+        "atNativeDpr": {
+          "dprMul": 1,
+          "canvasPx": 11849760,
+          "baselineMs": 3.5167,
+          "supersample": {
+            "costMs": 0.125,
+            "pctOfBaseline": 3.6,
+            "hardEdgesRemovedPct": 21.3
+          },
+          "smaa": {
+            "costMs": 0.0416,
+            "pctOfBaseline": 1.2,
+            "hardEdgesRemovedPct": -9.1
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

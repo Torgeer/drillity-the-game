@@ -1,0 +1,197 @@
+URL: http://localhost:5178/?quality=high&shot
+PERF: {
+  "fps": 27.602523659306048,
+  "quality": "medium",
+  "calls": 335,
+  "triangles": 383402,
+  "programs": 65,
+  "textures": 98,
+  "geometries": 117,
+  "systems": [
+    "renderer",
+    "assets",
+    "env",
+    "geology",
+    "terrain",
+    "rig",
+    "sim",
+    "vfx",
+    "progression",
+    "shopPreview",
+    "audio",
+    "ui"
+  ],
+  "jsHeapMB": 67.4
+}
+
+CONSOLE (170):
+[debug] [vite] connecting...
+[debug] [vite] connected.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] [assets] unknown material kind "steel" — substituting rawSteel
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x4fa400182e00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.

@@ -1,0 +1,120 @@
+DRILLITY — visual QA harness
+when      2026-09-04T09:23:13.724Z
+url       http://localhost:5178/?quality=high&shot
+mode      HEADED (real GPU — fps is meaningful)
+quality   high
+filter    tunnel-jumbo longhole rockbolt
+boot      2s
+page loads 1  (no mid-run reload — HMR muted)
+
+── RENDER HEALTH ───────────────────────────────────────────────────────
+  ok — the drawing buffer holds pixels (mean luma 20.9) and the GL
+  context stayed alive for every shot. The frames below are pictures of the game.
+
+── COVERAGE ────────────────────────────────────────────────────────────
+methods    3/21 photographed
+rigs       2/18 photographed
+UI states  1
+manifest   METHOD_IDS.md lists 21 method ids
+
+── COULD NOT PHOTOGRAPH: nothing was missing from the content tables, but this
+   run was FILTERED ( tunnel-jumbo longhole rockbolt) — it is not a coverage round.
+
+── BUDGET ──────────────────────────────────────────────────────────────
+source: README.md · Performance budget
+  draw calls   surface ≤ 80   section ≤ 60   rig ≤ 70
+  frame rate   ≥ 60 fps
+  texture mem  ≤ 90 MB (HIGH)      particles ≤ 12000
+  VERDICT: FAIL
+    surface    over budget in 6 state(s): m11-rockbolt=155 m16-tunnel-jumbo=151 m18-longhole=141 r14-tunnel-jumbo=149 r16-longhole-rig=133 13-burnin=89
+    rig        over budget in 5 state(s): m11-rockbolt=125 m16-tunnel-jumbo=123 m18-longhole=113 r14-tunnel-jumbo=121 r16-longhole-rig=107
+    fps        over budget in 3 state(s): m11-rockbolt=24.3 m16-tunnel-jumbo=21.1 m18-longhole=24
+  (texture MB is an estimate from live material maps, RGBA8 + mip tail.
+   per-band calls exclude shadow passes; frame totals include them.)
+
+── DOES EACH SHOT CONTAIN WHAT ITS NAME CLAIMS ─────────────────────────
+  PASS — all 6 frames verified against the live game state.
+  no two frames are byte-identical (5 distinct images).
+
+── PER-SHOT ────────────────────────────────────────────────────────────
+  id                          fps   frame  surf  sect   rig     tris  part   err   sec  verify
+  m11-rockbolt                24.3    304   155    20   125     260k   467     0  19.5  ok
+  m16-tunnel-jumbo            21.1    295   151    20   123     304k   652     0   6.1  ok
+  m18-longhole                  24    277   141    20   113     249k   689     0   6.6  ok
+  r14-tunnel-jumbo            87.9    292   149    20   121     303k   688     0   3.8  ok
+  r16-longhole-rig            92.7    264   133    20   107     246k   845     0   3.5  ok
+  13-burnin                   97.9    283    89    20    63     411k   726     0     -  ok
+
+── PER-SHOT DETAIL ─────────────────────────────────────────────────────
+  m11-rockbolt
+      Ground Support — install quality — anchorage and torque test · method=rockbolt · rig=tunnel-jumbo · region=german-site · section=heading · cam=hero · gauge=TORQUE · depth=13.3m rop=15.806 · tooling=shank-adapter/button-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 47.7 (2-198) · section 33.3 (0-106) · tex≈38.1MB · heap 108.1MB
+      UNDERGROUND PROBE  terrain=german-site env=german-site sunElev=14.962418614875581 sky=false clouds=false
+                         camera modes available: hero
+                         in-rock geometry named in the surface scene: drive-shotcrete, drive-muck, drifter, rig:tunnel-jumbo
+                         top-of-frame luma 84.8 (open sky reads bright)
+  m16-tunnel-jumbo
+      Drill & Blast (Face) — pull per round and overbreak · method=tunnel-jumbo · rig=tunnel-jumbo · region=german-site · section=heading · cam=hero · gauge=TORQUE · depth=6.51m rop=45.07 · tooling=shank-adapter/button-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 39.4 (1-218) · section 32.7 (0-126) · tex≈37.9MB · heap 111.6MB
+      NOTE QA bridge deepened this job to 38 m — clamped back to 18.6 m (method range 6-24)
+      UNDERGROUND PROBE  terrain=german-site env=german-site sunElev=14.962418614875581 sky=false clouds=false
+                         camera modes available: hero
+                         in-rock geometry named in the surface scene: drive-shotcrete, drive-muck, drifter, rig:tunnel-jumbo
+                         top-of-frame luma 37 (open sky reads bright)
+  m18-longhole
+      Longhole Production — toe accuracy — deviation becomes dilution · method=longhole · rig=longhole-rig · region=iberian-quarry · section=vertical · cam=hero · gauge=TORQUE · depth=22.03m rop=14.651 · tooling=shank-adapter/button-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 56.5 (0-201) · section 67.6 (0-120) · tex≈37.8MB · heap 130.8MB
+      UNDERGROUND PROBE  terrain=iberian-quarry env=iberian-quarry sunElev=14.962418614875581 sky=false clouds=false
+                         camera modes available: hero
+                         in-rock geometry named in the surface scene: drive-shotcrete, drive-muck, drifter, rig:tunnel-jumbo
+                         top-of-frame luma 94.3 (open sky reads bright)
+  r14-tunnel-jumbo
+      Aurbach FJ-220 Faceline · method=tunnel-jumbo · rig=tunnel-jumbo · region=german-site · section=heading · cam=orbit · gauge=TORQUE · depth=6m rop=92.561 · tooling=shank-adapter/button-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 48.2 (0-222) · section 34.1 (0-121) · tex≈38MB · heap 136.1MB
+      UNDERGROUND PROBE  terrain=german-site env=german-site sunElev=14.962418614875581 sky=false clouds=false
+                         camera modes available: hero
+                         in-rock geometry named in the surface scene: drive-shotcrete, drive-muck, drifter, rig:tunnel-jumbo
+                         top-of-frame luma 12.1 (open sky reads bright)
+  r16-longhole-rig
+      Fennholm LH-60 Fanline · method=longhole · rig=longhole-rig · region=iberian-quarry · section=vertical · cam=orbit · gauge=TORQUE · depth=9.13m rop=15.06 · tooling=shank-adapter/button-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 16.6 (0-184) · section 64.8 (1-109) · tex≈37.8MB · heap 98.1MB
+      UNDERGROUND PROBE  terrain=iberian-quarry env=iberian-quarry sunElev=14.962418614875581 sky=false clouds=false
+                         camera modes available: hero
+                         in-rock geometry named in the surface scene: drive-shotcrete, drive-muck, drifter, rig:tunnel-jumbo
+                         top-of-frame luma 2.6 (open sky reads bright)
+  13-burnin
+      luma surface 110.5 (1-217) · section 59.3 (0-122) · tex≈62.4MB · heap 110.8MB
+
+── CONSOLE ─────────────────────────────────────────────────────────────
+errors 0 · warnings 20 · total 21
+
+
+
+── ALL CONSOLE OUTPUT (first 400) ──────────────────────────────────────
+[debug] [vite] connecting...
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.WebGLProgram: Program Info Log: (246,1): warning X4000: use of potentially uninitialized variable (f_boreSDF)
+
+
+(280,1): warning X4000: use of potentially uninitialized variable (f_boreSDF)
+
+
+ 
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] [progression] contract has no archetype — world/terrain.js cannot tell this site apart from any other in the region qa-demo
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.

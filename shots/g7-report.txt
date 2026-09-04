@@ -1,0 +1,136 @@
+DRILLITY — visual QA harness
+when      2026-09-04T09:41:45.582Z
+url       http://localhost:5178/?quality=high&shot
+mode      HEADED (real GPU — fps is meaningful)
+quality   high
+filter    14-section-clean 07-section-closeup m01-auger m04-site m09-rotary m10-cfa m16-tunnel m17-hdd m21-raise m14-driven
+boot      2.1s
+page loads 1  (no mid-run reload — HMR muted)
+
+── RENDER HEALTH ───────────────────────────────────────────────────────
+  ok — the drawing buffer holds pixels (mean luma 20.5) and the GL
+  context stayed alive for every shot. The frames below are pictures of the game.
+
+── COVERAGE ────────────────────────────────────────────────────────────
+methods    8/21 photographed
+rigs       0/18 photographed
+UI states  3
+manifest   METHOD_IDS.md lists 21 method ids
+
+── COULD NOT PHOTOGRAPH: nothing was missing from the content tables, but this
+   run was FILTERED ( 14-section-clean 07-section-closeup m01-auger m04-site m09-rotary m10-cfa m16-tunnel m17-hdd m21-raise m14-driven) — it is not a coverage round.
+
+── BUDGET ──────────────────────────────────────────────────────────────
+source: README.md · Performance budget
+  draw calls   surface ≤ 80   section ≤ 60   rig ≤ 70
+  frame rate   ≥ 60 fps
+  texture mem  ≤ 90 MB (HIGH)      particles ≤ 12000
+  VERDICT: FAIL
+    surface    over budget in 2 state(s): 14-section-clean=82 m16-tunnel-jumbo=155
+    rig        over budget in 1 state(s): m16-tunnel-jumbo=127
+    fps        over budget in 1 state(s): 14-section-clean=28.4
+  (texture MB is an estimate from live material maps, RGBA8 + mip tail.
+   per-band calls exclude shadow passes; frame totals include them.)
+
+── DOES EACH SHOT CONTAIN WHAT ITS NAME CLAIMS ─────────────────────────
+  PASS — all 11 frames verified against the live game state.
+  no two frames are byte-identical (10 distinct images).
+
+── PER-SHOT ────────────────────────────────────────────────────────────
+  id                          fps   frame  surf  sect   rig     tris  part   err   sec  verify
+  14-section-clean            28.4    255    82    20    56     381k   514     0   6.8  ok
+  07-section-closeup         143.9    240    74    21    50     379k  1605     0   4.1  ok
+  m01-auger                  143.9    252    80    21    50     383k   898     0   4.4  ok
+  m04-site-investigation     143.9    251    80    20    50     384k   733     0     4  ok
+  m09-rotary-kelly           143.9    216    61    17    29     386k   970     0   4.7  ok
+  m10-cfa                    143.9    205    61    17    35     369k  1719     0   4.6  ok
+  m14-driven-pile            143.9    255    80    18    48     398k   811     0   5.1  ok
+  m16-tunnel-jumbo             124    304   155    20   127     309k  1629     0  14.1  ok
+  m17-hdd                    121.9    224    71    19    46     351k  1231     0   5.9  ok
+  m21-raise-boring           143.9    198    50    35    25     354k  1570     0   4.8  ok
+  13-burnin                  141.9    211    58    20    29     400k   448     0     -  ok
+
+── PER-SHOT DETAIL ─────────────────────────────────────────────────────
+  14-section-clean
+      method=dth · rig=crawler-lite · region=nordic · section=vertical · cam=hero · gauge=TORQUE · depth=34.2m rop=0 · tooling=flushing-swivel/dth-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 61.7 (2-177) · section 66.1 (1-121) · tex≈60.8MB · heap 113.6MB
+  07-section-closeup
+      method=dth · rig=crawler-lite · region=nordic · section=vertical · cam=downhole · gauge=TORQUE · depth=28.2m rop=0 · tooling=flushing-swivel/dth-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 102.2 (4-177) · section 62.8 (5-114) · tex≈60.8MB · heap 93.3MB
+  m01-auger
+      Auger Drilling — metres drilled · method=auger · rig=crawler-lite · region=nordic · section=vertical · cam=hero · gauge=TORQUE · depth=13.3m rop=0.009 · tooling=-/drag-bit · bit=auger-flight-std
+      luma surface 107.8 (1-185) · section 68.5 (0-123) · tex≈62.1MB · heap 94.5MB
+  m04-site-investigation
+      Site Investigation — sample quality and log fidelity · method=site-investigation · rig=crawler-lite · region=nordic · section=vertical · cam=hero · gauge=TORQUE · depth=9.63m rop=0 · tooling=-/spt-split-spoon · bit=auger-flight-std
+      luma surface 104.2 (3-182) · section 59.6 (1-118) · tex≈62MB · heap 114.3MB
+      NOTE QA bridge deepened this job to 38 m — clamped back to 27.5 m (method range 10-35)
+  m09-rotary-kelly
+      Rotary / Kelly Drilling — metres drilled · method=rotary-kelly · rig=foundation-bg · region=nordic · section=vertical · cam=hero · gauge=TORQUE · depth=13.3m rop=0.02 · tooling=drilling-bucket/- · bit=auger-flight-std
+      luma surface 101.2 (0-197) · section 69.4 (3-121) · tex≈62.2MB · heap 106.2MB
+  m10-cfa
+      CFA Piling — metres drilled · method=cfa · rig=foundation-bg · region=german-site · section=vertical · cam=hero · gauge=TORQUE · depth=10.78m rop=26.439 · bit=auger-flight-std
+      luma surface 102.5 (2-200) · section 54.9 (0-113) · tex≈60.7MB · heap 94.4MB
+      NOTE QA bridge deepened this job to 38 m — clamped back to 26 m (method range 5-35)
+  m14-driven-pile
+      Driven Piling — set and blow count to bearing, without damaging the pile · method=driven-pile · rig=piling-leader · region=nordic · section=pile · cam=hero · gauge=SET · depth=8.2m rop=1.356 · tooling=-/precast-pile · bit=auger-flight-std
+      luma surface 105.6 (2-184) · section 59.3 (0-131) · tex≈62.3MB · heap 100.7MB
+      NOTE QA bridge deepened this job to 38 m — clamped back to 23.4 m (method range 8-30)
+  m16-tunnel-jumbo
+      Drill & Blast (Face) — pull per round and overbreak · method=tunnel-jumbo · rig=tunnel-jumbo · region=german-site · section=heading · cam=hero · gauge=TORQUE · depth=6.51m rop=47.223 · tooling=shank-adapter/button-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 63.8 (2-222) · section 35.8 (0-119) · tex≈38MB · heap 121.2MB
+      NOTE QA bridge deepened this job to 38 m — clamped back to 18.6 m (method range 6-24)
+      UNDERGROUND PROBE  terrain=german-site env=german-site sunElev=14.962418614875581 sky=false clouds=false
+                         camera modes available: hero
+                         in-rock geometry named in the surface scene: drive-shotcrete, drive-muck, drifter, rig:tunnel-jumbo
+                         top-of-frame luma 39.2 (open sky reads bright)
+  m17-hdd
+      Horizontal Directional Drilling — metres drilled · method=hdd · rig=hdd-rig · region=german-site · section=profile · cam=hero · stage=1/2 (pullback) · gauge=PULL · depth=38.01m rop=0 · tooling=-/hdd-pilot-head · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 108.9 (2-189) · section 20.9 (0-105) · tex≈61.3MB · heap 112.9MB
+  m21-raise-boring
+      Raise Boring — metres drilled · method=raise-boring · rig=raisebore · region=german-site · section=raise · cam=hero · stage=1/2 (ream) · gauge=PULL · depth=38m rop=0 · tooling=-/raisebore-pilot-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 108.2 (1-189) · section 63.8 (0-112) · tex≈61.1MB · heap 111.2MB
+  13-burnin
+      luma surface 102.4 (1-183) · section 66 (0-118) · tex≈62.4MB · heap 109.1MB
+
+── CONSOLE ─────────────────────────────────────────────────────────────
+errors 0 · warnings 29 · total 30
+
+
+
+── ALL CONSOLE OUTPUT (first 400) ──────────────────────────────────────
+[debug] [vite] connecting...
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.WebGLProgram: Program Info Log: (246,1): warning X4000: use of potentially uninitialized variable (f_boreSDF)
+
+
+(280,1): warning X4000: use of potentially uninitialized variable (f_boreSDF)
+
+
+ 
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] [progression] contract has no archetype — world/terrain.js cannot tell this site apart from any other in the region qa-demo
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.

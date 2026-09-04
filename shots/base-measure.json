@@ -1,0 +1,834 @@
+{
+  "s-nordic": {
+    "min": 0,
+    "p01": 3.1,
+    "p05": 7.1,
+    "p25": 20.9,
+    "median": 58.5,
+    "p75": 130.5,
+    "p95": 181.9,
+    "p99": 184.1,
+    "max": 222.8,
+    "mean": 80,
+    "pctBelow4": 1.51,
+    "pctBelow16": 18.6,
+    "pctAbove96": 39.63,
+    "pctAbove160": 21.15,
+    "pctAbove224": 0,
+    "rows": [
+      179.4,
+      180.3,
+      179.7,
+      143.7,
+      121.2,
+      105.1,
+      81.1,
+      56.5,
+      41.7,
+      39.2,
+      41.5,
+      25,
+      13.7,
+      27.1,
+      20.3,
+      24
+    ],
+    "surface": {
+      "calls": 214,
+      "tris": 306688
+    },
+    "section": {
+      "calls": 16,
+      "tris": 43450
+    },
+    "meshes": 85,
+    "lights": 5,
+    "probes": {},
+    "fps": 60,
+    "textures": 103,
+    "geometries": 116,
+    "programs": 121,
+    "terrainCalls": 23,
+    "ugMode": null,
+    "texBytes": {
+      "materials": 38,
+      "textures": 84,
+      "sets": 28,
+      "setsReady": 0,
+      "pools": {
+        "hero": {
+          "usedMB": 19.9,
+          "floorMB": 9.4,
+          "freeMB": 0
+        },
+        "stratum": {
+          "usedMB": 0,
+          "floorMB": 15.6,
+          "freeMB": 14.7
+        },
+        "ground": {
+          "usedMB": 18.5,
+          "floorMB": 9.4,
+          "freeMB": 0
+        },
+        "general": {
+          "usedMB": 24.9,
+          "floorMB": 10.1,
+          "freeMB": 0
+        }
+      },
+      "decals": 0,
+      "dataTextures": 0,
+      "strata": 0,
+      "bytesApprox": 66355172,
+      "megabytes": 63.3,
+      "budgetMB": 88,
+      "peakMB": 63.3,
+      "pending": 28,
+      "slices": {
+        "count": 52,
+        "maxMs": 9.4,
+        "avgMs": 7.8,
+        "overFrameBudget": 0
+      },
+      "built": 0,
+      "failed": 0,
+      "tier": "high",
+      "anisotropy": 16,
+      "viewport": {
+        "w": 390,
+        "h": 844,
+        "dpr": 2
+      }
+    },
+    "probeL": {}
+  },
+  "s-alpine": {
+    "min": 0.2,
+    "p01": 8.4,
+    "p05": 16.9,
+    "p25": 29.7,
+    "median": 101.5,
+    "p75": 122.2,
+    "p95": 182.6,
+    "p99": 185.1,
+    "max": 225.9,
+    "mean": 86.8,
+    "pctBelow4": 0.15,
+    "pctBelow16": 4.33,
+    "pctAbove96": 53.49,
+    "pctAbove160": 9.08,
+    "pctAbove224": 0,
+    "rows": [
+      166,
+      154.2,
+      141.2,
+      122.7,
+      112.4,
+      104.2,
+      102.4,
+      106,
+      93.8,
+      54.4,
+      61.6,
+      45.2,
+      30.5,
+      38.6,
+      25.5,
+      29.7
+    ],
+    "surface": {
+      "calls": 201,
+      "tris": 299938
+    },
+    "section": {
+      "calls": 20,
+      "tris": 38044
+    },
+    "meshes": 81,
+    "lights": 5,
+    "probes": {},
+    "fps": 60,
+    "textures": 105,
+    "geometries": 112,
+    "programs": 117,
+    "terrainCalls": 22,
+    "ugMode": null,
+    "texBytes": {
+      "materials": 39,
+      "textures": 84,
+      "sets": 28,
+      "setsReady": 0,
+      "pools": {
+        "hero": {
+          "usedMB": 19.9,
+          "floorMB": 9.4,
+          "freeMB": 0
+        },
+        "stratum": {
+          "usedMB": 0,
+          "floorMB": 15.6,
+          "freeMB": 14.7
+        },
+        "ground": {
+          "usedMB": 18.5,
+          "floorMB": 9.4,
+          "freeMB": 0
+        },
+        "general": {
+          "usedMB": 24.9,
+          "floorMB": 10.1,
+          "freeMB": 0
+        }
+      },
+      "decals": 0,
+      "dataTextures": 0,
+      "strata": 0,
+      "bytesApprox": 66355172,
+      "megabytes": 63.3,
+      "budgetMB": 88,
+      "peakMB": 63.3,
+      "pending": 28,
+      "slices": {
+        "count": 68,
+        "maxMs": 9.4,
+        "avgMs": 7.9,
+        "overFrameBudget": 0
+      },
+      "built": 0,
+      "failed": 0,
+      "tier": "high",
+      "anisotropy": 16,
+      "viewport": {
+        "w": 390,
+        "h": 844,
+        "dpr": 2
+      }
+    },
+    "probeL": {}
+  },
+  "s-quarry": {
+    "min": 0.1,
+    "p01": 10.6,
+    "p05": 23.1,
+    "p25": 92.1,
+    "median": 134.2,
+    "p75": 156.4,
+    "p95": 216.9,
+    "p99": 219.9,
+    "max": 223.9,
+    "mean": 127.3,
+    "pctBelow4": 0.12,
+    "pctBelow16": 2.25,
+    "pctAbove96": 73.72,
+    "pctAbove160": 23.58,
+    "pctAbove224": 0,
+    "rows": [
+      211.7,
+      206.1,
+      185.3,
+      150.8,
+      133.8,
+      131,
+      129.6,
+      137.4,
+      132.6,
+      100.2,
+      92.7,
+      85.9,
+      71.6,
+      74.6,
+      97.2,
+      95.8
+    ],
+    "surface": {
+      "calls": 197,
+      "tris": 287062
+    },
+    "section": {
+      "calls": 20,
+      "tris": 40890
+    },
+    "meshes": 80,
+    "lights": 5,
+    "probes": {},
+    "fps": 15,
+    "textures": 108,
+    "geometries": 112,
+    "programs": 115,
+    "terrainCalls": 21,
+    "ugMode": null,
+    "texBytes": {
+      "materials": 41,
+      "textures": 84,
+      "sets": 28,
+      "setsReady": 0,
+      "pools": {
+        "hero": {
+          "usedMB": 19.9,
+          "floorMB": 9.4,
+          "freeMB": 0
+        },
+        "stratum": {
+          "usedMB": 0,
+          "floorMB": 15.6,
+          "freeMB": 14.7
+        },
+        "ground": {
+          "usedMB": 18.5,
+          "floorMB": 9.4,
+          "freeMB": 0
+        },
+        "general": {
+          "usedMB": 24.9,
+          "floorMB": 10.1,
+          "freeMB": 0
+        }
+      },
+      "decals": 0,
+      "dataTextures": 0,
+      "strata": 0,
+      "bytesApprox": 66355172,
+      "megabytes": 63.3,
+      "budgetMB": 88,
+      "peakMB": 63.3,
+      "pending": 28,
+      "slices": {
+        "count": 84,
+        "maxMs": 9.4,
+        "avgMs": 7.9,
+        "overFrameBudget": 0
+      },
+      "built": 0,
+      "failed": 0,
+      "tier": "high",
+      "anisotropy": 16,
+      "viewport": {
+        "w": 390,
+        "h": 844,
+        "dpr": 2
+      }
+    },
+    "probeL": {}
+  },
+  "s-andes": {
+    "min": 0,
+    "p01": 3,
+    "p05": 9.9,
+    "p25": 41.9,
+    "median": 86.3,
+    "p75": 106.5,
+    "p95": 142.5,
+    "p99": 195.4,
+    "max": 220.1,
+    "mean": 80.5,
+    "pctBelow4": 1.47,
+    "pctBelow16": 9.02,
+    "pctAbove96": 37.57,
+    "pctAbove160": 4.42,
+    "pctAbove224": 0,
+    "rows": [
+      155.9,
+      123.8,
+      115.3,
+      103.9,
+      92.8,
+      83.9,
+      77,
+      75.5,
+      82.3,
+      65.3,
+      54.7,
+      59,
+      44.3,
+      61.5,
+      48.3,
+      45.2
+    ],
+    "surface": {
+      "calls": 204,
+      "tris": 294242
+    },
+    "section": {
+      "calls": 20,
+      "tris": 45934
+    },
+    "meshes": 82,
+    "lights": 5,
+    "probes": {},
+    "fps": 15,
+    "textures": 111,
+    "geometries": 113,
+    "programs": 115,
+    "terrainCalls": 20,
+    "ugMode": null,
+    "texBytes": {
+      "materials": 42,
+      "textures": 84,
+      "sets": 28,
+      "setsReady": 0,
+      "pools": {
+        "hero": {
+          "usedMB": 19.9,
+          "floorMB": 9.4,
+          "freeMB": 0
+        },
+        "stratum": {
+          "usedMB": 0,
+          "floorMB": 15.6,
+          "freeMB": 14.7
+        },
+        "ground": {
+          "usedMB": 18.5,
+          "floorMB": 9.4,
+          "freeMB": 0
+        },
+        "general": {
+          "usedMB": 24.9,
+          "floorMB": 10.1,
+          "freeMB": 0
+        }
+      },
+      "decals": 0,
+      "dataTextures": 0,
+      "strata": 0,
+      "bytesApprox": 66355172,
+      "megabytes": 63.3,
+      "budgetMB": 88,
+      "peakMB": 63.3,
+      "pending": 28,
+      "slices": {
+        "count": 100,
+        "maxMs": 11.1,
+        "avgMs": 8,
+        "overFrameBudget": 0
+      },
+      "built": 0,
+      "failed": 0,
+      "tier": "high",
+      "anisotropy": 16,
+      "viewport": {
+        "w": 390,
+        "h": 844,
+        "dpr": 2
+      }
+    },
+    "probeL": {}
+  },
+  "s-arctic": {
+    "min": 0,
+    "p01": 7.4,
+    "p05": 17.7,
+    "p25": 74.5,
+    "median": 137.9,
+    "p75": 148.4,
+    "p95": 152.1,
+    "p99": 162.6,
+    "max": 218.1,
+    "mean": 112.9,
+    "pctBelow4": 0.1,
+    "pctBelow16": 4.49,
+    "pctAbove96": 71.59,
+    "pctAbove160": 1.17,
+    "pctAbove224": 0,
+    "rows": [
+      148.4,
+      149.2,
+      149.7,
+      149.2,
+      147.5,
+      137.7,
+      130.1,
+      131.8,
+      122.3,
+      105.2,
+      72.9,
+      102.2,
+      82.9,
+      48.7,
+      75.9,
+      52.1
+    ],
+    "surface": {
+      "calls": 206,
+      "tris": 280596
+    },
+    "section": {
+      "calls": 20,
+      "tris": 47360
+    },
+    "meshes": 83,
+    "lights": 5,
+    "probes": {},
+    "fps": 15,
+    "textures": 119,
+    "geometries": 114,
+    "programs": 119,
+    "terrainCalls": 21,
+    "ugMode": null,
+    "texBytes": {
+      "materials": 44,
+      "textures": 90,
+      "sets": 30,
+      "setsReady": 0,
+      "pools": {
+        "hero": {
+          "usedMB": 19.9,
+          "floorMB": 9.4,
+          "freeMB": 0
+        },
+        "stratum": {
+          "usedMB": 0,
+          "floorMB": 15.6,
+          "freeMB": 14.5
+        },
+        "ground": {
+          "usedMB": 18.8,
+          "floorMB": 9.4,
+          "freeMB": 0
+        },
+        "general": {
+          "usedMB": 24.9,
+          "floorMB": 10.1,
+          "freeMB": 0
+        }
+      },
+      "decals": 0,
+      "dataTextures": 0,
+      "strata": 0,
+      "bytesApprox": 66584546,
+      "megabytes": 63.5,
+      "budgetMB": 88,
+      "peakMB": 63.5,
+      "pending": 30,
+      "slices": {
+        "count": 116,
+        "maxMs": 11.1,
+        "avgMs": 8,
+        "overFrameBudget": 0
+      },
+      "built": 0,
+      "failed": 0,
+      "tier": "high",
+      "anisotropy": 16,
+      "viewport": {
+        "w": 390,
+        "h": 844,
+        "dpr": 2
+      }
+    },
+    "probeL": {}
+  },
+  "s-sahara": {
+    "min": 0,
+    "p01": 1.1,
+    "p05": 6.1,
+    "p25": 40.2,
+    "median": 115.4,
+    "p75": 177.5,
+    "p95": 186.6,
+    "p99": 189.6,
+    "max": 213.1,
+    "mean": 105.9,
+    "pctBelow4": 2.86,
+    "pctBelow16": 12.05,
+    "pctAbove96": 55.46,
+    "pctAbove160": 35.15,
+    "pctAbove224": 0,
+    "rows": [
+      176.3,
+      178.3,
+      180.3,
+      182.5,
+      173.2,
+      154.1,
+      133.5,
+      106.2,
+      84.2,
+      55.5,
+      55.2,
+      62.2,
+      45.2,
+      26.5,
+      40.9,
+      40.1
+    ],
+    "surface": {
+      "calls": 203,
+      "tris": 280492
+    },
+    "section": {
+      "calls": 20,
+      "tris": 44132
+    },
+    "meshes": 82,
+    "lights": 5,
+    "probes": {},
+    "fps": 15,
+    "textures": 124,
+    "geometries": 114,
+    "programs": 115,
+    "terrainCalls": 20,
+    "ugMode": null,
+    "texBytes": {
+      "materials": 45,
+      "textures": 93,
+      "sets": 31,
+      "setsReady": 0,
+      "pools": {
+        "hero": {
+          "usedMB": 19.9,
+          "floorMB": 9.4,
+          "freeMB": 0
+        },
+        "stratum": {
+          "usedMB": 0,
+          "floorMB": 15.6,
+          "freeMB": 14.4
+        },
+        "ground": {
+          "usedMB": 18.9,
+          "floorMB": 9.4,
+          "freeMB": 0
+        },
+        "general": {
+          "usedMB": 24.9,
+          "floorMB": 10.1,
+          "freeMB": 0
+        }
+      },
+      "decals": 0,
+      "dataTextures": 0,
+      "strata": 0,
+      "bytesApprox": 66699233,
+      "megabytes": 63.6,
+      "budgetMB": 88,
+      "peakMB": 63.6,
+      "pending": 31,
+      "slices": {
+        "count": 132,
+        "maxMs": 12.4,
+        "avgMs": 8.1,
+        "overFrameBudget": 0
+      },
+      "built": 0,
+      "failed": 0,
+      "tier": "high",
+      "anisotropy": 16,
+      "viewport": {
+        "w": 390,
+        "h": 844,
+        "dpr": 2
+      }
+    },
+    "probeL": {}
+  },
+  "s-german": {
+    "min": 0,
+    "p01": 1.5,
+    "p05": 8.3,
+    "p25": 37.5,
+    "median": 116.2,
+    "p75": 179.1,
+    "p95": 184,
+    "p99": 186.2,
+    "max": 210.2,
+    "mean": 107.5,
+    "pctBelow4": 2.2,
+    "pctBelow16": 11.56,
+    "pctAbove96": 57.63,
+    "pctAbove160": 36.94,
+    "pctAbove224": 0,
+    "rows": [
+      177.1,
+      178.7,
+      180.1,
+      181.6,
+      182.2,
+      163.8,
+      129.1,
+      112.6,
+      101.6,
+      73.3,
+      61.7,
+      50.3,
+      36.1,
+      42.7,
+      24.2,
+      25.2
+    ],
+    "surface": {
+      "calls": 195,
+      "tris": 285850
+    },
+    "section": {
+      "calls": 17,
+      "tris": 39494
+    },
+    "meshes": 79,
+    "lights": 5,
+    "probes": {},
+    "fps": 15,
+    "textures": 126,
+    "geometries": 107,
+    "programs": 125,
+    "terrainCalls": 24,
+    "ugMode": null,
+    "texBytes": {
+      "materials": 46,
+      "textures": 93,
+      "sets": 31,
+      "setsReady": 0,
+      "pools": {
+        "hero": {
+          "usedMB": 19.9,
+          "floorMB": 9.4,
+          "freeMB": 0
+        },
+        "stratum": {
+          "usedMB": 0,
+          "floorMB": 15.6,
+          "freeMB": 14.4
+        },
+        "ground": {
+          "usedMB": 18.9,
+          "floorMB": 9.4,
+          "freeMB": 0
+        },
+        "general": {
+          "usedMB": 24.9,
+          "floorMB": 10.1,
+          "freeMB": 0
+        }
+      },
+      "decals": 0,
+      "dataTextures": 0,
+      "strata": 0,
+      "bytesApprox": 66699233,
+      "megabytes": 63.6,
+      "budgetMB": 88,
+      "peakMB": 63.6,
+      "pending": 31,
+      "slices": {
+        "count": 148,
+        "maxMs": 12.4,
+        "avgMs": 8.1,
+        "overFrameBudget": 0
+      },
+      "built": 0,
+      "failed": 0,
+      "tier": "high",
+      "anisotropy": 16,
+      "viewport": {
+        "w": 390,
+        "h": 844,
+        "dpr": 2
+      }
+    },
+    "probeL": {}
+  },
+  "s-nsea": {
+    "min": 0,
+    "p01": 4.2,
+    "p05": 18.6,
+    "p25": 70.1,
+    "median": 185.4,
+    "p75": 202.8,
+    "p95": 215,
+    "p99": 216.9,
+    "max": 221,
+    "mean": 138.9,
+    "pctBelow4": 0.85,
+    "pctBelow16": 4.32,
+    "pctAbove96": 63.48,
+    "pctAbove160": 55.55,
+    "pctAbove224": 0,
+    "rows": [
+      198.2,
+      199.5,
+      200.6,
+      201.6,
+      200.8,
+      197.3,
+      196.6,
+      182.6,
+      172.2,
+      129.9,
+      80.4,
+      69.1,
+      49.7,
+      54.7,
+      52.1,
+      37
+    ],
+    "surface": {
+      "calls": 174,
+      "tris": 80224
+    },
+    "section": {
+      "calls": 22,
+      "tris": 53122
+    },
+    "meshes": 70,
+    "lights": 5,
+    "probes": {},
+    "fps": 15,
+    "textures": 130,
+    "geometries": 103,
+    "programs": 113,
+    "terrainCalls": 14,
+    "ugMode": null,
+    "texBytes": {
+      "materials": 50,
+      "textures": 99,
+      "sets": 33,
+      "setsReady": 0,
+      "pools": {
+        "hero": {
+          "usedMB": 19.9,
+          "floorMB": 9.4,
+          "freeMB": 0
+        },
+        "stratum": {
+          "usedMB": 0,
+          "floorMB": 15.6,
+          "freeMB": 14.2
+        },
+        "ground": {
+          "usedMB": 19,
+          "floorMB": 9.4,
+          "freeMB": 0
+        },
+        "general": {
+          "usedMB": 25,
+          "floorMB": 10.1,
+          "freeMB": 0
+        }
+      },
+      "decals": 0,
+      "dataTextures": 0,
+      "strata": 0,
+      "bytesApprox": 66928607,
+      "megabytes": 63.8,
+      "budgetMB": 88,
+      "peakMB": 63.8,
+      "pending": 33,
+      "slices": {
+        "count": 156,
+        "maxMs": 12.4,
+        "avgMs": 8.1,
+        "overFrameBudget": 0
+      },
+      "built": 0,
+      "failed": 0,
+      "tier": "high",
+      "anisotropy": 16,
+      "viewport": {
+        "w": 390,
+        "h": 844,
+        "dpr": 2
+      }
+    },
+    "probeL": {}
+  }
+}

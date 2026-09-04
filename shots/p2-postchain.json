@@ -1,0 +1,208 @@
+{
+  "when": "2026-09-04T10:25:45.158Z",
+  "method": "dth",
+  "tiers": {
+    "high": {
+      "tier": "high",
+      "dpr": 2,
+      "canvas": {
+        "w": 780,
+        "h": 1688
+      },
+      "frameMs": 1.917,
+      "frameFps": 521.7,
+      "drawCalls": 245,
+      "triangles": 411668,
+      "passes": [
+        {
+          "name": "BandRenderPass",
+          "costMs": null,
+          "note": "head pass — the scene itself"
+        },
+        {
+          "name": "DrillityContactAO",
+          "costMs": 0.475,
+          "spread": 0.75,
+          "pctOfFrame": 24.8
+        },
+        {
+          "name": "_UnrealBloomPass",
+          "costMs": 0.2083,
+          "spread": 0.875,
+          "pctOfFrame": 10.9
+        },
+        {
+          "name": "DrillityGrade",
+          "costMs": 0.0917,
+          "spread": 0.8417,
+          "pctOfFrame": 4.8
+        },
+        {
+          "name": "SMAAPass",
+          "costMs": -0.0083,
+          "spread": 0.4417,
+          "pctOfFrame": -0.4
+        }
+      ],
+      "aoPrepass": "included in DrillityContactAO",
+      "postScaleAB": {
+        "sweep": [
+          {
+            "postScale": 1,
+            "frameMs": 1.717,
+            "fps": 582.5,
+            "edges": {
+              "hardEdgePctgOf1e4": 141.19,
+              "softEdgePctgOf1e4": 572.91,
+              "meanAbsGrad": 4.4955
+            }
+          },
+          {
+            "postScale": 1.15,
+            "frameMs": 1.5,
+            "fps": 666.7,
+            "edges": {
+              "hardEdgePctgOf1e4": 97.73,
+              "softEdgePctgOf1e4": 415.48,
+              "meanAbsGrad": 3.3084
+            }
+          }
+        ],
+        "supersampleCostMs": -0.217,
+        "supersamplePctOfFrame": -14.5,
+        "hardEdgeReductionPct": 30.8
+      }
+    },
+    "medium": {
+      "tier": "medium",
+      "dpr": 2,
+      "canvas": {
+        "w": 780,
+        "h": 1688
+      },
+      "frameMs": 1.858,
+      "frameFps": 538.1,
+      "drawCalls": 239,
+      "triangles": 321852,
+      "passes": [
+        {
+          "name": "BandRenderPass",
+          "costMs": null,
+          "note": "head pass — the scene itself"
+        },
+        {
+          "name": "DrillityContactAO",
+          "costMs": 0.6833,
+          "spread": 0.6667,
+          "pctOfFrame": 36.8
+        },
+        {
+          "name": "_UnrealBloomPass",
+          "costMs": 0.1167,
+          "spread": 0.2667,
+          "pctOfFrame": 6.3
+        },
+        {
+          "name": "DrillityGrade",
+          "costMs": 0.0667,
+          "spread": 0.525,
+          "pctOfFrame": 3.6
+        },
+        {
+          "name": "SMAAPass",
+          "costMs": 0.1,
+          "spread": 0.3833,
+          "pctOfFrame": 5.4
+        }
+      ],
+      "aoPrepass": "included in DrillityContactAO",
+      "postScaleAB": {
+        "sweep": [
+          {
+            "postScale": 1,
+            "frameMs": 1.758,
+            "fps": 568.7,
+            "edges": {
+              "hardEdgePctgOf1e4": 131.32,
+              "softEdgePctgOf1e4": 662.43,
+              "meanAbsGrad": 4.5823
+            }
+          },
+          {
+            "postScale": 1.15,
+            "frameMs": 1.65,
+            "fps": 606.1,
+            "edges": {
+              "hardEdgePctgOf1e4": 104.89,
+              "softEdgePctgOf1e4": 442.95,
+              "meanAbsGrad": 3.4567
+            }
+          }
+        ],
+        "supersampleCostMs": -0.108,
+        "supersamplePctOfFrame": -6.5,
+        "hardEdgeReductionPct": 20.1
+      }
+    },
+    "low": {
+      "tier": "low",
+      "dpr": 1.5,
+      "canvas": {
+        "w": 585,
+        "h": 1266
+      },
+      "frameMs": 1.25,
+      "frameFps": 800,
+      "drawCalls": 150,
+      "triangles": 101114,
+      "passes": [
+        {
+          "name": "BandRenderPass",
+          "costMs": null,
+          "note": "head pass — the scene itself"
+        },
+        {
+          "name": "_UnrealBloomPass",
+          "costMs": 0.075,
+          "spread": 0.2,
+          "pctOfFrame": 6
+        },
+        {
+          "name": "DrillityGrade",
+          "costMs": -0.0417,
+          "spread": 0.3833,
+          "pctOfFrame": -3.3
+        }
+      ],
+      "aoPrepass": null,
+      "postScaleAB": {
+        "sweep": [
+          {
+            "postScale": 1,
+            "frameMs": 1.083,
+            "fps": 923.1,
+            "edges": {
+              "hardEdgePctgOf1e4": 155.08,
+              "softEdgePctgOf1e4": 310.52,
+              "meanAbsGrad": 3.8464
+            }
+          },
+          {
+            "postScale": 1.15,
+            "frameMs": 1.183,
+            "fps": 845.1,
+            "edges": {
+              "hardEdgePctgOf1e4": 124.46,
+              "softEdgePctgOf1e4": 377.69,
+              "meanAbsGrad": 3.6858
+            }
+          }
+        ],
+        "supersampleCostMs": 0.1,
+        "supersamplePctOfFrame": 8.5,
+        "hardEdgeReductionPct": 19.7
+      }
+    }
+  },
+  "errors": []
+}

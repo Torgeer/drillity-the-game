@@ -1,0 +1,5446 @@
+{
+ "when": "2026-09-04T09:06:31.301Z",
+ "url": "http://localhost:5178/?quality=high&shot",
+ "headed": true,
+ "quality": "high",
+ "budget": {
+  "fps": 60,
+  "section": 60,
+  "surface": 80,
+  "rig": 70,
+  "textureMB": 90,
+  "particles": 12000,
+  "source": "README.md · Performance budget"
+ },
+ "renderHealth": {
+  "ok": true,
+  "why": null,
+  "lost": false,
+  "calls": 254,
+  "meanLuma": 20.3,
+  "alpha": 255
+ },
+ "coverage": {
+  "methods": 21,
+  "rigs": 18,
+  "shots": 51
+ },
+ "skipped": [],
+ "unlisted": [],
+ "shots": [
+  {
+   "id": "01-boot",
+   "group": "ui",
+   "file": "post-01-boot.png",
+   "md5": "66a55d207061b40b3f3e18b72187bbc5",
+   "skipped": null,
+   "tookSec": 1.4,
+   "failed": [],
+   "errors": 0,
+   "metrics": {
+    "fps": 26,
+    "ctxLost": false,
+    "frame": {
+     "calls": 254,
+     "tris": 394510,
+     "callsMax": 254
+    },
+    "surface": {
+     "calls": 79,
+     "tris": 138160
+    },
+    "section": {
+     "calls": 20,
+     "tris": 44372
+    },
+    "rig": {
+     "calls": 56,
+     "tris": 15864
+    },
+    "texEstMB": 62.1,
+    "particles": {
+     "live": 367,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 82,
+      "min": 1,
+      "max": 183,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb8888777bbbbbbbbb8887888877778888776a777777777767554555537565666633225333a4344444b842222232222223211222425352222211112011888a212221112111817220111011201100111011511111211221101111111111111110115000111111111211"
+     },
+     "section": {
+      "mean": 59,
+      "min": 0,
+      "max": 124,
+      "sig": "0113323726112100000221101010000000377652173345101326447116565611132765522477650002276535654366100137463566855510022656557657771013375687445667101227376656554400122777557665640013377735854767200226266336355510022766545675551012276647544657100217456654667610"
+     },
+     "sky": {
+      "mean": 177.8,
+      "min": 174,
+      "max": 182,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "menu",
+    "liveScreen": "menu",
+    "liveHeading": "",
+    "cameraMode": "menu",
+    "rigId": "crawler-lite",
+    "rigMethodId": "dth",
+    "simMethodId": "dth",
+    "simActive": true,
+    "contractMethodId": "dth",
+    "regionId": "nordic",
+    "profileMode": "vertical",
+    "depth": 12.12,
+    "rop": 9.673,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": "flushing-swivel",
+     "downhole": "dth-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 0,
+     "slotcard": 0,
+     "menuNav": 1
+    }
+   },
+   "extra": null
+  },
+  {
+   "id": "02-menu",
+   "group": "ui",
+   "file": "post-02-menu.png",
+   "md5": "95cbf748ea61b1f45de16c270d845a86",
+   "skipped": null,
+   "tookSec": 3.3,
+   "failed": [],
+   "errors": 0,
+   "metrics": {
+    "fps": 28,
+    "ctxLost": false,
+    "frame": {
+     "calls": 254,
+     "tris": 394572,
+     "callsMax": 254
+    },
+    "surface": {
+     "calls": 79,
+     "tris": 138220
+    },
+    "section": {
+     "calls": 20,
+     "tris": 44372
+    },
+    "rig": {
+     "calls": 56,
+     "tris": 15864
+    },
+    "texEstMB": 62.1,
+    "particles": {
+     "live": 347,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 80.6,
+      "min": 2,
+      "max": 179,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb87878bbbbbbbbbbb888788888888bb788777887787888888765677767777777755254455b3455646333333339623443442222222a22222231111222293853122122111127164822311111111228991111111000110211011110117111999222101011011111222229111111111122233"
+     },
+     "section": {
+      "mean": 59.7,
+      "min": 0,
+      "max": 124,
+      "sig": "0112333716111200000211101104200002366662163246100227547117555411122756643556750012377545564535101126465567654610122646545757661012377777645666101227566557556510113767536765550013368746645767200227436456466510012756635563751012374635654667101237374566756410"
+     },
+     "sky": {
+      "mean": 175,
+      "min": 135,
+      "max": 178,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb8bbbbbbbbbbbb"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "menu",
+    "liveScreen": "menu",
+    "liveHeading": "",
+    "cameraMode": "menu",
+    "rigId": "crawler-lite",
+    "rigMethodId": "dth",
+    "simMethodId": "dth",
+    "simActive": true,
+    "contractMethodId": "dth",
+    "regionId": "nordic",
+    "profileMode": "vertical",
+    "depth": 12.32,
+    "rop": 9.291,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": "flushing-swivel",
+     "downhole": "dth-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 0,
+     "slotcard": 0,
+     "menuNav": 1
+    }
+   },
+   "extra": null
+  },
+  {
+   "id": "03-contracts",
+   "group": "ui",
+   "file": "post-03-contracts.png",
+   "md5": "5774d92bea8c430f1233de82f664f040",
+   "skipped": null,
+   "tookSec": 2.9,
+   "failed": [],
+   "errors": 0,
+   "metrics": {
+    "fps": 26.5,
+    "ctxLost": false,
+    "frame": {
+     "calls": 254,
+     "tris": 393856,
+     "callsMax": 254
+    },
+    "surface": {
+     "calls": 79,
+     "tris": 137908
+    },
+    "section": {
+     "calls": 20,
+     "tris": 43982
+    },
+    "rig": {
+     "calls": 56,
+     "tris": 15864
+    },
+    "texEstMB": 62.1,
+    "particles": {
+     "live": 302,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 86.1,
+      "min": 3,
+      "max": 177,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb8878bbbbbbbbb8888878887288878788887777747677767477776655555555a25325533353333393323333422222229232222222221131732992222213a1118267811113111111736991111111101000210119212413922654112221454344444441224444444355556111"
+     },
+     "section": {
+      "mean": 62.1,
+      "min": 0,
+      "max": 119,
+      "sig": "0113222605014210000211000477551013276752244445101337566216555410132665612667750413377765666666101217656635664610133755376666651012475667557465101326656646755610023745645454660012275636656676201217524567647610122654657755651012266645546766000147355755776410"
+     },
+     "sky": {
+      "mean": 173.6,
+      "min": 125,
+      "max": 177,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbba8bbb"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "contracts",
+    "liveScreen": "contracts",
+    "liveHeading": "Contracts",
+    "cameraMode": "menu",
+    "rigId": "crawler-lite",
+    "rigMethodId": "dth",
+    "simMethodId": "dth",
+    "simActive": true,
+    "contractMethodId": "dth",
+    "regionId": "nordic",
+    "profileMode": "vertical",
+    "depth": 12.65,
+    "rop": 10.854,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": "flushing-swivel",
+     "downhole": "dth-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 10,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 0,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": null
+  },
+  {
+   "id": "08-results",
+   "group": "ui",
+   "file": "post-08-results.png",
+   "md5": "d96f783c7900c768c028318601e9157e",
+   "skipped": null,
+   "tookSec": 3.3,
+   "failed": [],
+   "errors": 0,
+   "metrics": {
+    "fps": 24.3,
+    "ctxLost": false,
+    "frame": {
+     "calls": 143,
+     "tris": 367136,
+     "callsMax": 143
+    },
+    "surface": {
+     "calls": 22,
+     "tris": 124522
+    },
+    "section": {
+     "calls": 20,
+     "tris": 44116
+    },
+    "rig": {
+     "calls": 3,
+     "tris": 2856
+    },
+    "texEstMB": 62.1,
+    "particles": {
+     "live": 347,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 86,
+      "min": 6,
+      "max": 185,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcbbbbbbbbbbbbbbbcbbbbbbbbbbbbb7ccc787788777787878777778777777778776666566656666666444444444444444433333333333333432222422222272222222222222222222222222222222222022222222222222222222222262222222222221111111112221114212122222211"
+     },
+     "section": {
+      "mean": 61.7,
+      "min": 0,
+      "max": 125,
+      "sig": "1312231011101100001755522646441003376471155646100226666223776620033775321545650111265863757457100227773576556710123735775656661012264766575646101227676565757400024777667646571012173665455455110116654655753410123766485645571012274467245775101227566566556410"
+     },
+     "sky": {
+      "mean": 179.7,
+      "min": 175,
+      "max": 185,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcbbbbbbbbbbbbbbbcbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcc"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "results",
+    "liveScreen": "results",
+    "liveHeading": "Hole complete",
+    "cameraMode": "mast",
+    "rigId": "crawler-lite",
+    "rigMethodId": "dth",
+    "simMethodId": "dth",
+    "simActive": true,
+    "contractMethodId": null,
+    "regionId": "nordic",
+    "profileMode": "vertical",
+    "depth": 13.26,
+    "rop": 18.567,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": "flushing-swivel",
+     "downhole": "dth-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 7,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 0,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": null
+  },
+  {
+   "id": "09-shop",
+   "group": "ui",
+   "file": "post-09-shop.png",
+   "md5": "f7167a55e9b9380f3967d63ca81c0c5b",
+   "skipped": null,
+   "tookSec": 3.4,
+   "failed": [],
+   "errors": 0,
+   "metrics": {
+    "fps": 72.9,
+    "ctxLost": false,
+    "frame": {
+     "calls": 254,
+     "tris": 393964,
+     "callsMax": 254
+    },
+    "surface": {
+     "calls": 79,
+     "tris": 137924
+    },
+    "section": {
+     "calls": 20,
+     "tris": 44068
+    },
+    "rig": {
+     "calls": 56,
+     "tris": 15864
+    },
+    "texEstMB": 62.1,
+    "particles": {
+     "live": 305,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 100.1,
+      "min": 1,
+      "max": 203,
+      "sig": "bbbbaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb77778bbbbbbbbbbb88777877d877777777776767a677777766565665a45636663328a913346a33331121112136362222721111116859b1221111100032563210182170010001145312011101111111101111111111111111"
+     },
+     "section": {
+      "mean": 64.3,
+      "min": 1,
+      "max": 120,
+      "sig": "0112111014775610132767522444451013375662165554101226656226677610133777614566650512176566356647101347553766666410124756665574651013266666467556100237456454546600122756366556762012176245676476100226656577556510122666455468660001473557557764100137674647656410"
+     },
+     "sky": {
+      "mean": 170.5,
+      "min": 166,
+      "max": 176,
+      "sig": "baaaaaabaabbbbbbabbababbbbbbbbbbbaababbbbbbbbbbbbbbbaaaababbbbbbbbabbbbbbbbbbbbbbbababbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "shop",
+    "liveScreen": "shop",
+    "liveHeading": "iMarket",
+    "cameraMode": "orbit",
+    "rigId": "crawler-lite",
+    "rigMethodId": "dth",
+    "simMethodId": "dth",
+    "simActive": true,
+    "contractMethodId": null,
+    "regionId": "nordic",
+    "profileMode": "vertical",
+    "depth": 13.93,
+    "rop": 20.086,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": "flushing-swivel",
+     "downhole": "dth-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 5,
+     "cluster": 0,
+     "gaugebox": 0,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": null
+  },
+  {
+   "id": "09b-shop-listings",
+   "group": "ui",
+   "file": "post-09b-shop-listings.png",
+   "md5": "2f0f14b1838b1c17614a5c137142e8e5",
+   "skipped": null,
+   "tookSec": 38.5,
+   "failed": [],
+   "errors": 0,
+   "metrics": {
+    "fps": 144,
+    "ctxLost": false,
+    "frame": {
+     "calls": 251,
+     "tris": 395484,
+     "callsMax": 251
+    },
+    "surface": {
+     "calls": 78,
+     "tris": 138986
+    },
+    "section": {
+     "calls": 20,
+     "tris": 45476
+    },
+    "rig": {
+     "calls": 55,
+     "tris": 15384
+    },
+    "texEstMB": 62.1,
+    "particles": {
+     "live": 887,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 105.4,
+      "min": 4,
+      "max": 188,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb9bbbbbbbbbbbbbbb8887b77bcbbbbbbb77752778a777777766564763a66666864152433434443443211221229a222222211110019819a1222123001153232111122322233332011323122113231111333423210012333213"
+     },
+     "section": {
+      "mean": 64.6,
+      "min": 0,
+      "max": 120,
+      "sig": "1127464227754511023756512667561012377673245667101227575116555500133777543665650002377746754757200227355446366510021756645674651012264636543667101127356555656511112757666565651012376667666556100237757653556410123752576665242002175546656654101127765763755510"
+     },
+     "sky": {
+      "mean": 172.6,
+      "min": 169,
+      "max": 179,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "shop",
+    "liveScreen": "shop",
+    "liveHeading": "iMarket",
+    "cameraMode": "orbit",
+    "rigId": "crawler-lite",
+    "rigMethodId": "dth",
+    "simMethodId": "dth",
+    "simActive": true,
+    "contractMethodId": null,
+    "regionId": "nordic",
+    "profileMode": "vertical",
+    "depth": 19.74,
+    "rop": 9.126,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": "flushing-swivel",
+     "downhole": "dth-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 19,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 0,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": null
+  },
+  {
+   "id": "10-career",
+   "group": "ui",
+   "file": "post-10-career.png",
+   "md5": "e770ad9a60b653f58d2e1a655e35325d",
+   "skipped": null,
+   "tookSec": 2.1,
+   "failed": [],
+   "errors": 0,
+   "metrics": {
+    "fps": 143.9,
+    "ctxLost": false,
+    "frame": {
+     "calls": 251,
+     "tris": 394102,
+     "callsMax": 251
+    },
+    "surface": {
+     "calls": 78,
+     "tris": 138162
+    },
+    "section": {
+     "calls": 20,
+     "tris": 44942
+    },
+    "rig": {
+     "calls": 55,
+     "tris": 15384
+    },
+    "texEstMB": 62.1,
+    "particles": {
+     "live": 758,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 77.5,
+      "min": 3,
+      "max": 181,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb888b8888bbbbbbbb88878888888878786877777778888887677666734766366655354455b445454433333233a5333233225321229222222211112a2256122112123111116a58a11211111110911232111111001000011111101171111112221122106556111611123132122211231123"
+     },
+     "section": {
+      "mean": 65.9,
+      "min": 0,
+      "max": 124,
+      "sig": "1326466224764510122745421557641002476772245555101227665227647610023657523574550612376746755775101227515466646610121746637654651012275636556676100146276776655300112757775777641002376767566676101227546554546440012655776465651012375555654766101137565674854600"
+     },
+     "sky": {
+      "mean": 175.3,
+      "min": 118,
+      "max": 181,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb7bbbbbbbbbbbbbbb88bbbbbbbbbbbbbb88abb8bbbbbbbbbb"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "career",
+    "liveScreen": "career",
+    "liveHeading": "Career",
+    "cameraMode": "menu",
+    "rigId": "crawler-lite",
+    "rigMethodId": "dth",
+    "simMethodId": "dth",
+    "simActive": true,
+    "contractMethodId": null,
+    "regionId": "nordic",
+    "profileMode": "vertical",
+    "depth": 19.99,
+    "rop": 9.307,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": "flushing-swivel",
+     "downhole": "dth-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 0,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": null
+  },
+  {
+   "id": "10b-career-skills",
+   "group": "ui",
+   "file": "post-10b-career-skills.png",
+   "md5": "3391c4faa998ca037022074a57579c16",
+   "skipped": null,
+   "tookSec": 3.2,
+   "failed": [],
+   "errors": 0,
+   "metrics": {
+    "fps": 143.9,
+    "ctxLost": false,
+    "frame": {
+     "calls": 251,
+     "tris": 395010,
+     "callsMax": 251
+    },
+    "surface": {
+     "calls": 78,
+     "tris": 138694
+    },
+    "section": {
+     "calls": 20,
+     "tris": 45294
+    },
+    "rig": {
+     "calls": 55,
+     "tris": 15384
+    },
+    "texEstMB": 62.1,
+    "particles": {
+     "live": 1053,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 81.9,
+      "min": 5,
+      "max": 178,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb877bbbba8bbb88888878884887887787787777457677764777777726554555a5465568443233339333334222222212a322222222211123812a22221111111152666121111111004459a1111111001110101110211321222911022120123111543334111364434354355551"
+     },
+     "section": {
+      "mean": 63.8,
+      "min": 1,
+      "max": 120,
+      "sig": "2227776227655620113736633535471013365662275445101227655125746600033764621433452011373766255676101126742756644410133675565655661012375657464757101227577636673610023755665567641001265553524557000117665445656610033776554565650003376866447566001226555555636610"
+     },
+     "sky": {
+      "mean": 174.1,
+      "min": 169,
+      "max": 178,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "career",
+    "liveScreen": "career",
+    "liveHeading": "Career",
+    "cameraMode": "menu",
+    "rigId": "crawler-lite",
+    "rigMethodId": "dth",
+    "simMethodId": "dth",
+    "simActive": true,
+    "contractMethodId": null,
+    "regionId": "nordic",
+    "profileMode": "vertical",
+    "depth": 20.54,
+    "rop": 16.588,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": "flushing-swivel",
+     "downhole": "dth-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 8,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 0,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": null
+  },
+  {
+   "id": "11-garage",
+   "group": "ui",
+   "file": "post-11-garage.png",
+   "md5": "7a5d40f869e90514d3069371b22f518f",
+   "skipped": null,
+   "tookSec": 2.6,
+   "failed": [],
+   "errors": 0,
+   "metrics": {
+    "fps": 143.9,
+    "ctxLost": false,
+    "frame": {
+     "calls": 252,
+     "tris": 395330,
+     "callsMax": 252
+    },
+    "surface": {
+     "calls": 79,
+     "tris": 138896
+    },
+    "section": {
+     "calls": 20,
+     "tris": 45424
+    },
+    "rig": {
+     "calls": 55,
+     "tris": 15384
+    },
+    "texEstMB": 62.1,
+    "particles": {
+     "live": 1051,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 102.5,
+      "min": 5,
+      "max": 176,
+      "sig": "bbaabaaabaaabaaabbbbbbbbabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb77778888abbbbbbb6776666786866777455555557555565612321134339832112225212a8232101111111011178a88101111110352899511011821692101022211124111111113893110111111111111"
+     },
+     "section": {
+      "mean": 64.7,
+      "min": 0,
+      "max": 123,
+      "sig": "1226465227677610133767722456661012276661176465001157676127654500133687412456650302274364564676100127566355647510122757355556681012373746667564000126477665757510123665676675661013376466535564001237434776654510122755465556641012365657738545000237656754655410"
+     },
+     "sky": {
+      "mean": 168.2,
+      "min": 165,
+      "max": 172,
+      "sig": "abaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaabaaababaaaaaaaaaabaabaaaaaaaaaabaabaaaaaaaabbaaabaaabababbaaaaaabbbbbbaaabaaaababaaaabbbabaaaabababbabbaabbaabbbabbaababbbbbbbabbbabbbbababbabbbbbbbbbbaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbabbbbbbbbbbbbbbbbbbbbbbbb"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "garage",
+    "liveScreen": "garage",
+    "liveHeading": "Garage",
+    "cameraMode": "orbit",
+    "rigId": "crawler-lite",
+    "rigMethodId": "dth",
+    "simMethodId": "dth",
+    "simActive": true,
+    "contractMethodId": null,
+    "regionId": "nordic",
+    "profileMode": "vertical",
+    "depth": 21.11,
+    "rop": 18.886,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": "flushing-swivel",
+     "downhole": "dth-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 18,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 0,
+     "slotcard": 5,
+     "menuNav": 0
+    }
+   },
+   "extra": null
+  },
+  {
+   "id": "14-section-clean",
+   "group": "ui",
+   "file": "post-14-section-clean.png",
+   "md5": "c79bf0f3477aa28700f3a9c21f4d27a7",
+   "skipped": null,
+   "tookSec": 5.2,
+   "failed": [],
+   "errors": 0,
+   "metrics": {
+    "fps": 143.9,
+    "ctxLost": false,
+    "frame": {
+     "calls": 257,
+     "tris": 399608,
+     "callsMax": 257
+    },
+    "surface": {
+     "calls": 82,
+     "tris": 140172
+    },
+    "section": {
+     "calls": 20,
+     "tris": 47636
+    },
+    "rig": {
+     "calls": 55,
+     "tris": 15384
+    },
+    "texEstMB": 62.1,
+    "particles": {
+     "live": 1386,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 101.5,
+      "min": 2,
+      "max": 182,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb778876788876679767757778776644566164564666562778711133534333697781122113122646899181112111129844442115215413640100111143110011343410110001011100151111111111110000"
+     },
+     "section": {
+      "mean": 51.7,
+      "min": 0,
+      "max": 114,
+      "sig": "1226655324556610021765524674551003377653156465001227676224755600112744535553551301366655655556101327545754434610000713656544571003614311111331000125222465644510021535434424431011152433344533000114244335424300012535445433431012255125654343000115342434334510"
+     },
+     "sky": {
+      "mean": 175.4,
+      "min": 172,
+      "max": 179,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "hero",
+    "rigId": "crawler-lite",
+    "rigMethodId": "dth",
+    "simMethodId": "dth",
+    "simActive": true,
+    "contractMethodId": "dth",
+    "regionId": "nordic",
+    "profileMode": "vertical",
+    "depth": 34.19,
+    "rop": 0,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "stuck",
+    "tooling": {
+     "surface": "flushing-swivel",
+     "downhole": "dth-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": null
+  },
+  {
+   "id": "07-section-closeup",
+   "group": "ui",
+   "file": "post-07-section-closeup.png",
+   "md5": "c09828695eb89dffca0411e0e8d3211d",
+   "skipped": null,
+   "tookSec": 4,
+   "failed": [],
+   "errors": 0,
+   "metrics": {
+    "fps": 143.9,
+    "ctxLost": false,
+    "frame": {
+     "calls": 241,
+     "tris": 396264,
+     "callsMax": 241
+    },
+    "surface": {
+     "calls": 74,
+     "tris": 139218
+    },
+    "section": {
+     "calls": 20,
+     "tris": 47120
+    },
+    "rig": {
+     "calls": 49,
+     "tris": 14508
+    },
+    "texEstMB": 62.1,
+    "particles": {
+     "live": 1926,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 66,
+      "min": 0,
+      "max": 172,
+      "sig": "3455556887898988324234498a998999116435688a889999112268898a569aaa111188999999889a1010357aaaba97891000149a8a9977790100127b997a858610011477659763450113464434444545001246433343233500001923233322221010101121111121000110111100011100100001100000111111011110101111"
+     },
+     "section": {
+      "mean": 63.7,
+      "min": 0,
+      "max": 124,
+      "sig": "1117655425753411124766441636661012264463144876111327476456556510022766654647650512375744644456100126634655564510022655465556640102377765547557000327775644846410013742444533361011264246646566101126655656756510112744674646661002373557766477101237555536467610"
+     },
+     "sky": {
+      "mean": 100.5,
+      "min": 16,
+      "max": 160,
+      "sig": "5566667887723587446666789777778733666678878888872455556887897888325555688789899834554558778889983444446878899998343444598888899933333459888889992223344989878a99322324498a98899922332559899889992242254889887999222225588a788999222216688a789998222237688a779998"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "downhole",
+    "rigId": "crawler-lite",
+    "rigMethodId": "dth",
+    "simMethodId": "dth",
+    "simActive": true,
+    "contractMethodId": "dth",
+    "regionId": "nordic",
+    "profileMode": "vertical",
+    "depth": 28.18,
+    "rop": 0,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "stuck",
+    "tooling": {
+     "surface": "flushing-swivel",
+     "downhole": "dth-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": null
+  },
+  {
+   "id": "m01-auger",
+   "group": "methods",
+   "file": "post-m01-auger.png",
+   "md5": "82c6be069c912afbd919eb9d1b55f210",
+   "skipped": null,
+   "tookSec": 4.2,
+   "failed": [
+    "site HUD is up"
+   ],
+   "errors": 0,
+   "metrics": {
+    "fps": 136,
+    "ctxLost": false,
+    "frame": {
+     "calls": 239,
+     "tris": 389792,
+     "callsMax": 239
+    },
+    "surface": {
+     "calls": 76,
+     "tris": 139750
+    },
+    "section": {
+     "calls": 20,
+     "tris": 43602
+    },
+    "rig": {
+     "calls": 49,
+     "tris": 14880
+    },
+    "texEstMB": 62.1,
+    "particles": {
+     "live": 875,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 99.5,
+      "min": 1,
+      "max": 183,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb6bbb8788777887775788784577787767478771b3562666562677611142323333547751122113122445799181112111116142342115515512311000211125111011544410110101011100011111111111110000"
+     },
+     "section": {
+      "mean": 59,
+      "min": 0,
+      "max": 121,
+      "sig": "1114032123524110032322101242370004111120031112001227665454751500033755547545550501276754768456000226664576566710123745764556662012173755575535000227675556657210124777458647571012165664464354111227665555754410123766575545571002174466446776111227666565766510"
+     },
+     "sky": {
+      "mean": 175.8,
+      "min": 171,
+      "max": 181,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "hero",
+    "rigId": "crawler-lite",
+    "rigMethodId": "auger",
+    "simMethodId": "auger",
+    "simActive": true,
+    "contractMethodId": "auger",
+    "regionId": "nordic",
+    "profileMode": "vertical",
+    "depth": 13.3,
+    "rop": 0.009,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": null,
+     "downhole": "drag-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": true
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "target": 38,
+    "seek": 13.3
+   }
+  },
+  {
+   "id": "m02-cable-tool",
+   "group": "methods",
+   "file": "post-m02-cable-tool.png",
+   "md5": "afae036f11ea7e2aaef4448cd35ca2eb",
+   "skipped": null,
+   "tookSec": 4.5,
+   "failed": [
+    "site HUD is up"
+   ],
+   "errors": 0,
+   "metrics": {
+    "fps": 120,
+    "ctxLost": false,
+    "frame": {
+     "calls": 252,
+     "tris": 410114,
+     "callsMax": 252
+    },
+    "surface": {
+     "calls": 80,
+     "tris": 148562
+    },
+    "section": {
+     "calls": 17,
+     "tris": 39430
+    },
+    "rig": {
+     "calls": 53,
+     "tris": 23692
+    },
+    "texEstMB": 62.1,
+    "particles": {
+     "live": 731,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 99.4,
+      "min": 1,
+      "max": 182,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbb59bbbbbbbbbbbbbb5abbbbbbbbbbbbbb8b8bbbbbbbbbbbbbb7abbbbbbbbbbbbbbbbb77887678887777a878767788776776867175564666567686511133525333446981122113122632538151111101322334341115114522641110111311111111444410100000011154441111111221115000"
+     },
+     "section": {
+      "mean": 58.9,
+      "min": 0,
+      "max": 122,
+      "sig": "0114432124523100042360101111310004622110122122001326655444661100133755534653650501376636667555000227675576577700134756774456661012263766565544001227775566456400133777358547572002275663364455100226665456755410122766475546571002174466446676101227655575656610"
+     },
+     "sky": {
+      "mean": 169.8,
+      "min": 29,
+      "max": 190,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbba4bbbbbbbbbbbbbbabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcbbbbbbbbbbbbbbbbbbbbbbbbbbb9bbbbbbbbbbbbbbb5bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb8bbbbbbbbbbbbbbb49bbbbbbbbbbbbbb48bbbbbbbbbbbbbb44bbbbbbbbbbbbbb35bbbbbbbbbbbbbb42bbbbbbbbbbbbbb52bbbb"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "hero",
+    "rigId": "cable-percussion",
+    "rigMethodId": "cable-tool",
+    "simMethodId": "cable-tool",
+    "simActive": true,
+    "contractMethodId": "cable-tool",
+    "regionId": "nordic",
+    "profileMode": "vertical",
+    "depth": 13.37,
+    "rop": 1.296,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": null,
+     "downhole": "cable-tool-chisel"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "target": 38,
+    "seek": 13.3
+   }
+  },
+  {
+   "id": "m03-top-hammer",
+   "group": "methods",
+   "file": "post-m03-top-hammer.png",
+   "md5": "ceb710e2c2ee8092ee6e92121d562439",
+   "skipped": null,
+   "tookSec": 4.2,
+   "failed": [
+    "site HUD is up"
+   ],
+   "errors": 0,
+   "metrics": {
+    "fps": 82,
+    "ctxLost": false,
+    "frame": {
+     "calls": 247,
+     "tris": 401902,
+     "callsMax": 247
+    },
+    "surface": {
+     "calls": 79,
+     "tris": 140214
+    },
+    "section": {
+     "calls": 20,
+     "tris": 49004
+    },
+    "rig": {
+     "calls": 52,
+     "tris": 15344
+    },
+    "texEstMB": 62.2,
+    "particles": {
+     "live": 2120,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 102,
+      "min": 4,
+      "max": 205,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb9bbb8778777887766777662687478766477741636636665647775211433233337997322231222227988832211111112dab43342115511414501000111121111115435320101111011545541111111121151110"
+     },
+     "section": {
+      "mean": 63.7,
+      "min": 0,
+      "max": 120,
+      "sig": "1227643226651100122746622552551002275371175556111227466235566510123775646645450011276645677546101247455357576600123777776446671012265665565466101137676367655500033776466457472002274564544665100126566355636510123646365546681011273645656564110127466665757510"
+     },
+     "sky": {
+      "mean": 175.4,
+      "min": 172,
+      "max": 180,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "hero",
+    "rigId": "crawler-lite",
+    "rigMethodId": "top-hammer",
+    "simMethodId": "top-hammer",
+    "simActive": true,
+    "contractMethodId": "top-hammer",
+    "regionId": "nordic",
+    "profileMode": "vertical",
+    "depth": 13.53,
+    "rop": 12.424,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": "shank-adapter",
+     "downhole": "button-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "target": 38,
+    "seek": 13.3
+   }
+  },
+  {
+   "id": "m04-site-investigation",
+   "group": "methods",
+   "file": "post-m04-site-investigation.png",
+   "md5": "094838639ea2fb0435134f473811593a",
+   "skipped": null,
+   "tookSec": 4.7,
+   "failed": [
+    "site HUD is up"
+   ],
+   "errors": 0,
+   "metrics": {
+    "fps": 84.8,
+    "ctxLost": false,
+    "frame": {
+     "calls": 237,
+     "tris": 391026,
+     "callsMax": 237
+    },
+    "surface": {
+     "calls": 75,
+     "tris": 139888
+    },
+    "section": {
+     "calls": 19,
+     "tris": 43224
+    },
+    "rig": {
+     "calls": 49,
+     "tris": 14880
+    },
+    "texEstMB": 62.1,
+    "particles": {
+     "live": 775,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 98.8,
+      "min": 1,
+      "max": 182,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb5bbb89888778877747887876777877774677717366566666266661114232333323464112212322243658a191111111111303441115115511130000111144311111444410110101111140001110111111115100"
+     },
+     "section": {
+      "mean": 57.6,
+      "min": 0,
+      "max": 122,
+      "sig": "1114444414424300022434411323210006632230131176005662111011101000000110054753650013274474475656101327555674776610122765556554661011366645668555100227565566577710134756874456671012272766565544001226775576656400133777358547572002275663363555110227465456755510"
+     },
+     "sky": {
+      "mean": 175.9,
+      "min": 172,
+      "max": 181,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "hero",
+    "rigId": "crawler-lite",
+    "rigMethodId": "site-investigation",
+    "simMethodId": "site-investigation",
+    "simActive": true,
+    "contractMethodId": "site-investigation",
+    "regionId": "nordic",
+    "profileMode": "vertical",
+    "depth": 9.63,
+    "rop": 0,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "spt-drive",
+    "tooling": {
+     "surface": null,
+     "downhole": "spt-split-spoon"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": true
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "notes": [
+     "QA bridge deepened this job to 38 m — clamped back to 27.5 m (method range 10-35)"
+    ],
+    "target": 27.5,
+    "seek": 9.63
+   }
+  },
+  {
+   "id": "m05-dth",
+   "group": "methods",
+   "file": "post-m05-dth.png",
+   "md5": "9a78aef27a400e07a92c5d11f48b8ff0",
+   "skipped": null,
+   "tookSec": 4.5,
+   "failed": [
+    "site HUD is up"
+   ],
+   "errors": 0,
+   "metrics": {
+    "fps": 109.9,
+    "ctxLost": false,
+    "frame": {
+     "calls": 285,
+     "tris": 414954,
+     "callsMax": 285
+    },
+    "surface": {
+     "calls": 90,
+     "tris": 145208
+    },
+    "section": {
+     "calls": 20,
+     "tris": 48698
+    },
+    "rig": {
+     "calls": 64,
+     "tris": 20200
+    },
+    "texEstMB": 62.2,
+    "particles": {
+     "live": 2001,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 97.4,
+      "min": 4,
+      "max": 182,
+      "sig": "bbbbbbbbbb4abbbbbbbbbbbbbb5abbbbbbbbbbbbbb4abbbbbbbbbbbbbb5abbbbbbbbbbbbbb4abbbbbbbbbbbbbb49bb778877788876559377348788777759624264754666662883615334344333498462222121232388824121111111159110002115515518643344111114331114544310110111111400011111111111140001"
+     },
+     "section": {
+      "mean": 57.9,
+      "min": 0,
+      "max": 128,
+      "sig": "1237757323556411123752443666242012275542256554111157765523745510023676634365752002376565656755101227735366564500031766465664660002364565573647100227556556664510032754566446660002376747833686100256253752753500010202111111121002143234544233100125253565553500"
+     },
+     "sky": {
+      "mean": 167.4,
+      "min": 48,
+      "max": 179,
+      "sig": "bbbbbbbbbb3abbbbbbbbbbbbbb4abbbbbbbbbbbbbb49bbbbbbbbbbbbbb49bbbbbbbbbbbbbb4abbbbbbbbbbbbbb4abbbbbbbbbbbbbb4abbbbbbbbbbbbbb5abbbbbbbbbbbbbb5abbbbbbbbbbbbbb5abbbbbbbbbbbbbb5abbbbbbbbbbbbbb5abbbbbbbbbbbbbb5abbbbbbbbbbbbbb59bbbbbbbbbbbbbb59bbbbbbbbbbbbbb59bbbb"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "hero",
+    "rigId": "dth-crawler",
+    "rigMethodId": "dth",
+    "simMethodId": "dth",
+    "simActive": true,
+    "contractMethodId": "dth",
+    "regionId": "nordic",
+    "profileMode": "vertical",
+    "depth": 34.73,
+    "rop": 11.465,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": "flushing-swivel",
+     "downhole": "dth-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "target": 98.7,
+    "seek": 34.55
+   }
+  },
+  {
+   "id": "m06-overburden",
+   "group": "methods",
+   "file": "post-m06-overburden.png",
+   "md5": "d6ef45a42389bdd63d841df68da76f73",
+   "skipped": null,
+   "tookSec": 4.5,
+   "failed": [
+    "site HUD is up"
+   ],
+   "errors": 0,
+   "metrics": {
+    "fps": 86.8,
+    "ctxLost": false,
+    "frame": {
+     "calls": 257,
+     "tris": 415756,
+     "callsMax": 257
+    },
+    "surface": {
+     "calls": 82,
+     "tris": 140964
+    },
+    "section": {
+     "calls": 21,
+     "tris": 55538
+    },
+    "rig": {
+     "calls": 53,
+     "tris": 15392
+    },
+    "texEstMB": 62.2,
+    "particles": {
+     "live": 1527,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 103.2,
+      "min": 0,
+      "max": 183,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb98877888777788784577787777677771a366266666388861113333444558885111215433244779a191112111143711101115116515244434111155141111544411110111111100001111111111110000"
+     },
+     "section": {
+      "mean": 64.3,
+      "min": 0,
+      "max": 125,
+      "sig": "1227376316553411122667532545620013377733464757210267466236355511122766545675550012275647543657100216356644667610122764557565651002477755655656101227766543565510123652576666341002165546655545101137865653646600122786655466641012274555556645101236736465656500"
+     },
+     "sky": {
+      "mean": 175.3,
+      "min": 171,
+      "max": 181,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "hero",
+    "rigId": "crawler-lite",
+    "rigMethodId": "overburden",
+    "simMethodId": "overburden",
+    "simActive": true,
+    "contractMethodId": "overburden",
+    "regionId": "nordic",
+    "profileMode": "vertical",
+    "depth": 23.38,
+    "rop": 0,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "stuck",
+    "tooling": {
+     "surface": "shank-adapter",
+     "downhole": "casing-crown"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "target": 66.6,
+    "seek": 23.31
+   }
+  },
+  {
+   "id": "m07-core",
+   "group": "methods",
+   "file": "post-m07-core.png",
+   "md5": "4d565f09a313cb6f15551b3643fa285f",
+   "skipped": null,
+   "tookSec": 4.8,
+   "failed": [
+    "site HUD is up"
+   ],
+   "errors": 0,
+   "metrics": {
+    "fps": 94.6,
+    "ctxLost": false,
+    "frame": {
+     "calls": 275,
+     "tris": 418792,
+     "callsMax": 275
+    },
+    "surface": {
+     "calls": 86,
+     "tris": 145964
+    },
+    "section": {
+     "calls": 21,
+     "tris": 49194
+    },
+    "rig": {
+     "calls": 57,
+     "tris": 20392
+    },
+    "texEstMB": 62.2,
+    "particles": {
+     "live": 867,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 98.6,
+      "min": 1,
+      "max": 184,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb34bbbbbbbbbbbbbb5bbbbbbbbbbbbbbb8bbbbbbbbbbbbbbbbbbbbc8887788877448778478878877724777862646666664464381133334444583145122244332215459b91111111111731102115115311340300211144100110144510110000010110001110111113111000"
+     },
+     "section": {
+      "mean": 45.8,
+      "min": 0,
+      "max": 115,
+      "sig": "1237724127555711001113120141140001254453432556100125344124331410023533453335350501155633423344000125235653443310031524543324451002255435354544100124433644543510011544644432340002151424444433000125554354635400002523433356531001254545364453101335533421312100"
+     },
+     "sky": {
+      "mean": 173.2,
+      "min": 28,
+      "max": 181,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb67bbbbbbbbbbbbbb24bbbbbbbbbbbbbb23bbbb"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "hero",
+    "rigId": "core-rig",
+    "rigMethodId": "core",
+    "simMethodId": "core",
+    "simActive": true,
+    "contractMethodId": "core",
+    "regionId": "nordic",
+    "profileMode": "vertical",
+    "depth": 42.38,
+    "rop": 3.23,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": "flushing-swivel",
+     "downhole": "core-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "target": 120.8,
+    "seek": 42.28
+   }
+  },
+  {
+   "id": "m08-rc",
+   "group": "methods",
+   "file": "post-m08-rc.png",
+   "md5": "abd821141fa13dcf99cc28326c405225",
+   "skipped": null,
+   "tookSec": 5.3,
+   "failed": [
+    "site HUD is up"
+   ],
+   "errors": 0,
+   "metrics": {
+    "fps": 85.9,
+    "ctxLost": false,
+    "frame": {
+     "calls": 271,
+     "tris": 438478,
+     "callsMax": 271
+    },
+    "surface": {
+     "calls": 87,
+     "tris": 157298
+    },
+    "section": {
+     "calls": 21,
+     "tris": 46288
+    },
+    "rig": {
+     "calls": 59,
+     "tris": 33014
+    },
+    "texEstMB": 61.8,
+    "particles": {
+     "live": 1227,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 95.4,
+      "min": 4,
+      "max": 185,
+      "sig": "bbbbbbbbbb7abbbbbbbbbbbbbb67c988bbbbbbbbbb78899acbbbbbbb896b8999cbbbb988986a8888929888878757787784888777664a7a336377666666568a52226766667763456123666777883625a142201122262616512111111636375a411217116101284434112321211122000011211111111177652221323432220017"
+     },
+     "section": {
+      "mean": 40.8,
+      "min": 0,
+      "max": 124,
+      "sig": "0112221001222100001242310221110001131333023334000112222202133310011324312242252501133422232222000112133322221300011321232221230012022112423132000232641112112200113737673511120011277448566433001336755665566610122755673628671012275766465646100227656665486610"
+     },
+     "sky": {
+      "mean": 169,
+      "min": 79,
+      "max": 185,
+      "sig": "bbbbbbbbbb9bbbbbbbbbbbbbbb9abbbbbbbbbbbbbb9abbbbbbbbbbbbbb7abbbbbbbbbbbbbb6abbbbbbbbbbbbbb65bbbbbbbbbbbbbb66bbbbbbbbbbbbbb66bbbbbbbbbbbbbb67bbbbbbbbbbbbbb67c99bbbbbbbbbbb67c999bbbbbbbbbb67b999bbbbbbbbbb67b999bbbbbbbbbb67c998bbbbbbbbbb6699aabbbbbbbbbb77999a"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "hero",
+    "rigId": "rc-rig",
+    "rigMethodId": "rc",
+    "simMethodId": "rc",
+    "simActive": true,
+    "contractMethodId": "rc",
+    "regionId": "alpine",
+    "profileMode": "vertical",
+    "depth": 14.31,
+    "rop": 14.395,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": null,
+     "downhole": "rc-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "target": 38,
+    "seek": 13.3
+   }
+  },
+  {
+   "id": "m09-rotary-kelly",
+   "group": "methods",
+   "file": "post-m09-rotary-kelly.png",
+   "md5": "4f1ba1504bcac8cd1b350d9b58969345",
+   "skipped": null,
+   "tookSec": 5,
+   "failed": [
+    "site HUD is up"
+   ],
+   "errors": 0,
+   "metrics": {
+    "fps": 98,
+    "ctxLost": false,
+    "frame": {
+     "calls": 209,
+     "tris": 410544,
+     "callsMax": 209
+    },
+    "surface": {
+     "calls": 58,
+     "tris": 144888
+    },
+    "section": {
+     "calls": 17,
+     "tris": 41982
+    },
+    "rig": {
+     "calls": 29,
+     "tris": 19316
+    },
+    "texEstMB": 62.3,
+    "particles": {
+     "live": 904,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 95.6,
+      "min": 2,
+      "max": 215,
+      "sig": "bbbbbbbbbb4bbbbbbbbbbbbbb757dcbbbbbbbbbbb957dcccbbbbbbbbbb46b8cbbbbbbbbbbb5bab3cbbbbbbbbbb589a8688877887773a988277777777673696625556665655337a611123233333366741122122123436898171111111123842431117111014351014111111121111100011111011311155440151322221115000"
+     },
+     "section": {
+      "mean": 61.4,
+      "min": 0,
+      "max": 120,
+      "sig": "0102511011112510133675520321200013373472165656110227465434776620033765552544650511276754767456100226674576566710123745765555662012272755573525100227475566657200124677457647571002276664464445111117665556754410122766475545571002174466446776111226666575756510"
+     },
+     "sky": {
+      "mean": 170.5,
+      "min": 48,
+      "max": 218,
+      "sig": "bbbbbbbbbb4bbbbbbbbbbbbbbb5bbbbbbbbbbbbbb64bbbbbbbbbbbbbbb4bbbbbbbbbbbbbbb5bbbbbbbbbbbbbbb5bcbbbbbbbbbbbbb46cbbbbbbbbbbbbb5accbbbbbbbbbbbb4bccbbbbbbbbbbbb4ccccbbbbbbbbbba57dcbbbbbbbbbbb54cdcbbbbbbbbbbbb3cdccbbbbbbbbbbb3cecbbbbbbbbbbbb5cecbbbbbbbbbbbb39eccb"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "hero",
+    "rigId": "foundation-bg",
+    "rigMethodId": "rotary-kelly",
+    "simMethodId": "rotary-kelly",
+    "simActive": true,
+    "contractMethodId": "rotary-kelly",
+    "regionId": "nordic",
+    "profileMode": "vertical",
+    "depth": 13.3,
+    "rop": 0.028,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": "drilling-bucket",
+     "downhole": null
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": true
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "target": 38,
+    "seek": 13.3
+   }
+  },
+  {
+   "id": "m10-cfa",
+   "group": "methods",
+   "file": "post-m10-cfa.png",
+   "md5": "a9e215dde53e7f7f95803673b1d54051",
+   "skipped": null,
+   "tookSec": 4.9,
+   "failed": [
+    "site HUD is up"
+   ],
+   "errors": 0,
+   "metrics": {
+    "fps": 78,
+    "ctxLost": false,
+    "frame": {
+     "calls": 217,
+     "tris": 380974,
+     "callsMax": 217
+    },
+    "surface": {
+     "calls": 64,
+     "tris": 137736
+    },
+    "section": {
+     "calls": 17,
+     "tris": 39714
+    },
+    "rig": {
+     "calls": 35,
+     "tris": 19956
+    },
+    "texEstMB": 62.2,
+    "particles": {
+     "live": 1729,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 99.4,
+      "min": 4,
+      "max": 188,
+      "sig": "bbbbbbbbbb3bbbbbbbbbbbbbbb55abbbbbbbbbbbb74babbbbbbbbbbbbb349bbbbbbbbbbbbb3b9c4cbbbbbbbccc368ac5bbbbc88777288781778788888745744277877777543279524556655655355562323333264234454362111111226911001115115311356533111155154112510011211111111151001111111112225010"
+     },
+     "section": {
+      "mean": 54.4,
+      "min": 0,
+      "max": 121,
+      "sig": "0113233113222200015544412434441000272542456374101237664456577410123676738656542012275554545443100124434514335410011445475353240001132113423334000163225332232310011213221222210012376666656465001247776665665720133767764655562012277666667645101337655767566610"
+     },
+     "sky": {
+      "mean": 165.3,
+      "min": 20,
+      "max": 186,
+      "sig": "bbbbbbbbb172bbbbbbbbbbbbb142bbbbbbbbbbbbb54bbbbbbbbbbbbbbb3bbbbbbbbbbbbbbb3bbbbbbbbbbbbbbb2bbbbbbbbbbbbbbb2bbbbbbbbbbbbbbb27bbbbbbbbbbbbbb2bbbbbbbbbbbbbbb2bcbbbbbbbbbbbbb4aabbbbbbbbbbbb848bbbbbbbbbbbbb93bbbbbbbbbbbbbbb2babbbbbbbbbbbbb5babbbbbbbbbbbbb39abbb"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "hero",
+    "rigId": "foundation-bg",
+    "rigMethodId": "cfa",
+    "simMethodId": "cfa",
+    "simActive": true,
+    "contractMethodId": "cfa",
+    "regionId": "german-site",
+    "profileMode": "vertical",
+    "depth": 10.77,
+    "rop": 25.911,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": null,
+     "downhole": null
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": true
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "notes": [
+     "QA bridge deepened this job to 38 m — clamped back to 26 m (method range 5-35)"
+    ],
+    "target": 26,
+    "seek": 9.1
+   }
+  },
+  {
+   "id": "m11-rockbolt",
+   "group": "methods",
+   "file": "post-m11-rockbolt.png",
+   "md5": "e48bccfc164ca81168f9fd4f6d166800",
+   "skipped": null,
+   "tookSec": 18.5,
+   "failed": [
+    "site HUD is up"
+   ],
+   "errors": 0,
+   "metrics": {
+    "fps": 56.4,
+    "ctxLost": false,
+    "frame": {
+     "calls": 305,
+     "tris": 267996,
+     "callsMax": 305
+    },
+    "surface": {
+     "calls": 156,
+     "tris": 116430
+    },
+    "section": {
+     "calls": 20,
+     "tris": 38298
+    },
+    "rig": {
+     "calls": 125,
+     "tris": 48810
+    },
+    "texEstMB": 38.1,
+    "particles": {
+     "live": 1232,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 37.9,
+      "min": 0,
+      "max": 189,
+      "sig": "452224982222233343120678222334324222169b222233331212118822233333322111462323333322111125233444332122211332245443112221112223243421214111222323422221411122353232121131114c84795311111111225657241011111143953211101000102111120010000000010110120002111050051111"
+     },
+     "section": {
+      "mean": 32.8,
+      "min": 0,
+      "max": 115,
+      "sig": "1225655564556610113634554636551111163333334355110106222212225310010612235444561000060000222255110006101021225510000600002145551000060001216754010006000021216510000600002231551100060000223256110005212154554511000201111111330100011111111122000001000710011000"
+     },
+     "sky": {
+      "mean": 54.9,
+      "min": 1,
+      "max": 169,
+      "sig": "456224a722234332456024a823322333453224a8223233334522249812233333451124982232332345211589223234234521158922234423452215792222343344320589222234224421057a22233433441216782223343342210682123234324212068a122333324132168a122333334221146a213323324224068b12233232"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "hero",
+    "rigId": "tunnel-jumbo",
+    "rigMethodId": "rockbolt",
+    "simMethodId": "rockbolt",
+    "simActive": true,
+    "contractMethodId": "rockbolt",
+    "regionId": "german-site",
+    "profileMode": "heading",
+    "depth": 13.3,
+    "rop": 15.566,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": "shank-adapter",
+     "downhole": "button-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "target": 38,
+    "seek": 13.3,
+    "underground": {
+     "cameraModes": [
+      "hero"
+     ],
+     "sceneHints": [
+      "drive-shotcrete",
+      "drive-muck",
+      "drifter",
+      "rig:tunnel-jumbo"
+     ],
+     "terrainRegion": "german-site",
+     "envRegion": "german-site",
+     "sunElevation": 14.962418614875581,
+     "hasSky": false,
+     "hasClouds": false
+    }
+   }
+  },
+  {
+   "id": "m12-oil-rotary",
+   "group": "methods",
+   "file": "post-m12-oil-rotary.png",
+   "md5": "5c947ec58f95fd9301551b2b61d67023",
+   "skipped": null,
+   "tookSec": 6.4,
+   "failed": [
+    "site HUD is up"
+   ],
+   "errors": 0,
+   "metrics": {
+    "fps": 70,
+    "ctxLost": false,
+    "frame": {
+     "calls": 227,
+     "tris": 492532,
+     "callsMax": 231
+    },
+    "surface": {
+     "calls": 65,
+     "tris": 167788
+    },
+    "section": {
+     "calls": 24,
+     "tris": 53834
+    },
+    "rig": {
+     "calls": 39,
+     "tris": 52000
+    },
+    "texEstMB": 61.1,
+    "particles": {
+     "live": 738,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 72,
+      "min": 6,
+      "max": 214,
+      "sig": "5366415551255554b664415732145644b5bb41646214567448bb514bb115c5c4b85642abc2261665b7b554285226788586542337222744351512223a82122494253223384611655244222224221146522412222432127763542222551227775315426213365842231112443359bc21003333336bb5cd5343433574555b555445"
+     },
+     "section": {
+      "mean": 30.9,
+      "min": 0,
+      "max": 80,
+      "sig": "0113232213423210011322321221120000132222023232100113343114432200012343332544441001143324242544100114321000443320012442200244431001143344423444100114433344534310011434344343541001143331023434200010101101111100001322112311130000122112133112000012212212212300"
+     },
+     "sky": {
+      "mean": 71.2,
+      "min": 12,
+      "max": 177,
+      "sig": "45434455332565544546524434254544453441445325556453764154512555545534415541254554336551445125556433355166442557545355514445246564a444416454255644b554415642246544b644414632256544b8b6417532245544b6bb315541145344b4bb215541145544b3bb515541244744b2bb316551146644"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "hero",
+    "rigId": "oil-derrick",
+    "rigMethodId": "oil-rotary",
+    "simMethodId": "oil-rotary",
+    "simActive": true,
+    "contractMethodId": "oil-rotary",
+    "regionId": "sahara",
+    "profileMode": "vertical",
+    "depth": 24.55,
+    "rop": 4.578,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": null,
+     "downhole": "pdc-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "target": 38,
+    "seek": 13.3
+   }
+  },
+  {
+   "id": "m13-anchor",
+   "group": "methods",
+   "file": "post-m13-anchor.png",
+   "md5": "ad6dc549e5cdfe46ac0d0e09069ba5f7",
+   "skipped": null,
+   "tookSec": 5,
+   "failed": [
+    "site HUD is up"
+   ],
+   "errors": 0,
+   "metrics": {
+    "fps": 96,
+    "ctxLost": false,
+    "frame": {
+     "calls": 254,
+     "tris": 390994,
+     "callsMax": 254
+    },
+    "surface": {
+     "calls": 81,
+     "tris": 140948
+    },
+    "section": {
+     "calls": 21,
+     "tris": 43502
+    },
+    "rig": {
+     "calls": 52,
+     "tris": 15376
+    },
+    "texEstMB": 62.4,
+    "particles": {
+     "live": 1880,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 102.7,
+      "min": 1,
+      "max": 183,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb5bb8878777788777577676777777776636762566556556563768262233333336789815211221125857881472221111258b23331114554045101000111111111155343011110011014454451621111221400000"
+     },
+     "section": {
+      "mean": 62.7,
+      "min": 0,
+      "max": 122,
+      "sig": "0561411112211510122656631651110102274472175555211227465324666520122763656645450311275645678545100227465366576610123767776345672012274665565536101136676466656315023677367547473002263554464665200127566456646520122736465436672011273655556565111127466665657510"
+     },
+     "sky": {
+      "mean": 176.2,
+      "min": 172,
+      "max": 183,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "hero",
+    "rigId": "crawler-lite",
+    "rigMethodId": "anchor",
+    "simMethodId": "anchor",
+    "simActive": true,
+    "contractMethodId": "anchor",
+    "regionId": "nordic",
+    "profileMode": "vertical",
+    "depth": 13.5,
+    "rop": 11.122,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": "shank-adapter",
+     "downhole": "sda-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "target": 38,
+    "seek": 13.3
+   }
+  },
+  {
+   "id": "m14-driven-pile",
+   "group": "methods",
+   "file": "post-m14-driven-pile.png",
+   "md5": "a416711d33ffc1fc747218d0d49b98d3",
+   "skipped": null,
+   "tookSec": 4.5,
+   "failed": [
+    "site HUD is up"
+   ],
+   "errors": 0,
+   "metrics": {
+    "fps": 88,
+    "ctxLost": false,
+    "frame": {
+     "calls": 248,
+     "tris": 421248,
+     "callsMax": 248
+    },
+    "surface": {
+     "calls": 76,
+     "tris": 153536
+    },
+    "section": {
+     "calls": 18,
+     "tris": 37272
+    },
+    "rig": {
+     "calls": 47,
+     "tris": 27964
+    },
+    "texEstMB": 62.4,
+    "particles": {
+     "live": 793,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 104.8,
+      "min": 2,
+      "max": 183,
+      "sig": "bbbbbbbbbb54bbbbbbbbbbbbbb54bbbbbbbbbbbbbb54aabbbbbbbbbbb944aabbbbbbbbbbbb45bbbbbbbbbbbbb446a478788778887344a773788778876244475366666666634529114433333334435459222125232444344951113103323534332010124112469100511016999989745445665988644590026666744599965000"
+     },
+     "section": {
+      "mean": 54.8,
+      "min": 0,
+      "max": 120,
+      "sig": "0134247503572430112425301321551001133441134243100114245113344210011431765123331100011140151015000001101005666420023754745636441002275667637766200236655665456720012667637574571002275735765667201227357656566620122727555755361012275767757573100237675676465720"
+     },
+     "sky": {
+      "mean": 163,
+      "min": 60,
+      "max": 183,
+      "sig": "bbbbbbbbbb54bbbbbbbbbbbbbb54bbbbbbbbbbbbbb54bbbbbbbbbbbbbb54bbbbbbbbbbbbbb54bbbbbbbbbbbbbb54bbbbbbbbbbbbbb54bbbbbbbbbbbbbb44bbbbbbbbbbbbbb54bbbbbbbbbbbbbb64bbbbbbbbbbbbbb54bbbbbbbbbbbbbb64bbbbbbbbbbbbbb54bbbbbbbbbbbbbb54bbbbbbbbbbbbbb54bbbbbbbbbbbbbb54bbbb"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "hero",
+    "rigId": "piling-leader",
+    "rigMethodId": "driven-pile",
+    "simMethodId": "driven-pile",
+    "simActive": true,
+    "contractMethodId": "driven-pile",
+    "regionId": "nordic",
+    "profileMode": "pile",
+    "depth": 8.2,
+    "rop": 1.356,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "SET",
+    "phase": "drilling",
+    "tooling": {
+     "surface": null,
+     "downhole": "precast-pile"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "dolly",
+     "fits": true
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "notes": [
+     "QA bridge deepened this job to 38 m — clamped back to 23.4 m (method range 8-30)"
+    ],
+    "target": 23.4,
+    "seek": 8.19
+   }
+  },
+  {
+   "id": "m15-cased-cfa",
+   "group": "methods",
+   "file": "post-m15-cased-cfa.png",
+   "md5": "2d9cb22c5221ac3e709674a568e5097b",
+   "skipped": null,
+   "tookSec": 4.2,
+   "failed": [
+    "site HUD is up"
+   ],
+   "errors": 0,
+   "metrics": {
+    "fps": 106,
+    "ctxLost": false,
+    "frame": {
+     "calls": 219,
+     "tris": 410146,
+     "callsMax": 219
+    },
+    "surface": {
+     "calls": 65,
+     "tris": 145558
+    },
+    "section": {
+     "calls": 16,
+     "tris": 41626
+    },
+    "rig": {
+     "calls": 37,
+     "tris": 20004
+    },
+    "texEstMB": 62.4,
+    "particles": {
+     "live": 793,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 93,
+      "min": 2,
+      "max": 202,
+      "sig": "bbbbbbbb54126bbbbbbbbbbbbb549bbbbbbbbbbbb53bdcbbbbbbbbbbbb34b6bbbbbbbbbbbb3b9c3bbbbbbbbbbb2798867876788777499874777777776736a55266666666543488521123334335366551112122222553574121112111123734342115514513211100211141111115554210111101111514441510111122151000"
+     },
+     "section": {
+      "mean": 55.4,
+      "min": 0,
+      "max": 123,
+      "sig": "1124343124234431011445512534450001043330632345100014114114254410013301214222450002310111101321001147766476574620033736864564531012274555555577301237667445766730112655664667653002373567765557200347466567636511122755466675561001275466553456001137576535656720"
+     },
+     "sky": {
+      "mean": 155.6,
+      "min": 14,
+      "max": 187,
+      "sig": "bbbbbbbb5545abbbbbbbbbbb5543abbbbbbbbbbb55129bbbbbbbbbbb54126bbbbbbbbbbb41123bbbbbbbbbbbb2322bbbbbbbbbbbb142abbbbbbbbbbbb242bbbbbbbbbbbbbb3bbbbbbbbbbbbbbb2abbbbbbbbbbbbbb64bbbbbbbbbbbbbb3babbbbbbbbbbbbb3bacbbbbbbbbbbb43bacbbbbbbbbbbbb3bacbbbbbbbbbbbb5bbcbb"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "hero",
+    "rigId": "foundation-bg",
+    "rigMethodId": "cased-cfa",
+    "simMethodId": "cased-cfa",
+    "simActive": true,
+    "contractMethodId": "cased-cfa",
+    "regionId": "nordic",
+    "profileMode": "vertical",
+    "depth": 7.88,
+    "rop": 0.005,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "stuck",
+    "tooling": {
+     "surface": null,
+     "downhole": null
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": true
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "notes": [
+     "QA bridge deepened this job to 38 m — clamped back to 22.5 m (method range 5-30)"
+    ],
+    "target": 22.5,
+    "seek": 7.87
+   }
+  },
+  {
+   "id": "m16-tunnel-jumbo",
+   "group": "methods",
+   "file": "post-m16-tunnel-jumbo.png",
+   "md5": "6b0a947b71f7c8ab6a5cec4008ddafa9",
+   "skipped": null,
+   "tookSec": 5.4,
+   "failed": [
+    "site HUD is up"
+   ],
+   "errors": 0,
+   "metrics": {
+    "fps": 87.9,
+    "ctxLost": false,
+    "frame": {
+     "calls": 302,
+     "tris": 310737,
+     "callsMax": 302
+    },
+    "surface": {
+     "calls": 156,
+     "tris": 143972
+    },
+    "section": {
+     "calls": 20,
+     "tris": 38134
+    },
+    "rig": {
+     "calls": 127,
+     "tris": 49058
+    },
+    "texEstMB": 38.1,
+    "particles": {
+     "live": 1731,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 88,
+      "min": 1,
+      "max": 221,
+      "sig": "67845555555666664677565565567676566477766666788554566666655544446666667656554545367777665655555546776666665555554666666665555778355556656556789a35555455666999ce2444444459a99bcd35433433656a998a22233337c5965777232233333446865622723544345597a6001100311713bb93"
+     },
+     "section": {
+      "mean": 31.8,
+      "min": 0,
+      "max": 106,
+      "sig": "0115545545656632001645545644363200163342323355220006222321555521000611111332452200060001012255220006000011225521000611011124452100060000102625010006101001115621000600000231442200060100023256220005021121267521000212111114531000011311102122100000110000001100"
+     },
+     "sky": {
+      "mean": 91.9,
+      "min": 46,
+      "max": 157,
+      "sig": "788445555556566578845555555666666884555555556666678555555556666658845556556666765785555545557776477555555345777647756544433447764775556444447776477756555555657646775655665676764677556666667866447666666666884654765666766689565576576666668a665575677666667975"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "hero",
+    "rigId": "tunnel-jumbo",
+    "rigMethodId": "tunnel-jumbo",
+    "simMethodId": "tunnel-jumbo",
+    "simActive": true,
+    "contractMethodId": "tunnel-jumbo",
+    "regionId": "german-site",
+    "profileMode": "heading",
+    "depth": 6.51,
+    "rop": 45.464,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": "shank-adapter",
+     "downhole": "button-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "notes": [
+     "QA bridge deepened this job to 38 m — clamped back to 18.6 m (method range 6-24)"
+    ],
+    "target": 18.6,
+    "seek": 6.51,
+    "underground": {
+     "cameraModes": [
+      "hero"
+     ],
+     "sceneHints": [
+      "drive-shotcrete",
+      "drive-muck",
+      "drifter",
+      "rig:tunnel-jumbo"
+     ],
+     "terrainRegion": "german-site",
+     "envRegion": "german-site",
+     "sunElevation": 14.962418614875581,
+     "hasSky": false,
+     "hasClouds": false
+    }
+   }
+  },
+  {
+   "id": "m17-hdd",
+   "group": "methods",
+   "file": "post-m17-hdd.png",
+   "md5": "92c8c5392f804a3e3a5b9e7f63376793",
+   "skipped": null,
+   "tookSec": 6.3,
+   "failed": [
+    "site HUD is up"
+   ],
+   "errors": 0,
+   "metrics": {
+    "fps": 83.9,
+    "ctxLost": false,
+    "frame": {
+     "calls": 235,
+     "tris": 360508,
+     "callsMax": 235
+    },
+    "surface": {
+     "calls": 74,
+     "tris": 134594
+    },
+    "section": {
+     "calls": 19,
+     "tris": 38412
+    },
+    "rig": {
+     "calls": 46,
+     "tris": 15548
+    },
+    "texEstMB": 62.7,
+    "particles": {
+     "live": 1325,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 103.6,
+      "min": 0,
+      "max": 187,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcbbcbbbbbbbbbbbbccccbbbbbbbbccccccccbbbbcbbb97878c88bbb788877787788888787787778777717777777766775711224444344444442131212322251418a172221111323254341115315462920100112411111111343301211111122154451111111232110011"
+     },
+     "section": {
+      "mean": 15.7,
+      "min": 0,
+      "max": 109,
+      "sig": "0000001000000000001012221111110000030130000001000003100110010000000100000100001000171222102000000116321111122100001721222211120100042111211222100003011101111100000416002111100000051111011112000116012100010110005522212211121000041111111111000002000000010000"
+     },
+     "sky": {
+      "mean": 178.2,
+      "min": 172,
+      "max": 185,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcbbbbbbbbbbbbbbbcbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcbbbbbbbbbbbbbbbc"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "hero",
+    "rigId": "hdd-rig",
+    "rigMethodId": "hdd",
+    "simMethodId": "hdd",
+    "simActive": true,
+    "contractMethodId": "hdd",
+    "regionId": "german-site",
+    "profileMode": "profile",
+    "depth": 38.01,
+    "rop": 0,
+    "stage": 1,
+    "stageCount": 2,
+    "stageId": "pullback",
+    "gaugeLabel": "PULL",
+    "phase": "stuck",
+    "tooling": {
+     "surface": null,
+     "downhole": "hdd-pilot-head"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "target": 38,
+    "seek": 13.3
+   }
+  },
+  {
+   "id": "m18-longhole",
+   "group": "methods",
+   "file": "post-m18-longhole.png",
+   "md5": "eecc31c9fc388fffb7cc1c077b99caa0",
+   "skipped": null,
+   "tookSec": 5.6,
+   "failed": [
+    "site HUD is up"
+   ],
+   "errors": 0,
+   "metrics": {
+    "fps": 64,
+    "ctxLost": false,
+    "frame": {
+     "calls": 285,
+     "tris": 258819,
+     "callsMax": 285
+    },
+    "surface": {
+     "calls": 142,
+     "tris": 104226
+    },
+    "section": {
+     "calls": 21,
+     "tris": 45238
+    },
+    "rig": {
+     "calls": 113,
+     "tris": 31422
+    },
+    "texEstMB": 37.9,
+    "particles": {
+     "live": 1838,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 54.1,
+      "min": 0,
+      "max": 214,
+      "sig": "33812acd377777774349138d777566674545135c825122465565636a111111226656618a111111115566111511222211446711121223322144561111223346224456011125658c223455011117912b21445501111633794144450111146968212344011119b76621233001111113111023300111211211113320100111121121"
+     },
+     "section": {
+      "mean": 71.2,
+      "min": 0,
+      "max": 127,
+      "sig": "3566451202422140466120113156553001365630146544204655663534645610366566453556560535465442465456303445566436546430355556465446652035654655456544202446565556656420245456534378775135568776767776415667767877775660577777776777764067777767625434105665534523334220"
+     },
+     "sky": {
+      "mean": 96.2,
+      "min": 1,
+      "max": 214,
+      "sig": "34912add2777766624912add1667877623812add2777776633812acd3777777733802acd6778777633702acd67778876336127cd67777776335015bd67877777335013b568877777434923a4787777774349138d778666674348022d777666675338112d776666675438136d777556665447135d866546665437135d86555556"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "hero",
+    "rigId": "longhole-rig",
+    "rigMethodId": "longhole",
+    "simMethodId": "longhole",
+    "simActive": true,
+    "contractMethodId": "longhole",
+    "regionId": "iberian-quarry",
+    "profileMode": "vertical",
+    "depth": 21.15,
+    "rop": 12.521,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": "shank-adapter",
+     "downhole": "button-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "target": 38,
+    "seek": 13.3,
+    "underground": {
+     "cameraModes": [
+      "hero"
+     ],
+     "sceneHints": [
+      "drive-shotcrete",
+      "drive-muck",
+      "drifter",
+      "rig:tunnel-jumbo"
+     ],
+     "terrainRegion": "iberian-quarry",
+     "envRegion": "iberian-quarry",
+     "sunElevation": 20.166738133093173,
+     "hasSky": false,
+     "hasClouds": false
+    }
+   }
+  },
+  {
+   "id": "m19-sonic",
+   "group": "methods",
+   "file": "post-m19-sonic.png",
+   "md5": "ed6b4510f007fa5e1df6360aee1bdc5e",
+   "skipped": null,
+   "tookSec": 5.1,
+   "failed": [
+    "site HUD is up"
+   ],
+   "errors": 0,
+   "metrics": {
+    "fps": 89.9,
+    "ctxLost": false,
+    "frame": {
+     "calls": 266,
+     "tris": 393344,
+     "callsMax": 266
+    },
+    "surface": {
+     "calls": 83,
+     "tris": 138976
+    },
+    "section": {
+     "calls": 20,
+     "tris": 48458
+    },
+    "rig": {
+     "calls": 54,
+     "tris": 12042
+    },
+    "texEstMB": 62.6,
+    "particles": {
+     "live": 581,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 92.7,
+      "min": 1,
+      "max": 184,
+      "sig": "bbbbbbbbbb5abbbbbbbbbbbbbb5abbbbbbbbbbbbbb49bbbbbbbbbbbbbb4abbbbbbbbbbbbbb49bbbbbbbbbbbbb64342878877788778824538777777776689312465566556552921252133332323291438312211112318135222211111114344431014114561100000211011111114424441211000010454431130111121150000"
+     },
+     "section": {
+      "mean": 71.1,
+      "min": 0,
+      "max": 123,
+      "sig": "1111511011112520476665530331200047644472165656303644665424776650376665543544650534546754767456202646674576567730466645765557664046443755575535203554675566657320367477458647574035465664464455313544665556755430355556475545574025374466446776314646656565756520"
+     },
+     "sky": {
+      "mean": 169,
+      "min": 61,
+      "max": 183,
+      "sig": "bbbbbbbbbb4abbbbbbbbbbbbbb59bbbbbbbbbbbbbb5abbbbbbbbbbbbbb5abbbbbbbbbbbbbb5abbbbbbbbbbbbbb5abbbbbbbbbbbbbb5abbbbbbbbbbbbbb5abbbbbbbbbbbbbb5abbbbbbbbbbbbbb5abbbbbbbbbbbbbb5abbbbbbbbbbbbbb5abbbbbbbbbbbbbb4abbbbbbbbbbbbbb4abbbbbbbbbbbbbb4abbbbbbbbbbbbbb4abbbb"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "hero",
+    "rigId": "sonic-truck",
+    "rigMethodId": "sonic",
+    "simMethodId": "sonic",
+    "simActive": true,
+    "contractMethodId": "sonic",
+    "regionId": "nordic",
+    "profileMode": "vertical",
+    "depth": 13.31,
+    "rop": 0.507,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": null,
+     "downhole": "core-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "target": 38,
+    "seek": 13.3
+   }
+  },
+  {
+   "id": "m20-jet-grouting",
+   "group": "methods",
+   "file": "post-m20-jet-grouting.png",
+   "md5": "8c03fc925a8dde81af5f8e0b603fa266",
+   "skipped": null,
+   "tookSec": 4.5,
+   "failed": [
+    "site HUD is up"
+   ],
+   "errors": 0,
+   "metrics": {
+    "fps": 72.9,
+    "ctxLost": false,
+    "frame": {
+     "calls": 290,
+     "tris": 408258,
+     "callsMax": 290
+    },
+    "surface": {
+     "calls": 93,
+     "tris": 146778
+    },
+    "section": {
+     "calls": 21,
+     "tris": 45652
+    },
+    "rig": {
+     "calls": 64,
+     "tris": 19844
+    },
+    "texEstMB": 62.6,
+    "particles": {
+     "live": 788,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 96.7,
+      "min": 0,
+      "max": 185,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb4bbbbbbbbbbbbbbb5bbbbbbbbbbbbbbb5bbbbc788bbbbbbb4b98878877788777467388777766776656756654555555552853611123333343393231112221235337143131121111123742311111110011173442111111341110110011301011511553340312332211155554"
+     },
+     "section": {
+      "mean": 71.5,
+      "min": 0,
+      "max": 124,
+      "sig": "1111511111112520466675520541100047654472165656313745665564776650366665534544650033546755768556202646674576567720566645764556664046453765575544203555675566657320467477458647574035465664464455313545665556755430365566474546574026374466446776314646655575756620"
+     },
+     "sky": {
+      "mean": 175.6,
+      "min": 71,
+      "max": 183,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb58bbbbbbbbbbbbbb47bbbb"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "hero",
+    "rigId": "crawler-th",
+    "rigMethodId": "jet-grouting",
+    "simMethodId": "jet-grouting",
+    "simActive": true,
+    "contractMethodId": "jet-grouting",
+    "regionId": "nordic",
+    "profileMode": "vertical",
+    "depth": 13.33,
+    "rop": 0.468,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": "flushing-swivel",
+     "downhole": "drag-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "target": 38,
+    "seek": 13.3
+   }
+  },
+  {
+   "id": "m21-raise-boring",
+   "group": "methods",
+   "file": "post-m21-raise-boring.png",
+   "md5": "dea0fe563cbf892d7a8fd475e8d68c52",
+   "skipped": null,
+   "tookSec": 6.6,
+   "failed": [
+    "site HUD is up"
+   ],
+   "errors": 0,
+   "metrics": {
+    "fps": 78.9,
+    "ctxLost": false,
+    "frame": {
+     "calls": 215,
+     "tris": 365872,
+     "callsMax": 215
+    },
+    "surface": {
+     "calls": 53,
+     "tris": 125694
+    },
+    "section": {
+     "calls": 38,
+     "tris": 55852
+    },
+    "rig": {
+     "calls": 25,
+     "tris": 5244
+    },
+    "texEstMB": 62.6,
+    "particles": {
+     "live": 1935,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 103.1,
+      "min": 0,
+      "max": 188,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcbbbbbbbbbbbbcbccbbbbbbbbbbbbbbccbbbbbbb66747caccbbbbbbc8c7578a88bbb788855a557a88877878857757997177777775667799512244444625488821213123565548392162222145445744441115115512141000111151111011433311211011121151241110111121115000"
+     },
+     "section": {
+      "mean": 60.3,
+      "min": 0,
+      "max": 110,
+      "sig": "4776555355677520457676634556462035242420235534302443544612375430353355462351443022331122252211201233224122222310123112112112220046656663567576203666667336645630356666625666763056567654466554104776755347666630476765621526662035344651144533301353445213344310"
+     },
+     "sky": {
+      "mean": 178.2,
+      "min": 172,
+      "max": 186,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcbbbbbbbbbbbbbcbbccbbbbbbbbbbbcbbbc"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "hero",
+    "rigId": "raisebore",
+    "rigMethodId": "raise-boring",
+    "simMethodId": "raise-boring",
+    "simActive": true,
+    "contractMethodId": "raise-boring",
+    "regionId": "german-site",
+    "profileMode": "raise",
+    "depth": 38,
+    "rop": 0,
+    "stage": 1,
+    "stageCount": 2,
+    "stageId": "ream",
+    "gaugeLabel": "PULL",
+    "phase": "stuck",
+    "tooling": {
+     "surface": null,
+     "downhole": "raisebore-pilot-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "target": 38,
+    "seek": 13.3
+   }
+  },
+  {
+   "id": "r01-crawler-lite",
+   "group": "rigs",
+   "file": "post-r01-crawler-lite.png",
+   "md5": "3a092374f476362648b48df182e7f859",
+   "skipped": null,
+   "tookSec": 3.7,
+   "failed": [],
+   "errors": 0,
+   "metrics": {
+    "fps": 79.9,
+    "ctxLost": false,
+    "frame": {
+     "calls": 242,
+     "tris": 406542,
+     "callsMax": 242
+    },
+    "surface": {
+     "calls": 76,
+     "tris": 143140
+    },
+    "section": {
+     "calls": 21,
+     "tris": 52704
+    },
+    "rig": {
+     "calls": 49,
+     "tris": 14880
+    },
+    "texEstMB": 62.6,
+    "particles": {
+     "live": 548,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 106.2,
+      "min": 8,
+      "max": 181,
+      "sig": "baaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb79bbbbbbb9bb87878778788777767377a777677864656465856654664322565583453333221242358322222101213232996944421111122423531113111113222229113265311322264433661111463443333564"
+     },
+     "section": {
+      "mean": 62.1,
+      "min": 0,
+      "max": 119,
+      "sig": "2436672661155100133300211442243014255510132354302453333253325252133244213244751512401112636505102540111111111100555666665652552026565475475556315655566764666440456674655645452033556645677545203556565366576620466577776356674045545665565556203565776467656410"
+     },
+     "sky": {
+      "mean": 169.2,
+      "min": 166,
+      "max": 174,
+      "sig": "aaaaabaaaaabbabbaaaaaabbaaabbbbbaaaababbabbababbaaaaaaaaaaabbbbbaaaabbbbbbbbbbbbbbbbaabaabbabbbbabbabaababbbbbbbbaabaaaabbbbbbbbbbbbaabbabbbbbbbbbbabbbbbbbbbbbbbbbabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "orbit",
+    "rigId": "crawler-lite",
+    "rigMethodId": "auger",
+    "simMethodId": "auger",
+    "simActive": true,
+    "contractMethodId": "auger",
+    "regionId": "nordic",
+    "profileMode": "vertical",
+    "depth": 6,
+    "rop": 0.007,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": null,
+     "downhole": "drag-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": true
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "workingAs": "Auger"
+   }
+  },
+  {
+   "id": "r02-cable-percussion",
+   "group": "rigs",
+   "file": "post-r02-cable-percussion.png",
+   "md5": "c9221599953dd08264723162925bf4b4",
+   "skipped": null,
+   "tookSec": 3.1,
+   "failed": [],
+   "errors": 0,
+   "metrics": {
+    "fps": 63.1,
+    "ctxLost": false,
+    "frame": {
+     "calls": 254,
+     "tris": 425024,
+     "callsMax": 255
+    },
+    "surface": {
+     "calls": 80,
+     "tris": 152500
+    },
+    "section": {
+     "calls": 18,
+     "tris": 46236
+    },
+    "rig": {
+     "calls": 52,
+     "tris": 24020
+    },
+    "texEstMB": 62.6,
+    "particles": {
+     "live": 470,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 105.7,
+      "min": 6,
+      "max": 189,
+      "sig": "aaaaaaabcaaaaaaaaababbbbabbbaababbbbbbbbbbbbbbbbbbbbbbbb7bbbbbbbbbbbbbbb69bbbbbbbbbbbbbc58bbbbbbbbbbbb8a58bb77bb888877897977477866666669886655563325333883793333222335444228161421121268131313221111113228103425aa2211132922911422411111111331111111111111113545"
+     },
+     "section": {
+      "mean": 58,
+      "min": 0,
+      "max": 121,
+      "sig": "1142442121245411634233316333553014455521133356102453433113324610143545360344451414244437253244102323433334312200133222242211750002121131010110003656566765567540466675655645352044556655678546203556465457676620466577776446663046555665575565203565676367655510"
+     },
+     "sky": {
+      "mean": 164.3,
+      "min": 84,
+      "max": 191,
+      "sig": "aaaabaaaa9aaaaaaabaaaaaaa8aaaaabbbaaaaaac9aaaaaaaabaaaaacaaaaaaaabbaaaaab7abaabaaabbaaaaa9aaabbaaabbaaaa99baaaabbbbaabaa9aabaaaabbbbaaaa8baaabbbbbbaabaa6bbabaaabbbbbabbaaaaababbbbbbbaa6bababbbbbaabbaa8b6bbabbbbbbaab6799babbbbbbbbbb5a7abbbbbbbbbbbab89bbbbbb"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "orbit",
+    "rigId": "cable-percussion",
+    "rigMethodId": "cable-tool",
+    "simMethodId": "cable-tool",
+    "simActive": true,
+    "contractMethodId": "cable-tool",
+    "regionId": "nordic",
+    "profileMode": "vertical",
+    "depth": 6.05,
+    "rop": 1.005,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": null,
+     "downhole": "cable-tool-chisel"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "workingAs": "Cable-Tool"
+   }
+  },
+  {
+   "id": "r03-crawler-th",
+   "group": "rigs",
+   "file": "post-r03-crawler-th.png",
+   "md5": "5e60a8c3612551f5e285bede19d55711",
+   "skipped": null,
+   "tookSec": 3.1,
+   "failed": [],
+   "errors": 0,
+   "metrics": {
+    "fps": 53.7,
+    "ctxLost": false,
+    "frame": {
+     "calls": 276,
+     "tris": 421906,
+     "callsMax": 276
+    },
+    "surface": {
+     "calls": 88,
+     "tris": 147998
+    },
+    "section": {
+     "calls": 20,
+     "tris": 53194
+    },
+    "rig": {
+     "calls": 59,
+     "tris": 19660
+    },
+    "texEstMB": 62.6,
+    "particles": {
+     "live": 1297,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 110.8,
+      "min": 4,
+      "max": 217,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb5bbbbbbbbbbbbbbb8abbbbbbbbbbbbbb86bbbbbbbbbb2bbbe5bbbbbbb8763bbb652bbbbbb66222223226667763274448122533333667544635534222205277b8778241a311117588677121111111547746611101119531413311111111100101341111111"
+     },
+     "section": {
+      "mean": 63.7,
+      "min": 0,
+      "max": 121,
+      "sig": "3538354112245410233543411312347114655532623353101444424102433310133244244532451012011311122222104456666001301100574566776554564136566375466554205757557676567620367666676636453046556656567646204656364666676430467567776455652056457656576476202556575366744610"
+     },
+     "sky": {
+      "mean": 174.9,
+      "min": 171,
+      "max": 181,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "orbit",
+    "rigId": "crawler-th",
+    "rigMethodId": "top-hammer",
+    "simMethodId": "top-hammer",
+    "simActive": true,
+    "contractMethodId": "top-hammer",
+    "regionId": "nordic",
+    "profileMode": "vertical",
+    "depth": 6.17,
+    "rop": 0,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "stuck",
+    "tooling": {
+     "surface": "shank-adapter",
+     "downhole": "button-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "workingAs": "Top Hammer"
+   }
+  },
+  {
+   "id": "r04-si-rig",
+   "group": "rigs",
+   "file": "post-r04-si-rig.png",
+   "md5": "a21b599514b9aa81cb53d013a29be723",
+   "skipped": null,
+   "tookSec": 3.6,
+   "failed": [],
+   "errors": 0,
+   "metrics": {
+    "fps": 74,
+    "ctxLost": false,
+    "frame": {
+     "calls": 252,
+     "tris": 435504,
+     "callsMax": 253
+    },
+    "surface": {
+     "calls": 81,
+     "tris": 155156
+    },
+    "section": {
+     "calls": 19,
+     "tris": 48260
+    },
+    "rig": {
+     "calls": 52,
+     "tris": 26818
+    },
+    "texEstMB": 62.6,
+    "particles": {
+     "live": 629,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 104.7,
+      "min": 1,
+      "max": 197,
+      "sig": "ccccccccccccccbbccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc7c8767cccbc7cc7788876766777777736676665566666663665656553553444233831443233343302382665422235116215131114111228328952121010121111300101111131202022111110112212121211131211"
+     },
+     "section": {
+      "mean": 61.8,
+      "min": 0,
+      "max": 119,
+      "sig": "2546473211345100133233411342243015555532122354602413335264324210033734415344451512630323343133520101211122211003556666653651110026555475475556315655565764666440456574655645452043556645677545203556565456576620466577776356674045555665565556204565776467655510"
+     },
+     "sky": {
+      "mean": 188.2,
+      "min": 181,
+      "max": 195,
+      "sig": "ccccccccccccccbbccccccccccccbcbbcccccccccccccbcbcccccccccccccbbbcccccccccccccccccccccccccccccccccccccccccccccccbcccccccccccccccbcccccccccccccccccccccccccccccccbcccccccccccccccccccccccccccccccbcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "orbit",
+    "rigId": "si-rig",
+    "rigMethodId": "site-investigation",
+    "simMethodId": "site-investigation",
+    "simActive": true,
+    "contractMethodId": "site-investigation",
+    "regionId": "nordic",
+    "profileMode": "vertical",
+    "depth": 6,
+    "rop": 0,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "spt-drive",
+    "tooling": {
+     "surface": null,
+     "downhole": "spt-split-spoon"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": true
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "workingAs": "Site Inv."
+   }
+  },
+  {
+   "id": "r05-dth-crawler",
+   "group": "rigs",
+   "file": "post-r05-dth-crawler.png",
+   "md5": "7ef190c59ddb84a164259df9fcdf30cb",
+   "skipped": null,
+   "tookSec": 3,
+   "failed": [],
+   "errors": 0,
+   "metrics": {
+    "fps": 71,
+    "ctxLost": false,
+    "frame": {
+     "calls": 291,
+     "tris": 420716,
+     "callsMax": 291
+    },
+    "surface": {
+     "calls": 92,
+     "tris": 148532
+    },
+    "section": {
+     "calls": 21,
+     "tris": 52326
+    },
+    "rig": {
+     "calls": 65,
+     "tris": 20272
+    },
+    "texEstMB": 62.6,
+    "particles": {
+     "live": 1394,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 128.6,
+      "min": 9,
+      "max": 222,
+      "sig": "ddddddddddddddddddddddd6ddddddddddddddd9eedddddddddddddaeeedddddddddddd9eeedddddddddddd8dedd88777887888788878777775565779777787744435286477666664332357688877643454556449887654344445376a986653121336326a777348111112566ea22655511117626d79647111111622384645636"
+     },
+     "section": {
+      "mean": 62.6,
+      "min": 0,
+      "max": 122,
+      "sig": "3542343232245511632243252623352014415561162355102444433233434310133547353233251502102212231023100102111111111100574665775552565036565374576554315656556675577630466665666645353045556656668546303656365467677520477577787456663046556665576475203455676367654510"
+     },
+     "sky": {
+      "mean": 204.5,
+      "min": 96,
+      "max": 216,
+      "sig": "cdddddddddddddddddddddddddddddddddddddddddddddddcdddddddddddddddcdddddddddddddddddddddddddddddddcddddddddddddddddddddddddddddddddddddddcddddddddddddddd7ddddddddddddddd6ddddddddddddddd6ddddddddddddddd7ddddddddddddddd7ddddddddddddddd8ddddddddddddddd8dddddddd"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "orbit",
+    "rigId": "dth-crawler",
+    "rigMethodId": "dth",
+    "simMethodId": "dth",
+    "simActive": true,
+    "contractMethodId": "dth",
+    "regionId": "nordic",
+    "profileMode": "vertical",
+    "depth": 6.09,
+    "rop": 5.796,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": "flushing-swivel",
+     "downhole": "dth-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "workingAs": "DTH"
+   }
+  },
+  {
+   "id": "r06-core-rig",
+   "group": "rigs",
+   "file": "post-r06-core-rig.png",
+   "md5": "bcb087f73931942f47b4fede02785450",
+   "skipped": null,
+   "tookSec": 3.1,
+   "failed": [],
+   "errors": 0,
+   "metrics": {
+    "fps": 63.1,
+    "ctxLost": false,
+    "frame": {
+     "calls": 275,
+     "tris": 428172,
+     "callsMax": 275
+    },
+    "surface": {
+     "calls": 86,
+     "tris": 148796
+    },
+    "section": {
+     "calls": 21,
+     "tris": 54756
+    },
+    "rig": {
+     "calls": 59,
+     "tris": 20536
+    },
+    "texEstMB": 62.6,
+    "particles": {
+     "live": 751,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 105,
+      "min": 2,
+      "max": 197,
+      "sig": "bbbbccccccccccccbcccccccccccccccbccbccccccccccccccccccc2ccccccccccccccc45cccccccccccccb75cccccccccccbba64bbccc97778b9a643666677761671563265552564343344532333344222223354522233322225235442011251111111513211222311101441402115531110111110311111122012112001013"
+     },
+     "section": {
+      "mean": 60.4,
+      "min": 0,
+      "max": 124,
+      "sig": "2542333121145511233731431322352014515531132355602444434133334300146245416344451514314436353244001112312654706411131101211250221001111274476555415655567775567630466675665645352044556655677556203656465467676620466577787456663046556665576565203455676367654510"
+     },
+     "sky": {
+      "mean": 186.3,
+      "min": 180,
+      "max": 194,
+      "sig": "bbbbbbbcccccccccbbbbbbbcccccccccbbbbbcccccccccccbbbbcbccccccccccbbbbbcccccccccccbbbbbbccccccccccbbcccbccccccccccbbcbbcccccccccccbbbbccccccccccccccbcbcccccccccccbbcbccccccccccccbcbbccccccccccccbcbbccccccccccccbbcccccccccccccccbcbccccccccccccbccbcccccccccccc"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "orbit",
+    "rigId": "core-rig",
+    "rigMethodId": "core",
+    "simMethodId": "core",
+    "simActive": true,
+    "contractMethodId": "core",
+    "regionId": "nordic",
+    "profileMode": "vertical",
+    "depth": 6.07,
+    "rop": 2.412,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": "flushing-swivel",
+     "downhole": "core-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "workingAs": "Core"
+   }
+  },
+  {
+   "id": "r07-cpt-unit",
+   "group": "rigs",
+   "file": "post-r07-cpt-unit.png",
+   "md5": "91ca026a74a08d7bec9c76dfc8991617",
+   "skipped": null,
+   "tookSec": 3,
+   "failed": [],
+   "errors": 0,
+   "metrics": {
+    "fps": 82,
+    "ctxLost": false,
+    "frame": {
+     "calls": 217,
+     "tris": 411492,
+     "callsMax": 217
+    },
+    "surface": {
+     "calls": 66,
+     "tris": 145414
+    },
+    "section": {
+     "calls": 22,
+     "tris": 51430
+    },
+    "rig": {
+     "calls": 39,
+     "tris": 17154
+    },
+    "texEstMB": 62.6,
+    "particles": {
+     "live": 470,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 104,
+      "min": 5,
+      "max": 182,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb7bbbbbbbbbbbbbbb8887777877bbb77877778788777777775763666556665653023333333a3733331113222249352222112231566722236211111101323a3211222122127270110321312212223324233324422023321132"
+     },
+     "section": {
+      "mean": 61.4,
+      "min": 0,
+      "max": 122,
+      "sig": "3436543471145100133720420343243014545531122354842453335064324310145245413344451523312114342173100111111422651010566552101111130026565475475556415655566764666540466675655645452033556645677545203557565366676620466577776457674045555665665556203565676467656410"
+     },
+     "sky": {
+      "mean": 172.8,
+      "min": 168,
+      "max": 178,
+      "sig": "bbbbbbbbbbbbbbbbabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "orbit",
+    "rigId": "cpt-unit",
+    "rigMethodId": "site-investigation",
+    "simMethodId": "site-investigation",
+    "simActive": true,
+    "contractMethodId": "site-investigation",
+    "regionId": "nordic",
+    "profileMode": "vertical",
+    "depth": 6,
+    "rop": 0,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "spt-drive",
+    "tooling": {
+     "surface": null,
+     "downhole": "cpt-piezocone"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": true
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "workingAs": "Site Inv."
+   }
+  },
+  {
+   "id": "r08-rc-rig",
+   "group": "rigs",
+   "file": "post-r08-rc-rig.png",
+   "md5": "2eadaee35db428a7df7441bd110015e1",
+   "skipped": null,
+   "tookSec": 3.8,
+   "failed": [],
+   "errors": 0,
+   "metrics": {
+    "fps": 53.2,
+    "ctxLost": false,
+    "frame": {
+     "calls": 273,
+     "tris": 446396,
+     "callsMax": 275
+    },
+    "surface": {
+     "calls": 88,
+     "tris": 160408
+    },
+    "section": {
+     "calls": 21,
+     "tris": 50966
+    },
+    "rig": {
+     "calls": 62,
+     "tris": 33222
+    },
+    "texEstMB": 62,
+    "particles": {
+     "live": 1292,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 112.1,
+      "min": 10,
+      "max": 206,
+      "sig": "8bbbbbbbcbbbbbbb8899bbbbbbbbbbbb9998888aabbbbbbba9998988b8bbbbbbaaa99999b889bbbb999999997898988b88887881a6888967777767a6bb774aaa666666aba438719367337686852649da166567796a33aaaa3228266a67222acc222227445231135664252258365112314111b112222111211113921257771231"
+     },
+     "section": {
+      "mean": 36.1,
+      "min": 0,
+      "max": 125,
+      "sig": "3332554223233631134540313223358302221136024333100211222013422310011111111222150411231111112211001323233311111210132221322223110014332342322332001323333424236210232233332232221013231212233332101332343322212310021112288432331025561225622122003766774111122210"
+     },
+     "sky": {
+      "mean": 169.7,
+      "min": 117,
+      "max": 192,
+      "sig": "bbbbbbbbcbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcbbbbbbb8bbbbbbbcbbbbbbb9bbbbbbbcbbbbbbb89bbbbbbbbbbbbbb99bbbbbbabbbbbbb889bbbbbbbbbbbbb889bbbbbbbbbbbbb999bbbbbabbbbbbb989bbbbbbbbbbbbb9999bbbbbbbbbbbb98989bbbbbbbbbbb988877bbbbbbbbbb999999bbabbbbbbb9999998babbbbbbb"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "orbit",
+    "rigId": "rc-rig",
+    "rigMethodId": "rc",
+    "simMethodId": "rc",
+    "simActive": true,
+    "contractMethodId": "rc",
+    "regionId": "alpine",
+    "profileMode": "vertical",
+    "depth": 7.45,
+    "rop": 28.129,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": null,
+     "downhole": "rc-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "workingAs": "RC"
+   }
+  },
+  {
+   "id": "r09-foundation-bg",
+   "group": "rigs",
+   "file": "post-r09-foundation-bg.png",
+   "md5": "3da967efd4d46a9926719a3ad14b6746",
+   "skipped": null,
+   "tookSec": 4.2,
+   "failed": [],
+   "errors": 0,
+   "metrics": {
+    "fps": 54,
+    "ctxLost": false,
+    "frame": {
+     "calls": 231,
+     "tris": 424866,
+     "callsMax": 233
+    },
+    "surface": {
+     "calls": 68,
+     "tris": 150936
+    },
+    "section": {
+     "calls": 17,
+     "tris": 46664
+    },
+    "rig": {
+     "calls": 39,
+     "tris": 22396
+    },
+    "texEstMB": 62.6,
+    "particles": {
+     "live": 1262,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 83.8,
+      "min": 12,
+      "max": 181,
+      "sig": "bbbbbbb6622abaaabbbbbbb975333433bbbbbb7764333334bbbbbb9564344333bbbbbb4865333333bbbbb72764333333bbbbb16654555645bbbbba8655645654446767962222222233333797232222232222269432212212115317933342211111114692334245243223338335334534a9132244333334332112433647222223"
+     },
+     "section": {
+      "mean": 64.5,
+      "min": 0,
+      "max": 134,
+      "sig": "1533333664643420245324311224561033454451144525101334344113814320143310431425341512116011221136104767553110131100557566456446463036454766557656304564665564556760466577635665674055577665675555504566467765445740366467588744462045546566767475102567646665334620"
+     },
+     "sky": {
+      "mean": 129.7,
+      "min": 25,
+      "max": 176,
+      "sig": "bbbbbbb34a4abaaabbbbbbb34b6bbaabbbbbbbb45b7bbaabbbbbbbb6422bbaaabbbbbbb9987227abbbbbbbb898769622bbbbbbba97877777bbbbbbb964457677bbbbbbb984344357bbbbbbb994345443bbbbbbb975333343bbbbbbb696333333bbbbbbb986333333bbbbbbb965344434bbbbbbb864443344bbbbbbb964333334"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "orbit",
+    "rigId": "foundation-bg",
+    "rigMethodId": "rotary-kelly",
+    "simMethodId": "rotary-kelly",
+    "simActive": true,
+    "contractMethodId": "rotary-kelly",
+    "regionId": "nordic",
+    "profileMode": "vertical",
+    "depth": 6.81,
+    "rop": 55.463,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": "drilling-bucket",
+     "downhole": null
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": true
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "workingAs": "Kelly"
+   }
+  },
+  {
+   "id": "r10-cfa-rig",
+   "group": "rigs",
+   "file": "post-r10-cfa-rig.png",
+   "md5": "21e653836647c8aba8b3c0bf13ee4cd7",
+   "skipped": null,
+   "tookSec": 3.9,
+   "failed": [],
+   "errors": 0,
+   "metrics": {
+    "fps": 70,
+    "ctxLost": false,
+    "frame": {
+     "calls": 205,
+     "tris": 408354,
+     "callsMax": 205
+    },
+    "surface": {
+     "calls": 55,
+     "tris": 146292
+    },
+    "section": {
+     "calls": 18,
+     "tris": 44730
+    },
+    "rig": {
+     "calls": 27,
+     "tris": 25764
+    },
+    "texEstMB": 62.6,
+    "particles": {
+     "live": 1752,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 97.5,
+      "min": 8,
+      "max": 185,
+      "sig": "bbbbbb75bbbbbbabbbbbbb85bbbbbbbbbbbbbb8bbbbbbbbbbbbbbb85bbbbbbbbbb2bbb14bbbbbbbb5ca7478bbbbbbbbb77524787379778bb3363568746567777544454983664677634322235454435314445439845433333454544a8932112383312339422111111542115211111111111112321111111115231111111111221"
+     },
+     "section": {
+      "mean": 56.8,
+      "min": 0,
+      "max": 116,
+      "sig": "1332333123323420134343312232341013323331133232101241232312233410243244335544550145567556767463104666556655546630375655755646663034353644345766303445743644234320224455260453342012332332322234001232334332222310465657154222220047767776776667213766775676676750"
+     },
+     "sky": {
+      "mean": 164.3,
+      "min": 44,
+      "max": 179,
+      "sig": "bbbbbb7bbbbabbaabbbbbb7b6babbbaabbbbbb7bbbbbbaaabbbbbb75bbbbababbbbbbb756bbbbbaabbbbbb74abbbabbabbbbbb7babbbbbaabbb6bb77bbbbbbbabbb3bb7bbbbbbbbabbb8bb75bbbbbbaabbbbbb75bbbbbbbbbbbbbb8abbbbbbbbbbbbbb8b4bbbbbbbbbbbbb9bbbbbbbbbbbbbbb94abbbbbbbbbbbbb9abbbbbbbb"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "orbit",
+    "rigId": "cfa-rig",
+    "rigMethodId": "cfa",
+    "simMethodId": "cfa",
+    "simActive": true,
+    "contractMethodId": "cfa",
+    "regionId": "german-site",
+    "profileMode": "vertical",
+    "depth": 7.28,
+    "rop": 35.291,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": null,
+     "downhole": null
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": true
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "workingAs": "CFA"
+   }
+  },
+  {
+   "id": "r11-bolter",
+   "group": "rigs",
+   "file": "post-r11-bolter.png",
+   "md5": "d28db86768f1961d2b80d15fcce16609",
+   "skipped": null,
+   "tookSec": 4.7,
+   "failed": [],
+   "errors": 0,
+   "metrics": {
+    "fps": 58,
+    "ctxLost": false,
+    "frame": {
+     "calls": 291,
+     "tris": 290366,
+     "callsMax": 291
+    },
+    "surface": {
+     "calls": 149,
+     "tris": 125210
+    },
+    "section": {
+     "calls": 20,
+     "tris": 42230
+    },
+    "rig": {
+     "calls": 121,
+     "tris": 55066
+    },
+    "texEstMB": 38.3,
+    "particles": {
+     "live": 1546,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 27.4,
+      "min": 0,
+      "max": 223,
+      "sig": "0000000000000000000000000000000000010000000000000001000000011000000000000001110011010a11111112210112222152133373110121112322212111101141372223212111121111123113343a21222213334146794312225262134bea43217440322248a752110108013833333122820000002212111110000000"
+     },
+     "section": {
+      "mean": 33.7,
+      "min": 0,
+      "max": 120,
+      "sig": "1125555555656622111645545544564200163332325555220016222321556421000611353266552200060001012355220006000010224521000601101032251200060001002373000006100001325522000601100231342100061000123265220005111121555522000213111157731000011311101122100000010001001100"
+     },
+     "sky": {
+      "mean": 2.9,
+      "min": 0,
+      "max": 7,
+      "sig": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "orbit",
+    "rigId": "bolter",
+    "rigMethodId": "rockbolt",
+    "simMethodId": "rockbolt",
+    "simActive": true,
+    "contractMethodId": "rockbolt",
+    "regionId": "german-site",
+    "profileMode": "heading",
+    "depth": 6,
+    "rop": 0,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "bolt-install",
+    "tooling": {
+     "surface": "shank-adapter",
+     "downhole": "button-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "workingAs": "Bolting",
+    "underground": {
+     "cameraModes": [
+      "hero"
+     ],
+     "sceneHints": [
+      "drive-shotcrete",
+      "drive-muck",
+      "drifter",
+      "rig:tunnel-jumbo"
+     ],
+     "terrainRegion": "german-site",
+     "envRegion": "german-site",
+     "sunElevation": 14.962418614875581,
+     "hasSky": false,
+     "hasClouds": false
+    }
+   }
+  },
+  {
+   "id": "r12-oil-derrick",
+   "group": "rigs",
+   "file": "post-r12-oil-derrick.png",
+   "md5": "82bee89a6eba8377fe4f952243c25545",
+   "skipped": null,
+   "tookSec": 4.3,
+   "failed": [],
+   "errors": 0,
+   "metrics": {
+    "fps": 54,
+    "ctxLost": false,
+    "frame": {
+     "calls": 236,
+     "tris": 503070,
+     "callsMax": 239
+    },
+    "surface": {
+     "calls": 69,
+     "tris": 171776
+    },
+    "section": {
+     "calls": 24,
+     "tris": 57790
+    },
+    "rig": {
+     "calls": 45,
+     "tris": 53292
+    },
+    "texEstMB": 61.1,
+    "particles": {
+     "live": 557,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 85.7,
+      "min": 5,
+      "max": 217,
+      "sig": "85456556544451844566675455555111565745557676621157799752279852216addedd22ddd82217adddd722ddd822268caa99527956221568884422651522255558d611791411265435496973651335534454324646333754868643769321165587753256321119a8ec964443801229d88b6343151122287578a9122114222"
+     },
+     "section": {
+      "mean": 30.2,
+      "min": 0,
+      "max": 75,
+      "sig": "1324223213431110132233221232111003222332012210100323322212231010033233321223142003122223132300100332221233231010032221222222101103233223222210100323223232221111022323232322111102122111223100011433434454331111144445123344111114443500014311210453311002341121"
+     },
+     "sky": {
+      "mean": 73,
+      "min": 16,
+      "max": 126,
+      "sig": "4566544555434355455556445554445575554544555546658545755564445174758554554465511775555445474551117546654554654111757454456655611175675556565551118566645555456111456567556454611145866575565651215556566446565211654664512576521145466751155762114656662326667211"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "orbit",
+    "rigId": "oil-derrick",
+    "rigMethodId": "oil-rotary",
+    "simMethodId": "oil-rotary",
+    "simActive": true,
+    "contractMethodId": "oil-rotary",
+    "regionId": "sahara",
+    "profileMode": "vertical",
+    "depth": 14.34,
+    "rop": 5.907,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": null,
+     "downhole": "pdc-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "workingAs": "Oil Rotary"
+   }
+  },
+  {
+   "id": "r13-piling-leader",
+   "group": "rigs",
+   "file": "post-r13-piling-leader.png",
+   "md5": "c17d09d50943c692a71504967ec27d90",
+   "skipped": null,
+   "tookSec": 3.8,
+   "failed": [],
+   "errors": 0,
+   "metrics": {
+    "fps": 58,
+    "ctxLost": false,
+    "frame": {
+     "calls": 245,
+     "tris": 428754,
+     "callsMax": 245
+    },
+    "surface": {
+     "calls": 76,
+     "tris": 156910
+    },
+    "section": {
+     "calls": 17,
+     "tris": 41028
+    },
+    "rig": {
+     "calls": 47,
+     "tris": 28564
+    },
+    "texEstMB": 62.6,
+    "particles": {
+     "live": 293,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 101.9,
+      "min": 1,
+      "max": 184,
+      "sig": "bbbbbbb55bbbbbbbbbbbbbb55bbbbbbbbbbbbbb55bbbbbbbbbbbbbb55bbbbbbbbbbbbbb54bbbbbbbbbbbbbb54bbbbbbb877bbb9547367667877777744671494755666654451963653343343442459312232242655334831211101114422244141111101125315814101144410652232300431689881432211669999445600000"
+     },
+     "section": {
+      "mean": 53.6,
+      "min": 1,
+      "max": 122,
+      "sig": "0000000100010100144154310117110114523347133151315455553412255111144333401332511004424542134415052320121644282111021123113012010017565667665221431646548447551134275656677556214247667565564511211755665567851121165646545757212127657777645621312755566556552121"
+     },
+     "sky": {
+      "mean": 163.4,
+      "min": 75,
+      "max": 182,
+      "sig": "bbbbbbb55b7bbbbbbbbbbbb55b9bbbbbbbbbbbb55bbbbbbbbbbbbbb55bbbbbbbbbbbbbb55bbbbbbbbbbbbbb55bbbbbbbbbbbbbb55bbbbbbbbbbbbbb55bbbbbbbbbbbbbb55bbbbbbbbbbbbbb55bbbbbbbbbbbbbb55bbbbbbbbbbbbbb55bbbbbbbbbbbbbb55bbbbbbbbbbbbbb55bbbbbbbbbbbbbb55bbbbbbbbbbbbbb55bbbbbbb"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "orbit",
+    "rigId": "piling-leader",
+    "rigMethodId": "driven-pile",
+    "simMethodId": "driven-pile",
+    "simActive": true,
+    "contractMethodId": "driven-pile",
+    "regionId": "nordic",
+    "profileMode": "pile",
+    "depth": 6,
+    "rop": 0,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "SET",
+    "phase": "pitch",
+    "tooling": {
+     "surface": null,
+     "downhole": "precast-pile"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "dolly",
+     "fits": true
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "workingAs": "Driven Pile"
+   }
+  },
+  {
+   "id": "r14-tunnel-jumbo",
+   "group": "rigs",
+   "file": "post-r14-tunnel-jumbo.png",
+   "md5": "4ebdce59485ae020bc884af479c80b0e",
+   "skipped": null,
+   "tookSec": 3.7,
+   "failed": [],
+   "errors": 0,
+   "metrics": {
+    "fps": 65.1,
+    "ctxLost": false,
+    "frame": {
+     "calls": 293,
+     "tris": 314667,
+     "callsMax": 293
+    },
+    "surface": {
+     "calls": 150,
+     "tris": 144786
+    },
+    "section": {
+     "calls": 20,
+     "tris": 42230
+    },
+    "rig": {
+     "calls": 121,
+     "tris": 47098
+    },
+    "texEstMB": 38.1,
+    "particles": {
+     "live": 1266,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 55.6,
+      "min": 0,
+      "max": 222,
+      "sig": "43221221111111004222211111111100877642111111121043465543111222115432271121223322211222222234443322201222223344651111112223345576111111122346899a521111123357abcc122123424bcdeeee1101469a848bacdd01135789555789ab113531324334566621112222222334441133113222333433"
+     },
+     "section": {
+      "mean": 33.6,
+      "min": 0,
+      "max": 125,
+      "sig": "0015555455656733001645545544564200163332225555220016222321555422000611221256552200060100102355220006100011224521000610001033452100060000102273000006001010225521000600000222342100060000123265220005111121587521000212111155331100011311111122100000010011101100"
+     },
+     "sky": {
+      "mean": 23,
+      "min": 1,
+      "max": 134,
+      "sig": "1110100100000010111010000011111133322211111111014322222111111100432211111111110033222211111111003322221121111100333221211111110032322211111111002332211111111100422222111111110062222121111101007412221111111100863112111211110087511211111111018764111111111100"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "orbit",
+    "rigId": "tunnel-jumbo",
+    "rigMethodId": "tunnel-jumbo",
+    "simMethodId": "tunnel-jumbo",
+    "simActive": true,
+    "contractMethodId": "tunnel-jumbo",
+    "regionId": "german-site",
+    "profileMode": "heading",
+    "depth": 6,
+    "rop": 97.085,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": "shank-adapter",
+     "downhole": "button-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "workingAs": "Jumbo",
+    "underground": {
+     "cameraModes": [
+      "hero"
+     ],
+     "sceneHints": [
+      "drive-shotcrete",
+      "drive-muck",
+      "drifter",
+      "rig:tunnel-jumbo"
+     ],
+     "terrainRegion": "german-site",
+     "envRegion": "german-site",
+     "sunElevation": 14.962418614875581,
+     "hasSky": false,
+     "hasClouds": false
+    }
+   }
+  },
+  {
+   "id": "r15-hdd-rig",
+   "group": "rigs",
+   "file": "post-r15-hdd-rig.png",
+   "md5": "f9164932486709ef228bef19449e54b3",
+   "skipped": null,
+   "tookSec": 3.6,
+   "failed": [],
+   "errors": 0,
+   "metrics": {
+    "fps": 74,
+    "ctxLost": false,
+    "frame": {
+     "calls": 229,
+     "tris": 367954,
+     "callsMax": 229
+    },
+    "surface": {
+     "calls": 71,
+     "tris": 136344
+    },
+    "section": {
+     "calls": 20,
+     "tris": 43246
+    },
+    "rig": {
+     "calls": 44,
+     "tris": 15732
+    },
+    "texEstMB": 62.7,
+    "particles": {
+     "live": 1119,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 115.9,
+      "min": 11,
+      "max": 176,
+      "sig": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaababaabaaabbbbbbbbbbbbbaabbbbbbbbbbbbbbbbbbbbbbbbbbb9bbbbb8bbbbbbbbbb8bbbb7777787777877774444344444562222233334554423322794211333976431278111224227897789822111a33a3332887a5111111214323341111111165243441"
+     },
+     "section": {
+      "mean": 41.6,
+      "min": 0,
+      "max": 117,
+      "sig": "0000002100000000000021205650120001133453431044040113333223311101235126250230011023265665666332002236666576652200223737466753211021143335542010001223270343411000103433554421110022255324564111001346565776732310236576767574211011245655544211000002112212200000"
+     },
+     "sky": {
+      "mean": 162.3,
+      "min": 158,
+      "max": 167,
+      "sig": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "orbit",
+    "rigId": "hdd-rig",
+    "rigMethodId": "hdd",
+    "simMethodId": "hdd",
+    "simActive": true,
+    "contractMethodId": "hdd",
+    "regionId": "german-site",
+    "profileMode": "profile",
+    "depth": 9.22,
+    "rop": 0,
+    "stage": 0,
+    "stageCount": 2,
+    "stageId": "pilot",
+    "gaugeLabel": "TORQUE",
+    "phase": "rod-add",
+    "tooling": {
+     "surface": null,
+     "downhole": "hdd-pilot-head"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "workingAs": "HDD"
+   }
+  },
+  {
+   "id": "r16-longhole-rig",
+   "group": "rigs",
+   "file": "post-r16-longhole-rig.png",
+   "md5": "fc59a39018dabea6eddb5bc08eb0dbaa",
+   "skipped": null,
+   "tookSec": 3.8,
+   "failed": [],
+   "errors": 0,
+   "metrics": {
+    "fps": 63.1,
+    "ctxLost": false,
+    "frame": {
+     "calls": 312,
+     "tris": 296608,
+     "callsMax": 312
+    },
+    "surface": {
+     "calls": 160,
+     "tris": 127992
+    },
+    "section": {
+     "calls": 21,
+     "tris": 48084
+    },
+    "rig": {
+     "calls": 133,
+     "tris": 53982
+    },
+    "texEstMB": 37.9,
+    "particles": {
+     "live": 1060,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 37.3,
+      "min": 0,
+      "max": 216,
+      "sig": "000000000000100000000000000000000000000000000000000000000000010000000012132101000000131212122222111121559c933310122331523632331023444453322120112345443222312200237db73233323230246bb64235b84100246ab85337c82211247dc9422363210023454332222210001334323214210000"
+     },
+     "section": {
+      "mean": 59.4,
+      "min": 0,
+      "max": 113,
+      "sig": "4662345536356732365232542010652135523464465456233752236556776542356252365666460046511265653556323651236556655421344222667645532235412365665555314542226656665410465222021112145236611650026567322551236455555630365112535442141135522357742100014652225675401001"
+     },
+     "sky": {
+      "mean": 2.8,
+      "min": 0,
+      "max": 7,
+      "sig": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "orbit",
+    "rigId": "longhole-rig",
+    "rigMethodId": "longhole",
+    "simMethodId": "longhole",
+    "simActive": true,
+    "contractMethodId": "longhole",
+    "regionId": "iberian-quarry",
+    "profileMode": "vertical",
+    "depth": 9.05,
+    "rop": 15.114,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": "shank-adapter",
+     "downhole": "button-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "workingAs": "Longhole",
+    "underground": {
+     "cameraModes": [
+      "hero"
+     ],
+     "sceneHints": [
+      "drive-shotcrete",
+      "drive-muck",
+      "drifter",
+      "rig:tunnel-jumbo"
+     ],
+     "terrainRegion": "iberian-quarry",
+     "envRegion": "iberian-quarry",
+     "sunElevation": 20.166738133093173,
+     "hasSky": false,
+     "hasClouds": false
+    }
+   }
+  },
+  {
+   "id": "r17-sonic-truck",
+   "group": "rigs",
+   "file": "post-r17-sonic-truck.png",
+   "md5": "86a04105dd89351919d3580663fc23c4",
+   "skipped": null,
+   "tookSec": 4,
+   "failed": [],
+   "errors": 0,
+   "metrics": {
+    "fps": 72.9,
+    "ctxLost": false,
+    "frame": {
+     "calls": 260,
+     "tris": 395996,
+     "callsMax": 261
+    },
+    "surface": {
+     "calls": 80,
+     "tris": 139584
+    },
+    "section": {
+     "calls": 20,
+     "tris": 51306
+    },
+    "rig": {
+     "calls": 51,
+     "tris": 11238
+    },
+    "texEstMB": 62.6,
+    "particles": {
+     "live": 1030,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 102.6,
+      "min": 1,
+      "max": 199,
+      "sig": "ccccccc5cccccccbcccccccbcccccccbccccccc7cccccccbcccccc85ccccccccccccccc4ccccccccccccccc32ccccccccccc7755777777cc778784427776677765637484456666665205211434751544414753344477552253362454634101110000002421211111100100000101111111012111111111111112111111111111"
+     },
+     "section": {
+      "mean": 55.1,
+      "min": 0,
+      "max": 123,
+      "sig": "1431124523645421225011311022341124411240153445101321114113214520143100432445451003102132222246003672111110231100457143747657462047621276456453124651127555558752566133644576664155412266466765413661127676555731378113756763652246512275667456223562227555446611"
+     },
+     "sky": {
+      "mean": 181.7,
+      "min": 52,
+      "max": 199,
+      "sig": "ccccccc5ccccccbbccccccc6ccccccccccccccc6ccccccccccccccc5cccccccbccccccc5cccccccbccccccc6ccccccccccccccc6cccccccbccccccc6cccccccbcccaccc6ccccccbbccc3ccc6cccccccbccc8ccc7ccccccccccccccc7ccccccccccccccc7cccccccbcaccccc8ccccccccc3ccccc7cccccccbccccccc7cccccccb"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "orbit",
+    "rigId": "sonic-truck",
+    "rigMethodId": "sonic",
+    "simMethodId": "sonic",
+    "simActive": true,
+    "contractMethodId": "sonic",
+    "regionId": "nordic",
+    "profileMode": "vertical",
+    "depth": 6.62,
+    "rop": 41.574,
+    "stage": 0,
+    "stageCount": 1,
+    "stageId": "bore",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": null,
+     "downhole": "core-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "workingAs": "Sonic"
+   }
+  },
+  {
+   "id": "r18-raisebore",
+   "group": "rigs",
+   "file": "post-r18-raisebore.png",
+   "md5": "e7b2d4b85bfe41087bebf3f2f5669f7c",
+   "skipped": null,
+   "tookSec": 4.5,
+   "failed": [],
+   "errors": 0,
+   "metrics": {
+    "fps": 68,
+    "ctxLost": false,
+    "frame": {
+     "calls": 260,
+     "tris": 424460,
+     "callsMax": 260
+    },
+    "surface": {
+     "calls": 70,
+     "tris": 144726
+    },
+    "section": {
+     "calls": 36,
+     "tris": 57836
+    },
+    "rig": {
+     "calls": 42,
+     "tris": 24024
+    },
+    "texEstMB": 62.6,
+    "particles": {
+     "live": 880,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 135.1,
+      "min": 6,
+      "max": 221,
+      "sig": "dddeeeeeeeeedddddddeeeeeeeeeeddddddeeeeeeeeeeeddddeeeeeeeeeeeeddddeeeeeeeeeeeddddddeebcbccbeeddd99ddeaeadeaedddd998898a98a8999997788855795788878677475566668227652276246336232225755657864644454625545b855429123551182431101764311011121111315183116113115131234"
+     },
+     "section": {
+      "mean": 54.1,
+      "min": 0,
+      "max": 114,
+      "sig": "2331113123343411121001301344552125411151253544214762337356666532377216743567750046713376655556223631117233542221244111551247443136302256235044402230123444222220123015333222231013300132222222024662237676756622376222776655572145612476467777425662326667555521"
+     },
+     "sky": {
+      "mean": 216.2,
+      "min": 207,
+      "max": 222,
+      "sig": "dddeeeeeeeeedddddddeeeeeeeeedddddddeeeeeeeeedddddddeeeeeeeeeeddddddeeeeeeeeeeddddddeeeeeeeeeeddddddeeeeeeeeeeddddddeeeeeeeeeeddddddeeeeeeeeeeddddddeeeeeeeeeedddddeeeeeeeeeeeddddddeeeeeeeeeedddddeeeeeeeeeeedddddeeeeeeeeeeedddddeeeeeeeeeeeddddddeeeeeeeeeeddd"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {
+    "stateScene": "site",
+    "liveScreen": "site",
+    "liveHeading": "",
+    "cameraMode": "orbit",
+    "rigId": "raisebore",
+    "rigMethodId": "raise-boring",
+    "simMethodId": "raise-boring",
+    "simActive": true,
+    "contractMethodId": "raise-boring",
+    "regionId": "german-site",
+    "profileMode": "raise",
+    "depth": 9.76,
+    "rop": 3.711,
+    "stage": 0,
+    "stageCount": 2,
+    "stageId": "pilot",
+    "gaugeLabel": "TORQUE",
+    "phase": "drilling",
+    "tooling": {
+     "surface": null,
+     "downhole": "raisebore-pilot-bit"
+    },
+    "bit": {
+     "id": "auger-flight-std",
+     "kind": "auger",
+     "fits": false
+    },
+    "counts": {
+     "icard": 0,
+     "node": 0,
+     "ccard": 0,
+     "rigcard": 0,
+     "rmetric": 0,
+     "famcard": 0,
+     "cluster": 0,
+     "gaugebox": 1,
+     "slotcard": 0,
+     "menuNav": 0
+    }
+   },
+   "extra": {
+    "workingAs": "Raise Bore"
+   }
+  },
+  {
+   "id": "13-burnin",
+   "group": "ui",
+   "file": "post-13-burnin.png",
+   "md5": "ac5d814008bedcf73a125b5096de4ba9",
+   "skipped": null,
+   "tookSec": null,
+   "failed": [],
+   "errors": 0,
+   "metrics": {
+    "fps": 72,
+    "ctxLost": false,
+    "frame": {
+     "calls": 197,
+     "tris": 387540,
+     "callsMax": 197
+    },
+    "surface": {
+     "calls": 56,
+     "tris": 134186
+    },
+    "section": {
+     "calls": 17,
+     "tris": 45532
+    },
+    "rig": {
+     "calls": 27,
+     "tris": 5840
+    },
+    "texEstMB": 62.6,
+    "particles": {
+     "live": 460,
+     "capacity": 12000,
+     "budget": 12000,
+     "tier": "high"
+    },
+    "canvas": {
+     "surface": {
+      "mean": 101.1,
+      "min": 2,
+      "max": 187,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcbbbbbbbbbbbbbbccbbbbb556554bbbcc8877b5b7585777788877757a55877777566665555446567633332614513331313222255557312122211153459835a1221111145095353111055117101132222202311101013242321101110110000023"
+     },
+     "section": {
+      "mean": 52.9,
+      "min": 0,
+      "max": 119,
+      "sig": "1211212014243101247201431437451063401143131633222431123015434511153010422224550312101133163321111200003305123110001000210376441135522465765546214762237655555420265222766667762246623375667566315432227626565531466112767677654146711376557465223652237645765531"
+     },
+     "sky": {
+      "mean": 175.6,
+      "min": 171,
+      "max": 183,
+      "sig": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+     },
+     "w": 780,
+     "h": 1688
+    }
+   },
+   "ident": {},
+   "extra": null
+  }
+ ]
+}

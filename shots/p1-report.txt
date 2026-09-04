@@ -1,0 +1,217 @@
+URL: http://localhost:5178/
+PERF: {
+  "fps": 17.83944499504473,
+  "quality": "high",
+  "calls": 79,
+  "triangles": 239406,
+  "programs": 52,
+  "textures": 63,
+  "geometries": 50,
+  "systems": [
+    "renderer",
+    "assets",
+    "env",
+    "geology",
+    "terrain",
+    "sim",
+    "vfx",
+    "shopPreview",
+    "audio",
+    "ui"
+  ],
+  "jsHeapMB": 52.5
+}
+
+CONSOLE (144):
+[debug] [vite] connecting...
+[debug] [vite] connected.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] [boot] system "rig" unavailable — ./rig/rigFactory.js has no createRigSystem
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] [boot] system "progression" unavailable — Failed to fetch dynamically imported module: http://localhost:5178/src/game/progression.js?import
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] [assets] unknown material kind "steel" — substituting rawSteel
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[debug] [vite] connecting...
+[debug] [vite] connected.
+[warning] [boot] system "rig" unavailable — ./rig/rigFactory.js has no createRigSystem
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] [boot] system "progression" unavailable — Failed to fetch dynamically imported module: http://localhost:5178/src/game/progression.js?import
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] [assets] unknown material kind "steel" — substituting rawSteel
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2082:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3883:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470537028:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2082:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3883:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470537028:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2082:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3883:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470537028:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2082:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3883:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470537028:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2082:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3883:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470537028:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2082:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3883:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470537028:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2082:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3883:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470537028:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2082:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3883:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470537028:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2082:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3883:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470537028:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2082:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3883:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470537028:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2082:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3883:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470537028:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2082:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3883:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470537028:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2082:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3883:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470537028:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2082:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3883:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470537028:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2082:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3883:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470537028:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2082:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3883:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470537028:198:29)

@@ -1,0 +1,458 @@
+DRILLITY — visual QA harness
+when      2026-09-04T07:20:12.938Z
+url       http://localhost:5178/?quality=low&shot
+mode      HEADED (real GPU — fps is meaningful)
+quality   low
+filter    none — full coverage run
+boot      3.5s
+page loads 1  (no mid-run reload — HMR muted)
+
+── RENDER HEALTH ───────────────────────────────────────────────────────
+  ok — the drawing buffer holds pixels (mean luma 17.2) and the GL
+  context stayed alive for every shot. The frames below are pictures of the game.
+
+── COVERAGE ────────────────────────────────────────────────────────────
+methods    21/21 photographed
+rigs       18/18 photographed
+UI states  12
+manifest   METHOD_IDS.md lists 21 method ids
+
+── COULD NOT PHOTOGRAPH: nothing. Every id in the manifest and every rig
+   in data.js has a frame in this run.
+
+── BUDGET ──────────────────────────────────────────────────────────────
+source: README.md · Performance budget
+  draw calls   surface ≤ 80   section ≤ 60   rig ≤ 70
+  frame rate   ≥ 60 fps
+  texture mem  ≤ 90 MB (HIGH)      particles ≤ 12000
+  VERDICT: FAIL
+    surface    over budget in 43 state(s): 01-boot=142 02-menu=142 03-contracts=142 09-shop=142 09b-shop-listings=142 10-career=140 10b-career-skills=141 11-garage=141 …
+    rig        over budget in 43 state(s): 01-boot=120 02-menu=120 03-contracts=120 09-shop=120 09b-shop-listings=120 10-career=118 10b-career-skills=118 11-garage=118 …
+    fps        over budget in 8 state(s): 01-boot=27.2 02-menu=26.2 03-contracts=48 m03-top-hammer=59.1 m08-rc=55.2 m18-longhole=54 r05-dth-crawler=58 r11-bolter=58.3
+  (texture MB is an estimate from live material maps, RGBA8 + mip tail.
+   per-band calls exclude shadow passes; frame totals include them.)
+
+── DOES EACH SHOT CONTAIN WHAT ITS NAME CLAIMS ─────────────────────────
+  PASS — all 51 frames verified against the live game state.
+  no two frames are byte-identical (50 distinct images).
+
+── PER-SHOT ────────────────────────────────────────────────────────────
+  id                          fps   frame  surf  sect   rig     tris  part   err   sec  verify
+  01-boot                     27.2    227   142    20   120     145k   330     0     2  ok
+  02-menu                     26.2    227   142    20   120     145k   343     0   3.6  ok
+  03-contracts                  48    227   142    20   120     145k   304     0   2.8  ok
+  08-results                 131.9    106    21    20     3      83k   796     0     3  ok
+  09-shop                       96    227   142    20   120     146k   702     0   3.9  ok
+  09b-shop-listings          131.9    227   142    20   120     146k   865     0  44.1  ok
+  10-career                  133.9    224   140    20   118     145k   838     0   2.3  ok
+  10b-career-skills            138    225   141    20   118     146k   866     0   3.8  ok
+  11-garage                  127.9    225   141    20   118     145k   768     0   3.1  ok
+  14-section-clean            99.9    230   146    19   120     147k   896     0   5.9  ok
+  07-section-closeup          60.3    216   132    20   108     147k  1255     0   4.7  ok
+  m01-auger                   63.1    212   134    20   108     143k   557     0   5.1  ok
+  m02-cable-tool              88.7    233   148    17   122     153k   514     0   5.3  ok
+  m03-top-hammer              59.1    219   140    19   114     147k   535     0   5.3  ok
+  m04-site-investigation     101.9    211   134    19   108     144k   463     0   5.1  ok
+  m05-dth                       60    257   158    20   133     158k  1507     0   5.6  ok
+  m06-overburden              66.1    229   146    21   118     152k  1292     0   5.1  ok
+  m07-core                    75.9    252   160    20   132     156k   564     0   5.2  ok
+  m08-rc                      55.2    240   150    21   125     170k  1148     0     6  ok
+  m09-rotary-kelly            68.1    187   100    17    72     163k   651     0   5.6  ok
+  m10-cfa                       64    183   102    16    74     158k   562     0   4.7  ok
+  m11-rockbolt                93.3    191   157    20   126      53k  1050     0  13.5  ok
+  m12-oil-rotary                92    149    59    24    37     138k   635     0     6  ok
+  m13-anchor                  65.1    226   144    21   116     145k  1413     0   5.8  ok
+  m14-driven-pile             75.8    226   134    18   107     168k   562     0   5.3  ok
+  m15-cased-cfa                 67    197   116    16    88     159k   518     0   5.5  ok
+  m16-tunnel-jumbo            88.7    185   149    20   118      58k  1466     0     6  ok
+  m17-hdd                       72    210   130    19   104     144k   536     0   7.8  ok
+  m18-longhole                  54    172   137    21   106      58k  1348     0   5.7  ok
+  m19-sonic                     88    237   148    19   120     141k   455     0   5.6  ok
+  m20-jet-grouting            63.3    260   166    21   138     155k   572     0   5.3  ok
+  m21-raise-boring              68    130    48    38    23      88k   767     0   7.1  ok
+  r01-crawler-lite              62    214   134    21   108     145k   843     0   4.6  ok
+  r02-cable-percussion        78.9    240   154    17   128     156k   460     0   3.5  ok
+  r03-crawler-th              62.2    244   154    21   126     157k  1118     0   4.2  ok
+  r04-si-rig                  93.9    155    75    20    49     103k   385     0   4.1  ok
+  r05-dth-crawler               58    265   168    21   142     161k  1122     0   3.6  ok
+  r06-core-rig                  76    252   160    20   134     158k   750     0   3.6  ok
+  r07-cpt-unit                75.9    193   121    21    94     153k   367     0   4.1  ok
+  r08-rc-rig                  72.9    250   160    21   135     172k   974     0   4.1  ok
+  r09-foundation-bg             82    191   102    17    74     164k  1089     0   3.8  ok
+  r10-cfa-rig                   88    185   100    17    74     184k  1154     0   3.5  ok
+  r11-bolter                  58.3    191   157    20   126      63k   913     0     5  ok
+  r12-oil-derrick             68.1    153    63    24    42     140k   563     0   4.6  ok
+  r13-piling-leader           72.9    224   135    18   108     171k   240     0   4.9  ok
+  r14-tunnel-jumbo            84.8    193   159    20   128      60k  1115     0   4.2  ok
+  r15-hdd-rig                 90.7    142    61    20    35      88k   820     0   4.1  ok
+  r16-longhole-rig            89.9    192   157    21   130      69k  1084     0   4.1  ok
+  r17-sonic-truck               73    251   162    19   134     142k   916     0   4.1  ok
+  r18-raisebore                 84    155    55    36    29     102k   762     0   4.3  ok
+  13-burnin                     62    148    60    20    32      95k   487     0     -  ok
+
+── PER-SHOT DETAIL ─────────────────────────────────────────────────────
+  01-boot
+      method=dth · rig=crawler-lite · section=vertical · cam=menu · gauge=TORQUE · depth=12.12m rop=9.569 · tooling=flushing-swivel/dth-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 82.8 (3-182) · section 61 (0-126) · tex≈27.3MB · heap 75MB
+  02-menu
+      method=dth · rig=crawler-lite · section=vertical · cam=menu · gauge=TORQUE · depth=12.34m rop=9.03 · tooling=flushing-swivel/dth-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 84.3 (6-178) · section 61.2 (1-128) · tex≈27.3MB · heap 90.5MB
+  03-contracts
+      method=dth · rig=crawler-lite · section=vertical · cam=menu · gauge=TORQUE · depth=12.64m rop=11.334 · tooling=flushing-swivel/dth-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 88.9 (5-177) · section 61.1 (1-126) · tex≈27.3MB · heap 92.8MB
+  08-results
+      method=dth · rig=crawler-lite · section=vertical · cam=mast · gauge=TORQUE · depth=13.19m rop=18.056 · tooling=flushing-swivel/dth-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 80.8 (16-185) · section 61.8 (0-126) · tex≈27.3MB · heap 97.5MB
+  09-shop
+      method=dth · rig=crawler-lite · section=vertical · cam=orbit · gauge=TORQUE · depth=13.78m rop=14.438 · tooling=flushing-swivel/dth-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 103.6 (3-179) · section 63.1 (1-121) · tex≈27.3MB · heap 101.7MB
+  09b-shop-listings
+      method=dth · rig=crawler-lite · section=vertical · cam=orbit · gauge=TORQUE · depth=18.44m rop=9.501 · tooling=flushing-swivel/dth-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 109.6 (4-218) · section 65.7 (1-123) · tex≈27.3MB · heap 128.5MB
+  10-career
+      method=dth · rig=crawler-lite · section=vertical · cam=menu · gauge=TORQUE · depth=18.8m rop=14.65 · tooling=flushing-swivel/dth-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 86.5 (5-195) · section 65.9 (2-120) · tex≈27.3MB · heap 124.2MB
+  10b-career-skills
+      method=dth · rig=crawler-lite · section=vertical · cam=menu · gauge=TORQUE · depth=19.38m rop=8.865 · tooling=flushing-swivel/dth-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 87 (4-176) · section 67 (1-124) · tex≈27.3MB · heap 134.3MB
+  11-garage
+      method=dth · rig=crawler-lite · section=vertical · cam=orbit · gauge=TORQUE · depth=19.7m rop=9.914 · tooling=flushing-swivel/dth-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 111.6 (7-176) · section 66 (0-124) · tex≈27.3MB · heap 128.6MB
+  14-section-clean
+      method=dth · rig=crawler-lite · section=vertical · cam=hero · gauge=TORQUE · depth=34.18m rop=0 · tooling=flushing-swivel/dth-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 103.5 (1-182) · section 59.9 (1-121) · tex≈27.3MB · heap 138.8MB
+  07-section-closeup
+      method=dth · rig=crawler-lite · section=vertical · cam=downhole · gauge=TORQUE · depth=28.18m rop=0 · tooling=flushing-swivel/dth-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 70.2 (1-188) · section 65.9 (1-125) · tex≈27.3MB · heap 137.7MB
+  m01-auger
+      Auger Drilling — metres drilled · method=auger · rig=crawler-lite · section=vertical · cam=hero · gauge=TORQUE · depth=13.3m rop=0.009 · tooling=-/drag-bit · bit=auger-flight-std
+      luma surface 103.2 (1-199) · section 61 (0-124) · tex≈27.3MB · heap 138.5MB
+  m02-cable-tool
+      Cable-Tool / Drop Hammer — metres drilled · method=cable-tool · rig=cable-percussion · section=vertical · cam=hero · gauge=TORQUE · depth=29.4m rop=1.289 · tooling=-/cable-tool-chisel · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 103.4 (2-203) · section 60.2 (0-119) · tex≈27.8MB · heap 143.5MB
+  m03-top-hammer
+      Top Hammer — metres drilled · method=top-hammer · rig=crawler-lite · section=vertical · cam=hero · gauge=TORQUE · depth=14.64m rop=0 · tooling=shank-adapter/button-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 102.7 (1-183) · section 65.6 (1-130) · tex≈28MB · heap 151.3MB
+  m04-site-investigation
+      Site Investigation — sample quality and log fidelity · method=site-investigation · rig=crawler-lite · section=vertical · cam=hero · gauge=TORQUE · depth=9.63m rop=0 · tooling=-/spt-split-spoon · bit=auger-flight-std
+      luma surface 99.7 (1-183) · section 57.6 (0-129) · tex≈27.8MB · heap 157.6MB
+      NOTE QA bridge deepened this job to 38 m — clamped back to 27.5 m (method range 10-35)
+  m05-dth
+      DTH (Down-the-Hole) — metres drilled · method=dth · rig=dth-crawler · section=vertical · cam=hero · gauge=TORQUE · depth=41.76m rop=0.958 · tooling=flushing-swivel/dth-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 105 (0-184) · section 56.6 (0-118) · tex≈28MB · heap 137.7MB
+  m06-overburden
+      Overburden / Duplex Drilling — metres drilled · method=overburden · rig=crawler-lite · section=vertical · cam=hero · gauge=TORQUE · depth=17.6m rop=0.602 · tooling=shank-adapter/casing-crown · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 105.4 (1-206) · section 66.4 (0-123) · tex≈28MB · heap 154.9MB
+  m07-core
+      Core / Wireline Exploration — core recovery — whole core, in order, logged · method=core · rig=core-rig · section=vertical · cam=hero · gauge=TORQUE · depth=31.86m rop=3.589 · tooling=flushing-swivel/core-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 99.9 (1-184) · section 55.3 (0-121) · tex≈27.8MB · heap 94.7MB
+  m08-rc
+      Reverse Circulation — sample recovery and contamination · method=rc · rig=rc-rig · section=vertical · cam=hero · gauge=TORQUE · depth=18.03m rop=0 · tooling=-/rc-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 124.1 (4-221) · section 45.3 (0-107) · tex≈27.5MB · heap 103.2MB
+  m09-rotary-kelly
+      Rotary / Kelly Drilling — metres drilled · method=rotary-kelly · rig=foundation-bg · section=vertical · cam=hero · gauge=TORQUE · depth=13.3m rop=0 · tooling=drilling-bucket/- · bit=auger-flight-std
+      luma surface 99.7 (2-185) · section 61.4 (0-125) · tex≈28.8MB · heap 95.3MB
+  m10-cfa
+      CFA Piling — metres drilled · method=cfa · rig=foundation-bg · section=vertical · cam=hero · gauge=TORQUE · depth=9.1m rop=0 · bit=auger-flight-std
+      luma surface 98.8 (3-184) · section 57.6 (0-119) · tex≈28.6MB · heap 91.4MB
+      NOTE QA bridge deepened this job to 38 m — clamped back to 26 m (method range 5-35)
+  m11-rockbolt
+      Ground Support — install quality — anchorage and torque test · method=rockbolt · rig=tunnel-jumbo · section=heading · cam=hero · gauge=TORQUE · depth=13.3m rop=16.32 · tooling=shank-adapter/button-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 33.3 (0-208) · section 23.6 (0-80) · tex≈22.6MB · heap 94MB
+      UNDERGROUND PROBE  terrain=nordic env=nordic sunElev=13.010798795543984 sky=false clouds=false
+                         camera modes available: hero
+                         in-rock geometry named in the surface scene: drive-shotcrete, drive-muck, drifter, rig:tunnel-jumbo
+                         top-of-frame luma 20.7 (open sky reads bright)
+  m12-oil-rotary
+      Rotary / Oil & Gas — metres drilled · method=oil-rotary · rig=oil-derrick · section=vertical · cam=hero · gauge=TORQUE · depth=24.55m rop=4.571 · tooling=-/pdc-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 77.2 (1-206) · section 31.5 (0-81) · tex≈28.2MB · heap 98.6MB
+  m13-anchor
+      Anchor / Micropile — metres drilled · method=anchor · rig=crawler-lite · section=vertical · cam=hero · gauge=TORQUE · depth=13.48m rop=2.067 · tooling=shank-adapter/sda-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 102.1 (2-187) · section 63.6 (1-128) · tex≈28.9MB · heap 95.8MB
+  m14-driven-pile
+      Driven Piling — set and blow count to bearing, without damaging the pile · method=driven-pile · rig=piling-leader · section=pile · cam=hero · gauge=SET · depth=8.2m rop=1.355 · tooling=-/precast-pile · bit=auger-flight-std
+      luma surface 107.4 (2-182) · section 54.5 (0-128) · tex≈29.4MB · heap 102MB
+      NOTE QA bridge deepened this job to 38 m — clamped back to 23.4 m (method range 8-30)
+  m15-cased-cfa
+      Cased CFA (Double Rotary) — metres drilled · method=cased-cfa · rig=foundation-bg · section=vertical · cam=hero · gauge=TORQUE · depth=7.88m rop=0 · bit=auger-flight-std
+      luma surface 97.6 (3-181) · section 55.1 (0-121) · tex≈29.4MB · heap 101.8MB
+      NOTE QA bridge deepened this job to 38 m — clamped back to 22.5 m (method range 5-30)
+  m16-tunnel-jumbo
+      Drill & Blast (Face) — pull per round and overbreak · method=tunnel-jumbo · rig=tunnel-jumbo · section=heading · cam=hero · gauge=TORQUE · depth=6.51m rop=42.107 · tooling=shank-adapter/button-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 20.5 (0-210) · section 18.9 (0-67) · tex≈23.5MB · heap 115.1MB
+      NOTE QA bridge deepened this job to 38 m — clamped back to 18.6 m (method range 6-24)
+      UNDERGROUND PROBE  terrain=german-site env=german-site sunElev=14.962418614875581 sky=false clouds=false
+                         camera modes available: hero
+                         in-rock geometry named in the surface scene: drive-shotcrete, drive-muck, drifter, rig:tunnel-jumbo
+                         top-of-frame luma 4.2 (open sky reads bright)
+  m17-hdd
+      Horizontal Directional Drilling — metres drilled · method=hdd · rig=hdd-rig · section=profile · cam=hero · stage=1/2 (pullback) · gauge=PULL · depth=38.01m rop=0 · tooling=-/hdd-pilot-head · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 107.3 (0-187) · section 15.9 (0-106) · tex≈29.9MB · heap 107MB
+  m18-longhole
+      Longhole Production — toe accuracy — deviation becomes dilution · method=longhole · rig=longhole-rig · section=vertical · cam=hero · gauge=TORQUE · depth=21.12m rop=12.473 · tooling=shank-adapter/button-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 29.1 (0-200) · section 42 (0-78) · tex≈23.3MB · heap 111.2MB
+      UNDERGROUND PROBE  terrain=iberian-quarry env=iberian-quarry sunElev=20.166738133093173 sky=false clouds=false
+                         camera modes available: hero
+                         in-rock geometry named in the surface scene: drive-shotcrete, drive-muck, drifter, rig:tunnel-jumbo
+                         top-of-frame luma 23 (open sky reads bright)
+  m19-sonic
+      Sonic Drilling — metres drilled · method=sonic · rig=sonic-truck · section=vertical · cam=hero · gauge=TORQUE · depth=13.31m rop=0.502 · tooling=-/core-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 96.3 (0-182) · section 71.5 (1-124) · tex≈29.6MB · heap 120.4MB
+  m20-jet-grouting
+      Jet Grouting — metres drilled · method=jet-grouting · rig=crawler-th · section=vertical · cam=hero · gauge=TORQUE · depth=13.33m rop=0.541 · tooling=flushing-swivel/drag-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 100 (0-185) · section 71.7 (1-123) · tex≈29.6MB · heap 118.1MB
+  m21-raise-boring
+      Raise Boring — metres drilled · method=raise-boring · rig=raisebore · section=raise · cam=hero · stage=1/2 (ream) · gauge=PULL · depth=38m rop=0 · tooling=-/raisebore-pilot-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 105.8 (1-187) · section 60.7 (0-113) · tex≈29.7MB · heap 111.9MB
+  r01-crawler-lite
+      Nordvik NV-90 Scout · method=auger · rig=crawler-lite · section=vertical · cam=orbit · gauge=TORQUE · depth=6.37m rop=22.12 · tooling=-/drag-bit · bit=auger-flight-std
+      luma surface 116.1 (11-177) · section 61.9 (0-117) · tex≈29.6MB · heap 121.4MB
+  r02-cable-percussion
+      Kilmar CP-24 Shellhand · method=cable-tool · rig=cable-percussion · section=vertical · cam=orbit · gauge=TORQUE · depth=6.17m rop=4 · tooling=-/cable-tool-chisel · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 115.1 (8-177) · section 61.3 (0-119) · tex≈29.6MB · heap 107MB
+  r03-crawler-th
+      Steinbach TH-320 Ridgeline · method=top-hammer · rig=crawler-th · section=vertical · cam=orbit · gauge=TORQUE · depth=6.16m rop=2.055 · tooling=shank-adapter/button-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 111.5 (8-192) · section 63 (0-119) · tex≈29.6MB · heap 119.9MB
+  r04-si-rig
+      Rynnval SI-30 Probeline · method=site-investigation · rig=si-rig · section=vertical · cam=orbit · gauge=TORQUE · depth=6m rop=0 · tooling=-/spt-split-spoon · bit=auger-flight-std
+      luma surface 134.8 (8-225) · section 62.1 (0-129) · tex≈29.6MB · heap 115.7MB
+  r05-dth-crawler
+      Brenner DH-750 Ironvein · method=dth · rig=dth-crawler · section=vertical · cam=orbit · gauge=TORQUE · depth=6.1m rop=6.136 · tooling=flushing-swivel/dth-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 113.3 (6-198) · section 64.6 (0-125) · tex≈29.6MB · heap 121MB
+  r06-core-rig
+      Meridian CX-1200 Wireline · method=core · rig=core-rig · section=vertical · cam=orbit · gauge=TORQUE · depth=6.5m rop=13.537 · tooling=flushing-swivel/core-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 107.4 (1-182) · section 62.4 (1-116) · tex≈29.6MB · heap 101.5MB
+  r07-cpt-unit
+      Rynnval CP-20 Ballastline · method=site-investigation · rig=cpt-unit · section=vertical · cam=orbit · gauge=TORQUE · depth=6m rop=0 · tooling=-/cpt-piezocone · bit=auger-flight-std
+      luma surface 109.8 (10-177) · section 62.4 (0-128) · tex≈29.6MB · heap 114.8MB
+  r08-rc-rig
+      Kjelvik RC-410 Chipline · method=rc · rig=rc-rig · section=vertical · cam=orbit · gauge=TORQUE · depth=8.72m rop=18.495 · tooling=-/rc-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 132.4 (25-205) · section 47.5 (0-93) · tex≈28.4MB · heap 109.5MB
+  r09-foundation-bg
+      Torvald KR-46 Kellyline · method=rotary-kelly · rig=foundation-bg · section=vertical · cam=orbit · gauge=TORQUE · depth=6.8m rop=55.42 · tooling=drilling-bucket/- · bit=auger-flight-std
+      luma surface 102.4 (6-206) · section 64.2 (0-126) · tex≈29.6MB · heap 119.3MB
+  r10-cfa-rig
+      Lindhorst CF-28 Continuum · method=cfa · rig=cfa-rig · section=vertical · cam=orbit · gauge=TORQUE · depth=6.43m rop=28.759 · bit=auger-flight-std
+      luma surface 124 (10-223) · section 63.1 (0-120) · tex≈29.6MB · heap 123.9MB
+  r11-bolter
+      Skarnes GB-14 Boltline · method=rockbolt · rig=bolter · section=heading · cam=orbit · gauge=TORQUE · depth=6m rop=20.793 · tooling=shank-adapter/button-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 68.8 (0-212) · section 31.5 (0-87) · tex≈23.5MB · heap 123.1MB
+      UNDERGROUND PROBE  terrain=nordic env=nordic sunElev=13.010798795543984 sky=false clouds=false
+                         camera modes available: hero
+                         in-rock geometry named in the surface scene: drive-shotcrete, drive-muck, drifter, rig:tunnel-jumbo
+                         top-of-frame luma 3.6 (open sky reads bright)
+  r12-oil-derrick
+      Havstein DR-2400 Derrickline · method=oil-rotary · rig=oil-derrick · section=vertical · cam=orbit · gauge=TORQUE · depth=15.33m rop=5.541 · tooling=-/pdc-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 74.3 (8-179) · section 30.6 (1-76) · tex≈28.2MB · heap 123.5MB
+  r13-piling-leader
+      Bergholt PM-78 Leaderline · method=driven-pile · rig=piling-leader · section=pile · cam=orbit · gauge=SET · depth=6.02m rop=14.936 · tooling=-/precast-pile · bit=auger-flight-std
+      luma surface 111.3 (7-178) · section 53.9 (1-128) · tex≈29.6MB · heap 116.7MB
+  r14-tunnel-jumbo
+      Aurbach FJ-220 Faceline · method=tunnel-jumbo · rig=tunnel-jumbo · section=heading · cam=orbit · gauge=TORQUE · depth=6m rop=93.25 · tooling=shank-adapter/button-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 23.4 (0-205) · section 20 (0-82) · tex≈23.5MB · heap 126.9MB
+      UNDERGROUND PROBE  terrain=german-site env=german-site sunElev=14.962418614875581 sky=false clouds=false
+                         camera modes available: hero
+                         in-rock geometry named in the surface scene: drive-shotcrete, drive-muck, drifter, rig:tunnel-jumbo
+                         top-of-frame luma 3.4 (open sky reads bright)
+  r15-hdd-rig
+      Halvard HD-330 Traverse · method=hdd · rig=hdd-rig · section=profile · cam=orbit · stage=0/2 (pilot) · gauge=TORQUE · depth=9.22m rop=0 · tooling=-/hdd-pilot-head · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 117.4 (3-199) · section 40.9 (1-116) · tex≈29.9MB · heap 130.8MB
+  r16-longhole-rig
+      Fennholm LH-60 Fanline · method=longhole · rig=longhole-rig · section=vertical · cam=orbit · gauge=TORQUE · depth=9.13m rop=14.801 · tooling=shank-adapter/button-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 30.8 (0-212) · section 35.7 (0-82) · tex≈23.3MB · heap 114.9MB
+      UNDERGROUND PROBE  terrain=iberian-quarry env=iberian-quarry sunElev=20.166738133093173 sky=false clouds=false
+                         camera modes available: hero
+                         in-rock geometry named in the surface scene: drive-shotcrete, drive-muck, drifter, rig:tunnel-jumbo
+                         top-of-frame luma 3.5 (open sky reads bright)
+  r17-sonic-truck
+      Corvara SN-6 Resonant · method=sonic · rig=sonic-truck · section=vertical · cam=orbit · gauge=TORQUE · depth=6.64m rop=41.479 · tooling=-/core-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 100.7 (8-188) · section 55 (1-124) · tex≈29.6MB · heap 125.1MB
+  r18-raisebore
+      Vantera RB-92 Shaftline · method=raise-boring · rig=raisebore · section=raise · cam=orbit · stage=0/2 (pilot) · gauge=TORQUE · depth=9.23m rop=3.755 · tooling=-/raisebore-pilot-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 109.1 (2-177) · section 53.6 (2-117) · tex≈29.7MB · heap 119.2MB
+  13-burnin
+      luma surface 114.1 (6-181) · section 51.7 (1-121) · tex≈29.6MB · heap 107.7MB
+
+── CONSOLE ─────────────────────────────────────────────────────────────
+errors 1 · warnings 157 · total 159
+
+[error] [ui] update site: METER_SETS is not defined
+ReferenceError: METER_SETS is not defined
+    at paintMeters (http://localhost:5178/src/ui/screens/site.js?t=1788506068883:1723:17)
+    at paint (http://localhost:5178/src/ui/screens/site.js?t=1788506068883:2145:5)
+    at Object.update (http://localhost:5178/src/ui/screens/site.js?t=1788506068883:2305:7)
+    at Object.update (http://localhost:5178/src/ui/shell.js?t=1788506068883:700:36)
+    at frame (http://localhost:5178/src/main.js?t=1788506096326:365:29)
+
+── ALL CONSOLE OUTPUT (first 400) ──────────────────────────────────────
+[debug] [vite] connecting...
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.WebGLProgram: Program Info Log: (243,1): warning X4000: use of potentially uninitialized variable (f_boreSDF)
+
+
+(307,1): warning X4000: use of potentially uninitialized variable (f_boreSDF)
+
+
+ 
+[error] [ui] update site: METER_SETS is not defined
+ReferenceError: METER_SETS is not defined
+    at paintMeters (http://localhost:5178/src/ui/screens/site.js?t=1788506068883:1723:17)
+    at paint (http://localhost:5178/src/ui/screens/site.js?t=1788506068883:2145:5)
+    at Object.update (http://localhost:5178/src/ui/screens/site.js?t=1788506068883:2305:7)
+    at Object.update (http://localhost:5178/src/ui/shell.js?t=1788506068883:700:36)
+    at frame (http://localhost:5178/src/main.js?t=1788506096326:365:29)
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.

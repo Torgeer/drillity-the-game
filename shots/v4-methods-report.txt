@@ -1,0 +1,106 @@
+VFX METHOD VERIFICATION — quality=high  cap=12000
+  ok   vfx.js never reads d.toeDamage — the set gauge keeps its lead
+
+── longhole ─────────────────────────────────────────────
+  programme=longhole  sectionReturn=annulus
+  peak live 917 / 12000   draw 7   frame avg 7.94 ms (125.9 fps)  worst 7.9 ms
+  size range 0.0450 .. 2.185 m
+  ok   cuttingChip      peak 138
+  ok   upholeFlush      peak 68
+  ok   upholeSludge     peak 21
+  ok   state.drill.uphole = true
+  ok   state.drill.ringHole = 1
+  ok   state.drill.deviationCue = 0.026470746440607432
+  phases seen: drillingx37, (none)x96, idlex377
+  diag: active=true rop=13.30 depth=9.78 holeDepth=3.78 flush=0.70 rpm=0.80 medium=none
+
+── rockbolt ─────────────────────────────────────────────
+  programme=rockbolt  sectionReturn=annulus
+  peak live 734 / 12000   draw 7   frame avg 16.67 ms (60.0 fps)  worst 16.7 ms
+  size range 0.0419 .. 2.141 m
+  ok   faceWash         peak 67
+  ok   resinExtrude     peak 38 during beat 'bolt-install'
+  ok   cuttingChip      correctly absent
+  ok   state.drill.boltIndex = 0
+  ok   state.drill.boltType = resin
+  ok   state.drill.boltAnchorage = 1
+  phases seen: drillingx44, bolt-installx39, (none)x160, idlex262
+  diag: active=true rop=29.64 depth=1.20 holeDepth=2.45 flush=0.63 rpm=0.80 medium=none
+
+── site-investigation ─────────────────────────────────────────────
+  programme=spt  sectionReturn=annulus
+  peak live 274 / 12000   draw 6   frame avg 7.25 ms (137.9 fps)  worst 7.2 ms
+  size range 0.0451 .. 2.548 m
+  note no SPT blows in the window; sptPuff not exercised
+  ok   state.drill.logQuality = 1
+  phases seen: spt-drivex2, (none)x19, idlex418
+  diag: active=true rop=0.00 depth=6.00 holeDepth=0.00 flush=0.59 rpm=0.84 medium=none
+
+CONSOLE ERRORS: 20
+  [error] [update] env ReferenceError: pendingMethod is not defined
+    at Object.update (http://localhost:5178/src/core/env.js?t=1788505688882:1798:75)
+    at frame (http://localhost:5178/src/main.js?t=1788505688882:365:29)
+  [error] [update] env ReferenceError: pendingMethod is not defined
+    at Object.update (http://localhost:5178/src/core/env.js?t=1788505688882:1798:75)
+    at frame (http://localhost:5178/src/main.js?t=1788505688882:365:29)
+  [error] [update] env ReferenceError: pendingMethod is not defined
+    at Object.update (http://localhost:5178/src/core/env.js?t=1788505688882:1798:75)
+    at frame (http://localhost:5178/src/main.js?t=1788505688882:365:29)
+  [error] [update] env ReferenceError: pendingMethod is not defined
+    at Object.update (http://localhost:5178/src/core/env.js?t=1788505688882:1798:75)
+    at frame (http://localhost:5178/src/main.js?t=1788505688882:365:29)
+  [error] [update] env ReferenceError: pendingMethod is not defined
+    at Object.update (http://localhost:5178/src/core/env.js?t=1788505688882:1798:75)
+    at frame (http://localhost:5178/src/main.js?t=1788505688882:365:29)
+  [error] [update] env ReferenceError: pendingMethod is not defined
+    at Object.update (http://localhost:5178/src/core/env.js?t=1788505688882:1798:75)
+    at frame (http://localhost:5178/src/main.js?t=1788505688882:365:29)
+  [error] [update] env ReferenceError: pendingMethod is not defined
+    at Object.update (http://localhost:5178/src/core/env.js?t=1788505688882:1798:75)
+    at frame (http://localhost:5178/src/main.js?t=1788505688882:365:29)
+  [error] [update] env ReferenceError: pendingMethod is not defined
+    at Object.update (http://localhost:5178/src/core/env.js?t=1788505688882:1798:75)
+    at frame (http://localhost:5178/src/main.js?t=1788505688882:365:29)
+  [error] [update] env ReferenceError: pendingMethod is not defined
+    at Object.update (http://localhost:5178/src/core/env.js?t=1788505688882:1798:75)
+    at frame (http://localhost:5178/src/main.js?t=1788505688882:365:29)
+  [error] [update] env ReferenceError: pendingMethod is not defined
+    at Object.update (http://localhost:5178/src/core/env.js?t=1788505688882:1798:75)
+    at frame (http://localhost:5178/src/main.js?t=1788505688882:365:29)
+  [error] [update] env ReferenceError: pendingMethod is not defined
+    at Object.update (http://localhost:5178/src/core/env.js?t=1788505688882:1798:75)
+    at frame (http://localhost:5178/src/main.js?t=1788505688882:365:29)
+  [error] [update] env ReferenceError: pendingMethod is not defined
+    at Object.update (http://localhost:5178/src/core/env.js?t=1788505688882:1798:75)
+    at frame (http://localhost:5178/src/main.js?t=1788505688882:365:29)
+  [error] [update] env ReferenceError: pendingMethod is not defined
+    at Object.update (http://localhost:5178/src/core/env.js?t=1788505688882:1798:75)
+    at frame (http://localhost:5178/src/main.js?t=1788505688882:365:29)
+  [error] [update] env ReferenceError: pendingMethod is not defined
+    at Object.update (http://localhost:5178/src/core/env.js?t=1788505688882:1798:75)
+    at frame (http://localhost:5178/src/main.js?t=1788505688882:365:29)
+  [error] [update] env ReferenceError: pendingMethod is not defined
+    at Object.update (http://localhost:5178/src/core/env.js?t=1788505688882:1798:75)
+    at frame (http://localhost:5178/src/main.js?t=1788505688882:365:29)
+  [error] [update] env ReferenceError: pendingMethod is not defined
+    at Object.update (http://localhost:5178/src/core/env.js?t=1788505688882:1798:75)
+    at frame (http://localhost:5178/src/main.js?t=1788505688882:365:29)
+  [error] [update] env ReferenceError: pendingMethod is not defined
+    at Object.update (http://localhost:5178/src/core/env.js?t=1788505688882:1798:75)
+    at frame (http://localhost:5178/src/main.js?t=1788505688882:365:29)
+  [error] [update] env ReferenceError: pendingMethod is not defined
+    at Object.update (http://localhost:5178/src/core/env.js?t=1788505688882:1798:75)
+    at frame (http://localhost:5178/src/main.js?t=1788505688882:365:29)
+  [error] [update] env ReferenceError: pendingMethod is not defined
+    at Object.update (http://localhost:5178/src/core/env.js?t=1788505688882:1798:75)
+    at frame (http://localhost:5178/src/main.js?t=1788505688882:365:29)
+  [error] [bus] drill:start ReferenceError: pendingMethod is not defined
+    at http://localhost:5178/src/world/terrain.js?t=1788505850020:4149:108
+    at Object.emit (http://localhost:5178/src/core/contract.js?t=1788503036353:451:15)
+    at emit (http://localhost:5178/src/sim/drilling.js?t=1788505808323:2544:15)
+    at Object.startHole (http://localhost:5178/src/sim/drilling.js?t=1788505808323:2986:5)
+    at Object.startDemoContract (http://localhost:5178/src/main.js?t=1788505850020:292:27)
+    at eval (eval at evaluate (:234:30), <anonymous>:3:20)
+    at UtilityScript.evaluate (<anonymous>:236:17)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+FAILURES: 0

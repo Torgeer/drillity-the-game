@@ -1,0 +1,21 @@
+VFX METHOD VERIFICATION — quality=high  cap=12000
+  ok   vfx.js never reads d.toeDamage — the set gauge keeps its lead
+
+── rc ─────────────────────────────────────────────
+  programme=rc  sectionReturn: innerx29 annulusx399  medium: airx37 nonex391
+  peak live 1507 / 12000   draw 7   frame avg 6.95 ms (144.0 fps)  worst 6.9 ms
+  size range 0.0450 .. 2.442 m
+  ok   rcChipStream     peak 51
+  ok   rcCycloneDust    peak 14
+  ok   rcRejectDust     peak 50
+  ok   rcInnerTube      peak 96
+  ok   cuttingChip      correctly absent
+  ok   state.drill.sampleBags = 0
+  ok   state.drill.sampleRecovery = 1
+  ok   state.drill.sampleHoldUp = 0.08593241704188477
+  ok   state.drill.sampleWet = 0
+  phases seen: drillingx29, (none)x23, idlex387
+  diag: active=true rop=9.79 depth=40.41 holeDepth=0.41 flush=0.86 rpm=0.66
+
+CONSOLE ERRORS: 0
+FAILURES: 0

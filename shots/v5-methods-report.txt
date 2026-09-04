@@ -1,0 +1,101 @@
+VFX METHOD VERIFICATION — quality=high  cap=12000
+  ok   vfx.js never reads d.toeDamage — the set gauge keeps its lead
+
+── rc ─────────────────────────────────────────────
+  programme=rc  sectionReturn: innerx2 annulusx356  medium: airx63 nonex295
+  peak live 997 / 12000   draw 6   frame avg 16.67 ms (60.0 fps)  worst 16.7 ms
+  size range 0.0451 .. 2.265 m
+  ok   rcChipStream     peak 8
+  ok   rcCycloneDust    peak 1
+  ok   rcRejectDust     peak 3
+  ok   rcInnerTube      peak 6
+  ok   cuttingChip      correctly absent
+  ok   state.drill.sampleBags = 0
+  ok   state.drill.sampleRecovery = 1
+  ok   state.drill.sampleHoldUp = 0.010462845896335792
+  ok   state.drill.sampleWet = 0
+  phases seen: drillingx2, (none)x163, idlex265
+  diag: active=true rop=9.79 depth=40.07 holeDepth=0.07 flush=0.84 rpm=0.66
+
+── tunnel-jumbo ─────────────────────────────────────────────
+  programme=tunnel-jumbo  sectionReturn: facex2 annulusx349  medium: waterx2 airx38 nonex311
+  peak live 189 / 12000   draw 6   frame avg 7.05 ms (141.9 fps)  worst 7.0 ms
+  size range 0.0452 .. 1.423 m
+  ok   faceSpray        peak 7
+  ok   faceMist         peak 2
+  ok   faceSlurry       peak 2
+  ok   faceWash         peak 1
+  ok   dustPlume        correctly absent
+  ok   cuttingChip      correctly absent
+  ok   state.drill.roundHolesDone = 0
+  ok   state.drill.roundLength = 3
+  ok   state.drill.roundPull = 0.9
+  phases seen: boom-setupx2, (none)x98, idlex295
+  diag: active=true rop=0.00 depth=3.00 holeDepth=0.08 flush=0.64 rpm=0.84
+
+── longhole ─────────────────────────────────────────────
+  programme=longhole  sectionReturn: annulusx426  medium: waterx52 airx75 nonex299
+  peak live 974 / 12000   draw 7   frame avg 16.67 ms (60.0 fps)  worst 16.7 ms
+  size range 0.0451 .. 2.114 m
+  ok   cuttingChip      peak 139
+  ok   upholeFlush      peak 68
+  ok   upholeSludge     peak 22
+  ok   state.drill.uphole = true
+  ok   state.drill.ringHole = 1
+  ok   state.drill.deviationCue = 0.02654293680822504
+  phases seen: drillingx52, (none)x179, idlex272
+  diag: active=true rop=14.19 depth=9.47 holeDepth=3.47 flush=0.70 rpm=0.80
+
+── rockbolt ─────────────────────────────────────────────
+  programme=rockbolt  sectionReturn: facex2 annulusx452  medium: waterx2 airx49 nonex403
+  peak live 192 / 12000   draw 6   frame avg 16.67 ms (60.0 fps)  worst 16.7 ms
+  size range 0.0450 .. 1.527 m
+  FAIL faceWash         never alive
+  FAIL resinExtrude     never alive during beat 'bolt-install' (beat frames 0)
+  ok   cuttingChip      correctly absent
+  ok   state.drill.boltIndex = 0
+  ok   state.drill.boltType = resin
+  ok   state.drill.boltAnchorage = 1
+  phases seen: drillingx2, (none)x130, idlex376
+  diag: active=true rop=33.19 depth=1.20 holeDepth=0.10 flush=0.66 rpm=0.80
+
+── driven-pile ─────────────────────────────────────────────
+  programme=driven-pile  sectionReturn: nonex2 annulusx394  medium: nonex366 airx30
+  peak live 361 / 12000   draw 6   frame avg 6.95 ms (144.0 fps)  worst 6.9 ms
+  size range 0.0450 .. 1.530 m
+  FAIL pileBurst        never alive
+  ok   cuttingChip      correctly absent
+  ok   cuttingFines     correctly absent
+  ok   dustPlume        correctly absent
+  ok   dustBody         correctly absent
+  FAIL sparkStreak      emitted 92 — should never run for this method
+  ok   state.drill.blows = 0
+  ok   state.drill.setMm = 0.6
+  ok   state.drill.toeDepth = 0
+  ok   state.drill.headDamage = 0
+  ok   state.drill.dollyCondition = 1
+  phases seen: pitchx2, (none)x84, idlex348
+  diag: active=true rop=0.50 depth=4.00 holeDepth=0.00 flush=0.50 rpm=0.78
+
+── site-investigation ─────────────────────────────────────────────
+  programme=spt  sectionReturn: annulusx507  medium: waterx2 airx7 nonex498
+  peak live 268 / 12000   draw 6   frame avg 6.94 ms (144.0 fps)  worst 6.9 ms
+  size range 0.0452 .. 1.370 m
+  note no SPT blows in the window; sptPuff not exercised
+  ok   state.drill.logQuality = 1
+  phases seen: spt-drivex2, (none)x21, idlex495
+  diag: active=true rop=0.02 depth=6.00 holeDepth=0.00 flush=0.59 rpm=0.87
+
+CONSOLE ERRORS: 2
+  [error] [ui] mount site ReferenceError: progEl is not defined
+    at resetProgramme (http://localhost:5178/src/ui/screens/site.js?t=1788506231196:2045:5)
+    at Object.mount (http://localhost:5178/src/ui/screens/site.js?t=1788506231196:2298:7)
+    at show (http://localhost:5178/src/ui/shell.js?t=1788506231196:516:23)
+    at http://localhost:5178/src/ui/shell.js?t=1788506231196:546:22
+  [error] [ui] update site: tagDepth is not defined
+ReferenceError: tagDepth is not defined
+    at paint (http://localhost:5178/src/ui/screens/site.js?t=1788506231196:2112:5)
+    at Object.update (http://localhost:5178/src/ui/screens/site.js?t=1788506231196:2324:7)
+    at Object.update (http://localhost:5178/src/ui/shell.js?t=1788506231196:700:36)
+    at frame (http://localhost:5178/src/main.js?t=1788506231196:365:29)
+FAILURES: 4

@@ -1,0 +1,338 @@
+DRILLITY — visual QA harness
+when      2026-09-04T09:34:31.539Z
+url       http://localhost:5178/?quality=high&shot
+mode      HEADED (real GPU — fps is meaningful)
+quality   high
+filter    rc tunnel-jumbo longhole rockbolt driven-pile site-investigation
+boot      1.7s
+page loads 1  (no mid-run reload — HMR muted)
+
+── RENDER HEALTH ───────────────────────────────────────────────────────
+  ok — the drawing buffer holds pixels (mean luma 20.5) and the GL
+  context stayed alive for every shot. The frames below are pictures of the game.
+
+── COVERAGE ────────────────────────────────────────────────────────────
+methods    6/21 photographed
+rigs       4/18 photographed
+UI states  1
+manifest   METHOD_IDS.md lists 21 method ids
+
+── COULD NOT PHOTOGRAPH: nothing was missing from the content tables, but this
+   run was FILTERED ( rc tunnel-jumbo longhole rockbolt driven-pile site-investigation) — it is not a coverage round.
+
+── BUDGET ──────────────────────────────────────────────────────────────
+source: README.md · Performance budget
+  draw calls   surface ≤ 80   section ≤ 60   rig ≤ 70
+  frame rate   ≥ 60 fps
+  texture mem  ≤ 90 MB (HIGH)      particles ≤ 12000
+  VERDICT: FAIL
+    surface    over budget in 5 state(s): m11-rockbolt=128 m16-tunnel-jumbo=122 m18-longhole=141 r14-tunnel-jumbo=122 r16-longhole-rig=151
+    rig        over budget in 5 state(s): m11-rockbolt=98 m16-tunnel-jumbo=94 m18-longhole=113 r14-tunnel-jumbo=96 r16-longhole-rig=125
+    fps        over budget in 3 state(s): m04-site-investigation=27.6 m08-rc=22.7 m11-rockbolt=27.2
+  (texture MB is an estimate from live material maps, RGBA8 + mip tail.
+   per-band calls exclude shadow passes; frame totals include them.)
+
+── DOES EACH SHOT CONTAIN WHAT ITS NAME CLAIMS ─────────────────────────
+  FAIL — 5 of 11 frames did not prove their own subject:
+    m08-rc                     sim is running "rc" · rig is tooled for "rc"
+    m11-rockbolt               sim is running "rockbolt" · rig is tooled for "rockbolt"
+    m16-tunnel-jumbo           sim is running "tunnel-jumbo" · rig is tooled for "tunnel-jumbo"
+    r08-rc-rig                 machine is "rc-rig"
+    r14-tunnel-jumbo           machine is "tunnel-jumbo"
+  no two frames are byte-identical (10 distinct images).
+
+── PER-SHOT ────────────────────────────────────────────────────────────
+  id                          fps   frame  surf  sect   rig     tris  part   err   sec  verify
+  m04-site-investigation      27.6    217    68    19    50     293k   310     0   5.3  ok
+  m08-rc                      22.7    217    68    19    50     288k   321     0   1.9  FAIL
+  m11-rockbolt                27.2    246   128    20    98     234k   209     0   8.1  FAIL
+  m14-driven-pile            139.9    216    65    17    48     309k   399     1   4.8  ok
+  m16-tunnel-jumbo            87.8    246   122    17    94     320k   508     0   1.6  FAIL
+  m18-longhole                63.1    300   141    20   113     267k  1887     0   5.4  ok
+  r02-cable-percussion       127.9    228    70    18    55     308k   499     1     4  ok
+  r08-rc-rig                  83.7    218    66    17    50     305k   367     0     2  FAIL
+  r14-tunnel-jumbo            60.6    246   122    16    96     263k   317     0   1.9  FAIL
+  r16-longhole-rig              84    315   151    20   125     291k  1020     0   3.2  ok
+  13-burnin                    122    243    72    20    55     298k   716     1     -  ok
+
+── PER-SHOT DETAIL ─────────────────────────────────────────────────────
+  m04-site-investigation
+      Site Investigation — sample quality and log fidelity · method=site-investigation · rig=crawler-lite · region=nordic · section=vertical · cam=hero · gauge=TORQUE · depth=9.63m rop=0 · tooling=-/spt-split-spoon · bit=auger-flight-std
+      luma surface 111.1 (2-184) · section 64.1 (0-117) · tex≈60.6MB · heap 128.9MB
+      NOTE QA bridge deepened this job to 38 m — clamped back to 27.5 m (method range 10-35)
+  m08-rc
+      Reverse Circulation — sample recovery and contamination · method=site-investigation · rig=crawler-lite · region=alpine · section=vertical · cam=hero · gauge=TORQUE · depth=9.63m rop=0 · tooling=-/spt-split-spoon · bit=auger-flight-std
+      luma surface 120.7 (2-187) · section 26.3 (0-90) · tex≈57.7MB · heap 150.7MB
+      SETUP ERROR page.evaluate: RangeError: Maximum call stack size exceeded
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1394:20)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+      VERIFY FAIL  sim is running "rc"
+      VERIFY FAIL  rig is tooled for "rc"
+  m11-rockbolt
+      Ground Support — install quality — anchorage and torque test · method=site-investigation · rig=crawler-lite · region=german-site · section=vertical · cam=hero · gauge=TORQUE · depth=9.63m rop=0 · tooling=-/spt-split-spoon · bit=auger-flight-std
+      luma surface 48.2 (2-217) · section 65.8 (1-123) · tex≈34.9MB · heap 154.4MB
+      SETUP ERROR page.evaluate: RangeError: Maximum call stack size exceeded
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1394:20)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+      VERIFY FAIL  sim is running "rockbolt"
+      VERIFY FAIL  rig is tooled for "rockbolt"
+  m14-driven-pile
+      Driven Piling — set and blow count to bearing, without damaging the pile · method=driven-pile · rig=piling-leader · region=nordic · section=pile · cam=hero · gauge=SET · depth=8.2m rop=1.356 · tooling=-/precast-pile · bit=auger-flight-std
+      luma surface 111.1 (4-183) · section 59.2 (1-133) · tex≈60.8MB · heap 118.3MB
+      NOTE QA bridge deepened this job to 38 m — clamped back to 23.4 m (method range 8-30)
+      CONSOLE [error] [update] terrain RangeError: Maximum call stack size exceeded
+  m16-tunnel-jumbo
+      Drill & Blast (Face) — pull per round and overbreak · method=driven-pile · rig=piling-leader · region=german-site · section=pile · cam=hero · gauge=SET · depth=8.34m rop=34.504 · tooling=-/precast-pile · bit=auger-flight-std
+      luma surface 69.6 (0-214) · section 64 (3-130) · tex≈34.8MB · heap 102.9MB
+      SETUP ERROR page.evaluate: RangeError: Maximum call stack size exceeded
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1394:20)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+      VERIFY FAIL  sim is running "tunnel-jumbo"
+      VERIFY FAIL  rig is tooled for "tunnel-jumbo"
+  m18-longhole
+      Longhole Production — toe accuracy — deviation becomes dilution · method=longhole · rig=longhole-rig · region=iberian-quarry · section=vertical · cam=hero · gauge=TORQUE · depth=20.94m rop=12.437 · tooling=shank-adapter/button-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 67.2 (2-221) · section 64.2 (1-123) · tex≈37.9MB · heap 119.2MB
+      UNDERGROUND PROBE  terrain=iberian-quarry env=iberian-quarry sunElev=14.962418614875581 sky=false clouds=false
+                         camera modes available: hero
+                         in-rock geometry named in the surface scene: drive-shotcrete, drive-muck, drifter
+                         top-of-frame luma 97.1 (open sky reads bright)
+  r02-cable-percussion
+      Kilmar CP-24 Shellhand · method=cable-tool · rig=cable-percussion · region=nordic · section=vertical · cam=orbit · gauge=TORQUE · depth=6.04m rop=1.004 · tooling=-/cable-tool-chisel · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 113.5 (5-195) · section 53.1 (0-117) · tex≈60.9MB · heap 124.8MB
+      CONSOLE [error] [update] terrain RangeError: Maximum call stack size exceeded
+  r08-rc-rig
+      Kjelvik RC-410 Chipline · method=cable-tool · rig=cable-percussion · region=alpine · section=vertical · cam=orbit · gauge=TORQUE · depth=6.06m rop=4 · tooling=-/cable-tool-chisel · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 132.2 (18-184) · section 36 (0-95) · tex≈58MB · heap 130.5MB
+      SETUP ERROR page.evaluate: RangeError: Maximum call stack size exceeded
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1394:20)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+      VERIFY FAIL  machine is "rc-rig"
+  r14-tunnel-jumbo
+      Aurbach FJ-220 Faceline · method=cable-tool · rig=cable-percussion · region=german-site · section=vertical · cam=orbit · gauge=TORQUE · depth=6.09m rop=4 · tooling=-/cable-tool-chisel · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 40.5 (0-219) · section 60.4 (2-122) · tex≈37.9MB · heap 107MB
+      SETUP ERROR page.evaluate: RangeError: Maximum call stack size exceeded
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1394:20)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+      VERIFY FAIL  machine is "tunnel-jumbo"
+  r16-longhole-rig
+      Fennholm LH-60 Fanline · method=longhole · rig=longhole-rig · region=iberian-quarry · section=vertical · cam=orbit · gauge=TORQUE · depth=8.92m rop=15.737 · tooling=shank-adapter/button-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 24.1 (0-136) · section 60.1 (0-108) · tex≈37.9MB · heap 129.8MB
+      UNDERGROUND PROBE  terrain=iberian-quarry env=iberian-quarry sunElev=14.962418614875581 sky=false clouds=false
+                         camera modes available: hero
+                         in-rock geometry named in the surface scene: drive-shotcrete, drive-muck, drifter
+                         top-of-frame luma 8.7 (open sky reads bright)
+  13-burnin
+      luma surface 121 (2-192) · section 56 (0-115) · tex≈60.9MB · heap 123.4MB
+
+── CONSOLE ─────────────────────────────────────────────────────────────
+errors 4 · warnings 17 · total 27
+
+[error] [init] terrain RangeError: Maximum call stack size exceeded
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1394:20)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+[error] [update] terrain RangeError: Maximum call stack size exceeded
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1394:20)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+[error] [update] terrain RangeError: Maximum call stack size exceeded
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1394:20)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+[error] [update] terrain RangeError: Maximum call stack size exceeded
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1394:20)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+
+── ALL CONSOLE OUTPUT (first 400) ──────────────────────────────────────
+[debug] [vite] connecting...
+[error] [init] terrain RangeError: Maximum call stack size exceeded
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1394:20)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.WebGLProgram: Program Info Log: (246,1): warning X4000: use of potentially uninitialized variable (f_boreSDF)
+
+
+(280,1): warning X4000: use of potentially uninitialized variable (f_boreSDF)
+
+
+ 
+[setup:m08-rc] page.evaluate: RangeError: Maximum call stack size exceeded
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1394:20)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+[warning] [progression] contract has no archetype — world/terrain.js cannot tell this site apart from any other in the region qa-demo
+[setup:m11-rockbolt] page.evaluate: RangeError: Maximum call stack size exceeded
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1394:20)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[error] [update] terrain RangeError: Maximum call stack size exceeded
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1394:20)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+[setup:m16-tunnel-jumbo] page.evaluate: RangeError: Maximum call stack size exceeded
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1394:20)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[error] [update] terrain RangeError: Maximum call stack size exceeded
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1394:20)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+[setup:r08-rc-rig] page.evaluate: RangeError: Maximum call stack size exceeded
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1394:20)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+[setup:r14-tunnel-jumbo] page.evaluate: RangeError: Maximum call stack size exceeded
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1394:20)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+[error] [update] terrain RangeError: Maximum call stack size exceeded
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1394:20)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)
+    at dressFor (http://localhost:5178/src/world/terrain.js?t=1788514399423:1395:15)

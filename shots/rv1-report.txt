@@ -1,0 +1,194 @@
+DRILLITY — visual QA harness
+when      2026-09-04T09:59:18.539Z
+url       http://localhost:5178/?quality=high&shot
+mode      HEADED (real GPU — fps is meaningful)
+quality   high
+filter    --only ui
+boot      1.9s
+page loads 1  (no mid-run reload — HMR muted)
+
+── RENDER HEALTH ───────────────────────────────────────────────────────
+  ok — the drawing buffer holds pixels (mean luma 14.9) and the GL
+  context stayed alive for every shot. The frames below are pictures of the game.
+
+── COVERAGE ────────────────────────────────────────────────────────────
+methods    0/21 photographed
+rigs       0/18 photographed
+UI states  12
+manifest   METHOD_IDS.md lists 21 method ids
+
+── COULD NOT PHOTOGRAPH: nothing was missing from the content tables, but this
+   run was FILTERED (--only ui) — it is not a coverage round.
+
+── BUDGET ──────────────────────────────────────────────────────────────
+source: README.md · Performance budget
+  draw calls   surface ≤ 80   section ≤ 60   rig ≤ 70
+  frame rate   ≥ 60 fps
+  texture mem  ≤ 90 MB (HIGH)      particles ≤ 12000
+  VERDICT: FAIL
+    surface    over budget in 1 state(s): 14-section-clean=88
+    fps        over budget in 3 state(s): 01-boot=30 02-menu=29.2 03-contracts=32.6
+  (texture MB is an estimate from live material maps, RGBA8 + mip tail.
+   per-band calls exclude shadow passes; frame totals include them.)
+
+── DOES EACH SHOT CONTAIN WHAT ITS NAME CLAIMS ─────────────────────────
+  PASS — all 12 frames verified against the live game state.
+  no two frames are byte-identical (11 distinct images).
+
+── PER-SHOT ────────────────────────────────────────────────────────────
+  id                          fps   frame  surf  sect   rig     tris  part   err   sec  verify
+  01-boot                       30    241    76    20    54     395k   399     0   1.3  ok
+  02-menu                     29.2    237    75    17    54     393k    31     0   3.1  ok
+  03-contracts                32.6    236    74    17    54     393k     0     0   2.2  ok
+  08-results                 143.9    126    18    17     3     366k     3     0   2.5  ok
+  09-shop                    143.9    236    74    17    54     393k     0     0   2.7  ok
+  09b-shop-listings          143.9    241    76    20    54     397k   922     0  37.3  ok
+  10-career                  143.9    243    76    21    54     395k   652     0   2.3  ok
+  10b-career-skills          143.9    243    76    21    54     395k   808     0   3.4  ok
+  11-garage                  143.9    243    76    21    54     395k   761     0     3  ok
+  14-section-clean           115.9    274    88    21    56     378k  1315     0   6.5  ok
+  07-section-closeup         115.9    240    74    21    50     386k  1629     0     5  ok
+  13-burnin                  111.9    254    78    21    50     395k  1075     0     -  ok
+
+── PER-SHOT DETAIL ─────────────────────────────────────────────────────
+  01-boot
+      method=overburden · rig=crawler-lite · region=nordic · section=vertical · cam=menu · gauge=TORQUE · depth=12.06m rop=5.084 · tooling=shank-adapter/casing-crown · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 71.9 (1-183) · section 68 (0-123) · tex≈60.8MB · heap 90MB
+  02-menu
+      method=overburden · rig=crawler-lite · region=nordic · section=vertical · cam=menu · gauge=TORQUE · depth=12.06m rop=0 · tooling=shank-adapter/casing-crown · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 63.6 (5-176) · section 68 (0-122) · tex≈60.8MB · heap 126.6MB
+  03-contracts
+      method=overburden · rig=crawler-lite · region=nordic · section=vertical · cam=menu · gauge=TORQUE · depth=12.06m rop=0 · tooling=shank-adapter/casing-crown · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 184.9 (159-221) · section 68.1 (0-123) · tex≈60.8MB · heap 111.5MB
+  08-results
+      method=overburden · rig=crawler-lite · region=nordic · section=vertical · cam=mast · gauge=TORQUE · depth=12.06m rop=0 · tooling=shank-adapter/casing-crown · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 65.7 (8-184) · section 67.9 (0-123) · tex≈60.8MB · heap 118.9MB
+  09-shop
+      method=overburden · rig=crawler-lite · region=nordic · section=vertical · cam=orbit · gauge=TORQUE · depth=12.06m rop=0 · tooling=shank-adapter/casing-crown · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 87 (5-199) · section 67.8 (0-120) · tex≈60.8MB · heap 95MB
+  09b-shop-listings
+      method=overburden · rig=crawler-lite · region=nordic · section=vertical · cam=orbit · gauge=TORQUE · depth=14.32m rop=5.178 · tooling=shank-adapter/casing-crown · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 83.8 (4-183) · section 72 (2-125) · tex≈60.8MB · heap 110.6MB
+  10-career
+      method=overburden · rig=crawler-lite · region=nordic · section=vertical · cam=menu · gauge=TORQUE · depth=14.47m rop=5.17 · tooling=shank-adapter/casing-crown · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 65.2 (3-178) · section 73.4 (7-125) · tex≈60.8MB · heap 121.6MB
+  10b-career-skills
+      method=overburden · rig=crawler-lite · region=nordic · section=vertical · cam=menu · gauge=TORQUE · depth=14.71m rop=5.169 · tooling=shank-adapter/casing-crown · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 173.5 (9-225) · section 73.1 (6-121) · tex≈60.8MB · heap 110.4MB
+  11-garage
+      method=overburden · rig=crawler-lite · region=nordic · section=vertical · cam=orbit · gauge=TORQUE · depth=14.88m rop=5.671 · tooling=shank-adapter/casing-crown · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 107.8 (6-176) · section 73.5 (1-119) · tex≈60.8MB · heap 135.9MB
+  14-section-clean
+      method=dth · rig=crawler-lite · region=nordic · section=vertical · cam=hero · gauge=TORQUE · depth=34.19m rop=0 · tooling=flushing-swivel/dth-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 107.4 (3-182) · section 57.2 (2-120) · tex≈62.2MB · heap 136.9MB
+  07-section-closeup
+      method=dth · rig=crawler-lite · region=nordic · section=vertical · cam=downhole · gauge=TORQUE · depth=28.16m rop=0 · tooling=flushing-swivel/dth-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 78.7 (1-169) · section 65.2 (2-118) · tex≈60.8MB · heap 142.9MB
+  13-burnin
+      luma surface 37.7 (2-153) · section 57.6 (1-122) · tex≈62.1MB · heap 154.4MB
+
+── CONSOLE ─────────────────────────────────────────────────────────────
+errors 0 · warnings 92 · total 93
+
+
+
+── ALL CONSOLE OUTPUT (first 400) ──────────────────────────────────────
+[debug] [vite] connecting...
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.WebGLProgram: Program Info Log: (246,1): warning X4000: use of potentially uninitialized variable (f_boreSDF)
+
+
+(280,1): warning X4000: use of potentially uninitialized variable (f_boreSDF)
+
+
+ 
+[warning] [progression] HOLE_COMPLETE carried no breakdown.time — billing from the estimate, not from the run. Player performance is not being priced. Expected only from the QA bridge and the no-sim demo path. overburden
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.

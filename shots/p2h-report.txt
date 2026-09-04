@@ -1,0 +1,960 @@
+URL: http://localhost:5178/
+PERF: {
+  "fps": 27.983210073955565,
+  "quality": "medium",
+  "calls": 316,
+  "triangles": 375364,
+  "programs": 65,
+  "textures": 98,
+  "geometries": 113,
+  "systems": [
+    "renderer",
+    "assets",
+    "env",
+    "geology",
+    "terrain",
+    "rig",
+    "sim",
+    "vfx",
+    "progression",
+    "shopPreview",
+    "audio",
+    "ui"
+  ],
+  "jsHeapMB": 63.8
+}
+
+CONSOLE (407):
+[debug] [vite] connecting...
+[debug] [vite] connected.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] [assets] unknown material kind "steel" — substituting rawSteel
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [ui] update site TypeError: Cannot read properties of undefined (reading '0')
+    at paint (http://localhost:5178/src/ui/screens/site.js?t=1788471239361:561:69)
+    at Object.update (http://localhost:5178/src/ui/screens/site.js?t=1788471239361:717:7)
+    at Object.update (http://localhost:5178/src/ui/shell.js?import:579:36)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [ui] update site TypeError: Cannot read properties of undefined (reading '0')
+    at paint (http://localhost:5178/src/ui/screens/site.js?t=1788471239361:561:69)
+    at Object.update (http://localhost:5178/src/ui/screens/site.js?t=1788471239361:717:7)
+    at Object.update (http://localhost:5178/src/ui/shell.js?import:579:36)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[warning] [.WebGL-0x6c3c01474c00] GL_INVALID_OPERATION: glCopyTexSubImage2D: Invalid copy texture format combination.
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[error] [update] audio TypeError: Failed to set the 'value' property on 'AudioParam': The provided float value is non-finite.
+    at stepAmbience (http://localhost:5178/src/audio/audio.js?import:2172:25)
+    at Object.update (http://localhost:5178/src/audio/audio.js?import:3990:5)
+    at frame (http://localhost:5178/src/main.js?t=1788470970765:198:29)
+[debug] [vite] connecting...
+[debug] [vite] connected.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] [assets] unknown material kind "steel" — substituting rawSteel
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.

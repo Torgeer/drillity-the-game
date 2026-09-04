@@ -1,0 +1,555 @@
+URL: http://localhost:5178/?quality=high&shot
+PERF: {
+  "fps": 143.94242303078843,
+  "quality": "high",
+  "calls": 0,
+  "triangles": 0,
+  "programs": 69,
+  "textures": 87,
+  "geometries": 90,
+  "systems": [
+    "renderer",
+    "assets",
+    "env",
+    "geology",
+    "terrain",
+    "rig",
+    "sim",
+    "vfx",
+    "progression",
+    "shopPreview",
+    "audio",
+    "ui"
+  ],
+  "jsHeapMB": 85.9
+}
+
+CONSOLE (192):
+[debug] [vite] connecting...
+[debug] [vite] connected.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[error] THREE.WebGLProgram: Shader Error 0 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: drillity:carbide
+Material Type: MeshPhysicalMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: lib:__hole|{"color":592653,"roughness":0.92,"metalness":0.15,"side":1}
+Material Type: MeshStandardMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: MeshBasicMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: DrillityContactAO
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: DrillityGrade
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[warning] WebGL: CONTEXT_LOST_WEBGL: loseContext: context lost
+[warning] WebGL: CONTEXT_LOST_WEBGL: loseContext: context lost
+[log] THREE.WebGLRenderer: Context Lost.
+[log] THREE.WebGLRenderer: Context Lost.
+[log] THREE.WebGLRenderer: Context Restored.
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: drillity:carbide
+Material Type: MeshPhysicalMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: lib:__hole|{"color":592653,"roughness":0.92,"metalness":0.15,"side":1}
+Material Type: MeshStandardMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: MeshBasicMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: DrillityContactAO
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: DrillityGrade
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[warning] WebGL: CONTEXT_LOST_WEBGL: loseContext: context lost
+[log] THREE.WebGLRenderer: Context Lost.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.

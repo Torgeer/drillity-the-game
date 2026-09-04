@@ -1,0 +1,147 @@
+VFX MEASUREMENT — quality=high  cap=12000  window=26s
+
+── rc ──────────────────────────────────────────
+  programme=rc  sectionReturn: innerx520  medium: airx520
+  sim.methodId: rcx520   state.contract present 520 / CLEARED 0
+  underground: falsex520  env.undergroundId: nullx520  powerMode: (none)x520
+  samples 520 (drilling 226, method live 520)   phases: drillingx226 stuckx195 rod-addx99
+  NOTE per-kind peaks below are counted ONLY over the 520 frames where sim.methodId === 'rc'.
+  peak live 1637 / 12000   chips 205   size 0.0450..2.510 m
+    pool surfaceSoft  346 / 4320
+    pool surfaceAdd   828 / 2880
+    pool sectionSoft  549 / 3360
+    pool sectionAdd   69 / 1440
+  draw calls peak 221   tris peak 291186   loadScale min 0.38
+  fps min 21.0 / avg 124.9 / max 144.0
+  A/B particles on 76.8 fps (13.02 ms, 218 calls) vs off 143.9 fps (6.95 ms, 212 calls)
+     -> particle cost 6.08 ms/frame   draw-call cost 6   meshes toggled 7
+  ok   rcChipStream     peak 98
+  ok   rcCycloneDust    peak 29
+  ok   rcRejectDust     peak 116
+  ok   rcInnerTube      peak 181
+  ok   cuttingChip      correctly absent
+  ok   state.drill.sampleBags = 5
+  ok   state.drill.sampleWet = 0
+  ok   state.drill.sampleHoldUp = 0.12574210656246626
+  ALL LIVE KINDS: sparkEmber:291 sparkStreak:268 waterJet:261 motes:260 rockChipSprite:208 rcInnerTube:181 rcRejectDust:116 waterMist:106 sprayDrops:104 rcChipStream:98 puffSoft:85 waterGlint:55 puffGrit:52 dustPlume:42 grooveTrail:40 exhaustSmoke:29 rcCycloneDust:29 exhaustSoot:24 mudStreak:21 grooveCore:19 grooveSurface:19 cuttingFines:18 exhaustLight:16 greaseSmoke:16 dustBody:13 dustBacklight:12 shockRing:9 collapseChunk:8 greaseWisp:8 bitFlash:6 collapseDust:6
+
+── tunnel-jumbo ──────────────────────────────────────────
+  programme=tunnel-jumbo  sectionReturn: facex520  medium: waterx520
+  sim.methodId: tunnel-jumbox520   state.contract present 520 / CLEARED 0
+  underground: truex520  env.undergroundId: tunnel-jumbox520  powerMode: mainsx483 dieselx37
+  samples 520 (drilling 449, method live 520)   phases: boom-setupx34 drillingx449 tripping-outx19 bit-swapx18
+  NOTE per-kind peaks below are counted ONLY over the 520 frames where sim.methodId === 'tunnel-jumbo'.
+  peak live 1610 / 12000   chips 195   size 0.0405..2.539 m
+    pool surfaceSoft  608 / 4320
+    pool surfaceAdd   521 / 2880
+    pool sectionSoft  484 / 3360
+    pool sectionAdd   102 / 1440
+  draw calls peak 254   tris peak 280801   loadScale min 0.38
+  fps min 17.4 / avg 87.5 / max 124.2
+  A/B particles on 118.4 fps (8.45 ms, 254 calls) vs off 123.6 fps (8.09 ms, 249 calls)
+     -> particle cost 0.36 ms/frame   draw-call cost 5   meshes toggled 7
+  ok   faceSpray        peak 170
+  ok   faceMist         peak 125
+  ok   faceSlurry       peak 79
+  ok   faceWash         peak 103
+  ok   dustPlume        correctly absent
+  ok   cuttingChip      correctly absent
+  FAIL motes            emitted 6
+  FAIL exhaustLight     emitted 1
+  FAIL exhaustSmoke     emitted 14
+  ok   exhaustSoot      correctly absent
+  ok   state.drill.roundHolesDone = 50
+  ok   state.drill.roundPull = 0.9
+  ok   state.drill.powerMode = diesel
+  ALL LIVE KINDS: sparkEmber:263 sparkStreak:235 rockChipSprite:212 faceSpray:170 sprayDrops:160 waterJet:152 faceMist:125 faceWash:103 sprayMist:95 faceSlurry:79 waterMist:79 grooveTrail:55 mudStreak:28 grooveSurface:24 grooveCore:23 waterGlint:22 sprayGlint:15 exhaustSmoke:14 shockRing:10 motes:6 bitFlash:6 exhaustLight:1
+
+CONSOLE ERRORS: 8
+  [error] [init] terrain RangeError: Maximum call stack size exceeded
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514444199:1394:20)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514444199:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514444199:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514444199:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514444199:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514444199:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514444199:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514444199:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514444199:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514444199:1395:15)
+  [error] [update] terrain RangeError: Maximum call stack size exceeded
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514444199:1394:20)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514444199:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514444199:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514444199:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514444199:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514444199:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514444199:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514444199:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514444199:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514444199:1395:15)
+  [error] [update] terrain RangeError: Maximum call stack size exceeded
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514444199:1394:20)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514444199:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514444199:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514444199:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514444199:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514444199:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514444199:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514444199:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514444199:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514444199:1395:15)
+  [error] [init] terrain RangeError: Maximum call stack size exceeded
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1394:20)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+  [error] [update] terrain RangeError: Maximum call stack size exceeded
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1394:20)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+  [error] [init] terrain RangeError: Maximum call stack size exceeded
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1394:20)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+  [error] [init] terrain RangeError: Maximum call stack size exceeded
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1394:20)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+  [error] [update] terrain RangeError: Maximum call stack size exceeded
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1394:20)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+    at dressFor (http://localhost:5181/src/world/terrain.js?t=1788514567308:1395:15)
+FAILURES: 3

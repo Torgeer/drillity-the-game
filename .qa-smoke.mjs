@@ -1,0 +1,13 @@
+import { chromium, devices } from 'playwright';
+const b = await chromium.launch({ headless: false, channel: 'chrome' });
+const c = await b.newContext({ ...devices['iPhone 13 Pro'], viewport:{width:390,height:844}, deviceScaleFactor:2 });
+const p = await c.newPage();
+const errs = [];
+p.on('console', m => { if (m.type()==='error') errs.push(m.text()); });
+p.on('pageerror', e => errs.push('PAGEERROR '+e.message));
+await p.goto('http://localhost:5199/?quality=low&shot', { waitUntil:'load' });
+await p.waitForTimeout(7000);
+const st = await p.evaluate(() => ({ has: !!window.__DRILLITY, ui: !!window.__DRILLITY?.ui, sim: !!window.__DRILLITY?.sim, scene: window.__DRILLITY?.state?.scene }));
+console.log(JSON.stringify(st));
+console.log('errors', errs.length); errs.slice(0,10).forEach(e=>console.log(' ',e));
+await b.close();

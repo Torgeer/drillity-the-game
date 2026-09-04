@@ -1,0 +1,80 @@
+DRILLITY — visual QA harness
+when      2026-09-04T09:12:16.664Z
+url       http://localhost:5178/?quality=high&shot
+mode      HEADED (real GPU — fps is meaningful)
+quality   high
+filter    m11-rockbolt m14-driven-pile
+boot      2.5s
+page loads 1  (no mid-run reload — HMR muted)
+
+── RENDER HEALTH ───────────────────────────────────────────────────────
+  ok — the drawing buffer holds pixels (mean luma 19.7) and the GL
+  context stayed alive for every shot. The frames below are pictures of the game.
+
+── COVERAGE ────────────────────────────────────────────────────────────
+methods    2/21 photographed
+rigs       0/18 photographed
+UI states  1
+manifest   METHOD_IDS.md lists 21 method ids
+
+── COULD NOT PHOTOGRAPH: nothing was missing from the content tables, but this
+   run was FILTERED ( m11-rockbolt m14-driven-pile) — it is not a coverage round.
+
+── BUDGET ──────────────────────────────────────────────────────────────
+source: README.md · Performance budget
+  draw calls   surface ≤ 80   section ≤ 60   rig ≤ 70
+  frame rate   ≥ 60 fps
+  texture mem  ≤ 90 MB (HIGH)      particles ≤ 12000
+  VERDICT: FAIL
+    surface    over budget in 1 state(s): m11-rockbolt=153
+    rig        over budget in 1 state(s): m11-rockbolt=123
+    fps        over budget in 1 state(s): m11-rockbolt=25
+  (texture MB is an estimate from live material maps, RGBA8 + mip tail.
+   per-band calls exclude shadow passes; frame totals include them.)
+
+── DOES EACH SHOT CONTAIN WHAT ITS NAME CLAIMS ─────────────────────────
+  PASS — all 3 frames verified against the live game state.
+  no two frames are byte-identical (2 distinct images).
+
+── PER-SHOT ────────────────────────────────────────────────────────────
+  id                          fps   frame  surf  sect   rig     tris  part   err   sec  verify
+  m11-rockbolt                  25    278   153     3   123     191k   103     0  16.2  ok
+  m14-driven-pile            101.9    221    74     2    48     347k   235     0     6  ok
+  13-burnin                  143.9    214    69     4    42     345k   878     0     -  ok
+
+── PER-SHOT DETAIL ─────────────────────────────────────────────────────
+  m11-rockbolt
+      Ground Support — install quality — anchorage and torque test · method=rockbolt · rig=tunnel-jumbo · region=german-site · cam=hero · gauge=TORQUE · depth=13.3m rop=0 · tooling=shank-adapter/button-bit · bit=auger-flight-std (DOES NOT FIT THIS METHOD)
+      luma surface 45.8 (0-204) · section 6.1 (0-47) · tex≈35.6MB · heap 107.8MB
+      UNDERGROUND PROBE  terrain=german-site env=german-site sunElev=14.962418614875581 sky=false clouds=false
+                         camera modes available: hero
+                         in-rock geometry named in the surface scene: drive-shotcrete, drive-muck, drifter, rig:tunnel-jumbo
+                         top-of-frame luma 85 (open sky reads bright)
+  m14-driven-pile
+      Driven Piling — set and blow count to bearing, without damaging the pile · method=driven-pile · rig=piling-leader · region=nordic · cam=hero · gauge=SET · depth=8.37m rop=15.027 · tooling=-/precast-pile · bit=auger-flight-std
+      luma surface 103.6 (0-184) · section 4.6 (0-57) · tex≈60MB · heap 107.5MB
+      NOTE QA bridge deepened this job to 38 m — clamped back to 23.4 m (method range 8-30)
+  13-burnin
+      luma surface 106.3 (2-183) · section 4.9 (0-101) · tex≈60.1MB · heap 116.8MB
+
+── CONSOLE ─────────────────────────────────────────────────────────────
+errors 0 · warnings 14 · total 15
+
+
+
+── ALL CONSOLE OUTPUT (first 400) ──────────────────────────────────────
+[debug] [vite] connecting...
+[warning] [boot] system "geology" unavailable — Unexpected identifier 'freq'
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] [progression] contract has no archetype — world/terrain.js cannot tell this site apart from any other in the region qa-demo
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.

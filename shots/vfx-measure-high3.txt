@@ -1,0 +1,84 @@
+VFX MEASUREMENT — quality=high  cap=12000  window=26s
+
+── tunnel-jumbo ──────────────────────────────────────────
+  programme=tunnel-jumbo  sectionReturn: facex196 annulusx293  medium: waterx196 airx22 nonex271
+  sim.methodId: tunnel-jumbox196 augerx294   state.contract present 196 / CLEARED 318
+  underground: truex196 nullx25 falsex293  env.undergroundId: tunnel-jumbox196 nullx318  powerMode: mainsx196 (none)x318
+  samples 514 (drilling 168, method live 196)   phases: boom-setupx28 drillingx168 x57 idlex261
+  NOTE per-kind peaks below are counted ONLY over the 196 frames where sim.methodId === 'tunnel-jumbo'.
+  peak live 1218 / 12000   chips 130   size 0.0406..2.338 m
+    pool surfaceSoft  563 / 4320
+    pool surfaceAdd   319 / 2880
+    pool sectionSoft  328 / 3360
+    pool sectionAdd   35 / 1440
+  draw calls peak 254   tris peak 305478   loadScale min 0.38
+  fps min 18.2 / avg 47.0 / max 143.9
+  A/B particles on 143.9 fps (6.95 ms, 215 calls) vs off 143.9 fps (6.95 ms, 208 calls)
+     -> particle cost 0.00 ms/frame   draw-call cost 7   meshes toggled 7
+  ok   faceSpray        peak 154
+  ok   faceMist         peak 105
+  ok   faceSlurry       peak 77
+  ok   faceWash         peak 101
+  ok   dustPlume        correctly absent
+  ok   cuttingChip      correctly absent
+  FAIL motes            emitted 106
+  FAIL exhaustLight     emitted 1
+  FAIL exhaustSmoke     emitted 1
+  ok   exhaustSoot      correctly absent
+  ok   state.drill.roundHolesDone = 14
+  ok   state.drill.roundPull = 0.9
+  ok   state.drill.powerMode = mains
+  ALL LIVE KINDS: sparkEmber:157 faceSpray:154 sprayDrops:154 sparkStreak:152 rockChipSprite:139 motes:106 faceMist:105 faceWash:101 sprayMist:97 faceSlurry:77 waterJet:66 waterMist:32 sprayGlint:15 mudStreak:12 grooveTrail:10 shockRing:9 grooveCore:9 waterGlint:9 grooveSurface:8 bitFlash:5 exhaustSmoke:1 exhaustLight:1
+
+── rockbolt ──────────────────────────────────────────
+  programme=rockbolt  sectionReturn: facex1 annulusx464  medium: waterx1 airx42 nonex422
+  sim.methodId: rockboltx1 augerx470   state.contract present 1 / CLEARED 508
+  underground: truex1 nullx44 falsex464  env.undergroundId: rockboltx1 nullx508  powerMode: (none)x509
+  samples 509 (drilling 1, method live 1)   phases: drillingx1 x102 idlex406
+  NOTE per-kind peaks below are counted ONLY over the 1 frames where sim.methodId === 'rockbolt'.
+  peak live 192 / 12000   chips 4   size 0.0450..1.766 m
+    pool surfaceSoft  25 / 4320
+    pool surfaceAdd   188 / 2880
+    pool sectionSoft  8 / 3360
+    pool sectionAdd   2 / 1440
+  draw calls peak 229   tris peak 305482   loadScale min 0.38
+  fps min 21.1 / avg 41.3 / max 144.0
+  A/B particles on 38.3 fps (26.09 ms, 210 calls) vs off 31.4 fps (31.87 ms, 213 calls)
+     -> particle cost -5.77 ms/frame   draw-call cost -3   meshes toggled 7
+  ok   faceWash         peak 2
+  FAIL beat 'bolt-install' (0 frames): resinExtrude=0 groutReturn=0
+  ok   cuttingChip      correctly absent
+  FAIL motes            emitted 101
+  ok   exhaustLight     correctly absent
+  ok   state.drill.boltIndex = 0
+  ok   state.drill.boltType = resin
+  ALL LIVE KINDS: motes:101 rockChipSprite:6 sprayDrops:3 faceWash:2 bitFlash:1 shockRing:1
+
+── driven-pile ──────────────────────────────────────────
+  programme=driven-pile  sectionReturn: nonex1 annulusx461  medium: nonex418 airx44
+  sim.methodId: driven-pilex1 augerx467   state.contract present 1 / CLEARED 506
+  underground: falsex462 nullx45  env.undergroundId: nullx507  powerMode: (none)x507
+  samples 507 (drilling 0, method live 1)   phases: pitchx1 x109 idlex397
+  NOTE per-kind peaks below are counted ONLY over the 1 frames where sim.methodId === 'driven-pile'.
+  peak live 190 / 12000   chips 0   size 0.0450..1.260 m
+    pool surfaceSoft  25 / 4320
+    pool surfaceAdd   186 / 2880
+    pool sectionSoft  0 / 3360
+    pool sectionAdd   0 / 1440
+  draw calls peak 213   tris peak 305466   loadScale min 0.38
+  fps min 20.8 / avg 35.1 / max 60.0
+  A/B particles on 47.7 fps (20.95 ms, 211 calls) vs off 25.7 fps (38.94 ms, 208 calls)
+     -> particle cost -17.99 ms/frame   draw-call cost 3   meshes toggled 7
+  FAIL pileBurst        never alive
+  ok   cuttingChip      correctly absent
+  ok   cuttingFines     correctly absent
+  ok   dustPlume        correctly absent
+  ok   dustBody         correctly absent
+  ok   sparkStreak      correctly absent
+  ok   state.drill.blows = 0
+  ok   state.drill.headDamage = 0
+  ok   state.drill.dollyCondition = 1
+  ALL LIVE KINDS: motes:101
+
+CONSOLE ERRORS: 0
+FAILURES: 5

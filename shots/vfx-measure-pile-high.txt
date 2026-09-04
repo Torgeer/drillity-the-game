@@ -1,0 +1,30 @@
+VFX MEASUREMENT — quality=high  cap=12000  window=30s
+
+── driven-pile ──────────────────────────────────────────
+  programme=driven-pile  sectionReturn: nonex583 annulusx9  medium: nonex587 airx5
+  sim.methodId: driven-pilex584 augerx8   state.contract present 586 / CLEARED 13
+  underground: falsex592 nullx7  env.undergroundId: nullx599  powerMode: (none)x599
+  samples 599 (drilling 553, method live 584)   phases: pitchx31 x15 drillingx553
+  NOTE per-kind peaks below are counted ONLY over the 584 frames where sim.methodId === 'driven-pile'.
+  peak live 652 / 12000   chips 0   size 0.0451..1.271 m
+    pool surfaceSoft  382 / 4320
+    pool surfaceAdd   272 / 2880
+    pool sectionSoft  0 / 3360
+    pool sectionAdd   26 / 1440
+  draw calls peak 235   tris peak 382524   loadScale min 0.38
+  fps min 19.7 / avg 88.9 / max 141.9
+  A/B particles on 139.9 fps (7.15 ms, 235 calls) vs off 141.9 fps (7.05 ms, 231 calls)
+     -> particle cost 0.10 ms/frame   draw-call cost 4   meshes toggled 7
+  ok   pileBurst        peak 222
+  ok   cuttingChip      correctly absent
+  ok   cuttingFines     correctly absent
+  ok   dustPlume        correctly absent
+  ok   dustBody         correctly absent
+  ok   sparkStreak      correctly absent
+  ok   state.drill.blows = 1287
+  ok   state.drill.headDamage = 0.026378780040658002
+  ok   state.drill.dollyCondition = 1
+  ALL LIVE KINDS: motes:259 pileBurst:222 puffGrit:109 puffSoft:44 exhaustSmoke:35 exhaustSoot:35 exhaustLight:18 grooveTrail:11 shockRing:9 grooveCore:7 grooveSurface:6
+
+CONSOLE ERRORS: 0
+FAILURES: 0

@@ -1,0 +1,179 @@
+VFX METHOD VERIFICATION — quality=high  cap=12000
+
+── rc ─────────────────────────────────────────────
+  programme=null  sectionReturn=annulus
+  peak live 1359 / 12000   draw 6   frame avg 6.95 ms (144.0 fps)  worst 6.9 ms
+  size range 0.0453 .. 2.318 m
+  ok   rcChipStream     peak 31
+  ok   rcCycloneDust    peak 6
+  ok   rcRejectDust     peak 21
+  ok   rcInnerTube      peak 34
+  ok   cuttingChip      correctly absent
+  ok   state.drill.sampleBags = 0
+  ok   state.drill.sampleRecovery = 1
+  ok   state.drill.sampleHoldUp = 0.035137940895798345
+  ok   state.drill.sampleWet = 0
+  phases seen: drilling, , idle
+
+CONSOLE ERRORS: 61
+  [error] THREE.WebGLProgram: Shader Error 0 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: drillity:carbide
+Material Type: MeshPhysicalMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: lib:__hole|{"color":592653,"roughness":0.92,"metalness":0.15,"side":1}
+Material Type: MeshStandardMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: MeshBasicMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: DrillityContactAO
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+FAILURES: 0

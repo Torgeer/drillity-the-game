@@ -1,0 +1,242 @@
+VFX METHOD VERIFICATION — quality=high  cap=12000
+
+── rc ─────────────────────────────────────────────
+  programme=undefined  sectionReturn=undefined
+  peak live 0 / 12000   draw 0   frame avg 0.00 ms (0.0 fps)  worst 0.0 ms
+  size range 0.0000 .. 0.000 m
+  FAIL rcChipStream     never alive
+  FAIL rcCycloneDust    never alive
+  FAIL rcRejectDust     never alive
+  FAIL rcInnerTube      never alive
+  ok   cuttingChip      correctly absent
+  FAIL state.drill.sampleBags never arrived
+  FAIL state.drill.sampleRecovery never arrived
+  FAIL state.drill.sampleHoldUp never arrived
+  FAIL state.drill.sampleWet never arrived
+  phases seen: 
+
+── tunnel-jumbo ─────────────────────────────────────────────
+  programme=undefined  sectionReturn=undefined
+  peak live 0 / 12000   draw 0   frame avg 0.00 ms (0.0 fps)  worst 0.0 ms
+  size range 0.0000 .. 0.000 m
+  FAIL faceSpray        never alive
+  FAIL faceMist         never alive
+  FAIL faceSlurry       never alive
+  FAIL faceWash         never alive
+  ok   dustPlume        correctly absent
+  ok   cuttingChip      correctly absent
+  FAIL state.drill.roundHolesDone never arrived
+  FAIL state.drill.roundLength never arrived
+  FAIL state.drill.roundPull never arrived
+  phases seen: 
+
+── longhole ─────────────────────────────────────────────
+  programme=undefined  sectionReturn=undefined
+  peak live 0 / 12000   draw 0   frame avg 0.00 ms (0.0 fps)  worst 0.0 ms
+  size range 0.0000 .. 0.000 m
+  FAIL cuttingChip      never alive
+  note d.uphole never true in the window; uphole kinds not exercised
+  FAIL state.drill.uphole never arrived
+  FAIL state.drill.ringHole never arrived
+  FAIL state.drill.deviationCue never arrived
+  phases seen: 
+
+── rockbolt ─────────────────────────────────────────────
+  programme=undefined  sectionReturn=undefined
+  peak live 0 / 12000   draw 0   frame avg 0.00 ms (0.0 fps)  worst 0.0 ms
+  size range 0.0000 .. 0.000 m
+  FAIL faceWash         never alive
+  FAIL resinExtrude     never alive during beat 'bolt-install' (beat frames 0)
+  ok   cuttingChip      correctly absent
+  FAIL state.drill.boltIndex never arrived
+  FAIL state.drill.boltType never arrived
+  FAIL state.drill.boltAnchorage never arrived
+  phases seen: 
+
+── driven-pile ─────────────────────────────────────────────
+  programme=undefined  sectionReturn=undefined
+  peak live 0 / 12000   draw 0   frame avg 0.00 ms (0.0 fps)  worst 0.0 ms
+  size range 0.0000 .. 0.000 m
+  FAIL pileBurst        never alive
+  ok   cuttingChip      correctly absent
+  ok   cuttingFines     correctly absent
+  ok   dustPlume        correctly absent
+  ok   dustBody         correctly absent
+  ok   sparkStreak      correctly absent
+  FAIL state.drill.blows never arrived
+  FAIL state.drill.setMm never arrived
+  FAIL state.drill.toeDepth never arrived
+  FAIL state.drill.headDamage never arrived
+  FAIL state.drill.dollyCondition never arrived
+  phases seen: 
+
+── site-investigation ─────────────────────────────────────────────
+  programme=undefined  sectionReturn=undefined
+  peak live 0 / 12000   draw 0   frame avg 0.00 ms (0.0 fps)  worst 0.0 ms
+  size range 0.0000 .. 0.000 m
+  note no SPT blows in the window; sptPuff not exercised
+  FAIL state.drill.logQuality never arrived
+  phases seen: 
+
+CONSOLE ERRORS: 384
+  [error] THREE.WebGLProgram: Shader Error 0 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: drillity:carbide
+Material Type: MeshPhysicalMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: lib:__hole|{"color":592653,"roughness":0.92,"metalness":0.15,"side":1}
+Material Type: MeshStandardMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: MeshBasicMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: DrillityContactAO
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+  [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+FAILURES: 31

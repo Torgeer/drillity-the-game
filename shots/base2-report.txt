@@ -1,0 +1,1300 @@
+DRILLITY — visual QA harness
+when      2026-09-04T06:54:07.363Z
+url       http://localhost:5178/?quality=high&shot
+mode      HEADED (real GPU — fps is meaningful)
+quality   high
+boot      1.8s
+page loads 1  (no mid-run reload — HMR muted)
+
+── COVERAGE ────────────────────────────────────────────────────────────
+methods    21/21 photographed
+rigs       18/18 photographed
+UI states  12
+manifest   METHOD_IDS.md lists 21 method ids
+
+── COULD NOT PHOTOGRAPH: nothing. Every id in the manifest and every rig
+   in data.js has a frame in this run.
+
+── BUDGET ──────────────────────────────────────────────────────────────
+source: README.md · Performance budget
+  draw calls   surface ≤ 80   section ≤ 60   rig ≤ 70
+  frame rate   ≥ 60 fps
+  texture mem  ≤ 90 MB (HIGH)      particles ≤ 12000
+  VERDICT: FAIL
+    fps        over budget in 4 state(s): 01-boot=31.1 02-menu=33.1 03-contracts=30.7 08-results=32.6
+  (texture MB is an estimate from live material maps, RGBA8 + mip tail.
+   per-band calls exclude shadow passes; frame totals include them.)
+
+── DOES EACH SHOT CONTAIN WHAT ITS NAME CLAIMS ─────────────────────────
+  FAIL — 40 of 51 frames did not prove their own subject:
+    14-section-clean           section band is not black
+    m01-auger                  frame is not black
+    m02-cable-tool             frame is not black
+    m03-top-hammer             frame is not black
+    m04-site-investigation     frame is not black
+    m05-dth                    frame is not black
+    m06-overburden             frame is not black
+    m07-core                   frame is not black
+    m08-rc                     frame is not black
+    m09-rotary-kelly           frame is not black
+    m10-cfa                    frame is not black
+    m11-rockbolt               frame is not black
+    m12-oil-rotary             frame is not black
+    m13-anchor                 frame is not black
+    m14-driven-pile            frame is not black
+    m15-cased-cfa              frame is not black
+    m16-tunnel-jumbo           frame is not black
+    m17-hdd                    frame is not black
+    m18-longhole               frame is not black
+    m19-sonic                  frame is not black
+    m20-jet-grouting           frame is not black
+    m21-raise-boring           frame is not black
+    r01-crawler-lite           frame is not black
+    r02-cable-percussion       frame is not black
+    r03-crawler-th             frame is not black
+    r04-si-rig                 frame is not black
+    r05-dth-crawler            frame is not black
+    r06-core-rig               frame is not black
+    r07-cpt-unit               frame is not black
+    r08-rc-rig                 frame is not black
+    r09-foundation-bg          frame is not black
+    r10-cfa-rig                frame is not black
+    r11-bolter                 frame is not black
+    r12-oil-derrick            frame is not black
+    r13-piling-leader          frame is not black
+    r14-tunnel-jumbo           frame is not black
+    r15-hdd-rig                frame is not black
+    r16-longhole-rig           frame is not black
+    r17-sonic-truck            frame is not black
+    r18-raisebore              frame is not black
+  no two frames are byte-identical (50 distinct images).
+
+── PER-SHOT ────────────────────────────────────────────────────────────
+  id                          fps   frame  surf  sect   rig     tris  part   err  verify
+  01-boot                     31.1      0     0     0     0       0k   137    24  ok
+  02-menu                     33.1      0     0     0     0       0k   176     0  ok
+  03-contracts                30.7      0     0     0     0       0k     0     0  ok
+  08-results                  32.6      0     0     0     0       0k     3     0  ok
+  09-shop                    143.9      0     0     0     0       0k     0     0  ok
+  09b-shop-listings            144      0     0     0     0       0k     0     0  ok
+  10-career                    144      0     0     0     0       0k     0     0  ok
+  10b-career-skills          143.9      0     0     0     0       0k     0     0  ok
+  11-garage                  143.9      0     0     0     0       0k     0     0  ok
+  14-section-clean           143.9      0     0     0     0       0k  1645     0  FAIL
+  07-section-closeup         117.9      0     0     0     0       0k  2230     0  ok
+  m01-auger                  131.9      0     0     0     0       0k   986     0  FAIL
+  m02-cable-tool             143.9      0     0     0     0       0k   779     0  FAIL
+  m03-top-hammer             139.9      0     0     0     0       0k  2191     0  FAIL
+  m04-site-investigation     143.9      0     0     0     0       0k   886     0  FAIL
+  m05-dth                    101.9      0     0     0     0       0k  2059     0  FAIL
+  m06-overburden             131.9      0     0     0     0       0k  2008     0  FAIL
+  m07-core                   143.9      0     0     0     0       0k   924     0  FAIL
+  m08-rc                     135.9      0     0     0     0       0k  1761     0  FAIL
+  m09-rotary-kelly           135.9      0     0     0     0       0k   981     0  FAIL
+  m10-cfa                    139.9      0     0     0     0       0k   871     0  FAIL
+  m11-rockbolt               143.9      0     0     0     0       0k  1449     0  FAIL
+  m12-oil-rotary               144      0     0     0     0       0k   895     0  FAIL
+  m13-anchor                 143.9      0     0     0     0       0k  1859     0  FAIL
+  m14-driven-pile            143.9      0     0     0     0       0k   919     0  FAIL
+  m15-cased-cfa              143.9      0     0     0     0       0k   803     0  FAIL
+  m16-tunnel-jumbo           133.9      0     0     0     0       0k  1963     0  FAIL
+  m17-hdd                      144      0     0     0     0       0k  1669     0  FAIL
+  m18-longhole                 110      0     0     0     0       0k  2226     0  FAIL
+  m19-sonic                  143.9      0     0     0     0       0k   773     0  FAIL
+  m20-jet-grouting             102      0     0     0     0       0k   901     0  FAIL
+  m21-raise-boring           143.9      0     0     0     0       0k  2692     0  FAIL
+  r01-crawler-lite            88.7      0     0     0     0       0k   608     0  FAIL
+  r02-cable-percussion       141.9      0     0     0     0       0k   552     0  FAIL
+  r03-crawler-th               106      0     0     0     0       0k  1450     0  FAIL
+  r04-si-rig                 135.9      0     0     0     0       0k   651     0  FAIL
+  r05-dth-crawler             84.8      0     0     0     0       0k  1554     0  FAIL
+  r06-core-rig               139.9      0     0     0     0       0k  1241     0  FAIL
+  r07-cpt-unit               141.9      0     0     0     0       0k   707     0  FAIL
+  r08-rc-rig                  97.8      0     0     0     0       0k  1401     0  FAIL
+  r09-foundation-bg          119.9      0     0     0     0       0k  1420     0  FAIL
+  r10-cfa-rig                135.9      0     0     0     0       0k  1492     0  FAIL
+  r11-bolter                 141.9      0     0     0     0       0k  1558     0  FAIL
+  r12-oil-derrick            135.9      0     0     0     0       0k   787     0  FAIL
+  r13-piling-leader          131.9      0     0     0     0       0k   481     0  FAIL
+  r14-tunnel-jumbo             116      0     0     0     0       0k  1720     0  FAIL
+  r15-hdd-rig                139.9      0     0     0     0       0k  1468     0  FAIL
+  r16-longhole-rig           141.9      0     0     0     0       0k  1638     0  FAIL
+  r17-sonic-truck            131.9      0     0     0     0       0k  1346     0  FAIL
+  r18-raisebore              141.9      0     0     0     0       0k  1148     0  FAIL
+  13-burnin                    116      0     0     0     0       0k   547     0  ok
+
+── PER-SHOT DETAIL ─────────────────────────────────────────────────────
+  01-boot
+      method=auger · rig=crawler-lite · region=nordic · section=vertical · cam=menu · gauge=TORQUE · depth=0m rop=0
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.1MB · heap 99.6MB
+      CONSOLE [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+      CONSOLE [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+      CONSOLE [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+      CONSOLE [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+      CONSOLE [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+      CONSOLE [error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+  02-menu
+      method=auger · rig=crawler-lite · region=nordic · section=vertical · cam=menu · gauge=TORQUE · depth=0m rop=0
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.1MB · heap 109.6MB
+  03-contracts
+      method=auger · rig=crawler-lite · region=nordic · section=vertical · cam=menu · gauge=TORQUE · depth=0m rop=0
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.1MB · heap 98.2MB
+  08-results
+      method=auger · rig=crawler-lite · region=nordic · section=vertical · cam=mast · gauge=TORQUE · depth=0m rop=0
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.1MB · heap 116.7MB
+  09-shop
+      method=auger · rig=crawler-lite · region=nordic · section=vertical · cam=orbit · gauge=TORQUE · depth=0m rop=0
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.1MB · heap 111.2MB
+  09b-shop-listings
+      method=auger · rig=crawler-lite · region=nordic · section=vertical · cam=orbit · gauge=TORQUE · depth=0m rop=0
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.1MB · heap 88MB
+  10-career
+      method=auger · rig=crawler-lite · region=nordic · section=vertical · cam=menu · gauge=TORQUE · depth=0m rop=0
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.1MB · heap 87.7MB
+  10b-career-skills
+      method=auger · rig=crawler-lite · region=nordic · section=vertical · cam=menu · gauge=TORQUE · depth=0m rop=0
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.1MB · heap 87.6MB
+  11-garage
+      method=auger · rig=crawler-lite · region=nordic · section=vertical · cam=orbit · gauge=TORQUE · depth=0m rop=0
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.1MB · heap 99.3MB
+  14-section-clean
+      method=dth · rig=crawler-lite · section=vertical · cam=hero · gauge=TORQUE · depth=34.2m rop=0
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.1MB · heap 94.3MB
+      VERIFY FAIL  section band is not black
+  07-section-closeup
+      method=dth · rig=crawler-lite · section=vertical · cam=downhole · gauge=TORQUE · depth=28.19m rop=10.863
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.1MB · heap 91.5MB
+  m01-auger
+      Auger Drilling — metres drilled · method=auger · rig=crawler-lite · section=vertical · cam=hero · gauge=TORQUE · depth=13.3m rop=0.009
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.1MB · heap 95.3MB
+      VERIFY FAIL  frame is not black
+  m02-cable-tool
+      Cable-Tool / Drop Hammer — metres drilled · method=cable-tool · rig=cable-percussion · section=vertical · cam=hero · gauge=TORQUE · depth=30.87m rop=1.324
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.1MB · heap 96MB
+      VERIFY FAIL  frame is not black
+  m03-top-hammer
+      Top Hammer — metres drilled · method=top-hammer · rig=crawler-lite · section=vertical · cam=hero · gauge=TORQUE · depth=13.55m rop=14.23
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.2MB · heap 91.9MB
+      VERIFY FAIL  frame is not black
+  m04-site-investigation
+      Site Investigation — sample quality and log fidelity · method=site-investigation · rig=crawler-lite · section=vertical · cam=hero · gauge=TORQUE · depth=9.63m rop=0
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.1MB · heap 99MB
+      NOTE QA bridge deepened this job to 38 m — clamped back to 27.5 m (method range 10-35)
+      VERIFY FAIL  frame is not black
+  m05-dth
+      DTH (Down-the-Hole) — metres drilled · method=dth · rig=dth-crawler · section=vertical · cam=hero · gauge=TORQUE · depth=43.44m rop=1.154
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.2MB · heap 106.6MB
+      VERIFY FAIL  frame is not black
+  m06-overburden
+      Overburden / Duplex Drilling — metres drilled · method=overburden · rig=crawler-lite · section=vertical · cam=hero · gauge=TORQUE · depth=13.37m rop=0.665
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.2MB · heap 103.4MB
+      VERIFY FAIL  frame is not black
+  m07-core
+      Core / Wireline Exploration — core recovery — whole core, in order, logged · method=core · rig=core-rig · section=vertical · cam=hero · gauge=TORQUE · depth=47.69m rop=2.776
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.2MB · heap 97.9MB
+      VERIFY FAIL  frame is not black
+  m08-rc
+      Reverse Circulation — sample recovery and contamination · method=rc · rig=rc-rig · section=vertical · cam=hero · gauge=TORQUE · depth=18.03m rop=0
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈61MB · heap 116MB
+      VERIFY FAIL  frame is not black
+  m09-rotary-kelly
+      Rotary / Kelly Drilling — metres drilled · method=rotary-kelly · rig=foundation-bg · section=vertical · cam=hero · gauge=TORQUE · depth=13.3m rop=0.02
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.3MB · heap 114.4MB
+      VERIFY FAIL  frame is not black
+  m10-cfa
+      CFA Piling — metres drilled · method=cfa · rig=foundation-bg · section=vertical · cam=hero · gauge=TORQUE · depth=9.1m rop=0
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.2MB · heap 118.8MB
+      NOTE QA bridge deepened this job to 38 m — clamped back to 26 m (method range 5-35)
+      VERIFY FAIL  frame is not black
+  m11-rockbolt
+      Ground Support — install quality — anchorage and torque test · method=rockbolt · rig=tunnel-jumbo · section=heading · cam=hero · gauge=TORQUE · depth=13.3m rop=17.401
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈65.5MB · heap 108.6MB
+      UNDERGROUND PROBE  terrain=nordic env=nordic sunElev=13.010798795543984 sky=false clouds=false
+                         camera modes available: hero
+                         in-rock geometry named in the surface scene: drifter, rig:tunnel-jumbo
+                         top-of-frame luma 0 (open sky reads bright)
+      VERIFY FAIL  frame is not black
+  m12-oil-rotary
+      Rotary / Oil & Gas — metres drilled · method=oil-rotary · rig=oil-derrick · section=vertical · cam=hero · gauge=TORQUE · depth=23.59m rop=4.548
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈61.1MB · heap 108.1MB
+      VERIFY FAIL  frame is not black
+  m13-anchor
+      Anchor / Micropile — metres drilled · method=anchor · rig=crawler-lite · section=vertical · cam=hero · gauge=TORQUE · depth=13.49m rop=1.817
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.4MB · heap 115.4MB
+      VERIFY FAIL  frame is not black
+  m14-driven-pile
+      Driven Piling — set and blow count to bearing, without damaging the pile · method=driven-pile · rig=piling-leader · section=pile · cam=hero · gauge=SET · depth=8.2m rop=1.356
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.4MB · heap 115.9MB
+      NOTE QA bridge deepened this job to 38 m — clamped back to 23.4 m (method range 8-30)
+      VERIFY FAIL  frame is not black
+  m15-cased-cfa
+      Cased CFA (Double Rotary) — metres drilled · method=cased-cfa · rig=foundation-bg · section=vertical · cam=hero · gauge=TORQUE · depth=7.88m rop=0
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.4MB · heap 137.3MB
+      NOTE QA bridge deepened this job to 38 m — clamped back to 22.5 m (method range 5-30)
+      VERIFY FAIL  frame is not black
+  m16-tunnel-jumbo
+      Drill & Blast (Face) — pull per round and overbreak · method=tunnel-jumbo · rig=tunnel-jumbo · section=heading · cam=hero · gauge=TORQUE · depth=6.51m rop=48.594
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈65.7MB · heap 114.4MB
+      NOTE QA bridge deepened this job to 38 m — clamped back to 18.6 m (method range 6-24)
+      UNDERGROUND PROBE  terrain=german-site env=german-site sunElev=14.962418614875581 sky=false clouds=false
+                         camera modes available: hero
+                         in-rock geometry named in the surface scene: drifter, rig:tunnel-jumbo
+                         top-of-frame luma 0 (open sky reads bright)
+      VERIFY FAIL  frame is not black
+  m17-hdd
+      Horizontal Directional Drilling — metres drilled · method=hdd · rig=hdd-rig · section=profile · cam=hero · stage=1/2 (pullback) · gauge=PULL · depth=38m rop=0
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.7MB · heap 113.3MB
+      VERIFY FAIL  frame is not black
+  m18-longhole
+      Longhole Production — toe accuracy — deviation becomes dilution · method=longhole · rig=longhole-rig · section=vertical · cam=hero · gauge=TORQUE · depth=20.78m rop=12.046
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈64.2MB · heap 138.4MB
+      UNDERGROUND PROBE  terrain=iberian-quarry env=iberian-quarry sunElev=20.166738133093173 sky=false clouds=false
+                         camera modes available: hero
+                         in-rock geometry named in the surface scene: drifter, rig:tunnel-jumbo
+                         top-of-frame luma 0 (open sky reads bright)
+      VERIFY FAIL  frame is not black
+  m19-sonic
+      Sonic Drilling — metres drilled · method=sonic · rig=sonic-truck · section=vertical · cam=hero · gauge=TORQUE · depth=13.31m rop=0.517
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.6MB · heap 140.5MB
+      VERIFY FAIL  frame is not black
+  m20-jet-grouting
+      Jet Grouting — metres drilled · method=jet-grouting · rig=crawler-th · section=vertical · cam=hero · gauge=TORQUE · depth=13.33m rop=0.448
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.6MB · heap 125.6MB
+      VERIFY FAIL  frame is not black
+  m21-raise-boring
+      Raise Boring — metres drilled · method=raise-boring · rig=raisebore · section=raise · cam=hero · stage=1/2 (ream) · gauge=PULL · depth=38m rop=1.215
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.6MB · heap 128.8MB
+      VERIFY FAIL  frame is not black
+  r01-crawler-lite
+      Nordvik NV-90 Scout · method=auger · rig=crawler-lite · section=vertical · cam=orbit · gauge=TORQUE · depth=6m rop=0.007
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.6MB · heap 134.5MB
+      VERIFY FAIL  frame is not black
+  r02-cable-percussion
+      Kilmar CP-24 Shellhand · method=cable-tool · rig=cable-percussion · section=vertical · cam=orbit · gauge=TORQUE · depth=6.04m rop=1.003
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.6MB · heap 151.1MB
+      VERIFY FAIL  frame is not black
+  r03-crawler-th
+      Steinbach TH-320 Ridgeline · method=top-hammer · rig=crawler-th · section=vertical · cam=orbit · gauge=TORQUE · depth=6.18m rop=0
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.6MB · heap 115.2MB
+      VERIFY FAIL  frame is not black
+  r04-si-rig
+      Rynnval SI-30 Probeline · method=site-investigation · rig=si-rig · section=vertical · cam=orbit · gauge=TORQUE · depth=6m rop=0
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.6MB · heap 120.5MB
+      VERIFY FAIL  frame is not black
+  r05-dth-crawler
+      Brenner DH-750 Ironvein · method=dth · rig=dth-crawler · section=vertical · cam=orbit · gauge=TORQUE · depth=6.12m rop=6.73
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.6MB · heap 119.8MB
+      VERIFY FAIL  frame is not black
+  r06-core-rig
+      Meridian CX-1200 Wireline · method=core · rig=core-rig · section=vertical · cam=orbit · gauge=TORQUE · depth=6.54m rop=22
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.6MB · heap 137.3MB
+      VERIFY FAIL  frame is not black
+  r07-cpt-unit
+      Rynnval CP-20 Ballastline · method=site-investigation · rig=cpt-unit · section=vertical · cam=orbit · gauge=TORQUE · depth=6m rop=0
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.6MB · heap 144.9MB
+      VERIFY FAIL  frame is not black
+  r08-rc-rig
+      Kjelvik RC-410 Chipline · method=rc · rig=rc-rig · section=vertical · cam=orbit · gauge=TORQUE · depth=9.09m rop=18.305
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈61.2MB · heap 119.3MB
+      VERIFY FAIL  frame is not black
+  r09-foundation-bg
+      Torvald KR-46 Kellyline · method=rotary-kelly · rig=foundation-bg · section=vertical · cam=orbit · gauge=TORQUE · depth=6.81m rop=56.322
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.6MB · heap 128.3MB
+      VERIFY FAIL  frame is not black
+  r10-cfa-rig
+      Lindhorst CF-28 Continuum · method=cfa · rig=cfa-rig · section=vertical · cam=orbit · gauge=TORQUE · depth=6.45m rop=29.215
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.6MB · heap 132.5MB
+      VERIFY FAIL  frame is not black
+  r11-bolter
+      Skarnes GB-14 Boltline · method=rockbolt · rig=bolter · section=heading · cam=orbit · gauge=TORQUE · depth=6m rop=22.892
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈65.7MB · heap 134.1MB
+      VERIFY FAIL  frame is not black
+  r12-oil-derrick
+      Havstein DR-2400 Derrickline · method=oil-rotary · rig=oil-derrick · section=vertical · cam=orbit · gauge=TORQUE · depth=13.75m rop=6.032
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈61.1MB · heap 128.2MB
+      VERIFY FAIL  frame is not black
+  r13-piling-leader
+      Bergholt PM-78 Leaderline · method=driven-pile · rig=piling-leader · section=pile · cam=orbit · gauge=SET · depth=6m rop=0
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.6MB · heap 132.3MB
+      VERIFY FAIL  frame is not black
+  r14-tunnel-jumbo
+      Aurbach FJ-220 Faceline · method=tunnel-jumbo · rig=tunnel-jumbo · section=heading · cam=orbit · gauge=TORQUE · depth=6m rop=90.96
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈65.7MB · heap 137.6MB
+      VERIFY FAIL  frame is not black
+  r15-hdd-rig
+      Halvard HD-330 Traverse · method=hdd · rig=hdd-rig · section=profile · cam=orbit · stage=0/2 (pilot) · gauge=TORQUE · depth=7.73m rop=45
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.7MB · heap 134.6MB
+      VERIFY FAIL  frame is not black
+  r16-longhole-rig
+      Fennholm LH-60 Fanline · method=longhole · rig=longhole-rig · section=vertical · cam=orbit · gauge=TORQUE · depth=8.98m rop=15.602
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈64.2MB · heap 143.2MB
+      VERIFY FAIL  frame is not black
+  r17-sonic-truck
+      Corvara SN-6 Resonant · method=sonic · rig=sonic-truck · section=vertical · cam=orbit · gauge=TORQUE · depth=6.66m rop=42.156
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.6MB · heap 146.9MB
+      VERIFY FAIL  frame is not black
+  r18-raisebore
+      Vantera RB-92 Shaftline · method=raise-boring · rig=raisebore · section=raise · cam=orbit · stage=0/2 (pilot) · gauge=TORQUE · depth=6.4m rop=4.108
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.6MB · heap 165.6MB
+      VERIFY FAIL  frame is not black
+  13-burnin
+      luma surface 0 (0-0) · section 0 (0-0) · tex≈62.6MB · heap 157.8MB
+
+── CONSOLE ─────────────────────────────────────────────────────────────
+errors 48 · warnings 180 · total 233
+
+[error] THREE.WebGLProgram: Shader Error 0 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: drillity:carbide
+Material Type: MeshPhysicalMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: lib:__hole|{"color":592653,"roughness":0.92,"metalness":0.15,"side":1}
+Material Type: MeshStandardMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: MeshBasicMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: DrillityContactAO
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: DrillityGrade
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: drillity:carbide
+Material Type: MeshPhysicalMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: lib:__hole|{"color":592653,"roughness":0.92,"metalness":0.15,"side":1}
+Material Type: MeshStandardMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: MeshBasicMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: DrillityContactAO
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: DrillityGrade
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+
+── ALL CONSOLE OUTPUT (first 400) ──────────────────────────────────────
+[debug] [vite] connecting...
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[error] THREE.WebGLProgram: Shader Error 0 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: drillity:carbide
+Material Type: MeshPhysicalMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: lib:__hole|{"color":592653,"roughness":0.92,"metalness":0.15,"side":1}
+Material Type: MeshStandardMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: MeshBasicMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: DrillityContactAO
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: DrillityGrade
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[warning] WebGL: CONTEXT_LOST_WEBGL: loseContext: context lost
+[warning] WebGL: CONTEXT_LOST_WEBGL: loseContext: context lost
+[log] THREE.WebGLRenderer: Context Lost.
+[log] THREE.WebGLRenderer: Context Lost.
+[log] THREE.WebGLRenderer: Context Restored.
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: drillity:carbide
+Material Type: MeshPhysicalMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: lib:__hole|{"color":592653,"roughness":0.92,"metalness":0.15,"side":1}
+Material Type: MeshStandardMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: MeshBasicMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: DrillityContactAO
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: DrillityGrade
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[error] THREE.WebGLProgram: Shader Error 1282 - VALIDATE_STATUS false
+
+Material Name: 
+Material Type: ShaderMaterial
+
+Program Info Log: 
+
+
+[warning] WebGL: INVALID_OPERATION: useProgram: program not valid
+[warning] WebGL: CONTEXT_LOST_WEBGL: loseContext: context lost
+[log] THREE.WebGLRenderer: Context Lost.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.

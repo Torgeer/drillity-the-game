@@ -1,0 +1,37 @@
+URL: http://localhost:5178/?quality=high&shot
+PERF: {
+  "fps": 29.574132492113513,
+  "quality": "high",
+  "calls": 353,
+  "triangles": 438748,
+  "programs": 73,
+  "textures": 102,
+  "geometries": 122,
+  "systems": [
+    "renderer",
+    "assets",
+    "env",
+    "geology",
+    "terrain",
+    "rig",
+    "sim",
+    "vfx",
+    "progression",
+    "shopPreview",
+    "audio",
+    "ui"
+  ],
+  "jsHeapMB": 140.8
+}
+
+CONSOLE (10):
+[debug] [vite] connecting...
+[debug] [vite] connected.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[debug] [vite] connecting...
+[debug] [vite] connected.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
+[warning] THREE.Texture: Unable to serialize Texture.
