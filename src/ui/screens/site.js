@@ -607,12 +607,14 @@ export function createSiteScreen(app) {
   C.tap(pauseBtn, async () => {
     const ok = await app.confirm({
       title: 'Leave the hole?',
-      message: 'Abandoning a contract forfeits the payout and the metres already drilled.',
+      message: 'Leave this contract and lose the unfinished hole and remaining payout. Mobilisation is not refunded and reputation will fall.',
       confirmLabel: 'Abandon',
       cancelLabel: 'Keep drilling',
       destructive: true,
     });
     if (!ok) return;
+    const abandoned = ctx.progression?.abandonContract?.();
+    if (abandoned && !abandoned.ok) { app.toast(abandoned.reason, 'warn'); return; }
     if (ctx.sim && typeof ctx.sim.abortHole === 'function') {
       try { ctx.sim.abortHole('abandoned'); } catch (e) { console.error('[ui] abortHole', e); }
     } else {

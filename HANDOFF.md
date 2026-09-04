@@ -1,5 +1,41 @@
 # DRILLITY I THE GAME — handover
 
+## Continuation 2026-09-05 — playable career loop
+
+- Contract acceptance in the UI now goes through progression, so mobilisation,
+  rig/certificate checks and the run accumulator cannot be bypassed.
+- Accepting the same active job resumes it without resetting settled holes or
+  charging twice. A different job cannot silently overwrite the current job.
+- The site abandonment button now closes the career contract as well as the
+  simulation. Its confirmation describes the remaining payout and reputation.
+- Results offer **Next hole** while a contract is active, **Next contract** after
+  settlement. The board now prefers progression's board, including rescue jobs.
+- Random ground thickness retries up to 16 times when no reachable valid final
+  bed exists, then uses the nominal profile. Invalid ground is never silently
+  substituted. 24,000 seeded contracts passed final-bed and target-depth checks.
+- Corrupt primary saves no longer overwrite a valid backup. Invalid basic save
+  shapes fall back to backup; failed writes stay dirty and retry. Visibility
+  autosave listeners are removed on dispose.
+- New build gate `tools/check-career.mjs`: save recovery, write retry, job resume,
+  replacement protection, abandonment and a real two-hole auger simulation
+  through rod changes, payout, XP and contract completion.
+- `npm run build` passes. `node tools/stagepace.mjs --fps` passed all four existing
+  HDD/raise-boring comparisons at 30 and 120 fps. These are not all-method tests.
+- Browser checked the board/details and rejection of replacement while a job is
+  active. Complete two-hole settlement was tested headlessly, not via UI clicks.
+
+### Release status: unfinished
+
+Do not describe this as a finished game. Remaining release gates include:
+1. Jet-grouting still uses generic downward rotary tuning instead of its required
+   pre-drill / jet-and-lift sequence. Implement simulation, HUD and monitor together.
+2. Verify every method from acceptance to result; then progression across unlocks,
+   equipment purchases, poor runs and recovery. Current career test covers auger.
+3. Recheck the historical DOM-growth report with repeated navigation and long play.
+4. Finish tool continuity, guide clearance, chassis materials and fleet visuals.
+5. Profile full gameplay on target mobile hardware, verify touch and audio, and
+   run a final fresh-save and migrated-save regression before release.
+
 ## Continuation 2026-09-05 — photographic mast pass
 
 - Start with `research/20-mast-photo-reference.md`: a real, visually inspected

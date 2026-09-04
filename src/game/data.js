@@ -5664,8 +5664,18 @@ export function makeContract(regionId, level = 1, rand = makeRandom(Date.now() &
   const biased = constraint.groundBias
     ? { ...rand, range: (a, b) => a + (0.45 + 0.55 * rand.f()) * (b - a) }
     : rand;
-  const column = buildGroundColumn(region, Math.max(dHi, targetDepth) * 1.15, biased, method, underground);
-  const bed = bottomableBed(column, method, dHi, archetypeId) || column[0];
+  let column, bed;
+  // Random thickness can exceed the pre-collar allowance even when the
+  // nominal profile is suitable. Retry with the same seeded random stream.
+  for (let attempt = 0; attempt < 16 && !bed; attempt++) {
+    column = buildGroundColumn(region, Math.max(dHi, targetDepth) * 1.15, biased, method, underground);
+    bed = bottomableBed(column, method, dHi, archetypeId);
+  }
+  if (!bed) {
+    column = nominalColumn(region, method, underground);
+    bed = bottomableBed(column, method, dHi, archetypeId);
+  }
+  if (!bed) throw new Error(`No drillable contract: ${region.id}/${method.id}/${archetypeId}`);
   // The hole may not bottom ABOVE the bed it is meant to end in, and it may
   // never be pushed past the method's own rating to get there.
   targetDepth = clamp(

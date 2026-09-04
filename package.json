@@ -10,7 +10,8 @@
     "check:facts": "node tools/checkfacts.mjs",
     "check:data": "node tools/checkdata.mjs",
     "check:models": "node tools/check-reference-model.mjs",
-    "check": "node tools/checkfacts.mjs && node tools/checkdata.mjs && node tools/check-reference-model.mjs"
+    "check": "node tools/checkfacts.mjs && node tools/checkdata.mjs && node tools/check-reference-model.mjs && node tools/check-career.mjs",
+    "check:career": "node tools/check-career.mjs"
   },
   "dependencies": {
     "three": "0.169.0"
