@@ -1,0 +1,22 @@
+<!doctype html><html lang="sv"><meta charset="utf-8"><title>Jetgrouting · sektionskontroll</title>
+<style>body{margin:0;background:#172129;color:white;font:16px system-ui}canvas{display:block}aside{position:fixed;top:16px;left:16px;background:#172129e8;padding:16px;border-radius:8px}input{width:260px}output{display:block;margin-top:8px}</style>
+<aside><label>Behandlat från botten<br><input id="progress" type="range" min="0" max="20" step=".1" value="10"></label><output></output></aside>
+<script type="module">
+import * as THREE from 'three';
+import {createGeology} from '../src/world/geology.js';
+import {createGameState,createBus} from '../src/core/contract.js';
+const state=createGameState();
+const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(innerWidth,innerHeight);document.body.prepend(renderer.domElement);
+const ctx={THREE,state,bus:createBus(),quality:{id:'low'},renderer};
+const geo=createGeology(ctx);await geo.init();
+geo.generateProfile({methodId:'jet-grouting',regionId:'nordic',targetDepth:20,holeDiaMm:1200,seed:12,groundSpec:[{id:'clay',top:0,bottom:20,thickness:20}]});
+geo.resize(innerWidth,innerHeight);geo.setViewMetres(30);
+state.drill.depth=20;state.drill.stage=1;
+function frame(){
+  state.drill.stageProgress=Number(document.querySelector('input').value);
+  geo.update(1/60,state);renderer.render(geo.scene,geo.camera);
+  const column=geo.sectionRoot.getObjectByName('jet-treated-column');
+  document.querySelector('output').textContent=`Behandlat: ${state.drill.stageProgress.toFixed(1)} m · monitor: ${(20-state.drill.stageProgress).toFixed(1)} m · markering: ${column.visible?'synlig':'dold'}`;
+  requestAnimationFrame(frame);
+}frame();
+</script></html>

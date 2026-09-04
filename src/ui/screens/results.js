@@ -191,7 +191,11 @@ export function createResultsScreen(app) {
      to be a visible way off this screen in the first frame; the old sticky bar
      sat in the middle of the page (the content never overflowed) and stayed
      invisible for the best part of a second. */
-  const againBtn = C.Button({ label: 'Next contract', kind: 'amber', icon: 'play', onTap: () => app.nav(SCENES.CONTRACTS) });
+  const againBtn = C.Button({ label: 'Next contract', kind: 'amber', icon: 'play', onTap: () => {
+    const active = state.contract;
+    if (active) app.nav(SCENES.SITE, { contract: active });
+    else app.nav(SCENES.CONTRACTS);
+  } });
   const shopBtn = C.Button({ label: 'iMarket', kind: 'ghost', icon: 'cart', onTap: () => app.nav(SCENES.SHOP) });
   const actionsEl = C.h('div.results__actions', shopBtn, againBtn);
 
@@ -475,6 +479,9 @@ export function createResultsScreen(app) {
     el,
 
     mount(params) {
+      const nextLabel = state.contract ? 'Next hole' : 'Next contract';
+      againBtn.querySelector('.btn__label').textContent = nextLabel;
+      againBtn.setAttribute('aria-label', nextLabel);
       summary = buildSummary(params);
       const sm = summary;
       const c = sm.contract;

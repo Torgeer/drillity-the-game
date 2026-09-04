@@ -473,6 +473,12 @@ export function createContractsScreen(app) {
   }
 
   function acceptContract(c) {
+    const progression = app.ctx.progression;
+    if (progression?.acceptContract) {
+      const result = progression.acceptContract(c);
+      if (!result.ok) { app.toast(result.reason, 'warn'); return; }
+      if (result.resumed) { app.nav(SCENES.SITE, { contract: state.contract }); return; }
+    }
     state.contract = c;
     if (state.drill) {
       state.drill.target = c.target;
@@ -494,8 +500,10 @@ export function createContractsScreen(app) {
       state.world.strata = strata;
       state.world.contractId = c.id;
     }
-    app.bus.emit(EVENTS.CONTRACT_ACCEPT, { contract: c });
-    app.bus.emit(EVENTS.REGION_CHANGE, { regionId: c.region });
+    if (!progression?.acceptContract) {
+      app.bus.emit(EVENTS.CONTRACT_ACCEPT, { contract: c });
+      app.bus.emit(EVENTS.REGION_CHANGE, { regionId: c.region });
+    }
     app.toast(`Mobilising to ${regionInfo(c.region).name}`, 'amber');
     app.nav(SCENES.SITE, { contract: c });
   }

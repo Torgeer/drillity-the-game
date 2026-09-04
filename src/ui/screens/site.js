@@ -91,8 +91,8 @@ const CONTROL_SETS = {
                 protect: ['Mud flow', 'MUD'] },
   cfa:        { advance: ['Penetration rate', 'ADVANCE'],    work: ['Rotation', 'ROTATION'],
                 protect: ['Concrete pressure', 'CONCRETE'] },
-  jet:        { advance: ['Withdrawal rate', 'WITHDRAW'],    work: ['Jet pressure', 'JET'],
-                protect: ['Rotation speed', 'ROTATION'] },
+  jet:        { advance: ['Withdrawal rate', 'WITHDRAW'],    work: ['Rotation speed', 'ROTATION'],
+                protect: ['Grout delivery', 'GROUT'] },
   piling:     { advance: ['Hammer energy', 'ENERGY'],        work: ['Blow rate', 'BLOWS'],
                 protect: ['Alignment', 'ALIGN', 'the pile wanders off line unattended — trim the rake'] },
 
@@ -217,7 +217,7 @@ const STATUS_UNIT = {
   pile: (p) => ['Blows', `${int(p.blows)}`],
   'probe:cpt': (p) => ['Sounding', `${num(p.pushRateMmS, 0)} mm/s`],
   'probe:spt': (p) => ['Test', `${int(p.testIndex)}`],
-  twoStage: (p) => [p.reverse ? 'Ream' : 'Pilot', `${num(p.passM, 0)}/${num(p.passTargetM, 0)} m`],
+  twoStage: (p) => [p.stageName || (p.reverse ? 'Ream' : 'Pilot'), `${num(p.passM, 0)}/${num(p.passTargetM, 0)} m`],
 };
 
 /* ═══ THE UNIT CARD ═════════════════════════════════════════════════════
@@ -376,10 +376,10 @@ const UNIT_VIEWS = {
       tone: 'good',
       rows: [
         ['Along', `${num(p.passM, 1)} / ${num(p.passTargetM, 1)} m`],
-        ['Cutters', pct01(1 - n01(p.cutterWear01))],
+        p.treatment ? ['Coverage', pct01(p.treatmentQuality01)] : ['Cutters', pct01(1 - n01(p.cutterWear01))],
         ['Stalls', int(p.stalls)],
       ],
-      note: p.mucksByGravity
+      note: p.treatment ? 'Rotate and deliver grout while lifting. Excessive lift reduces treatment coverage.' : p.mucksByGravity
         ? 'A raise mucks by gravity — there is nothing to circulate on the way up.'
         : 'The constraint on the way back is pull, not rate.',
     }),
@@ -607,12 +607,14 @@ export function createSiteScreen(app) {
   C.tap(pauseBtn, async () => {
     const ok = await app.confirm({
       title: 'Leave the hole?',
-      message: 'Abandoning a contract forfeits the payout and the metres already drilled.',
+      message: 'Leave this contract and lose the unfinished hole and remaining payout. Mobilisation is not refunded and reputation will fall.',
       confirmLabel: 'Abandon',
       cancelLabel: 'Keep drilling',
       destructive: true,
     });
     if (!ok) return;
+    const abandoned = ctx.progression?.abandonContract?.();
+    if (abandoned && !abandoned.ok) { app.toast(abandoned.reason, 'warn'); return; }
     if (ctx.sim && typeof ctx.sim.abortHole === 'function') {
       try { ctx.sim.abortHole('abandoned'); } catch (e) { console.error('[ui] abortHole', e); }
     } else {
@@ -1012,7 +1014,7 @@ export function createSiteScreen(app) {
     ctlMethodId = methodId; ctlKind = kind; ctlWell = hasWell; ctlProg = prog;
 
     const m = rawMethod(methodId);
-    const fam = hasWell ? 'oil' : controlFamily(m, kind, prog);
+    const fam = methodId === 'jet-grouting' ? (prog === 'jet-lift' ? 'jet' : 'rotary') : hasWell ? 'oil' : controlFamily(m, kind, prog);
     const set = CONTROL_SETS[fam] || CONTROL_SETS.rotary;
     const protect = set.protect
       || PROTECT_BY_FLUSH[(m && m.flushMedium) || '']
@@ -2160,7 +2162,7 @@ export function createSiteScreen(app) {
         simTel.methodId || null,
         simTel.method ? simTel.method.kind : null,
         !!simTel.well,
-        pkey,
+        simTel.methodId === 'jet-grouting' ? (simTel.stageReverse ? 'jet-lift' : 'jet-drill') : pkey,
       );
       /* And the sim decides which of them are connected to anything. A pushed
          piezocone does not turn and circulates nothing; an SPT drive is driven

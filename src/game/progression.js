@@ -706,6 +706,12 @@ export function createProgression(ctx) {
    */
   function acceptContract(contract) {
     if (!contract) return { ok: false, reason: 'No contract' };
+    if (run && state.contract) {
+      if (contract.id && contract.id === state.contract.id) {
+        return { ok: true, reason: '', mobilisation: 0, resumed: true };
+      }
+      return { ok: false, reason: 'Finish or abandon your current contract first' };
+    }
     const missing = (contract.requiredCerts || []).filter((c) => !state.player.certs.includes(c));
     if (missing.length) {
       return { ok: false, reason: `Needs ${missing.map((c) => getCert(c)?.name || c).join(', ')}` };
@@ -1198,15 +1204,17 @@ export function createProgression(ctx) {
    * @returns {boolean} whether it was persisted
    */
   function save() {
-    savePending = false;
+    // A failed write remains dirty so autosave can retry after storage recovers.
+    savePending = true;
     const store = storage();
     if (!store) return false;
     let json;
     try { json = JSON.stringify(serialise()); } catch (e) { console.error('[progression] serialise failed', e); return false; }
     try {
       const prev = store.getItem(SAVE_KEY);
-      if (prev) store.setItem(SAVE_BACKUP_KEY, prev);
+      if (prev && readPayload(store, SAVE_KEY)) store.setItem(SAVE_BACKUP_KEY, prev);
       store.setItem(SAVE_KEY, json);
+      savePending = false;
       return true;
     } catch (e) {
       console.warn('[progression] save failed', e && e.message);
@@ -1235,7 +1243,15 @@ export function createProgression(ctx) {
       const raw = store.getItem(key);
       if (!raw) return null;
       const parsed = JSON.parse(raw);
-      return parsed && typeof parsed === 'object' ? parsed : null;
+      for (const key of ['methods', 'regions', 'rigs', 'tools']) {
+        if (parsed?.unlocked?.[key] != null && !Array.isArray(parsed.unlocked[key])) return null;
+      }
+      if (parsed?.garage?.owned != null && !Array.isArray(parsed.garage.owned)) return null;
+      // Syntactically valid JSON can still be a broken save ([], {}, null).
+      return parsed && !Array.isArray(parsed) && parsed.player
+        && typeof parsed.player === 'object' && !Array.isArray(parsed.player)
+        && Number.isFinite(parsed.player.money) && Number.isFinite(parsed.player.xp)
+        ? parsed : null;
     } catch { return null; }
   }
 
@@ -1539,8 +1555,10 @@ export function createProgression(ctx) {
     if (typeof window !== 'undefined') {
       const flush = () => { if (savePending) save(); };
       window.addEventListener('pagehide', flush);
-      window.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flush(); });
+      const onVisibility = () => { if (document.visibilityState === 'hidden') flush(); };
+      document.addEventListener('visibilitychange', onVisibility);
       unsubs.push(() => window.removeEventListener('pagehide', flush));
+      unsubs.push(() => document.removeEventListener('visibilitychange', onVisibility));
     }
   }
 

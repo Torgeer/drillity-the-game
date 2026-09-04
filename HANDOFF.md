@@ -1,5 +1,147 @@
 # DRILLITY I THE GAME — handover
 
+## Continuation 2026-09-05 — treated-column section
+
+- Added a reusable translucent section overlay for the interval treated during
+  jet lift. It grows from the job bottom toward the surface and is hidden before
+  treatment. Width follows the existing exaggerated section bore radius; this is
+  a progress marker, not a computed physical column diameter.
+- Fixed the vertical jet action anchor: the monitor now follows the return-pass
+  treatment front instead of staying at final depth.
+- Removed the 6m minimum on the contract target in geology (view limits remain
+  separate), so a 5m job's treatment front can reach the surface correctly.
+- Added tools/jet-section-review.html, an isolated slider-driven visual review
+  without career/save changes. Inspected the half-treated 20m section in-browser.
+- Overlay uses one geometry/material across frames, disposed with geology.
+- Remaining: physical soilcrete appearance, per-layer treatment quality display,
+  all-method visual regression and mobile performance verification.
+
+## Continuation 2026-09-05 — treatment quality and longer jobs
+
+- Fixed a scoring defect: jet treatment quality was calculated but had zero
+  weight in the final grade. It now contributes 50%, with the remaining score
+  covering time, control, wear, straightness, hazards and safety.
+- Added relative soil response to grout delivery versus withdrawal. Sand/gravel
+  receive higher relative erodibility than cohesive/mixed soils. These are
+  explicit game-balance factors, not measured soil properties or design values.
+- Regression tests complete 5, 20 and 60m clay jobs, including rod timing and jam
+  recovery. Identical delivery gives less coverage in clay than sand; excessive
+  withdrawal lowers treatment quality. Existing tests and production build pass.
+- Full graphical column treatment and mobile performance remain open. Long-job
+  verification here is headless; do not claim complete visual or fleet acceptance.
+
+## Continuation 2026-09-05 — jet-grouting sequence
+
+- Explicit jet-grouting tuning now replaces the generic rotary fallback. The
+  sequence is pre-drill, then rotate/jet/lift back to the surface. Process source:
+  https://www.keller.com/expertise/techniques/jet-grouting
+- Return-pass progress requires grout delivery and rotation. Completion is emitted
+  once, at the end of treatment, not when the initial bore reaches depth.
+- A normalized coverage score penalizes excessive feed relative to grout delivery.
+  This is game tuning, not a prediction of column diameter, strength or permeability.
+- HUD switches from penetration controls to withdrawal/rotation/grout; stage names
+  come from simulation. The old jet labels incorrectly swapped rotation and flow.
+- Added a simple original monitor with radial ports. Crawler-th selects a rotary
+  head for jet grouting and hides its percussion head and dust hood. Other methods
+  retain their existing head. This is procedural geometry, not a new Blender asset.
+- VFX medium changed from water to mud to agree with the method's content record.
+- `check-jet.mjs` covers phase order, no premature payout, no treatment without flow
+  or rotation, completion at surface, finite monitor geometry and 30/120fps parity.
+  Model tests also exercise repeated top-hammer/jet switching at HIGH and LOW.
+- Still needed: full-length job balancing, soil-dependent erodibility, physical
+  treatment-volume visualization, nozzle blockage and a field-referenced asset pass.
+  Jet-grouting no longer falls back silently, but is not an engineering simulator.
+
+## Continuation 2026-09-05 — playable career loop
+
+- Contract acceptance in the UI now goes through progression, so mobilisation,
+  rig/certificate checks and the run accumulator cannot be bypassed.
+- Accepting the same active job resumes it without resetting settled holes or
+  charging twice. A different job cannot silently overwrite the current job.
+- The site abandonment button now closes the career contract as well as the
+  simulation. Its confirmation describes the remaining payout and reputation.
+- Results offer **Next hole** while a contract is active, **Next contract** after
+  settlement. The board now prefers progression's board, including rescue jobs.
+- Random ground thickness retries up to 16 times when no reachable valid final
+  bed exists, then uses the nominal profile. Invalid ground is never silently
+  substituted. 24,000 seeded contracts passed final-bed and target-depth checks.
+- Corrupt primary saves no longer overwrite a valid backup. Invalid basic save
+  shapes fall back to backup; failed writes stay dirty and retry. Visibility
+  autosave listeners are removed on dispose.
+- New build gate `tools/check-career.mjs`: save recovery, write retry, job resume,
+  replacement protection, abandonment and a real two-hole auger simulation
+  through rod changes, payout, XP and contract completion.
+- `npm run build` passes. `node tools/stagepace.mjs --fps` passed all four existing
+  HDD/raise-boring comparisons at 30 and 120 fps. These are not all-method tests.
+- Browser checked the board/details and rejection of replacement while a job is
+  active. Complete two-hole settlement was tested headlessly, not via UI clicks.
+
+### Release status: unfinished
+
+Do not describe this as a finished game. Remaining release gates include:
+1. Jet-grouting has its two-stage prototype (see newest entry); validate long jobs,
+   erodibility and treatment graphics before considering the method finished.
+2. Verify every method from acceptance to result; then progression across unlocks,
+   equipment purchases, poor runs and recovery. Current career test covers auger.
+3. Recheck the historical DOM-growth report with repeated navigation and long play.
+4. Finish tool continuity, guide clearance, chassis materials and fleet visuals.
+5. Profile full gameplay on target mobile hardware, verify touch and audio, and
+   run a final fresh-save and migrated-save regression before release.
+
+## Continuation 2026-09-05 — photographic mast pass
+
+- Start with `research/20-mast-photo-reference.md`: a real, visually inspected
+  machine photograph, source attribution, implementation limits and next steps.
+  OEM photos are references only; do not present Blender renders as real photos.
+- Added `tools/blender_compact_mast.py` and `compact-feed-mast.glb` (6,152 triangles).
+  Blender MCP generated an isolated scene; existing scenes were preserved.
+  Editable `.blend` is in the task outputs directory.
+- Starter HIGH/MEDIUM now uses the authored mast, with independent lower/upper
+  sections for existing flex. LOW and failed downloads retain procedural fallback.
+- Rails, chain runs, fasteners and an open guide replace the procedural beam.
+  Chain motion and jaw actuation are not simulated; method-specific clearance
+  still needs review before calling the assembly mechanically complete.
+- `npm run build` passes: data/facts, model scale, anchors, repeated method
+  switching and HIGH/LOW selection. Production single-file output: 3,973.24kB.
+- Browser workshop visually checked with the actual rig system: 49 draw calls,
+  about 36,826 triangles in the observed auger view. FPS is view/hardware dependent;
+  this is not a full-game performance certification.
+- Next: tool continuity/guide clearance, chassis UVs and track materials, moving
+  hoses and operator guarding. Keep Three.js while addressing these asset issues.
+- No revised completion percentage: the historical 45% is not a measured release
+  estimate. No full mission regression or mobile benchmark was performed here.
+
+
+## Continuation 2026-09-05 — Blender pipeline, first module
+
+The historical assessment below remains a baseline, not current verification.
+Latest work: `research/19-oem-visual-pass.md` documents references and limits.
+
+- Fixed the undeclared `boreExag` which actually prevented startup in this checkout.
+- Connected the configured Blender MCP to Blender 5.2.1; authored a compact
+  rotary head in a separate scene. Editable source is in the task outputs;
+  `tools/blender_compact_head.py` is the reproducible authoring script.
+- GLB is loaded at rig init, embedded in the single-file build, and used on
+  crawler-lite at HIGH/MEDIUM. LOW retains procedural rotary geometry.
+- The rotor and tool outlet survive batching as animation anchors. Top-hammer
+  selects the percussive head, while auger selects rotary.
+- Corrected duplicated feed end equipment on the starter mast's flex split,
+  added crown cheeks/sheave, and moved rails behind the gearbox to avoid overlap.
+- Reduced excessive normal-map amplitude on paint, raw/worn steel and chrome.
+  UV/material reconstruction remains open; this is not a complete fleet remake.
+- `npm run build` passes: facts/data + new model tests, 47 modules, 3,412.72 kB.
+  Vite now imports its ESM config directly through `tools/vite.mjs`, fixing the
+  restricted-Windows parent-directory error. Dev dependency discovery is disabled.
+- New `tools/rig-review.html` provides orbit, close-up, method selection and
+  draw-call/triangle readouts using the actual game rig system. Workshop figures
+  are NOT full-game or mobile benchmarks.
+- Known: jet-grouting warning remains; browser can emit texture-serialization
+  warnings. Startup and workshop had no observed console errors after the fix.
+- Next: whole compact carrier/positioner/clamps/guarding in Blender, tool/string
+  continuity, accurate auger return, then separate foundation and rock-drill families.
+
+---
+
 **For whoever takes this over.** Written 2026-09-04, after a long multi-agent
 day. Repo: <https://github.com/Torgeer/drillity-the-game> (public).
 

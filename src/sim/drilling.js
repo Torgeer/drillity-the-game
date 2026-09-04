@@ -1705,57 +1705,29 @@ export const TUNING = {
       },
     },
 
-    /* any method without its own entry falls back to this generic rotary rig */
-
-    /* ═════════════════════════════════════════════════════════════════
-       ONE METHOD IS FALLING BACK TO IT, AND IT IS NOT DELIBERATE.
-
-       `jet-grouting` (game/data.js, unlock 47) has no entry above, so it
-       plays as this generic downward rotary rig — and `tools/checkdata.mjs`
-       has been warning about it for that reason. It is the last such method,
-       and the fallback is not a decision anyone made; it is the entry nobody
-       has written yet. Recorded here so the next agent does not have to
-       re-derive the shape of it.
-
-       WHY IT IS WRONG RATHER THAN MERELY GENERIC. Jet grouting drills a
-       monitor down and then does the actual work COMING BACK UP, rotating and
-       lifting while the jets cut the soil apart and rebuild it as a column.
-       `ui/screens/site.js` already knows that — it resolves the method to its
-       `jet` control family off data.js (`flushMedium: 'mud'` plus the
-       `soil-stabilisation` application) and labels the three controls
-       WITHDRAW / JET / ROTATION, which GAMEDESIGN §7 also publishes. Under
-       this fallback the slider labelled "Withdrawal rate" is weight-on-bit
-       pushing DOWN. The HUD is not generic about it; it is wrong about it.
-       `audio/audio.js` is in the same position with a `shaftHz` of [0.1, 0.7]
-       authored for a monitor and an rpm curve coming from `optRpm: 0.55`.
-
-       WHAT AN ENTRY MAY CLAIM. The sequence — drill to full depth first, then
-       rotate and raise while jetting — is sourced (research/05 §A12), and so
-       is the pressure floor (25 MPa / 250 bar, EN 12716, below which it is not
-       jet grouting), the 700 bar / 400 l/min pump ceiling, the single < double
-       < triple system ladder, and the hidden variable being soil erodibility:
-       cohesionless erodes more than cohesive. That is enough for a two-stage
-       model on exactly the machinery `hdd` and `raise-boring` already use —
-       `stages: [pre-drill, jet-and-lift]` with `reverse: true` on the second.
-
-       WHAT IT MAY NOT. research/05 §A12 marks column diameter by soil and
-       system UNVERIFIED and says in as many words not to ship a table without
-       a source; there is no sourced withdrawal rate in any unit and no sourced
-       monitor rpm anywhere in the pack; and the 400 bar the shop copy prints
-       is inside the sourced envelope but is not itself cited. Under
-       PLATFORM_TRUTH Part C rule 7 those are "say less", not "round off". The
-       normalised 0..1 tuning constants below are not claims — no unit is ever
-       printed beside them — but any NUMBER this method puts in front of a
-       player has to come from the pack first.
-
-       NOT BUILT HERE ON PURPOSE. Building it well needs two files this agent
-       does not own: `ui/screens/site.js` renders a two-stage strip whose
-       labels are hardcoded 'Pilot' / 'Ream', which are the wrong words for a
-       pre-drill and a lift, and `rig/rigFactory.js` fits jet-grouting a plain
-       drag bit and a flushing swivel with no monitor and no nozzle. Adding
-       `stages` here without those two would trade a wrong control label for a
-       wrong stage label and a rig that still cannot show what it is doing.
-       ═════════════════════════════════════════════════════════════════ */
+    'jet-grouting': {
+      // Process: Keller, https://www.keller.com/expertise/techniques/jet-grouting
+      // All rate/efficiency constants are gameplay tuning, not field specifications.
+      name: 'Jet grouting', kind: 'rotary', rodLength: 3, ropMax: 45,
+      K: 900, wobExp: 0.85, rpmExp: 0.65, ucsExp: 0.85, ucsFloor: 6,
+      softFloorUcs: 0, softEffMin: 1,
+      optWob: 0.45, optRpm: 0.55, optFlush: 0.70,
+      torque: { base: 0.10, wob: 0.50, cut: 0.65, abr: 0.28, depth: 0.080, wear: 0.16 },
+      wearMul: 0.7, heatMul: 0.6, flushK: 0.9, erodeK: 0.7,
+      bandMul: 1, driftMul: 1, casing: false, impact: 'grind',
+      bitKinds: ['drag'], completeOnProgramme: true,
+      score: { weights: { time: .10, groove: .10, bit: .05, straight: .05,
+        hazard: .10, safety: .10, quality: .50 } },
+      stages: [
+        { id: 'pre-drill', name: 'Pre-drill', reverse: false },
+        { id: 'jet-and-lift', name: 'Jet and lift', reverse: true, jet: true,
+          ropMul: 0.4, optWob: 0.45, flushOff: false,
+          gauge: { axis: 'pull', label: 'LIFT LOAD', unit: '', max: 1.25 },
+          pullBase: 0.12, pullPerHard: 0.08, pullPerRate: 0.45,
+          pullPerLoad: 0.2, pullPerUnstable: 0.08, loadDrain: 0.3,
+          stallAt: 1, wearMul: 0.25 },
+      ],
+    },
     _default: {
       name: 'Rotary', kind: 'rotary', rodLength: 3, ropMax: 45,
       K: 900, wobExp: 0.85, rpmExp: 0.65, ucsExp: 0.85, ucsFloor: 6,
@@ -2449,6 +2421,12 @@ export function synthProfile({ regionId = 'nordic', targetDepth = 40, seed = 1, 
 /* ═══════════════════════════════════════════════════════════════════════════
    THE SYSTEM
    ═══════════════════════════════════════════════════════════════════════════ */
+// Relative gameplay response only. Keller's process reference establishes that
+// cohesionless soils are generally more erodible; these factors are not soil tests.
+export function jetErodibility(groundId) {
+  return ({sand: 1, gravel: 1, silt: .85, clay: .70, till: .65, marl: .65})[groundId] ?? .70;
+}
+
 export function createDrillSim(ctx = {}) {
   const bus = ctx.bus || { on: () => () => {}, emit: () => {} };
   const EV = EVENTS;
@@ -5691,6 +5669,7 @@ export function createDrillSim(ctx = {}) {
       cutterWear: 0, cutterChanges: 0,
       pilotDeviation: 0, quality01: 1,
       startedPass: false,
+      treatedQualityM: 0,
     };
   }
 
@@ -5729,6 +5708,11 @@ export function createDrillSim(ctx = {}) {
 
     /* ── stage 1: the way back ── */
     const st = stages[1];
+    if (st.jet) {
+      const coverage = clamp(S.act.flush * jetErodibility(S.ground.id) / Math.max(0.15, S.act.wob * 1.5))
+        * clamp(S.act.rpm / 0.35);
+      p.treatedQualityM += Math.min(dBore, S.target - p.passM) * coverage;
+    }
     p.passM = Math.min(S.target, p.passM + dBore);
     S.stageProgress = p.passM;
     S.holeDepth = p.passM;
@@ -5782,6 +5766,7 @@ export function createDrillSim(ctx = {}) {
         - 0.30 * (p.stalls / Math.max(1, p.stalls + 3))
         - 0.25 * p.cutterWear
         - 0.35 * clamp(p.pilotDeviation / T.straight.maxDev));
+      if (st.jet) p.quality01 = clamp(p.treatedQualityM / Math.max(0.01, S.target));
       complete();
     }
     return 0;                    // the contract depth does not grow on the way back
@@ -5885,7 +5870,7 @@ export function createDrillSim(ctx = {}) {
           } };
       }
       case 'twoStage':
-        return { score: clamp(p.quality01), label: S.stage === 0 ? 'PILOT' : 'REAM',
+        return { score: clamp(p.quality01), label: activeStage()?.name?.toUpperCase() || 'PASS',
           detail: { stage: S.stage, passM: +p.passM.toFixed(2),
                     stalls: p.stalls, cutterWear01: +p.cutterWear.toFixed(3),
                     cutterChanges: p.cutterChanges,
@@ -5987,6 +5972,12 @@ export function createDrillSim(ctx = {}) {
     /* ── 6. ROP ── */
     const r = ropModel(m, S.bit, S.ground, S.act, env());
     S.rop = r.rop;
+    if (activeStage()?.jet) {
+      // Treatment advances only with grout and rotation; feed alone cannot finish.
+      const grout = clamp((S.act.flush - 0.25) / 0.45);
+      const rotation = clamp(S.act.rpm / 0.35);
+      S.rop *= grout * rotation;
+    }
     S.ropPotential = r.potential;
     S.ropTerms = r.terms;
 
@@ -7862,8 +7853,10 @@ export function createDrillSim(ctx = {}) {
         const st = S.m.stages[Math.min(S.stage, S.m.stages.length - 1)];
         return {
           kind: 'two-stage', unit: 'pass',
+          treatment: S.methodId === 'jet-grouting',
+          treatmentQuality01: clamp(p.treatedQualityM / Math.max(.01, p.passM)),
           stage: S.stage, stageId: st.id, stageName: st.name, reverse: !!st.reverse,
-          passM: +p.passM.toFixed(2), passTargetM: +S.target.toFixed(2),
+          passM: +(S.stage === 0 ? S.depth : p.passM).toFixed(2), passTargetM: +S.target.toFixed(2),
           // On the way back the constraint is PULL, not rate.
           pull01: +nz(p.pull).toFixed(3),
           stallAt: st.stallAt == null ? null : st.stallAt,

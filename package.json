@@ -4,12 +4,15 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host --port 5178",
-    "build": "npm run check && vite build",
-    "preview": "vite preview --host --port 5179",
+    "dev": "node tools/vite.mjs dev",
+    "build": "npm run check && node tools/vite.mjs build",
+    "preview": "node tools/vite.mjs preview",
     "check:facts": "node tools/checkfacts.mjs",
     "check:data": "node tools/checkdata.mjs",
-    "check": "node tools/checkfacts.mjs && node tools/checkdata.mjs",
+    "check:models": "node tools/check-reference-model.mjs",
+    "check": "node tools/checkfacts.mjs && node tools/checkdata.mjs && node tools/check-reference-model.mjs && node tools/check-career.mjs && node tools/check-jet.mjs",
+    "check:career": "node tools/check-career.mjs",
+    "check:jet": "node tools/check-jet.mjs",
     "blender": "\"C:/Program Files/Blender Foundation/Blender 5.2/blender.exe\" --background --python blender/build.py --"
   },
   "dependencies": {

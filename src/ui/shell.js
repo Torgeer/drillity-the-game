@@ -371,6 +371,10 @@ export function createUI(ctx) {
       return this._rawContracts().map(normalizeContract);
     },
     _rawContracts() {
+      // The career board includes rescue work and follows level/region changes.
+      // A separate UI-generated board bypassed those progression rules.
+      const fromProg = ctx.progression?.getContracts?.();
+      if (fromProg?.length) return fromProg;
       const g = ctx.game;
       if (g?.contracts?.length) return g.contracts;
       if (typeof g?.makeContractBoard === 'function') {
@@ -385,8 +389,6 @@ export function createUI(ctx) {
         }
         if (boardCache?.length) return boardCache;
       }
-      const fromProg = ctx.progression?.getContracts?.();
-      if (fromProg?.length) return fromProg;
       return [];
     },
     /** Drop the generated board so the next read regenerates it. */
