@@ -2546,6 +2546,19 @@ export function createGeology(ctx) {
 
   const disposables = [];
   const track = (o) => { disposables.push(o); return o; };
+  // One reusable section overlay. Its extent represents executed treatment,
+  // not predicted soilcrete strength or an independently calculated diameter.
+  const treatmentMaterial = track(new T.MeshBasicMaterial({
+    color: 0xb9b2a1, transparent: true, opacity: .65, depthWrite: false, depthTest: false,
+    side: T.DoubleSide,
+  }));
+  const treatmentColumn = new T.Mesh(new T.PlaneGeometry(1, 1), treatmentMaterial);
+  treatmentColumn.name = 'jet-treated-column';
+  treatmentColumn.renderOrder = 2;
+  treatmentColumn.visible = false;
+  treatmentColumn.position.z = .08;
+  root.add(treatmentColumn);
+
 
   /* ── shared uniforms ──────────────────────────────────────────────────── */
   const texA = makeLookupTexture(T, CFG.lookupWidth, true);
@@ -3579,7 +3592,7 @@ export function createGeology(ctx) {
     spec = {
       regionId: inSpec.regionId || ctx?.state?.world?.regionId || 'nordic',
       applicationId: inSpec.applicationId || 'water-well',
-      targetDepth: Math.max(6, +inSpec.targetDepth || 45),
+      targetDepth: Math.max(0.1, +inSpec.targetDepth || 45),
       seed: (inSpec.seed ?? ((Math.random() * 0xffffff) | 0)) >>> 0,
       // contracts carry difficulty on a 1..5 scale; everything here wants 0..1
       difficulty: normDifficulty(inSpec.difficulty),
@@ -6440,6 +6453,9 @@ export function createGeology(ctx) {
    * progress bar for that stage runs in reverse (DESIGN_EXPANSION.md §1).
    */
   function actionStation() {
+    if (spec.methodId === 'jet-grouting' && stage >= 1) {
+      return Math.max(0, spec.targetDepth - stageProgress);
+    }
     if (layout.id === 'raise' && stage >= 1) {
       return Math.max(0, (raise ? raise.length : maxStation()) - stageProgress);
     }
@@ -6481,6 +6497,14 @@ export function createGeology(ctx) {
       ? depthForStation(smoothDepth) : smoothDepth;
 
     const act = actionStation();
+    treatmentColumn.visible = spec.methodId === 'jet-grouting' && stage >= 1 && stageProgress > .001;
+    if (treatmentColumn.visible) {
+      const top = secYForDepth(Math.max(0, spec.targetDepth - stageProgress));
+      const bottom = secYForDepth(spec.targetDepth);
+      treatmentColumn.position.set(axisXAt(0), (top + bottom) * .5, .08);
+      treatmentColumn.scale.set(holeR * 2, Math.abs(top - bottom), 1);
+    }
+
     const horiz = mode.horizontal;
 
     /* ── scroll ──

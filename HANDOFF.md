@@ -1,5 +1,21 @@
 # DRILLITY I THE GAME — handover
 
+## Continuation 2026-09-05 — treated-column section
+
+- Added a reusable translucent section overlay for the interval treated during
+  jet lift. It grows from the job bottom toward the surface and is hidden before
+  treatment. Width follows the existing exaggerated section bore radius; this is
+  a progress marker, not a computed physical column diameter.
+- Fixed the vertical jet action anchor: the monitor now follows the return-pass
+  treatment front instead of staying at final depth.
+- Removed the 6m minimum on the contract target in geology (view limits remain
+  separate), so a 5m job's treatment front can reach the surface correctly.
+- Added tools/jet-section-review.html, an isolated slider-driven visual review
+  without career/save changes. Inspected the half-treated 20m section in-browser.
+- Overlay uses one geometry/material across frames, disposed with geology.
+- Remaining: physical soilcrete appearance, per-layer treatment quality display,
+  all-method visual regression and mobile performance verification.
+
 ## Continuation 2026-09-05 — treatment quality and longer jobs
 
 - Fixed a scoring defect: jet treatment quality was calculated but had zero
