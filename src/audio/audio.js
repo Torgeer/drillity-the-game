@@ -1122,7 +1122,26 @@ export function createAudio(ctx) {
   const unsubs = [];
 
   /* ── mix state (valid even before unlock, so intent is never lost) ────── */
-  const busUser = { master: 1, sfx: 1, music: 1, ambience: 1 };
+  /**
+   * SILENT UNDER THE CAPTURE HARNESS.
+   *
+   * `tools/shoot.mjs` and every `.qa-*` / `.perf-*` probe drive a HEADED Chrome
+   * on the developer's own machine — headless cannot bind the discrete GPU here
+   * — so an unmuted run plays the game out loud through their speakers, which
+   * is exactly what happened. Every launch site now passes `--mute-audio`, but
+   * a probe written tomorrow can forget it. This is the second line of defence:
+   * the game itself stays silent whenever it is being driven for a capture.
+   *
+   *   ?shot   -> muted (the harness always sets it; it also enables
+   *              preserveDrawingBuffer for captureFrame)
+   *   ?mute   -> muted, for a plain browser session
+   *   ?sound  -> forces sound ON even under ?shot, if you are debugging audio
+   */
+  const _q = (() => {
+    try { return new URLSearchParams(location.search); } catch (e) { return null; }
+  })();
+  const _silent = !!_q && !_q.has('sound') && (_q.has('shot') || _q.has('mute'));
+  const busUser = { master: _silent ? 0 : 1, sfx: 1, music: 1, ambience: 1 };
   const busSettings = { sfx: 0.85, music: 0.5, ambience: 0.85 };
   let duckUntil = 0;             // ctx-time until which duckFor() holds
   let duckAmount = 1;            // smoothed 0..1 multiplier applied to music+amb

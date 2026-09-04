@@ -1,0 +1,393 @@
+{
+  "tag": "postpatch",
+  "cases": {
+    "rockbolt": {
+      "painted": {
+        "max": 41,
+        "med": 41
+      },
+      "overlaps": 1,
+      "overlapList": [
+        "canvas(148x85@12,627) x gaugebox__cap(55x14@59,710) = 55x2"
+      ],
+      "onBand3D": [],
+      "smallTargets": [],
+      "clipped": [],
+      "split": {
+        "surfPct": 54,
+        "sectPct": 46,
+        "stagePct": 66.9
+      },
+      "bands": {
+        "surface": {
+          "y": 52,
+          "h": 305
+        },
+        "section": {
+          "y": 357,
+          "h": 260
+        }
+      },
+      "dom": {
+        "screens": 2,
+        "liveNodes": 126,
+        "docNodes": 169,
+        "dockH": 227,
+        "stripH": 52,
+        "dockCount": 1,
+        "hud": {
+          "top": 51,
+          "bottom": 224
+        }
+      }
+    },
+    "driven-pile": {
+      "painted": {
+        "max": 37,
+        "med": 29
+      },
+      "overlaps": 3,
+      "overlapList": [
+        "canvas(150x86@12,627) x gaugebox__cap(109x14@32,711) = 109x2",
+        "vsl__fill(83x50@106,784) x vsl__val(14x14@106,777) = 14x7",
+        "gaugebox__cap(109x14@32,711) x railbtn(122x34@122,717) = 19x8"
+      ],
+      "onBand3D": [],
+      "smallTargets": [],
+      "clipped": [],
+      "split": {
+        "surfPct": 54,
+        "sectPct": 46,
+        "stagePct": 66.9
+      },
+      "bands": {
+        "surface": {
+          "y": 52,
+          "h": 305
+        },
+        "section": {
+          "y": 357,
+          "h": 260
+        }
+      },
+      "dom": {
+        "screens": 2,
+        "liveNodes": 126,
+        "docNodes": 169,
+        "dockH": 227,
+        "stripH": 52,
+        "dockCount": 1,
+        "hud": {
+          "top": 52,
+          "bottom": 227
+        }
+      }
+    },
+    "rc": {
+      "painted": {
+        "max": 50,
+        "med": 46
+      },
+      "overlaps": 31,
+      "overlapList": [
+        "canvas(150x86@12,627) x gaugebox__cap(55x14@59,711) = 55x2",
+        "vsl__fill(83x46@198,788) x vsl__val(14x14@198,777) = 14x3",
+        "canvas(150x86@12,627) x unitcard(366x124@12,629) = 150x84",
+        "railbtn(110x34@268,717) x unitcard(366x124@12,629) = 110x34",
+        "spark(202x30@174,617) x unitcard(366x124@12,629) = 202x18",
+        "groove(204x16@174,695) x unitcard(366x124@12,629) = 204x16",
+        "canvas(150x86@12,627) x unitcard__t(145x15@26,659) = 136x15",
+        "rop__v(37x30@174,663) x unitcard(366x124@12,629) = 37x30",
+        "railbtn__l(86x12@280,728) x unitcard(366x124@12,629) = 86x12",
+        "gaugebox__cap(55x14@59,711) x unitcard(366x124@12,629) = 55x14",
+        "gaugebox__cap(55x14@59,711) x unitcard__n(271x14@26,710) = 55x13",
+        "canvas(150x86@12,627) x ucell__v(46x15@26,691) = 46x15",
+        "canvas(150x86@12,627) x ucell__k(73x11@117,678) = 45x11",
+        "canvas(150x86@12,627) x unitcard__n(271x14@26,710) = 136x3",
+        "canvas(150x86@12,627) x ucell__v(29x15@117,691) = 29x15",
+        "canvas(150x86@12,627) x ucell__k(39x11@26,678) = 39x11",
+        "groove__x(30x14@192,696) x unitcard(366x124@12,629) = 30x14",
+        "rop__k(28x14@174,649) x unitcard(366x124@12,629) = 28x14",
+        "groove(204x16@174,695) x ucell__v(38x15@299,691) = 38x10",
+        "groove(204x16@174,695) x ucell__v(29x15@208,691) = 29x10",
+        "rop__u(19x14@214,676) x unitcard(366x124@12,629) = 19x14",
+        "groove(204x16@174,695) x unitcard__n(271x14@26,710) = 123x2",
+        "rop__u(19x14@214,676) x ucell__k(60x11@208,678) = 19x11",
+        "railbtn(110x34@268,717) x unitcard__n(271x14@26,710) = 28x7",
+        "rop__v(37x30@174,663) x ucell__k(73x11@117,678) = 16x11",
+        "groove__x(30x14@192,696) x ucell__v(29x15@208,691) = 14x9",
+        "i(7x7@181,700) x unitcard(366x124@12,629) = 7x7",
+        "rop__v(37x30@174,663) x ucell__k(60x11@208,678) = 3x11",
+        "groove__x(30x14@192,696) x unitcard__n(271x14@26,710) = 30x1",
+        "rop__v(37x30@174,663) x ucell__v(29x15@208,691) = 3x3",
+        "canvas(150x86@12,627) x unitcard(366x124@12,627) = 150x86",
+        "spark(202x30@174,617) x unitcard(366x124@12,627) = 202x20",
+        "railbtn(110x34@268,717) x unitcard(366x124@12,627) = 110x34",
+        "groove(204x16@174,695) x unitcard(366x124@12,627) = 204x16",
+        "canvas(150x86@12,627) x unitcard__t(145x15@26,657) = 136x15",
+        "rop__v(37x30@174,663) x unitcard(366x124@12,627) = 37x30",
+        "railbtn__l(86x12@280,728) x unitcard(366x124@12,627) = 86x12",
+        "gaugebox__cap(55x14@59,711) x unitcard(366x124@12,627) = 55x14",
+        "canvas(150x86@12,627) x unitcard__n(271x14@26,707) = 136x6",
+        "canvas(150x86@12,627) x ucell__v(46x15@26,688) = 46x15",
+        "gaugebox__cap(55x14@59,711) x unitcard__n(271x14@26,707) = 55x10",
+        "groove(204x16@174,695) x unitcard__n(271x14@26,707) = 123x4",
+        "canvas(150x86@12,627) x ucell__k(73x11@117,675) = 45x11",
+        "canvas(150x86@12,627) x ucell__v(29x15@117,688) = 29x15",
+        "canvas(150x86@12,627) x ucell__k(39x11@26,675) = 39x11",
+        "groove__x(30x14@192,696) x unitcard(366x124@12,627) = 30x14",
+        "rop__k(28x14@174,649) x unitcard(366x124@12,627) = 28x14",
+        "groove(204x16@174,695) x ucell__v(38x15@299,688) = 38x8",
+        "rop__u(19x14@214,676) x unitcard(366x124@12,627) = 19x14",
+        "groove(204x16@174,695) x ucell__v(29x15@208,688) = 29x8",
+        "rop__u(19x14@214,676) x ucell__k(60x11@208,675) = 19x10",
+        "rop__v(37x30@174,663) x ucell__k(73x11@117,675) = 16x11",
+        "railbtn(110x34@268,717) x unitcard__n(271x14@26,707) = 28x4",
+        "groove__x(30x14@192,696) x ucell__v(29x15@208,688) = 14x7",
+        "groove__x(30x14@192,696) x unitcard__n(271x14@26,707) = 30x3",
+        "i(7x7@181,700) x unitcard(366x124@12,627) = 7x7",
+        "rop__u(19x14@214,676) x ucell__v(29x15@208,688) = 19x2",
+        "rop__v(37x30@174,663) x ucell__k(60x11@208,675) = 3x11",
+        "rop__v(37x30@174,663) x ucell__v(29x15@208,688) = 3x5",
+        "canvas(150x86@12,627) x unitcard__n(271x14@26,708) = 136x5",
+        "canvas(150x86@12,627) x ucell__v(46x15@26,689) = 46x15",
+        "gaugebox__cap(55x14@59,711) x unitcard__n(271x14@26,708) = 55x11",
+        "canvas(150x86@12,627) x ucell__k(73x11@117,676) = 45x11",
+        "groove(204x16@174,695) x unitcard__n(271x14@26,708) = 123x4",
+        "canvas(150x86@12,627) x ucell__v(29x15@117,689) = 29x15",
+        "canvas(150x86@12,627) x ucell__k(39x11@26,676) = 39x11",
+        "groove(204x16@174,695) x ucell__v(38x15@299,689) = 38x8",
+        "groove(204x16@174,695) x ucell__v(29x15@208,689) = 29x8",
+        "rop__u(19x14@214,676) x ucell__k(60x11@208,676) = 19x10",
+        "rop__v(37x30@174,663) x ucell__k(73x11@117,676) = 16x11",
+        "railbtn(110x34@268,717) x unitcard__n(271x14@26,708) = 28x5",
+        "groove__x(30x14@192,696) x ucell__v(29x15@208,689) = 14x7",
+        "groove__x(30x14@192,696) x unitcard__n(271x14@26,708) = 30x3",
+        "rop__v(37x30@174,663) x ucell__k(60x11@208,676) = 3x11",
+        "rop__u(19x14@214,676) x ucell__v(29x15@208,689) = 19x2",
+        "rop__v(37x30@174,663) x ucell__v(29x15@208,689) = 3x5",
+        "beat__t(128x14@174,648) x unitcard(366x124@12,627) = 128x14",
+        "beat__s(67x14@174,667) x unitcard(366x124@12,627) = 67x14",
+        "beat__rule(204x2@174,700) x unitcard(366x124@12,627) = 204x2",
+        "i(204x2@110,700) x unitcard(366x124@12,627) = 204x2",
+        "beat__left(26x14@352,649) x unitcard(366x124@12,627) = 26x14",
+        "beat__s(67x14@174,667) x ucell__k(60x11@208,676) = 33x6",
+        "canvas(150x86@12,627) x i(204x2@110,700) = 52x2",
+        "beat__s(67x14@174,667) x ucell__k(73x11@117,676) = 16x6",
+        "beat__rule(204x2@174,700) x ucell__v(38x15@299,689) = 38x2",
+        "beat__rule(204x2@174,700) x ucell__v(29x15@208,689) = 29x2",
+        "i(204x2@110,700) x ucell__v(29x15@117,689) = 29x2",
+        "i(204x2@110,700) x ucell__v(29x15@208,689) = 29x2",
+        "i(204x2@110,700) x ucell__v(38x15@299,689) = 15x2",
+        "beat__s(67x14@174,667) x ucell__k(60x11@208,675) = 33x6",
+        "i(92x2@298,700) x unitcard(366x124@12,627) = 80x2",
+        "beat__s(67x14@174,667) x ucell__k(73x11@117,675) = 16x6",
+        "beat__rule(204x2@174,700) x ucell__v(38x15@299,688) = 38x2",
+        "i(92x2@298,700) x ucell__v(38x15@299,688) = 38x2",
+        "beat__rule(204x2@174,700) x ucell__v(29x15@208,688) = 29x2",
+        "i(204x2@96,700) x unitcard(366x124@12,627) = 204x2",
+        "canvas(150x86@12,627) x i(204x2@96,700) = 66x2",
+        "i(204x2@96,700) x ucell__v(29x15@117,688) = 29x2",
+        "i(204x2@96,700) x ucell__v(29x15@208,688) = 29x2",
+        "i(204x2@185,700) x unitcard(366x124@12,627) = 193x2",
+        "i(204x2@185,700) x ucell__v(38x15@299,688) = 38x2",
+        "i(204x2@185,700) x ucell__v(29x15@208,688) = 29x2",
+        "i(204x2@129,700) x unitcard(366x124@12,627) = 204x2",
+        "i(204x2@129,700) x ucell__v(38x15@299,688) = 34x2",
+        "canvas(150x86@12,627) x i(204x2@129,700) = 33x2",
+        "i(204x2@129,700) x ucell__v(29x15@208,688) = 29x2",
+        "i(204x2@129,700) x ucell__v(29x15@117,688) = 17x2"
+      ],
+      "onBand3D": [],
+      "smallTargets": [],
+      "clipped": [],
+      "split": {
+        "surfPct": 54,
+        "sectPct": 46,
+        "stagePct": 66.9
+      },
+      "bands": {
+        "surface": {
+          "y": 52,
+          "h": 305
+        },
+        "section": {
+          "y": 357,
+          "h": 260
+        }
+      },
+      "dom": {
+        "screens": 2,
+        "liveNodes": 126,
+        "docNodes": 169,
+        "dockH": 227,
+        "stripH": 52,
+        "dockCount": 1,
+        "hud": {
+          "top": 52,
+          "bottom": 227
+        }
+      }
+    },
+    "dth": {
+      "painted": {
+        "max": 38,
+        "med": 38
+      },
+      "overlaps": 2,
+      "overlapList": [
+        "canvas(150x86@12,665) x gaugebox__cap(55x14@59,749) = 55x2",
+        "gaugebox__cap(55x14@59,749) x vsl__name(34x11@37,756) = 12x8"
+      ],
+      "onBand3D": [],
+      "smallTargets": [],
+      "clipped": [],
+      "split": {
+        "surfPct": 54.1,
+        "sectPct": 45.9,
+        "stagePct": 71.4
+      },
+      "bands": {
+        "surface": {
+          "y": 52,
+          "h": 326
+        },
+        "section": {
+          "y": 378,
+          "h": 277
+        }
+      },
+      "dom": {
+        "screens": 2,
+        "liveNodes": 126,
+        "docNodes": 169,
+        "dockH": 189,
+        "stripH": 52,
+        "dockCount": 1,
+        "hud": {
+          "top": 52,
+          "bottom": 189
+        }
+      }
+    },
+    "oil-rotary": {
+      "painted": {
+        "max": 42,
+        "med": 42
+      },
+      "overlaps": 3,
+      "overlapList": [
+        "canvas(150x86@12,627) x gaugebox__cap(55x14@59,711) = 55x2",
+        "pit__gain(29x8@71,730) x pit__base(1x8@71,730) = 1x8",
+        "sstrip__prog(390x2@0,49) x sstrip__tele(390x2@0,49) = 390x2"
+      ],
+      "onBand3D": [],
+      "smallTargets": [],
+      "clipped": [],
+      "split": {
+        "surfPct": 54,
+        "sectPct": 46,
+        "stagePct": 66.9
+      },
+      "bands": {
+        "surface": {
+          "y": 52,
+          "h": 305
+        },
+        "section": {
+          "y": 357,
+          "h": 260
+        }
+      },
+      "dom": {
+        "screens": 2,
+        "liveNodes": 126,
+        "docNodes": 169,
+        "dockH": 227,
+        "stripH": 52,
+        "dockCount": 1,
+        "hud": {
+          "top": 52,
+          "bottom": 227
+        }
+      }
+    }
+  },
+  "nav": [
+    {
+      "visit": 1,
+      "screens": 2,
+      "liveNodes": 126,
+      "docNodes": 169,
+      "dockH": 189,
+      "stripH": 52,
+      "dockCount": 1,
+      "hud": {
+        "top": 52,
+        "bottom": 189
+      },
+      "overlaps": 2,
+      "painted": 30
+    },
+    {
+      "visit": 2,
+      "screens": 4,
+      "liveNodes": 126,
+      "docNodes": 817,
+      "dockH": 189,
+      "stripH": 52,
+      "dockCount": 1,
+      "hud": {
+        "top": 51,
+        "bottom": 186
+      },
+      "overlaps": 2,
+      "painted": 30
+    },
+    {
+      "visit": 3,
+      "screens": 4,
+      "liveNodes": 126,
+      "docNodes": 817,
+      "dockH": 189,
+      "stripH": 52,
+      "dockCount": 1,
+      "hud": {
+        "top": 51,
+        "bottom": 186
+      },
+      "overlaps": 2,
+      "painted": 30
+    },
+    {
+      "visit": 4,
+      "screens": 4,
+      "liveNodes": 126,
+      "docNodes": 817,
+      "dockH": 189,
+      "stripH": 52,
+      "dockCount": 1,
+      "hud": {
+        "top": 51,
+        "bottom": 186
+      },
+      "overlaps": 2,
+      "painted": 30
+    },
+    {
+      "visit": 5,
+      "screens": 4,
+      "liveNodes": 126,
+      "docNodes": 817,
+      "dockH": 189,
+      "stripH": 52,
+      "dockCount": 1,
+      "hud": {
+        "top": 51,
+        "bottom": 186
+      },
+      "overlaps": 2,
+      "painted": 30
+    }
+  ]
+}

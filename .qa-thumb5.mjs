@@ -5,7 +5,7 @@ export function removeStyle(id){const s=document.querySelector('style[data-vite-
 export function injectQuery(u){return u;} export class ErrorOverlay extends HTMLElement{}`;
 
 async function run(stub) {
-  const b = await chromium.launch({ headless: false, channel: 'chrome' });
+  const b = await chromium.launch({ args: ['--mute-audio'], headless: false, channel: 'chrome' });
   const c = await b.newContext({ ...devices['iPhone 13 Pro'], viewport:{width:390,height:844}, deviceScaleFactor:2, isMobile:true, hasTouch:true });
   if (stub) await c.route('**/@vite/client', r => r.fulfill({ status:200, contentType:'application/javascript', body: VITE_STUB }));
   const p = await c.newPage();

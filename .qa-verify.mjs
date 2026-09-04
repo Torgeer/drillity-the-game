@@ -99,7 +99,7 @@ const PROBE_WITH_TOKEN = () => {
 };
 
 const run = async () => {
-  const browser = await chromium.launch({ headless: false, channel: 'chrome' });
+  const browser = await chromium.launch({ args: ['--mute-audio'], headless: false, channel: 'chrome' });
   const ctx = await browser.newContext({ ...devices['iPhone 13 Pro'], viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   // Other agents are saving files continuously and every save full-reloaded the
   // page out from under the probe. Stub Vite's HMR client so the page holds.

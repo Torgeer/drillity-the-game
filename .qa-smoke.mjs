@@ -1,5 +1,5 @@
 import { chromium, devices } from 'playwright';
-const b = await chromium.launch({ headless: false, channel: 'chrome' });
+const b = await chromium.launch({ args: ['--mute-audio'], headless: false, channel: 'chrome' });
 const c = await b.newContext({ ...devices['iPhone 13 Pro'], viewport:{width:390,height:844}, deviceScaleFactor:2 });
 const p = await c.newPage();
 const errs = [];

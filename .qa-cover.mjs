@@ -38,7 +38,7 @@ const MEASURE = () => {
   return { W, H, regions: regions.length, list: regions,
     coveredPct: +(100*covered/grid.length).toFixed(1), uncoveredPct: +(100*(1-covered/grid.length)).toFixed(1) };
 };
-const b = await chromium.launch({ headless:false, channel:'chrome' });
+const b = await chromium.launch({ args: ['--mute-audio'], headless:false, channel:'chrome' });
 const c = await b.newContext({ ...devices['iPhone 13 Pro'], viewport:{width:390,height:844}, deviceScaleFactor:2, isMobile:true, hasTouch:true });
 await c.route('**/@vite/client', r => r.fulfill({ status:200, contentType:'application/javascript', body: VITE_STUB }));
 const p = await c.newPage();

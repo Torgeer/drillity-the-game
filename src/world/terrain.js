@@ -4238,7 +4238,8 @@ export function createTerrain(ctx) {
      Draw calls, measured (see the report): 13-15 for the whole drive against a
      surface site's 16-25 and a budget of 80.
      ═══════════════════════════════════════════════════════════════════════ */
-  let methodId = ctx?.state?.contract?.methodId || null;
+  let methodId = ctx?.state?.contract?.methodId
+    || ctx?.state?.world?.site?.methodId || null;
   let ugSpec = UNDERGROUND[methodId] || null;
   let pendingMethod = null;
   let driveGroup = null;

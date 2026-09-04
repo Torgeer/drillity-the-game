@@ -16,7 +16,7 @@ export class ErrorOverlay extends HTMLElement {}
 `;
 
 export async function openStable(url) {
-  const b = await chromium.launch({ headless: false, channel: 'chrome' });
+  const b = await chromium.launch({ args: ['--mute-audio'], headless: false, channel: 'chrome' });
   const c = await b.newContext({ ...devices['iPhone 13 Pro'], viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   // Neutralise Vite's HMR client: other agents are saving files continuously
   // and every save was full-reloading the page out from under the probe.
