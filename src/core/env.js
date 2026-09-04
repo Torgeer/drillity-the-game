@@ -2347,17 +2347,35 @@ export function createEnvironment(ctx) {
       // rig change and re-read it lazily. This handler must NOT switch mode —
       // see the single-writer note above.
       ctx.bus.on(EVENTS.RIG_CHANGE, () => { workLights = null; });
-      const m0 = (ctx.state && ctx.state.contract && ctx.state.contract.methodId) || null;
+      const s0 = ctx.state && ctx.state.world && ctx.state.world.site;
+      const m0 = (ctx.state && ctx.state.contract && ctx.state.contract.methodId)
+        || (s0 && s0.methodId) || null;
       if (UNDERGROUND[m0]) api.setUnderground(m0);
     },
 
     update(dt, state) {
       time += dt;
 
-      /* The method decides whether there is a sky at all. The live contract is
-         the authority — it is what the player accepted and what the sim is
-         running — and this poll is the ONLY writer (see init()). */
-      const mid = (state && state.contract && state.contract.methodId) || pendingMethod;
+      /* The method decides whether there is a sky at all, and this poll is the
+         ONLY writer of it (see init()).
+
+         IT READS state.world.site, NOT state.contract. progression.js clears
+         the contract at settlement from inside the HOLE_COMPLETE dispatch, so
+         on the eight single-unit methods it is null for the whole results
+         screen while the drive is still on screen behind it. Reading the
+         contract put `mid = null` one frame after the last hole finished,
+         which is setUnderground(null): the light rig, the ambient, the
+         hemisphere and the participating medium are all disposed and THE SKY
+         COMES BACK ON INSIDE THE ROCK. `state.world.site` carries the same
+         methodId and is never cleared by settlement.
+
+         With every source null, HOLD — `|| ugId` — because the site on screen
+         has not changed just because nothing is describing it this frame.
+         audio.js already does exactly this and is the only consumer that has
+         ever survived a settlement intact. */
+      const w0 = (state && state.world && state.world.site) || null;
+      const mid = (state && state.contract && state.contract.methodId)
+        || (w0 && w0.methodId) || pendingMethod || ugId;
       const wantUg = UNDERGROUND[mid] ? mid : null;
       if (wantUg !== ugId) api.setUnderground(wantUg);
 

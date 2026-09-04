@@ -1,0 +1,13 @@
+{
+  "when": "2026-09-04T21:25:03.752Z",
+  "quality": "high",
+  "bootMs": 21999,
+  "stops": [
+    {
+      "i": 0,
+      "method": "auger",
+      "aborted": "page.evaluate: Target page, context or browser has been closed"
+    }
+  ],
+  "errors": []
+}

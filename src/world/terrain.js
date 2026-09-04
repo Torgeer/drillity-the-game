@@ -5200,10 +5200,47 @@ export function createTerrain(ctx) {
        the method, the region and the application instead. Deriving is not the
        same as defaulting: a default would put the tunnel jumbo back on a forest
        floor, which is the exact fault this layer exists to remove. */
+    /* ── READ state.world.site, NOT state.contract ────────────────────────
+       progression.js clears `state.contract` at settlement, and it does it
+       from INSIDE the HOLE_COMPLETE dispatch — so on the eight single-unit
+       methods the contract is null for the whole results screen while this
+       site is still on screen and still being rendered behind it:
+
+           contract                  : rockbolt / underground-drive / holes 1
+           state.contract   after run: null
+           state.world.site after run: rockbolt / underground-drive
+
+       Reading the contract therefore handed this function `mid = null` one
+       frame after the last hole finished, which called setMethod(null) — and
+       that clears ugSpec, so `changed` is true and rebuild() TORE THE DRIVE
+       DOWN AND BUILT A SURFACE PAD under the results screen. The player
+       watches an underground drive become a forest clearing at the moment
+       they are being told they did well in it.
+
+       `state.world.site` is published on accept, carries methodId, regionId,
+       applicationId, archetype and sitePlane, and is NEVER cleared by
+       settlement — only replaced by the next accept, or wiped by reset(). It
+       is the authority for anything that DESCRIBES the site. The contract
+       means "money outstanding", which is a different question.
+
+       And when every source is null — first boot, the menu, a save with no
+       site — HOLD THE PREVIOUS VALUE rather than resolving a new one.
+       audio.js is the only consumer in the tree that already survives this,
+       and it survives it exactly this way: it keeps the last good id and
+       refuses an unknown one. Copied, not re-derived. */
     const c = (state && state.contract) || null;
-    const mid = (c && c.methodId) || pendingMethod;
+    const site = (state && state.world && state.world.site) || null;
+    const mid = (c && c.methodId) || (site && site.methodId) || pendingMethod || methodId;
     if (mid !== methodId) setMethod(mid);
-    const aid = resolveArchetype(mid, regionId, c && c.applicationId, c && c.archetype, ctx && ctx.data);
+    /* Same precedence for the SETTING. An explicit `archetype` on either
+       source is the authority; resolveArchetype() derives only when neither
+       carries one — and with nothing at all to go on it is not called, so a
+       blank frame can never rebuild the site into the region default. */
+    const appId = (c && c.applicationId) || (site && site.applicationId) || null;
+    const explicit = (c && c.archetype) || (site && site.archetype) || null;
+    const aid = (mid || explicit)
+      ? resolveArchetype(mid, regionId, appId, explicit, ctx && ctx.data)
+      : archId;
     if (aid !== archId) setArchetype(aid);
 
     if (ugSpec) {

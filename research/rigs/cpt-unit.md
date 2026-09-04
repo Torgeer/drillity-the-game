@@ -1,7 +1,7 @@
 # `cpt-unit` — CPT push unit (ballasted truck or crawler)
 
 **Engineering reference for the modeller. GEOMETRY AND MATERIALS ONLY.**
-status: in progress
+status: complete
 
 > **NAMING RULE (DOMAIN.md §10):** every manufacturer name and model designation in
 > this document — A.P. van den Berg, Pagani, Geomil, Comacchio, Hyson, Envi, Geotech AB,
@@ -360,10 +360,257 @@ metre, not a stubby bit. It lives in a padded case, and the game is right to sho
 
 ## 5. Distinctive features — the thumbnail silhouette
 
+At 64×64 px, this machine is identified by **absence** more than presence. That is unusual
+and it is the design opportunity.
+
+1. **NO MAST.** Everything else in the garage has a tall vertical or inclined member
+   breaking the sky. This one has a stub — a push frame roughly the height of a person and
+   a half, sitting *inside* the machine's own footprint, not above it. The horizon line of
+   the silhouette is nearly flat. If a player can see a mast against the sky, you have drawn
+   the wrong machine.
+2. **A LOW SOLID BOX WITH ITS FEET DOWN.** Four jack legs visibly planted, and the tracks or
+   wheels visibly **unloaded** — a sliver of daylight, or at least slack, under the running
+   gear. Nothing else in the fleet deliberately stands *off* its own undercarriage.
+3. **MASSIVE FOR ITS SIZE.** It is short, wide, and reads as heavy — the proportions of a
+   counterweight, not of a machine. Squat, blocky, over-massed. Pack 11 §D.5: *"a squat,
+   heavy, deliberately over-massed tracked box. All that weight exists only to be sat on."*
+4. **A ROD GOING STRAIGHT DOWN THROUGH THE MIDDLE OF IT**, and nothing else moving. No
+   rotation, no head spinning, no cuttings, no plume, no spoil pile, no mud tank, no
+   compressor. **The ground around the rod is undisturbed.** A CPT site is conspicuously
+   clean — that emptiness is the identifier.
+5. **THE GLOW OF A SCREEN** at the operator position, brighter than anything else on the
+   machine. It is the only thing that is *doing* something.
+
+If you need a sixth for the Nordic variant: **an orange twin-column chain-fed tower
+overhanging the front of the tracks**, well outboard of the machine, with a black energy
+chain up its full height (`Geoteknik-broschyr.pdf` pp.4–7).
+
 ## 6. Materials and paint
+
+**Painted steel** — the great majority. Body panels, deck, push frame columns, jack legs,
+rod rack, console pedestal, engine covers.
+- The Nordic school is a **strong saturated safety orange** with black or dark-grey
+  undercarriage and black trim (`Geoteknik-broschyr.pdf` pp.4–7, every machine).
+- The Comacchio geotech crawler renders in **cream/sand with a red rotary head and a dark
+  undercarriage** (p.16/17 drawings) — a different, equally real convention.
+- Bauer's foundation machines in the same folder are **yellow with dark grey** (hose
+  catalogue p.2).
+- Whatever the game picks, keep the **undercarriage a different, darker value than the
+  body**. That separation is true of all three conventions and it is what makes the machine
+  read as sitting *on* something.
+
+**Bare / unpainted steel** — the honest wear surfaces, and they must not be painted:
+- The **push rods** themselves — plain steel, mill finish, quickly going to a dull mid-grey
+  with rust blooming at the thread shoulders.
+- The **chrome piston rods** — hard-chrome, genuinely mirror-bright, with a wiped band where
+  the seals run and a duller, finger-marked, faintly water-spotted zone outside it.
+- The **rod clamp jaws** — polished bright by 44 mm steel passing through them, with the
+  gripping serrations packed with dried clay.
+- The **hatch coaming** and any edge the rods knock against — paint chipped through to
+  primer and then to bright steel at every corner.
+- **Crimped hose ferrules** — bright zinc-plated silver, and per Bauer they carry a **stamped
+  part number** on the crimp. A tiny bright ring at every hose end.
+- **Checker plate** on decks and steps — worn shiny on the tread pattern, dirt in the grooves.
+
+**Rubber** — tracks (matte black, dusty grey when dry, near-black and shiny when wet), the
+road-wheel tyres inside the track loop (with **bright red painted hub centres** on the
+Geotech machines — a strong, cheap detail), the **rod wiper** at the collar, hose covers
+(matte black, spiral-wrapped where they rub), and the jack-pad faces.
+
+**Glass / plastic** — the console screen and its hinged weather lid, the cab glazing if you
+build a cab, work-lamp lenses, and the amber beacon.
+
+**Where dirt actually accumulates** (this is the part that sells it):
+- **A ring of wet clay around the hole**, and a spray pattern of it up the frame legs to
+  about knee height — thrown off the rods as they come out.
+- **Clay smeared full-length on the rod currently in the hole**, clean rods in the rack. The
+  wiper is what makes that difference legible.
+- **Track pads and the whole lower body** caked to the height of the track top. In Swedish
+  marine clay this is a pale grey-brown that dries to a chalky crust and cracks.
+- **The jack pads and the ground under them** — pressed, glossy, with squeezed-out mud
+  around the rim.
+- **Rust runs from every fastener and every drain hole**, streaking down the paint below.
+- **Rust on stored steel**, and the folder shows exactly what it looks like: the Klaravik
+  auction photos in `C:\Users\henri\Downloads` (`extrabilder513148*_large.jpg`) show stacked
+  casing and pile shoes sitting outdoors in Swedish weather — a warm orange-brown even
+  scale-rust over the whole surface, darker in the pits, with the mill stencilling and the
+  blue plastic thread protectors still legible through it. That is the right rust for
+  anything left on the ground.
+- **What does NOT accumulate here:** drill cuttings, mud splatter from a flush return,
+  grease slung by a rotating head, dust film from percussion. There is no rotation and no
+  flush. A CPT machine is dirty only from the *ground it stands on and the rods it pulls* —
+  never from the process. Getting this restraint right is what makes it read as testing.
 
 ## 7. Photo references
 
+Everything below is in `C:\Users\henri\Downloads`.
+
+| Reference | What it is good for |
+|---|---|
+| `Geoteknik-broschyr.pdf` **p.5** | **The best single reference in the folder.** Four tracked Nordic geotech/sounding rigs, three-quarter front, on white — clean read of body massing, mast position, track/bogie relationship, console placement, front jack feet, orange-on-black paint split. Use this for overall proportions. |
+| `Geoteknik-broschyr.pdf` **p.4** | Full **side elevation** of a Geotech rig at a real building with ~30 people standing beside it — **a free human scale reference**. Track length vs body length, bogie count, mast overhang at the front. |
+| `Geoteknik-broschyr.pdf` **p.6** (top-right photo) | Close-up of the **stand-up operator console**: hinged weather lid propped open over a large screen, joystick, multi-knob, keypad, brushed-metal bezel, mounted on the machine's flank. Also the orange body panel and track detail behind it. |
+| `Geoteknik-broschyr.pdf` **p.6** (bottom-left) | The **radar "virtual guard cage"** visualised as a glowing yellow-green cylinder around the rod at ground level. Also the collar area with the rod entering bare soil. |
+| `Geoteknik-broschyr.pdf` **p.6** (bottom-right) | The rig beside the **green twin-axle trailer power pack**, hose across wet ground, hose reel on the rig. Site-context reference. |
+| `Geoteknik-broschyr.pdf` **p.7** (right photo) | **The rod clamp at ground level** — two black powder-coated clamp bodies straddling the rod on bare soil, orange operating levers, yellow warning triangles, bolted foot frame. Best close-up of the collar hardware in the folder. |
+| `Geoteknik-broschyr.pdf` **p.7** (bottom-left) | The rig **working in a birch forest** on soft ground — mud on tracks, machine attitude, mast standing proud of the trees. Good environment/wear reference. |
+| `Geoteknik-broschyr.pdf` **p.7** (bottom-right) | The **radio remote control** belly box in detail: colour screen, twin joysticks, dead-man grip, rocker banks. |
+| `Geoteknik-broschyr.pdf` **p.7** (small line drawing) | **Front elevation** of the rig showing the **±10° mast side-tilt** envelope. |
+| `Geoteknik-broschyr.pdf` **p.8** | **The cone**, rendered large and clean: 60° tip, shoulder filter, friction sleeve, striped instrument modules, conductivity adapter, tail thread. Also the **SCPT schematic** — note the seismic source is a **sledgehammer struck against a beam laid on the ground beside the machine**. |
+| `Comacchio-GEO-305Pres_2023_FULL_WEB.pdf` **p.16** | **Dimensioned side and front general-arrangement drawings** of a small geotech crawler: mast up 6200, feed stroke 3600, body height 1700, base length 3840, shoe 300, gauge 1400–1700. Wrong machine, right drawing conventions and right proportional family. |
+| `Comacchio-GEO-305Pres_2023_FULL_WEB.pdf` **p.17** | The same machine **dimensioned in transport position** — mast folded back over the body, height 2340, length 3870. Useful for a transport/travel pose. |
+| `Comacchio-GEO-305Pres_2023_FULL_WEB.pdf` **pp.2–14** | Photo pages of the crawler in the field (no captions). General small-geotech-crawler reference only. |
+| `Bauer-Maschinen-Hydraulikschläuche…pdf` **p.2** | A BG 28 H on a low-loader with **thick black hose bundles fanning from the mast foot** — the clearest hose-routing photo in the folder. |
+| `extrabilder51314847/52/57/72/82_large.jpg` (Klaravik auction lots) | **Rust and stored-steel reference.** Stacked casing pipe in grass and a crate of pile shoes, all outdoors in Sweden. Orange-brown scale rust, blue thread protectors, weathered timber crates. Not machines — materials only. |
+
+**Not found:** no photograph anywhere in `C:\Users\henri\Downloads` (root, `Atpa\`, or the
+other subfolders) shows a ballasted CPT truck or a 20 t CPT crawler. The `Atpa\` folder was
+swept and is entirely drill bits, DTH hammers, casing shoes and product photography — no
+CPT content. See §8.
+
 ## 8. NOT SOURCED
 
+Everything here is a real gap. Do not let anyone fill it with a plausible-sounding number.
+
+1. **Every overall dimension of the game's actual subject.** No length, width, height, track
+   gauge, shoe width, wheelbase or deck height for a **20 t ballasted CPT crawler or a 6×6
+   CPT truck** exists anywhere in this folder. The masses (20–22 t) and the thrust (200 kN)
+   are well sourced; the *geometry* is not sourced at all. The only dimensioned drawing in
+   the folder is a different, much smaller machine (Comacchio GEO 305).
+2. **Mast/push-frame height for the ballasted machine.** The game uses 2.05 m. Nothing
+   supports or contradicts it. It must be at least one rod (1.0 m) plus clamps plus
+   crosshead, so ≥ ~1.6 m is a floor, but the actual figure is unknown.
+3. **How the 20 t of ballast is packaged.** Integral heavy chassis, cast blocks, or removable
+   plates with lifting slots? Unknown. The game's plate stack is a guess.
+4. **The Pagani / light-machine anchoring method.** Pack 11 §A.14 flags it `UNVERIFIED`. Pack
+   06 §A.2.8 says the 3.5 t `[INSITU]` machine uses **four hydraulically driven screw
+   anchors**, which is sourced — but the anchor's own geometry (flight diameter, pitch,
+   length, drive head) is not.
+5. **Track gauge and shoe width for any CPT machine.** Only the Comacchio comparator has
+   numbers (300 mm shoe / 1400–1700 mm gauge) and it is a ~4 t machine, not a 20 t one.
+6. **Handrail, ladder, walkway and step geometry** for this class. Nothing dimensioned
+   anywhere. Model to sensible EU practice and label it as judgement.
+7. **Hose DN sizes, bend radii, and hose colours.** The Bauer catalogue is a 2-page
+   image-based sales sheet — it gives the *architecture* (packages, bulkhead plates, six main
+   lines, cable inside the bundle, tarp wrap) but **no dimensional table at all**.
+8. **Cab vs canopy on the ballasted machine.** Pack 06 §E.3(a) says "cabin"; no photograph or
+   drawing of one exists in the folder. Its glazing, door position and size are unknown.
+9. **Paint colour for the ballasted school.** Sourced colours exist only for the Nordic
+   (orange), Comacchio (cream/red) and Bauer (yellow) machines. Pick one and own it.
+10. **Rod magazine capacity and layout on a real CPT machine.** The 30–40 m depth implies
+    30–40 rods; where a real machine stows them is not shown in any source here.
+11. **Weight of a single push rod, and rod handling ergonomics.** Not sourced.
+12. **Nordic sounding methods** (*viktsondering*, *Jb-totalsondering*, *hejarsondering*,
+    CPT-SU) — pack 06 §I already flags these as "parameters not sourced". Still true.
+13. **`5.Kravspecifikation geoteknik-1.pdf` contributed nothing.** It is a consultant
+    procurement document (roles, CVs, reference projects, a vehicle-emissions clause). It
+    does not name a single investigation method or machine. Recorded here so nobody re-reads
+    it hoping.
+
 ## 9. Domain-truth warnings — what the game currently gets wrong
+
+Read against `C:\Users\henri\Downloads\drillity-the-game\src\rig\rigFactory.js`,
+`buildCPTUnit`, lines ~6486–6740. **A lot of this builder is right** — the comment block at
+the top is one of the better pieces of domain writing in the file, and the spec block is
+almost entirely sourced. The following are the real defects.
+
+### 9.1 CORRECTNESS — the cylinders are inside out (sourced, fixable, high value)
+
+The builder puts a **static fat cylinder body on the frame** and a **moving thin chrome rod
+on the carriage**:
+
+```js
+part(T, stack.lower, G.cyl(T, 0.085, 0.085, pushH * 0.42, …), p.dark,  { p: [s*0.34, pushH*0.30, -0.20] });  // static body
+part(T, carriage,    G.cyl(T, 0.052, 0.052, 0.34,        …), p.chrome,{ p: [s*0.34, 0.24,       -0.20] });  // moving rod
+```
+
+That is a conventional feed ram. The CPT penetrometer is famously **the inverse**: pack 11
+§A.14 and §D.5 — *"the piston rods are fixed to the truck frame and the cylinders move…
+the visible moving parts are the cylinder bodies travelling up and down the fixed rods —
+the inverse of every other hydraulic ram in this document."* The fix is a parent/material
+swap: **full-length chrome rods parented to `stack.lower`, fat dark cylinder bodies parented
+to `carriage`.** This is the single most identifiable feature of the class and the game
+currently draws it backwards.
+
+### 9.2 CORRECTNESS — there is a visible gap in the load path at full extension
+
+`dyn.carriageRange = [pushH - 0.55, 0.26]` = a carriage travel from **y ≈ 1.50 down to
+y ≈ 0.26**, a **1.24 m stroke**. But the moving chrome rod is only **0.34 m** long
+(spanning carriage-local y 0.07 → 0.41), and the static cylinder body spans frame-local
+y 0.185 → 1.046. So at the top of travel the chrome spans y 1.57 → 1.91 — **entirely above
+the cylinder, with roughly half a metre of empty air between them.** The ram visually
+disconnects. Whichever way §9.1 is resolved, the moving element and the fixed element must
+overlap across the whole stroke.
+
+### 9.3 The stroke should be sized to the rod, and the magazine to the depth
+
+The spec says `rodLenM: 1.0` and `typicalDepthM: '30-40'`. Both are sourced and correct
+(pack 06 §E.3, §A.2.8). But:
+- the usable stroke must clear **one rod plus both clamps**, and
+- the magazine holds **18 rods** (`rows = 3`, `cols = 6`), which is **18 m** — less than half
+  the machine's own stated depth. Either carry 30–40, or show it reloading.
+
+### 4.4-related: the cone in the case is a good touch and the areas are right
+
+`coneCm2: '10 and 15'`, `pushRodOdMm: 44.5`, `rateMmS: 20`, `rateToleranceMmS: 5`,
+`readingIntervalMm: 50`, `measures: 'qc, fs, u2'`, `standard: 'ASTM D5778'` — **all sourced
+and all correct** against pack 06 §A.2.2–A.2.4. Do not let anyone "improve" these.
+
+### 9.4 The hatch-through-the-deck is sourced to the TRUCK, not the crawler
+
+Pack 06 §E.3(a) attributes the mid-deck hatch to the **ballasted truck**. The game puts it on
+a **tracked** machine. That is a hybrid, and it may well be right — van den Berg's crawler
+is the same penetrometer on tracks — but **no source in this folder shows a tracked machine
+pushing through a hatch in the middle of its own deck.** Flagging it, not condemning it.
+
+### 9.5 Canopy where the source says cabin
+
+The builder makes an **open hood** — four posts, a roof, one glass panel. Pack 06 §E.3(a):
+*"The operator sits **inside, in a cabin** over the push point, at a screen."* On a 20 t
+all-weather machine in Nordic conditions that matters. Either enclose it, or move to the
+Nordic pattern (§4.5) and build a proper hinged-lid stand-up console with a laptop cabinet —
+which is sourced in photographs and is more characterful than a generic canopy.
+
+### 9.6 Hose routing is the generic pattern, not the sourced one
+
+`dyn.hoses` lays three independent round tubes plus a separate `signal-cable` tube. The Bauer
+catalogue (p.2) says hoses on this kind of machine run as **packages between bulkhead
+plates**, six main lines at a time, with the **electric cable bundled inside the hose
+package** and the whole thing in a **flat tarpaulin wrap**. A flat strapped ribbon leaving a
+bolted bulkhead plate is both better sourced and cheaper to draw than four separate snakes.
+
+### 9.7 Missing parts that are sourced and cheap
+
+- **The rubber rod wiper** at the collar (`Avskrapargummi 42-44`, `Geoteknik-broschyr.pdf`
+  p.11). Explains clean rods vs. dirty rod.
+- **The jacks must visibly unload the tracks.** `buildJackSet` is called with `stroke: 0.46`
+  but nothing in the builder lifts the machine off its running gear, which is the entire
+  point of the jacks per `[D5778]` §12.1.1 and pack 06 §E.3(a).
+- **The saturation-oil ritual** — `CPT Olja 2dl` and `CPT Spaltfilter NOVA`
+  (`Geoteknik-broschyr.pdf` p.13). A small bottle and a filter tin at the cone case.
+- **Threaded-joint grease tub** (`Gängfett BioPlus 4,5 kg`, p.11).
+- **Red-centred bogie road wheels** visible inside the rubber track loop — present on every
+  machine in the brochure, and a two-material freebie.
+
+### 9.8 Two things the game invented that it should keep, but label
+
+- `weightKg: 20000` / `thrustKn: 200` — **sourced exactly** (van den Berg CPT Crawler,
+  pack 11 §A.14; `[INSITU]` table, pack 06 §A.2.8). Good.
+- `alternativeReaction: 'The 3.5 t variant screws four helical anchors instead'` —
+  **sourced** (pack 06 §A.2.8/§E.3(b) `[INSITU]`). Good. But the *specific* anchor design is
+  not; keep player-facing text at "screw anchors".
+- `powerKw: 55` — **not sourced for this class.** Comparable: Geotech 505 is 56 kW at 3.8–4.2 t,
+  Geotech 608 is 100 kW at 6.2 t. Nothing contradicts 55 kW for a machine that only has to
+  push slowly, but it is a guess. Mark it.
+
+### 9.9 The naming rule
+
+`spec.name = 'Rynnval CP-20 Ballastline'` and `klass = 'Tracked CPT unit — ballasted reaction
+mass'` are **correct practice** under DOMAIN.md §10 — an invented badge over a real machine
+class. Nothing in this document may be used as a product name: not *A.P. van den Berg*,
+*HYSON*, *Pagani*, *TG 63-100*, *Geotech*, *Geotech 220/404/505/608*, *Geomek*, *NOVA*,
+*SCPT-GS2*, *Comacchio*, *GEO 305*, *Bauer*, nor *BG 28 H*. Model the shapes. Invent the badge.
+
+---
+
+*status: complete*

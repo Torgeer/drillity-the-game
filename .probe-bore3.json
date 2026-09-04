@@ -1,0 +1,120 @@
+{
+  "scale": {
+    "ppu": 38.85,
+    "holeRUnits": 0.5432,
+    "boreHalfPx": 21.1,
+    "trueHoleHalfPx": 2.95,
+    "exagg": 7.15
+  },
+  "window": {
+    "centreX": 390,
+    "bitRow": 1177,
+    "rTop": 915,
+    "rBot": 1171,
+    "metresOfHoleVisible": 6.74
+  },
+  "perMesh": {
+    "sectionBackdrop": {
+      "insideCore80pct": 2763,
+      "inOuterBore": 836,
+      "outside": 20157
+    },
+    "head": {
+      "insideCore80pct": 4746,
+      "inOuterBore": 1059,
+      "outside": 20289
+    },
+    "merged": {
+      "insideCore80pct": 3038,
+      "inOuterBore": 838,
+      "outside": 20360
+    },
+    "borehole-wall": {
+      "insideCore80pct": 7523,
+      "inOuterBore": 2271,
+      "outside": 20058
+    },
+    "casing": {
+      "insideCore80pct": 2755,
+      "inOuterBore": 892,
+      "outside": 20316
+    },
+    "drill-string": {
+      "insideCore80pct": 5629,
+      "inOuterBore": 1638,
+      "outside": 35833
+    },
+    "bit": {
+      "insideCore80pct": 5583,
+      "inOuterBore": 1714,
+      "outside": 36483
+    },
+    "boulders": {
+      "insideCore80pct": 5468,
+      "inOuterBore": 1789,
+      "outside": 35799
+    },
+    "annotations": {
+      "insideCore80pct": 5492,
+      "inOuterBore": 1737,
+      "outside": 36188
+    },
+    "depth-readout": {
+      "insideCore80pct": 5622,
+      "inOuterBore": 1712,
+      "outside": 36421
+    },
+    "section-face": {
+      "insideCore80pct": 8481,
+      "inOuterBore": 2570,
+      "outside": 61166
+    },
+    "depth-ruler": {
+      "insideCore80pct": 5516,
+      "inOuterBore": 1609,
+      "outside": 35338
+    },
+    "drill-log": {
+      "insideCore80pct": 5507,
+      "inOuterBore": 1740,
+      "outside": 36394
+    },
+    "fractures": {
+      "insideCore80pct": 5592,
+      "inOuterBore": 1719,
+      "outside": 38370
+    },
+    "water-table": {
+      "insideCore80pct": 5493,
+      "inOuterBore": 1699,
+      "outside": 36151
+    },
+    "vfx:sectionSoft": {
+      "insideCore80pct": 5543,
+      "inOuterBore": 1678,
+      "outside": 35698
+    },
+    "vfx:sectionAdd": {
+      "insideCore80pct": 5671,
+      "inOuterBore": 1664,
+      "outside": 36131
+    },
+    "vfx:chips": {
+      "insideCore80pct": 5542,
+      "inOuterBore": 1693,
+      "outside": 35524
+    }
+  },
+  "luminance": {
+    "p1": 0.6,
+    "p5": 3.3,
+    "p50": 3.8,
+    "p90": 46.1,
+    "p95": 61.7,
+    "p99": 69.3,
+    "max": 83.8,
+    "pctAbove70": 0.71,
+    "pctBelow5": 63.88
+  },
+  "consoleErrors": []
+}

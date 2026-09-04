@@ -545,10 +545,15 @@ canvas { display: block; }
   height: 12px; display: flex; align-items: center; justify-content: center; gap: 5px;
   min-width: 0;
 }
+/* No label tracking here, and an ellipsis if it still does not fit. The head
+   row now carries the numeral too, so the name has ~65px in an 85px column;
+   at `--tr-label` the longest of them ("ROTATION") measured 69px and was
+   being sliced mid-glyph with `text-overflow: clip`. */
 .vsl__name {
+  min-width: 0;
   font-size: var(--t-2xs); font-weight: 800; line-height: 1;
-  letter-spacing: var(--tr-label); text-transform: uppercase; color: var(--c-fg-muted);
-  white-space: nowrap; overflow: hidden; text-overflow: clip;
+  letter-spacing: 0; text-transform: uppercase; color: var(--c-fg-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 /* In the head row, in reserved space — not floating over the track it
    describes. It is the only numeral on the control. */
@@ -881,8 +886,12 @@ canvas { display: block; }
 .sstrip.is-alert.is-info .sstrip__alert { color: var(--c-steel-soft); }
 .sstrip.is-alert.is-good .sstrip__alert { color: var(--c-success-soft); }
 
-/* Two rules on one 2px foot: the job underneath, the telegraph over it. The
-   job rule is the amber; the telegraph borrows the alert's own colour. */
+/* Two rules, TWO FEET — not one 2px foot with the telegraph painted over the
+   job. Stacking them put two marks on the same two pixels, which is an
+   overlap however thin it is, and the lower one was simply unreadable
+   whenever the telegraph was up. The job rule keeps the bottom 2px (amber);
+   the telegraph sits in its own 2px row directly above it and borrows the
+   alert's colour. Adjacent, never coincident. */
 .sstrip__prog, .sstrip__tele {
   position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
   -webkit-clip-path: inset(0 calc(100% - var(--p) * 100%) 0 0);
@@ -890,6 +899,7 @@ canvas { display: block; }
 }
 .sstrip__prog { background: rgb(var(--rgb-amber) / .9); transition: -webkit-clip-path var(--dur-4) linear, clip-path var(--dur-4) linear; }
 .sstrip__tele {
+  bottom: 2px;   /* its own row, above the job rule — see the note above */
   background: currentColor;
   -webkit-clip-path: inset(0 calc(100% - var(--tp) * 100%) 0 0);
           clip-path: inset(0 calc(100% - var(--tp) * 100%) 0 0);
@@ -948,10 +958,16 @@ canvas { display: block; }
   display: flex; flex-direction: column;
 }
 .gaugebox canvas { flex: none; display: block; }
+/* 14px, NOT 11: at font-size 11px the line box this text actually paints is
+   14px tall, so an 11px row let it spill ~1.5px top and bottom — over the
+   dial above it every single frame. `line-height` is pinned to the row height
+   so the two can never drift apart again.
+   THIS NUMBER IS COUPLED to `CAP_H` in src/ui/screens/site.js (resizeGauge
+   subtracts it from the canvas). Change one and you must change the other. */
 .gaugebox__cap {
-  position: static; flex: none; height: 11px;
+  position: static; flex: none; height: 14px;
   display: flex; align-items: center; justify-content: center;
-  font-size: var(--t-2xs); line-height: 1; font-weight: 800;
+  font-size: var(--t-2xs); line-height: 14px; font-weight: 800;
   letter-spacing: var(--tr-label); text-transform: uppercase; color: var(--c-fg-dim);
 }
 
@@ -1149,8 +1165,10 @@ canvas { display: block; }
   background: rgb(var(--rgb-black) / .5);
 }
 .pit__base { position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: rgb(var(--rgb-fg) / .38); }
+/* Starts 1px clear of `.pit__base`, which occupies the centre pixel itself.
+   At `left: 50%` the gain bar and the base line shared that pixel. */
 .pit__gain {
-  position: absolute; left: 50%; right: 0; top: 0; bottom: 0;
+  position: absolute; left: calc(50% + 1px); right: 0; top: 0; bottom: 0;
   background: linear-gradient(90deg, var(--c-warning), var(--c-danger));
   -webkit-clip-path: inset(0 calc(100% - var(--g) * 100%) 0 0);
           clip-path: inset(0 calc(100% - var(--g) * 100%) 0 0);
@@ -1234,6 +1252,16 @@ canvas { display: block; }
    This is where ANCHORAGE, the recovery on a bag, the crown you spent and the
    assay live: they are OUTCOMES, and an outcome pinned to the stage for a
    whole run is a number nobody is acting on. Tap dismisses it. */
+/* The two rows the card takes over keep their space and lose their ink.
+   `visibility: hidden` is deliberate and `display: none` would be a bug: the
+   dock's rows are what hold the sliders down at their own height, so removing
+   them from layout slid the controls up UNDER the card — which is the very
+   thing the card is documented as never doing ("leaves the three sliders live
+   underneath so the player never loses the machine"). Hidden visibility also
+   takes the rows out of hit-testing, so the buttons behind the card cannot be
+   pressed blind. */
+.dock__inst.is-taken, .dock__aux.is-taken { visibility: hidden; }
+
 .unitcard {
   position: absolute; z-index: 2;
   left: var(--s-3); right: var(--s-3); top: 9px;

@@ -1,0 +1,82 @@
+
+rockbolt
+  painted     max 41 / med 41   (enumerated from *, no allowlist)
+  OVERLAPS    1  <-- GATE FAIL
+                canvas(148x74@12,627) x gaugebox__cap(55x14@59,699) = 55x2
+  ON THE 3D   0  ok
+  targets<44  0  ok  
+  clipped     1  vsl__name "ROTATION" 69>65
+  split       surface 54 / section 46   (3D = 66.9% of stage)
+  chrome      .sstrip 52px  .sitedock 227px  ctx.hud {"top":51,"bottom":224}
+
+driven-pile
+  painted     max 37 / med 29   (enumerated from *, no allowlist)
+  OVERLAPS    1  <-- GATE FAIL
+                canvas(150x75@12,627) x gaugebox__cap(109x14@32,700) = 109x2
+  ON THE 3D   0  ok
+  targets<44  0  ok  
+  clipped     0  
+  split       surface 54 / section 46   (3D = 66.9% of stage)
+  chrome      .sstrip 52px  .sitedock 227px  ctx.hud {"top":52,"bottom":227}
+
+rc
+  painted     max 39 / med 39   (enumerated from *, no allowlist)
+  OVERLAPS    34  <-- GATE FAIL
+                canvas(150x75@12,627) x gaugebox__cap(55x14@59,700) = 55x2
+                actionbtn(88x80@290,627) x unitcard(366x124@12,627) = 88x80
+                vsl__track(85x64@105,643) x unitcard(366x124@12,627) = 85x64
+                vsl__track(85x64@197,643) x unitcard(366x124@12,627) = 85x64
+                vsl__track(85x64@12,643) x unitcard(366x124@12,627) = 85x64
+                vsl__fill(83x46@198,660) x unitcard(366x124@12,627) = 83x46
+                vsl__fill(83x42@106,664) x unitcard(366x124@12,627) = 83x42
+                vsl__fill(83x27@13,679) x unitcard(366x124@12,627) = 83x27
+                vsl__track(85x64@12,643) x unitcard__t(145x15@26,657) = 71x15
+                actionbtn__s(74x27@297,673) x unitcard(366x124@12,627) = 74x14
+                vsl__track(85x64@105,643) x unitcard__t(145x15@26,657) = 66x15
+                vsl__track(85x64@105,643) x ucell__k(73x11@117,675) = 72x11
+                vsl__fill(83x42@106,664) x ucell__k(73x11@117,675) = 71x11
+                actionbtn__l(44x16@312,656) x unitcard(366x124@12,627) = 44x16
+  ON THE 3D   0  ok
+  targets<44  0  ok  
+  clipped     0  
+  split       surface 54 / section 46   (3D = 66.9% of stage)
+  chrome      .sstrip 52px  .sitedock 227px  ctx.hud {"top":52,"bottom":227}
+
+dth
+  painted     max 38 / med 38   (enumerated from *, no allowlist)
+  OVERLAPS    1  <-- GATE FAIL
+                canvas(150x75@12,665) x gaugebox__cap(55x14@59,738) = 55x2
+  ON THE 3D   0  ok
+  targets<44  0  ok  
+  clipped     0  
+  split       surface 54.1 / section 45.9   (3D = 71.4% of stage)
+  chrome      .sstrip 52px  .sitedock 189px  ctx.hud {"top":52,"bottom":189}
+
+oil-rotary
+  painted     max 42 / med 42   (enumerated from *, no allowlist)
+  OVERLAPS    1  <-- GATE FAIL
+                canvas(150x75@12,627) x gaugebox__cap(55x14@59,700) = 55x2
+  ON THE 3D   0  ok
+  targets<44  0  ok  
+  clipped     0  
+  split       surface 54 / section 46   (3D = 66.9% of stage)
+  chrome      .sstrip 52px  .sitedock 227px  ctx.hud {"top":52,"bottom":227}
+
+
+=== REPEAT NAVIGATION: five ordinary visits to the site screen ===
+visit |  .sitedock |  .sstrip |  .screen nodes |  live nodes |  doc nodes |  .sitedock count |  ctx.hud
+  1   |     189 px |    52 px |         2      |      120   |     163   |         1        | {"top":52,"bottom":189}
+  2   |     189 px |    52 px |         4      |      120   |     811   |         1        | {"top":51,"bottom":186}
+  3   |     189 px |    52 px |         4      |      120   |     811   |         1        | {"top":51,"bottom":186}
+  4   |     189 px |    52 px |         4      |      120   |     811   |         1        | {"top":51,"bottom":186}
+  5   |     189 px |    52 px |         4      |      120   |     811   |         1        | {"top":51,"bottom":186}
+
+  GROWTH      document nodes 163 -> 811 (+648)   <-- GATE FAIL
+
+=== GATES ===
+  overlaps (enumerated) .... FAIL (38)
+  nothing over the 3D ...... PASS
+  touch targets >= 44px .... PASS
+  no navigation growth ..... FAIL
+
+no console errors

@@ -1,0 +1,588 @@
+{
+  "bitRow": 861,
+  "centreX": 390,
+  "pxPerUnit": 38.85,
+  "holeR": 0.5432,
+  "bandTop": 758,
+  "bandBottom": 1316,
+  "uDepth": 19.987636513496806,
+  "rows": [
+    {
+      "dz": 0.5,
+      "row": 841,
+      "discardedNear": 24,
+      "lo": 368,
+      "hi": 411,
+      "widthPx": 44
+    },
+    {
+      "dz": 1,
+      "row": 822,
+      "discardedNear": 28,
+      "lo": 368,
+      "hi": 409,
+      "widthPx": 42
+    },
+    {
+      "dz": 2,
+      "row": 783,
+      "discardedNear": 20,
+      "lo": 368,
+      "hi": 410,
+      "widthPx": 43
+    },
+    {
+      "dz": 3,
+      "row": 744,
+      "off": true
+    },
+    {
+      "dz": 5,
+      "row": 666,
+      "off": true
+    }
+  ],
+  "lum": [
+    [
+      -60,
+      175
+    ],
+    [
+      -58,
+      172
+    ],
+    [
+      -56,
+      164
+    ],
+    [
+      -54,
+      159
+    ],
+    [
+      -52,
+      151
+    ],
+    [
+      -50,
+      141
+    ],
+    [
+      -48,
+      124
+    ],
+    [
+      -46,
+      111
+    ],
+    [
+      -44,
+      103
+    ],
+    [
+      -42,
+      92
+    ],
+    [
+      -40,
+      80
+    ],
+    [
+      -38,
+      67
+    ],
+    [
+      -36,
+      55
+    ],
+    [
+      -34,
+      51
+    ],
+    [
+      -32,
+      42
+    ],
+    [
+      -30,
+      28
+    ],
+    [
+      -28,
+      19
+    ],
+    [
+      -26,
+      46
+    ],
+    [
+      -24,
+      77
+    ],
+    [
+      -22,
+      51
+    ],
+    [
+      -20,
+      46
+    ],
+    [
+      -18,
+      36
+    ],
+    [
+      -16,
+      33
+    ],
+    [
+      -14,
+      27
+    ],
+    [
+      -12,
+      39
+    ],
+    [
+      -10,
+      37
+    ],
+    [
+      -8,
+      41
+    ],
+    [
+      -6,
+      41
+    ],
+    [
+      -4,
+      141
+    ],
+    [
+      -2,
+      40
+    ],
+    [
+      0,
+      44
+    ],
+    [
+      2,
+      48
+    ],
+    [
+      4,
+      53
+    ],
+    [
+      6,
+      57
+    ],
+    [
+      8,
+      61
+    ],
+    [
+      10,
+      62
+    ],
+    [
+      12,
+      66
+    ],
+    [
+      14,
+      48
+    ],
+    [
+      16,
+      60
+    ],
+    [
+      18,
+      75
+    ],
+    [
+      20,
+      84
+    ],
+    [
+      22,
+      39
+    ],
+    [
+      24,
+      46
+    ],
+    [
+      26,
+      67
+    ],
+    [
+      28,
+      75
+    ],
+    [
+      30,
+      101
+    ],
+    [
+      32,
+      115
+    ],
+    [
+      34,
+      134
+    ],
+    [
+      36,
+      144
+    ],
+    [
+      38,
+      154
+    ],
+    [
+      40,
+      164
+    ],
+    [
+      42,
+      178
+    ],
+    [
+      44,
+      186
+    ],
+    [
+      46,
+      188
+    ],
+    [
+      48,
+      186
+    ],
+    [
+      50,
+      186
+    ],
+    [
+      52,
+      181
+    ],
+    [
+      54,
+      167
+    ],
+    [
+      56,
+      149
+    ],
+    [
+      58,
+      151
+    ],
+    [
+      60,
+      156
+    ]
+  ],
+  "inventory": [
+    {
+      "name": "sectionBackdrop",
+      "type": "Mesh",
+      "visible": true,
+      "parentVisible": true,
+      "renderOrder": -1000,
+      "transparent": false,
+      "box": {
+        "x0": -58,
+        "x1": 839,
+        "y0": 716,
+        "y1": 1358
+      }
+    },
+    {
+      "name": "head",
+      "type": "Mesh",
+      "visible": true,
+      "parentVisible": true,
+      "renderOrder": 0,
+      "transparent": false,
+      "box": {
+        "x0": 370,
+        "x1": 410,
+        "y0": 763,
+        "y1": 861
+      }
+    },
+    {
+      "name": "merged",
+      "type": "Mesh",
+      "visible": true,
+      "parentVisible": true,
+      "renderOrder": 0,
+      "transparent": false,
+      "box": {
+        "x0": 370,
+        "x1": 410,
+        "y0": 857,
+        "y1": 862
+      }
+    },
+    {
+      "name": "merged",
+      "type": "Mesh",
+      "visible": true,
+      "parentVisible": true,
+      "renderOrder": 0,
+      "transparent": false,
+      "box": {
+        "x0": 380,
+        "x1": 400,
+        "y0": 860,
+        "y1": 866
+      }
+    },
+    {
+      "name": "merged",
+      "type": "Mesh",
+      "visible": true,
+      "parentVisible": true,
+      "renderOrder": 0,
+      "transparent": false,
+      "box": {
+        "x0": 376,
+        "x1": 404,
+        "y0": 795,
+        "y1": 860
+      }
+    },
+    {
+      "name": "borehole-wall",
+      "type": "Mesh",
+      "visible": true,
+      "parentVisible": true,
+      "renderOrder": 1,
+      "transparent": false,
+      "box": {
+        "x0": 351,
+        "x1": 429,
+        "y0": -479,
+        "y1": -440
+      }
+    },
+    {
+      "name": "casing",
+      "type": "Mesh",
+      "visible": false,
+      "parentVisible": true,
+      "renderOrder": 2,
+      "transparent": false,
+      "box": {
+        "x0": 351,
+        "x1": 429,
+        "y0": -479,
+        "y1": -440
+      }
+    },
+    {
+      "name": "drill-string",
+      "type": "Mesh",
+      "visible": true,
+      "parentVisible": true,
+      "renderOrder": 3,
+      "transparent": false,
+      "box": {
+        "x0": 351,
+        "x1": 429,
+        "y0": -479,
+        "y1": -440
+      }
+    },
+    {
+      "name": "bit",
+      "type": "Mesh",
+      "visible": true,
+      "parentVisible": true,
+      "renderOrder": 4,
+      "transparent": false,
+      "box": {
+        "x0": 367,
+        "x1": 413,
+        "y0": 831,
+        "y1": 881
+      }
+    },
+    {
+      "name": "boulders",
+      "type": "Mesh",
+      "visible": true,
+      "parentVisible": true,
+      "renderOrder": 1,
+      "transparent": false,
+      "box": {
+        "x0": 181,
+        "x1": 757,
+        "y0": -469,
+        "y1": -100
+      }
+    },
+    {
+      "name": "annotations",
+      "type": "Mesh",
+      "visible": true,
+      "parentVisible": true,
+      "renderOrder": 7,
+      "transparent": true,
+      "box": {
+        "x0": null,
+        "x1": null,
+        "y0": null,
+        "y1": null
+      }
+    },
+    {
+      "name": "depth-readout",
+      "type": "Mesh",
+      "visible": true,
+      "parentVisible": true,
+      "renderOrder": 21,
+      "transparent": true,
+      "box": {
+        "x0": 648,
+        "x1": 774,
+        "y0": 842,
+        "y1": 890
+      }
+    },
+    {
+      "name": "section-face",
+      "type": "Mesh",
+      "visible": true,
+      "parentVisible": true,
+      "renderOrder": 0,
+      "transparent": false,
+      "box": {
+        "x0": -8,
+        "x1": 788,
+        "y0": 435,
+        "y1": 1638
+      }
+    },
+    {
+      "name": "depth-ruler",
+      "type": "Mesh",
+      "visible": true,
+      "parentVisible": true,
+      "renderOrder": 20,
+      "transparent": true,
+      "box": {
+        "x0": 674,
+        "x1": 775,
+        "y0": 337,
+        "y1": 1540
+      }
+    },
+    {
+      "name": "drill-log",
+      "type": "Mesh",
+      "visible": true,
+      "parentVisible": true,
+      "renderOrder": 20,
+      "transparent": true,
+      "box": {
+        "x0": 0,
+        "x1": 218,
+        "y0": 337,
+        "y1": 1540
+      }
+    },
+    {
+      "name": "fractures",
+      "type": "Mesh",
+      "visible": true,
+      "parentVisible": true,
+      "renderOrder": 5,
+      "transparent": true,
+      "box": {
+        "x0": -80,
+        "x1": 932,
+        "y0": -270,
+        "y1": 8122
+      }
+    },
+    {
+      "name": "water-table",
+      "type": "Mesh",
+      "visible": true,
+      "parentVisible": true,
+      "renderOrder": 6,
+      "transparent": true,
+      "box": {
+        "x0": 664,
+        "x1": 780,
+        "y0": -189,
+        "y1": -169
+      }
+    },
+    {
+      "name": "vfx:sectionSoft",
+      "type": "Mesh",
+      "visible": true,
+      "parentVisible": true,
+      "renderOrder": 3000,
+      "transparent": true,
+      "box": {
+        "x0": 371,
+        "x1": 409,
+        "y0": 1018,
+        "y1": 1056
+      }
+    },
+    {
+      "name": "vfx:sectionAdd",
+      "type": "Mesh",
+      "visible": true,
+      "parentVisible": true,
+      "renderOrder": 3001,
+      "transparent": true,
+      "box": {
+        "x0": 371,
+        "x1": 409,
+        "y0": 1018,
+        "y1": 1056
+      }
+    },
+    {
+      "name": "vfx:chips",
+      "type": "Mesh",
+      "visible": true,
+      "parentVisible": true,
+      "renderOrder": 2999,
+      "transparent": true,
+      "box": {
+        "x0": 371,
+        "x1": 409,
+        "y0": 1018,
+        "y1": 1056
+      }
+    },
+    {
+      "name": "section-backdrop",
+      "type": "Mesh",
+      "visible": true,
+      "parentVisible": true,
+      "renderOrder": -50,
+      "transparent": false,
+      "box": {
+        "x0": -117,
+        "x1": 897,
+        "y0": 532,
+        "y1": 1542
+      }
+    }
+  ],
+  "consoleErrors": []
+}

@@ -114,14 +114,38 @@ const CFG = {
 
          holeR = clamp(0.30 + (holeDiaMm / 1000) * 1.6, 0.30, 1.6)   [units]
 
-     so a 38 mm micropile (0.36 u radius, 14 px across) and a 6000 mm raise
-     bore (1.60 u radius, 62 px across) are visibly different holes — which is
-     the whole point of the raise-boring unlock. The exaggeration that falls out
-     is 19x at 38 mm, 7.1x at 152 mm, 4.2x at 600 mm and 0.5x at 6000 mm: hugely
-     over-gauge where the hole would otherwise vanish, honest where it would
-     otherwise dominate. Everything that shares the hole's scale —
-     boulders above all — is expressed as a multiple of the derived holeR,
-     never in metres, so the two scales cannot drift apart again. */
+     Stated as a RATIO, which is the form that has to reach the player, that is
+
+         drawn diameter = clamp(0.60 m + 3.2 * true diameter, 0.60, 3.20)
+         exaggeration E = drawn / true = 3.2 + 0.60 / D          (D in metres)
+
+     — a fixed 3.2x over-gauge plus a 0.60 m floor term so the smallest hole
+     still reads as a hole, clamped so the largest cannot eat the band. So a
+     38 mm micropile (0.36 u radius, 14 px across) and a 6000 mm raise bore
+     (1.60 u radius, 62 px across) are visibly different holes — which is the
+     whole point of the raise-boring unlock. E is 19.0x at 38 mm, 7.1x at
+     152 mm, 4.2x at 600 mm and 0.53x at 6000 mm: hugely over-gauge where the
+     hole would otherwise vanish, UNDER-gauge where it would otherwise dominate.
+     Everything that shares the hole's scale — boulders above all — is expressed
+     as a multiple of the derived holeR, never in metres, so the two scales
+     cannot drift apart again.
+
+     MEASURED, headed Chrome, 390x844@2x, dth @ Ø152 mm, 34.0 m: the band runs
+     38.85 device px per metre of depth; the face shader discards a 42-44 px
+     column along the string (predicted 42.2 px at gauge, 43.9 px with the
+     over-gauge term of holeRadius()) against a true 5.9 px. The exaggeration is
+     real, it is 7.15x, and the arithmetic above is exactly what produces it.
+
+     THEREFORE IT IS DECLARED. A depth ruler that is 1:1 in Y beside a bore that
+     is 7x in X is a frame stating two scales and admitting to neither — which
+     is what the critic measured and reported as "9-17x oversize". research/07
+     §F1 settles the form: "a vertical ruler in metres of depth and a horizontal
+     ruler in metres of station, each labelled with its own scale, plus a small
+     V.E. badge. This is not decoration — it is the thing that stops a player
+     misreading the curve as tighter than it is." drawRuler() badges the bore
+     the same way the station ruler already badges vertical exaggeration, in
+     every mode, and ctx.sectionView.boreExaggeration publishes the number so no
+     other system can restate it differently. */
   holeRadius: 0.54,      // fallback visual radius (the 152 mm default)
   holeDiaDefault: 152,   // mm, used when no contract is active
   holeRGain: 1.6,        // units of visual radius per metre of real diameter
@@ -2650,6 +2674,12 @@ export function createGeology(ctx) {
   function applyHoleDiameter() {
     const mm = Number(spec.holeDiaMm) || Number(ctx?.state?.contract?.holeDia) || CFG.holeDiaDefault;
     holeR = clamp(CFG.holeRBase + (mm / 1000) * CFG.holeRGain, CFG.holeRBase, CFG.holeRMax);
+    /* The exaggeration is DERIVED from the two diameters, never asserted, so it
+       cannot drift from what is drawn: change holeRGain and the badge changes
+       with it. It is what drawRuler() prints and what ctx.sectionView carries.
+       Below 1.0 the bore is drawn UNDER gauge (a 6 m raise bore hits the
+       ceiling at 0.53x) and the badge says so rather than staying silent. */
+    boreExag = (2 * holeR) / Math.max(mm / 1000, 1e-6);
     U.uHoleR.value = holeR;
     annulus.outerR = holeR;
     annulus.innerR = holeR * CFG.rodRatio;
@@ -2658,6 +2688,8 @@ export function createGeology(ctx) {
       ctx.sectionView.holeRadius = holeR;
       ctx.sectionView.rodRadius = annulus.innerR;
       ctx.sectionView.casingRadius = annulus.casingR;
+      ctx.sectionView.holeDiaMm = mm;
+      ctx.sectionView.boreExaggeration = boreExag;
     }
     // the borehole wall is the only place angular detail is squeezed by the
     // hole's on-screen width, so its budget is derived from that width

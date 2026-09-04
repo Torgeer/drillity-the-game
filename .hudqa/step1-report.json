@@ -1,0 +1,325 @@
+{
+  "tag": "step1",
+  "cases": {
+    "rockbolt": {
+      "painted": {
+        "max": 41,
+        "med": 41
+      },
+      "overlaps": 1,
+      "overlapList": [
+        "canvas(148x74@12,627) x gaugebox__cap(55x14@59,699) = 55x2"
+      ],
+      "onBand3D": [],
+      "smallTargets": [],
+      "clipped": [
+        "vsl__name \"ROTATION\" 69>65"
+      ],
+      "split": {
+        "surfPct": 54,
+        "sectPct": 46,
+        "stagePct": 66.9
+      },
+      "bands": {
+        "surface": {
+          "y": 52,
+          "h": 305
+        },
+        "section": {
+          "y": 357,
+          "h": 260
+        }
+      },
+      "dom": {
+        "screens": 2,
+        "liveNodes": 120,
+        "docNodes": 163,
+        "dockH": 227,
+        "stripH": 52,
+        "dockCount": 1,
+        "hud": {
+          "top": 51,
+          "bottom": 224
+        }
+      }
+    },
+    "driven-pile": {
+      "painted": {
+        "max": 37,
+        "med": 29
+      },
+      "overlaps": 1,
+      "overlapList": [
+        "canvas(150x75@12,627) x gaugebox__cap(109x14@32,700) = 109x2"
+      ],
+      "onBand3D": [],
+      "smallTargets": [],
+      "clipped": [],
+      "split": {
+        "surfPct": 54,
+        "sectPct": 46,
+        "stagePct": 66.9
+      },
+      "bands": {
+        "surface": {
+          "y": 52,
+          "h": 305
+        },
+        "section": {
+          "y": 357,
+          "h": 260
+        }
+      },
+      "dom": {
+        "screens": 2,
+        "liveNodes": 120,
+        "docNodes": 163,
+        "dockH": 227,
+        "stripH": 52,
+        "dockCount": 1,
+        "hud": {
+          "top": 52,
+          "bottom": 227
+        }
+      }
+    },
+    "rc": {
+      "painted": {
+        "max": 39,
+        "med": 39
+      },
+      "overlaps": 34,
+      "overlapList": [
+        "canvas(150x75@12,627) x gaugebox__cap(55x14@59,700) = 55x2",
+        "actionbtn(88x80@290,627) x unitcard(366x124@12,627) = 88x80",
+        "vsl__track(85x64@105,643) x unitcard(366x124@12,627) = 85x64",
+        "vsl__track(85x64@197,643) x unitcard(366x124@12,627) = 85x64",
+        "vsl__track(85x64@12,643) x unitcard(366x124@12,627) = 85x64",
+        "vsl__fill(83x46@198,660) x unitcard(366x124@12,627) = 83x46",
+        "vsl__fill(83x42@106,664) x unitcard(366x124@12,627) = 83x42",
+        "vsl__fill(83x27@13,679) x unitcard(366x124@12,627) = 83x27",
+        "vsl__track(85x64@12,643) x unitcard__t(145x15@26,657) = 71x15",
+        "actionbtn__s(74x27@297,673) x unitcard(366x124@12,627) = 74x14",
+        "vsl__track(85x64@105,643) x unitcard__t(145x15@26,657) = 66x15",
+        "vsl__track(85x64@105,643) x ucell__k(73x11@117,675) = 72x11",
+        "vsl__fill(83x42@106,664) x ucell__k(73x11@117,675) = 71x11",
+        "actionbtn__l(44x16@312,656) x unitcard(366x124@12,627) = 44x16",
+        "vsl__track(85x64@12,643) x ucell__v(46x15@26,688) = 46x15",
+        "vsl__fill(83x27@13,679) x ucell__v(46x15@26,688) = 46x15",
+        "vsl__name(61x11@107,628) x unitcard(366x124@12,627) = 61x11",
+        "vsl__track(85x64@197,643) x ucell__k(60x11@208,675) = 60x11",
+        "vsl__fill(83x46@198,660) x ucell__k(60x11@208,675) = 60x11",
+        "actionbtn(88x80@290,627) x ucell__k(51x11@299,675) = 51x11",
+        "actionbtn__s(74x27@297,673) x ucell__k(51x11@299,675) = 51x11",
+        "actionbtn(88x80@290,627) x ucell__v(38x15@299,688) = 38x15",
+        "vsl__fill(83x42@106,664) x unitcard__t(145x15@26,657) = 65x8",
+        "vsl__track(85x64@105,643) x ucell__v(29x15@117,688) = 29x15",
+        "vsl__fill(83x42@106,664) x ucell__v(29x15@117,688) = 29x15",
+        "vsl__track(85x64@197,643) x ucell__v(29x15@208,688) = 29x15",
+        "vsl__fill(83x46@198,660) x ucell__v(29x15@208,688) = 29x15",
+        "vsl__track(85x64@12,643) x ucell__k(39x11@26,675) = 39x11",
+        "vsl__name(34x11@28,628) x unitcard(366x124@12,627) = 34x11",
+        "vsl__fill(83x27@13,679) x ucell__k(39x11@26,675) = 39x8",
+        "vsl__name(24x11@218,628) x unitcard(366x124@12,627) = 24x11",
+        "actionbtn__s(74x27@297,673) x ucell__v(38x15@299,688) = 21x11",
+        "vsl__val(14x14@67,626) x unitcard(366x124@12,627) = 14x12",
+        "vsl__val(14x14@173,626) x unitcard(366x124@12,627) = 14x12",
+        "vsl__val(14x14@247,626) x unitcard(366x124@12,627) = 14x12",
+        "vsl__val(14x14@67,626) x unitcard(366x124@12,627) = 14x13",
+        "vsl__val(14x14@173,626) x unitcard(366x124@12,627) = 14x13",
+        "vsl__val(14x14@247,626) x unitcard(366x124@12,627) = 14x13",
+        "actionbtn__l(81x16@294,656) x unitcard(366x124@12,627) = 81x16",
+        "actionbtn__s(71x27@298,673) x unitcard(366x124@12,627) = 71x14",
+        "actionbtn__s(71x27@298,673) x ucell__v(38x15@299,688) = 38x11",
+        "actionbtn__s(71x27@298,673) x ucell__k(51x11@299,675) = 35x11"
+      ],
+      "onBand3D": [],
+      "smallTargets": [],
+      "clipped": [],
+      "split": {
+        "surfPct": 54,
+        "sectPct": 46,
+        "stagePct": 66.9
+      },
+      "bands": {
+        "surface": {
+          "y": 52,
+          "h": 305
+        },
+        "section": {
+          "y": 357,
+          "h": 260
+        }
+      },
+      "dom": {
+        "screens": 2,
+        "liveNodes": 120,
+        "docNodes": 163,
+        "dockH": 227,
+        "stripH": 52,
+        "dockCount": 1,
+        "hud": {
+          "top": 52,
+          "bottom": 227
+        }
+      }
+    },
+    "dth": {
+      "painted": {
+        "max": 38,
+        "med": 38
+      },
+      "overlaps": 1,
+      "overlapList": [
+        "canvas(150x75@12,665) x gaugebox__cap(55x14@59,738) = 55x2"
+      ],
+      "onBand3D": [],
+      "smallTargets": [],
+      "clipped": [],
+      "split": {
+        "surfPct": 54.1,
+        "sectPct": 45.9,
+        "stagePct": 71.4
+      },
+      "bands": {
+        "surface": {
+          "y": 52,
+          "h": 326
+        },
+        "section": {
+          "y": 378,
+          "h": 277
+        }
+      },
+      "dom": {
+        "screens": 2,
+        "liveNodes": 120,
+        "docNodes": 163,
+        "dockH": 189,
+        "stripH": 52,
+        "dockCount": 1,
+        "hud": {
+          "top": 52,
+          "bottom": 189
+        }
+      }
+    },
+    "oil-rotary": {
+      "painted": {
+        "max": 42,
+        "med": 42
+      },
+      "overlaps": 1,
+      "overlapList": [
+        "canvas(150x75@12,627) x gaugebox__cap(55x14@59,700) = 55x2"
+      ],
+      "onBand3D": [],
+      "smallTargets": [],
+      "clipped": [],
+      "split": {
+        "surfPct": 54,
+        "sectPct": 46,
+        "stagePct": 66.9
+      },
+      "bands": {
+        "surface": {
+          "y": 52,
+          "h": 305
+        },
+        "section": {
+          "y": 357,
+          "h": 260
+        }
+      },
+      "dom": {
+        "screens": 2,
+        "liveNodes": 120,
+        "docNodes": 163,
+        "dockH": 227,
+        "stripH": 52,
+        "dockCount": 1,
+        "hud": {
+          "top": 52,
+          "bottom": 227
+        }
+      }
+    }
+  },
+  "nav": [
+    {
+      "visit": 1,
+      "screens": 2,
+      "liveNodes": 120,
+      "docNodes": 163,
+      "dockH": 189,
+      "stripH": 52,
+      "dockCount": 1,
+      "hud": {
+        "top": 52,
+        "bottom": 189
+      },
+      "overlaps": 1,
+      "painted": 30
+    },
+    {
+      "visit": 2,
+      "screens": 4,
+      "liveNodes": 120,
+      "docNodes": 811,
+      "dockH": 189,
+      "stripH": 52,
+      "dockCount": 1,
+      "hud": {
+        "top": 51,
+        "bottom": 186
+      },
+      "overlaps": 1,
+      "painted": 30
+    },
+    {
+      "visit": 3,
+      "screens": 4,
+      "liveNodes": 120,
+      "docNodes": 811,
+      "dockH": 189,
+      "stripH": 52,
+      "dockCount": 1,
+      "hud": {
+        "top": 51,
+        "bottom": 186
+      },
+      "overlaps": 1,
+      "painted": 30
+    },
+    {
+      "visit": 4,
+      "screens": 4,
+      "liveNodes": 120,
+      "docNodes": 811,
+      "dockH": 189,
+      "stripH": 52,
+      "dockCount": 1,
+      "hud": {
+        "top": 51,
+        "bottom": 186
+      },
+      "overlaps": 1,
+      "painted": 30
+    },
+    {
+      "visit": 5,
+      "screens": 4,
+      "liveNodes": 120,
+      "docNodes": 811,
+      "dockH": 189,
+      "stripH": 52,
+      "dockCount": 1,
+      "hud": {
+        "top": 51,
+        "bottom": 186
+      },
+      "overlaps": 1,
+      "painted": 30
+    }
+  ]
+}

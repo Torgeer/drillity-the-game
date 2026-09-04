@@ -1,6 +1,6 @@
 # Rig reference — `sonic-truck` (truck-mounted sonic / resonant drilling rig)
 
-status: in progress — head geometry sourced, rig-scale geometry in progress
+status: COMPLETE - all nine sections written and sourced
 
 > **Naming rule (DOMAIN.md §10):** this document cites real manufacturers and
 > model designations so the geometry can be verified against a real object. The
@@ -11,7 +11,10 @@ status: in progress — head geometry sourced, rig-scale geometry in progress
 
 | File | Pages | What it actually showed |
 |---|---|---|
+| `Bauer-Maschinen-Hydraulikschlaeuche-hydraulic hoses-DE-EN-905-213-1+2.pdf` | 2 pp (both) | **Not a sonic document** - it is a Bauer BG piling-rig hose-package flyer. Useful anyway for *hose architecture nomenclature and how a bundle is actually routed*: "hose deflection" to "bulkhead plate", main hose package = **six main lines** plus high-pressure lines, a separate **mast hose package** from base-carrier bulkhead to head bulkhead, **electric cable bundled inside the same package**, and a **flat tarp / hose bag** wrapping the bundle. The photo shows the bundle running the length of the mast as one wrapped black mass, not as loose individual lines. |
 | `Comacchio-GEO-305Pres_2023_FULL_WEB.pdf` | 18 pp; p15, p16, p17 read closely, p2/3/5/8/11/14 are photos | Sales deck for the exact carrier the sonic head in the brochure photo is bolted to. **p16 and p17 are dimensioned general-arrangement drawings** (working and transport position) with a red sonic-style head drawn on the mast - the only hard dimensions in the whole source set. p15 is a depth-vs-method table. p1-p14 are photographs with no text. |
+| `Structural_drilling_using_the_high-frequency_sonic-in-Slovenia.pdf` | 10 pp; text of pp. 1-10, figure page p7 rendered | Sporin & Vukelic, RMZ M&G Vol. 64 (2017), DOI 10.1515/rmzmag-2017-0001. Peer-reviewed. **Physics and process, almost no geometry.** Resonance f = c / 2l, the three-phase core-barrel / override-casing / extraction cycle, "frequencies of up to 150 Hz", bit shape has no decisive influence, over-feed forms a "knot" and can fracture rods, one sonic rig in the whole of Slovenia in 2016. Its only picture of a machine (Fig. 5, p7) is a low-resolution reproduction that adds nothing the brochure does not show better. |
+| `drillity-the-game/research/02-prospecting.md` A3/E5, `06-geotech-water-geothermal.md` A.6, `11-oem-anchor-geotech-hdd.md` A.13/B.4, `16-site-archetypes.md` A.16 | grepped and read | **The method is already fully covered by the existing packs** - physics, liquefaction, the two-tier frequency split, the head spec tables with the brochure's unit error already caught, ASTM D6914, the brownfield archetype, and the rule that "sonic is bought as a head on someone else's crawler". They contain **no rig geometry**, which is exactly the gap this file fills. `18-visual-reference.md` has no sonic entry at all. |
 | `Drilltechniques-Sonic-Brochure.pdf` | p1-p8 (p1,2,3,7,8 rendered and looked at) | Vendor guide for Toa Tone Boring (JP) and Sonic Drill Corp (CA) heads. **p2 is the single most useful geometry image in the folder**: a labelled render of the sonic head + drill string. **p3 and p7 are the only real photographs of complete sonic rigs in the whole folder** - and BOTH are tracked, not trucks (see 9.1). p4-p6, p8 are head spec tables. p1 is a cover, useless. |
 
 ## 2. What the machine IS
@@ -209,6 +212,28 @@ string. Adds what photo 1 could not show:
 - Guarding: a **welded mesh panel** on a frame beside the clamp, and a red
   cylindrical vessel (accumulator or extinguisher) on the frame.
 
+### 4.5 Component inventory - what has to be there, and why it reads
+
+| Component | What it actually is | Why it matters visually | Source |
+|---|---|---|---|
+| **Mast structure** | **Fabricated plate / box section**, two parallel built-up columns with a webbed centre and a repeating pattern of round and rectangular lightening holes. **Not a lattice** - no tubular chords, no diagonal bracing, no bays. | This is the first thing a driller checks. A lattice mast on a sonic rig is wrong. The hole pattern is what gives the mast its texture at mid distance. | Brochure p3; Comacchio p8, p11, p16 |
+| **Carriage / how it runs on the mast** | Slides on **machined gib plates bolted to the mast face**, driven by a **roller chain running in the mast channel** (visible black chain, oiled). Feed stroke **3,600 mm** on a **6,200 mm** mast = 58%. Feed/retract up to **5 t**. | The carriage must not run to the mast top - it stops well short at both ends. The chain is bare oiled steel and catches light. | Comacchio p11 (chain, gibs), p16 (stroke) |
+| **The head (the drifter equivalent)** | An **oscillator** (twin counter-rotating eccentrics in a symmetric housing) plus a **rotation unit** plus a **water swivel** plus an **air damper**, stacked vertically. Head weight about **520 kg** for the mid Toa Tone SP-50 with water swivel. | Fat, taller than wide as installed, **wider than the mast**, and in a **different paint colour from the carrier**. Bristling with hose ports on every face. | Brochure p2 (oscillator geometry), p3, p7; `research/11` A.13 |
+| **Air damper** | Small air receiver plus line to the head; **0.7 MPa, min 8 L/min**. It isolates the resonance from the mast. | A real, visible small pressure vessel and a thin air line running up with the hose bundle. Without it the model has no explanation for why the mast survives. | Brochure p5, p6 |
+| **Cylinders, and where the rods sit at working extension** | (a) **Levelling jacks / outriggers** - one per corner, vertical, hinged foot plates, standing on **timber cribbing**; at working extension the chrome rod is out roughly **half to two-thirds of stroke**, because the machine is levelled, not jacked clear. (b) **Mast raise / tilt rams** between deck and mast foot - at working (vertical) position these are at or near **full extension**. (c) **Mast slide / crowd cylinder** where fitted. | Chrome shows only over the extended length; a jack sitting fully closed or fully open both read as wrong. | Brochure p3 (jacks on timber); Comacchio p16, p17 |
+| **Hose routing** | A **wrapped bundle**, not loose lines: base-carrier bulkhead plate to deflection point to up the mast to head bulkhead plate. **Six main working lines** plus high-pressure lines plus an **electric cable in the same bundle**, often under a flat tarp / hose bag. On top of that a **full-height energy chain (drag chain)** carries the moving part of the loom to the carriage, and one **helical / coiled hose** takes up travel. At the head, two very large hoses hang in **free unsupported loops**. | Hoses are the visual signature of a sonic rig. The rule: **bundled and disciplined along the mast, loose and swinging at the head.** | Bauer hose flyer p2 (architecture); brochure p3 (coil, bundles), p7 (free loops); Comacchio p8, p11 (energy chain) |
+| **Guarding** | A **welded wire-mesh cage** around the string at the mast foot, in a painted frame, with a **hinged gate**, a **door interlock switch**, and a bank of **three red mushroom E-stops on a yellow/black plate** inside it. Yellow/black hazard chevrons on the frame. | Roughly one man high, semi-transparent grey, a bright rectangle in the silhouette. Modern machines are not sold without it. | Comacchio p8, p11 |
+| **Clamp / breakout table** | Two hydraulic clamp boxes at ground level either side of the string with jaws between them; the lower one holds, the upper one breaks. Plastered with yellow/black decals. | Sits *below* the deck at ground level, straddling the hole, not on the deck. | Brochure p3; Comacchio p8 |
+| **Handrails and walkways** | The compact crawler has **no perimeter walkway and no handrail** - the deck is bonnet, not floor. Where a work platform exists it is **site-built aluminium tube scaffold** standing on the ground around the rig, not part of the machine. | Do not give this machine a ship-rail deck. That belongs to a big truck rig, not a compact crawler. | Brochure p7 (scaffold); Comacchio p8, p14 |
+| **Ladders** | None on the compact crawler. Deck height is only **1,700 mm** to the top of the bonnet and the machine is not walked on. | A ladder is a scale cue that says "big machine" - and it would be wrong here. | Comacchio p16 |
+| **Counterweight** | **None.** There is no counterweight on this class - stability comes from the jacks and the track base. | Adding a counterweight would make it read as a piling rig. | All photos |
+| **Cab / canopy** | **None on either sonic photograph.** The carrier is run from a **panel on the machine at deck level** (Comacchio p14: operator standing at a stand-up console beside the mast) or from a **detached ground console on its own skid** with an umbilical (brochure p7); radio remote control is an option (Comacchio p17). | The absence of a cab is itself an identifying feature. The driller stands *facing the string*. | Brochure p3, p7; Comacchio p14, p17 |
+| **Undercarriage** | Low steel-track crawler. **Track shoe 300 mm**, **variable-width undercarriage 1,400-1,700 mm**, undercarriage length **3,840-3,870 mm**. Steel tracks with optional **rubber shoes**. Sprocket at one end, idler at the other, small bottom rollers, guarded track frame. | Shoe width / track width = 0.21 - two narrow tracks with a wide gap, quite unlike a dozer. The variable width (extend to work, retract to 1,400 mm to get through a gate) is a real, animatable feature. | Comacchio p16, p17 |
+| **Winch** | A **service / rod winch** with wire rope over a **crown sheave at the mast top**, hook and chain hanging down one side. Used to lift casing, barrels and the core catcher, not for feed. | The rope down the front of the mast and the hook swinging free are strong small details. | Brochure p3 (rope plus chain hook), p7 (crown, rope, flag whip) |
+| **Rod handling** | A **top-of-mast articulated handling arm** on the dimensioned drawing (Comacchio p16 shows a cranked arm at the mast head), plus the winch, plus **hand stabbing by the driller** (brochure p7 shows a man in orange at the string). Rods and casing are **laid on the ground or on a timber trestle**, not always racked on the machine (Comacchio p14 top-right: rods on a wooden trestle). | A carousel is not what these photos show. The rod supply on a compact sonic rig is scruffy and mostly on the ground. | Comacchio p16, p14; brochure p7 |
+| **Two sizes of tube** | A sonic rig **always carries two diameters**: the **core barrel** and the **override casing** that follows it down. The game catalogue already ships a **100 mm x 3 m sonic core barrel** and a **150 mm x 3 m sonic override casing** (`src/game/data.js` lines ~1961-1966). | Whatever holds the tubes must show **two visibly different diameters**. One diameter is the single most common way to draw a sonic rig wrong. | `Structural_drilling..._Slovenia.pdf` Phase I/II; `research/02` E5; `src/game/data.js` |
+| **Beacon** | Orange rotating beacon on a stalk on the bonnet. | Small, but it is on every one of these machines. | Comacchio p14 |
+
 ## 5. Distinctive features (thumbnail silhouette)
 
 Five things, in order of how far away they still read:
@@ -282,12 +307,217 @@ All observations from the photographs
 
 ## 7. Photo references
 
-(pending)
+Everything usable is inside the PDFs. **The `C:/Users/henri/Downloads` root holds
+about 274 loose images and none of them is a sonic rig** - they are Drillity brand
+and UI assets, HP/Atpa business photos, stock photos and AI-generated images. The
+`Atpa` subfolder is **drilling tools** (bits, drive shoes, casing heads) not rigs,
+and `Atpa/Atpa products` likewise. Checked by filename sweep across the root and
+`Atpa`; nothing sonic-named exists.
+
+| Reference | Where | Useful for |
+|---|---|---|
+| **Sonic head plus string, labelled render** | `Drilltechniques-Sonic-Brochure.pdf` **p2** | The only clean, unobstructed view of the oscillator geometry. Use this for the head shape: twin eccentric bosses, trapezoid taper, collar, adapter, pipe. |
+| **Complete sonic rig, three-quarter, mast up** | `Drilltechniques-Sonic-Brochure.pdf` **p3** | Mast plate structure and hole pattern; energy chain; red head stack; coiled hose; clamp table; jacks on timber; tracked carrier. Best all-round reference in the set. |
+| **Complete sonic rig, working, operator at the string** | `Drilltechniques-Sonic-Brochure.pdf` **p7** | Head in a different colour; free hose loops; crown sheave and flag; detached ground console; site clutter and scaffold; scale against a man. |
+| **Dimensioned GA, working position** | `Comacchio-GEO-305Pres_2023_FULL_WEB.pdf` **p16** | Every proportion in section 3. Also shows the mast-head handling arm and the head mounted on the mast face. |
+| **Dimensioned GA, transport position** | `Comacchio-GEO-305Pres_2023_FULL_WEB.pdf` **p17** | How the mast folds down over the machine; transport envelope; track width retracted. |
+| **Mast foot, guard cage, close** | `Comacchio-GEO-305Pres_2023_FULL_WEB.pdf` **p8** | Mesh guard and gate; energy chains; head; water swivel; carrier decals; hoses at deck level. |
+| **Carriage and mast detail, very close** | `Comacchio-GEO-305Pres_2023_FULL_WEB.pdf` **p11** (left half) | Feed chain in the mast channel; gib plates and bolts; three red E-stops on a yellow plate; door interlock switch; DANGER and no-hands decals on the head. The best texture reference in the set. |
+| **Working site photos, four views** | `Comacchio-GEO-305Pres_2023_FULL_WEB.pdf` **p14** | Operator standing at a deck console; alternative paint scheme (red body, white mast); dust plume; rods on a timber trestle; barrier fencing; timber cribbing; a rig working off a bridge pier. |
+| **Hose bundle architecture** | `Bauer-Maschinen-Hydraulikschlaeuche...pdf` **p2** | How a hose package is actually built and wrapped on a drilling mast. Different machine class, correct principle. |
+| Figure 5, "drilling equipment fitted with a high-frequency drill head" | `Structural_drilling_using_the_high-frequency_sonic-in-Slovenia.pdf` **p7** | Low-resolution journal reproduction. Confirms the class but adds no geometry the brochure does not give better. |
 
 ## 8. NOT SOURCED
 
-(pending)
+Every one of these is a real hole. **Do not invent a number to fill one.**
+
+1. **A truck-mounted sonic rig. Anywhere in the local material.** This is the big
+   one and it is the whole subject of the brief. Both sonic photographs the owner
+   supplied are **tracked crawlers**, and both are captioned as such. Truck-mounted
+   sonic rigs are real and are the dominant configuration in North American
+   environmental work (Terra Sonic International builds them), but **no dimension,
+   drawing or photograph of one exists in `C:/Users/henri/Downloads`**. Every
+   number in section 3 belongs to a compact crawler. See 9.1.
+2. **Machine mass.** Neither the Comacchio deck nor the brochure gives an
+   operating weight for any sonic rig or carrier. The game asserts 21,000 kg
+   (`rigFactory.js`); nothing in the folder supports or refutes it.
+3. **Engine power for the carrier.** The Comacchio deck gives none. The only
+   sourced sonic-rig engine figure is **180 kW Stage V** for a Terra Sonic TSi
+   150CC, via `research/11` A.13 (web-sourced there, not from a local file). The
+   game asserts 205 kW - unsourced.
+4. **Head physical dimensions.** No source gives the oscillator housing's height,
+   width or depth in millimetres. The brochure p2 render gives **ratios only** (the
+   housing about 2.2x as wide as tall; pipe about 0.13x the housing width). Head
+   *weight* about 520 kg (Toa Tone SP-50 with water swivel) is the only absolute.
+5. **Mast cross-section dimensions.** No width, depth or wall thickness for the
+   mast box section. Only the overall 6,200 mm height and 3,600 mm stroke.
+6. **Mast tilt / angle range for the sonic configuration.** Comacchio p16 and p17
+   show the mast vertical and folded, nothing between. The only sourced angle
+   figure is **0 to 45 degrees** for a Terra Sonic TSi 150CC via `research/11`.
+7. **Rod carousel / magazine.** No source shows one on a sonic rig. Whether this
+   class carries an on-board magazine at all is unverified; the photographs show
+   ground-laid rods, a trestle and hand stabbing.
+8. **Sprocket, idler and roller counts and diameters** for the undercarriage. The
+   GA drawings are too small to count rollers reliably.
+9. **Ground clearance, track frame height, deck plan dimensions.** Not dimensioned
+   on p16 or p17.
+10. **The parametric transport length.** p17 gives `Y + 510 mm` and `Y1 + 830 mm`
+    where Y is the mast length - **the deck never states what Y is** for any mast
+    option, so absolute transport length is unknown.
+11. **Exact paint codes / RAL numbers** for either scheme.
+12. **Sonic tooling geometry** - the sonic core barrel, override casing and
+    carbide drive shoe. `src/rig/tools.js` has **no sonic tooling builder at all**
+    (checked: no match for "sonic" in that file), and no local source gives the
+    shoe or barrel geometry. `research/02` E5 and `research/16` A.16 describe them
+    in words only.
+13. **The 30 mm disagreement** between p16 (3,840 mm undercarriage length) and p17
+    (3,870 mm) is unresolved. Both recorded; neither picked.
+14. **Sonicor 33K oscillator force.** The brochure prints the same 50,000 lbf as
+    the 50K, which contradicts the model name. Already flagged as unverified in
+    `research/11` A.13.
 
 ## 9. Domain-truth warnings vs the current game builder
 
-(pending)
+Read from `C:/Users/henri/Downloads/drillity-the-game/src/rig/rigFactory.js`,
+function `buildSonicTruck` (around line 2447) and `buildOscillator` (line 1554),
+plus `src/game/data.js` and `src/rig/tools.js`. **I own none of these files and
+changed none of them.** Ranked by how badly a driller would react.
+
+### 9.1 The carrier is a truck, and every sonic rig in the owner's own material is a crawler
+
+`buildSonicTruck` builds an **8.2 m, three-axle truck chassis** with a cab, a
+walkway, a handrail and four outriggers, and `data.js` line 1225 calls it a
+"Truck-mounted sonic head". The two photographs the owner supplied are captioned:
+
+- "A TONE EP26 SONIC HEAD MOUNTED ON A ... **COMACCHIO GEO 305 TRACKED RIG**"
+  (`Drilltechniques-Sonic-Brochure.pdf` p3)
+- "THE SONIC DRILL CORPORATION 50K HEAD MOUNTED ON A ... **COMACCHIO 900P TRACKED
+  RIG**" (`Drilltechniques-Sonic-Brochure.pdf` p7)
+
+`research/11` A.13 already states the rule flatly: *sonic is bought as a head and
+mounted on someone else's crawler.* Truck-mounted sonic is a real configuration -
+it is not sourced **here**. Two honest options, and the decision is the owner's:
+
+- **(a) Rebuild as a compact crawler.** Everything in section 3 is then a sourced
+  number and the machine becomes correct end to end. It also stops the fleet
+  having two truck rigs where the reference material has none.
+- **(b) Keep the truck** and accept that the geometry is unsourced - but then at
+  minimum fix the head, mast, guarding and rod-handling from sections 4 and 5,
+  because those parts are the same whatever it is bolted to.
+
+### 9.2 The oscillator force does not match any real head
+
+`rigFactory.js` line 2586: `oscillatorHz: 150, oscillatorKn: 180`.
+
+**150 Hz is correct** for the top tier. **180 kN matches nothing.** The two sourced
+tiers are:
+
+| Tier | Frequency | Force | Source |
+|---|---|---|---|
+| Hydraulic-motor heads | **67 Hz** | **38 / 65 / 78.4 kN** | `Drilltechniques-Sonic-Brochure.pdf` p4, p5, p6 |
+| High-frequency oscillator | **133-150 Hz** | **222 kN (50,000 lbf)** | `Drilltechniques-Sonic-Brochure.pdf` p8; corroborated independently by Terra Sonic TSi 150 in `research/11` A.13 |
+
+The current rig mixes the top-tier frequency with a force that sits between the
+two tiers. **Use 222 kN at 150 Hz, or 78.4 kN at 67 Hz. Not 180 kN.**
+
+Also `data.js` line 1230 says "running 90-160 Hz". Nothing in the sources gives
+90 Hz or 160 Hz; the sourced numbers are 67, 133 and 150 Hz.
+
+### 9.3 The rod rack shows one diameter; a sonic rig always carries two
+
+`buildRodRack(... rows: 2, cols: 5, len: rodLen, r: 0.055 ...)` and
+`buildCarousel(... rodDia: 0.089 ...)` - a single diameter in each, and the two do
+not even agree with each other. The sonic cycle is **core barrel first, then
+override casing down around it**
+(`Structural_drilling_using_the_high-frequency_sonic-in-Slovenia.pdf`, Phase I/II;
+`research/02` E5: "a sonic rig always has two sizes of tube on the rack"). The
+game's own catalogue already ships both: **100 mm core barrel** and **150 mm
+override casing** (`src/game/data.js` ~1961-1966).
+
+**Fix:** two visibly different diameters on the rack - roughly 0.100 m and
+0.150 m, matching `data.js`. This is cheap and it is the most recognisable sonic
+tell there is.
+
+### 9.4 The mast has no energy chain, and that is the class signature
+
+The builder routes hoses with `buildHoseSet` along four short spline points from
+the deck to the mast base, and nothing on the mast itself. Every photograph shows
+a **full-height black articulated energy chain / cable track** running the whole
+feed travel (`Drilltechniques-Sonic-Brochure.pdf` p3, p7;
+`Comacchio-GEO-305Pres_2023_FULL_WEB.pdf` p8, p11) plus a **helical coiled hose**
+and **free hanging loops at the head**. The Bauer flyer confirms the architecture:
+a bundled mast hose package running bulkhead to bulkhead, not loose lines.
+
+**Fix, in priority order:** (1) energy chain up the mast, (2) a wrapped bundle
+along the mast to a bulkhead plate at the head, (3) two big free loops sagging off
+the head.
+
+### 9.5 There is no guarding
+
+The builder gives the machine a "core-catcher table / clamp" at the mast foot and
+nothing else. Every modern photograph shows a **welded mesh guard cage** around the
+string with a hinged gate, an interlock switch and **three red mushroom E-stops on
+a yellow/black plate** (`Comacchio-GEO-305Pres_2023_FULL_WEB.pdf` p8, p11). On a
+machine whose entire hazard is a violently vibrating string at head height, the
+absence of a guard is the detail a driller would notice first.
+
+### 9.6 The oscillator shape is half right
+
+`buildOscillator` is better than most of the fleet: it has **two cylindrical
+weight housings side by side with rotating discs**, which genuinely matches the
+brochure's "counter rotating rollers", and it has rubber isolation pucks. Three
+corrections from `Drilltechniques-Sonic-Brochure.pdf` p2:
+
+- **Aspect.** The game shell is `w=0.82 x h=0.72 x 0.59` - essentially a cube.
+  The render shows the oscillator housing about **2.2x as wide as it is tall**.
+- **The taper is missing.** The real housing **tapers down as a trapezoid / bell**
+  from full width into a narrow neck, then a **collar flange**, then a **darker
+  adapter sub**, then the pipe. The game goes straight from box to a thin spindle.
+  The taper is the load path and it is what makes the part read as a casting.
+- **The air damper is missing.** Rubber pucks are not the whole isolation story -
+  the real heads run an **air damper at 0.7 MPa, min 8 L/min**
+  (`Drilltechniques-Sonic-Brochure.pdf` p5, p6). Add an air line and a small
+  receiver.
+
+### 9.7 A carousel is not what the photographs show
+
+`buildCarousel(... rods: 5 ...)` puts a five-rod magazine on the mast. No source in
+this folder shows a magazine on a sonic rig. What is shown is a **mast-head
+articulated handling arm** (`Comacchio-GEO-305Pres_2023_FULL_WEB.pdf` p16), a
+**service winch over a crown sheave** with a hook and chain
+(`Drilltechniques-Sonic-Brochure.pdf` p3, p7), and **rods laid on the ground or on
+a timber trestle** with the driller stabbing by hand
+(`Comacchio-GEO-305Pres_2023_FULL_WEB.pdf` p14). Not a blocker, but flagged: the
+carousel is an invention, and section 8 item 7 records it as unverified.
+
+### 9.8 Unsourced spec numbers on the rig card
+
+`weightKg: 21000` and `powerKw: 205` (`rigFactory.js` line 2585) have no support in
+any local file. The only sourced sonic-rig engine figure anywhere in the research
+is **180 kW** (Terra Sonic TSi 150CC, `research/11` A.13). Either cite something or
+mark them as game balance, not spec.
+
+### 9.9 Things the builder already gets right - keep them
+
+- The mast is built from `buildFeedBeam`, **not** `buildLatticeMast`. Correct: the
+  real mast is plate/box section, and the fleet's core rig correctly gets the
+  lattice instead.
+- Carriage travel `[mastH - 2.3, 0.75]` over an 8.0 m mast = **62% of mast height**;
+  the real figure is 3,600 / 6,200 = **58%**. Close, and correctly short of both
+  ends.
+- `rodLen = 3.05 m` matches the sourced **3 m (10 ft)** sonic tooling section.
+- The deck control stand facing the mast is right in principle - sonic is run
+  **facing the string**, from a deck panel or a detached ground console
+  (`Drilltechniques-Sonic-Brochure.pdf` p7;
+  `Comacchio-GEO-305Pres_2023_FULL_WEB.pdf` p14). Add E-stops to it.
+- Four outriggers with foot plates is right; put **timber cribbing** under them.
+
+### 9.10 Naming - DOMAIN.md section 10
+
+This document names Comacchio, Toa Tone Boring, Sonic Drill Corporation, Terra
+Sonic, Drilltechniques and Bauer, and model designations GEO 305, 900P, EP-26N,
+SP-50, SP-8000, Sonicor 50K/33K, TSi 150. **None of them may appear in the game**
+as a product name, a decal, a badge or a mast sticker. The game's own name for
+this rig ("Corvara SN-6 Resonant", `data.js` line 1225) is correct practice.
+Copy the geometry; invent the badge.
+

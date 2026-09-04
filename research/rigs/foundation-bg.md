@@ -1,7 +1,7 @@
 # Rig reference — `foundation-bg` : Rotary-Kelly bored piling rig (BG class, ~118 t)
 
-status: IN PROGRESS — written incrementally. Anything marked `NOT SOURCED` stayed
-unfound and must not be invented.
+status: COMPLETE for the material available locally. Anything marked `NOT SOURCED`
+stayed unfound and must not be invented. §8 lists the real gaps.
 
 > **NAMING RULE (DOMAIN.md §10):** everything below is for GEOMETRY, PROPORTION
 > and MATERIALS only. Do **not** put manufacturer names, model designations,
@@ -237,6 +237,34 @@ the BG 45, secondary via pack 10 §D.3 / §D.5), so the car body is a **cross-fr
 with visible slide-out beams and locking pins** between the crawler frames. That
 mechanism matters more visually than the exact shoe pitch.
 
+### 4.7 Hose routing — a bundle, not loose snakes
+
+`Bauer-Maschinen-Hydraulikschläuche-hydraulic hoses-DE-EN-905-213-1+2.pdf` is
+short but it is the only local document that says exactly where the hoses run.
+Three packages are sold, and their endpoints *are* the routing:
+
+| Package | Runs from → to | Contents |
+|---|---|---|
+| **Hauptschlauchpaket / Main hose package** | *hose deflection* (`Schlauchumlenkung`) → **bulkhead plate on the KDK** (`Schottplatte KDK`) | **six main working lines to the KDK**, plus high-pressure lines depending on equipment |
+| **Main hose package complete** | same | all hydraulic hoses to the KDK bulkhead, **electric cable inside the hose package**, **new flat tarpaulin hose bag** (`Neue Flachplane`) |
+| **Mastschlauchpaket / Mast hose package complete** | **bulkhead on the base carrier** → **bulkhead on the KDK** | all hoses base carrier → KDK bulkhead, electric cable in the bundle, new tarpaulins |
+
+So the correct geometry is:
+
+1. A **deflection point / roller** on the machine where the bundle turns upward.
+2. A **flat, ordered bundle** — six-plus lines side by side, an electric cable
+   inside it — **wrapped in a fabric hose bag**, so what you see is a strapped
+   flat package, not a handful of individual black tubes.
+3. It terminates at a **bulkhead plate on the rotary drive**, where every line
+   ends in a bolted plate. There is a matching bulkhead on the base carrier.
+4. Because the KDK travels the crowd stroke, the bundle **must form a moving loop
+   that grows and shrinks** — in `Rotary_Drilling_Rig_1000_0001.jpg` this is
+   clearly visible as a large organised catenary of parallel hoses beside the mast.
+
+Hose envelope (same source): suction hoses **NS 25–100**; two-layer low-pressure
+**NS 6–75**; six-layer high-pressure **to NS 25**; **R15 high-pressure 420 bar,
+NS 32–50, lengths up to 120 m**; temperature range **−55 °C to 150 °C**.
+
 ---
 
 ## 5. Distinctive features (thumbnail silhouette)
@@ -264,24 +292,242 @@ stands vertical, not raked** — raking is the driven-pile silhouette
 
 ---
 
+---
+
 ## 6. Materials and paint
-_(pending)_
+
+Mapped onto the game's existing material buckets in `rigFactory.js`
+(`paint · dark · black · accent · steel · worn · chrome · rubber · glass`).
+
+| Surface | Material | Evidence / reasoning |
+|---|---|---|
+| Mast / leader, uppercarriage house, cab shell, counterweight, engine covers | **painted steel** — two-tone. In `Rotary_Drilling_Rig_1000_0001.jpg` the mast, undercarriage and linkage are **dark graphite**, the engine-house side panels **yellow-orange**, the cab and the deck handrails **white / light grey**. | the render; the game already uses a similar 3-value split |
+| Deck handrails, cab-roof rail, access ladder | painted, and **a different value from the house** — in the render the perimeter rails read almost white, the ladder orange-red. High-contrast because they are safety furniture. | render |
+| Kelly bar tubes and drive keys | **worn / bright steel with a mud gradient.** The bar is the one part that goes into the ground and back out several times an hour. | `Kelly_Bars_DE_EN…pdf` p. 2 — high-tensile steel tube; factory finish `NOT SOURCED` |
+| Noise-damping covers on the outer Kelly (optional) | **sheet metal** panels filling the flutes between the drive keys — a smoother, plated band on the outer tube only | ibid. p. 2 |
+| Drilling tools (bucket, auger, rock auger) | painted body + **hardfacing weld beads or bolt-on wear strips**, and **tungsten-carbide teeth brazed into steel holders** | `bauer-maschinen-drilling-tools-and-casings…pdf` pp. 5–6, 11 ("wear protection: hard facing or wear strips", "fishtail pilot and flat teeth"); `bwh-betek-katalog-spezialtiefbau-foundationdrilling-en.pdf` (carbide tip brazed to a steel section; weld-on teeth; flat teeth; holders; **fused-tungsten-carbide coating 6 mm thick**; stud-welded "TungStuds" wear protection) |
+| Hoses | **black rubber**, but bundled — see §4.7. The bundle is wrapped in a **flat tarpaulin / hose bag** (*Flachplane*, "new hose bag"), so the visible object is a **fabric-sleeved bundle**, not loose snakes | `Bauer-Maschinen-Hydraulikschläuche…pdf` |
+| Cylinder rods (leader rams, crowd) | **chrome** | game convention; consistent with the render |
+| Cab glazing | **glass**, and there is a lot of it — full-height front screen, side screen, **and a roof window** so the operator can watch the masthead | render |
+| Track shoes, sprocket, idler, rollers | **worn / dark steel.** These are steel-shoe crawlers, not rubber-padded. | render |
+
+**Where dirt actually lands** (this is the part that makes it read as a working
+machine rather than a showroom render):
+
+- **A vertical mud gradient on the outer Kelly tube** — caked at the bottom,
+  thinning upward to the height the bar last went in. It comes out of a wet hole
+  every cycle. This is the single most characteristic dirt pattern on the machine.
+- **Spoil and wet clay on the mast foot, the lower quarter of the leader, and the
+  front of the car body** — the bucket is emptied by spinning it, and it throws.
+  `16-site-archetypes.md` l. 370 notes the rig *slews to the side of the hole* to
+  do this, so the dirt is asymmetric: heaviest on the slew-off side.
+- **Track frames and shoes packed with mud**, cleaner on the wearing faces.
+- **Grease and dark streaks** at the crowd-sledge rails, the Kelly drive adapter
+  and the sheave pins; the machine has **central lubrication**
+  (`rb-equipment-and-accessories-bauer-parts-and-service.pdf`, "Central
+  Lubrication") so grease exits at every bearing.
+- **Rust** on the counterweight lifting eyes, the pin bosses of the KDK mount, and
+  the exposed edges of any part that is routinely unbolted for transport.
+- **Chipped paint on walkway nosings and handrail top rails** — where boots and
+  hands go. The game already does this (`addWearStory` chips at the walkway edge);
+  it is right, keep it.
+- **Concrete splatter** near the hole if the rig also handles the tremie — grey,
+  hard, and it does not wash off.
+
+---
 
 ## 7. Photo references
-_(pending)_
+
+| Image | What it is | Useful for |
+|---|---|---|
+| `C:\Users\henri\Downloads\Rotary_Drilling_Rig_1000_0001.jpg` | **The best local image of this class.** A clean 3D-render turntable of a rotary drilling rig, shown twice (large hero + small full-machine). Neutral background, no branding. | **Mast section** (see §9 — it is a *plate/box girder with big round lightening holes*, not a lattice); the **parallel-kinematics linkage** at the mast foot with two rams plus a diagonal masthead strut; **hose bundle routing** — a large organised catenary loop of many parallel hoses running from the deck up the mast; **deck layout** — cab offset forward-left, engine house right-rear in yellow, perimeter handrails, side ladder; **undercarriage** — long steel-shoe crawler frames, sprocket at one end, idler at the other, visible track rollers; **cab glazing** including the roof window; the **overall colour split** (graphite structure / yellow house / white cab and rails). **Not useful for the Kelly bar** — the tool fitted in the render is a large auger on the drive, not a telescopic Kelly. |
+| `C:\Users\henri\Downloads\rtg-rammtechnik-gmbh-rg-rammgerät-im-einsatz-pile-driver-in-action-2023.jpg.webp` | A **driven-pile** rig (different archetype) | **Contrast only** — this is the silhouette `foundation-bg` must NOT look like. Leader + hammer, and it rakes. |
+| `C:\Users\henri\Downloads\Surface_Drill_Rig_1000_0001.jpg`, `surface_top_hammer_drill_rigged_01.jpg`, `surface-drill-rig-for-quarrying-and-mining-smartroc-d65-3d-model-77345d1f1d.webp` | Surface top-hammer / DTH rigs | Wrong class. Useful only as a negative reference. |
+| `C:\Users\henri\Downloads\Atpa\*` (≈40 images) | Swept: these are **drilling tools and bits** (down-the-hole bits, drill heads Ø129–238 API, `BS_SW80.JPG`, `Sw100.JPG`), plus product and sticker shots. | **No piling rigs.** Useful for *tool* wear and steel finish, not for this machine. |
+| `C:\Users\henri\Downloads\AdobeStock_576964972.jpeg`, `AdobeStock_69686132.jpeg` | Checked and rejected: an offshore worker portrait and a world map. | Nothing. |
+
+`NOT SOURCED`: **no photograph of a real rotary-Kelly rig at work exists in
+Downloads** — only the render. The mud, the spoil pile, the working platform and
+the Kelly-in-the-hole cycle have no local photographic reference. If the owner
+can drop two or three site photos of a BG-class rig into Downloads (one full
+side elevation, one close-up of the Kelly entering the rotary drive, one of the
+mast foot with the tool on the ground) this document's weakest section closes.
+
+---
 
 ## 8. NOT SOURCED
-- Overall machine length / width / height for any BG rig, from a **local** file.
-- Track gauge, track shoe width, sprocket / idler / roller geometry.
-- Mast cross-section dimensions, and whether this class is lattice or box section.
-- KDK external dimensions.
-- Diameter step between Kelly elements (only the **outer** pipe Ø is published).
+
+Honest list. None of these should be invented.
+
+- **Overall machine length / width / height** for any BG rig, from a *local* file.
+  The bauma catalogue pages carry no general arrangement.
+- **Track gauge, track shoe width, sprocket / idler diameters, roller count.**
+- **Mast cross-section dimensions** (width × depth) and its bay pitch. The *type*
+  of section is now evidenced by the render, but not its size.
+- **KDK external dimensions**, weight, and how far it stands off the mast face
+  measured rather than inferred.
+- **Crowd-cylinder vs crowd-winch architecture** for this specific class — pack 10
+  records that Soilmec sells CCS and WCS as distinct variants with different mast
+  geometry (§ll. 167), so this is a real fork, not a detail. Which one a BG uses is
+  unsourced here.
+- **Diameter step between Kelly elements** — only the *outer* pipe Ø is published
+  in the Kelly-bar catalogue. Do not guess a taper ratio.
+- **Factory paint finish of the Kelly bar itself** (painted or bare) — unstated.
+- **Counterweight mass and dimensions** as a published figure.
+- **Number and position of winches on a BG deck**, from a primary source. Pack 10's
+  "three or four winches" is second-hand from a brochure not in this folder.
+- **Cab dimensions, tilt mechanism, and whether it elevates.**
+- A **local photograph** of the class at work (see §7).
+
+---
 
 ## 9. Domain-truth warnings vs the current game build
-- **The Kelly tubes are ROUND, not square.** `buildKellyBar` uses `G.box`.
-  Source: `Kelly_Bars_DE_EN_905_518_1_2.pdf` p. 2, *"2–5 telescopic tubular
-  sections"*; every table column is headed *"Diameter outer pipe"*.
-- **Six drive keys per section, not two** (ibid. p. 2).
-- **Only the bottom drive stub is square, and it is 200 mm** on every class from
-  BK 110 to BK 500 (ibid. pp. 8–16).
-_(more to follow)_
+
+Read against `buildFoundationBG` and `buildKellyBar`,
+`C:\Users\henri\Downloads\drillity-the-game\src\rig\rigFactory.js` ll. 2723–2876.
+
+**A. The Kelly bar is wrong in three ways at once — and it is the machine's
+signature part.**
+
+1. **The tubes are ROUND, not square.** `buildKellyBar` builds each section with
+   `G.box(T, s, secLen, s)`. Source: `Kelly_Bars_DE_EN_905_518_1_2.pdf` p. 2 —
+   *"A Kelly bar consists of 2–5 telescopic **tubular** sections"*; every dimension
+   table in that catalogue is headed **"Diameter outer pipe"**. A driller will spot
+   a square Kelly instantly.
+2. **Six drive keys per section, not two.** Current code loops `k < 2`. Source:
+   ibid. p. 2 — *"Standard Kelly bars are fabricated with a total of 6 drive keys
+   on each section."*
+3. **Only the bottom stub is square, and it is 200 mm** — on *every* class from
+   BK 110 to BK 500 (ibid. pp. 8–16). The code does place a square-ish plate at the
+   bottom (`s * 1.6 × 0.18 × s * 1.6`) but the whole bar above it is square too, so
+   the distinction is lost.
+
+**B. Kelly proportions.** Current: `sections: 4, secLen: 6.4, size: 0.34`, i.e.
+25.6 m of tube at 340 mm outer, telescoping with a 0.80 size ratio per section.
+Against the catalogue: for a 360 kNm rig the correct family is **BK 300/419 or
+BK 400/394 or BK 420/470** — **outer pipe 394–470 mm**, not 340. The game's bar is
+**~20 % too thin for its stated torque**. Retracted length A for a 4-fold in this
+class is **11.3–20.3 m**; the game's collapsed bar is ~6.4 m + overlaps. Extension
+ratio should be **≈3× retracted** for a 4-fold (A 11.33 → B 34.20,
+`Kelly_Bars…pdf` p. 13); the code's `maxExt = 3 × (6.4 − 0.9) = 16.5 m` on a 6.4 m
+base is ~3.6×, close but the absolute lengths are short. Also
+`spec.kellyM: 4 × 6.4 = 25.6` vs `maxDepthM: 68` — those two cannot both be true:
+`T = B + W − H`, so 68 m of depth needs a bar whose **extended** length is ~68 m,
+which in this catalogue is a **BK 280/419/4/68 (A = 19.33 m, B = 66.20 m, 13,450 kg)**
+or a BK 420/470. Either raise the bar or lower the depth.
+
+**C. The mast is built as a lattice; the real machine is a plate/box girder.**
+`buildLatticeMast(... bays: 7, chordR: 0.075 ...)` builds an open lattice with
+75 mm chords. In `Rotary_Drilling_Rig_1000_0001.jpg` the leader is a **welded
+box section of flat plate, pierced with large round lightening holes**, closed on
+its faces — a completely different read at any distance: solid dark mass with
+punched circles, not an open truss. Lattice belongs on a crawler crane or a
+driven-pile leader, not on this class of rotary mast. `NOT SOURCED`: the section's
+actual width and plate thickness.
+
+**D. The hoses are modelled as four loose snakes; the real thing is one bundled,
+bagged package with a defined start and end.** From
+`Bauer-Maschinen-Hydraulikschläuche…pdf`: the **Hauptschlauchpaket / main hose
+package** runs *"from hose deflection (Schlauchumlenkung) to Bulkhead KDK
+(Schottplatte)"* and carries **six main working lines to the KDK** plus
+high-pressure lines; the **Mastschlauchpaket / mast hose package** runs *"from
+bulkhead base carrier to bulkhead KDK"* and includes the **electric cable inside
+the hose package**, all wrapped in a **flat tarpaulin (`Flachplane`) / hose bag**.
+So the correct model is: a **deflection roller** on the machine, a **flat bundle
+in a fabric sleeve** running up the mast, and a **bulkhead plate on the rotary
+drive** where every hose terminates — and the bundle must **move with the
+carriage**, forming a loop that grows and shrinks over the crowd stroke. The game
+currently routes hoses only around the deck (`root`, y ≈ 2.2–5.5), never to the
+KDK, and the KDK travels 2.6 → 14.3 m with no hose following it. Hose sizes for
+reference: suction NS 25–100, low-pressure NS 6–75, six-layer high-pressure to
+NS 25, R15 420 bar NS 32–50, **lengths up to 120 m**.
+
+**E. The counterweight must read as removable.** It is currently a rounded box
+fused to the body (`G.roundedBox(3.05, 1.45, 1.05)` at z = −7.65). Every published
+weight for this class is *"transport weight **without counterweight**"*
+(bauma 2025 pp. 3, 5: 63.4 t for BG 30 H, 74.6 t for BG 36 H) — the slab comes off
+for every move. Give it **lifting eyes, a pinned/bolted interface and a parting
+line**. Same for the crawler frames: the BG 55 ships with a *"jack-up system with
+optimized clearance width for crawler removal"* (ibid. p. 6).
+
+**F. The rotary drive is a swappable pinned module, not a welded lump.** The BG 45
+takes either of two KDKs via a *"hydraulically operated pin connection on the
+crowd sledge"* (`10-oem-foundation.md` §C.1). `buildTool('rotary-drive-head')`
+should show pin bosses and lifting eyes at the sledge interface.
+
+**G. Missing part between drive and Kelly: the Kelly drive adapter
+(`Kellymitnehmer`).** A separate component with its own type series
+(`KA 400/343` … `KA 962/559`), a **hollow stem**, and — in System I — a **cardanic
+joint** and an **Öffnerplatte / trigger plate** that releases the telescopic locks
+(`Kelly_Bars…pdf` pp. 4–5). Right now the Kelly is parented straight to the
+carriage at `(0, 0.05, 0)` and passes through nothing. Model a **stepped collar**
+at the drive with a visible trigger plate.
+
+**H. Missing at the masthead: the upper Kelly guide.** The catalogue makes a
+selling point of the **long Kelly head (standard)** precisely *"to allow an upper
+Kelly guide to be used"* (ibid. p. 6). There should be a guide collar near the top
+of the mast that the Kelly head runs through, and it is what sets the visible
+**drill-axis stand-off of 1,300–2,000 mm** from the mast face
+(`10-oem-foundation.md` §D.5, secondary). The game places the Kelly essentially on
+the mast centreline via the carriage — the characteristic gap is missing.
+
+**I. Missing rope hardware: the rope swivel.** The main rope ends in a **swivel**
+of 575–915 mm body length with Ø160–216 mm eyes and Ø50–80 mm pins, rated 17 t to
+60 t (`Kelly_Bars…pdf` pp. 8–16), and *then* the Kelly eye. The game's `ropeA`
+tube runs straight to the masthead with nothing at the Kelly end.
+
+**J. Crowd stroke is over-long.** `dyn.carriageRange = [mastH − 5.2, 2.6]` gives
+the carriage ~11.7 m of travel on a 19.5 m mast — 60 % of the leader. The
+secondary BG 45 figure is a **9.5 m crowd stroke on a ~28.5 m mast**, i.e. **≈⅓**.
+Shorten the range or lengthen the mast.
+
+**K. Rotation speed.** `tools.js` derives `rpmMax = 38 − 0.03 × torque` → 27 rpm at
+360 kNm. The catalogue rates a 300 kNm electric drive at **50 rpm maximum**
+(bauma 2025 p. 4). The game is conservative rather than wrong, but if the number is
+shown to the player, 50 rpm is the sourced ceiling for a 300 kNm drive.
+
+**L. Kelly box size.** `tools.js` sets `kellyBoxMm: torqueKNm > 250 ? 200 : 150`.
+Bauer specifies **Kelly box 200 mm on every drilling tool in the catalogue**, and a
+**200 mm drive stub on every Kelly bar from BK 110 to BK 500**
+(`bauer-maschinen-drilling-tools-and-casings…pdf` pp. 5–11;
+`Kelly_Bars…pdf` pp. 8–16). 200 is the volume size across the whole range; smaller
+boxes exist but are not a simple function of rig torque.
+
+**M. Tool proportions for whatever hangs on the Kelly** (currently unspecified in
+the rig builder). From `bauer-maschinen-drilling-tools-and-casings…pdf` pp. 5–6, 11:
+
+| Tool | Effective length NL | Overall length GL | OD range | Weight |
+|---|---|---|---|---|
+| Auger `SB` / `SB-2` | 1,700 or 2,250 mm | **2,315 or 2,865 mm** | 520 – 2,500 mm | 600 – 2,900 kg |
+| Drilling bucket `KB` / `KB-2` | 1,550–1,900 mm (RL 1,200/1,500) | **2,150 – 2,500 mm** | 520 – 2,500 mm | 660 – 5,730 kg |
+
+So the tool on the bottom of the Kelly is **~2.2–2.9 m long overall** and up to
+**2.5 m across** — a big object, roughly as tall as a person and a half, and the
+head above the flights (GL − NL ≈ 600 mm) is the Kelly-box block. Buckets carry a
+**ventilation pipe (`Saugkanal`)** and a **fishtail pilot**; augers a
+**fishtail pilot and flat teeth**. Rock augers (`SBF-K`, `SBF-P`, `SBF-Z2`) are the
+carbide-toothed variants for 5–100 MPa rock.
+
+**N. Naming — do not regress.** `spec.name` is already the fictional
+`Torvald KR-46 Kellyline`, which is correct per DOMAIN.md §10. Keep every real
+designation in this document out of the mesh names, the decals (`addDecals`
+`brand`), and the shop copy. The **shapes** in this document are free to copy; the
+**badges** are not.
+
+---
+
+## Appendix — continuation of §1, further sources read
+
+| File | Extent | What it showed | Useful? |
+|---|---|---|---|
+| `C:\Users\henri\Downloads\Bauer-Maschinen-Hydraulikschläuche-hydraulic hoses-DE-EN-905-213-1+2.pdf` | whole (2 pp.) | Short but **directly load-bearing for hose routing**: names the three hose packages and their exact endpoints (hose deflection → KDK bulkhead; base-carrier bulkhead → KDK bulkhead), states **six main lines to the KDK**, the electric cable inside the bundle, the **flat tarpaulin hose bag**, and the hose size / pressure / length envelope. | **Yes** |
+| `C:\Users\henri\Downloads\bauer-maschinen-drilling-tools-and-casings-de-en-11-25_0.pdf` | contents p. 1; augers pp. 5–6; buckets pp. 11–12; type key p. 2 | Tool type codes (SB auger, KB bucket, KR core barrel), dimension tables (NL / GL / OD / weight), **"Kelly box 200 mm"** repeated on every tool, wear-protection wording, and the casing OD ladder. | **Yes** |
+| `C:\Users\henri\Downloads\bwh-betek-katalog-spezialtiefbau-foundationdrilling-en.pdf` | scanned for materials | Tungsten-carbide tooling: carbide tip brazed to a steel body, weld-on teeth, flat teeth, dragon tooth, holders, **fused-tungsten-carbide coating 6 mm**, stud-welded wear protection. | Yes, for **materials on tools** only |
+| `C:\Users\henri\Downloads\rb-equipment-and-accessories-bauer-parts-and-service.pdf` | scanned | A **spare-parts** catalogue — tricone bits, filters, seals, joystick labels, central lubrication. Aimed at the anchor/KR rig line, not the BG. | **Mostly not useful** for this subject; the one takeaway is that the machine has **central lubrication** (so grease at every bearing). |
+| `C:\Users\henri\Downloads\Rotary_Drilling_Rig_1000_0001.jpg` | viewed | See §7 and §9-C. **The most informative single item for silhouette and structure.** | **Yes** |
+| `C:\Users\henri\Downloads\Atpa\` (folder swept), `AdobeStock_*.jpeg`, `Surface_Drill_Rig_*` | listed / spot-checked | No rotary-Kelly rigs. | No |
+| `C:\Users\henri\Downloads\drillity-the-game\research\16-site-archetypes.md` | ll. 50, 100–119, 282–296, 317, 370 | Confirms `rotary-kelly` belongs to the `nordic`, `german-site`, `iberian-quarry` and `alpine` archetypes; the working-platform rule; the **5 m exclusion zone for large-diameter rotary bored** work; that the rig **slews to the side of the hole** to discharge spoil; and the noise rule against shaking spoil off in reverse. | Yes, for **staging** |
+| `C:\Users\henri\Downloads\drillity-the-game\research\18-visual-reference.md` | first 60 ll. | Not a source on this machine — it is the owner's visual target for the surface/section scene, and flags that the reference reel is AI-generated. | Context only |
+
+_Status: complete for the material available locally. The gaps in §8 are real gaps,
+not omissions._

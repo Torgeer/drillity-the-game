@@ -1,7 +1,7 @@
 # Engineering reference — `crawler-th`
 ## Surface top-hammer crawler drill with screw compressor
 
-status: **in progress** (rev 2)
+status: **complete for this pass** (rev 4)
 subject: game rig id `crawler-th` (game name "Steinbach TH-320 Ridgeline")
 compiled: 2026-09-04
 
@@ -24,8 +24,52 @@ compiled: 2026-09-04
 | `research/03-mining.md` §C.1.1 | — | An in-project silhouette description of exactly this rig already exists: tracked undercarriage, boom + feed beam, drifter riding **on top** of the beam, rod carousel on the side, dust hood at the ground end with a big flexible hose to a cyclone/filter box, diesel + **screw compressor** in the body, cab offset to see the collar. | **YES** |
 | `research/12-oem-rock-tooling.md` §B.2, §C.1, §C.2 | — | Thread / hole / rod ladder (R25 → GT60), rod lengths **3.0–6.1 m**, top hammer's whole hole range **28–152 mm**, and one published field configuration: 87 mm GT60 pilot tube, **4.3 m GT60 rods**, 115 mm ballistic retrac bits, 20 m holes at **15°** in granite. | **YES — tool end** |
 | `research/16-site-archetypes.md` §A.4, §A.5, D4 | — | Where the machine stands (quarry bench, pit bench, infra corridor, slope & cutting, tunnel portal, urban rock excavation) and the sourced class split **top hammer ≈ 1–5.5 in holes / DTH 3.5–8 in**. Already flags defect **D4** — `crawler-th` offering `jet-grouting`. | **YES** |
+| `Downloads/surface-drill-rig-for-quarrying-and-mining-smartroc-d65-3d-model-77345d1f1d.webp` | whole image | A clean full-machine render of the **sibling DTH surface crawler** — same boom-mounted-vertical-feed architecture, yellow cyclone + black cone dust collector on the left of the feed with two corrugated hoses to the collar hood, grey/yellow two-tone body, guard-grilled cab, steel tracks, rear mesh-grille enclosure with exhaust stack, front levelling jacks, a circular step platform at feed mid-height, and a **bare bright-metal feed beam**. Its compressor bay is oversized for top hammer — the one thing not to copy. Badged; do not copy the badge. | **YES — layout and materials** |
+| `Downloads/Atpa/` (folder, sampled) | listing + `atpa-de-slide-3.jpg` | ATPA tooling-company product, factory and logistics photography — drill heads, casing shoes, bits, a works interior with a steel delivery truck. **No surface top-hammer rigs.** | **NO** |
 
-_(more source rows appended in §1b as they are read)_
+**See §1b immediately below** for the photographs recovered from inside the PDFs — they are the strongest references in this document.
+
+---
+
+## 1b. Additional sources read — images recovered from inside the PDFs
+
+Poppler is not installed, so PDF **pages** cannot be rasterised. I instead
+extracted the **embedded photographs** out of the PDFs with `pypdf`
+(`page.images`) and viewed those directly. That worked, and it produced the four
+best references in this document. Extracted copies are in the session scratchpad
+at `.../scratchpad/pdfimg/`.
+
+| source | what it showed | useful? |
+|---|---|---|
+| `top-hammer-drilling-tools-broshure-english.pdf` **p.16** (embedded photo) | **A real small surface top-hammer construction crawler at work**, red, in a rock trench in a Nordic forest. **Rubber tracks. No cab at all** — the operator stands off to the side with a **hanging remote-control box on a neck strap**. Short vertical feed on a folding red boom, standing well outboard; tall rear enclosure with a **louvred grille door** (engine + compressor); rear stabiliser legs down. | **YES — class-defining** |
+| `top-hammer-drilling-tools-broshure-english.pdf` **p.60** (embedded photo) | **The best component photograph found.** A boom + feed + drifter assembly close up (this one is an underground longhole boom, *not* a surface rig — flagged honestly — but the feed/drifter/hose subassembly is the same family). Shows: the feed is an **open fabricated frame with two bright round guide bars**, not a solid box; a **festooned loop of ~10 black hoses** hanging in the middle of the feed as the drifter's travel take-up; **two large-bore black corrugated hoses in catenary droops** from feed to carrier; the boom as a red box-section with a bare chrome extension-cylinder rod; a red rotator/tilt casting at the boom nose; a hose-protection **coil spring**; a **yellow/black hazard-striped decal** on the carrier corner. | **YES — best component reference** |
+| `Tophammer catalog.pdf` **p.2** (embedded photo) | **The dust hood, close up, on a yellow surface rig on a quarry bench.** A **large black flexible rubber bell/skirt** clamped to the mouth of a **yellow fabricated steel duct**, with a **black corrugated suction hose** leaving the top of the duct. Behind it, the feed's **bright bare-aluminium / silver extruded beam** with bolted plates, and hose bundles in **black spring guards**. Also: a hand-held **yellow-painted button bit with bare carbide buttons** on a black rod, and a second yellow drill rig on the bench in the background. | **YES — dust hood + materials** |
+| `Tophammer catalog.pdf` **p.11** (embedded photo) | Shank adapters and rods standing in a pickup bed. Material fact: drill steel is delivered **painted (bright yellow here) on the body with bare, bright, machined splines and thread ends** — a two-material look worth copying on rods in the game. | **YES — tool materials** |
+| `Tophammer catalog.pdf` **p.43** (embedded photo) | A finished blasthole in granite: **angular grey cuttings 2–8 mm heaped in a ring around the collar**, the hole mouth slightly bevelled, faint spiral rings on the hole wall. | **YES — collar / cuttings** |
+| `catalog_rocktool_english.pdf` | Scanned all 34 pages: **contains no embedded photograph over 60 kB.** It is a tables-and-line-art tooling catalogue. | **NO — no imagery** |
+| `Top_Hammer_Tools.pdf` (Mitsubishi, 88 pp.) | Large images exist (pp. 1, 2, 3, 6, 7, 17, 21, 41, 61, 83) but the catalogue is a **shank-adapter / tooling cross-reference**, already mined by `research/12` §B.3. Not a rig source. | **partly — tools only** |
+
+### What those four photographs change
+
+1. **There are two distinct sizes in this class, and they look different.**
+   The **small construction machine** (brochure p.16) is **rubber-tracked, has no
+   cab, and is run by a walking operator on a remote box**. The **quarry
+   production machine** (`surface_top_hammer_drill_rigged_01.jpg`, and the
+   background rig in catalogue p.2) is **steel-tracked, cabbed, bigger, with a
+   mesh-caged rod magazine**. `crawler-th` is written as the second, but the
+   first is equally real and is the machine that does urban rock excavation,
+   trenching and slope work. **Record both; do not silently merge them.**
+2. **The feed is an open frame, not a closed box.** Brochure p.60 shows two
+   **bright round guide bars** running the length of a fabricated frame, with the
+   carriage riding them. Catalogue p.2 shows the same beam as a **bright
+   bare-aluminium extrusion**, not painted. A solid painted box beam is the wrong
+   read.
+3. **The hose festoon is a large, visible, load-bearing piece of the silhouette.**
+   Roughly ten hoses looped in a hanging bundle in the middle of the feed
+   (p.60) — not two thin tubes.
+4. **The dust hood is a rubber bell on a fabricated duct**, not a simple cone,
+   and the corrugated suction hose is genuinely fat — comparable in diameter to
+   a drill rod several times over.
 
 ---
 
@@ -215,6 +259,20 @@ working machine rather than a CAD block.
 5. **Low wide tracked body, small offset glazed cab, louvred rear enclosure** —
    deck height about equal to track height, no tall tower.
 
+**And the size split, which changes the silhouette entirely.** Two machines
+share this class name and both are real:
+
+| | **small construction crawler** (brochure p.16) | **quarry production crawler** (`surface_top_hammer_drill_rigged_01.jpg`, D65 render) |
+|---|---|---|
+| operator | **none on board — a walking operator with a hanging remote-control box** | **cabbed**, glazed, guard-grilled |
+| tracks | **rubber** | steel, grousered |
+| rod store | small or none (single rods handed in) | **mesh-caged magazine on the feed** |
+| where | trench and city rock excavation, slope work, portal collars | bench blastholes, pre-split rows |
+
+`crawler-th` as built is the second. The first is the better-sourced photograph
+in this folder and is the obvious candidate if the game ever wants a cheaper
+starter tier of the same method.
+
 ---
 
 ## 6. Materials and paint
@@ -228,10 +286,25 @@ working machine rather than a CAD block.
   pivots and pins, the drifter body, hose clamps, the beam underside, guard
   grilles and louvres. The two-tone yellow-body / dark-undercarriage split is
   visible in both images and does most of the work of reading as a machine.
-- **Bare / bright steel:** shank adapter, drill rods, the exposed length of
+- **Bare / bright steel and aluminium:** shank adapter, the exposed length of
   **every cylinder rod** (chrome — distinctly brighter and more specular than
   paint), track pins, and the machined feed rails, which polish to bare metal
-  exactly where the carriage runs.
+  exactly where the carriage runs. **Correction from the photographs: on the
+  real machines the whole feed beam is often bare bright extrusion, not painted
+  at all** — catalogue p.2 shows a silver extruded beam with bolted plates, the
+  D65 render shows bright metal rails the full length of the feed, and brochure
+  p.60 shows two bright round guide bars. Do not paint the beam body-colour by
+  default; a bare metal feed against a painted body is a strong, correct
+  material contrast.
+- **Drill steel is painted, with bare ends.** Catalogue pp.11 and 17: rods,
+  shanks, coupling sleeves and bit bodies are **painted a bright colour** (yellow
+  in this catalogue) over the body, with **bare, bright, machined threads,
+  splines and gauge faces**, and **bare hemispherical carbide buttons** in the
+  bit face. A uniformly bare-steel rod is wrong; so is a uniformly painted one.
+- **Two-tone body is normal.** The D65 render is **grey lower structure + yellow
+  upper panels**; `Surface_Drill_Rig_1000_0001.jpg` is yellow over a dark grey
+  undercarriage; brochure p.16 is red over black. All three keep the
+  undercarriage dark and the superstructure bright.
 - **Rubber:** hose covers (matte black, slightly dusty), cab seals, the dust
   curtain, engine bay mounts.
 - **Glass:** cab glazing, faintly green-tinted, with the guard grille in front.
@@ -264,12 +337,25 @@ in limestone, buff in sandstone, grey in granite.
 
 ## 7. Photo references
 
+Ranked. The first four are the ones to model from.
+
 | file | shows | good for |
 |---|---|---|
-| `C:/Users/henri/Downloads/Surface_Drill_Rig_1000_0001.jpg` | small boom-mounted surface crawler, rear 3/4, feed vertical | boom geometry, dust hose + collector mounted on the feed, coiled hoses, rear tank, track/deck proportions |
-| `C:/Users/henri/Downloads/surface_top_hammer_drill_rigged_01.jpg` | larger top-hammer crawler, front 3/4, feed at ~45° | **working attitude**, mesh rod-store guard cage, louvred rear enclosure, cab position |
+| **1.** `C:/Users/henri/Downloads/Surface_Drill_Rig_1000_0001.jpg` | small boom-mounted surface crawler, rear 3/4, feed vertical | boom geometry, dust hose + collector **mounted on the feed**, coiled hoses, rear tank, track/deck proportions, feed-head sheave |
+| **2.** `C:/Users/henri/Downloads/surface-drill-rig-for-quarrying-and-mining-smartroc-d65-3d-model-77345d1f1d.webp` | **a clean full-machine 3/4 render of the sibling DTH crawler.** Same architecture as `crawler-th` — boom-mounted vertical feed, yellow cyclone + black cone dust collector on the left of the feed with **two corrugated hoses down to the collar hood**, grey/yellow two-tone body, cab with side guard grille and roof guard, steel tracks, rear enclosure with mesh grille panels and a black exhaust stack, front levelling jacks, a circular step platform at the feed's mid-height. **The feed beam reads as bare bright metal, not painted.** | **overall layout and material split.** Its compressor bay is oversized for a top-hammer rig — that is the one thing not to copy. Carries a maker's badge and model letters: **do not copy them.** |
+| **3.** `C:/Users/henri/Downloads/surface_top_hammer_drill_rigged_01.jpg` | larger top-hammer crawler, front 3/4, feed at ~45° | **working attitude**, mesh rod-store guard cage, louvred rear enclosure, cab position |
+| **4.** `.../scratchpad/pdfimg/THB_p60.jpg` (from `top-hammer-drilling-tools-broshure-english.pdf` p.60) | boom + feed + drifter close-up (underground longhole boom, same subassembly family) | **the best component reference**: open feed frame with bright round guide bars, the ~10-hose festoon loop, corrugated hose catenaries, boom-nose rotator casting, hose spring guard, hazard-stripe decal |
+| 5. `.../scratchpad/pdfimg/THC_p2.jpg` (from `Tophammer catalog.pdf` p.2) | dust hood close-up on a yellow surface rig, quarry bench | **the dust hood**: black rubber bell on a yellow fabricated duct, corrugated suction hose, bare-aluminium feed extrusion, hose spring guards; and a second rig on the bench behind |
+| 6. `.../scratchpad/pdfimg/THB_p16.jpg` (brochure p.16) | small red construction crawler in a rock trench | **the cabless remote-operated variant**: rubber tracks, louvred rear enclosure, rear stabiliser legs, walking operator with a neck-strap control box |
+| 7. `.../scratchpad/pdfimg/THC_p32.jpg` (catalogue p.32) | large underground longhole rig, feed at ~45° | open lattice feed frame with parallel tubes and cross-bracing, a large box magazine slung under the feed, corrugated hose loops |
+| 8. `.../scratchpad/pdfimg/THC_p17.jpg` and `THC_p11.jpg` | bits, coupling sleeve, shank adapter, rods | **tool materials**: yellow-painted bodies, bare bright machined threads and splines, bare hemispherical carbide buttons |
+| 9. `.../scratchpad/pdfimg/THC_p43.jpg` (catalogue p.43) | a finished blasthole in granite | **collar detail**: angular grey cuttings 2–8 mm ringed around the hole, faint spiral rings on the hole wall |
 
-_(further image-sweep results appended below)_
+**Swept and found nothing for this class:** `C:/Users/henri/Downloads/Atpa/` —
+sampled `atpa-de-slide-3.jpg` and the file listing; it is an ATPA tooling
+company's product, factory and logistics photography (drill heads, casing
+shoes, bits, a works interior with a steel delivery truck). **No surface
+top-hammer rigs.** `catalog_rocktool_english.pdf` holds no embedded photos at all.
 
 ---
 
@@ -290,13 +376,46 @@ _(further image-sweep results appended below)_
 - **Whether this class has an oscillating or extendable undercarriage.**
 - **Whether this class carries a winch**, and where.
 - **Ground pressure, gradeability, tramming speed.**
-- **PDF pages could not be viewed as images on this machine** — poppler /
-  `pdftoppm` is not installed, so every PDF was read as **extracted text only**.
-  Any drawing, dimensioned diagram or photograph inside those PDFs is unread.
-  **Installing poppler would unlock the largest remaining source of truth.**
+- **Feed beam length as a published figure**, and the drifter's stroke / travel.
+- **The rod-magazine capacity** on the quarry machine (the cage hides it).
+- **Whether the small cabless variant uses a cable umbilical or radio remote** —
+  brochure p.16 shows a box on a neck strap but the link is not visible.
+- **PDF *pages* could not be rasterised on this machine** — poppler / `pdftoppm`
+  is not installed. **Worked around it** by pulling the **embedded photographs**
+  out of the PDFs with `pypdf` (`page.images`) and viewing those, which produced
+  five of the nine photo references in §7. What remains unread is anything that
+  lives as **vector line art or a dimensioned drawing on the page** rather than
+  as an embedded raster — and a dimensioned general-arrangement drawing is
+  exactly the thing still missing from §3. **Installing poppler would let a later
+  pass rasterise pages and check for GA drawings.**
+- **No rig-maker specification sheet for a top-hammer surface crawler exists in
+  the folder at all.** Every PDF supplied for this rig is a **tooling** catalogue
+  (bits, rods, shanks, couplings) or a **rotary blasthole** automation brochure.
+  If the owner wants sourced absolute dimensions for this machine, the folder
+  needs one surface-drill-rig product sheet — that single file would close most
+  of this section.
 
 ---
 
 ## 9. Domain-truth warnings — what the game currently gets wrong
 
-_(rev 3 — being written)_
+Checked against `src/rig/rigFactory.js` `buildCrawlerTH()` (from ~line 2098).
+
+| # | what the game does | what the material says | fix |
+|---|---|---|---|
+| **W1** | **The feed is split into two halves stacked by `buildMastStack`** — `buildFeedBeam(stack.lower, mastH*0.5)` + `buildFeedBeam(stack.upper, mastH*0.5)` — i.e. a telescoping mast. | The *section* `buildFeedBeam` draws (two webs, a back plate, an open front, rails outside the section) is **right** and matches catalogue p.2. The **two-stage stack is the problem**: a top-hammer surface rig has a **single one-piece feed beam**. `research/03` §C.1.1: *"a feed beam (a rail) with the hydraulic drifter sliding along it."* Brochure p.60 and catalogue p.32 both show one continuous frame. | Keep the section. Drop the upper/lower split — one beam of full length. The two-stage stack is a piling-rig idiom. |
+| **W2** | **`jet-grouting` is in `methods`.** | Already flagged as defect **D4** in `research/16`: *"A screw compressor is not a high-pressure grout pump."* Jet grouting needs a 400-bar grout pump and a multi-tube monitor string `[EN12716]`. | Remove `jet-grouting` from `crawler-th`. |
+| **W3** | **Cab is always present** (`cab: { w: 1.05, h: 1.80, d: 1.20 }`). | Brochure p.16 shows the small construction machine of exactly this class with **no cab at all** and a walking operator on a remote box. | Not wrong for the big machine — but if the game ever wants a small/cheap tier of this rig, the cabless remote-control variant is the sourced one. |
+| **W4** | **`trackWidth: 0.46`, `gauge: 0.92`, steel-track look.** | Both are plausible for the cabbed quarry machine; the small class runs **rubber tracks** (brochure p.16). | Note only — the game's figures are unsourced either way (§8). |
+| **W5** | **Feed rails are modelled but the feed-chain sheaves are not.** `buildCarriage` gets `railX`/`railZ`, but there is no idler wheel at either beam end. | `Surface_Drill_Rig_1000_0001.jpg` shows a prominent **round sheave at the top of the beam**; it is one of the few circular shapes on the whole machine and reads at distance. | Add a sheave at each beam end. |
+| **W6** | **`buildDustHood` does draw a skirt plus a suction tube** (`G.tube(..., 0.075, ...)`), but the tube runs only ~1.5 m and **stops in mid-air**; the deck cyclone is a separate `lathe` at `[-0.72, 1.10, -3.60]` and nothing joins the two. | The **corrugated hose between hood and collector is the most recognisable single line on the machine** (`Surface_Drill_Rig_1000_0001.jpg`, catalogue p.2). Also, the hood in catalogue p.2 is a **black flexible rubber bell clamped to a fabricated steel duct**, not a bare lathe skirt, and the hose is **ribbed**, not smooth. | Run the tube all the way to the cyclone; ribbed geometry or a ribbed normal map; add the duct between skirt and hose. Both mounting positions (on the feed, on the deck) are real — pick one and route the hose to it. |
+| **W7** | **Hose sets are 4 smooth tubes of r = 0.022–0.05 m, all on the body, none on the feed.** One `addCoiledAirline` exists on the body. | Brochure p.60: the drifter's hoses are a **festooned bundle of ~10 hanging on the feed itself**, and they are what must move as the carriage travels. `Surface_Drill_Rig_1000_0001.jpg`: the coiled spiral hoses are **between boom and feed**, not on the body. | Move the coil and add a feed-mounted hose loop; the body hoses are the least visible ones. |
+| **W8** | **Three outriggers** (two front at ±0.95, one rear). | Consistent with brochure p.16 (rear legs visible) — no correction, but the "drilling" pose should visibly **unload the tracks**. | Pose note only. |
+| **W9** | **`rodLen = 3.05` m, carousel of 6.** | 3.05 m is at the **bottom** of the sourced range; published extension-rod steps run **3.0–6.1 m**, and the one published field configuration for this exact duty uses **4.3 m GT60 rods** (`research/12` §C.2). | 3.05 m is defensible; 4.3 m is the better-sourced default for bench work. Either way, cite it. |
+| **W10** | **`holeMm: '76-127'`.** | Sits correctly inside the sourced top-hammer envelope **28–152 mm** and inside the surface production band **1–5.5 in** (`research/12`, `research/16` §A.4). | **Correct — leave it.** |
+| **W11** | **`weightKg: 12500`, `powerKw: 168`, `feedKn: 42`, `drifterKw: 21`.** | **None of these four is sourced** from any file in the folder. | Leave them, but they are guesses; see §8. Do not print them in-game as if they were spec-sheet truth. |
+| **W12** | **The rod carousel is a bare cluster of rods** (`buildCarousel` with `rods: 6`). | On the real quarry machine the whole magazine is **inside a perforated mesh guard cage** (`surface_top_hammer_drill_rigged_01.jpg`) — a large flat grey mass that changes the silhouette. | Add the cage; it is cheap geometry and a top-5 identifying feature. |
+| **W13** | Naming: **`name: 'Steinbach TH-320 Ridgeline'`.** | Correct approach per `DOMAIN.md` §10 — an invented name, no real badge. | **Correct — keep doing this.** Do not let any real designation from this document (DC125R, GT60, T51, COP, HD) reach a product name or a decal. Thread designations like **T51 / GT60 are industry standards, not brands**, and are safe as *tool* specs; model numbers are not. |
+| **W14** | **Two different rod lengths for the same method.** `rigFactory.js` `buildCrawlerTH` sets `rodLen = 3.05`; `data.js` `top-hammer` sets `rodLength: 3.66`. | Both are inside the sourced 3.0–6.1 m band, so neither is wrong — but the rig and the method disagree with each other, and the carousel geometry is built from the rig's number while the drilling cycle is presumably driven by the method's. | Pick one. `research/12` §C.2's field configuration for bench work uses **4.3 m**. |
+| **W15** | **The `top-hammer` method in `data.js` is otherwise well set.** `holeDiaRange: [38, 127]`, `nominalDia: 76`, `depthRange: [3, 45]`, `flushMedium: 'air'`, `threadFamily: 'R/T percussion'`, archetypes `quarry-bench / open-pit-bench / infrastructure-corridor / tunnel-portal / urban-plot`. | All of it agrees with the sourced material: 38–127 mm sits inside top hammer's 28–152 mm envelope; air flushing is correct; the archetype list matches `research/16` §A.4 exactly, including urban rock excavation. | **Correct — leave it.** This is the best-sourced part of the rig's data. |
+

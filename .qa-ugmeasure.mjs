@@ -16,6 +16,7 @@ const TAG = flag('tag', 'ug');
 const QUALITY = flag('quality', 'high');
 const METHODS = (flag('methods', 'tunnel-jumbo,longhole,rockbolt')).split(',');
 const OUT = flag('out', null);
+const PORT = flag('port', '5178');   // vite falls back when 5178 is taken
 
 const PHONE = {
   ...devices['iPhone 13 Pro'],
@@ -42,7 +43,7 @@ page.on('pageerror', (e) => errors.push('[pageerror] ' + String(e).slice(0, 200)
 await page.routeWebSocket(/.*/, () => { /* mocked: never reaches the dev server */ })
   .catch((e) => console.log('could not mute HMR -', e.message));
 
-await page.goto(`http://localhost:5178/?quality=${QUALITY}&shot`, { waitUntil: 'load' });
+await page.goto(`http://localhost:${PORT}/?quality=${QUALITY}&shot`, { waitUntil: 'load' });
 await page.waitForFunction(() => window.__DRILLITY && window.__DRILLITY.__qa, { timeout: 30000 });
 await sleep(2500);
 
@@ -236,6 +237,10 @@ for (const spec of METHODS) {
     const info = (c.gl && c.gl.info) || null;
     out.calls = info ? { calls: info.render.calls, tris: info.render.triangles } : null;
     out.terrainCalls = c.terrain && c.terrain.drawCalls != null ? c.terrain.drawCalls : null;
+    out.arch = c.terrain && c.terrain.archetype;
+    out.contractArch = c.state.contract && c.state.contract.archetype;
+    out.siteArch = c.state.world && c.state.world.site && c.state.world.site.archetype;
+    out.cam = cam ? { p: cam.position.toArray().map(function (v) { return +v.toFixed(2); }), fov: cam.fov, aspect: +cam.aspect.toFixed(3) } : null;
     out.rigId = c.state && c.state.garage && c.state.garage.rigId;
     out.workLights = (c.rig && c.rig.getWorkLights) ? c.rig.getWorkLights().map((l) => ({
       name: l.name, cone: l.coneDeg, range: l.rangeM, moves: l.moves, colour: l.colourHex,
@@ -249,6 +254,8 @@ for (const spec of METHODS) {
 
   report.methods[mid] = m;
   const p = m.probes || {};
+  process.stdout.write(`  arch=${m.arch}  contract=${m.contractArch}  site=${m.siteArch}  cam=${JSON.stringify(m.cam)}
+`);
   const line = (pre) => Object.keys(p).filter((k) => k.startsWith(pre))
     .map((k) => `${k.slice(pre.length)}m:${p[k].luma != null ? p[k].luma : 'off'}`).join('  ');
   process.stdout.write(

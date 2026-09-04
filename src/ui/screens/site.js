@@ -1292,11 +1292,20 @@ export function createSiteScreen(app) {
      `.cluster` (tools/shoot.mjs:414 → its `site HUD is up` check at :749),
      and the instrument cluster is this element now. The class carries no CSS
      at all. When tools/ moves that count to `.sitedock`, delete it here. */
+  /* Named, because the unit card does not COVER these two rows — it takes
+     them. `showUnit`/`hideUnit` hide them outright while it is up. An opaque
+     card laid over live rows still leaves them painted and hit-testable: the
+     gauge, its caption and `.railbtn` all went on drawing underneath, an
+     enumerating harness counts every one of those as an overlap, and a button
+     the player cannot see is a button they can still hit. */
+  const dockInst = C.h('div.dock__inst', gaugeBox, readouts);
+  /* Instrument, then decision, then action — left to right, the order a
+     driller reads them in. */
+  const dockAux = C.h('div.dock__aux', wellEl, railEl);
+
   const dock = C.h('div.sitedock.cluster',
-    C.h('div.dock__inst', gaugeBox, readouts),
-    /* Instrument, then decision, then action — left to right, the order a
-       driller reads them in. */
-    C.h('div.dock__aux', wellEl, railEl),
+    dockInst,
+    dockAux,
     C.h('div.dock__ctl',
       C.h('div.controls__sliders', feedSl.el, rotSl.el, flushSl.el),
       actionBtn,
@@ -1343,7 +1352,10 @@ export function createSiteScreen(app) {
   const A0 = Math.PI;
   const SWEEP = Math.PI;
   const REDLINE = 0.86;
-  const CAP_H = 11;           // the TORQUE caption strip at the foot of the box
+  /* The caption row at the foot of the box. COUPLED to `.gaugebox__cap`'s
+     `height` in src/ui/styles.css — 14px is the line box this 11px text
+     actually paints, and an 11px row let it spill onto the dial. */
+  const CAP_H = 14;
 
   /** roundRect is not in every Safari the game has to run on. */
   function roundRectPath(c, x, y, w, h, rr) {
@@ -1358,10 +1370,22 @@ export function createSiteScreen(app) {
     c.closePath();
   }
 
+  /* THE CANVAS IS THE BOX MINUS THE CAPTION ROW.
+     The caption used to be absolutely positioned over the bottom `CAP_H` px
+     of the dial; `styles.css .gaugebox` is now a flex column and the caption
+     is a real row in it. The canvas therefore no longer contains the caption
+     and must not be sized as if it did — taking the whole box height pushed
+     the 11px caption out of the bottom of `.gaugebox` entirely, where it
+     painted on the dial above it AND on `.railbtn` in the aux row below.
+     `cy` below drops its own `- CAP_H` for the same reason: the space is
+     already gone from `gH`, and subtracting it twice moved the dial up. */
   function resizeGauge() {
     const r = gaugeBox.getBoundingClientRect();
+    // Not laid out — the unit card has the instrument row. Keep the last good
+    // size rather than writing a fallback one over it.
+    if (!r.width || !r.height) return;
     gW = Math.max(80, Math.round(r.width || 158));
-    gH = Math.max(60, Math.round(r.height || 90));
+    gH = Math.max(48, Math.round((r.height || 90) - CAP_H));
     gDpr = app.viewport.dpr || window.devicePixelRatio || 1;
     gaugeCanvas.width = Math.round(gW * gDpr);
     gaugeCanvas.height = Math.round(gH * gDpr);
@@ -1442,7 +1466,7 @@ export function createSiteScreen(app) {
        clearances are real: the 13px band halo must not clip at 12 o'clock, and
        the hub must not touch the caption — it used to overlap it by 3px. */
     const cx = gW / 2;
-    const cy = gH - CAP_H - 10;
+    const cy = gH - 10;   // CAP_H already removed from gH in resizeGauge()
     const r = Math.min(gW / 2 - 8, cy - 7);
     const at = (v) => A0 + SWEEP * clamp(v, 0, 1);
     const bandW = bandHi - bandLo;
@@ -1786,6 +1810,11 @@ export function createSiteScreen(app) {
     unitT = 0;
     unitCard.hidden = true;
     unitCard.className = 'unitcard';
+    // Give the instrument and auxiliary rows their slot back.
+    dockInst.classList.remove('is-taken');
+    dockAux.classList.remove('is-taken');
+    // The gauge and the sparkline were not laid out while they were hidden.
+    requestAnimationFrame(() => { resizeGauge(); sizeSpark(); if (blowOn) resizeBlow(); });
   }
 
   function showUnit(card) {
@@ -1801,6 +1830,10 @@ export function createSiteScreen(app) {
     unitNote.hidden = !card.note;
     unitCard.className = 'unitcard' + (card.tone ? ' unitcard--' + card.tone : '');
     unitCard.hidden = false;
+    /* TAKE the two rows, do not cover them. Same picture, minus the elements
+       that used to keep painting and hit-testing behind an opaque card. */
+    dockInst.classList.add('is-taken');
+    dockAux.classList.add('is-taken');
     if (!app.reducedMotion) {
       unitCard.style.animation = 'none';
       void unitCard.offsetWidth;

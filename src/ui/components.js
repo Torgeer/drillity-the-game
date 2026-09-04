@@ -876,10 +876,19 @@ export function VSlider(o = {}) {
   let lastDetent = Math.round(value * detents);
   let pid = null;
 
+  /* ONE ELEMENT PER PAINTED THING.
+     This control used to stack four marks for one value: the fill area, a
+     tick overlay across the whole track, a white knob line, and a numeral
+     pill floating over all of it. `styles.css` retired three of them — the
+     ticks are the TRACK's own background layer (they are a scale, a property
+     of the track, not the value) and the knob is the fill's own top border —
+     but the elements were still being created here, so an enumerating
+     harness kept counting every pair of them as an overlap.
+     The numeral goes in the head row, which already reserved 12px for the
+     name, instead of floating over the track it describes. */
   const fill = h('i.vsl__fill');
-  const knob = h('i.vsl__knob');
   const readout = h('span.vsl__val', { text: Math.round(value * 100) + '' });
-  const track = h('div.vsl__track', fill, h('i.vsl__ticks'), knob, readout);
+  const track = h('div.vsl__track', fill);
 
   const el = h(`div.vsl.vsl--${o.kind || 'feed'}`, {
     role: 'slider', tabindex: '0',
@@ -887,7 +896,7 @@ export function VSlider(o = {}) {
     'aria-valuenow': String(Math.round(value * 100)),
     'aria-orientation': 'vertical',
   },
-    h('div.vsl__head', h('span.vsl__name', { text: o.short || o.label })),
+    h('div.vsl__head', h('span.vsl__name', { text: o.short || o.label }), readout),
     track,
   );
 
