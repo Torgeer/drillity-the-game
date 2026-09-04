@@ -2679,7 +2679,7 @@ export function createGeology(ctx) {
        with it. It is what drawRuler() prints and what ctx.sectionView carries.
        Below 1.0 the bore is drawn UNDER gauge (a 6 m raise bore hits the
        ceiling at 0.53x) and the badge says so rather than staying silent. */
-    boreExag = (2 * holeR) / Math.max(mm / 1000, 1e-6);
+    const boreExag = (2 * holeR) / Math.max(mm / 1000, 1e-6);
     U.uHoleR.value = holeR;
     annulus.outerR = holeR;
     annulus.innerR = holeR * CFG.rodRatio;

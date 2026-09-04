@@ -1,5 +1,35 @@
 # DRILLITY I THE GAME — handover
 
+## Continuation 2026-09-05 — Blender pipeline, first module
+
+The historical assessment below remains a baseline, not current verification.
+Latest work: `research/19-oem-visual-pass.md` documents references and limits.
+
+- Fixed the undeclared `boreExag` which actually prevented startup in this checkout.
+- Connected the configured Blender MCP to Blender 5.2.1; authored a compact
+  rotary head in a separate scene. Editable source is in the task outputs;
+  `tools/blender_compact_head.py` is the reproducible authoring script.
+- GLB is loaded at rig init, embedded in the single-file build, and used on
+  crawler-lite at HIGH/MEDIUM. LOW retains procedural rotary geometry.
+- The rotor and tool outlet survive batching as animation anchors. Top-hammer
+  selects the percussive head, while auger selects rotary.
+- Corrected duplicated feed end equipment on the starter mast's flex split,
+  added crown cheeks/sheave, and moved rails behind the gearbox to avoid overlap.
+- Reduced excessive normal-map amplitude on paint, raw/worn steel and chrome.
+  UV/material reconstruction remains open; this is not a complete fleet remake.
+- `npm run build` passes: facts/data + new model tests, 47 modules, 3,412.72 kB.
+  Vite now imports its ESM config directly through `tools/vite.mjs`, fixing the
+  restricted-Windows parent-directory error. Dev dependency discovery is disabled.
+- New `tools/rig-review.html` provides orbit, close-up, method selection and
+  draw-call/triangle readouts using the actual game rig system. Workshop figures
+  are NOT full-game or mobile benchmarks.
+- Known: jet-grouting warning remains; browser can emit texture-serialization
+  warnings. Startup and workshop had no observed console errors after the fix.
+- Next: whole compact carrier/positioner/clamps/guarding in Blender, tool/string
+  continuity, accurate auger return, then separate foundation and rock-drill families.
+
+---
+
 **For whoever takes this over.** Written 2026-09-04, after a long multi-agent
 day. Repo: <https://github.com/Torgeer/drillity-the-game> (public).
 

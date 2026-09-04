@@ -1,0 +1,42 @@
+<!doctype html><html lang="sv"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Drillity · maskinverkstad</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#172129;color:#edf0f1;font:15px system-ui}canvas{display:block;width:100vw;height:100vh}
+header{position:absolute;top:22px;left:24px;max-width:420px}h1{font-size:25px;margin:0 0 9px}p{color:#b8c6ce;line-height:1.5;margin:7px 0}
+nav{position:absolute;bottom:24px;left:24px;right:24px;display:flex;gap:10px;flex-wrap:wrap}button,select{padding:12px 17px;background:#24333e;color:white;border:1px solid #58707e;border-radius:7px;font:inherit;min-height:44px}button:hover{background:#3a4d58}output{display:block;font:12px monospace;color:#b8c6ce;margin-top:12px}.tag{color:#f0b454;font-size:12px;letter-spacing:.15em}
+</style>
+<header><div class="tag">DRILLITY / MASKINVERKSTAD</div><h1>Nordvik NV-90 Scout</h1><p>Blender-modell i spelets riggsystem. Dra för att rotera, scrolla för att zooma.</p><output id="status">Laddar…</output></header>
+<nav><select id="method" aria-label="Borrmetod"><option value="auger">Skruvborrning · rotation</option><option value="top-hammer">Topphammare · slag</option></select><button id="motion">Pausa rörelsen</button><button id="detail">Visa borrhuvudet</button><button id="full">Visa hela riggen</button><a href="/" style="color:#f0b454;padding:12px">Till spelet</a></nav>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { createGameState, createBus, BRAND, EVENTS } from '../src/core/contract.js';
+import { createAssets } from '../src/core/assets.js';
+import { createRigSystem } from '../src/rig/rigFactory.js';
+const renderer=new THREE.WebGLRenderer({antialias:true}); renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;document.body.append(renderer.domElement);
+const scene=new THREE.Scene();scene.background=new THREE.Color('#172129');
+const pmrem=new THREE.PMREMGenerator(renderer);const room=new RoomEnvironment();const env=pmrem.fromScene(room);scene.environment=env.texture;room.dispose();pmrem.dispose();
+scene.add(new THREE.HemisphereLight(0xddeeff,0x817868,2));
+const key=new THREE.DirectionalLight(0xfff1dc,3);key.position.set(4,8,4);key.castShadow=true;key.shadow.mapSize.set(1024,1024);scene.add(key);
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(100,100),new THREE.MeshStandardMaterial({color:0x26353c,roughness:.9}));floor.rotation.x=-Math.PI/2;floor.position.y=-.04;floor.receiveShadow=true;scene.add(floor);
+const camera=new THREE.PerspectiveCamera(36,innerWidth/innerHeight,.05,150);camera.position.set(6,4,7);
+const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(0,1.9,-1);controls.enableDamping=true;controls.maxPolarAngle=Math.PI*.49;controls.update();
+const state=createGameState();const ctx={THREE,scene,state,quality:{id:'high'},BRAND,EVENTS,bus:createBus(),renderer};
+ctx.assets=createAssets(ctx);await ctx.assets.init();ctx.rig=createRigSystem(ctx);await ctx.rig.init();ctx.rig.setMethod('auger');ctx.rig.setRotation(.35);ctx.rig.setPercussion(.3);
+let animate=true,detail=false,elapsed=0,prev=performance.now(),frames=0,reportAt=prev;
+document.querySelector('#method').onchange=e=>ctx.rig.setMethod(e.target.value);
+document.querySelector('#motion').onclick=e=>{animate=!animate;e.target.textContent=animate?'Pausa rörelsen':'Starta rörelsen'};
+document.querySelector('#detail').onclick=()=>{detail=true;camera.position.set(1.35,3.4,1.5);controls.target.set(0,2.1,0);controls.update()};
+document.querySelector('#full').onclick=()=>{detail=false;camera.position.set(6,4,7);controls.target.set(0,1.9,-1);controls.update()};
+function tick(now){requestAnimationFrame(tick);const dt=Math.min((now-prev)/1000,.05);prev=now;
+if(animate){elapsed+=dt;ctx.rig.setFeed((Math.sin(elapsed*.3)+1)*.32);ctx.rig.update(dt,state)}
+controls.update();renderer.render(scene,camera);frames++;
+if(now-reportAt>1000){const model=ctx.rig.group.getObjectByName('blender-compact-rotary');let shown=!!model;for(let n=model;n;n=n.parent)shown&&=n.visible;
+document.querySelector('#status').textContent=`${ctx.rig.getMethodId()} · Blender ${shown?'synlig':'dold'} · ${renderer.info.render.calls} draw calls · ${renderer.info.render.triangles.toLocaleString('sv')} trianglar · ${Math.round(frames*1000/(now-reportAt))} fps (verkstad)`;
+frames=0;reportAt=now;}}
+requestAnimationFrame(tick);
+addEventListener('resize',()=>{renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()});
+</script></html>

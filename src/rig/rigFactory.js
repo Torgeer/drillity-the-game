@@ -32,6 +32,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { buildTool, TOOL_UTILS, disposeToolLibrary } from './tools.js';
+import { loadReferenceModels, cloneCompactHead, disposeReferenceModels } from './referenceModels.js';
 
 const {
   part, group, G, material, mergeStatic, disposeObject,
@@ -1308,14 +1309,21 @@ function buildFeedBeam(T, ctx, parent, o) {
   }
 
   /* ── feed motor, idler, tensioner ─────────────────────────────────────── */
-  for (const yy of [H - 0.10, 0.10]) {
+  // Segment joins are not mast ends: a split flex rig still has ONE drive
+  // and ONE foot idler. Keep the old defaults for unspecialised builders.
+  const ends = [];
+  if (o.topEnd !== false) ends.push(H - 0.10);
+  if (o.bottomEnd !== false) ends.push(0.10);
+  for (const yy of ends) {
     part(T, g, G.cyl(T, 0.11, 0.11, 0.16, segAt(q, 14)), p.dark, { p: [0, yy, -d * 0.90], r: [0, 0, Math.PI / 2] });
     // sprocket guard — a chain wheel a hand can reach is guarded
     part(T, g, G.box(T, 0.24, 0.28, 0.05), mat, { p: [0, yy, -d * 0.90 - 0.11], cast: false, name: 'chain-guard' });
   }
-  part(T, g, G.cyl(T, 0.09, 0.09, 0.24, segAt(q, 12)), p.steel, { p: [w * 0.4, H - 0.10, -d * 0.9], r: [0, 0, Math.PI / 2] });
-  if (q > 0) {
+  if (o.topEnd !== false) part(T, g, G.cyl(T, 0.09, 0.09, 0.24, segAt(q, 12)), p.steel, { p: [w * 0.4, H - 0.10, -d * 0.9], r: [0, 0, Math.PI / 2] });
+  if (q > 0 && o.topEnd !== false) {
     boltFlange(T, g, p.worn, { p: [w * 0.4, H - 0.10, -d * 0.9 + 0.12], radius: 0.062, count: 6, axis: 'z', af: 0.014 });
+  }
+  if (q > 0 && o.bottomEnd !== false) {
     // chain tension screw at the foot
     part(T, g, G.cyl(T, 0.022, 0.022, 0.22, 6), p.steel, { p: [0, 0.10, -d * 0.90 - 0.19], r: [Math.PI / 2, 0, 0], cast: false });
     part(T, g, G.cyl(T, 0.036, 0.036, 0.032, 6), p.steel, { p: [0, 0.10, -d * 0.90 - 0.28], r: [Math.PI / 2, 0, 0], cast: false });
@@ -1355,7 +1363,9 @@ function buildFeedBeam(T, ctx, parent, o) {
   }
 
   /* ── front centraliser / rod guide at the bottom ──────────────────────── */
-  const guide = group(T, g, 'rod-guide', { p: [0, 0.12, 0] });
+  let guide = null;
+  if (o.bottomEnd !== false) {
+  guide = group(T, g, 'rod-guide', { p: [0, 0.12, o.guideZ || 0] });
   part(T, guide, G.box(T, w * 1.5, 0.10, 0.30), p.dark, {});
   part(T, guide, G.torus(T, 0.075, 0.028, 6, segAt(q, 16)), p.worn, { p: [0, 0.02, 0] });
   if (q > 0) {
@@ -1366,7 +1376,8 @@ function buildFeedBeam(T, ctx, parent, o) {
     part(T, guide, G.cyl(T, 0.026, 0.026, 0.20, segAt(q, 8)), p.chrome,
       { p: [w * 0.55, 0.02, 0], r: [0, 0, Math.PI / 2], cast: false });
   }
-  addDecals(T, ctx, g, {
+  }
+  if (o.topEnd !== false) addDecals(T, ctx, g, {
     stripes: [[0, H - 0.22, zWebF + 0.02, w * 0.95, 0.22]],
   });
   return { group: g, height: H, width: w, depth: d, guide: guide, railX: xW, railZ: zRail };
@@ -1407,7 +1418,8 @@ function buildCarriage(T, ctx, parent, o) {
   // backplate + the two cheeks that carry the head
   part(T, g, G.roundedBox(T, w, h, d, 0.02, 2), mat, { p: [0, 0, z] });
   for (let s = -1; s <= 1; s += 2) {
-    part(T, g, G.box(T, 0.028, h * 1.12, Math.abs(z) * 1.5), mat, { p: [s * w * 0.5, 0, z * 0.55] });
+    part(T, g, G.box(T, 0.028, h * 1.12, o.cheekDepth ?? Math.abs(z) * 1.5), mat,
+      { p: [s * w * 0.5, 0, o.cheekZ ?? z * 0.55] });
   }
 
   // gib blocks: four of them, wrapping the rail top and bottom on each side.
@@ -1525,6 +1537,9 @@ function buildRotaryHead(T, ctx, parent, o) {
   const p = P(ctx);
   const q = o.q === undefined ? 2 : o.q;
   const s = o.scale || 1;
+  if (o.referenceHousing && q > 0 && ctx.rigModels?.compactRotary) {
+    return cloneCompactHead(ctx.rigModels.compactRotary, parent, o.p || [0, 0, 0], s);
+  }
   const g = group(T, parent, 'rotary-head', { p: o.p || [0, 0, 0] });
   const w = 0.62 * s;
   const h = 0.46 * s;
@@ -2023,8 +2038,22 @@ function buildCrawlerLite(T, ctx) {
   // mast
   const mastH = 4.2;
   const stack = buildMastStack(T, ctx, boom, { p: [0, -0.14, 1.28], height: mastH });
-  const beamLo = buildFeedBeam(T, ctx, stack.lower, { height: mastH * 0.5, width: 0.34, depth: 0.26, q: q });
-  const beamHi = buildFeedBeam(T, ctx, stack.upper, { height: mastH * 0.5, width: 0.34, depth: 0.26, q: q });
+  // The drill axis stays at z=0. Rails sit BEHIND the gearbox, rather than
+  // passing through its motor housings. The lower guide reaches back to axis.
+  buildFeedBeam(T, ctx, stack.lower, { height: mastH * 0.5, width: 0.34, depth: 0.26, q, topEnd: false, p: [0, 0, -0.26], guideZ: 0.26 });
+  buildFeedBeam(T, ctx, stack.upper, { height: mastH * 0.5, width: 0.34, depth: 0.26, q, bottomEnd: false, splice: false, p: [0, 0, -0.26] });
+  // Fabricated crown cheeks with an open centre, rather than a solid cap.
+  // GEO 305 / compact Klemm-class reference: research/19-oem-visual-pass.md.
+  // Dimensions below are our fictional machine's modelling choices, not OEM specs.
+  const crown = group(T, stack.upper, 'feed-crown', { p: [0, mastH * 0.5, -0.36] });
+  for (const side of [-1, 1]) {
+    part(T, crown, G.box(T, 0.035, 0.14, 0.48), p.paint, { p: [side * 0.14, 0.04, 0.10] });
+    part(T, crown, G.box(T, 0.035, 0.24, 0.11), p.paint, { p: [side * 0.14, -0.09, 0.28] });
+  }
+  part(T, crown, G.cyl(T, 0.095, 0.095, 0.22, segAt(q, 14)), p.dark,
+    { p: [0, -0.02, 0.25], r: [0, 0, Math.PI / 2] });
+  part(T, crown, G.cyl(T, 0.032, 0.032, 0.34, segAt(q, 10)), p.worn,
+    { p: [0, -0.02, 0.25], r: [0, 0, Math.PI / 2] });
   dyn.mastPivot = stack.pivot;
   dyn.mastLower = stack.lower;
   dyn.mastUpper = stack.upper;
@@ -2034,15 +2063,28 @@ function buildCrawlerLite(T, ctx) {
 
   const carriage = group(T, stack.lower, 'carriage', { dynamic: true });
   buildCarriage(T, ctx, carriage, {
-    w: 0.42, h: 0.30, d: 0.16, z: -0.10, q: q,
-    railX: 0.34 / 2 - 0.018, railZ: -0.26 * 0.18,
+    w: 0.42, h: 0.30, d: 0.16, z: -0.36, cheekDepth: 0.28, cheekZ: -0.34, q: q,
+    railX: 0.34 / 2 - 0.018, railZ: -0.26 - 0.26 * 0.18,
   });
   const drifter = buildDrifter(T, ctx, carriage, { p: [0, 0, 0], scale: 0.78, q: q });
+  const rotary = buildRotaryHead(T, ctx, carriage, { scale: 0.78, q, referenceHousing: true });
+  // Preserve both independent modules through static merging so a method
+  // change can hide the complete housing, motors and spindle together.
+  drifter.group.userData.dynamic = true;
+  rotary.group.userData.dynamic = true;
   dyn.carriage = carriage;
-  dyn.carriageRange = [mastH - 1.45, 0.55];
-  dyn.percussion = drifter.percussion;
-  dyn.spindle = drifter.spindle;
-  dyn.toolAnchor = drifter.out;
+  dyn.selectHead = (method) => {
+    const hammer = method === 'top-hammer';
+    drifter.group.visible = hammer;
+    rotary.group.visible = !hammer;
+    const head = hammer ? drifter : rotary;
+    dyn.percussion = hammer ? drifter.percussion : null;
+    dyn.spindle = head.spindle;
+    dyn.toolAnchor = head.out;
+    // Keep the outlet above the collar at the end of feed travel.
+    dyn.carriageRange = [mastH - 1.45, hammer ? 0.95 : 0.75];
+  };
+  dyn.selectHead('auger');
 
   // rod carousel + arm
   const car2 = buildCarousel(T, ctx, stack.lower, {
@@ -7574,6 +7616,7 @@ export function createRigSystem(ctx) {
     if (!active) return;
     clearTools();
     const dyn = active.dyn;
+    if (dyn.selectHead) dyn.selectHead(methodId);
     // A machine may own a method outright and run different tooling on it than
     // the table's default: the CPT unit shares `site-investigation` with the SI
     // rig but pushes a piezocone where the SI rig drives a split spoon.
@@ -8934,6 +8977,8 @@ export function createRigSystem(ctx) {
     sectionGroup: sectionGroup,
 
     async init() {
+      await loadReferenceModels(ctx);
+      if (disposed) return api;
       const scene = ctx && ctx.scene;
       if (scene && scene.add) scene.add(group);
       // The rig's local origin IS the drilling centreline, so it anchors to the
@@ -9551,6 +9596,7 @@ export function createRigSystem(ctx) {
       clearTools();
       for (const b of builds.values()) disposeObject(b.root);
       builds.clear();
+      disposeReferenceModels(ctx);
       active = null;
       disposeObject(sectionGroup);
       if (group.parent) group.parent.remove(group);

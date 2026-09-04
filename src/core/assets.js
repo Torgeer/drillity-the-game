@@ -1589,7 +1589,9 @@ export function createAssets(ctx = {}) {
       paintedSteel: {
         // Panel-mapped vertically: the lower-half dirt build-up is an authored
         // gradient, so v is clamped and only u tiles around the bodywork.
-        cls: 'hero', variants: 4, prio: 2, normalStrength: 1.35,
+        // Enamel texture is shallow surface relief, not hammered sheet metal.
+        // Retain dirt/chip colour and roughness; limit only the normal amplitude.
+        cls: 'hero', variants: 4, prio: 2, normalStrength: 1.35, normalOut: 0.12,
         wrap: { s: 'repeat', t: 'clamp' },
         defaults: (p) => ({
           /* BRAND.amberPlant, NOT BRAND.amber.
@@ -1723,7 +1725,7 @@ export function createAssets(ctx = {}) {
 
       /* ── machined / forged steel ──────────────────────────────────────── */
       rawSteel: {
-        cls: 'std', variants: 2, prio: 3, normalStrength: 0.85,
+        cls: 'std', variants: 2, prio: 3, normalStrength: 0.85, normalOut: 0.16,
         defaults: (p) => ({
           color: p.color || '#9DA2A8',
           seed: (p.seed === undefined ? 3 : p.seed) | 0,
@@ -1768,7 +1770,7 @@ export function createAssets(ctx = {}) {
       wornSteel: {
         // u runs along the rod (threaded at both ends, therefore finite);
         // v runs around the circumference, which is what actually wraps.
-        cls: 'std', variants: 3, prio: 2, normalStrength: 1.1,
+        cls: 'std', variants: 3, prio: 2, normalStrength: 1.1, normalOut: 0.20,
         wrap: { s: 'clamp', t: 'repeat' },
         defaults: (p) => ({
           color: p.color || '#7E7D79',
@@ -1896,7 +1898,7 @@ export function createAssets(ctx = {}) {
 
       /* ── hydraulic cylinder rods ──────────────────────────────────────── */
       chrome: {
-        cls: 'fine', variants: 2, prio: 3, normalStrength: 0.35, normalOut: 0.5,
+        cls: 'fine', variants: 2, prio: 3, normalStrength: 0.35, normalOut: 0.08,
         defaults: (p) => ({ color: p.color || '#EEF1F4', seed: (p.seed === undefined ? 31 : p.seed) | 0, wear: clamp01(p.wear || 0.12) }),
         setKey: (d) => `${qc(d.color)}~${q2(d.wear)}~${d.seed & 3}`,
         fallback: (d) => ({ albedo: hexRGB(d.color), rough: 0.045, metal: 1, ao: 1 }),
