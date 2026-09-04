@@ -362,16 +362,29 @@ property of the section, computed from the actual transform, and show it
 whenever it is not 1:1. This is the same discipline as `sourced: false` on
 numbers — the game already believes in it, just unevenly applied.
 
-### 9.4 The fps mystery — and a harness bug that may explain it
-`m01-auger` 26.9 fps, `m07-core` 26.0, `m04-site-investigation` 24.6, **at 75–78
-draw calls, the same as states running at 143.9.** Before hunting shader cost,
-note what the renderer agent found immediately before it was stopped:
+### 9.4 The fps mystery — SOLVED, and it was pattern C again
+`m01-auger` 26.9 fps, `m07-core` 26.0, `m04-site-investigation` 24.6, at the same
+draw calls as states running at 143.9. **It was the measuring instrument.**
 
-> **`tools/shoot.mjs:899` waits 1.5 s, but warm-up takes 60–100 s.**
+`.perf-fps.mjs` was made crash-safe and run forward-then-reversed **in one page
+load**, reading three independent clocks at every stop (commit `90defe7`,
+`shots/f3-fps.json`):
 
-So the slow states may simply be the ones captured before the GPU clocked up —
-i.e. **the numbers may be an artefact, not a regression.** Fix the harness wait
-first, re-measure, and only then go looking. This is pattern C again.
+```
+stop  state    t+       live fps   rAF       GPU      calls  programs
+#0    auger     29.2 s    26.5      36.9 ms  4.10 ms   221     65
+#5    auger     99.3 s   102.5       8.3 ms  5.88 ms   235     77
+```
+
+**The same state, twice, in the same session: 26.5 → 102.5 fps — while the GPU
+frame got MORE expensive (4.10 → 5.88 ms) and the draw calls went UP (221 → 235),
+and the program count climbed 65 → 77 as shaders compiled.** A cost that vanishes
+as a session warms, on a frame doing more work, is not a cost of that state.
+
+`tools/shoot.mjs:899` waits **1.5 s**; warm-up takes **60–100 s**. The slow states
+were simply the ones captured first. **Fix the harness wait; there is nothing
+wrong with those states.** And treat every fps number in `shots/*-report.json`
+taken before this as suspect.
 
 ### 9.5 Express budgets in the instrument's own terms
 `README.md` listed "≤ 80 surface · ≤ 70 rig" as if disjoint; the harness's
@@ -558,7 +571,8 @@ completeness critic.
 ## 14. What to do next, in order
 
 1. **Fix `tools/shoot.mjs:899`'s 1.5 s wait** (warm-up is 60–100 s) and
-   re-measure — the fps "mystery" may not exist (§9.4).
+   re-measure. **The fps mystery is already disproved** (§9.4) — but every fps
+   figure captured before commit `90defe7` was measured cold and is unreliable.
 2. **Finish the eight stub references** (§5), then unblock the builders.
 3. **The DOM leak** (`ui/`) — the game gets worse the longer it is played.
 4. **The band inset** (`renderer.js`) — half the section is drawn and discarded.
