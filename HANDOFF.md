@@ -1,5 +1,27 @@
 # DRILLITY I THE GAME — handover
 
+## Continuation 2026-09-05 — jet-grouting sequence
+
+- Explicit jet-grouting tuning now replaces the generic rotary fallback. The
+  sequence is pre-drill, then rotate/jet/lift back to the surface. Process source:
+  https://www.keller.com/expertise/techniques/jet-grouting
+- Return-pass progress requires grout delivery and rotation. Completion is emitted
+  once, at the end of treatment, not when the initial bore reaches depth.
+- A normalized coverage score penalizes excessive feed relative to grout delivery.
+  This is game tuning, not a prediction of column diameter, strength or permeability.
+- HUD switches from penetration controls to withdrawal/rotation/grout; stage names
+  come from simulation. The old jet labels incorrectly swapped rotation and flow.
+- Added a simple original monitor with radial ports. Crawler-th selects a rotary
+  head for jet grouting and hides its percussion head and dust hood. Other methods
+  retain their existing head. This is procedural geometry, not a new Blender asset.
+- VFX medium changed from water to mud to agree with the method's content record.
+- `check-jet.mjs` covers phase order, no premature payout, no treatment without flow
+  or rotation, completion at surface, finite monitor geometry and 30/120fps parity.
+  Model tests also exercise repeated top-hammer/jet switching at HIGH and LOW.
+- Still needed: full-length job balancing, soil-dependent erodibility, physical
+  treatment-volume visualization, nozzle blockage and a field-referenced asset pass.
+  Jet-grouting no longer falls back silently, but is not an engineering simulator.
+
 ## Continuation 2026-09-05 — playable career loop
 
 - Contract acceptance in the UI now goes through progression, so mobilisation,
@@ -27,8 +49,8 @@
 ### Release status: unfinished
 
 Do not describe this as a finished game. Remaining release gates include:
-1. Jet-grouting still uses generic downward rotary tuning instead of its required
-   pre-drill / jet-and-lift sequence. Implement simulation, HUD and monitor together.
+1. Jet-grouting has its two-stage prototype (see newest entry); validate long jobs,
+   erodibility and treatment graphics before considering the method finished.
 2. Verify every method from acceptance to result; then progression across unlocks,
    equipment purchases, poor runs and recovery. Current career test covers auger.
 3. Recheck the historical DOM-growth report with repeated navigation and long play.

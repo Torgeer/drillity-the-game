@@ -2200,9 +2200,22 @@ function buildCrawlerTH(T, ctx) {
   const drifter = buildDrifter(T, ctx, carriage, { p: [0, 0, 0], scale: 1.0, q: q });
   dyn.carriage = carriage;
   dyn.carriageRange = [mastH - 1.85, 0.60];
-  dyn.percussion = drifter.percussion;
-  dyn.spindle = drifter.spindle;
-  dyn.toolAnchor = drifter.out;
+  drifter.group.name = 'crawler-th-drifter';
+  const rotary = buildRotaryHead(T, ctx, carriage, { scale: 0.78, q });
+  drifter.group.userData.dynamic = true;
+  rotary.group.userData.dynamic = true;
+  dyn.selectHead = (method) => {
+    const jet = method === 'jet-grouting';
+    dyn.carriageRange = [mastH - 1.85, jet ? 0.95 : 0.60];
+    drifter.group.visible = !jet;
+    rotary.group.visible = jet;
+    const head = jet ? rotary : drifter;
+    dyn.percussion = jet ? null : drifter.percussion;
+    dyn.spindle = head.spindle;
+    dyn.toolAnchor = head.out;
+    if (dyn.dustHood) dyn.dustHood.visible = !jet;
+  };
+  dyn.selectHead('top-hammer');
 
   // rod holder / breakout table at the bottom of the beam
   const table = group(T, stack.lower, 'rod-holder', { p: [0, 0.34, 0.10] });
@@ -2211,6 +2224,7 @@ function buildCrawlerTH(T, ctx) {
     part(T, table, G.box(T, 0.20, 0.10, 0.16), p.worn, { p: [(i ? 1 : -1) * 0.17, 0.10, 0] });
   }
   dyn.dustHood = buildDustHood(T, ctx, stack.lower, { p: [0, 0.0, 0], q: q });
+  dyn.dustHood.userData.dynamic = true;
 
   const carousel = buildCarousel(T, ctx, stack.lower, {
     rods: 6, rodLen: rodLen, rodDia: 0.051, radius: 0.34,
@@ -7278,7 +7292,7 @@ const METHOD_TOOLING = {
   },
   'jet-grouting': {
     surface: { id: 'flushing-swivel', opts: { boreMm: 32 } },
-    downhole: { id: 'drag-bit', opts: { diameterMm: 120 } },
+    downhole: { id: 'jet-monitor', opts: {} },
     stringDia: 0.09, stringMat: 'worn',
   },
 

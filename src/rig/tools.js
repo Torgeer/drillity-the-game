@@ -9438,7 +9438,24 @@ function buildBillet(THREE_, ctx, opts) {
 }
 
 /** id → builder. Every builder has the signature (THREE, ctx, opts). */
+/** Fictional monitor: radial grout ports above a drilling shoe. Metres internally. */
+export function buildJetMonitor(THREE_, ctx = {}, opts = {}) {
+  const T = THREE_ || THREE, g = new T.Group();
+  g.name = 'jet-grout-monitor';
+  const steel = material(ctx, 'wornSteel');
+  const seg = opts.lod === 'low' ? 12 : 24;
+  part(T, g, G.cyl(T, .045, .045, .48, seg), steel, { p: [0,-.24,0] });
+  part(T, g, G.cyl(T, .06, .045, .08, seg), steel, { p: [0,-.48,0] });
+  for (const side of [-1,1]) {
+    flushHole(T, ctx, g, { x: side*.045, y: -.24, z: 0, r: .005,
+      dir: [side,0,0], seg: 10, chamferMat: steel });
+  }
+  return finalise(T, g, { id: 'jet-monitor', name: 'Jet grout monitor',
+    family: 'Grouting tools', method: 'jet-grouting' }, opts);
+}
+
 export const TOOL_BUILDERS = {
+  'jet-monitor': buildJetMonitor,
   // percussion
   'button-bit': buildButtonBit,
   'dth-bit': buildDTHBit,

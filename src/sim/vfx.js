@@ -1311,7 +1311,7 @@ export const EFFECTS = {
 export const FLUSH_MEDIUM = {
   auger: 'none', 'cable-tool': 'water', 'top-hammer': 'air', dth: 'air',
   overburden: 'air', core: 'water', 'rotary-kelly': 'none', cfa: 'none',
-  'cased-cfa': 'none', hdd: 'mud', sonic: 'water', 'jet-grouting': 'water',
+  'cased-cfa': 'none', hdd: 'mud', sonic: 'water', 'jet-grouting': 'mud',
   anchor: 'air', dw: 'mud', displacement: 'none', 'soil-mixing': 'mud',
   'raise-boring': 'water', microtunnelling: 'mud', 'pipe-bursting': 'none',
   'auger-boring': 'none', vibro: 'none', 'dynamic-compaction': 'none',

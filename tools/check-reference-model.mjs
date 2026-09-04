@@ -41,6 +41,16 @@ for(const quality of ['high','low']) {
   assert.equal(!!blender,quality==='high','LOW must use the lightweight procedural module');
   if(blender)assert(blender.getObjectByName('spindle').userData.dynamic,'Spindle must survive static merging');
   console.log(`OK ${quality}: method switching, animation anchors, node lifetime`);
+  rig.setRig('crawler-th');
+  rig.setMethod('jet-grouting');
+  assert(!rig.group.getObjectByName('crawler-th-drifter').visible,'Jet grouting must hide the percussion head');
+  const jetCount=count();
+  for(let i=0;i<3;i++) {
+    rig.setMethod('top-hammer');
+    assert(rig.group.getObjectByName('crawler-th-drifter').visible);
+    rig.setMethod('jet-grouting');
+    assert.equal(count(),jetCount,'Jet method switching must not leak tool nodes');
+  }
   // Materials on templates are shared; do not dispose this shared test fixture mid-loop.
 }
 console.log(`OK GLB: ${tris} triangles, ${bytes.length} bytes, outlet ${p.toArray()}`);

@@ -5,8 +5,8 @@
 header{position:absolute;top:22px;left:24px;max-width:420px}h1{font-size:25px;margin:0 0 9px}p{color:#b8c6ce;line-height:1.5;margin:7px 0}
 nav{position:absolute;bottom:24px;left:24px;right:24px;display:flex;gap:10px;flex-wrap:wrap}button,select{padding:12px 17px;background:#24333e;color:white;border:1px solid #58707e;border-radius:7px;font:inherit;min-height:44px}button:hover{background:#3a4d58}output{display:block;font:12px monospace;color:#b8c6ce;margin-top:12px}.tag{color:#f0b454;font-size:12px;letter-spacing:.15em}
 </style>
-<header><div class="tag">DRILLITY / MASKINVERKSTAD</div><h1>Nordvik NV-90 Scout</h1><p>Blender-modell i spelets riggsystem. Dra för att rotera, scrolla för att zooma.</p><output id="status">Laddar…</output></header>
-<nav><select id="method" aria-label="Borrmetod"><option value="auger">Skruvborrning · rotation</option><option value="top-hammer">Topphammare · slag</option></select><button id="motion">Pausa rörelsen</button><button id="detail">Visa borrhuvudet</button><button id="full">Visa hela riggen</button><a href="/" style="color:#f0b454;padding:12px">Till spelet</a></nav>
+<header><div class="tag">DRILLITY / MASKINVERKSTAD</div><h1>Nordvik NV-90 Scout</h1><p>Modeller i spelets riggsystem. Dra för att rotera, scrolla för att zooma.</p><output id="status">Laddar…</output></header>
+<nav><select id="method" aria-label="Borrmetod"><option value="auger">Skruvborrning · rotation</option><option value="top-hammer">Topphammare · slag</option><option value="jet-grouting">Jetgrouting · monitor</option></select><button id="motion">Pausa rörelsen</button><button id="detail">Visa borrhuvudet</button><button id="full">Visa hela riggen</button><a href="/" style="color:#f0b454;padding:12px">Till spelet</a></nav>
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -27,7 +27,7 @@ const controls=new OrbitControls(camera,renderer.domElement);controls.target.set
 const state=createGameState();const ctx={THREE,scene,state,quality:{id:'high'},BRAND,EVENTS,bus:createBus(),renderer};
 ctx.assets=createAssets(ctx);await ctx.assets.init();ctx.rig=createRigSystem(ctx);await ctx.rig.init();ctx.rig.setMethod('auger');ctx.rig.setRotation(.35);ctx.rig.setPercussion(.3);
 let animate=true,detail=false,elapsed=0,prev=performance.now(),frames=0,reportAt=prev;
-document.querySelector('#method').onchange=e=>ctx.rig.setMethod(e.target.value);
+document.querySelector('#method').onchange=e=>{ctx.rig.setRig(e.target.value==='jet-grouting'?'crawler-th':'crawler-lite');ctx.rig.setMethod(e.target.value);document.querySelector('h1').textContent=e.target.value==='jet-grouting'?'Jetgrouting · monitor':'Nordvik NV-90 Scout'};
 document.querySelector('#motion').onclick=e=>{animate=!animate;e.target.textContent=animate?'Pausa rörelsen':'Starta rörelsen'};
 document.querySelector('#detail').onclick=()=>{detail=true;camera.position.set(1.35,3.4,1.5);controls.target.set(0,2.1,0);controls.update()};
 document.querySelector('#full').onclick=()=>{detail=false;camera.position.set(6,4,7);controls.target.set(0,1.9,-1);controls.update()};
