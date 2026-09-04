@@ -232,6 +232,7 @@ const order = FORWARD_ONLY ? [...METHODS] : [...METHODS, ...[...METHODS].reverse
 console.log(`booted in ${bootMs} ms — ${order.length} stops`);
 for (let i = 0; i < order.length; i++) {
   const mid = order[i];
+  try {
   const seed = await enterState(mid);
   const clocks = await page.evaluate(pageClocks);
   const stop = { i, method: mid, seed, ...clocks };
@@ -244,6 +245,7 @@ for (let i = 0; i < order.length; i++) {
     console.log(`     bisect (base ${stop.bisect.baseFrameMs} ms/frame):`);
     for (const r of stop.bisect.rows.slice(0, 8)) console.log(`       ${String(r.savedMs).padStart(7)} ms  ${r.item}`);
   }
+  } catch (e) { console.log('#'+i+' '+mid+' ABORTED: '+String(e.message).slice(0,120)); report.stops.push({ i, method: mid, aborted: String(e.message).slice(0,200) }); break; }
 }
 console.log('adapter:', report.stops[0] && report.stops[0].adapter);
 await browser.close();

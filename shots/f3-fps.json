@@ -1,0 +1,351 @@
+{
+  "when": "2026-09-04T21:25:51.714Z",
+  "quality": "high",
+  "bootMs": 18146,
+  "stops": [
+    {
+      "i": 0,
+      "method": "auger",
+      "seed": {
+        "ok": true,
+        "rigId": "crawler-lite",
+        "region": "nordic",
+        "target": 38,
+        "seek": 13.3
+      },
+      "adapter": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 Laptop GPU (0x00002860) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "visible": "visible",
+      "focused": true,
+      "sinceBootS": 29.2,
+      "liveFpsMedian": 26.5,
+      "liveFpsMin": 26,
+      "rafMedianMs": 36.9,
+      "rafP90Ms": 38.8,
+      "rafMaxMs": 43.7,
+      "rafFps": 27.1,
+      "dtMedian": 0.0348,
+      "dtMax": 0.0488,
+      "longTaskMs": 0,
+      "longTasks": 0,
+      "windowMs": 3005,
+      "gpuMsMedian": 4.1,
+      "gpuMsSpread": 0.213,
+      "calls": 221,
+      "tris": 408496,
+      "programs": 65,
+      "rigId": "crawler-lite",
+      "methodId": "auger",
+      "region": "nordic",
+      "scene": "site",
+      "quality": "high",
+      "canvas": [
+        780,
+        1688
+      ],
+      "jsHeapMB": 135,
+      "bisect": {
+        "baseFrameMs": 41.3,
+        "rows": [
+          {
+            "item": "surface/cloudDeck",
+            "savedMs": 14.95
+          },
+          {
+            "item": "surface/Mesh",
+            "savedMs": 2.35
+          },
+          {
+            "item": "shadowMap.enabled",
+            "savedMs": 0.35
+          },
+          {
+            "item": "section/section-backdrop",
+            "savedMs": 0.3
+          },
+          {
+            "item": "surface/vfx:surfaceAdd",
+            "savedMs": 0.15
+          },
+          {
+            "item": "section/vfx:sectionAdd",
+            "savedMs": 0.15
+          },
+          {
+            "item": "surface/Object3D",
+            "savedMs": 0.05
+          },
+          {
+            "item": "surface/terrain-root",
+            "savedMs": 0.05
+          },
+          {
+            "item": "section/Object3D",
+            "savedMs": 0.05
+          },
+          {
+            "item": "section/Object3D",
+            "savedMs": 0.05
+          },
+          {
+            "item": "section/vfx:chips",
+            "savedMs": 0.05
+          },
+          {
+            "item": "pass/_UnrealBloomPass",
+            "savedMs": 0.05
+          },
+          {
+            "item": "pass/DrillityGrade",
+            "savedMs": 0.05
+          },
+          {
+            "item": "surface/rig-system",
+            "savedMs": 0
+          },
+          {
+            "item": "surface/vfx:surfaceSoft",
+            "savedMs": 0
+          },
+          {
+            "item": "surface/vfx:birds",
+            "savedMs": 0
+          },
+          {
+            "item": "surface/vfx:heatShimmer",
+            "savedMs": 0
+          },
+          {
+            "item": "section/geology-root",
+            "savedMs": 0
+          },
+          {
+            "item": "section/rig-section",
+            "savedMs": 0
+          },
+          {
+            "item": "section/sectionBackdrop",
+            "savedMs": -0.05
+          },
+          {
+            "item": "section/vfx:sectionSoft",
+            "savedMs": -0.05
+          },
+          {
+            "item": "pass/DrillityContactAO",
+            "savedMs": -0.15
+          },
+          {
+            "item": "pass/SMAAPass",
+            "savedMs": -0.15
+          }
+        ]
+      }
+    },
+    {
+      "i": 1,
+      "method": "core",
+      "seed": {
+        "ok": true,
+        "rigId": "core-rig",
+        "region": "nordic",
+        "target": 106,
+        "seek": 37.1
+      },
+      "adapter": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 Laptop GPU (0x00002860) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "visible": "visible",
+      "focused": true,
+      "sinceBootS": 73,
+      "liveFpsMedian": 141.9,
+      "liveFpsMin": 135.9,
+      "rafMedianMs": 7.1,
+      "rafP90Ms": 8.6,
+      "rafMaxMs": 11.2,
+      "rafFps": 140.8,
+      "dtMedian": 0.007,
+      "dtMax": 0.014,
+      "longTaskMs": 0,
+      "longTasks": 0,
+      "windowMs": 1095,
+      "gpuMsMedian": 4.575,
+      "gpuMsSpread": 0.663,
+      "calls": 251,
+      "tris": 439266,
+      "programs": 76,
+      "rigId": "core-rig",
+      "methodId": "core",
+      "region": "nordic",
+      "scene": "site",
+      "quality": "high",
+      "canvas": [
+        780,
+        1688
+      ],
+      "jsHeapMB": 105
+    },
+    {
+      "i": 2,
+      "method": "rotary-kelly",
+      "seed": {
+        "ok": true,
+        "rigId": "foundation-bg",
+        "region": "nordic",
+        "target": 38,
+        "seek": 13.3
+      },
+      "adapter": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 Laptop GPU (0x00002860) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "visible": "visible",
+      "focused": true,
+      "sinceBootS": 79.9,
+      "liveFpsMedian": 132.1,
+      "liveFpsMin": 113.9,
+      "rafMedianMs": 8.2,
+      "rafP90Ms": 10.3,
+      "rafMaxMs": 14.5,
+      "rafFps": 122,
+      "dtMedian": 0.007,
+      "dtMax": 0.0143,
+      "longTaskMs": 0,
+      "longTasks": 0,
+      "windowMs": 1270,
+      "gpuMsMedian": 5.662,
+      "gpuMsSpread": 0.913,
+      "calls": 192,
+      "tris": 434972,
+      "programs": 70,
+      "rigId": "foundation-bg",
+      "methodId": "rotary-kelly",
+      "region": "nordic",
+      "scene": "site",
+      "quality": "high",
+      "canvas": [
+        780,
+        1688
+      ],
+      "jsHeapMB": 127
+    },
+    {
+      "i": 3,
+      "method": "rotary-kelly",
+      "seed": {
+        "ok": true,
+        "rigId": "foundation-bg",
+        "region": "nordic",
+        "target": 38,
+        "seek": 13.3
+      },
+      "adapter": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 Laptop GPU (0x00002860) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "visible": "visible",
+      "focused": true,
+      "sinceBootS": 85.6,
+      "liveFpsMedian": 144,
+      "liveFpsMin": 143.9,
+      "rafMedianMs": 7,
+      "rafP90Ms": 7.9,
+      "rafMaxMs": 9.5,
+      "rafFps": 142.9,
+      "dtMedian": 0.007,
+      "dtMax": 0.0072,
+      "longTaskMs": 0,
+      "longTasks": 0,
+      "windowMs": 1041,
+      "gpuMsMedian": 4.438,
+      "gpuMsSpread": 0.288,
+      "calls": 192,
+      "tris": 434996,
+      "programs": 70,
+      "rigId": "foundation-bg",
+      "methodId": "rotary-kelly",
+      "region": "nordic",
+      "scene": "site",
+      "quality": "high",
+      "canvas": [
+        780,
+        1688
+      ],
+      "jsHeapMB": 114
+    },
+    {
+      "i": 4,
+      "method": "core",
+      "seed": {
+        "ok": true,
+        "rigId": "core-rig",
+        "region": "nordic",
+        "target": 150.7,
+        "seek": 52.74
+      },
+      "adapter": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 Laptop GPU (0x00002860) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "visible": "visible",
+      "focused": true,
+      "sinceBootS": 92.6,
+      "liveFpsMedian": 123.9,
+      "liveFpsMin": 96.6,
+      "rafMedianMs": 9.6,
+      "rafP90Ms": 12.1,
+      "rafMaxMs": 15.2,
+      "rafFps": 104.2,
+      "dtMedian": 0.0071,
+      "dtMax": 0.0207,
+      "longTaskMs": 0,
+      "longTasks": 0,
+      "windowMs": 1464,
+      "gpuMsMedian": 4.975,
+      "gpuMsSpread": 0.65,
+      "calls": 251,
+      "tris": 438516,
+      "programs": 77,
+      "rigId": "core-rig",
+      "methodId": "core",
+      "region": "nordic",
+      "scene": "site",
+      "quality": "high",
+      "canvas": [
+        780,
+        1688
+      ],
+      "jsHeapMB": 110
+    },
+    {
+      "i": 5,
+      "method": "auger",
+      "seed": {
+        "ok": true,
+        "rigId": "crawler-lite",
+        "region": "nordic",
+        "target": 38,
+        "seek": 13.3
+      },
+      "adapter": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 Laptop GPU (0x00002860) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "visible": "visible",
+      "focused": true,
+      "sinceBootS": 99.3,
+      "liveFpsMedian": 102.5,
+      "liveFpsMin": 86.8,
+      "rafMedianMs": 8.3,
+      "rafP90Ms": 10.5,
+      "rafMaxMs": 15.4,
+      "rafFps": 120.5,
+      "dtMedian": 0.007,
+      "dtMax": 0.0143,
+      "longTaskMs": 0,
+      "longTasks": 0,
+      "windowMs": 1284,
+      "gpuMsMedian": 5.875,
+      "gpuMsSpread": 1.75,
+      "calls": 235,
+      "tris": 412526,
+      "programs": 77,
+      "rigId": "crawler-lite",
+      "methodId": "auger",
+      "region": "nordic",
+      "scene": "site",
+      "quality": "high",
+      "canvas": [
+        780,
+        1688
+      ],
+      "jsHeapMB": 115
+    }
+  ],
+  "errors": []
+}
