@@ -24,6 +24,7 @@ import {
   EVENTS, GROUND,
   clamp, lerp, smoothstep, damp, makeRandom,
 } from '../core/contract.js';
+import { getItem } from '../game/data.js';
 
 /* ═══════════════════════════════════════════════════════════════════════════
    TUNING — every number in the model lives here.
@@ -1450,17 +1451,13 @@ export const TUNING = {
         overdrillM: 0.05,       // the hole must be at least two inches longer than the bolt
         ringSpacingM: 1.5,      // rings of bolts along the drive
         perRing: 5,             // bolts per ring across the back and the shoulders
-        // FRICTION BOLTS: THE HOLE MUST BE SMALLER THAN THE BOLT. Pull-out
-        // strength falls monotonically as the bit gets bigger, and competent
-        // rock is the MOST sensitive because there is almost no overbreak to
-        // forgive the diameter — the hole really is the bit.
-        bitMmIdeal: 33.0,       // 1.3 in for a 33 mm bolt; 1.5 in for a 39 mm bolt
-        bitMmZero: 39.5,        // a hole this size leaves the slot unchanged: no anchorage
-        competentUcs: 90,       // above this the hole is the bit diameter ...
-        competentSensitivity: 1.6,  // ... so a diameter error costs this much more
+        // Nominal BIT trial ranges come from the fitted item's sourced
+        // stats.bitTrialRangeMm, read at programme start. They are eligibility
+        // inputs, not a universal strength curve. Site pull tests establish
+        // actual anchorage and driving time; see the item's manufacturer source.
         slotClosedIn: 0.0625,   // a slot closed by 1/16 in is full rock-to-metal contact
-        gaugeWearMm: 2.2,       // gauge lost to a fully worn bit, in mm of hole diameter
-        overbreakMm: 3.0,       // extra hole diameter broken ground gives you for free —
+        gaugeWearMm: 2.2,       // NOT SOURCED: authored gauge-wear approximation, mm
+        overbreakMm: 3.0,       // NOT SOURCED: authored extra diameter in broken ground —
                                 // and free diameter is the last thing a friction bolt wants
         devDegPerM: 1.35,       // hole crookedness per metre per unit of off-optimal feed.
                                 /* MEASURED AND LOGGED, NOT CHARGED FOR. The research pack
@@ -1475,9 +1472,8 @@ export const TUNING = {
                                    Split Sets; for a resin-grouted bar a varying annulus
                                    plausibly does hurt encapsulation, and "plausibly" is not
                                    a source. Hole DIAMETER is the sourced mechanic and it is
-                                   untouched: `bitMmIdeal` 33.0 -> `bitMmZero` 39.5. */
-        driveSecFull: 2.2,      // drive time for a fully anchored bolt — the drive time
-                                // is itself the field tell, exactly as slot closure is
+                                   represented only as fit eligibility; no kN prediction. */
+        driveSecFull: 2.2,      // NOT SOURCED: player-time install beat, not field drive time
         spinSec: 1.4,           // resin: spin the bar through the cartridges for this long
         gelSec: 2.6,            // ... the resin gels here, and spinning past it shears the bond
         holdSec: 1.8,           // ... then hold, without turning, while it cures
@@ -1548,18 +1544,14 @@ export const TUNING = {
       score: { weights: { time: 0.10, groove: 0.10, bit: 0.06, straight: 0.00,
                           hazard: 0.08, safety: 0.08, quality: 0.58 } },
       pile: {
-        ramKg: 16000,           // the large class: a 16 t ram block
-        strokeMaxM: 1.5,        // the maximum drop that protects the pile
-        // ramKg x g x strokeMaxM = 235.4 kNm, which is exactly the catalogue
-        // rating for this class. The energy IS the drop height, which is why
-        // the drop is what the safety rule caps.
-        energyMinKnm: 12,       // the bottom of the adjustable range on the same machine
-        bpmRange: [30, 100],    // blow rate on the heavy classic hammers
-        // THE COUPLING. Energy and rate are on one hydraulic circuit: 235 kNm at
-        // 30 bpm is 7,050 kNm/min, and that product is the envelope. You buy
-        // energy per blow with blow rate and you cannot max both. 12 kNm at
-        // 100 bpm sits far under the curve, which is why the low end is
-        // reachable at any rate and the high end is not.
+        // The shipped hammer supplies its physical envelope; the item cites
+        // manufacturer technical details p.2. No independent 16 t sim default.
+        ...getItem('impact-hammer-9t').impactHammer,
+        hammerItemId: 'impact-hammer-9t',
+        energyMinKnm: 12,       // NOT SOURCED for the 9 t configuration; retained gameplay floor
+        // NOT SOURCED: retained gameplay power coupling, not a manufacturer
+        // energy/rate curve. Hydraulic theoretical power is NOT ram power.
+        // Do not infer a new curve by multiplying separate catalogue maxima.
         powerKnmPerMin: 7050,
         effHydraulic: [0.65, 0.90],  // measured hammer/cushioning efficiency, hydraulic
         // Where a competent pile driver sits on that envelope. You START SOFT
@@ -2047,10 +2039,10 @@ export const TUNING = {
        in the bit table where a number affects the assay rather than the metre. */
     'rc-bit-std':       { name: 'RC Bit, Drop Centre',  kind: 'rc',      carbide: 1.00, wobCap: 1.00, aggression: 1.00, sampleGain: 1.00 },
     'rc-bit-venturi':   { name: 'RC Bit, Venturi Face', kind: 'rc',      carbide: 1.10, wobCap: 1.00, aggression: 1.04, sampleGain: 1.40 },
-    /* Bolting bits. `gaugeMm` is the HOLE DIAMETER, and on a friction bolt it is
-       the single number that decides whether the bolt holds anything: the hole
-       must be smaller than the tube, and pull-out falls monotonically as the bit
-       gets bigger. This is the only bit field the anchorage model reads. */
+    /* Bolting bits. gaugeMm is nominal bit diameter, not measured hole size.
+       The inch-derived 38.1 mm matches the manufacturer's 1-1/2 in trial endpoint:
+       https://www.splitset.com.au/ss-39-stabiliser-installation/ — Bit selection.
+       33 and 39.1 mm are authored catalogue options, NOT SOURCED bolt recommendations. */
     'bolt-bit-33':      { name: 'Bolting Bit 33 mm',   kind: 'bolt',    carbide: 0.95, wobCap: 1.00, aggression: 0.96, gaugeMm: 33.0 },
     'bolt-bit-38':      { name: 'Bolting Bit 38 mm',   kind: 'bolt',    carbide: 1.00, wobCap: 1.00, aggression: 1.00, gaugeMm: 38.1 },
     'bolt-bit-39':      { name: 'Bolting Bit 39 mm',   kind: 'bolt',    carbide: 1.00, wobCap: 1.00, aggression: 1.02, gaugeMm: 39.1 },
@@ -2195,6 +2187,12 @@ function bitFits(bit, method) {
  */
 export function resolveMethod(id, opts = {}) {
   const base = methodOf(id);
+  if (id === 'driven-pile') {
+    const item = getItem(opts.hammerId);
+    if (item?.impactHammer && item.methods.includes(id)) {
+      return { ...base, pile: { ...base.pile, ...item.impactHammer, hammerItemId: item.id } };
+    }
+  }
   if (base.cpt && opts.probeMode === 'cpt') {
     return { ...base, ...base.cpt, name: `${base.name} (CPT)` };
   }
@@ -2247,7 +2245,7 @@ export function hammerEnvelope(m, rate01) {
   const bpm = lerp(p.bpmRange[0], p.bpmRange[1], clamp(nz(rate01, 0.5)));
   const eRam = (p.ramKg * 9.81 * p.strokeMaxM) / 1000;      // kNm at the full stroke
   const ePower = p.powerKnmPerMin / Math.max(1, bpm);       // what the circuit can refill
-  return { bpm, eRam, eMax: Math.min(eRam, ePower), eMin: p.energyMinKnm };
+  return { bpm, eRam, eMax: Math.min(eRam, p.ratedEnergyKnm ?? eRam, ePower), eMin: p.energyMinKnm };
 }
 
 /** The hammer setting the player has actually asked for, in real units. */
@@ -3389,8 +3387,8 @@ export function createDrillSim(ctx = {}) {
 
   /**
    * The mud programme fitted in the `mud` bay, and whether a lost-circulation
-   * pill is on board. The sim deliberately does not import game/data.js, so the
-   * programme table in TUNING.mud is keyed by the same item ids that file uses.
+   * pill is on board. The programme table in TUNING.mud is keyed by the same
+   * item ids game/data.js uses.
    */
   function resolveMud() {
     const lo = loadoutIds();
@@ -3451,7 +3449,7 @@ export function createDrillSim(ctx = {}) {
     // fitted: with a piezocone in the probe slot, site investigation is not a
     // boring rig at all — the cone is pushed, nothing turns and nothing is
     // circulated. Resolve that once, here, and everything downstream is honest.
-    S.m = resolveMethod(S.methodId, { probeMode: resolveProbeMode() });
+    S.m = resolveMethod(S.methodId, { probeMode: resolveProbeMode(), hammerId: loadoutIds().hammer });
     S.flushMedium = resolveFlushMedium(c);
     S.bit = resolveBit();
     S.wear = S.bitStartWear;
@@ -5408,8 +5406,10 @@ export function createDrillSim(ctx = {}) {
   function startBolt() {
     const b = S.m.bolt;
     const total = Math.max(1, Math.round(S.target / (b.ringSpacingM / b.perRing)));
+    const bitRangeMm = getItem(loadoutIds().install)?.stats?.bitTrialRangeMm;
     const p = {
       kind: 'bolt', type: resolveBoltType(),
+      frictionSpec: bitRangeMm ? { bitRangeMm } : null,
       total, index: 0, ring: 1, inRing: 1,
       holeTargetM: b.lengthM + b.overdrillM,
       holeOpen: true, holeDevDeg: 0, holeMm: 0,
@@ -5426,11 +5426,21 @@ export function createDrillSim(ctx = {}) {
   /** The hole diameter the fitted bit is actually making right now. */
   function boltHoleMm() {
     const b = S.m.bolt;
-    const gauge = nz(S.bit.gaugeMm, b.bitMmIdeal + 3);
     // A worn button bit under-gauges: the hole gets TIGHTER, which is harder to
-    // drive and better anchorage. Broken ground over-breaks and does the
+    // drive, until installation is no longer possible. Broken ground does the
     // opposite. Both are real and they pull against each other.
-    return gauge - b.gaugeWearMm * clamp(S.wear) + b.overbreakMm * (1 - clamp(S.stability));
+    return boltGaugeMm() + b.overbreakMm * (1 - clamp(S.stability));
+  }
+
+  function boltGaugeMm() {
+    // NOT SOURCED: the existing wear-to-gauge model is an authored estimate.
+    return nz(S.bit.gaugeMm, 0) - S.m.bolt.gaugeWearMm * clamp(S.wear);
+  }
+
+  function frictionFit(gaugeMm = boltGaugeMm()) {
+    const range = S.prog?.frictionSpec?.bitRangeMm;
+    if (!range || !Number.isFinite(gaugeMm)) return 'unknown';
+    return gaugeMm < range[0] ? 'undersize' : gaugeMm > range[1] ? 'oversize' : 'supported';
   }
 
   function stepBolt(dt, dtD, dBore) {
@@ -5463,15 +5473,17 @@ export function createDrillSim(ctx = {}) {
   function beginBoltInstall() {
     const b = S.m.bolt, p = S.prog;
     p.holeMm = boltHoleMm();
+    p.bitGaugeMm = boltGaugeMm();
     p.spunSec = 0; p.gelled = false; p.heldSec = 0; p.mixIn = 0; p.mixT = 0; p.driveSec = 0;
 
     if (p.type === 'friction') {
       // A slotted tube larger than the hole, hammered in with the drifter. The
       // drive time is itself the field tell: a bolt that goes in easily has not
       // gripped anything.
-      const tight = clamp((b.bitMmZero - p.holeMm) / Math.max(0.1, b.bitMmZero - b.bitMmIdeal));
-      const dur = Math.max(0.5, b.driveSecFull * (0.35 + 0.65 * tight));
-      beginBeat('bolt-install', dur, { kind: 'bolt-install', data: { type: 'friction', tight } });
+      // NOT SOURCED: this beat is a gameplay duration. A nominal diameter
+      // cannot predict a field driving time without the site's pull tests.
+      beginBeat('bolt-install', b.driveSecFull,
+        { kind: 'bolt-install', data: { type: 'friction', fit: frictionFit(p.bitGaugeMm) } });
     } else if (p.type === 'resin') {
       beginBeat('bolt-install', b.spinSec + b.gelSec + b.holdSec,
         { kind: 'bolt-install', data: { type: 'resin' } });
@@ -5532,16 +5544,16 @@ export function createDrillSim(ctx = {}) {
     let anchorage;
 
     if (p.type === 'friction') {
-      // The hole must be SMALLER than the tube, and pull-out falls monotonically
-      // as the bit gets bigger. In competent rock there is no overbreak to
-      // forgive the diameter, so the hole really is the bit.
-      let dia = clamp((b.bitMmZero - p.holeMm) / Math.max(0.1, b.bitMmZero - b.bitMmIdeal));
-      if (S.ground.ucs >= b.competentUcs) dia = Math.pow(dia, b.competentSensitivity);
-      const drive = clamp(p.driveSec / b.driveSecFull, 0.2, 1.2);
-      anchorage = clamp(dia * Math.min(1, drive));
-      // THE SLOT. Closed by 1/16 in means full rock-to-metal contact; unchanged
-      // means the hole was too big and the bolt is holding nothing.
-      p.slotClosureIn = +(b.slotClosedIn * dia).toFixed(4);
+      // NOT SOURCED: binary fit score, NOT a capacity, pull-test result or
+      // probability of support. The manufacturer requires ground-specific
+      // pull tests. Rejecting an out-of-band choice does not imply zero kN.
+      // Eligibility concerns trial BIT size. The separate authored overbreak
+      // estimate cannot invalidate a manufacturer-supported nominal trial bit.
+      p.diameterFit = frictionFit(p.bitGaugeMm);
+      anchorage = p.diameterFit === 'supported' ? 1 : 0;
+      // NOT SOURCED: representative slot cue for the eligible game install.
+      // An ineligible trial has no measured slot reading; do not fabricate one.
+      p.slotClosureIn = p.diameterFit === 'supported' ? b.slotClosedIn : null;
     } else if (p.type === 'resin') {
       const mix = p.mixT > 0 ? clamp(p.mixIn / p.mixT) : 0;
       const spin = clamp(p.spunSec / b.spinSec);
@@ -5570,7 +5582,10 @@ export function createDrillSim(ctx = {}) {
     p.installs.push({
       index: n, ring: p.ring, type: p.type,
       holeMm: +p.holeMm.toFixed(1), holeDevDeg: +p.holeDevDeg.toFixed(2),
+      bitGaugeMm: +p.bitGaugeMm.toFixed(3),
       anchorage01: +p.anchorage.toFixed(3),
+      diameterFit: p.type === 'friction' ? p.diameterFit : null,
+      anchorageBasis: p.type === 'friction' ? 'game-fit-score-not-pull-test' : null,
       slotClosureIn: p.slotClosureIn,
       plateTight, quality01: +quality.toFixed(3),
       torqueDue: due, torqueTaken: false, torqueKnm: null,
@@ -7759,6 +7774,9 @@ export function createDrillSim(ctx = {}) {
       if (p.type !== 'friction') return { ok: false, reason: 'not-a-friction-bolt' };
       const last = p.installs[p.installs.length - 1];
       if (!last) return { ok: false, reason: 'no-bolt-installed' };
+      if (last.slotClosureIn == null) {
+        return { ok: false, reason: 'No slot measurement is available for this unverified trial fit.' };
+      }
       last.inspected = true;
       beginBeat('bolt-inspect', S.m.bolt.inspectSec, { kind: 'bolt-inspect' });
       return {
@@ -8711,7 +8729,15 @@ export function createDrillSim(ctx = {}) {
           boltLengthM: b.lengthM, holeTargetM: +p.holeTargetM.toFixed(2),
           intoHoleM: +S.holeDepth.toFixed(2),
           holeMm: +boltHoleMm().toFixed(1),
-          holeIdealMm: b.bitMmIdeal, holeZeroMm: b.bitMmZero,
+          // No physical ideal hole diameter was established by the bit trial
+          // range. Retain this legacy UI field equal to the modeled hole so
+          // its old "Hole vs ideal" warning cannot invent that comparison.
+          holeIdealMm: boltHoleMm(),
+          holeZeroMm: null, // no universal zero-capacity diameter is established
+          bitGaugeMm: +boltGaugeMm().toFixed(3),
+          bitTrialRangeMm: p.type === 'friction' ? p.frictionSpec?.bitRangeMm || null : null,
+          diameterFit: p.type === 'friction' ? frictionFit() : null,
+          anchorageBasis: p.type === 'friction' ? 'game-fit-score-not-pull-test' : null,
           holeOpen: p.holeOpen,
           // The slot-closure reading, and it only exists once you have looked.
           slotClosureIn: last && last.inspected ? last.slotClosureIn : null,
@@ -8762,6 +8788,7 @@ export function createDrillSim(ctx = {}) {
           bearingPenRequiredM: p0.bearingPenM,
           founded: p.founded,
           // The hammer, in real units, and the envelope it is sitting on.
+          hammerItemId: p0.hammerItemId, ramKg: p0.ramKg, ratedEnergyKnm: p0.ratedEnergyKnm,
           energyKnm: +h.kNm.toFixed(1), dropM: +h.dropM.toFixed(3),
           maxDropM: p0.strokeMaxM,
           blowRateBpm: Math.round(h.bpm),

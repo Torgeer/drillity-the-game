@@ -2740,37 +2740,39 @@ const ITEMS_NEWMETHODS = [
     description: 'Two hundred and sixteen — a big hole for a big stope. At this diameter the deviation over twenty-five metres is what decides whether the ring breaks clean or leaves a brow.' }),
 
   /* ── Ground support. The hole is finished when something is IN it. ─────── */
-  /* THE DIAMETER LADDER IS THE MECHANIC. A friction bolt has to be driven into
-     a hole SLIGHTLY SMALLER than itself — a 33 mm bolt takes a 33.0 mm bit, a
-     39 mm bolt a 38.1 mm bit — and a resin-grouted bolt needs a thin, even
-     annulus for the resin to mix and grip in. Drill it oversize and the bolt
-     goes in beautifully, torques up to nothing and pull-tests as a failure.
-     (research/03-mining.md §friction bolts, §hole rule.) */
+  /* Split-tube families need their own trial-bit range and site pull testing.
+     Manufacturer installation pages, "Bit selection and drilling":
+     https://www.splitset.com.au/ss-39-stabiliser-installation/ — 35–38 mm;
+     also states 1-1/2 in, represented by the existing 38.1 mm simulation bit.
+     Lower bound conservatively retains rounded metric 35 rather than the
+     1-3/8 in conversion 34.925: nominal trial sizes, not an exact tolerance.
+     https://www.splitset.com.au/ss-46-stabiliser-installation/ — 41–45 mm.
+     These are starting ranges, not guaranteed capacity or resin annulus rules. */
   it({ id: 'bolt-bit-33', name: 'R32 33 mm Bolting Bit', category: CAT.buttonBits, slot: 'bit',
     price: 214, unlockLevel: 29, methods: ['rockbolt'],
     thread: 'R32', material: 'carbide grade K25', model: 'button-bit', consumable: true,
     stats: { ropMult: 0.92, wearRate: 0.88, maxUCS: 300, abrasionRes: 0.86, life: 620 },
-    description: 'The right bit. Thirty-three millimetres is a tight hole and it drills slower for it, and it is the reason the bolt you put in it holds what the drawing says it holds.' }),
+    description: 'A small bolting bit. Below the usual 35–38 mm trial range for the 39 mm split-tube bolt; a tighter hole can prevent full installation. Match the bit to the support system and site pull tests.' }),
   it({ id: 'bolt-bit-38', name: 'R32 38 mm Bolting Bit', category: CAT.buttonBits, slot: 'bit',
     price: 178, unlockLevel: 29, methods: ['rockbolt'],
     thread: 'R32', material: 'carbide grade K20', model: 'button-bit', consumable: true,
     stats: { ropMult: 1.0, wearRate: 1.0, maxUCS: 280, abrasionRes: 0.8, life: 560 },
-    description: 'The middle of the ladder: right for a 39 mm friction bolt, generous for resin. It is the bit most crews run, and it is the one that makes a bad habit look fine for a year.' }),
+    description: 'Within the usual trial range for a 39 mm split-tube bolt. Confirm the choice with pull tests in the actual ground: nominal bit size alone does not establish anchorage.' }),
   it({ id: 'bolt-bit-39', name: 'R32 39 mm Bolting Bit', category: CAT.buttonBits, slot: 'bit',
     price: 142, unlockLevel: 29, methods: ['rockbolt'], tier: 'econ',
     thread: 'R32', material: 'carbide grade K15', model: 'button-bit', consumable: true,
     stats: { ropMult: 1.1, wearRate: 1.15, maxUCS: 240, abrasionRes: 0.66, life: 430 },
-    description: 'Cheapest, fastest, and wrong. A 39 mm hole is bigger than the 39 mm friction bolt meant to grip it and far too wide for resin to mix in — the bolts go in like a dream and pull out at half their rated load.' }),
+    description: 'Above the usual trial range for the 39 mm split-tube bolt. An oversized hole can lose the interference the tube needs. Other bolt systems require their own specified hole size.' }),
   it({ id: 'friction-bolt-39', name: 'Split-Tube Friction Bolt, 39 mm x 2.4 m', category: CAT.rockBolts, slot: 'install',
     price: 31, unlockLevel: 29, methods: ['rockbolt'],
     thread: 'n/a', material: 'S355J2', model: 'friction-bolt', consumable: true,
-    stats: { life: 2.4 },
-    description: 'A slotted tube driven into a hole narrower than itself; the steel springs against the rock down its whole length. No resin, no cure time, and it is holding the moment you let go of it.' }),
+    stats: { life: 2.4, bitTrialRangeMm: [35, 38.1] }, // source and nominal inch rounding above
+    description: 'A slotted tube driven into a hole narrower than itself. Start with a 35–38 mm trial bit and verify anchorage with site pull tests. No resin or cure time; the tube grips through interference with the rock.' }),
   it({ id: 'friction-bolt-46', name: 'Split-Tube Friction Bolt, 46 mm x 3.0 m', category: CAT.rockBolts, slot: 'install',
     price: 44, unlockLevel: 32, methods: ['rockbolt'], duty: 'HD',
     thread: 'n/a', material: 'S355J2', model: 'friction-bolt', consumable: true,
-    stats: { life: 3.0 },
-    description: 'The heavy split-tube: sixteen tonnes ultimate against the thirty-three millimetre bolt\'s eleven, and three metres of it. This is what goes into ground that has already told you once.' }),
+    stats: { life: 3.0, bitTrialRangeMm: [41, 45] }, // manufacturer SS-46 installation page above
+    description: 'The larger split-tube family uses a 41–45 mm trial bit range. The smaller bolting bits in this catalogue do not cover that range. Select the support system and verify anchorage against the site design.' }),
   it({ id: 'rebar-bolt-20', name: 'Resin-Grouted Rebar Bolt, 20 mm x 2.4 m', category: CAT.rockBolts, slot: 'install',
     price: 30, unlockLevel: 29, methods: ['rockbolt', 'anchor'],
     thread: 'n/a', material: 'S355J2', model: 'rebar-bolt', consumable: true,
@@ -2857,7 +2859,11 @@ const ITEMS_NEWMETHODS = [
     price: 198000, unlockLevel: 33, methods: ['driven-pile'],
     thread: 'n/a', material: '34CrNiMo6', duty: 'HD', model: 'impact-hammer',
     stats: { ropMult: 1.0, wearRate: 1.0, life: 0 },
-    description: 'Nine tonnes of ram, 106 kilonewton-metres at a 1,200 mm stroke, forty to a hundred blows a minute. Energy and rate share one hydraulic circuit, so every blow you add is energy you took out of the others.' }),
+    // Manufacturer HHK 7/9A, 9T extension, technical details p.2:
+    // https://junttan.com/wp-content/uploads/2015/10/Junttan_HHK_7A_datasheet.pdf
+    // Rated potential energy is rounded; it is not energy delivered into a pile.
+    impactHammer: { ramKg: 9000, strokeMaxM: 1.2, ratedEnergyKnm: 106, bpmRange: [40, 100] },
+    description: 'Nine tonnes of ram, 106 kilonewton-metres at a 1,200 mm stroke, forty to a hundred blows a minute.' }),
   it({ id: 'vibro-hammer-1500', name: 'Vibratory Hammer, 1500 kN', category: CAT.vibroHammers, slot: 'hammer',
     price: 164000, unlockLevel: 37, methods: ['driven-pile'],
     thread: 'n/a', material: '34CrNiMo6', duty: 'HD', model: 'vibratory-hammer',
