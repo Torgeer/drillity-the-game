@@ -73,29 +73,27 @@ WHAT THIS FILE IS NOT ALLOWED TO DO
 #         vs resin-grouted bolt types, and mesh handling as a class feature.
 # [R16]   research/16-site-archetypes.md S B.13 - the rockbolt machine class and
 #         the bolt-vs-hole diameter rule.
-# A DEFECT IN THE SHARED MATERIAL CONTRACT, FOUND WHILE BUILDING THIS MACHINE
-# -------------------------------------------------------------------------
+# A DEFECT IN THE SHARED MATERIAL CONTRACT - FOUND HERE, FIXED ELSEWHERE
+# ----------------------------------------------------------------------
 # `blender/lib/rig.py` declares MAT_DARK = 'paintedDark' for "chassis, frames,
-# guarding". THERE IS NO `paintedDark` KIND IN src/core/assets.js. Its KINDS
-# table runs paintedSteel, rawSteel, wornSteel, carbide, castIron, chrome,
-# rubber, hose, plastic, glass, ... and `resolveKind()` answers an unknown kind
-# by warning once and SUBSTITUTING rawSteel. The procedural rigs never hit it
-# because rigFactory.js gets its dark from
-#     material(ctx, 'paintedSteel', { color: 0x232A33, roughness: .62, ... })
-# - paintedSteel with a colour override, not a kind of its own.
+# guarding", and for most of this pipeline's life THERE WAS NO `paintedDark`
+# KIND IN src/core/assets.js. Its `resolveKind()` answers an unknown kind by
+# warning once and SUBSTITUTING rawSteel, so every Blender machine's chassis,
+# belly plate, mudguards, boom saddles and deck resolved to BRIGHT BARE STEEL -
+# the exact contrast [R]S6 and [R]S9 W18 call the biggest realism win on this
+# machine, inverted. The procedural rigs never hit it, because rigFactory.js
+# gets its dark from material(ctx, 'paintedSteel', { color: 0x232A33, ... }) -
+# a colour override, not a kind of its own.
 #
-# So every Blender-authored machine's chassis, belly plate, mudguards, boom
-# saddles and deck currently resolve to BRIGHT BARE STEEL in game. That is the
-# exact contrast [R]S6 and [R]S9 W18 call the single biggest realism win on
-# this machine - "a dark chassis under a bright body would do more for realism
-# than any added geometry" - inverted.
-#
-# NOT FIXED HERE. lib/rig.py and assets.js both belong to other people, and
-# this file keeps the library's declared constant rather than quietly routing
-# around a bug that affects all ten machines. The fix is one of: add a
-# `paintedDark` kind to assets.js KINDS, or have the glTF loader map the name
-# onto paintedSteel with the 0x232A33 override rigFactory already uses.
-# Reported rather than worked around.
+# Found while building this machine and NOT worked around here, because
+# lib/rig.py and assets.js belong to other people and a local substitution
+# would have hidden a fleet-wide fault behind one correct-looking model. It was
+# fixed properly at commit 08188f4, which adds a real `paintedDark` kind
+# derived from paintedSteel. All 17 exported models were requesting it.
+# Recorded because the lesson generalises: this file's 68 MAT_DARK calls were
+# the largest single consumer of a material that did not exist, and nothing in
+# the export, the node graph or the draw-call count could see that. Only asking
+# assets.js could.
 #
 # [GF]    src/rig/rigFactory.js buildBolter() L5729-5975 + src/game/data.js
 #         L1272 - the game's own procedural bolter and its spec block. Read for
@@ -676,7 +674,7 @@ def build_frame(parent, name, y0, y1, nose=False, tail=False):
         for s in (-1, 1):     # tow eyes
             cheapbox('%s_tow%d' % (name, s > 0), (0.028, 0.180, 0.130),
                      R.MAT_WORN, parent,
-                     (s * 0.230, y1 - 0.060, FRAME_Z0 + 0.150))
+                     (s * 0.230, y1 - 0.090, FRAME_Z0 + 0.150))
     if tail:
         run = 0.620
         box(name + '_tailslope', (2 * RAIL_X + RAIL_W, run, 0.030), R.MAT_DARK,
@@ -831,10 +829,15 @@ def build_hood(parent):
                  R.MAT_DARK, parent, (0, y0 + 0.006, z),
                  (math.radians(28), 0, 0))
     # exhaust and its heat shield: a diesel that only trams still has a stack
-    cyl('hood_exhaust', 0.062, 0.520, R.MAT_WORN, parent,
+    # Sized to finish UNDER H_TRAM. The machine trams with its roof down at
+    # 2 100 mm [BS]p.7, so 2 100 - not the 2 841 working height - is what every
+    # fixed thing on the carrier has to clear. A 520 mm stack put the exhaust
+    # 100 mm above the drive the machine is supposed to drive down.
+    EXH_TOP = H_TRAM - 0.070
+    cyl('hood_exhaust', 0.062, EXH_TOP - (HOOD_Z - 0.040), R.MAT_WORN, parent,
         (0.560, -0.700, HOOD_Z - 0.040), sides=10)
-    cyl('hood_exhshield', 0.082, 0.300, R.MAT_WORN, parent,
-        (0.560, -0.700, HOOD_Z + 0.060), sides=10)
+    cyl('hood_exhshield', 0.082, 0.240, R.MAT_WORN, parent,
+        (0.560, -0.700, EXH_TOP - 0.240), sides=10)
     # 60 l fuel tank [BS]p.5, slung between the rails where a tank actually goes
     box('fuel_tank', (0.480, 0.560, 0.360), R.MAT_DARK, parent,
         (-0.320, -0.880, FRAME_Z1 + 0.190), bevel=0.030)
@@ -1139,8 +1142,11 @@ def build_canopy(parent):
         (cx, cy, ROOF_UND + ROOF_T / 2), bevel=0.016)
     # "a broad flat cap" over the plate, and the "louvred / slotted front
     # edge" [R]S4.6 - the FOPS grille that lets an operator see the back
+    # The cap's TOP is the 2 841 mm, not the plate's. Sitting it on top of the
+    # plate put the machine 14 mm over its own published roof-up height - small,
+    # but this file's whole claim is that its dimensions close.
     box('canopy_cap', (ROOF_W - 0.120, ROOF_D - 0.120, 0.028), R.MAT_PAINT,
-        roof, (cx, cy, ROOF_Z_UP + 0.014), bevel=0.010)
+        roof, (cx, cy, ROOF_Z_UP - 0.014), bevel=0.010)
     n = 7
     for i in range(n):
         sx = cx - ROOF_W / 2 + ROOF_W * (i + 0.5) / n
@@ -1283,6 +1289,26 @@ Z_FOOT     = 1.240   # swing-bearing height above ground. DERIVED: the
 # drill, 0.735 m PRINTED (see S7). That is 3.185, leaving 0.355 m of shank,
 # chuck and dead length in a 3.540 m unit - and [BS]p.2 advertises a SHORT dead
 # length as a feature of this exact unit. The two roads meet.
+# A TENSION IN THE REFERENCE, DECLARED RATHER THAN QUIETLY RESOLVED.
+# [R]S5.2 describes the thumbnail silhouette as "a single boom pointing UP,
+# with a SHORT FEED held square to the roof ... a short bright bar tilted
+# against the roof, not a tall mast." A 3.540 m unit on a 2.100 m machine is
+# not a short bar - it is the tallest thing on the model by a long way.
+# [R]S8 is equally clear the other way: no bolter feed length is published
+# anywhere, and "do NOT put a 12-18 ft jumbo feed on this machine."
+#
+# 3.540 m is 11.6 ft, so it is inside that prohibition - just. And it is
+# forced by arithmetic on sourced numbers: a 2.400 m bolt needs a 2.450 m hole
+# ([BS]p.5 + [GF] holeRule), the carriage has to travel all of it because the
+# feed's 400 mm extension is positioning and not penetration ([BS]p.7), and
+# the drill on the carriage is 735 mm long (printed). That is 3.185 m before
+# any shank, chuck or dead length at all.
+#
+# So the geometry is kept and S5's wording is the thing that is loose: what is
+# short about a bolter's feed is that it is short FOR ITS HOLE DEPTH and short
+# next to a jumbo's 12-18 ft, not short next to the carrier. A modeller who
+# reads "short bright bar" literally builds a machine that cannot drill the
+# bolt it carries. Flagged in research/rigs/bolter.md S10.7 as well.
 FEED_BODY  = 3.540   # DERIVED from Sandvik DS411 TS2-051:11 BH30 = 4 142 mm
 CARR_TRAV  = 2.450   # carriage stroke = hole depth = 2.400 bolt + 0.050
                      # [BS]p.5 bolt length + [GF] spec.holeRule
@@ -1333,11 +1359,18 @@ def build_pedestal(parent):
                 (y0 + 0.080, FRAME_Z1 + 0.240, Y_FOOT, Z_FOOT),
                 (y1 - 0.080, FRAME_Z1 + 0.240, Y_FOOT, Z_FOOT),
                 (y0 + 0.080, FRAME_Z1 + 0.240, y1 - 0.080, FRAME_Z1 + 0.240))):
+            # DARK, not body colour. [R]S6 puts "main frames, belly plate,
+            # bumper, mudguards, BOOM PEDESTAL BASE, jack legs" in the second,
+            # much darker graphite - and it earns its place visually as well as
+            # in the source: painted the same yellow as the boom, the
+            # triangular pedestal and the short boom above it merged into one
+            # solid wedge in the side elevation and the boom stopped reading as
+            # a boom at all.
             aim_box('ped_leg%d_%d' % (s > 0, i), 0.032, 0.190,
-                    (s * 0.300, ay, az), (s * 0.300, by, bz), R.MAT_PAINT,
+                    (s * 0.300, ay, az), (s * 0.300, by, bz), R.MAT_DARK,
                     parent, bev=0.010)
         box('ped_web%d' % (s > 0), (0.026, (y1 - y0) * 0.62, 0.340),
-            R.MAT_PAINT, parent,
+            R.MAT_DARK, parent,
             (s * 0.300, (y0 + y1) / 2, FRAME_Z1 + 0.400), bevel=0.008)
     cyl('ped_bearing', 0.230, 0.230, R.MAT_CAST, parent,
         (0, Y_FOOT, Z_FOOT - 0.150), sides=18)
@@ -1345,7 +1378,9 @@ def build_pedestal(parent):
               (0, Y_FOOT, Z_FOOT + 0.080))
     R.empty(R.NODE_MOUNT, 'marque', parent,
             (-0.316, (y0 + y1) / 2, FRAME_Z1 + 0.400), (0, math.radians(90), 0))
-    box('ped_badgeplate', (0.014, 0.520, 0.150), R.MAT_PAINT, parent,
+    box('ped_badgeplate', (0.014, 0.520, 0.150), R.MAT_PAINT, parent,   # the
+        # badge plate stays BODY colour - it is the one thing on the pedestal
+        # meant to be read, and mount:marque is pinned to it
         (-0.316, (y0 + y1) / 2, FRAME_Z1 + 0.400), bevel=0.006)
     # automatic boom lubrication on the rear part of the boom [BS]p.5
     box('ped_lubepump', (0.180, 0.200, 0.260), R.MAT_DARK, parent,
@@ -2045,15 +2080,19 @@ def build_lights(root, roof, fx):
 
     # 3. eight tramming lamps: 6 x 40 W LED + 2 x 70 W halogen [BS]p.5.
     #    The two halogens are the long-throw pair and go on the front.
+    # Every lamp is recessed INSIDE the carrier's own 6 457 mm chain. Measured,
+    # the tail lamps hung 90 mm past the tail and the tow eyes 30 mm past the
+    # nose - on a machine that reverses down a 3 m drive, those are the first
+    # things to meet the rib.
     tram = [
-        ('tram-f1', (-0.760, Y_NOSE - 0.020, FRAME_Z1 + 0.320), (0, 1, -0.30), 70, 0xFFE6BE),
-        ('tram-f2', (0.760, Y_NOSE - 0.020, FRAME_Z1 + 0.320), (0, 1, -0.30), 70, 0xFFE6BE),
-        ('tram-f3', (-0.520, Y_NOSE - 0.060, FRAME_Z1 + 0.560), (0, 1, -0.16), 40, 0xF2F6FF),
-        ('tram-f4', (0.520, Y_NOSE - 0.060, FRAME_Z1 + 0.560), (0, 1, -0.16), 40, 0xF2F6FF),
-        ('tram-r1', (-0.640, Y_TAIL + 0.020, 1.420), (0, -1, -0.28), 40, 0xF2F6FF),
-        ('tram-r2', (0.640, Y_TAIL + 0.020, 1.420), (0, -1, -0.28), 40, 0xF2F6FF),
-        ('tram-r3', (-0.640, Y_TAIL + 0.020, 0.980), (0, -1, -0.46), 40, 0xF2F6FF),
-        ('tram-r4', (0.640, Y_TAIL + 0.020, 0.980), (0, -1, -0.46), 40, 0xF2F6FF),
+        ('tram-f1', (-0.760, Y_NOSE - 0.110, FRAME_Z1 + 0.320), (0, 1, -0.30), 70, 0xFFE6BE),
+        ('tram-f2', (0.760, Y_NOSE - 0.110, FRAME_Z1 + 0.320), (0, 1, -0.30), 70, 0xFFE6BE),
+        ('tram-f3', (-0.520, Y_NOSE - 0.150, FRAME_Z1 + 0.560), (0, 1, -0.16), 40, 0xF2F6FF),
+        ('tram-f4', (0.520, Y_NOSE - 0.150, FRAME_Z1 + 0.560), (0, 1, -0.16), 40, 0xF2F6FF),
+        ('tram-r1', (-0.640, Y_TAIL + 0.110, 1.420), (0, -1, -0.28), 40, 0xF2F6FF),
+        ('tram-r2', (0.640, Y_TAIL + 0.110, 1.420), (0, -1, -0.28), 40, 0xF2F6FF),
+        ('tram-r3', (-0.640, Y_TAIL + 0.110, 0.980), (0, -1, -0.46), 40, 0xF2F6FF),
+        ('tram-r4', (0.640, Y_TAIL + 0.110, 0.980), (0, -1, -0.46), 40, 0xF2F6FF),
     ]
     for name, loc, aim, watt, col in tram:
         m, _ = R.worklight(name, root, loc, aim, cone_deg=46, range_m=22)
