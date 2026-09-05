@@ -66,6 +66,11 @@ const METHODS = (flag('methods', 'dth,cfa,auger')).split(',');
    alpine, both of which are right-lit, so it cannot see the case that
    mattered. See .probe-suns.mjs. */
 const REGION = flag('region', null);
+/* `--depth 0.05` spuds instead of drilling 35 % in. `collar.groundAtSeamPx` is
+   a SURFACE number and is depth-independent; `sectionGroundAtSeamPx` is not —
+   the cut scrolls and the surface does not, so the only depth at which the two
+   ground lines can be compared at all is the one where drilling starts. */
+const DEPTH_FRAC = flag('depthfrac', null);
 
 const PHONE = {
   ...devices['iPhone 13 Pro'],
@@ -127,7 +132,7 @@ report.sessionWarm = await warmUp({ label: 'session' });
 
 for (const mid of METHODS) {
  try {
-  await page.evaluate(async ([M, PIN]) => {
+  await page.evaluate(async ([M, PIN, DF]) => {
     const c = window.__DRILLITY;
     const d = c.data;
     const regions = (d.REGIONS || []).filter((rg) => d.methodsForRegion
@@ -136,12 +141,12 @@ for (const mid of METHODS) {
     let k = null;
     try { k = await c.__qa.startDemoContract({ method: M, region, depth: 8 }); }
     catch (e) { k = c.state.contract; }
-    try { c.sim.debug.setDepth(Math.max(0.5, ((k && k.targetDepth) || 10) * 0.35)); } catch (e) { void e; }
+    try { c.sim.debug.setDepth(Math.max(0.5, ((k && k.targetDepth) || 10) * (DF != null ? Number(DF) : 0.35))); } catch (e) { void e; }
     /* A method/region pair the generator will not issue still has to be
        measurable: env mirrors state.world.regionId every frame, so writing it
        there is what actually moves the sky, and it survives update(). */
     if (PIN && c.state && c.state.world) c.state.world.regionId = PIN;
-  }, [mid, REGION]);
+  }, [mid, REGION, DEPTH_FRAC]);
 
   const live = await page.waitForFunction(() => {
     const c = window.__DRILLITY;
@@ -296,6 +301,14 @@ for (const mid of METHODS) {
         sectionMode: sv.profileMode || null,
         depthAtY0: Number.isFinite(sv.depthAtY0) ? +sv.depthAtY0.toFixed(3) : null,
         holeX: Number.isFinite(sv.holeX) ? +sv.holeX.toFixed(3) : null,
+        /* geology sizes `halfH` as viewMetres*0.5 and lays its headroom, its
+           strip-recentring window and its ruler framing out against it; the
+           renderer anchors the cut's WIDTH, so the frustum's true height is
+           whatever a shorter band can show at 19.4 px/m. When these two
+           disagree, everything geology positions from halfH is off by the
+           ratio — including a depth ruler. */
+        viewMetresClaimed: Number.isFinite(sv.viewMetres) ? +sv.viewMetres.toFixed(3) : null,
+        viewMetresActual: +(c.sectionCamera.top - c.sectionCamera.bottom).toFixed(3),
       },
       lights: {
         surfaceKey: screenLight(c.camera, byName(c.scene, 'keySun')),
@@ -349,6 +362,7 @@ for (const mid of METHODS) {
   console.log(`${mid.padEnd(10)} [${m.warm ? 'warm' : 'COLD'}${live ? '' : ', CHROME NOT LIVE'}]`);
   console.log(`  collarOffsetPx ${k.collarOffsetPx}  groundAtSeamPx ${k.groundAtSeamPx}  scaleRatio ${k.scaleRatio}`);
   console.log(`  section mode ${k.sectionMode} depthAtY0 ${k.depthAtY0} holeX ${k.holeX}  sectionGroundAtSeamPx ${k.sectionGroundAtSeamPx}`);
+  console.log(`  viewMetres claimed ${k.viewMetresClaimed} vs actual frustum ${k.viewMetresActual}`);
   console.log(`  light surf ${JSON.stringify(m.lights.surfaceKey)}`);
   console.log(`  light sect ${JSON.stringify(m.lights.sectionKey)}`);
   if (m.rig) console.log(`  rig GROUND rect ${JSON.stringify(m.rig.groundRect)}`);
