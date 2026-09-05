@@ -118,6 +118,9 @@ are long precisely because they spend their length being honest about gaps.
 | 5 | **`tools-core-dth`** | Confident on the geometry it covers, but **fourteen further catalogues on the same subject went unread**, including **five water-powered DTH hammer datasheets** — a genuinely different machine that **nothing in the library covers at all**. |
 | 6 | **`tools-kelly-foundation`** | Two excellent primaries, one of which had never been opened. **Ten single-product datasheets were left unread** and several almost certainly carry the dimensioned drawing of an individual tool that the document could not find. Tooth and tooth-holder dimensions are named but never dimensioned anywhere. |
 
+| 7 | **`hdd-rig`** | Well sourced *because* the agent went to the web — only three of ~20 local PDFs earned their place. Manufacturer sheets, a tooling catalogue and six patents carry it. **No photograph of an HDD rig, spread, reamer, entry pit or mud recycler exists anywhere.** Three specific things stay unsourced: the **beam cross-section** (searched for, found nowhere), the **carriage stroke** (every maker publishes speed, none publishes stroke), and the **slant-face angle**, which no manufacturer publishes at all. |
+| 8 | **`tools-anchors-sda`** | Strong on the bar, coupler, nut and plate — six sources agreeing on the size ladder. Its one gap is **missing by design and cannot be closed from catalogues**: the **over-drill ratio, bit Ø against bar Ø**, is not published because **bit adapters deliberately decouple bit size from bar size**, and the grout-cover requirement lives in EN 14199 / 14490 and the ETA — none of which are in the folder. The document fences off the nearest parallel as non-transferable rather than borrowing it. |
+
 **At the other end of the scale — the strongest document in the library is
 `tools-overburden`**, and it should be the template for what "well sourced"
 means here. It rests on the owner's own manufacturing drawings, a 63-page casing
@@ -129,8 +132,8 @@ thickness, hinge-pin diameter, hinge offset, cutting-flank shape and swing
 mechanism are all `NOT SOURCED`. The diameters constrain that mechanism; they do
 not describe it.
 
-*(Rows for `hdd-rig`, `tools-bits-carbide`, `tools-rods-pipe` and
-`tools-anchors-sda` are appended when those documents land.)*
+*(Rows for `tools-bits-carbide` and `tools-rods-pipe` are appended when those
+documents land.)*
 
 The **fourteen references written before this run** (`foundation-bg`, `cfa-rig`,
 `piling-leader`, `tunnel-jumbo`, `bolter`, `longhole-rig`, `core-rig`, `rc-rig`,
@@ -154,8 +157,7 @@ They are listed so that "we looked" is never assumed.
   `2025_Productinfo_KR-RM-HF_EN.pdf` · `2025_Productinfo_Abfangschelle_EN.pdf` ·
   `2025_Productinfo_DW-S_EN.pdf` · `2025_Productinfo_KR-WS-29_EN.pdf` ·
   `2025_Productinfo_RS-WS_EN.pdf`. Short files. **Cheapest large win available.**
-- **Five water-powered DTH datasheets**: `13.1`–`13.5 BWH-MWH-wasserbetriebener-Imlochhammer-WAI35/40/50/60/80-EN`.
-  **Nothing in the library covers water-powered DTH.**
+- **Fifteen water-powered DTH files, not five.** The `hdd-rig` agent checked all ten `PD_W*` files on the hypothesis that one might be an HDD general arrangement. **None is** — every one is water-powered DTH material: `PD_W70/100/120/150/280` are **hammers**, `PD_WASP*` are **water pumps**, `PD_WS150/WS200/WIS` are **water swivels**. Add the five `13.1–13.5 BWH…WAI35/40/50/60/80` datasheets and there are **fifteen files on a machine the library covers with nothing at all.** A negative result on one question that closed a bigger gap on another.
 - **Four Chinese casing drawings**, the only likely source anywhere for the **upset casing end** (墩头) that `tools-overburden.md` could not close: `133墩头打击套管 STR133001-Model.pdf` — **the highest-value unread file in that set** — plus `101.6套管双母扣 STR102002.pdf`, `152套管公母扣2025.3.12-Model.pdf` and `180打击套管 STR180001-Model.pdf`. **A dimensioned drawing is language-independent** — do not skip these because the filename is Chinese.
 - The **~300 remaining exploded views** in
   `Kelly-Spare_Parts_and_Wear_Parts_DE_EN_905_835_1_2.pdf` — one per Kelly section,
@@ -213,6 +215,8 @@ DTH/ring bit) and very weak on machines.
 
 `sonic-truck` · `core-rig` · `rc-rig` · `si-rig` · `cpt-unit` · `hdd-rig` ·
 `raisebore` · `oil-derrick` · `cable-percussion` · `bolter` · `longhole-rig`
+
+For `hdd-rig` the gap is wider than the machine: there is **no photograph of an HDD spread, back-reamer, entry or exit pit, or mud recycler** either — and an HDD rig is only one item in a spread.
 
 **Four of those eleven are one procurement gap, not four:** there is **no
 underground photograph of any kind in the folder**. One trip underground with a
@@ -320,6 +324,12 @@ as A1 and A4.
 *narrower than the casing it is supposed to clear a path for*, and it
 contradicts its own docstring while doing it.
 
+**A7. A 12-tonne pulling swivel on a 330 kN rig.** `hdd-rig.md`. The sourced
+rule is that the swivel is rated at **≥ 1.5 × pullback**, which on a 330 kN
+(≈34 t) machine means about **50 t**. The game fits **12 t** — roughly a quarter
+of the load it would see on the pullback it claims. The swivel is the single
+component in an HDD spread whose failure loses the whole product string.
+
 ### Tier B — a number a specialist knows by heart, wrong by a lot
 
 **B1. Vibratory hammer frequency is 35–56 % too high.**
@@ -384,6 +394,26 @@ casing, and it **silently relaxes the retraction constraint by 14 %** on the
 band and **below every entry in the eccentric shoe table**. The sourced range is
 **Expanded ≈ 1.06–1.13 × casing OD**; **1.10–1.14 lands inside both sources.**
 
+**B11. The HDD rig has the weight of one machine class and the force of
+another.** `hdd-rig.md`. `weightKg: 9600` is a **real and accurate** weight — for
+a **124.6 kN** machine. The spec claims **330 kN**, whose real-world equivalent
+is **23.6 t** on a 9.05 m chassis. Someone took two numbers from two different
+rigs. This is `HANDOFF.md` §8B's *"two tables describing one thing"* again, and
+it is the third instance found on this run.
+
+**B12. Anchor plate thickness is hard-coded and matches no real plate.**
+`tools-anchors-sda.md`. The sourced ladder runs **150 × 150 × 8 mm up to
+350 × 350 × 90 mm** — **thickness scales 11× while side scales only 2.3×**, so the
+thickness-to-side ratio sweeps from **1:19 to 1:4**. The game uses
+**`thicknessMm: 20` for every plate**, which corresponds to **no row on the
+ladder**. A 350 mm plate at 20 mm thick would fold.
+
+**B13. The SDA coupler is built 73 % too long at the large sizes.**
+`tools-anchors-sda.md`. Sourced coupler length is **140–250 mm across the entire
+family** — it **barely scales at all**. The game uses `majorMm * 5`, which builds
+a **380 mm** coupler where the real part is **220 mm**. (Its OD ratio of
+× 1.36 is fine — sourced is 1.24–1.37. Only the length is wrong.)
+
 ### Tier C — a missing feature a driller looks for first
 
 **C1. A Kelly bar has six drive keys and lock recesses between them.**
@@ -441,6 +471,30 @@ running side by side**, visually three times as coarse as the pitch alone
 suggests. The same drawing shows a **plain guide nose** ahead of the thread that
 stabs and aligns before any thread engages — **no rod in the game has one**.
 
+**C10. HDD pipe does not live in a carousel.** `hdd-rig.md`. It lives in
+**gravity-fed columns in a box** on the frame, and real on-board capacity is
+**28–75 rods**. The shop currently offers a **"220-rod carousel"** — wrong
+mechanism and roughly 3–8× the wrong capacity.
+
+**C11. The HDD rig folds its beam DOWN for transport; the game raises it 48°.**
+`hdd-rig.md`. The transport pose is backwards.
+
+**C12. The anchor head has one part too many, and the sphere is on the wrong
+component.** `tools-anchors-sda.md`. The game builds flat plate + dome +
+a separate `'seat'` washer + a flat-ended hex nut. The sourced head is **flat
+plate + a cold-formed domed plate + a nut with a spherical end** — three parts,
+not four, with the sphere on the *nut*. **And nothing tilts**, which is the
+entire reason the spherical seat exists: an anchor is rarely square to the face,
+and the ±5° seat is what accommodates that. The tilt is the detail that says
+"anchor" rather than "bolt".
+
+**C13. The HDD anchors are power augers, not stakes — and the anchor plate is
+also the drip tray.** `hdd-rig.md`. Two patents give the mechanism: two power
+augers on a mount pivoting about a transverse axis, one laterally movable to dodge
+obstacles. The plate they bear on **doubles as the drilling-fluid collecting
+tray**. One part that is simultaneously the load path and the dirt story — and
+the best single detail available for making an HDD entry pit read as real.
+
 ### Tier D — proportion and scaling errors
 
 **D1. The offshore derrick is 22 % too squat and does not taper enough.**
@@ -486,6 +540,13 @@ never print as fact.
   4 500 kN pull, 4.6 m column. Not one of these is supported or refuted by any
   source found (`raisebore.md` §8).
 - **`weightKg: 9400`** on the cable-percussion rig (`cable-percussion.md` §3d).
+- **`slantDeg: 15`** on the HDD pilot head. **No manufacturer publishes the
+  slant-face angle at all** (`hdd-rig.md` §8), so this is an invention and is
+  flagged as one in that document. Keep the flag.
+- **`ultimateLoadKN: 400` on the R38 anchor bar is the YIELD figure, not the
+  ultimate.** Ultimate is **500 kN**, confirmed by two independent sources
+  (`tools-anchors-sda.md`). This one is not merely unsourced — **it is a wrong
+  label on a right number**, which is worse, because it passes a spot check.
 - **Every `priceEur` formula.** Game-economy numbers, which is fine — but they
   should not be presented to the player as specifications.
 
@@ -518,6 +579,22 @@ already right. These were checked against primary sources on this run and
   (`raisebore.md` §9.8).
 - **The RC bit's drop-centre face and hemispherical carbide** match the source
   exactly (`tools-core-dth.md` §9.5).
+
+**Two warnings that the evidence reversed — recorded because a correction that
+turned out to be wrong is worth as much as one that was right:**
+
+- **`entryDeg = 16` is right. Leave it.** `hdd-rig.md` §9-D. An earlier draft of
+  that document called it too steep; **eleven manufacturer sheets** then showed
+  mid-size HDD rigs are built for **14–21°**, putting 16° dead centre. The
+  warning was withdrawn in place rather than deleted.
+- **The chain feed is legitimate.** `hdd-rig.md` §9-F. Called "flat wrong" in an
+  earlier draft; a patent then described exactly this as a **2:1
+  block-and-tackle chain drive**.
+
+**Also confirmed correct on this run:** `buildAnchorBar`'s **3 m default bar
+length** and `buildRingBitSystem`'s **lost-ring / retrieved-pilot logic** are both
+already right (`tools-anchors-sda.md` §9.12) — recorded so a later pass does not
+undo them.
 
 **Well-observed modelling that should be left alone:**
 
@@ -565,6 +642,8 @@ wrong, and it goes wrong worst on the biggest, most visible tools.
 | **Carbide button exposure** | **Exactly 5.0 mm, on every bit in the overburden family.** A Ø10 × 15 mm button seated 10 mm deep with a spherical R5.0 crown is a true hemisphere, so **the tip never projects further than its own radius.** Confirmed twice — stated in the spec, and measured as a bounding-box difference on the CAD model. | `tools-overburden.md` |
 | **Percussive casing wall** | **Near-constant at ~12–13 mm** from Ø88.9 to Ø152.4, so bore/OD *rises* from 0.72 to 0.84 as the casing grows. **Not proportional.** | `tools-overburden.md` |
 | **Eccentric expanded / retracted** | **Retracted Ø < casing I.D. < casing O.D. < Expanded Ø**, without exception across 46 rows and four system families. Expanded ≈ **1.06–1.13 × casing OD**; Retracted ≈ **0.88–0.93 × casing I.D.**; Expanded ≈ **1.27–1.37 × Retracted**. **This is the checkable rule that would have caught the historic Odex error.** | `tools-overburden.md` |
+| **SDA coupler length** | **Barely scales at all — 140–250 mm across the entire bar family.** Its **OD** scales normally (× 1.24–1.37 on the bar), but its length is nearly constant. Multiplying length by thread size builds a coupler 73 % too long at the top of the range. | `tools-anchors-sda.md` |
+| **Anchor plate thickness** | **Scales 11× while the plate side scales 2.3×** — 8 mm on a 150 mm plate, 90 mm on a 350 mm plate. Thickness:side sweeps **1:19 → 1:4**, so it is the *thickness* that must be driven by load, not by plate size. | `tools-anchors-sda.md` |
 | **Ring-bit over-cut** | **6–18 mm on diameter** (3–9 mm of annulus on radius) — never a fraction of a millimetre. The historic "0.146 mm" claim was wrong by two orders of magnitude. | `tools-overburden.md` |
 
 ---
