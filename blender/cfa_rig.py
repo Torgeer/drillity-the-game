@@ -320,12 +320,13 @@ def build_undercarriage():
         for i in range(n_str):
             yy = y0 + (i + 0.5) * straight / n_str
             objs.append(clone(tpl, 'sh', (x, yy, 2 * rr - 0.015), (math.pi, 0, 0)))
-        # the two rounded ends
-        for cy, base in ((y1, -math.pi / 2), (y0, math.pi / 2)):
-            for i in range(n_arc):
-                a = base + math.pi * i / (n_arc - 1) * (1 if cy == y1 else 1)
-                sgn = 1 if cy == y1 else -1
-                ang = base + sgn * math.pi * i / (n_arc - 1)
+        # the two rounded ends: ang 0 is the bottom of the wheel and runs to
+        # pi at the top, +ve wrapping FORWARD round the idler and -ve wrapping
+        # REARWARD round the sprocket. Getting this sign wrong lays the arc
+        # under the machine and leaves a flap of track hanging off the nose.
+        for cy, sgn in ((y1, 1.0), (y0, -1.0)):
+            for i in range(1, n_arc - 1):
+                ang = sgn * math.pi * i / (n_arc - 1)
                 objs.append(clone(tpl, 'sh',
                                   (x, cy + (rr - 0.015) * math.sin(ang),
                                    rr - (rr - 0.015) * math.cos(ang)),
@@ -602,10 +603,10 @@ def build_masthead():
         cutters = []
         for cy, cz, cr in (((yb + yf) / 2 + 0.30, (hz0 + hz1) / 2 + 0.35, 0.44),
                            ((yb + yf) / 2 - 0.55, (hz0 + hz1) / 2 - 0.55, 0.28)):
-            c = tube('hh', cr, 0.5, MAT_PAINT, loc=(x - 0.25 * side, cy, cz),
+            c = tube('hh', cr, 0.60, MAT_PAINT, loc=(0, 0, 0),
                      rot=(0, math.pi / 2, 0), sides=14)
-            c.location = (x - 0.25 * side, cy, cz)
-            cutters.append(c)
+            c.location = (x - 0.30, cy, cz)     # tube() origin is at its BASE,
+            cutters.append(c)                   # so start it clear of the plate
         cut(cheek, cutters)
         objs.append(cheek)
         # top chord and the sloped nose
@@ -963,6 +964,29 @@ def build_basebox():
     cut(objs[0], [bore])
     objs.append(tube('collarring', AUGER_R + 0.16, 0.10, MAT_WORN,
                      loc=(0, DRILL_Y, BASEBOX_H), sides=22))
+    # corner posts, ribs, a lifting lug and an access hatch, so a 2.1 x 1.6 x
+    # 1.63 m fabrication does not read as a primitive (rubric axis 4)
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            objs.append(box('basepost', (0.13, 0.13, BASEBOX_H + 0.03), MAT_DARK,
+                            loc=(sx * 1.02, DRILL_Y + 0.05 + sy * 0.77,
+                                 BASEBOX_H / 2), bevel=0.015))
+    for i in range(3):
+        objs.append(box('baserib', (0.09, 1.58, 0.11), MAT_PAINT,
+                        loc=(-0.52 + i * 0.52, DRILL_Y + 0.05, BASEBOX_H - 0.34),
+                        bevel=0.012))
+    objs.append(box('basehatch', (0.62, 0.04, 0.60), MAT_DARK,
+                    loc=(0.42, DRILL_Y + 0.86, 0.80), bevel=0.012))
+    for hz in (0.62, 0.98):
+        objs.append(tube('basehinge', 0.024, 0.10, MAT_STEEL,
+                         loc=(0.12, DRILL_Y + 0.88, hz),
+                         rot=(math.pi / 2, 0, 0), sides=8))
+    objs.append(box('baseflange', (2.16, 1.66, 0.09), MAT_DARK,
+                    loc=(0, DRILL_Y + 0.05, BASEBOX_H + 0.04), bevel=0.012))
+    for sx in (-1, 1):
+        objs.append(tube('baselug', 0.085, 0.045, MAT_HAZARD,
+                         loc=(sx * 0.86, DRILL_Y + 0.05, BASEBOX_H + 0.20),
+                         rot=(math.pi / 2, 0, 0), sides=10))
     for side in (-1, 1):
         objs.append(box('basestripe', (0.06, 1.50, 0.22), MAT_HAZARD,
                         loc=(side * 1.05, DRILL_Y + 0.05, 0.30)))
@@ -996,8 +1020,9 @@ def build_ropes():
     back = MAST_CY - MAST_D / 2 - 0.09
     objs.append(hose('mainrope',
                      [(-0.34, -1.55, HOUSE_Z - 0.28),
-                      (-0.34, back - 0.55, HOUSE_Z + 1.20),
-                      (-0.34, back, 7.40),
+                      (-0.34, back - 0.95, HOUSE_Z + 0.95),
+                      (-0.34, back - 0.06, 4.60),
+                      (-0.34, back, 9.50),
                       (-0.34, back, HEAD_TOP_Z - 1.60),
                       (-0.34, MAST_CY + 0.70, HEAD_TOP_Z - 0.40),
                       (-0.34, DRILL_Y - 0.30, HEAD_TOP_Z - 0.42),
@@ -1005,8 +1030,9 @@ def build_ropes():
                      radius=0.016, mat=MAT_WORN, sides=6))
     objs.append(hose('auxrope',
                      [(0.62, -1.55, HOUSE_Z - 0.28),
-                      (0.52, back - 0.55, HOUSE_Z + 1.20),
-                      (0.40, back, 7.40),
+                      (0.52, back - 0.95, HOUSE_Z + 0.95),
+                      (0.40, back - 0.06, 4.60),
+                      (0.34, back, 9.50),
                       (0.34, back, HEAD_TOP_Z - 1.60),
                       (0.34, MAST_CY + 0.70, HEAD_TOP_Z - 0.40),
                       (0.34, DRILL_Y - 0.30, HEAD_TOP_Z - 0.42),
@@ -1038,7 +1064,8 @@ def build_concrete_line(z_head):
                       (0.34, fy - 0.10, 1.55),
                       (0.95, fy + 0.55, 0.22),
                       (2.20, fy + 1.05, 0.13),
-                      (3.70, DRILL_Y + 2.30, 0.13)],
+                      (3.55, fy + 0.85, 0.12),
+                      (4.60, DRILL_Y + 1.60, 0.12)],
                      radius=0.085, mat=MAT_RUBBER, sides=9))
     # heavy clamped steel couplings — a concrete line is jointed, not continuous
     for i, (px, py, pz, rx, rz) in enumerate((
