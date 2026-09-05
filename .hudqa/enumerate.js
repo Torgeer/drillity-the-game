@@ -220,8 +220,41 @@ export const ENUMERATE = function measureScreen(opts) {
         stagePct: +(100 * bandH / H).toFixed(1) }
     : null;
 
-  /* ── Touch targets. Every interactive thing, not a list of class names. ── */
+  /* ── Touch targets — HIT-TESTED, not inferred ─────────────────────────────
+     This used to take the border box and add back any ::before/::after with a
+     NEGATIVE inset. Two things were wrong with that.
+
+     It could not see the hit area it was written for. `.railbtn::after` (a
+     34px control that must reach 44) expands with
+     `top:50%; height:44px; transform:translateY(-50%)` — every inset is 0 or
+     50%, none negative, so the rule contributed nothing and the pad came out
+     {0,0}. And styles.css said, in a comment beside that rule, that this file
+     "verifies that by HIT-TESTING rather than by reading this rule". It did
+     not. A claim like that is worse than the gap it describes, because the
+     next person believes it.
+
+     Worse, reading the CSS can only ever make a target look BIGGER. It cannot
+     see a target made smaller — one covered by a scrim, an overlay, or a
+     sibling with a higher z-index. A 60px button nobody can press passed.
+
+     So this now asks the browser the question the rule is actually about:
+     starting at the centre, step outward one pixel at a time and keep going
+     while `elementFromPoint` still lands on the element or something inside
+     it. Pseudo-element hit areas are attributed to their originating element,
+     so they are counted; anything painted on top is not, so a stolen target
+     measures small and is reported. That is the tappable box, measured. */
   const TAP = 'button, a[href], input, select, textarea, [role="button"], [role="tab"], [role="switch"], [role="slider"], [onclick], [data-tap]';
+  const REACH = 40;                    // px probed each way: enough to clear 44
+  const ownedAt = (el, x, y) => {
+    if (x < 0 || y < 0 || x > window.innerWidth - 1 || y > window.innerHeight - 1) return false;
+    const t = document.elementFromPoint(x, y);
+    return !!t && (t === el || el.contains(t));
+  };
+  const span = (el, cx, cy, dx, dy) => {
+    let n = 0;
+    for (let i = 1; i <= REACH; i++) { if (!ownedAt(el, cx + dx * i, cy + dy * i)) break; n = i; }
+    return n;
+  };
   const targets = [];
   for (const el of live.querySelectorAll(TAP)) {
     const st = resolve(el);
@@ -230,28 +263,31 @@ export const ENUMERATE = function measureScreen(opts) {
     if (cs.pointerEvents === 'none' || el.disabled) continue;
     const r = el.getBoundingClientRect();
     if (r.width < 1 || r.height < 1) continue;
-    // A target may be enlarged by a transparent ::before/::after hit area.
-    const pseudoPad = ['::before', '::after'].reduce((acc, ps) => {
-      const p = getComputedStyle(el, ps);
-      if (!p || p.content === 'none' || p.position !== 'absolute') return acc;
-      const ins = ['top', 'right', 'bottom', 'left'].map((s) => parseFloat(p[s]));
-      if (ins.some((v) => v < 0)) {
-        return {
-          w: acc.w + Math.max(0, -Math.min(ins[1], 0)) + Math.max(0, -Math.min(ins[3], 0)),
-          h: acc.h + Math.max(0, -Math.min(ins[0], 0)) + Math.max(0, -Math.min(ins[2], 0)),
-        };
-      }
-      return acc;
-    }, { w: 0, h: 0 });
-    const w = r.width + pseudoPad.w, h = r.height + pseudoPad.h;
+    const cx = Math.round((r.left + r.right) / 2);
+    const cy = Math.round((r.top + r.bottom) / 2);
+    const cls = (typeof el.className === 'string' && el.className.trim())
+      ? el.className.trim().split(/\s+/)[0] : el.tagName.toLowerCase();
+
+    /* Its own centre does not belong to it: something is on top. Whatever the
+       box says, this control cannot be pressed. */
+    if (!ownedAt(el, cx, cy)) {
+      targets.push({ cls, w: 0, h: 0, box: `${Math.round(r.width)}x${Math.round(r.height)}`,
+        ok: false, blocked: true });
+      continue;
+    }
+    const w = span(el, cx, cy, -1, 0) + span(el, cx, cy, 1, 0) + 1;
+    const h = span(el, cx, cy, 0, -1) + span(el, cx, cy, 0, 1) + 1;
     targets.push({
-      cls: (typeof el.className === 'string' && el.className.trim())
-        ? el.className.trim().split(/\s+/)[0] : el.tagName.toLowerCase(),
-      w: Math.round(w), h: Math.round(h), ok: w >= 43.5 && h >= 43.5,
+      cls, w, h, box: `${Math.round(r.width)}x${Math.round(r.height)}`,
+      ok: w >= 43.5 && h >= 43.5, blocked: false,
     });
   }
-  const smallTargets = targets.filter((t) => !t.ok)
-    .map((t) => `${t.cls} ${t.w}x${t.h}`);
+  /* Both numbers are reported: the hit box is what the rule is about, the
+     border box is what a reader will see in the stylesheet, and when they
+     differ that difference is the expander doing its job. */
+  const smallTargets = targets.filter((t) => !t.ok).map((t) => (t.blocked
+    ? `${t.cls} BLOCKED (box ${t.box}, centre owned by something on top)`
+    : `${t.cls} hit ${t.w}x${t.h} (box ${t.box})`));
 
   /* ── Clipped text: a label the layout cut in half ──────────────────────── */
   const clipped = [];
@@ -287,6 +323,13 @@ export const ENUMERATE = function measureScreen(opts) {
     onBand3D: onBand,
     bands, split,
     targets: targets.length, smallTargets,
+    /* WHICH controls were actually on screen when the 44px gate ran. Without
+       this the gate can pass because the control was not rendered at all —
+       `.railbtn` only exists while `telemetry.actions` has an enabled entry,
+       so a QA state with no actions passes a rule it never tested. A gate that
+       cannot tell "compliant" from "absent" is the allowlist problem again,
+       one level up. */
+    targetList: targets.map((t) => `${t.cls} ${t.blocked ? 'BLOCKED' : t.w + 'x' + t.h}`),
     clipped: [...new Set(clipped)],
     dom,
   };

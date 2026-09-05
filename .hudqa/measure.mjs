@@ -115,13 +115,14 @@ if (ONLY !== 'nav') {
     const ovDetails = [...new Set(S.flatMap((s) => s.overlapList))];
     const onBand = [...new Set(S.flatMap((s) => s.onBand3D))];
     const small = [...new Set(S.flatMap((s) => s.smallTargets))];
+    const seen = [...new Set(S.flatMap((s) => s.targetList))].sort();
     const clipped = [...new Set(S.flatMap((s) => s.clipped))];
     const med = S[Math.floor(S.length / 2)];
 
     json.cases[m] = {
       painted: { max: Math.max(...S.map((s) => s.painted)), med: med.painted },
       overlaps: maxOv, overlapList: ovDetails,
-      onBand3D: onBand, smallTargets: small, clipped,
+      onBand3D: onBand, smallTargets: small, targetsSeen: seen, clipped,
       split: med.split, bands: med.bands, dom: med.dom,
     };
 
@@ -132,6 +133,9 @@ if (ONLY !== 'nav') {
     say(`  ON THE 3D   ${onBand.length}${onBand.length ? '  <-- GATE FAIL' : '  ok'}`);
     for (const d of onBand.slice(0, 8)) say(`                ${d}`);
     say(`  targets<44  ${small.length}${small.length ? '  <-- GATE FAIL' : '  ok'}  ${small.join(', ')}`);
+    /* Named, so a pass earned by a control simply not being on screen is
+       visible instead of silent. Hit boxes, from elementFromPoint. */
+    say(`  targets     ${seen.length ? seen.join(', ') : 'NONE ON SCREEN — the 44px gate tested nothing'}`);
     say(`  clipped     ${clipped.length}  ${clipped.slice(0, 4).join(' | ')}`);
     say(`  split       surface ${med.split?.surfPct} / section ${med.split?.sectPct}   (3D = ${med.split?.stagePct}% of stage)`);
     say(`  chrome      .sstrip ${med.dom.stripH}px  .sitedock ${med.dom.dockH}px  ctx.hud ${JSON.stringify(med.dom.hud)}`);
