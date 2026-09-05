@@ -3164,10 +3164,10 @@ export function createDrillSim(ctx = {}) {
              the first, so par walked a jet grouting lift through the ROTARY
              model — pricing the monitor as if it were re-cutting the soil it
              is being pulled back out of, at a rate set by ground it is not
-             touching. Measured: 18 m priced at 113 s against 258 s actually
-             run at the stage optimum, so `time` scored 0.000 on a pass played
-             correctly — exactly the way raise-boring scored zero before the
-             second pass was priced at all. */
+             touching. Measured: 18 m priced at 113 s against 469 s actually
+             run, so `time` scored 0.000 on a pass played correctly, exactly
+             the way raise-boring scored zero before the second pass was
+             priced at all. */
           stageLiftMaxMh: nz(rev.liftMaxMh, 0),
         });
         back += step / Math.max(0.2, r.rop);
@@ -6282,13 +6282,28 @@ export function createDrillSim(ctx = {}) {
     } else p.stallSec = Math.max(0, p.stallSec - dt * 0.5);
 
     if (p.passM >= S.target - 1e-6) {
-      p.quality01 = clamp(1
-        - 0.30 * (p.stalls / Math.max(1, p.stalls + 3))
-        - 0.25 * p.cutterWear
-        - 0.35 * clamp(p.pilotDeviation / T.straight.maxDev));
+      p.quality01 = pullQuality();
       complete();
     }
     return 0;                    // the contract depth does not grow on the way back
+  }
+
+  /**
+   * THE PULL PASS'S OWN SCORE — a reamer coming up a raise, a product pipe
+   * coming home along a bore.
+   *
+   * Pure over the pass's accumulators, so it is the same answer at any moment
+   * of the pass as at its end. That is the point: it used to be computed
+   * INLINE at `passM >= target` and nowhere else, so a run that stopped short
+   * was still carrying `quality01`'s initial 1 — see jetQuality().
+   */
+  function pullQuality() {
+    const p = S.prog;
+    if (!p) return 1;
+    return clamp(1
+      - 0.30 * (p.stalls / Math.max(1, p.stalls + 3))
+      - 0.25 * p.cutterWear
+      - 0.35 * clamp(p.pilotDeviation / T.straight.maxDev));
   }
 
   /**
@@ -6427,6 +6442,13 @@ export function createDrillSim(ctx = {}) {
   function jetQuality() {
     const p = S.prog, J = p && p.jet;
     if (!J) return 1;
+    /* NOTHING LIFTED IS NOT A PERFECT COLUMN, and the accumulators say so only
+       if they are asked properly. `worst01` starts at 1 and `shortSum` at 0 —
+       both mean "no neck seen yet", not "no neck" — so before the first metre
+       those two terms alone pay 0.60 for a column that does not exist. The
+       product of this method is the column. Until a metre has been lifted
+       there is none, and the mark for it is zero. */
+    if (!(p.passM > 0)) return 0;
     const m = Math.max(1e-3, p.passM);
     const mean = clamp(J.meanSum / m);
     const shortFrac = clamp(J.shortSum / m);
@@ -6542,6 +6564,19 @@ export function createDrillSim(ctx = {}) {
           } };
       }
       case 'twoStage': {
+        /* ── SCORED LIVE, NEVER OFF `p.quality01` ─────────────────────────
+           `quality01` is set at `passM >= target` and NOWHERE ELSE on either
+           pass, and it is initialised to 1. So every two-stage run that
+           stopped short reported a PERFECT mark on the axis carrying most of
+           its grade. Measured on jet grouting, whose `score.weights.quality`
+           is 0.50: a lift held under EN 12716's 250 bar for 14.56 of 18 m
+           built no column at all (`columnMean01: 0`) and scored `quality
+           1.000` for a run total of 0.740 — BEATING the correctly jetted run,
+           which built `columnMean01: 0.836` and totalled 0.693. The run that
+           delivered nothing outscored the run that delivered the job.
+
+           Both marks are pure functions of the pass's own accumulators, so
+           they are askable at any moment. They are asked here. */
         /* THE AXIS NAME IS WHAT IS BEING SCORED, and on a jetting lift that is
            not a pass, it is the COLUMN. 'PILOT'/'REAM' stay exactly as they
            were for the two pull-force passes — `results.js` prints this string
@@ -6555,7 +6590,7 @@ export function createDrillSim(ctx = {}) {
         const js = S.m.stages[1] && S.m.stages[1].jet;
         if (J && js) {
           const mm = Math.max(1e-3, p.passM);
-          return { score: clamp(p.quality01), label: S.stage === 0 ? 'PRE-DRILL' : 'COLUMN',
+          return { score: clamp(jetQuality()), label: S.stage === 0 ? 'PRE-DRILL' : 'COLUMN',
             detail: {
               stage: S.stage, passM: +p.passM.toFixed(2),
               /* CONTINUITY, and the neck that decides it. Both are indices,
@@ -6580,7 +6615,7 @@ export function createDrillSim(ctx = {}) {
               needs: 'column diameter by soil, withdrawal rate and monitor rpm are UNVERIFIED (research/05 §A12)',
             } };
         }
-        return { score: clamp(p.quality01), label,
+        return { score: clamp(pullQuality()), label,
           detail: { stage: S.stage, passM: +p.passM.toFixed(2),
                     stalls: p.stalls, cutterWear01: +p.cutterWear.toFixed(3),
                     cutterChanges: p.cutterChanges,
