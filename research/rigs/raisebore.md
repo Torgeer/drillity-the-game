@@ -3,6 +3,7 @@
 status: COMPLETE for the material available. Raise boring is the worst-sourced
 machine in this library and §8 is long on purpose — see the warning at the head
 of §3. Nothing marked NOT SOURCED may be invented.
+
 Subject: game rig id `raisebore`. Builder: `C:\Users\henri\Downloads\drillity-the-game\src\rig\rigFactory.js` (`buildRaisebore`, ~line 3145).
 Purpose: GEOMETRY and MATERIALS reference for the modeller. **No real manufacturer name or model designation may become a product name in the game (DOMAIN.md §10).** Use the shapes, not the badge.
 

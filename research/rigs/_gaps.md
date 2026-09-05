@@ -156,6 +156,7 @@ They are listed so that "we looked" is never assumed.
   `2025_Productinfo_RS-WS_EN.pdf`. Short files. **Cheapest large win available.**
 - **Five water-powered DTH datasheets**: `13.1`–`13.5 BWH-MWH-wasserbetriebener-Imlochhammer-WAI35/40/50/60/80-EN`.
   **Nothing in the library covers water-powered DTH.**
+- **Four Chinese casing drawings**, the only likely source anywhere for the **upset casing end** (墩头) that `tools-overburden.md` could not close: `133墩头打击套管 STR133001-Model.pdf` — **the highest-value unread file in that set** — plus `101.6套管双母扣 STR102002.pdf`, `152套管公母扣2025.3.12-Model.pdf` and `180打击套管 STR180001-Model.pdf`. **A dimensioned drawing is language-independent** — do not skip these because the filename is Chinese.
 - The **~300 remaining exploded views** in
   `Kelly-Spare_Parts_and_Wear_Parts_DE_EN_905_835_1_2.pdf` — one per Kelly section,
   every diameter from Ø254 to Ø559. Only one page has been read. Render any
@@ -229,6 +230,10 @@ as one grade weaker than their reference length suggests.
 `tunnel-jumbo` — its only image is a **rail-mounted** unit, which is the wrong
 architecture for a boom jumbo.
 
+### 4.3b The tool families are photographed unevenly, and one is not photographed at all
+
+`_photos.md` records **31 overburden images**, which makes that family the best-photographed subject in the library — but `tools-overburden.md` reports that **not one of them shows a casing crown, ring bit, pilot head, lost bit, ring shoe or eccentric as a finished object**. Its §6 wear description is therefore **reasoned from geometry and materials, not observed**. Three stock photographs would close that section entirely, and it is the family the owner actually sells — so it is the one where a wrong wear pattern would be noticed first.
+
 ### 4.4 What one photo trip would fix, in priority order
 
 1. **Anything underground** — closes four ids at once (§4.1).
@@ -239,6 +244,7 @@ architecture for a boom jumbo.
    period engraving.
 5. **A core rig and an RC rig working** — two substantial references with no
    photograph behind them.
+6. **Overburden tooling as finished objects** — a casing crown, a ring bit and an eccentric, new and worn. Cheap, and it is the owner's own product line.
 
 ### 4.5 Two cautions carried from `_photos.md`
 
