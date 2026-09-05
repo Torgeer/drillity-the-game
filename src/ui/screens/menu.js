@@ -193,7 +193,9 @@ export function createMenuScreen(app) {
     lvlLabel.firstChild.textContent = String(lvl);
     /* Progress INSIDE the level, not lifetime XP over one level's increment —
        that ratio held this ring at a full circle from level 2 onward. */
-    ring.setValue(app.xpProgress(p.xp, lvl).frac);
+    // `frac` is null when no system owns an XP curve: an empty ring, not a
+    // full one drawn against a denominator the shell used to invent.
+    ring.setValue(app.xpProgress(p.xp, lvl).frac ?? 0);
     moneyRoll.to(p.money || 0);
 
     const rig = state.garage?.rigId;

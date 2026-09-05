@@ -412,13 +412,22 @@ export function createCareerScreen(app) {
        1 during level 2 and the bar is pinned full for the rest of the game,
        while the caption read "48,210 / 640 XP". `app.xpProgress` asks the
        curve in game/data.js the question this bar is actually about. */
+    /* `frac` and `need` come back null when no system owns an XP curve — the
+       shell stopped inventing one (app.xpForLevel). An empty bar and the XP
+       total on its own, rather than a fraction of an unpublished denominator
+       and a caption naming it. */
     const xpp = app.xpProgress(p.xp, lvl);
-    const bar = C.Bar({ kind: 'amber', value: xpp.frac });
+    const bar = C.Bar({ kind: 'amber', value: xpp.frac ?? 0 });
     bar.el.classList.add('bar--tall', 'bar--smooth');
+    if (xpp.frac === null) { bar.el.removeAttribute('role'); bar.el.setAttribute('aria-hidden', 'true'); }
     wrap.appendChild(C.SectionTitle('Progress'));
     wrap.appendChild(C.h('div.panel.panel--pad', C.h('div.panel__body',
       C.h('div.rxp__head', C.h('span.label', { text: `LVL ${lvl}` }),
-        C.h('span.label', { text: `${Math.round(xpp.into)} / ${Math.round(xpp.need)} XP` })),
+        C.h('span.label', {
+          text: xpp.need === null
+            ? `${Math.round(xpp.into)} XP`
+            : `${Math.round(xpp.into)} / ${Math.round(xpp.need)} XP`,
+        })),
       bar.el,
       C.h('dl.specs', { style: { 'margin-top': '12px' } },
         C.SpecRow('Metres drilled', Math.round(p.stats?.metresDrilled || 0).toLocaleString('en-US') + ' m'),

@@ -100,16 +100,23 @@ export function createResultsScreen(app) {
   const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
   /* ── Static frame ─────────────────────────────────────────────────────── */
-  const gradeLetter = C.h('span.grade__l', { text: 'B' });
-  const gradeEl = C.h('div.grade', { role: 'img', 'aria-label': 'Grade B' }, C.h('i.grade__ring'), gradeLetter);
+  /* '—', not 'B'. The frame is authored before any hole exists, so whatever
+     stands here is a grade the screen is asserting on no evidence at all —
+     and it is live in the DOM until the 0.06 s stamp fires. */
+  const gradeLetter = C.h('span.grade__l', { text: '—' });
+  const gradeEl = C.h('div.grade', { role: 'img', 'aria-label': 'Grade not recorded' }, C.h('i.grade__ring'), gradeLetter);
   const titleEl = C.h('h1.results__title', { text: 'Hole complete' });
   const subEl = C.h('p.results__eyebrow', { text: 'Contract closed' });
   /* The grade never stands alone: this line carries the composite it came from
      and what the next grade up would have cost. */
   const verdictEl = C.h('p.results__eyebrow', { text: '' });
 
-  const mDepth = metric('0.0 m', 'Drilled');
-  const mTime = metric('00:00', 'On tools');
+  /* Both open on a dash. '0.0 m' and '00:00' are the two readings a hole
+     that went nowhere would produce, so as placeholders they are
+     indistinguishable from a measurement — and they are on screen until the
+     0.34 s stage. */
+  const mDepth = metric('—', 'Drilled');
+  const mTime = metric('—', 'On tools');
   /* `metric('0 m/h', 'Avg ROP')` used to be the third tile here, and it was
      the last invented number left on this screen after 75e2f27.
 
@@ -128,15 +135,17 @@ export function createResultsScreen(app) {
      downhole hours — on the payload. Until it does, two tiles. */
   const metricsEl = C.h('div.rmetrics.reveal', mDepth.el, mTime.el);
 
-  const moneyNum = C.h('div.rmoney__v', { text: '€0' });
+  /* '—', not '€0'. A zero in the payout slot is a claim about the hole. */
+  const moneyNum = C.h('div.rmoney__v', { text: '—' });
   const moneyRoll = C.NumberRoll(moneyNum, { value: 0, duration: 0.8, format: (v) => fmtMoney(v) });
   const moneyKey = C.h('p.rmoney__k', { text: 'Payout' });
   const moneyEl = C.h('div.rmoney.reveal', moneyNum, moneyKey);
 
   const xpBar = C.Bar({ kind: 'amber', label: 'Experience to next level' });
   xpBar.el.classList.add('bar--tall', 'bar--smooth');
-  const xpFrom = C.h('span.label', { text: 'LVL 1' });
-  const xpGain = C.h('span.label', { text: '+0 XP' });
+  // Blank, not 'LVL 1' / '+0 XP': both are real values a real player can hold.
+  const xpFrom = C.h('span.label', { text: '' });
+  const xpGain = C.h('span.label', { text: '' });
   const levelUpSlot = C.h('div');
   const xpEl = C.h('div.rxp.reveal',
     C.h('div.rxp__head', xpFrom, xpGain),
@@ -176,8 +185,12 @@ export function createResultsScreen(app) {
   const wearAfter = C.Bar({ kind: 'warning', label: 'Bit life after' });
   wearBefore.el.classList.add('bar--tall', 'bar--smooth');
   wearAfter.el.classList.add('bar--tall', 'bar--smooth');
-  const wearBeforeV = C.h('span.rmetric__k', { text: '100% life' });
-  const wearAfterV = C.h('span.rmetric__k', { text: '100% life' });
+  /* '—', not '100% life'. These are only written when a before/after was
+     actually recorded, and  is the one thing keeping the
+     literals off screen — one attribute away from printing a fresh crown
+     over a hole that ground one out. */
+  const wearBeforeV = C.h('span.rmetric__k', { text: '—' });
+  const wearAfterV = C.h('span.rmetric__k', { text: '—' });
   const wearBitName = C.h('p.icard__blurb', { text: '—' });
   const wearNote = C.h('p.cdetail__brief', {
     style: { 'font-size': 'var(--t-2xs)', 'margin-top': 'var(--s-3)' }, text: '',
@@ -307,7 +320,14 @@ export function createResultsScreen(app) {
     const s = ledger[0];
     if (!s || typeof s.net !== 'number') return null;
     if (contractId && s.contractId && s.contractId !== contractId) return null;
-    // A stale entry from an earlier hole would misreport this one.
+    /* A stale entry from an earlier hole would misreport this one. With
+       `depth` now null rather than 0 when nothing published one, this check
+       cannot run — and a check that cannot run has not passed, so the
+       settlement is refused instead of accepted unverified. That is the
+       whole point of the guard: it exists for the case where the deferral in
+       shell.js is removed, and that is exactly the case where the payload is
+       incomplete. */
+    if (depth === null) return null;
     if (depth > 0 && typeof s.depth === 'number'
       && Math.abs(s.depth - depth) > Math.max(1, depth * 0.05)) return null;
     return s;
@@ -324,7 +344,18 @@ export function createResultsScreen(app) {
     const c = raw ? app.normalizeContract(raw) : null;
     const d = state.drill || {};
 
-    const depth = r.depth ?? d.depth ?? 0;
+    /* `?? 0` USED TO CLOSE THIS CHAIN, and it survived the pass that removed
+       every other fallback on the screen — because a hero tile reading
+       "0.0 m" looks like a hole that made no progress rather than like a
+       measurement nobody took. It also fed `applyRewards`, quietly adding
+       zero metres to a career stat, and the `lastSettlement` guard below,
+       where `depth > 0` then skipped the staleness check entirely and let an
+       EARLIER hole's settlement validate against this one. `null` and a dash:
+       same rule as `timeSec` two lines down, which was fixed and this was
+       not. */
+    const depth = Number.isFinite(r.depth) ? r.depth
+      : Number.isFinite(d.depth) ? d.depth
+        : null;
 
     /* HOLE_COMPLETE carries timeSec, and sim/drilling.js mirrors the same run
        clock onto state.drill.timeSec. Those are the only two places the run's
@@ -507,15 +538,36 @@ export function createResultsScreen(app) {
     let hours = null;
 
     if (settle) {
-      payout = Math.round(settle.revenue || 0);
-      costs = Math.round(settle.costs?.total || 0);
-      net = Math.round(settle.net ?? (payout - costs));
-      xp = Math.round(settle.xp || 0);
+      /* `|| 0` AND `?? (payout - costs)` STOOD IN ALL FOUR OF THESE.
+         A settlement missing its revenue printed "Gross payout €0"; one
+         missing its costs object printed "Running costs €0" and then a net
+         that equalled the gross — a coherent, plausible, entirely invented
+         ledger. That is the same defect this screen was cleaned once to
+         remove, surviving in the half of it no harness renders. A zero is
+         not a blank: it is the claim "this hole earned nothing", and nobody
+         would ever have gone back to check it. */
+      const num = (v) => (Number.isFinite(v) ? Math.round(v) : null);
+      payout = num(settle.revenue);
+      costs = num(settle.costs?.total);
+      /* The subtraction survives, because gross and costs are both printed
+         and a player can check it by eye. It is available only when BOTH
+         are: a net derived from a missing half is the same invention with an
+         extra step in front of it. */
+      net = num(settle.net) ?? (payout !== null && costs !== null ? payout - costs : null);
+      xp = num(settle.xp);
       hours = Number.isFinite(settle.hours) ? settle.hours : null;
       /* Each line is rounded on its own and any line rounding to zero is
          dropped, so the visible rows can sum to less than the subtotal under
-         them. The dropped remainder is carried as one honest line rather than
-         left to the reader to notice. */
+         them. The remainder is carried as one line rather than left to the
+         reader to notice.
+
+         SIGNED, and `!== 0` rather than `> 0`. Eleven independent roundings
+         drift in both directions, so `rest` can be negative — rows summing
+         to MORE than the subtotal above them — and that case was silently
+         dropped, which is the discrepancy the line exists to close running
+         the other way. The caption no longer says "lines under €1 each"
+         either: it is those lines PLUS the rounding drift, and naming only
+         half of what a number contains is how a label stops being true. */
       let shown = 0;
       for (const [key, name, note] of COST_LINES) {
         const v = settle.costs?.[key];
@@ -523,8 +575,8 @@ export function createResultsScreen(app) {
         items.push({ name, qty: note, cost: Math.round(v) });
         shown += Math.round(v);
       }
-      const rest = costs - shown;
-      if (rest > 0) items.push({ name: 'Other running costs', qty: 'lines under €1 each', cost: rest });
+      const rest = costs === null ? 0 : costs - shown;
+      if (rest !== 0) items.push({ name: 'Other running costs', qty: 'small lines and rounding', cost: rest });
     }
     /* THE ELSE BRANCH IS GONE, AND IT WAS THE LARGEST FALSEHOOD ON THIS
        SCREEN. It read, in full: a grade bonus table {D:0, C:.05, B:.12,
@@ -607,7 +659,8 @@ export function createResultsScreen(app) {
     const p = state.player;
     if (!p) return;
     p.stats = p.stats || {};
-    p.stats.metresDrilled = (p.stats.metresDrilled || 0) + sm.depth;
+    // A hole whose depth nobody published adds nothing to a career total.
+    if (sm.depth !== null) p.stats.metresDrilled = (p.stats.metresDrilled || 0) + sm.depth;
     p.stats.holesDone = (p.stats.holesDone || 0) + 1;
     if (sm.grade === 'S') p.stats.perfectRuns = (p.stats.perfectRuns || 0) + 1;
   }
@@ -639,6 +692,25 @@ export function createResultsScreen(app) {
       moneyRoll.setInstant(true); moneyRoll.to(0); moneyRoll.setInstant(false);
       xpBar.setValue(0);
       wearBefore.setValue(0); wearAfter.setValue(0);
+      /* THE REST OF THE STATIC FRAME, RESET FOR THE SAME REASON AS
+         `is-unmeasured` ABOVE. ui/shell.js caches this screen instance and
+         re-mounts it, so anything the constructor wrote and the timeline does
+         not always overwrite is the PREVIOUS hole's answer sitting on screen
+         under this hole's heading — or, on the first run, the literal the
+         file was authored with. The stamp opened as a hard-coded 'B'; the
+         payout as '€0'; the two wear captions as '100% life', one attribute
+         away from printing a fresh crown over a hole that ground one out.
+         Each is now blanked here and written only from something measured. */
+      gradeLetter.textContent = '—';
+      gradeEl.setAttribute('aria-label', 'Grade not recorded');
+      moneyNum.textContent = '—';
+      moneyKey.textContent = '';
+      xpFrom.textContent = '';
+      xpGain.textContent = '';
+      wearBitName.textContent = '—';
+      wearNote.textContent = '';
+      wearBeforeV.textContent = '—';
+      wearAfterV.textContent = '—';
       for (const k of Object.keys(crits)) {
         crits[k].bar.setValue(0);
         crits[k].v.textContent = '—';
@@ -656,7 +728,11 @@ export function createResultsScreen(app) {
          this screen from a microtask precisely so that it has), so the caption
          named one level and printed another. `xpBefore` and `need0` went with
          it — see the XP bar. */
-      const lvlNow = state.player?.level || 1;
+      /* `|| 1` used to close this, so a state with no player on it printed
+         "LVL 1 · Trainee" — a rank, in the caption slot, for a player whose
+         level nothing had recorded. Level 1 is a real level a real player can
+         be at, which is what makes the default undetectable. */
+      const lvlNow = Number.isFinite(state.player?.level) ? state.player.level : null;
       applyRewards(sm);
 
       timeline = [];
@@ -679,8 +755,29 @@ export function createResultsScreen(app) {
            came from — quoting a locally re-derived number next to a grade
            awarded elsewhere is how a screen ends up contradicting itself. */
         if (!sm.compositeKnown) {
+          /* 'Graded on speed, straightness, tool care and safety' used to
+             stand here, and it was false on every method in the game.
+
+             The composite is SEVEN axes, not four: sim/drilling.js:725
+             weights time .24, groove .26, bit .14, straight .14, hazard .12,
+             safety .10, quality 0. The four this screen tiles are 0.62 of the
+             letter on a plain rotary — and on the six quality-weighted
+             methods it is far worse: the jumbo (:1297) weights quality at
+             .62 and the four printed tiles at 0.22. A player could read four
+             green tiles under a D and the frame would not reconcile.
+
+             It was also printed in the one branch where the screen knows
+             LEAST: no composite was published at all, so the letter came from
+             a producer this screen cannot see into. Naming a formula for a
+             number you did not receive is the confident half of a guess.
+             Say what is actually true of this branch instead.
+
+             CROSS-FILE: `breakdown.weights` and `breakdown.quality` are both
+             on the payload already (drilling.js:7877-7878) and both ignored
+             here. Rendering the real axes is the fix; this is the honest
+             holding line until someone does it. */
           verdictEl.textContent = sm.grade
-            ? 'Graded on speed, straightness, tool care and safety'
+            ? 'The score behind this grade was not published'
             : 'This run was not scored';
         } else if (sm.nextGrade && sm.nextAt !== null) {
           verdictEl.textContent = `Score ${pct(sm.composite)} · ${sm.nextGrade} starts at ${pct(sm.nextAt)}`;
@@ -690,17 +787,23 @@ export function createResultsScreen(app) {
       });
 
       at(0.34 * S, () => {
-        mDepth.v.textContent = `${sm.depth.toFixed(1)} m`;
+        mDepth.v.textContent = sm.depth === null ? '—' : `${sm.depth.toFixed(1)} m`;
         mTime.v.textContent = sm.timeSec === null ? '—' : fmtClock(sm.timeSec);
         metricsEl.classList.add('is-in');
       });
 
       at(0.50 * S, () => {
         moneyEl.classList.add('is-in');
-        if (sm.settled) {
+        if (sm.settled && sm.net !== null) {
           moneyKey.textContent = 'Net paid';
           moneyRoll.to(sm.net);
           app.haptic('success');
+        } else if (sm.settled) {
+          /* Settled, but the settlement did not carry a net and neither half
+             of the subtraction was available either. Rolling a null through
+             NumberRoll would have printed €0 and called it the payout. */
+          moneyNum.textContent = '—';
+          moneyKey.textContent = 'The settlement recorded no payout';
         } else {
           /* Nothing was booked, so nothing was paid. The headline used to
              carry an estimate here under the word "Payout"; a dash and the
@@ -712,7 +815,7 @@ export function createResultsScreen(app) {
 
       at(0.68 * S, () => {
         xpEl.classList.add('is-in');
-        xpFrom.textContent = roleLabel(lvlNow, `LVL ${lvlNow}`, ' · ');
+        xpFrom.textContent = lvlNow === null ? '' : roleLabel(lvlNow, `LVL ${lvlNow}`, ' · ');
         xpGain.textContent = sm.xp === null ? '' : `+${sm.xp} XP`;
         /* `clamp((xpBefore + sm.xp) / app.xpForLevel(level))` used to stand
            here and it was wrong three ways at once: `state.player.xp` is
@@ -723,7 +826,10 @@ export function createResultsScreen(app) {
            read at mount, by which point progression had already booked it, so
            it was never "before" anything. One call to the curve's own
            function, on the value the player actually holds. */
-        xpBar.setValue(clamp(app.xpProgress(state.player?.xp, lvlNow).frac, 0, 1));
+        /* No level, no curve to place the player on — the bar draws nothing
+           rather than a fraction of a denominator nobody owns. */
+        const prog = lvlNow === null ? null : app.xpProgress(state.player?.xp, lvlNow);
+        xpBar.setValue(prog && Number.isFinite(prog.frac) ? clamp(prog.frac, 0, 1) : 0);
       });
 
       // GAMEDESIGN §2.4 grades on speed, straightness, tool care and safety.
@@ -741,11 +847,26 @@ export function createResultsScreen(app) {
             t.v.textContent = '—';
             t.bar.setValue(0);
             t.bar.setKind('steel');   // a declared kind; at value 0 only the track shows
+            /* AND IT SAYS THE SAME THING TO A SCREEN READER.
+               `C.Bar` is `role="progressbar"` and `setValue(0)` writes
+               `aria-valuenow="0"` (components.js:720), so a tile reading
+               "—  not measured on this run" was announcing "Speed, 0 percent".
+               That is the invented number this screen deleted from the visual
+               layer, still asserted on the accessibility one — to the players
+               least able to cross-check it against the picture. Without the
+               role it is a plain element and announces nothing, which is what
+               "not measured" should sound like. */
+            t.bar.el.removeAttribute('role');
+            t.bar.el.removeAttribute('aria-valuenow');
+            t.bar.el.setAttribute('aria-hidden', 'true');
             t.ev.textContent = 'not measured on this run';
             t.el.classList.add('is-unmeasured');
             continue;
           }
           t.el.classList.remove('is-unmeasured');
+          // Restored: ui/shell.js caches and re-mounts this screen instance.
+          t.bar.el.setAttribute('role', 'progressbar');
+          t.bar.el.removeAttribute('aria-hidden');
           t.v.textContent = pct(v);
           t.bar.setValue(v);
           t.bar.setKind(v >= 0.78 ? 'success' : v >= 0.44 ? 'amber' : 'danger');
@@ -763,10 +884,26 @@ export function createResultsScreen(app) {
         const fin = (x) => (typeof x === 'number' && Number.isFinite(x) ? x : null);
         const gUp = fin(sm.groove?.uptime01);
         if (gUp !== null) {
-          const combo = fin(sm.groove.bestCombo);
-          scoreList.appendChild(C.SpecRow('Groove uptime',
-            `${pct(gUp)} in the band`
-            + (combo !== null && combo > 1 ? ` · best ×${combo.toFixed(2)}` : '')));
+          /* `· best ×1.74` USED TO HANG OFF THIS ROW AND IT WAS NOT A BEST.
+             Its source is `groove.bestCombo`, and sim/drilling.js:7880 fills
+             that from `D.combo` — the DAMPED DISPLAY value, written every
+             frame by `D.combo = damp(D.combo, S.combo, f, dt)` (:7960). What
+             the payload carries is therefore the smoothed instantaneous
+             multiplier on the last frame of the run.
+
+             It is not a maximum even by accident: `S.combo` is driven by
+             `S.greenBandTime`, which DECAYS out of the band (:3669), is
+             scaled down on a missed rod (:7370, :7394) and is zeroed outright
+             in three places (:6165, :6943, :7439). A player who held a ×2.4
+             for the whole hole and dropped the last rod was shown the number
+             after the drop, under the word "best".
+
+             Nothing in the sim tracks a peak, so there is nothing here to
+             print and the word was the whole invention. CROSS-FILE: for the
+             row to come back, sim/drilling.js needs a real
+             `S.bestCombo = Math.max(S.bestCombo, S.combo)` in step() — or the
+             field renaming to `comboAtFinish`, which is what it actually is. */
+          scoreList.appendChild(C.SpecRow('Groove uptime', `${pct(gUp)} in the band`));
         }
         const hSeen = fin(sm.hazards?.seen);
         const hClean = fin(sm.hazards?.clean);
@@ -819,8 +956,15 @@ export function createResultsScreen(app) {
         // The running-costs subtotal used to arrive as a toast on top of the
         // grade medallion. It belongs here, above the payout, so the headline
         // number is unambiguously net.
-        consumeList.appendChild(ledgerRow('Running costs', plural(sm.items.length, 'line'), '−' + fmtMoney(sm.costs)));
-        consumeList.appendChild(C.h('div.ritem',
+        /* A ROW WITH NOTHING BEHIND IT IS NOT DRAWN. These three used to be
+           unconditional over `|| 0`, so a settlement missing any of the three
+           figures printed "€0" in the row's own typeface — indistinguishable
+           from a hole that genuinely cost nothing, earned nothing or paid
+           nothing. Suppressing the row states the gap; a zero hides it. */
+        if (sm.costs !== null) {
+          consumeList.appendChild(ledgerRow('Running costs', plural(sm.items.length, 'line'), '−' + fmtMoney(sm.costs)));
+        }
+        if (sm.payout !== null) consumeList.appendChild(C.h('div.ritem',
           C.h('span.ritem__n', { text: 'Gross payout' }),
           /* THE GRADE THE MONEY WAS PRICED AT, which is the settlement's, not
              the stamp's. 75e2f27 made the stamp the band the composite falls
@@ -832,7 +976,7 @@ export function createResultsScreen(app) {
           C.h('span.ritem__q', { text: sm.paidGrade ? `grade ${sm.paidGrade}` : 'ungraded' }),
           C.h('span.ritem__c.is-pos', { text: fmtMoney(sm.payout) }),
         ));
-        consumeList.appendChild(C.h('div.ritem.ritem--total',
+        if (sm.net !== null) consumeList.appendChild(C.h('div.ritem.ritem--total',
           C.h('span.ritem__n', { text: 'Net paid' }),
           C.h('span.ritem__q', { text: sm.hours > 0 ? `${sm.hours.toFixed(1)} h booked` : '' }),
           C.h('span.ritem__c.is-net', { text: fmtMoney(sm.net) }),
@@ -859,7 +1003,17 @@ export function createResultsScreen(app) {
            unit — bolts, piles, tunnel advance — which on a bolter differs by
            two orders of magnitude. Two quantities, one preposition. */
         const changed = sm.bitsChanged ? plural(sm.bitsChanged, 'crown') + ' changed downhole' : null;
-        const used = sm.wearUsed === null ? null : `${pct(sm.wearUsed)} of the crown consumed`;
+        /* `pct()` CLAMPS TO 0..1 AND THIS QUANTITY DOES NOT.
+           progression.applyWear() runs `while (after <= 0) { consumed += 1;
+           after += 1; }` — that loop exists precisely because a hole can eat
+           more than one crown — so `wear` above 1 is ordinary, and printing
+           it through `pct` capped a 1.7-crown hole at "100 % of the crown
+           consumed". A ceiling that silently swallows the interesting cases
+           is the clamp inversion this screen already deleted once, in the
+           straightness ratio. Over a whole crown the honest unit is crowns. */
+        const used = sm.wearUsed === null ? null
+          : sm.wearUsed > 1 ? `${sm.wearUsed.toFixed(2)} crowns consumed`
+            : `${pct(sm.wearUsed)} of the crown consumed`;
         wearNote.textContent = [changed, used].filter(Boolean).join(' · ')
           || (measured ? '' : 'Wear on this run was not recorded.');
         for (const w of sm.wornOther) {

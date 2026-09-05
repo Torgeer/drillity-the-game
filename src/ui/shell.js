@@ -461,11 +461,23 @@ export function createUI(ctx) {
     certs: () => CAT.allCerts(),
     certById: (id) => CAT.certInfo(id),
 
-    /** XP needed for the next level. Progression / game data own the real curve. */
-    xpForLevel: (lvl) =>
-      ctx.progression?.xpForLevel?.(lvl)
-      ?? ctx.game?.xpToNext?.(lvl)
-      ?? Math.round(120 * Math.pow(lvl, 1.35)),
+    /**
+     * XP needed for the next level, or `null` when no system owns a curve.
+     *
+     * `?? Math.round(120 * Math.pow(lvl, 1.35))` used to close this chain,
+     * and it was an INVENTED CURVE: two constants sourced from nothing,
+     * quietly becoming the denominator of every XP bar and ring in the game
+     * whenever progression and game data were both absent. The bars did not
+     * decline to draw — they drew a confident fraction of a number no system
+     * owns, in the same typeface as a real one, on three screens at once.
+     *
+     * A UI shell does not get to author a progression curve. Null, and the
+     * bars draw nothing.
+     */
+    xpForLevel: (lvl) => {
+      const v = ctx.progression?.xpForLevel?.(lvl) ?? ctx.game?.xpToNext?.(lvl);
+      return Number.isFinite(v) && v > 0 ? v : null;
+    },
 
     /**
      * Progress INSIDE the current level — `{ into, need, frac }` — for every
@@ -491,7 +503,12 @@ export function createUI(ctx) {
       const v = Math.max(0, Number(xp) || 0);
       const f = ctx.game?.xpProgress;
       if (ctx.progression && typeof f === 'function') return f(v);
-      const need = app.xpForLevel(lvl || 1) || 1;
+      /* `|| 1` stood on the `need` below, so with no curve every bar in the
+         game divided the player's XP by ONE and pinned itself full. `frac`
+         is null when there is no denominator, and the three callers draw
+         nothing rather than a full bar. */
+      const need = app.xpForLevel(lvl || 1);
+      if (need === null) return { level: lvl || 1, into: v, need: null, frac: null };
       return { level: lvl || 1, into: v, need, frac: Math.min(1, v / need) };
     },
 
