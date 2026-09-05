@@ -431,18 +431,58 @@ claims perfect knowledge of ground above the crown.
 
 - **`m07-core` is over its draw-call budget** — surface 82 against 80. Only
   visible once the harness started grading **warm** numbers.
-- **Five models sit below y=0**, exactly measured: `oil-derrick` −1.090,
-  `piling-leader` −0.830, `cfa-rig` −0.660, `hdd-rig` −0.439, `raisebore`
-  −0.350. `rig.py` puts the origin at the slew centre at ground level. Some of
-  these are correct (a raise borer hangs a string below its own floor); decide
-  each on the machine's own facts and **comment the ones that are right** so
-  nobody re-opens them.
-- **Three machines have no first-hand dimensional source at all** —
-  `foundation_bg` (its 27.100 m figure has been quoted in this project as if
-  sourced; **it is not**), `crawler_th` (100 % `NOT SOURCED` on dimensions), and
-  `rc_rig` (its reference states no dimensioned GA of any RC rig was found).
-  `rc_rig` is also **171,908 triangles — 9× `core_rig`**, from bevels inside
-  long arrays.
+- ~~**Five models sit below y=0**~~ — **DONE.** One was wrong and is fixed;
+  four were right and now say so at the node.
+  **`oil-derrick` was the wrong one: −1.090 → −0.300.** Its two skid-beam
+  layers — the only things the rig stands on — ran from −1.090 to 0.000,
+  because the file used z = 0 as two datums at once: `FLOOR_Z` is sourced as
+  "drill floor height above MAIN DECK" and measured from z = 0, while
+  `sub-shoe` ("base pad on the skid beam") also sat at z = 0. The beams now
+  stand on the deck and the columns start on top of them, so the sourced 28 ft
+  is preserved and the unsourced beam depth is what moved. The residual
+  −0.300 is the well conductor passing through the deck.
+  The other four are **correct and commented**: `piling-leader` −0.830 is the
+  driven pile (its own statics stop at −0.175), `cfa-rig` −0.660 is the auger
+  tip on `pivot:spindle` (statics stop at −0.100), `hdd-rig` −0.439 is the
+  string entering the ground 1.87 m ahead of the beam nose (statics stop at
+  −0.123), `raisebore` −0.350 is the pilot string through the collar. Each
+  carries a note at the node saying why, and not to lift it.
+- ~~**Three machines have no first-hand dimensional source at all**~~ —
+  **DONE, and two of the three claims were already stale when written.**
+  - **`foundation_bg`: 27.100 m IS sourced.** It is printed on p.16 of the
+    brochure the builder already cited, in the upgraded-version GA, beside
+    24110 · 19640 · Stroke 10000 · 1400 · 4340-5840 · R 4640 · 3000 ·
+    BK 420/470/4/48. The file's decode is printed on the same drawing:
+    4 460 + 19 640 + 1 500 = 25 600 and
+    4 460 + 19 640 + 3 000 = 27 100, side by side. What the re-read DID
+    find was a width fault: **5.065 m against a published 3 500–4 700**, caused
+    by a track guard 170 mm proud of the shoe and a cab whose **wing mirror**
+    was the widest object on the machine. Now **4.700 m exactly**.
+  - **`crawler_th` was never 100 % unsourced** — its header already carried
+    four datasheets. A fifth, Epiroc PowerROC T35 MkII 9868 0035 01e, has a
+    dimensioned GA on p.4 with L1/L2, W1, H1/H2, h1/h2 and l1/l2 printed beside
+    their table, which also closes the **boom angles** that left this class's
+    defining motion undeclared. Width 2.765 → 2.603, every static now inside
+    ±1.231; the residual is the fold ram of a boom swung into its working
+    pose, which is the class's defining proportion and is documented as such.
+  - **`rc_rig`: a dimensioned GA of a tracked RC rig does exist** — two, in
+    fact (Epiroc Explorac 235 p.7 and Explorac 100 p.6/p.7), both now cited
+    with URLs. The 235's drawing settles `rc-rig.md` §9.A: its mast really is
+    an open lattice. Triangles **171,908 → 84,260** and 11.73 MB → 5.43 MB,
+    all of it bevel inside arrays (480 track shoes/grousers and 332 feed-chain
+    links at 108 triangles each instead of 12), with bounds and draw calls
+    unchanged. Measured per primitive: the **machine** is inside x = ±1.561;
+    the 7.883 m bounding box is the cyclone stand and bag rows, which is a
+    wrong-NODE problem needing a runtime fix, not a wrong-size one.
+
+  **The tool that unblocked all three, because it will unblock the next one
+  too:** `crawler-th.md` §8 concluded that dimensioned drawings could not be
+  read on this machine because poppler is missing. Poppler is missing — but
+  **PyMuPDF is installed**, and
+  `d[9].get_pixmap(matrix=pymupdf.Matrix(3, 3)).save('p10.png')` renders any
+  page of any catalogue in this library legibly. Every drawing quoted above was
+  read that way. **Reach for it before writing another `NOT SOURCED` entry
+  about a drawing.**
 - **`data.js` and the model disagree about what `cable-percussion` IS.** The data
   describes an American truck spudder (9.4 t, 82 kW, `depthCapacity: 250`,
   walking beam, three lines off one winch). The model and its reference describe
