@@ -449,6 +449,25 @@ has a double-weighted domain-truth axis and a measured HUD-restraint gate.
 
 ### Found 2026-09-05, all measured, none fixed
 
+**`box()` in `blender/lib/rig.py` returns boxes at HALF the size asked for, and
+every machine is built on it.** `primitive_cube_add(size=1)` makes a cube of
+EDGE 1 (-0.5..+0.5), and the next line sets `scale = size/2`, so the edge ends
+up `size/2`. Measured in Blender 5.2.1: `box((4, 2, 10))` has dimensions
+**(2.000, 1.000, 5.000)**.
+
+`tube()` is correct — radius and depth both come out as asked. So a machine
+built from both silently gets **correct cylinders and half-size boxes**, which
+is the hardest possible version of this failure to catch in a wireframe: nothing
+looks broken, the proportions are just quietly wrong.
+
+It has already bitten twice (`04d8681`, "pd55: fix half-size boxes") and
+`foundation_bg.py` now measures the factor at build time and compensates.
+**That compensation must be removed the moment `rig.py` is fixed**, or those
+two machines become double-size. Nobody fixed `rig.py` because six machines were
+being written against it concurrently; they are all stopped now, so **this is
+the first thing to do when Blender work resumes** — fix `rig.py`, then strip the
+per-machine workarounds, then re-export and re-measure all of them.
+
 **The primary action button cannot be pressed by a right thumb.** Identical on
 all five methods: `.actionbtn` centre (334, 795) is HARD for the right hand,
 `.vsl` centre (54, 795) is HARD for the left. Both bottom corners. This is not

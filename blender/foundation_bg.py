@@ -1342,3 +1342,30 @@ def build(out_path):
 #    Either is traceable; 360 is not.
 # 4. rpmMax: tools.js derives 27 rpm; the published ceiling for the drives on
 #    this machine is 40 and 53 rpm [S1 p.11].
+#
+# 5. **BUG IN blender/lib/rig.py, NOT FIXED FROM HERE.** `box()` returns a box
+#    at HALF the size asked for: `primitive_cube_add(size=1)` makes a cube of
+#    EDGE 1 (-0.5..+0.5) and the next line sets `scale = size/2`, so the edge
+#    ends up size/2. Measured in Blender 5.2.1: `box((4, 2, 10))` has
+#    dimensions (2.000, 1.000, 5.000). `tube()` is correct — radius and depth
+#    both come out as asked — so a machine built from both silently ends up
+#    with correct cylinders and half-size boxes, which is exactly the failure
+#    that is hardest to see in a wireframe.
+#    Six machines share that file and were being written against it at the same
+#    time as this one, so it is not edited here. This model measures the factor
+#    at build time (`_measure_box_scale()`), prints it, and multiplies. When
+#    rig.box() is fixed centrally the probe returns 1.0 and this file needs no
+#    change. THE OTHER MACHINES WILL NEED ONE: whoever fixes rig.py must check
+#    every other blender/*.py for boxes that were sized by eye against the
+#    halved output, because those will double.
+#
+# 6. What this model does NOT do, so nobody has to discover it twice:
+#    · the hose package is authored for the parked pose (drive at the bottom of
+#      the stroke). It is parented to the leader, so it does not grow and shrink
+#      with the crowd stroke the way the real bundle does. A second pass wants
+#      a skinned or re-pointed curve driven off `slide:carriage`.
+#    · the Kelly element diameters below the 470 mm outer pipe are DERIVED
+#      (solved against the 200 mm stub diagonal), not published. Only the outer
+#      pipe diameter is in the catalogue.
+#    · mast cross-section (1.20 × 1.05 m), slew-ring diameter, deck height and
+#      cab dimensions are derived from ratios and envelopes, not from a drawing.
