@@ -893,7 +893,13 @@ def build_cable_reel(parent):
     """
     drum = R.empty(R.NODE_PIVOT, 'cableReel', parent, (0, REEL_Y, REEL_Z))
     drum['drum_r_m'] = REEL_R
-    cyl('reel_core', REEL_R * 0.46, REEL_W, R.MAT_DARK, drum,
+    # R.MAT_RUBBER, not R.MAT_DARK.  The core is the ONE object on the drum
+    # nobody can see: reel_wrap below is nearly twice its radius and covers all
+    # but 35 mm of its length at each end, inside the flanges.  It was 60
+    # triangles holding paintedDark open as a third draw call in pivot:cableReel
+    # for a surface that never reaches the camera.  It is now the same material
+    # as the coil of cable wrapped straight over it.
+    cyl('reel_core', REEL_R * 0.46, REEL_W, R.MAT_RUBBER, drum,
         (-REEL_W / 2, 0, 0), (0, math.pi / 2, 0), sides=16)
     # PAINTED flanges, not dark. Built in the chassis grey they were a dark
     # disc inside a dark bay and disappeared in every render - present in the
@@ -914,7 +920,14 @@ def build_cable_reel(parent):
     cyl('reel_wrap', REEL_R * 0.86, REEL_W - 0.070, R.MAT_RUBBER, drum,
         (-(REEL_W - 0.070) / 2, 0, 0), (0, math.pi / 2, 0), sides=20)
     # slip-ring housing and the limiting switch [BS]p.5
-    cyl('reel_sliprings', 0.090, 0.140, CAB_STAIN, drum,
+    # R.MAT_PAINT, not CAB_STAIN.  CAB_STAIN is rawSteel and this 180 mm
+    # housing was its only use inside pivot:cableReel, so it cost the fourth
+    # and last draw call in the group.  It bolts flat onto the outboard face of
+    # a flange that is already paint, and the stainless read belongs to the
+    # electrical cabinet on the deck, which keeps it.  The reel is now two
+    # calls - amber flanges, black cable - which is exactly the thumbnail tell
+    # [R]S5.4 asks for.
+    cyl('reel_sliprings', 0.090, 0.140, R.MAT_PAINT, drum,
         (REEL_W / 2, 0, 0), (0, math.pi / 2, 0), sides=12)
     cheapbox('reel_limitsw', (0.070, 0.110, 0.090), R.MAT_DARK, parent,
              (REEL_W / 2 + 0.170, REEL_Y - 0.240, REEL_Z + 0.150))
@@ -1404,7 +1417,13 @@ def build_boom(root):
     swing = R.empty(R.NODE_PIVOT, 'boomSwing', root, (0, Y_FOOT, Z_FOOT))
     swing['axis'] = 'z'
     swing['range_deg'] = math.degrees(SWING_MAX)      # +/-45 [BS]p.7
-    cyl('boom_slewhousing', 0.200, 0.260, R.MAT_CAST, swing, (0, 0, -0.130),
+    # R.MAT_PAINT, not R.MAT_CAST.  pivot:boomSwing held exactly two draw
+    # calls, 120 triangles between them, and castIron was one of them for the
+    # sake of this single housing.  A boom-foot slew casting is painted with
+    # the machine on every bolter this was modelled from; the cast read at the
+    # boom foot is carried by ped_bearing directly underneath, which is static
+    # and keeps castIron.  The whole swing is now one call.
+    cyl('boom_slewhousing', 0.200, 0.260, R.MAT_PAINT, swing, (0, 0, -0.130),
         sides=18)
     cyl('boom_slewcollar', 0.155, 0.120, R.MAT_PAINT, swing, (0, 0, 0.110),
         sides=14)
@@ -1413,7 +1432,11 @@ def build_boom(root):
     lift['axis'] = 'x'
     lift['max_deg'] = math.degrees(LIFT_MAX)          # +70 [BS]p.7
     lift['min_deg'] = math.degrees(LIFT_MIN)          # -30 [BS]p.7
-    cyl('boom_knuckle', 0.135, 0.420, R.MAT_CAST, lift, (-0.210, 0, 0),
+    # R.MAT_PAINT, not R.MAT_CAST: 52 triangles that were the only castIron in
+    # pivot:boomLift, so they cost a draw call of their own.  The knuckle is
+    # welded into the boom box it carries, and boom_outer beside it is already
+    # paint.
+    cyl('boom_knuckle', 0.135, 0.420, R.MAT_PAINT, lift, (-0.210, 0, 0),
         (0, math.pi / 2, 0), sides=14)
     L_OUT = BOOM_LEN - 0.460
     box('boom_outer', (BOOM_W, L_OUT, BOOM_D), R.MAT_PAINT, lift,
@@ -1422,8 +1445,15 @@ def build_boom(root):
         for zz in (BOOM_D / 2 - 0.020, -BOOM_D / 2 + 0.020):
             cyl('boom_pad%d_%d' % (s > 0, zz > 0), 0.026, 0.030, R.MAT_WORN,
                 lift, (s * (BOOM_W / 2 - 0.030), L_OUT + 0.100, zz), sides=6)
+    # R.MAT_WORN, not R.MAT_STEEL.  28 triangles - an eight-sided tube - and
+    # the only rawSteel under pivot:boomLift, so a whole draw call.  The
+    # LINKAGE is the thing that matters here and the linkage is geometry, not
+    # a material name: the rod is still exactly where it was, still running the
+    # length of the boom, still holding the feed attitude.  boom_parbell, the
+    # bellcrank it terminates in, is already wornSteel, and an unpainted link
+    # rod on a machine that works underground is weathered, not bright.
     aim_tube('boom_parlink', 0.030, (0.185, 0.050, 0.150),
-             (0.185, L_OUT + 0.050, 0.150), R.MAT_STEEL, lift, sides=8)
+             (0.185, L_OUT + 0.050, 0.150), R.MAT_WORN, lift, sides=8)
     cyl('boom_parbell', 0.070, 0.110, R.MAT_WORN, lift, (0.185, 0.025, 0.150),
         (0, math.pi / 2, 0), sides=10)
 
@@ -1433,7 +1463,10 @@ def build_boom(root):
     L_IN = BOOM_LEN - (L_OUT + 0.020)
     box('boom_inner', (BOOM_W * 0.78, L_IN + 0.320, BOOM_D * 0.78), R.MAT_PAINT,
         tele, (0, L_IN / 2 - 0.160, 0), bevel=0.012)
-    cyl('boom_head', 0.150, 0.340, R.MAT_CAST, tele, (-0.170, L_IN, 0),
+    # R.MAT_PAINT, not R.MAT_CAST: the only castIron in slide:boomTele, 52
+    # triangles for a whole draw call, welded to the painted inner boom it
+    # caps.  slide:boomTele is now one call.
+    cyl('boom_head', 0.150, 0.340, R.MAT_PAINT, tele, (-0.170, L_IN, 0),
         (0, math.pi / 2, 0), sides=14)
 
     # -- the lift cylinder ---------------------------------------------------
@@ -1459,9 +1492,16 @@ def build_boom(root):
     ramp['axis'] = 'x'
     L = v.length
     cyl('boomram_barrel', 0.082, L * 0.52, R.MAT_DARK, ramp, (0, 0, 0), sides=14)
-    cyl('boomram_gland', 0.090, 0.070, R.MAT_WORN, ramp, (0, 0, L * 0.52 - 0.035),
+    # R.MAT_DARK on both, not R.MAT_WORN.  pivot:boomRam carried two draw calls
+    # for 132 triangles; a 70 mm gland collar and a 110 mm pin eye are not a
+    # material read, and a cylinder painted whole - barrel, gland and eye the
+    # same colour - is what most of them look like.  The barrel's paint is the
+    # bigger surface, so the merge goes this way round.  boomram_rod's chrome
+    # is untouched: it is the only chrome left on the boom and the note above
+    # is explicit about why it is there.
+    cyl('boomram_gland', 0.090, 0.070, R.MAT_DARK, ramp, (0, 0, L * 0.52 - 0.035),
         sides=12)
-    cyl('boomram_eyeA', 0.060, 0.110, R.MAT_WORN, ramp, (-0.055, 0, 0),
+    cyl('boomram_eyeA', 0.060, 0.110, R.MAT_DARK, ramp, (-0.055, 0, 0),
         (0, math.pi / 2, 0), sides=10)
     rod = R.empty(R.NODE_SLIDE, 'boomRamRod', ramp, (0, 0, L * 0.52))
     rod['travel_m'] = L * 0.44
@@ -1600,7 +1640,11 @@ def build_feed(mast_parent):
                  R.MAT_PAINT, mast, (s * (FEED_W / 2 + 0.110), 0, 0))
     # the roll-over motor: 240 deg of feed rotation is a big ring gear, and it
     # is what lets one boom bolt the back and both walls [BS]p.7
-    cyl('feed_rollmotor', 0.105, 0.200, R.MAT_CAST, mast,
+    # R.MAT_DARK, not R.MAT_CAST: 44 triangles, and the only castIron under
+    # pivot:mast, so a draw call of its own.  A hydraulic roll motor is a dark
+    # bolt-on, not a raw casting, and feed_waterkit - the other bolt-on hanging
+    # off this cradle - is already paintedDark.
+    cyl('feed_rollmotor', 0.105, 0.200, R.MAT_DARK, mast,
         (FEED_W / 2 + 0.125, 0, 0), (0, math.pi / 2, 0), sides=12)
     cyl('feed_rollring', 0.185, 0.080, R.MAT_WORN, mast,
         (-FEED_W / 2 - 0.150, 0, 0), (0, math.pi / 2, 0), sides=20)
@@ -1640,7 +1684,11 @@ def build_feed(mast_parent):
             (s * 0.150, 0, TOP_Z + 0.130), sides=8)
     cyl('feedx_tiproller', 0.058, 0.170, R.MAT_RUBBER, fx,
         (-0.090, 0, COL_Z + 0.030), (0, math.pi / 2, 0), sides=12)
-    cyl('feedx_flushhead', 0.060, 0.120, R.MAT_CAST, fx,
+    # R.MAT_WORN, not R.MAT_CAST.  36 triangles, the only castIron in
+    # slide:feedExtend, one whole draw call.  A flushing head lives in the
+    # water and the cuttings coming back out of the hole, and feedx_centbore
+    # and feedx_foot either side of it are already wornSteel.
+    cyl('feedx_flushhead', 0.060, 0.120, R.MAT_WORN, fx,
         (0.150, -0.070, TOP_Z - 0.060), (math.radians(90), 0, 0), sides=10)
 
     # -- THE INDEXER: the whole feeder rotates to swap drill for bolt ---------
@@ -1724,12 +1772,19 @@ def build_feed(mast_parent):
     spindle['axis'] = 'z'
     cyl('spindle_chuck', 0.072, 0.155, R.MAT_WORN, spindle, (0, 0, -0.010),
         sides=12)
-    cyl('spindle_shank', 0.045, 0.200, R.MAT_STEEL, spindle, (0, 0, 0.120),
+    # R.MAT_WORN on the shank and the rod below it, not R.MAT_STEEL.
+    # pivot:spindle held two draw calls for 144 triangles between them, split
+    # down the middle of one drill string: chuck and bit wornSteel, shank and
+    # rod rawSteel.  Both kinds are bare steel and the two objects that keep
+    # wornSteel - the chuck the shank sits in, and the bit on the end of the
+    # rod - are the ones a player is closest to.  A rod that has been through a
+    # bolter's rock is not bright.  One call now.
+    cyl('spindle_shank', 0.045, 0.200, R.MAT_WORN, spindle, (0, 0, 0.120),
         sides=10)
     R.empty(R.NODE_MOUNT, 'tool', spindle, (0, 0, SHANK_OFF))
     # the rod standing in the feed, bit exactly at the collar: the machine is
     # authored at the moment the hole is started.
-    cyl('drill_rod', ROD_OD / 2, ROD_LEN, R.MAT_STEEL, spindle,
+    cyl('drill_rod', ROD_OD / 2, ROD_LEN, R.MAT_WORN, spindle,
         (0, 0, SHANK_OFF), sides=8)
     cyl('drill_bit', BIT_OD / 2 + 0.005, 0.078, R.MAT_WORN, spindle,
         (0, 0, SHANK_OFF + ROD_LEN), sides=10)
@@ -1902,7 +1957,12 @@ def build_bolting_unit(index, car, spindle_parent, bot_z, top_z, col_z):
         _bolt(mag, 'mag_bolt%d' % i, math.cos(a) * MAG_R,
               math.sin(a) * MAG_R, z_lo, L)
     # the index motor and its pawl
-    cyl('mag_motor', 0.072, 0.150, R.MAT_CAST, index,
+    # R.MAT_DARK, not R.MAT_CAST.  36 triangles, the only castIron under
+    # pivot:boltIndex, and that group already carries six other materials -
+    # 680 triangles of paintedDark among them, including mag_guard's mounting
+    # and the two bolt holders.  A dark index motor tucked behind the magazine
+    # is a draw call the machine gets back for nothing.
+    cyl('mag_motor', 0.072, 0.150, R.MAT_DARK, index,
         (bx + MAG_R, -MAG_R - 0.090, z_lo - 0.170), sides=10)
     box('mag_guard', (MAG_R * 1.5, 0.030, BOLT_LEN * 0.55), R.MAT_PAINT, index,
         (bx + MAG_R * 0.2, -MAG_R * 2.0, z_lo + BOLT_LEN * 0.45), bevel=0.010)
@@ -2019,15 +2079,29 @@ def build_jacks(root):
             x = s * JACK_X
             cheapbox('jack_%s_box%d' % (tag, s > 0), (0.150, 0.170, 0.320),
                      R.MAT_DARK, nd, (x, 0, FRAME_Z0 + 0.160))
+            # R.MAT_WORN, not R.MAT_CHROME.  36 triangles apiece and, because
+            # chrome appeared in BOTH slide:jack-* groups, two whole draw calls
+            # for 144 triangles.  A bright rod earns its call when it is long,
+            # extended, lit and moving (43e6c57); a 96 mm jack rod authored
+            # DOWN, standing in the muck it is pushing against with the pad and
+            # boss already wornSteel at both ends of it, is the opposite of
+            # that.  boomram_rod and feedext_rod - the rods a player watches
+            # move - keep their chrome.
             cyl('jack_%s_rod%d' % (tag, s > 0), 0.048, FRAME_Z0 - 0.050,
-                R.MAT_CHROME, nd, (x, 0, 0.050), sides=10)
+                R.MAT_WORN, nd, (x, 0, 0.050), sides=10)
             cyl('jack_%s_pad%d' % (tag, s > 0), 0.135, 0.052, R.MAT_WORN, nd,
                 (x, 0, 0.000), sides=14)
             cone('jack_%s_boss%d' % (tag, s > 0), 0.085, 0.050, 0.050,
                  R.MAT_WORN, nd, (x, 0, 0.050), sides=12)
-            # hazard striping on the leg guard: a jack leg is a crush point
+            # The leg guard is a crush point, but R.MAT_DARK, not R.MAT_HAZARD:
+            # this is a 70 mm collar on a 320 mm jack body, 44 triangles a pair,
+            # and it was a draw call in each of the two jack groups.  Striping
+            # earns a call when a player can read it AS striping - the deck toe
+            # boards and the fire-bottle bracket do, at 840 triangles in one
+            # static call; a band this small on a leg below the frame never
+            # resolves.  The guard box it wraps is already paintedDark.
             cheapbox('jack_%s_stripe%d' % (tag, s > 0), (0.156, 0.176, 0.070),
-                     R.MAT_HAZARD, nd, (x, 0, FRAME_Z0 + 0.020))
+                     R.MAT_DARK, nd, (x, 0, FRAME_Z0 + 0.020))
         out.append(nd)
     return out
 
