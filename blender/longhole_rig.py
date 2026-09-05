@@ -1181,6 +1181,21 @@ def build_carriage(fx, z0, z1):
     what one rod into a hole looks like.
     """
     car = empty(NODE_SLIDE, 'carriage', fx, (0, 0, z0 + 0.60))
+    # THE CARRIAGE CONTRACT.  This node shipped with no extras at all.
+    # src/core/gltfRig.js makeDyn() reads exactly `travel_m` off
+    # `slides.get('carriage')`; with it undefined, setCarriage() evaluates
+    # `-0 * undefined`, writes NaN into a world matrix, and the machine
+    # silently disappears instead of throwing.
+    # The stroke is not a guess and does not need one: [S] p.3's feed table
+    # rows are all "rod length + 1 815 mm" (FEED_LEN 3.340 = ROD_LEN 1.525 +
+    # 1.815), and the 1 815 mm IS the two end housings plus the drifter plus
+    # the carriage over-run — the comment on `feed-head` / `feed-foot` above
+    # says so.  What is left over is exactly one rod of clear travel, which is
+    # also what a longhole ring rig has to have: one rod in, uncouple, next.
+    car['travel_m'] = ROD_LEN                # 1.525 m  [S] p.3 feed table
+    car['axis'] = 'z'
+    car['travel_min_m'] = z0 + 0.60
+    car['travel_max_m'] = z0 + 0.60 + ROD_LEN
     p = []
     p.append(box('carriage-plate', (FEED_W + 0.02, 0.10, 0.30), MAT_STEEL, car,
                  (0, 0.04, 0), bevel=0.006))
