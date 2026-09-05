@@ -473,18 +473,29 @@ def radial(o, count, axis='Z'):
     return b
 
 
-def ram(name, a, b, barrel_r, parent=None, frac=0.55):
+def ram(name, a, b, barrel_r, parent=None, frac=0.55,
+        bar_mat=MAT_DARK, rod_mat=MAT_CHROME):
     """A hydraulic cylinder: a dark barrel over the first `frac` of the run and
     a bright CHROME rod over the rest.
 
-    Two objects, two materials, and worth it.  A polished rod against a matte
-    barrel is the cheapest realism cue on any machine with hydraulics, and this
-    one has fourteen of them - steering, boom lift, boom telescope, feed tilt,
-    feed extension, four jack/stinger legs and the rod arm.  [R] section 6.
+    Two objects, two materials, and worth it - WHERE IT IS WORTH IT.  A polished
+    rod against a matte barrel is the cheapest realism cue on any machine with
+    hydraulics, and this one has fourteen of them.  [R] section 6.
+
+    WHAT IT COSTS, AND WHY THE MATERIALS ARE NOW ARGUMENTS.  weld() collapses a
+    dynamic group by material, so a material costs a DRAW CALL PER GROUP it
+    appears in.  Fourteen rams on fourteen separate pivot:/slide: nodes meant
+    chrome alone was eight draw calls carrying 224 triangles between them - 28
+    a call, on the one machine in the fleet that misses the frame-rate budget
+    (53.5 fps warm against a 60 fps target, `shots/astra1-report.txt`).  The
+    standing rule from commit 43e6c57 is that a bright rod earns its call when
+    it is LONG, EXTENDED, LIT AND MOVING; a 42 mm stub inside the casting it
+    slides into does not.  So `bar_mat`/`rod_mat` let each caller say which it
+    is, and the geometry never changes either way.
     """
     mid = tuple(a[i] + (b[i] - a[i]) * frac for i in range(3))
-    out = [strut(name + '_bar', a, mid, barrel_r, MAT_DARK, parent)]
-    out.append(strut(name + '_rod', mid, b, barrel_r * 0.55, MAT_CHROME,
+    out = [strut(name + '_bar', a, mid, barrel_r, bar_mat, parent)]
+    out.append(strut(name + '_rod', mid, b, barrel_r * 0.55, rod_mat,
                      parent, sides=8))
     return [o for o in out if o]
 
@@ -718,7 +729,11 @@ def build_rear(root):
     for sgn in (-1, +1):
         rout.append(disc('reel-flange%d' % (sgn > 0), REEL_R, 0.020, MAT_WORN,
                          (sgn * REEL_W / 2, 0, 0), 'X', sides=24))
-    rout.append(disc('reel-core', REEL_R * 0.57, REEL_W, MAT_DARK,
+    # MAT_WORN with the flanges each side of it, not MAT_DARK: the core is
+    # never painted on a reel that is dragged through a drive, and paintedDark
+    # was 76 triangles for a whole draw call in pivot:cable-reel. The cable
+    # itself stays MAT_RUBBER - that one IS the read.
+    rout.append(disc('reel-core', REEL_R * 0.57, REEL_W, MAT_WORN,
                      (0, 0, 0), 'X', sides=20))
     # the radial spokes the elevation actually draws on the outboard flange
     from mathutils import Matrix
@@ -810,8 +825,12 @@ def build_jack(name, parent, y):
     o.append(box(name + '-house', (0.20, 0.19, FRAME_TOP - JACK_PAD_Z - 0.02),
                  MAT_DARK, None,
                  (0, 0, (FRAME_TOP + JACK_PAD_Z) / 2), bevel=0.010))
+    # MAT_WORN, not MAT_CHROME: a carrier jack leg is 28 triangles that spend a
+    # whole draw call in this slide: group, and it lives retracted into its own
+    # house except when the machine is set down. It is also the honest material
+    # - a leg that stamps on a broken drive floor is scuffed, not polished.
     o.append(strut(name + '-leg', (0, 0, JACK_PAD_Z + 0.22), (0, 0, JACK_PAD_Z),
-                   0.055, MAT_CHROME))
+                   0.055, MAT_WORN))
     o.append(disc(name + '-pad', 0.115, 0.035, MAT_WORN,
                   (0, 0, JACK_PAD_Z + 0.017), 'Z', sides=14))
     weld([x for x in o if x], nd, name)
@@ -903,7 +922,9 @@ def build_front(art):
     roof = empty(NODE_SLIDE, 'cab-roof', art, (0, 0, 0))
     rf = [box('cab-roof-plate', (cw + 0.10, cy + 0.10, 0.075), MAT_PAINT, None,
               (cxm, cym, H_ROOF - 0.038), bevel=0.014)]
-    rf.append(box('cab-roof-lip', (cw + 0.16, cy + 0.16, 0.020), MAT_DARK,
+    # MAT_PAINT with the plate it is welded under. 12 triangles were a whole
+    # draw call in slide:cab-roof, which is the worst ratio on the machine.
+    rf.append(box('cab-roof-lip', (cw + 0.16, cy + 0.16, 0.020), MAT_PAINT,
                   None, (cxm, cym, H_ROOF - 0.086)))
     weld(rf, roof, 'cabroof')
 
@@ -1029,9 +1050,14 @@ def build_boom(art):
     ]
     # the lift cylinder slung underneath, base lug on the turret.  Drawn on the
     # elevation as a heavy ram below the arm.
+    # Body colour both halves. pivot:boom-lift was FOUR draw calls for 200
+    # triangles - paintedSteel 36, castIron 108, paintedDark 28, chrome 28 -
+    # and the barrel and rod together are 56 of them. A boom lift cylinder
+    # painted the machine's own colour is what most of this class ships as.
     inner_parts += ram('boom-lift-ram', (0, -0.26, -0.30),
                        (0, inner * 0.86 * math.cos(ang) + 0.04,
-                        inner * 0.86 * math.sin(ang) - 0.12), 0.070, lift)
+                        inner * 0.86 * math.sin(ang) - 0.12), 0.070, lift,
+                       bar_mat=MAT_PAINT, rod_mat=MAT_PAINT)
     weld([o for o in inner_parts if o], lift, 'boominner')
 
     # outer arm on slide: - the telescope.  The printed 1 250 mm section.
@@ -1042,9 +1068,13 @@ def build_boom(art):
         strut('boom-outer', (0, 0, 0), b1, BOOM_R * 0.80, MAT_STEEL, tele,
               sides=10),
         # the cross axle: the whole point of this machine's geometry
-        tube('feed-axle', 0.072, 0.56, MAT_CAST, parent=tele,
+        # MAT_STEEL, not MAT_CAST: a turned axle and the fabricated yoke it
+        # runs in are machined steel, and MAT_STEEL is already in this group
+        # for the outer arm - so castIron was a whole draw call for 152
+        # triangles inside slide:boom-tele.
+        tube('feed-axle', 0.072, 0.56, MAT_STEEL, parent=tele,
              loc=(-0.28, b1[1], b1[2]), rot=(0, math.pi / 2, 0), sides=12),
-        box('axle-yoke', (0.44, 0.22, 0.30), MAT_CAST, tele,
+        box('axle-yoke', (0.44, 0.22, 0.30), MAT_STEEL, tele,
             (0, b1[1] - 0.06, b1[2]), bevel=0.014),
     ]
     # the hose loop from the boom knuckle to the moving feed.  Hose routing is
@@ -1101,8 +1131,12 @@ def build_feed(tele, b1):
     parts.append(box('feed-beam', (FEED_W, FEED_H, FEED_LEN), MAT_PAINT, fx,
                      (0, -0.09, 0), bevel=0.010))
     for sgn in (-1, +1):
+        # MAT_WORN, not MAT_STEEL: 24 triangles of rail were a draw call on
+        # their own in slide:feed-extend, and MAT_WORN is already here for the
+        # rod guide. A rail the carriage slides on all shift is burnished and
+        # oil-stained, which is what wornSteel is for.
         parts.append(box('feed-rail%d' % (sgn > 0), (0.045, 0.075, FEED_LEN),
-                         MAT_STEEL, fx, (sgn * (FEED_W / 2 - 0.02), 0.005, 0)))
+                         MAT_WORN, fx, (sgn * (FEED_W / 2 - 0.02), 0.005, 0)))
     # end housings: the feed table's four rows are all rod length + 1 815 mm,
     # and these two boxes plus the carriage over-run are that constant.
     parts.append(box('feed-head', (FEED_W + 0.05, FEED_H + 0.06, 0.20),
@@ -1113,8 +1147,11 @@ def build_feed(tele, b1):
     # the cradle the feed slides in, and the extension ram that drives it
     parts.append(box('feed-cradle', (FEED_W + 0.13, FEED_H + 0.13, 0.52),
                      MAT_DARK, fx, (0, -0.09, 0.02), bevel=0.014))
+    # The rod goes dark with its barrel. It is the last chrome on the machine
+    # outside the steering rams and it was 28 triangles for a draw call in a
+    # group that already carries 460 triangles of paintedDark.
     parts += ram('feed-ext-ram', (0.20, -0.20, -0.24), (0.20, -0.20, 0.66),
-                 0.045, fx)
+                 0.045, fx, rod_mat=MAT_DARK)
 
     # Rod guide / drill-steel support at the ROCK end of the feed - a V-jawed
     # clamp closing on the string, plus a bushing below it.  The plan coverage
@@ -1236,10 +1273,13 @@ def build_carriage(fx, z0, z1):
     # which is this class's most reliable visual tell.
     s.append(tube('rod-1', ROD_R, min(ROD_LEN, reach), MAT_WORN,
                   parent=spindle, loc=(0, 0, 0), sides=10))
-    s.append(disc('rod-1-box', ROD_BOX_R, 0.12, MAT_STEEL,
+    # The boxes are MAT_WORN with the rod they are cut into, not MAT_STEEL.
+    # Two materials in pivot:spindle were two draw calls for 144 triangles, and
+    # a coupling box is the same weathered steel as the rod body anyway.
+    s.append(disc('rod-1-box', ROD_BOX_R, 0.12, MAT_WORN,
                   (0, 0, 0.06), 'Z', sides=10, parent=spindle))
     if reach > ROD_LEN + 0.05:
-        s.append(disc('rod-2-box', ROD_BOX_R, 0.12, MAT_STEEL,
+        s.append(disc('rod-2-box', ROD_BOX_R, 0.12, MAT_WORN,
                       (0, 0, ROD_LEN), 'Z', sides=10, parent=spindle))
         s.append(tube('rod-2', ROD_R, reach - ROD_LEN, MAT_WORN,
                       parent=spindle, loc=(0, 0, ROD_LEN), sides=10))
@@ -1294,8 +1334,11 @@ def build_carousel(fx, z0):
         box('arm-jaw', (0.13, 0.15, 0.10), MAT_WORN, arm,
             (-CARO_OFF * 0.92, 0.02, 0), bevel=0.008),
     ]
+    # Body colour both halves: pivot:rod-arm was four draw calls for 272
+    # triangles, of which the ram was 56. A 35 mm gripper cylinder buried in
+    # the carousel is not where a chrome rod earns a call.
     a += ram('arm-ram', (0.02, -0.16, 0.02), (-CARO_OFF * 0.55, -0.10, 0.02),
-             0.035, arm)
+             0.035, arm, bar_mat=MAT_PAINT, rod_mat=MAT_PAINT)
     weld([o for o in a if o], arm, 'rodarm')
     return drum
 
@@ -1322,8 +1365,11 @@ def build_stingers(fx, z0, z1):
     f = [
         box('sting-foot-house', (0.13, 0.15, 0.26), MAT_DARK, foot,
             (0, -0.20, 0.03), bevel=0.008),
+        # MAT_WORN, not MAT_CHROME - see build_jack(). 28 triangles were
+        # spending a draw call of their own in this slide: group, and a leg
+        # standing on a broken drive floor is scuffed steel, not chrome.
         strut('sting-foot-leg', (0, -0.20, -0.02), (0, -0.20, -FEED_FOOT_Z),
-              0.042, MAT_CHROME, foot),
+              0.042, MAT_WORN, foot),
     ]
     f.append(disc('sting-foot-pad', 0.10, 0.030, MAT_WORN,
                   (0, -0.20, -FEED_FOOT_Z + 0.015), 'Z', sides=12,
@@ -1337,8 +1383,9 @@ def build_stingers(fx, z0, z1):
     h = [
         box('sting-head-house', (0.13, 0.15, 0.22), MAT_DARK, head,
             (0, -0.20, 0.05), bevel=0.008),
+        # MAT_WORN, not MAT_CHROME - as the foot stinger above.
         strut('sting-head-leg', (0, -0.20, 0.02), (0, -0.20, STING_TOP),
-              0.042, MAT_CHROME, head),
+              0.042, MAT_WORN, head),
     ]
     h.append(disc('sting-head-pad', 0.10, 0.030, MAT_WORN,
                   (0, -0.20, STING_TOP - 0.015), 'Z', sides=12, parent=head))
