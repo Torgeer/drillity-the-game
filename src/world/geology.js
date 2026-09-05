@@ -6291,11 +6291,17 @@ export function createGeology(ctx) {
     // the axis, and its scale
     g.fillStyle = 'rgba(150,160,174,0.30)';
     g.fillRect(x0, 0, Math.max(1, css(0.9)), H);
-    g.fillStyle = 'rgba(150,160,174,0.55)';
+    /* On the band's own top edge, not the canvas's — the strip starts 4.4 m
+       above the picture, so a caption at css(1.5) was 127 CSS px off screen.
+       See drawRulerHead(). */
+    const winTop = clamp((ruler.windowTop ?? stripLead()) * pxPerM, 0, Math.max(0, H - css(14)));
+    g.fillStyle = 'rgba(9,12,17,0.86)';
+    g.fillRect(0, winTop, W, css(11));
+    g.fillStyle = 'rgba(150,160,174,0.62)';
     g.font = `600 ${css(7.5)}px ${BRAND.fontSans}`;
     g.textAlign = 'left';
     g.textBaseline = 'top';
-    g.fillText('BLOWS / 250', css(1.5), css(1.5));
+    g.fillText('BLOWS / 250', css(1.5), winTop + css(1.5));
 
     // metre marks stay, small, so the record is still a depth axis
     const d0 = Math.ceil(topDepth), d1 = Math.floor(topDepth + span);
@@ -6333,9 +6339,11 @@ export function createGeology(ctx) {
 
      TWO CONSTRAINTS, AND THEY PULL AGAINST EACH OTHER.
 
-       · The VIEW is always about 20 m tall whatever the hole is, so the minor
-         tick has to stay countable on screen — the eye cannot read a ruler
-         whose ticks are 4 px apart. That sets a floor.
+       · The VIEW is always about the same height whatever the hole is (13.4 m
+         on the shipping layout — see viewH; it was written as "about 20" when
+         `viewMetres` was still being read as a height), so the minor tick has
+         to stay countable on screen — the eye cannot read a ruler whose ticks
+         are 4 px apart. That sets a floor.
        · The RUN has to carry enough labelled majors that the player sees a
          number belonging to their own hole. That pulls the other way on a
          short hole.
@@ -6399,19 +6407,37 @@ export function createGeology(ctx) {
        redundant rather than merely duplicated.
 
        It scrolls with the strip, so on a 3,000 m well the visible rail is the
-       20 m of it in frame and TD is off the bottom until you get near it —
-       which is honest, and is what the TD datum below is for. */
+       13 m of it in frame and TD is off the bottom until you get near it —
+       which is honest, and is what the TD datum below is for.
+
+       NOT ON A LONG-SECTION, and this was measured on screen rather than
+       reasoned about. In `profile` and `heading` the run is a bore length or a
+       chainage, and this is a DEPTH axis: on a 20 m HDD shot the exit TVD is
+       0.3 m, so the whole rail was 6 CSS px tall and `yBit` clamped into the
+       end of it — the gauge read FULLY DRILLED at 9.5 m of 20. A progress
+       graphic on the wrong axis is worse than none, and those two modes have
+       the station ruler across the bottom, which is their real progress axis.
+       The TD datum below stays in every mode: it is a statement about depth
+       and it is true in all of them. */
     const tdTvd = depthForStation(runM);
     const drilled = depthForStation(depth);
-    if (runM > 0) {
+    if (runM > 0 && !mode.horizontal) {
       const railW = Math.max(1, Math.round(W * 0.09));
       const yTop = Math.max(0, (0 - topDepth) * pxPerM);
       const yTd = Math.min(H, (tdTvd - topDepth) * pxPerM);
       const yBit = clamp((drilled - topDepth) * pxPerM, yTop, Math.max(yTop, yTd));
       if (yTd > 0 && yTop < H) {
-        g.fillStyle = 'rgba(150,160,174,0.16)';
-        g.fillRect(0, yTop, railW, Math.max(0, yTd - yTop));
-        g.fillStyle = 'rgba(223,181,82,0.62)';
+        /* The faceplate gradient is TRANSPARENT at x=0 (it only reaches full
+           opacity at 0.22 W), so without a backing the rail composites onto
+           whatever rock happens to be behind the strip and the undrilled half
+           read lighter than the drilled half — the reading inverted. The rail
+           gets its own tube. */
+        const runH = Math.max(0, yTd - yTop);
+        g.fillStyle = 'rgba(9,12,17,0.72)';
+        g.fillRect(0, yTop, railW, runH);
+        g.fillStyle = 'rgba(150,160,174,0.22)';
+        g.fillRect(0, yTop, railW, runH);
+        g.fillStyle = 'rgba(223,181,82,0.78)';
         g.fillRect(0, yTop, railW, Math.max(0, yBit - yTop));
       }
     }
@@ -6473,7 +6499,8 @@ export function createGeology(ctx) {
       g.fillRect(0, Math.round(y) - 1, W * 0.62, css(1.6));
       g.font = `700 ${css(7)}px ${BRAND.fontSans}`;
       g.textAlign = 'left';
-      g.fillText(label, 2, y - css(6));
+      // clear of the run rail, same inset the GWL datum uses
+      g.fillText(label, Math.round(W * 0.11), y - css(6));
     };
     /* TOTAL DEPTH — the datum that makes the rail readable as "how much is
        left". It is the one depth on this axis the player is being paid to
@@ -6489,14 +6516,99 @@ export function createGeology(ctx) {
     if (pile && pile.bearing) datum(pile.bearing.top, 'BEARING', 'rgba(16,185,129,0.85)');
     if (path) datum(path.Dc, 'COVER', 'rgba(223,181,82,0.70)');
 
-    // 'm' unit mark at the top of the strip — the section's only unit label
-    g.fillStyle = 'rgba(150,160,174,0.50)';
-    g.font = `600 ${css(8)}px ${BRAND.fontSans}`;
-    g.textAlign = 'left';
-    g.fillText('m', x0 + W * 0.34, css(8));
+    drawRulerHead(g, W, H, css, x0, pxPerM);
 
     tex.needsUpdate = true;
     ruler.top = topDepth;
+  }
+
+  /* ── THE HEAD OF THE RULER, AND THE ONE THING IT HAS TO ADMIT ──────────────
+     TWO FINDINGS, BOTH MEASURED, ONE FIX.
+
+     1. The 'm' unit mark — described in the file as "the section's only unit
+        label" — was drawn 8 CSS px from the TOP OF THE CANVAS, and the canvas
+        is not the band. The strip is 31 m tall, the band shows 13.4 m of it,
+        and update() places the window `stripLead()` metres down the strip. So
+        the label sat 4.4 m above the top edge of the picture. Measured warm at
+        390x844: the strip's top edge projects to CSS y 231.4 and the band
+        begins at 359. **It was 127.6 px off screen and had never once been
+        visible.** Same arithmetic put the driving record's 'BLOWS / 250' axis
+        caption off screen too. Everything here is placed from `winTop`, the
+        canvas row the band's own top edge falls on, which update() hands over
+        as ruler.windowTop per repaint (`nt` is floored to 0.5 m, so the lead
+        is re-derived rather than assumed).
+
+     2. THE BORE IS DRAWN OVER GAUGE AND THE RULER DID NOT SAY SO.
+        applyHoleDiameter() draws a 152 mm hole at about 1.09 m — call it x7 —
+        against a depth axis that is 1:1. The exaggeration is necessary: at
+        19.4 CSS px per metre a true-scale 152 mm bore is 3 px wide and there
+        is nothing to look at. But undeclared it is simply wrong, and a working
+        driller spots it in ten seconds and then trusts nothing else on screen.
+
+        drawScalePlate() already states it, in words, on the floor of the band.
+        This is the same statement where the eye actually is, and it is drawn
+        rather than asserted: a bar of the TRUE bore diameter at the ruler's
+        own scale — 3 CSS px, a hairline — beside the ratio. The player can
+        hold that sliver against the fat bore in the middle of the band and
+        check the number for themselves. That is the difference between a
+        diagram and a claim.
+
+        It is the same `boreExag` the plate prints, read from the same
+        variable, so the two cannot drift (ASTRA §5). Below 1.05x there is no
+        exaggeration to declare and it draws nothing rather than saying "x1.0",
+        which would be furniture. */
+  function drawRulerHead(g, W, H, css, x0, pxPerM) {
+    const winTop = clamp((ruler.windowTop ?? stripLead()) * pxPerM, 0, Math.max(0, H - css(26)));
+    const labelX = x0 + W * 0.34;
+    const ex = boreExag;
+    const declare = ex >= 1.05 || ex <= 0.95;
+    const rows = declare ? css(21) : css(12);
+
+    /* A backing plate: the head lands wherever the window happens to be, so it
+       can fall on a tick or a numeral, and instrument furniture that reads as
+       overlapping type is worse than none. */
+    const grad = g.createLinearGradient(0, winTop, 0, winTop + rows);
+    grad.addColorStop(0, 'rgba(9,12,17,0.90)');
+    grad.addColorStop(0.72, 'rgba(9,12,17,0.86)');
+    grad.addColorStop(1, 'rgba(9,12,17,0.0)');
+    g.fillStyle = grad;
+    g.fillRect(Math.round(W * 0.11), winTop, W, rows);
+
+    /* The unit goes hard RIGHT, over the numeral column it belongs to, rather
+       than at labelX where the numerals start: the bore tag shares this row
+       and at labelX the two overlapped into "×7.3 nØ". The strip is 50 CSS px
+       wide and there is exactly one row's worth of room in it. */
+    g.textBaseline = 'alphabetic';
+    g.textAlign = 'right';
+    g.fillStyle = 'rgba(150,160,174,0.62)';
+    g.font = `600 ${css(8)}px ${BRAND.fontSans}`;
+    g.fillText('m', W - css(2), winTop + css(8.5));
+    g.textAlign = 'left';
+
+    if (!declare) return;
+    const gx = Math.round(W * 0.11);
+    g.fillStyle = 'rgba(232,192,94,0.90)';
+    g.font = `700 ${css(7)}px ${BRAND.fontMono}`;
+    g.fillText(`×${ex < 10 ? ex.toFixed(1) : Math.round(ex)} Ø`, gx, winTop + css(8.5));
+
+    /* TWO BARS, ONE ROW, AT THE RULER'S OWN SCALE: the long faint one is the
+       bore as DRAWN, the short bright one at its left end is the same bore at
+       TRUE scale. The ratio between them is the exaggeration, so the number
+       above is not asserted — it is measurable off the picture with the eye,
+       against the same px/m as the ticks beside it.
+       A first pass drew only the true bar. At 2.2 CSS px, and taller than it
+       was wide, it read as a bullet glyph rather than as a width — a gauge
+       nobody can read is the empty-set gate one level down (ASTRA §8), so it
+       needs the thing it is a fraction OF, drawn beside it. */
+    const trueM = Math.max(Number(spec.holeDiaMm) || CFG.holeDiaDefault, 1) / 1000;
+    const gy = winTop + css(12.0);
+    const gh = Math.max(1, css(3.2));
+    // holeR is clamped, so on a big bore this runs to the strip edge and stops
+    const drawnW = Math.min(2 * holeR * pxPerM, W - gx - css(1.5));
+    g.fillStyle = 'rgba(232,192,94,0.30)';
+    g.fillRect(gx, gy, Math.max(1, Math.round(drawnW)), gh);
+    g.fillStyle = 'rgba(232,192,94,0.96)';
+    g.fillRect(gx, gy, Math.max(1, Math.round(trueM * pxPerM)), gh);
   }
 
   /* Hatch pitches are given in CSS pixels and scaled by the strip's supersample
@@ -7701,16 +7813,26 @@ export function createGeology(ctx) {
       && Math.abs(depthForStation(depth) - (ruler.drawnAt ?? -1e9)) > 0.15;
     const rulerScrolled = ruler
       && (topDepth < ruler.top + 1.0 || botDepth > ruler.top + ruler.span - 1.0);
-    if (rulerScrolled || rulerStale) {
+    /* AND THE WINDOW MOVING IS ITS OWN REASON TO REPAINT, because the head is
+       drawn at the window's top edge and that edge slides along the strip. The
+       bit is not the only thing that moves it: after a jump in depth the
+       scroll damps into place over about a second with `depth` CONSTANT, so
+       neither of the two tests above fires and the head stayed frozen where
+       the window was when the settle began — measured 9.7 m of strip away from
+       where the band's top edge had ended up, i.e. off screen. 0.2 m is 4 CSS
+       px, and while nothing is moving nothing repaints. */
+    const rulerHeadMoved = ruler
+      && Math.abs((topDepth - ruler.top) - (ruler.windowTop ?? -1e9)) > 0.2;
+    if (rulerScrolled || rulerStale || rulerHeadMoved) {
       const nt = rulerScrolled
         ? Math.floor((topDepth - stripLead()) * 2) / 2
         : ruler.top;                                     // repaint in place
       /* Where the band's top edge falls INSIDE the strip about to be drawn.
          The strip is taller than the band and starts above it, so anything the
          ruler wants ON SCREEN — its unit header, its bore-scale gauge — has to
-         be drawn from here and not from the canvas edge. The lead is re-derived
-         per repaint because `nt` is floored to 0.5 m and drifts from
-         stripLead() by up to half a metre. */
+         be drawn from here and not from the canvas edge. It is re-derived per
+         repaint and never assumed: `nt` is floored to 0.5 m, and between
+         re-centrings the window travels the length of the strip. */
       ruler.windowTop = topDepth - nt;
       drawRuler(nt);
       ruler.drawnAt = depthForStation(depth);
