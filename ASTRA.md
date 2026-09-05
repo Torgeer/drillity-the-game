@@ -61,8 +61,8 @@ npm run blender        # builds every machine, per-machine PASS/FAIL, non-zero e
 
 **Do not "tidy" the leading `call` out of the `blender` script.** npm runs
 scripts through `cmd.exe /d /s /c`, and `/s` strips the outer quotes of a
-command that STARTS with a quote — so a script beginning `"C:\Program
-Files\...lender.exe"` dies with `'C:\Program' is not recognized` before
+command that STARTS with a quote — so a script beginning with a quoted
+path dies with `'C:\Program' is not recognized` before
 Blender is ever launched. It did, for however long the path has had forward
 slashes in it: the gate was exiting 1 without building anything, which is
 ASTRA §8's "a gate over an empty set passes forever" wearing a different hat.
