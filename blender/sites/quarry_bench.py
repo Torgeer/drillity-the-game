@@ -248,7 +248,7 @@ def half_width(dist):
 
 def ndc_y(dist, height):
     """Where a point at (`dist`, `height`) lands vertically: -1 is the bottom of
-    the surface band, +1 the top, +0.28 the horizon."""
+    the surface band, +1 the top; the measured horizon is approximately -0.12."""
     top = EYE_Z + TOP_K * dist
     bot = EYE_Z - BOT_K * dist
     return 2.0 * (height - bot) / (top - bot) - 1.0
@@ -747,13 +747,21 @@ def build_plant():
         rot = (0.0, -pitch, ang)
         mx, my, mz = (x0 + x1) * 0.5, (y0 + y1) * 0.5, (z0 + z1) * 0.5
 
-        # trestles under the run, feet 1.6 m below grade (see the crusher legs)
+        # NOT SOURCED — the gantry section and footing depth are authored plant
+        # geometry. Derive support tops from that section, rather than another
+        # independent height: the previous tz - 0.9 left every trestle detached.
+        gantry_depth = 0.55
+        footing_z = -1.6
+        # Vertical intersection with the underside of the pitched box at its
+        # centreline; section thickness is measured normal to the run.
+        underside_offset = gantry_depth * 0.5 / math.cos(pitch)
         for t in range(5):
             f = (t + 0.5) / 5.0
             tz = z0 + dz * f
-            S.tube('belt%d-trestle-%d' % (k, t), 0.16, tz + 1.6 - 0.9, S.MAT_DARK,
-                   loc=(x0 + dx * f, y0 + dy * f, -1.6), sides=6)
-        S.box('belt%d-gantry' % k, (length, 1.5, 0.55), S.MAT_DARK,
+            S.tube('belt%d-trestle-%d' % (k, t), 0.16,
+                   tz - underside_offset - footing_z, S.MAT_DARK,
+                   loc=(x0 + dx * f, y0 + dy * f, footing_z), sides=6)
+        S.box('belt%d-gantry' % k, (length, 1.5, gantry_depth), S.MAT_DARK,
               loc=(mx, my, mz), rot=rot)
         # THE BELT AND ITS SKIRTING ARE ONE OBJECT, AND THAT IS A DECISION.
         # [MINSYS-DUST] specifies "full-length skirting" — the continuous rubber
@@ -768,8 +776,13 @@ def build_plant():
         S.box('belt%d-belt' % k, (length, 1.30, 0.34), S.MAT_RUBBER,
               loc=(mx, my, mz + 0.44), rot=rot)
         for e, (ex, ey, ez) in enumerate(((x0, y0, z0), (x1, y1, z1))):
-            S.tube('belt%d-drum-%d' % (k, e), 0.34, 1.4, S.MAT_STEEL,
-                   loc=(ex, ey, ez + 0.44), rot=(math.pi * 0.5, 0.0, ang), sides=10)
+            drum_width = 1.4                 # NOT SOURCED — authored plant width
+            # tube() starts at its base. Centre the drum across the belt by
+            # offsetting that base half a width opposite its rotated +Z axis.
+            S.tube('belt%d-drum-%d' % (k, e), 0.34, drum_width, S.MAT_STEEL,
+                   loc=(ex - math.sin(ang) * drum_width * 0.5,
+                        ey + math.cos(ang) * drum_width * 0.5, ez + 0.44),
+                   rot=(math.pi * 0.5, 0.0, ang), sides=10)
 
         # ── the transfer point, and the misting cannon on it ────────────────
         # [MINSYS-DUST] puts sprays "at feed chutes, crusher inlets and transfer
@@ -852,7 +865,7 @@ if __name__ == '__main__':
 
 
 # ═════════════════════════════════════════════════════════════════════════════
-# THE EDGE ARTEFACT — measured, not diagnosed, and it is NOT this file's
+# THE EDGE ARTEFACT — historical captures; cause remains unverified
 #
 # Geometry from this model that reaches the outer ~6 % of the surface band's
 # WIDTH comes back as vertical coloured speckle along that edge. Measured:
@@ -862,19 +875,22 @@ if __name__ == '__main__':
 #   · the SAME FRAME with only `site:quarry-bench` set invisible has none of it
 #     (shots/qb-quarry-noglb.png). So it is this model's geometry that triggers
 #     it;
-#   · it did NOT move when the conveyors were rewritten twice and repositioned,
-#     which is what rules out any one object as the cause. It is positional, not
-#     object-specific.
+#   · it did NOT move when the conveyors were rewritten twice and repositioned.
+#     That supports a screen-position dependency, but does not establish which
+#     renderer, material or geometry operation causes it.
 #
 # The surface band is a SCISSORED region of one shared context with a shared
 # post chain (src/core/renderer.js), and the procedural site never put a
 # high-contrast object against that boundary — nothing in the six-cone quarry
 # reached the frame edge at all. A post-process that samples its neighbourhood
-# across a scissor boundary would produce exactly this, and that is a renderer
-# question, not a modelling one. `src/core/renderer.js` is not this agent's
-# file; the finding is handed over rather than guessed at.
+# across a scissor boundary is one SUSPICION, not a diagnosed renderer defect.
+# `src/core/renderer.js` requires a live reproduction with the post chain
+# isolated before its ownership of the defect can be established.
 #
 # What this file does about it: keeps its own geometry inboard of about
 # NDC x -0.85. That is a mitigation, not a fix, and it should be removed when
 # the cause is found.
+# The 2026-09-05 WIP finalization corrected detached conveyor supports and
+# off-centre drums, verified in isolated CPU renders. Those renders do not
+# exercise the game's post chain and make no claim to resolve this artefact.
 # ═════════════════════════════════════════════════════════════════════════════
