@@ -1112,6 +1112,24 @@ def build_carriage(rack):
     working advance is far slower, and pullback slower still at 0.3-0.6 m/min.
     """
     sl = R.empty(R.NODE_SLIDE, 'carriage', rack, (0, RACK_AFT - 1.15, 0))
+    # THE CARRIAGE CONTRACT, and this node had NO extras at all.
+    # src/core/gltfRig.js makeDyn() reads exactly `travel_m` off
+    # `slides.get('carriage')`; without it setCarriage() evaluates
+    # `-0 * undefined`, writes NaN into a world matrix, and the machine
+    # silently disappears from the scene rather than throwing.  On this rig it
+    # also deleted the animation outright: "its travel IS the drilling
+    # animation", four lines above.
+    # The stroke is the beam minus what stands on it.  RACK_LEN 6.80 carries
+    # the carriage (0.94 deep), the vice/breakout at the nose and the tail
+    # stop; what is left is one ROD_LEN of clear travel, which is exactly the
+    # cross-check RACK_LEN was sized on ("a 4.6 m rod + carriage + vice +
+    # clearances needs ~6.5 m").  So the stroke IS the rod, and if ROD_LEN ever
+    # moves this follows it.
+    sl['travel_m'] = ROD_LEN                 # 4.60 m — one rod of clear travel
+    sl['axis'] = 'y'                         # along the raked beam, not world Z
+    sl['travel_min_m'] = RACK_AFT - 1.15 - ROD_LEN
+    sl['travel_max_m'] = RACK_AFT - 1.15
+    sl['rate_m_min'] = 55.0                  # [R] §3.8 rapid travel 36-73 m/min
 
     R.box('carriage-frame', (RACK_W + 0.30, 0.94, 0.40), R.MAT_DARK, sl,
           (0, 0, -0.14), bevel=0.02)
@@ -1160,6 +1178,15 @@ def build_carriage(rack):
            (math.pi / 2, 0, 0), sides=14)
     R.tube('swivel-inlet', 0.052, 0.16, R.MAT_STEEL, sl, (0.10, 0.62, 0.02),
            (0, 1.0, 0), sides=10)
+
+    # `mount:tool` — the string leaves the machine at the SAVER SUB, and this
+    # is the node src/core/gltfRig.js looks for by that exact string.  It was
+    # missing, so makeDyn() fell through to `slides.get('carriage')` and hung
+    # the tool at the carriage centre — 580 mm behind the sub, inside the
+    # rotary housing.  A working fallback hiding a fault (ASTRA.md §8).
+    # Parented to the spindle so the tool turns with it, and placed at the
+    # bottom of the saver sub (spindle-local -0.56 along its own axis).
+    R.empty(R.NODE_MOUNT, 'tool', spn, (0, -0.56, 0))
     return sl, spn
 
 
@@ -1214,6 +1241,21 @@ def build_entry():
     """
     # The string continuing into the ground at the entry angle. Just enough
     # below z = 0 to read as entering rather than stopping at the surface.
+    #
+    # THIS IS WHY THE MODEL SITS 0.439 m BELOW y = 0, AND IT IS CORRECT.
+    # `glbinfo` flags any machine more than 250 mm under the ground plane and
+    # ASTRA.md §7.5 lists this one at -0.439. A per-primitive sweep puts every
+    # millimetre of it here: a 0.62 m stub of rod at ENTRY_DEG = 16 deg reaches
+    # z = -0.425, and the rod radius takes it to -0.439. The next deepest thing
+    # on the machine is the rack nose plate at -0.123 and the rubber tracks at
+    # -0.038 — i.e. the rig itself sits ON grade, as it must, because it reacts
+    # its whole thrust through the anchor tray and two ground augers.
+    # An HDD rig is the one machine in this fleet whose hole is NOT under it:
+    # the string leaves the beam nose and goes into open ground 1.87 m ahead.
+    # Drawn stopping dead at the ground plane it reads as a rod resting on the
+    # grass, which is precisely the silhouette this method must not have.
+    # There is no entry pit here on purpose — see the docstring above; the pit
+    # is scene, not machine.
     R.tube('string-entry', ROD_OD / 2, 0.62, R.MAT_WORN, None,
            (0, HOLE_Y + 0.62 * math.cos(ENTRY), 0.62 * math.sin(ENTRY)),
            (math.pi - ENTRY, 0, 0), sides=12)
