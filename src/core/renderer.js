@@ -29,58 +29,101 @@ const STAGE_ASPECT_MAX = 9 / 16;    // widest portrait stage we ever show
 const STAGE_ASPECT_MIN = 9 / 19.5;  // tallest portrait stage we ever show
 
 /**
- * ═══ LOW'S ANTI-ALIASING — decided, with the measurements ══════════════════
+ * ═══ LOW'S ANTI-ALIASING — DECIDED FOR A 60 fps MID-RANGE PHONE ════════
  *
- * LOW declares `aa: 'none'` in contract.js, and this file used to answer that
- * by supersampling: `postScale = 1.15`, i.e. render the WHOLE chain at 1.15
- * linear and downsample on the final blit. That is 1.32x the fragments, paid
- * by every pass including the scene render — the expensive one — and it is
- * 32 % of LOW's fragment budget spent standing in for an AA pass.
+ * DECISION: LOW runs postScale 1.0 with the SMAA pass BUILT BUT DISABLED —
+ * i.e. it finally does what contract.js says it does, `aa: 'none'`. MEDIUM and
+ * HIGH keep SMAA. Nothing here is free, so LOW buys nothing.
  *
- * Measured (RTX 4070, headed Chrome, 390x844 @2, paired A/B, batched timer;
- * see .qa-post.mjs — an unbatched first attempt returned pass costs that were
- * exactly the 100 us performance.now() quantiser):
+ * This file has now overridden that one-word declaration twice, in opposite
+ * directions, and BOTH overrides rested on numbers that do not reproduce.
+ * What follows is what does.
  *
- *   LOW, native 585x1266   render 1.09-1.23 ms
- *     postScale 1.15         +0.10 to +0.14 ms   = 8.5-13 % of the render
- *                            hard edges -13.9 to -19.7 %   (4 runs)
- *   MEDIUM/HIGH, 780x1688  SMAAPass  -0.12 to +0.10 ms, median +0.03 ms
- *                            i.e. at or under this rig's noise floor
- *   MEDIUM, one clean paired pair at 1.32 Mpx:
- *     supersample +0.45 ms (26.3 %)   SMAA +0.067 ms (3.9 %)   — 6.7x
- *   HIGH at 2.06 Mpx:
- *     supersample +0.167 ms, hard edges -47.9 %
- *     SMAA        +0.108 ms, hard edges -68.1 %   — cheaper AND better
+ * ── WHAT WAS CLAIMED ───────────────────────────────────────────
+ * Round 1: `postScale = 1.15` — render the whole chain at 1.15 linear, 1.32x
+ * the fragments, paid by EVERY pass including the scene render. Round 2 threw
+ * that out for SMAA on every tier, on "SMAA +0.108 ms, hard edges -68.1 % —
+ * cheaper AND better".
  *
- * THE DESKTOP CANNOT SETTLE THE PHONE CASE AND THIS FILE SHOULD NOT PRETEND
- * IT CAN. This GPU is submit-bound, not fill-bound: 246 draw calls still ran
- * in 3.95 ms at 11.85 Mpx, so raising the fragment count barely moves the
- * clock and the supersample flatters itself here. The open question was
- * whether a fill-bound phone inverts the ordering. It does not — it deepens
- * it, for a reason the numbers above only hint at and the shapes make plain:
+ * ── WHAT REPRODUCES (.qa-post.mjs, 5 INTERLEAVED paired repeats per cell,
+ *    batched glFinish timer, RTX 4070 headed Chrome, 4 sessions, 3 tiers) ───
  *
- *   • the supersample's surcharge lands on SCENE fragments — PBR, shadow
- *     lookups, IBL, the transmission and AO passes — which are one to two
- *     orders of magnitude more expensive per fragment than anything SMAA
- *     does. Fill-bound is precisely the regime where that surcharge is worst.
- *   • SMAA is three full-screen passes of cheap texture work at 1.0x. Its
- *     cost is bandwidth on the cheapest fragments in the frame.
- *   • it also enlarges every RENDER TARGET by 32 %, including the half-float
- *     HDR pair — 11.9 -> 15.7 MB at LOW — which on a tiler is bandwidth, not
- *     just memory.
- *   • and 1.15 linear is only 1.32 samples per pixel. It is a very weak
- *     supersample, which is exactly what the -14 to -20 % edge figure says.
+ * 1. NEITHER AA CAN BE TIMED ON THIS MACHINE. The 2x2 (postScale x SMAA)
+ *    differences are 0.03-0.21 ms against a per-cell spread of 0.64-2.28 ms
+ *    across repeats — an order of magnitude inside the instrument's own noise.
+ *    Raising the canvas to 6.67 Mpx does not help: the frame is still 3.4 ms
+ *    at 151 draw calls. This GPU is submit-bound and cannot be pushed into the
+ *    fill-bound regime a phone lives in. The round-1 and round-2 timings were
+ *    read off exactly this noise; the earlier ones were not even paired.
  *
- * DECISION: LOW gets SMAA at postScale 1.0, like every other tier. The
- * renderer was already overriding `aa: 'none'` — it chose a supersample AA on
- * LOW's behalf. This chooses a cheaper and better one instead. The cost is
- * +5.9 MB of RGBA8 targets and +0.37 MB of SMAA lookup textures against LOW's
- * 35 MB budget; the saving is 32 % of every fragment LOW draws.
+ * 2. THE EDGE METRIC MEASURES BLUR, NOT ALIASING, so it cannot adjudicate
+ *    either. Whole-band luma-gradient histogram, surface band, per 1e4 px:
  *
- * If a future device probe finds a GPU where three dependent full-screen
- * passes are worse than 32 % more fragments, `__qaPostScale()` reproduces the
- * old configuration exactly (1.15 with SMAA disabled) so it can be re-argued
- * with numbers rather than reverted on a hunch.
+ *      tier / Mpx        cfg              hard    soft   meanAbsGrad
+ *      LOW  0.74     1.0  no SMAA        112.5   330.8      3.554
+ *                    1.0  SMAA           119.5   328.2      3.588
+ *                    1.15 no SMAA         69.9   327.3      2.655
+ *      MED  1.32     1.0  no SMAA        109.3   675.2      4.464
+ *                    1.0  SMAA           109.7   682.1      4.460
+ *                    1.15 no SMAA         64.9   453.4      3.268
+ *      HIGH 1.32     1.0  no SMAA        118.1   605.2      4.409
+ *                    1.0  SMAA           116.7   611.1      4.423
+ *                    1.15 no SMAA         68.2   410.4      3.158
+ *      LOW  6.67     1.0  no SMAA         62.0   247.0      3.005
+ *                    1.0  SMAA            63.1   248.1      3.038
+ *                    1.15 no SMAA         47.3   244.2      2.204
+ *
+ *    The supersample cuts MEAN gradient over the whole band by 25-28 % in
+ *    every session. That is not antialiasing — a 1.32-sample box downsample
+ *    softens ground texture, dust and gravel equally with silhouettes. The
+ *    "-68.1 % hard edges" that justified round 2 was this same metric reading
+ *    a global blur.
+ *
+ *    SMAA moves all three figures by under 2 % WITH NO CONSISTENT SIGN across
+ *    four sessions (+6.2, +0.3, -1.2, +1.8 % hard). It is not inert — the
+ *    paired per-pass A/B charges it 0.175 ms at 0.74 Mpx and 0.708 ms at
+ *    6.67 Mpx — it is doing the right thing: edge-directed AA preserves
+ *    texture, and this scene's gradient budget is dominated by ground texture.
+ *    A whole-band histogram is the wrong instrument for it, and no better one
+ *    has been built. DO NOT quote an edge percentage for SMAA from this rig.
+ *
+ * 3. WHAT IS NOT NOISE — the per-pass paired A/B, which does survive:
+ *
+ *      SMAAPass, LOW at 0.74 Mpx (the phone's real LOW canvas)  0.175 ms
+ *                                                              = 4.7 % of frame
+ *      SMAAPass, LOW at 6.67 Mpx                               0.708 ms
+ *                                                              = 21 % of frame
+ *
+ *    The pct-of-frame quadruples with resolution. That is the fill-bound
+ *    direction, on the tier whose entire purpose is headroom.
+ *
+ * ── SO THE DECISION RESTS ON WHAT IS DETERMINISTIC ─────────────────────
+ *
+ *   • A mid-range phone at LOW renders 0.74 Mpx (390x844 CSS, dprCap 1.5) —
+ *     the pc1 LOW row above IS the phone case, not an extrapolation of it.
+ *   • postScale 1.15 costs 32 % more fragments through the SCENE render —
+ *     PBR, shadow lookups, IBL, the AO prepass — which are one to two orders
+ *     of magnitude dearer per fragment than anything SMAA touches, and it
+ *     grows every render target by 32 % including the half-float HDR pair
+ *     (11.9 -> 15.7 MB at LOW). Fill-bound is the regime where that is worst.
+ *   • SMAA is three DEPENDENT full-screen passes. On a tile-based mobile GPU
+ *     each one is a full framebuffer resolve and re-read — the worst shape
+ *     there is for a tiler — plus 0.37 MB of lookup textures.
+ *   • LOW is the tier a device drops to because it cannot afford the frame.
+ *     Spending a measured 4.7 % of that frame on an effect this project has
+ *     never once been able to see is not a trade; it is a habit.
+ *
+ * The one-word field in contract.js was right the whole time, and both
+ * overrides were the renderer quietly deciding on another module's behalf
+ * (HANDOFF §8A). LOW: no AA. MEDIUM/HIGH: SMAA, where `aa: 'smaa'` asks for
+ * it and the headroom exists.
+ *
+ * TO RE-ARGUE THIS, you need an instrument this repo does not have: a
+ * fill-bound device (a real phone, or a GPU that can be starved), and an edge
+ * metric restricted to GEOMETRIC silhouettes — a depth/normal discontinuity
+ * mask — rather than a whole-band luma histogram. `__qaPostScale()` still
+ * reproduces the round-1 supersample exactly, and `smaaPass.enabled` is the
+ * only thing standing between LOW and round 2, so both are one line away.
  */
 const POST_SCALE_RETIRED_LOW = 1.15;   // what LOW used to supersample at
 
@@ -140,6 +183,93 @@ const CAMERA_MODES = {
    channel-split (doubles as the seam defocus) → filmic grade in linear →
    seam glow → ACES → sRGB → S-curve → vignette → grain → letterbox.
    ═══════════════════════════════════════════════════════════════════════════ */
+/**
+ * ═══ THE SEAM, MEASURED — AND WHAT IS AND IS NOT THIS FILE'S DOING ═══════
+ *
+ * research/18: surface and cross-section are ONE CONTINUOUS SCENE, "no
+ * divider, no seam, no visible split". GAMEDESIGN §1 asks for the same thing.
+ * `.qa-seam.mjs` turns that sentence into numbers off the real framebuffer at
+ * 390x844 @2, warm, chrome live. Latest run: shots/t2-seam.json (dth, cfa,
+ * auger) and shots/t1-seam.json (dth, cfa, rockbolt).
+ *
+ * ── THE GRADE PASS IS NO LONGER THE PROBLEM — A/B, each term zeroed ─────
+ *
+ *   seam lip's share of the step   dth 0.28 · cfa 0.27 · auger 0.36 luma
+ *                                  (baseStep 95.0/103.5/105.5 vs lipFreeStep
+ *                                   95.3/103.8/105.9 — render it with
+ *                                   uSeamStrength = 0 and the step does not
+ *                                   move)
+ *   vignette across the seam       surface x0.886 / section x0.936 (dth)
+ *                                  x0.889 / x0.898 (cfa)
+ *                                  x0.897 / x0.923 (auger)
+ *                                  — within 0.5-5.4 %, continuous.
+ *                                  It was x0.657, a 0.61-stop step in ONE
+ *                                  pixel, before the single-ellipse rewrite.
+ *   warm reach into the surface    0 to 0.5 px on the two open-air methods
+ *
+ * So of a 95-107 luma step, this file contributes about 0.3. Do not spend
+ * another round inside the grade shader looking for the seam.
+ *
+ * ── WHAT THE STEP ACTUALLY IS ──────────────────────────────────
+ *
+ *   mean luma 3-12 px above / below the seam, lip rows excluded:
+ *     dth    52.4 -> 98.9   (+46.5, 1.89x)
+ *     cfa    38.2 -> 139.8  (+101.6, 3.66x)
+ *     auger  — stepL +106.9
+ *     rockbolt 17.2 -> 107.2 (+90.0, 6.23x)   — underground: the surface band
+ *                                              is a tunnel at envIntensity
+ *                                              0.15, the cut is lit at 0.56
+ *
+ *   THE TWO BANDS ARE LIT BY DIFFERENT SUNS. Projected into each band's own
+ *   screen space:
+ *     surface keySun      az 79.9-103.9°   el 14.8-16.2°   #ffe0a6 (warm)
+ *     section sectionKey  az 150.8°        el 49.3°        #e8e5dc (neutral)
+ *     → 47-71° apart in azimuth, 33-35° in elevation. Golden hour above the
+ *       line, near-noon below it.
+ *
+ *   THERE IS NO AERIAL PERSPECTIVE BELOW THE SEAM AT ALL.
+ *     scene.fog         exp2, density 0.0052-0.027
+ *     sectionScene.fog  null
+ *     env intensity     0.62 surface / 0.56 section (0.15 / 0.56 underground)
+ *
+ *   BAND EXPOSURE IS NOT MATCHED. section/surface mean luma 1.03 (dth),
+ *   1.20 (cfa), 1.54 (auger), 1.61 (rockbolt); the section's p05 floor is
+ *   1.9-4.2x the surface's, i.e. the cut has no deep shadow.
+ *
+ * All four live in core/env.js (`keySun` ≈:1336, `sectionKey` ≈:1379), not
+ * here. They are the seam.
+ *
+ * ── AND THE THREE GEOMETRIC CLAIMS, WHICH ARE THIS FILE'S ──────────────
+ *
+ * Identical on every method measured, because they are camera properties:
+ *
+ *   collarOffsetPx   62.44 px    the borehole axis (world 0,0,0) projects to
+ *                                x 257.4 in the surface band; the section
+ *                                camera is centred on it and draws it at
+ *                                x 195. GAMEDESIGN §1's invariant — "the
+ *                                borehole in the section lines up horizontally
+ *                                with the mast above it" — is out by 16.0 %
+ *                                OF THE STAGE WIDTH. The hero camera's 3/4
+ *                                framing is deliberate; this consequence of it
+ *                                does not appear to be.
+ *   groundAtSeamPx   -22.81 px   the world ground plane at the collar projects
+ *                                22.8 px ABOVE the seam, so the cut opens
+ *                                below where the ground is.
+ *   scaleRatio       2.81x       surface 54.58 CSS px/m at the collar against
+ *                                the section's 19.42. A rod crossing the seam
+ *                                changes size by 2.81x.
+ *
+ * scaleRatio is the hard one and it is a genuine design tension, not an
+ * oversight: 19.42 px/m is not free to move — world/geology.js lays its
+ * gutter, ruler and 19.4 px/m out against the REFERENCE aspect and
+ * `adoptCameraScale()` rejects a camera more than 35 % off it (see
+ * updateSectionFrustum below). Matching at the collar the other way needs the
+ * hero camera at ~39 m instead of 14 m, which would shrink the machine to
+ * nothing. The reference frame gets both because its rig is genuinely far
+ * away. Whoever takes this needs a decision, not a patch — and it is worth
+ * noting that collarOffsetPx and groundAtSeamPx do NOT depend on it and can
+ * be fixed independently.
+ */
 const GradeShader = {
   name: 'DrillityGrade',
   uniforms: {
@@ -1252,15 +1382,16 @@ export function createRenderer(ctx) {
       gradePass = null;
     }
 
-    /* ── SMAA — every tier ──────────────────────────────────────────
-       LOW included. `q.aa` still says 'none' there; that field records the
-       tier's INTENT ("no expensive AA"), and the cheapest AA this chain can
-       buy is measurably SMAA, not the supersample this file used to
-       substitute. See POST_SCALE_RETIRED_LOW for the numbers. The pass is
-       built regardless so it can be A/B'd against a forced supersample. */
+    /* ── SMAA — MEDIUM and HIGH. LOW honours its own `aa: 'none'` ────
+       The pass is BUILT on every tier, so the QA rigs can still A/B it, but
+       on LOW it is built DISABLED. contract.js declares `aa: 'none'` there
+       and this file has now overridden that declaration twice — first with a
+       supersample, then with SMAA — each time on numbers that did not
+       reproduce. See LOW'S ANTI-ALIASING at the top of this file. */
     {
       try {
         smaaPass = new SMAAPass(deviceW, deviceH);
+        smaaPass.enabled = q.aa !== 'none';
         composer.addPass(smaaPass);
       } catch (e) {
         warnOnce('SMAA unavailable.', e);

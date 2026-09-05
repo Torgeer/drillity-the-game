@@ -221,6 +221,55 @@ for (const mid of METHODS) {
         surfaceEnvIntensity: +(c.scene.environmentIntensity ?? 1).toFixed(3),
         sectionEnvIntensity: +(c.sectionScene.environmentIntensity ?? 1).toFixed(3),
       },
+      /* ── CONTINUITY: does the cut open WHERE THE GROUND IS? ───────────
+         research/18 point 1 and GAMEDESIGN §1 both ask for one continuous
+         scene — "the borehole in the section lines up horizontally with the
+         mast above it". That is three separate claims and each is a number:
+
+           groundAtSeamPx  the world ground plane (y=0) at the borehole,
+                           projected through the SURFACE camera, in CSS px
+                           from the seam. 0 = the cut opens exactly where the
+                           ground is. Positive = the ground is BELOW the seam,
+                           i.e. the section starts in mid-air.
+           collarOffsetPx  the borehole axis (world x=0,z=0) projected into
+                           the surface band, minus the section band's own
+                           borehole x. Non-zero = the hole is not under the
+                           mast.
+           scaleRatio      surface CSS px per metre AT THE COLLAR over the
+                           section's 19.4 px/m. 1.0 = a rod crossing the seam
+                           does not change size. A perspective band and an
+                           ortho band can only match on one plane; the collar
+                           is the plane that has to match. */
+      continuity: (() => {
+        const T = c.THREE;
+        if (!T) return null;
+        const v = new T.Vector3();
+        const toBand = (cam, band, x, y, z) => {
+          v.set(x, y, z).project(cam);
+          return { x: band.x + (v.x * 0.5 + 0.5) * band.w,
+                   y: band.y + (1 - (v.y * 0.5 + 0.5)) * band.h,
+                   ndcY: +v.y.toFixed(5) };
+        };
+        const g0 = toBand(c.camera, b.surface, 0, 0, 0);      // collar, ground level
+        const g1 = toBand(c.camera, b.surface, 0, 1, 0);      // one metre up the mast
+        const s0 = toBand(c.sectionCamera, b.section, 0, 0, 0);
+        const s1 = toBand(c.sectionCamera, b.section, 0, -1, 0);
+        const surfPxPerM = Math.abs(g0.y - g1.y);
+        const sectPxPerM = Math.abs(s0.y - s1.y);
+        return {
+          groundCssY: +g0.y.toFixed(2),
+          seamCssY: b.section.y,
+          groundAtSeamPx: +(g0.y - b.section.y).toFixed(2),
+          collarSurfaceX: +g0.x.toFixed(2),
+          collarSectionX: +s0.x.toFixed(2),
+          collarOffsetPx: +(g0.x - s0.x).toFixed(2),
+          surfPxPerM: +surfPxPerM.toFixed(2),
+          sectPxPerM: +sectPxPerM.toFixed(2),
+          scaleRatio: sectPxPerM > 0.01 ? +(surfPxPerM / sectPxPerM).toFixed(3) : null,
+          cameraFovDeg: +c.camera.fov.toFixed(2),
+          cameraPos: vec(c.camera.position),
+        };
+      })(),
       grade: gp ? {
         exposure: +gp.uniforms.uExposure.value.toFixed(4),
         seamY: +gp.uniforms.uSeamY.value.toFixed(5),
@@ -404,6 +453,7 @@ for (const mid of METHODS) {
       sectionViewMetres: +scene.sectionViewMetres.toFixed(2),
       sectionPxPerMetre: scene.sectionPxPerMetre,
     },
+    continuity: scene.continuity,
     grade: scene.grade,
     light: scene.light,
     air: scene.air,
