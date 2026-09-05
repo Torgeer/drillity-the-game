@@ -92,13 +92,46 @@ for (const spec of SPECS) {
     process.stdout.write(`  [retry ${a + 1}] wanted ${archOv}, got ${st.arch}\n`);
   }
 
+  /* --probe "x,y,z,r[,dx,dy,dz]" frames a sphere of radius r centred on a
+     world point, using renderer.focusOn(). This is a DIAGNOSTIC view, not a
+     review view: it is how you find out what a kit actually built when the
+     hero frame is ambiguous, without guessing from a 90 px slot. */
+  const PROBE = flag('probe', null);
+  if (PROBE) {
+    const p = PROBE.split(',').map(Number);
+    await page.evaluate((q) => {
+      const c = window.__DRILLITY, T = c.THREE;
+      if (window.__probeMesh) c.scene.remove(window.__probeMesh);
+      const m = new T.Mesh(new T.SphereGeometry(q[3] || 20, 8, 6), new T.MeshBasicMaterial());
+      m.position.set(q[0], q[1], q[2]);
+      m.visible = false;
+      c.scene.add(m);
+      window.__probeMesh = m;
+      c.renderer.focusOn(m, { padding: 1.0, dir: q.length > 4 ? [q[4], q[5], q[6]] : undefined, duration: 0 });
+    }, p);
+  }
+
   // let it live a moment so wind, dust and the machine are moving
   await sleep(1400);
 
-  await page.evaluate(() => { const u = document.getElementById('ui'); if (u) u.style.visibility = 'hidden'; });
+  /* Hide EVERY DOM element that is not an ancestor of the canvas — not just
+     #ui. Another agent's error banner (the glTF "machine model unavailable"
+     card) is mounted outside #ui and covered a third of two review frames
+     before this was general. A shot of the bands must contain only the bands. */
+  await page.evaluate(() => {
+    const cv = document.querySelector('canvas');
+    window.__hidden = [];
+    for (const el of document.body.querySelectorAll('body > *')) {
+      if (cv && el.contains(cv)) continue;
+      window.__hidden.push([el, el.style.visibility]);
+      el.style.visibility = 'hidden';
+    }
+    const u = document.getElementById('ui');
+    if (u && !window.__hidden.some((h) => h[0] === u)) { window.__hidden.push([u, u.style.visibility]); u.style.visibility = 'hidden'; }
+  });
   await sleep(320);
   await page.screenshot({ path: `shots/${TAG}-${label}.png`, animations: 'allow' });
-  await page.evaluate(() => { const u = document.getElementById('ui'); if (u) u.style.visibility = ''; });
+  await page.evaluate(() => { for (const [el, v] of (window.__hidden || [])) el.style.visibility = v; });
 
   const m = await page.evaluate(() => {
     const c = window.__DRILLITY, T = c.THREE;
@@ -163,6 +196,33 @@ for (const spec of SPECS) {
       grid,
     };
   });
+
+  /* --ray "px,py[;px,py...]" — pixel coordinates in the SAVED PNG. Raycasts
+     the scene from the live camera and names what is actually there, which is
+     the only way to stop guessing at a shape in a screenshot. */
+  const RAY = flag('ray', null);
+  if (RAY) {
+    const hits = await page.evaluate((spec) => {
+      const c = window.__DRILLITY, T = c.THREE;
+      const cv = document.querySelector('canvas');
+      const rc = new T.Raycaster();
+      const out = [];
+      for (const pair of spec.split(';')) {
+        const [px, py] = pair.split(',').map(Number);
+        const ndc = new T.Vector2((px / cv.width) * 2 - 1, -(py / cv.height) * 2 + 1);
+        rc.setFromCamera(ndc, c.camera);
+        const list = rc.intersectObject(c.scene, true).slice(0, 4).map((h) => ({
+          name: h.object.name || h.object.type,
+          parent: (h.object.parent && h.object.parent.name) || null,
+          dist: +h.distance.toFixed(1),
+          mat: (h.object.material && h.object.material.name) || null,
+        }));
+        out.push({ px, py, list });
+      }
+      return out;
+    }, RAY);
+    process.stdout.write(`  RAY ${JSON.stringify(hits)}\n`);
+  }
 
   report.sites[label] = m;
   process.stdout.write(

@@ -471,6 +471,9 @@ const ARCHETYPES = {
     /* "no edge of the property in sight" — the benches ARE the horizon, so the
        region's ridge is pulled right down to stop it competing with them. */
     dress: { spruce: 0, birch: 0, rock: 0.9, stone: 1.2, grass: 0.06, scree: 1.5, scrub: 0.15, ice: 0.2 },
+    /* The bench floor is 44 m before the first batter stands out of it.
+       Everything scattered outside that is inside solid rock. */
+    dressMaxR: 40,
   },
   'tunnel-portal': {
     kit: 'portal', plane: 'surface', groundKind: 'gravel', pad: 10.0, farAmp: 0.9,
@@ -1404,6 +1407,46 @@ function torus(T, R, t, rs, ts, arc, x, y, z, rx = 0, ry = 0, rz = 0) {
   const g = new T.TorusGeometry(R, t, rs, ts, arc);
   if (rx || ry || rz) g.applyMatrix4(new T.Matrix4().makeRotationFromEuler(new T.Euler(rx, ry, rz)));
   g.translate(x, y, z);
+  return g;
+}
+
+/**
+ * WORLD-SPACE UVs — the fix for every large flat prop in this file.
+ *
+ * `BoxGeometry` carries uv 0..1 per face whatever its size, and the prop pool
+ * hands that straight to the material. So a 22 m bench face and a 0.3 m bolt
+ * plate each get exactly one tile of the gravel map: the bench renders as a
+ * single stretched smear with no surface at all, and the bolt plate renders as
+ * one enormous cobble. Both were visible in the round-4 baseline —
+ * shots/c1-open-pit-bench.png is a flat tan wall filling the frame, and
+ * shots/b0-tunnel-portal.png is cobbles a metre across.
+ *
+ * This projects uv from the vertex's own WORLD position on its dominant normal
+ * axis, at a stated tile size in metres. Two consequences beyond the obvious:
+ * adjacent boxes share the projection, so a wall built from 40 segments has a
+ * continuous surface across the joints rather than 40 restarts; and the tile
+ * size becomes an authored quantity in metres, which is checkable against the
+ * thing being drawn — 2.5 m for blasted rock, 1.2 m for concrete.
+ *
+ * Call it AFTER the geometry is in world position and BEFORE put(): the prop
+ * pool only fabricates a uv attribute when there is none, and never rewrites
+ * one that is already there.
+ */
+function worldUV(T, g, tile = 2.5) {
+  const pos = g.attributes.position, nor = g.attributes.normal;
+  if (!pos || !nor) return g;
+  const uv = new Float32Array(pos.count * 2);
+  const inv = 1 / Math.max(0.05, tile);
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+    const ax = Math.abs(nor.getX(i)), ay = Math.abs(nor.getY(i)), az = Math.abs(nor.getZ(i));
+    let u, v;
+    if (ay >= ax && ay >= az) { u = x; v = z; }        // facing up or down
+    else if (ax >= az) { u = z; v = y; }               // facing along x
+    else { u = x; v = y; }                             // facing along z
+    uv[i * 2] = u * inv; uv[i * 2 + 1] = v * inv;
+  }
+  g.setAttribute('uv', new T.BufferAttribute(uv, 2));
   return g;
 }
 
@@ -2410,6 +2453,49 @@ export function createTerrain(ctx) {
       return g;
     };
 
+    /**
+     * A MASS OF BROKEN ROCK, not a box.
+     *
+     * Every rock feature in this file was one axis-aligned `box` per tier, and
+     * the round-4 diagnostic (shots/p1-tunnel-portal.png, the whole portal
+     * framed from above) shows what that renders as: a wall of smooth pale
+     * cardboard cartons with ruled edges, stacked. No texture can rescue it,
+     * because the failure is the SILHOUETTE — a blasted cut slope's outline is
+     * broken at every scale and a box's is straight at every scale.
+     *
+     * So a mass is `n` overlapping blocks inside the envelope (w, h, d),
+     * each one yawed, tilted and scaled off a seeded hash, and each one a
+     * different value. Overlap is deliberate and generous: the blocks have to
+     * read as one mass with a ragged edge, not as a pile of separate rocks.
+     * Cost is `n` boxes into the same merged `earth` mesh as the ground — no
+     * extra draw call, ~12·n triangles, and it is the difference between rock
+     * and packaging.
+     *
+     * `seed` must differ per call site or two masses come out identical.
+     */
+    const rockMass = (put2, cx, cy, cz, w, h, d, yaw, colHex, seed, n = 10, cls = 'earth') => {
+      const base = new T.Color(colHex);
+      for (let i = 0; i < n; i++) {
+        const r1 = hash2(i * 1.7 + seed, seed * 0.37, 11);
+        const r2 = hash2(i * 2.9 + seed, seed * 0.71, 23);
+        const r3 = hash2(i * 4.1 + seed, seed * 1.13, 37);
+        const r4 = hash2(i * 5.3 + seed, seed * 1.79, 51);
+        // blocks are big fractions of the envelope, so they interlock
+        const bw = w * (0.52 + r1 * 0.44);
+        const bh = h * (0.52 + r2 * 0.46);
+        const bd = d * (0.60 + r3 * 0.48);
+        const ox = (r2 - 0.5) * (w - bw) * 0.9;
+        const oy = (r3 - 0.5) * (h - bh) * 0.8;
+        const oz = (r4 - 0.5) * (d - bd) * 0.7;
+        const px = cx + Math.cos(yaw) * ox - Math.sin(yaw) * oz;
+        const pz = cz + Math.sin(yaw) * ox + Math.cos(yaw) * oz;
+        const g = box(T, bw, bh, bd, px, cy + oy, pz,
+          (r1 - 0.5) * 0.22, yaw + (r4 - 0.5) * 0.55, (r3 - 0.5) * 0.20);
+        put2(worldUV(T, g, 2.2),
+          base.clone().multiplyScalar(0.72 + 0.46 * r1).getHex(), cls);
+      }
+    };
+
     /* ── URBAN PLOT ─────────────────────────────────────────────────────────
        The archetype the owner named as the clearest miss, and the rubric names
        the same one: "a foundation job in a city is not a Nordic forest with a
@@ -2688,6 +2774,121 @@ export function createTerrain(ctx) {
         cone.translate(x, terrainHeight(x, z) + h * 0.35, z);
         put(cone, region.spoil, 'earth');
       }
+      /* ── ROUND 4: THE THREE THINGS §A.2 ASKS FOR THAT WERE NOT HERE ───────
+
+         shots/b0-infrastructure-corridor.png is a gravel plot with a fence,
+         a pipe stack and some cones. Nothing in it says LINE. §A.2's road case
+         names what does, and all three were missing:
+
+           the live carriageway   "a coned taper, lane closure and diversion
+                                   signage running past the works". The public
+                                   road IS the archetype — a corridor job is
+                                   defined by the fact that traffic is still
+                                   using the thing you are working on.
+           the logistics          "grab lorries queued on a one-way haul route,
+                                   with a wheel wash and a road sweeper —
+                                   corridor jobs are logistics-limited".
+           the compound           "a compound somewhere along the length, not
+                                   on the work".
+
+         §A.2's own negatives are respected: no numeric taper is drawn as a
+         labelled quantity (the doc marks traffic-management values NOT
+         SOURCED — the taper is drawn, never captioned), and this is the ROAD
+         case, so a tracked machine on a granular strip is legitimate. The rail
+         case would need a road-rail vehicle and is deliberately not faked. */
+
+      /* THE LIVE CARRIAGEWAY, running past on the far side of the embankment.
+         Two lanes of dark bituminous surfacing with a broken centre line and a
+         continuous edge line, laid ALONG the alignment — so the one strong
+         perspective line in the frame agrees with the direction of the work. */
+      for (let i = -9; i <= 9; i++) {
+        const [x, z] = along(i * 8.0, 15.5);
+        const y = terrainHeight(x, z);
+        const ry = Math.atan2(AX, AZ);
+        put(worldUV(T, box(T, 8.2, 0.16, 8.4, x, y + 0.10, z, 0, ry, 0), 3.0), 0x33363A, 'slab');
+        // centre line: broken, 2.6 m mark on a 8 m cycle
+        put(box(T, 0.13, 0.03, 2.6, x, y + 0.19, z, 0, ry, 0), 0xC9C6B4, 'slab');
+        // edge lines, continuous
+        for (const s of [-1, 1]) {
+          const [ex, ez] = along(i * 8.0, 15.5 + s * 3.7);
+          put(box(T, 0.10, 0.03, 8.4, ex, terrainHeight(ex, ez) + 0.19, ez, 0, ry, 0), 0xC9C6B4, 'slab');
+        }
+      }
+      /* THE TAPER that closes the nearside lane, marching along the line, and
+         the lit arrow board at the head of it. */
+      for (let i = 0; i < 11; i++) {
+        const [x, z] = along(-30 + i * 5.2, 12.6 - i * 0.42);
+        const y = terrainHeight(x, z);
+        put(new T.ConeGeometry(0.26, 0.78, 6).translate(x, y + 0.39, z), 0xE0562A, 'matte');
+        put(box(T, 0.20, 0.14, 0.20, x, y + 0.58, z), 0xE8E6DF, 'matte');
+        put(box(T, 0.50, 0.05, 0.50, x, y + 0.03, z), 0x2A2E33, 'rubber');
+      }
+      {
+        const [ax, az] = along(-36, 12.9);
+        const y = terrainHeight(ax, az);
+        put(box(T, 2.3, 1.4, 0.12, ax, y + 2.0, az, 0, Math.atan2(AX, AZ) + 1.57, 0), 0x1B2129, 'matte');
+        put(box(T, 2.1, 1.2, 0.05, ax + 0.09, y + 2.0, az, 0, Math.atan2(AX, AZ) + 1.57, 0), BRAND.amber, 'paint');
+        put(box(T, 0.16, 1.4, 0.16, ax, y + 0.7, az), 0x8B9199, 'metal');
+        put(box(T, 1.9, 0.22, 1.4, ax, y + 0.11, az), 0x3A3F44, 'rubber');
+      }
+
+      /* THE GRAB LORRY on the one-way haul route, loading arisings — §A.2's
+         "190 grab wagons over 13 days, peaking at 22 lorries per day". This is
+         the mid-ground machine research/18 point 4 asks for, and on a corridor
+         it is a road vehicle rather than a second rig, because the constraint
+         on this archetype is haulage and not drilling. */
+      {
+        const [gx, gz] = along(17.0, -4.0);
+        const c = at(gx, gz, Math.atan2(AX, AZ) + 1.57);
+        put(c(box(T, 8.8, 0.9, 2.55, 0, 1.15, 0)), 0x3A3F44, 'metal');           // chassis
+        put(c(box(T, 5.4, 1.5, 2.45, -1.4, 2.25, 0)), 0x2E5F7A, 'paint');        // body
+        put(c(box(T, 5.5, 0.20, 2.55, -1.4, 3.05, 0)), 0x24506A, 'paint');       // top rail
+        put(c(box(T, 2.4, 1.9, 2.45, 3.2, 2.15, 0)), 0x2E5F7A, 'paint');         // cab
+        put(c(box(T, 2.2, 0.9, 2.2, 3.2, 2.95, 0)), 0x1B2129, 'glass');
+        // the grab crane behind the cab, boom up, grab hanging over the body
+        put(c(cyl(T, 0.38, 0.42, 1.9, 10, 1.5, 2.25, 0)), 0x9AA0A6, 'metal');
+        put(c(box(T, 0.34, 3.4, 0.34, 1.5, 4.3, 0, 0, 0, 0.44)), 0x8A6F22, 'paint');
+        put(c(box(T, 3.0, 0.28, 0.28, 0.1, 5.6, 0, 0, 0, -0.30)), 0x8A6F22, 'paint');
+        put(c(cyl(T, 0.035, 0.035, 1.5, 5, -1.2, 4.7, 0)), 0x6E757C, 'metal');
+        put(c(box(T, 0.85, 0.75, 0.85, -1.2, 3.7, 0)), 0x5A6169, 'metal');       // the grab
+        for (const [wx, wz] of [[3.0, 1.25], [-1.5, 1.28], [-2.7, 1.28], [3.0, -1.25], [-1.5, -1.28], [-2.7, -1.28]]) {
+          put(c(cyl(T, 0.55, 0.55, 0.40, 12, wx, 0.55, wz, 0, 0, Math.PI / 2)), 0x141518, 'rubber');
+        }
+      }
+      /* THE WHEEL WASH the haul route needs before it rejoins the highway —
+         same legal reason as the urban plot's, and on a corridor it sits at
+         the one point where the strip meets the carriageway. */
+      {
+        const [wx, wz] = along(30.0, 4.0);
+        const y = terrainHeight(wx, wz);
+        const ry = Math.atan2(AX, AZ);
+        put(box(T, 6.0, 0.30, 4.0, wx, y + 0.14, wz, 0, ry, 0), 0x4A4E52, 'slab');
+        for (let i = 0; i < 8; i++) {
+          const [bx, bz] = along(30.0 - 1.6 + i * 0.44, 4.0);
+          put(box(T, 5.7, 0.10, 0.12, bx, terrainHeight(bx, bz) + 0.34, bz, 0, ry, 0), 0x8B9199, 'metal');
+        }
+        const [tx2, tz2] = along(30.0, 7.4);
+        put(box(T, 1.3, 1.5, 1.3, tx2, terrainHeight(tx2, tz2) + 0.75, tz2), 0x2F6A86, 'paint');
+      }
+
+      /* THE COMPOUND — "somewhere along the length, not on the work". Two
+         cabins, a fuel bowser and a stack of duct, set well down the line so
+         it reads as a separate place the corridor passes through. */
+      {
+        const [cx, cz] = along(-44.0, -13.0);
+        const c = at(cx, cz, Math.atan2(AX, AZ));
+        for (let i = 0; i < 2; i++) {
+          put(c(box(T, 6.0, 2.55, 2.44, 0, 1.30, i * 3.2)), i ? 0xD8DAD5 : 0x2F6A86, 'paint');
+          put(c(box(T, 6.1, 0.14, 2.5, 0, 2.62, i * 3.2)), 0x4A4F55, 'metal');
+          for (let w = -1; w <= 1; w++) put(c(box(T, 1.2, 0.85, 0.06, w * 2.0, 1.70, 1.25 + i * 3.2)), 0x1B2129, 'glass');
+        }
+        put(c(cyl(T, 0.95, 0.95, 3.0, 12, -5.4, 1.35, 1.6, 0, 0, Math.PI / 2)), 0xB33B2B, 'paint');
+        put(c(box(T, 3.2, 0.30, 1.4, -5.4, 0.15, 1.6)), 0x4A4F55, 'matte');
+        for (let i = 0; i < 4; i++) {
+          put(c(box(T, 2.4, 0.55, 0.55, 5.6, 0.30 + Math.floor(i / 2) * 0.58, -0.6 + (i % 2) * 0.62)), 0x8E969E, 'metal');
+        }
+      }
+
       // the site's own traffic management: cones down the working edge
       for (let i = -8; i <= 8; i++) {
         const [x, z] = along(i * 3.0, -6.0);
@@ -2733,32 +2934,102 @@ export function createTerrain(ctx) {
          The second thing §A.5 asks for, and the old kit had none of, is TWO
          drill classes on one bench: "the game draws one machine for both". The
          grade-control RC rig is here, on the pattern, behind the hero. */
-      const BENCH_H = 12.0, BENCH_W = 22.0;
-      for (let b = 0; b < 4; b++) {
-        const r = 30 + b * BENCH_W;
-        const n = Math.max(16, Math.round((TAU * r) / 15));
+      /* THE RINGS ARE SOLVED AGAINST THE FRAME, ONE AT A TIME.
+
+         hero sits at [7.60, 2.60, 9.90] with a 34-deg VERTICAL field, so the
+         top of the surface band is 17 deg above the sight line. A ring at
+         plan distance D with crest height H subtends atan((H - 2.6)/D). To
+         close the sky the OUTERMOST ring has to clear 17 deg and the inner
+         ones have to stay under it, or the near wall eats the whole frame —
+         which is exactly what the first attempt at this did (r 30, h 12, a
+         flat tan wall from edge to edge in shots/c1-open-pit-bench.png).
+
+           ring  radius  crest   viewing dist   elevation
+             0      44     11         56           8.5 deg
+             1      70     23         82          14.0 deg
+             2      96     35        108          16.7 deg
+             3     122     47        134          18.3 deg  ← closes the sky
+
+         Four benches at 12 m of lift on 26 m of width, which is inside §A.5's
+         "12-15 m benches, 20-40 m wide" for a large pit, and the eye reads
+         four crest lines stepping away instead of one wall. */
+      const BENCH_H = 12.0, BENCH_W = 26.0, BENCH_R0 = 44.0;
+      /* THE BACKING WALL — the guarantee, not the picture.
+
+         Four jittered rings of tangential boxes will always be able to open a
+         wedge of sky somewhere, and one did: a bright vertical spike beside
+         the mast in shots/c3-open-pit-bench.png and again in c4. Chasing the
+         individual gap is the wrong fix, because the next parameter change
+         reopens it somewhere else. So there is one CONTINUOUS, unjittered,
+         heavily overlapped ring at r = 150 standing 62 m tall behind
+         everything, dark and hazed. It closes the horizon by construction —
+         "no edge of the property in sight" becomes a property of the geometry
+         rather than of the tuning — and it costs 40 boxes in the mesh that is
+         already being merged. */
+      for (const [r, n, wh, tint] of [[150, 40, 120, 0.50], [230, 44, 190, 0.42]]) {
         for (let i = 0; i < n; i++) {
           const a = (i / n) * TAU;
           const px = Math.cos(a) * r, pz = Math.sin(a) * r;
+          put(worldUV(T, box(T, (TAU * r) / n + 10.0, wh, 14, px, terrainHeight(px, pz) + wh * 0.5 - 12, pz, 0, a + Math.PI / 2, 0), 4.0),
+            new T.Color(region.colA).multiplyScalar(tint).getHex(), 'earth');
+        }
+      }
+      for (let b = 0; b < 4; b++) {
+        const r = BENCH_R0 + b * BENCH_W;
+        const n = Math.max(18, Math.round((TAU * r) / 15));
+        const h = BENCH_H * (b + 1) - 1.0;
+        for (let i = 0; i < n; i++) {
+          const a = (i / n) * TAU;
+          /* Per-segment radial jitter. A batter blasted out of rock is not a
+             turned cylinder, and without this the four rings read as four
+             lathe operations. +-0.9 m at 15 m of segment is about 3.5 deg of
+             plan wander, which is roughly what a real crest line does. */
+          const jr = (hash2(i * 3.7, b * 11.3, 21) - 0.5) * 1.2;
+          const px = Math.cos(a) * (r + jr), pz = Math.sin(a) * (r + jr);
           const y = terrainHeight(px, pz);
-          const seg = (TAU * r) / n + 1.6;              // overlap so no gap opens
-          /* THE BATTER AND THE BERM, which is the shape §A.5 names: a steep
-             face, a flat catch bench, then the next face. Two boxes per ring
-             — the face standing on the level below, and the berm slab on top
-             of it — is the cheapest honest read of it, and both merge into the
-             same `earth` mesh as the ground. */
-          const h = BENCH_H * (b + 1);
-          put(box(T, seg, h, 8.0, px, y + h * 0.5 - 0.8, pz, 0, -a, 0),
-            b % 2 ? region.rock : region.colA, 'earth');
-          put(box(T, seg, 0.9, BENCH_W - 8.0,
-            px + Math.cos(a) * (BENCH_W * 0.5), y + h - 0.35, pz + Math.sin(a) * (BENCH_W * 0.5), 0, -a, 0),
-            region.spoil, 'earth');
+          const seg = (TAU * r) / n + 3.0;              // overlap so no gap opens
+          /* VALUE, NOT TEXTURE — this wall is 56 to 134 m away.
+
+             The first attempt at it tiled a gravel map at 2.6 m, which at that
+             range is 2-4 px a tile: the mip chain averages it to its own mean
+             and the wall renders as one flat field, which is what
+             shots/c2-open-pit-bench.png is a picture of. The three colours it
+             was built from make it worse — andes' rock (#8A7D68), colA
+             (#7D6B52) and spoil (#7A6A52) are within 12 % of each other in
+             luminance, so alternating them changed nothing anyone could see.
+
+             What reads at 60-130 m is FORM: the value step between a vertical
+             face standing in its own shade and a horizontal catch bench facing
+             open sky. On a real pit that is about 2.3:1, and it is authored
+             here as one — face x0.58, bench top x1.30 — instead of being left
+             to three albedos that happen to be the same colour.
+
+             The face is also split into FLITCHES. §A.5: benches "excavated in
+             flitches of about 2.5-3 m", and those horizons are visible on
+             every pit wall there is. Three sub-bands per 12 m bench, a few
+             percent of value apart, give the wall internal structure that
+             survives all the way to the back of the hole, for three boxes. */
+          const faceH = h + 24;
+          const rough = 0.90 + 0.20 * hash2(i * 5.1, b * 7.9, 33);
+          const faceCol = new T.Color(b % 2 ? region.rock : region.colA);
+          put(worldUV(T, box(T, seg, faceH, 9.0, px, y + h - faceH * 0.5, pz, 0, a + Math.PI / 2, 0), 2.6),
+            faceCol.clone().multiplyScalar(0.58 * rough).getHex(), 'earth');
+          for (let f = 0; f < 3; f++) {
+            const fy = y + h - 1.3 - f * (BENCH_H / 3);
+            put(worldUV(T, box(T, seg, BENCH_H / 3 - 0.6, 9.5, px, fy, pz, 0, a + Math.PI / 2, 0), 2.2),
+              faceCol.clone().multiplyScalar((0.66 + f * 0.055) * rough).getHex(), 'earth');
+          }
+          // the catch bench: dozed fines, flat to the sky. The pale half of
+          // the pair, and the line the eye counts benches by.
+          put(worldUV(T, box(T, seg, 1.2, BENCH_W - 9.0,
+            px + Math.cos(a) * (BENCH_W * 0.5), y + h - 0.4, pz + Math.sin(a) * (BENCH_W * 0.5), 0, a + Math.PI / 2, 0), 3.2),
+            new T.Color(region.spoil).multiplyScalar(1.30).getHex(), 'earth');
           /* the safety berm along the crest of every bench — a real rule, and
              the line that makes a bench read as a bench at 60-130 m */
           if (i % 2 === 0) {
-            put(box(T, seg * 0.9, 1.5, 1.9,
-              px + Math.cos(a) * (BENCH_W - 9.0), y + h + 0.6, pz + Math.sin(a) * (BENCH_W - 9.0), 0, -a, 0),
-              region.rock, 'earth');
+            put(worldUV(T, box(T, seg * 0.92, 1.7, 2.2,
+              px + Math.cos(a) * (BENCH_W - 10.0), y + h + 0.75, pz + Math.sin(a) * (BENCH_W - 10.0), 0, a + Math.PI / 2, 0), 1.8),
+              new T.Color(region.rock).multiplyScalar(1.12).getHex(), 'earth');
           }
         }
       }
@@ -2766,14 +3037,41 @@ export function createTerrain(ctx) {
          situated at the side of the pit, forming a ramp." It cuts across the
          benches at a constant grade, which is the one diagonal in an image
          otherwise made entirely of horizontals. */
-      for (let i = 0; i < 26; i++) {
-        const a = 1.15 + i * 0.075;
-        const r = 30 + i * 3.4;
+      for (let i = 0; i < 30; i++) {
+        const a = 1.15 + i * 0.068;
+        const r = BENCH_R0 + i * 2.6;
         const px = Math.cos(a) * r, pz = Math.sin(a) * r;
-        const y = terrainHeight(px, pz) + i * 1.85;
-        put(box(T, 13.0, 1.1, 16.0, px, y, pz, 0, -a, 0), region.spoil, 'earth');
-        put(box(T, 1.6, 1.4, 15.0, px + Math.cos(a) * 6.2, y + 1.1, pz + Math.sin(a) * 6.2, 0, -a, 0),
+        const y = terrainHeight(px, pz) + i * 1.62;
+        /* X is TANGENTIAL after the a+PI/2 rotation, so it is the direction of
+           travel: 16 m of road along the climb (the boxes are 3-8 m apart, so
+           they overlap heavily) by 13 m of running width across it. */
+        put(worldUV(T, box(T, 16.0, 1.4, 13.0, px, y, pz, 0, a + Math.PI / 2, 0), 3.2), region.spoil, 'earth');
+        put(worldUV(T, box(T, 15.0, 1.6, 1.6, px + Math.cos(a) * 6.2, y + 1.3, pz + Math.sin(a) * 6.2, 0, a + Math.PI / 2, 0), 1.8),
           region.rock, 'earth');                        // the windrow down the outer edge
+      }
+      /* THE HAUL TRUCK, ON THE RAMP. §A.5's fleet is 90-180 t; this is drawn
+         at ~9.5 m over the tray, which is the small end of that. It matters
+         that it is on the RAMP and not on the flat: a loaded truck climbing
+         out is the one thing in the frame that says the hole is 200 m deep,
+         and it puts a strong warm shape against the cold grey wall. */
+      {
+        const a = 1.15 + 7 * 0.068, r = BENCH_R0 + 7 * 2.6;
+        const px = Math.cos(a) * r, pz = Math.sin(a) * r;
+        const y = terrainHeight(px, pz) + 7 * 1.62 + 0.7;
+        const c = (g) => {
+          g.applyMatrix4(new T.Matrix4().makeRotationY(a + Math.PI / 2));
+          g.translate(px, y, pz);
+          return g;
+        };
+        put(c(box(T, 9.5, 1.5, 5.4, 0, 2.35, 0)), 0xB8791C, 'paint');       // body
+        put(c(box(T, 8.2, 2.6, 5.0, -0.6, 3.9, 0)), 0xA96E18, 'paint');     // tray
+        put(c(box(T, 8.4, 0.30, 5.2, -0.6, 5.3, 0)), region.spoil, 'earth');// and it is loaded
+        put(c(box(T, 2.6, 1.7, 3.0, 4.3, 3.3, 0)), 0xC7761F, 'paint');      // cab
+        put(c(box(T, 2.3, 0.8, 2.6, 4.3, 4.0, 0)), 0x1B2129, 'glass');
+        put(c(box(T, 0.9, 0.12, 5.0, 5.6, 2.0, 0)), 0x8B9199, 'metal');     // access deck
+        for (const [wx, wz] of [[3.2, 2.6], [3.2, -2.6], [-2.6, 2.8], [-2.6, -2.8]]) {
+          put(c(cyl(T, 1.5, 1.5, 1.0, 14, wx, 1.5, wz, 0, 0, Math.PI / 2)), 0x141518, 'rubber');
+        }
       }
 
       /* THE SURVEYED PATTERN. §A.5 gives burden 3-3.5 m and spacing 3.5-6 m,
@@ -2898,17 +3196,39 @@ export function createTerrain(ctx) {
          lining, so 6.4 wide and 7.0 to the crown. */
       const OW = 6.4, OH = 7.0;
 
-      /* THE TUBE. Four slabs making a box with no near end, running 26 m into
-         the hill, unlit and matte black. Backface culling means the player
-         only ever sees the inside. */
-      for (let s = -1; s <= 1; s += 2) {
-        put(box(T, 0.9, OH + 1.2, 26, FX + tx * s * (OW * 0.5 + 0.45) + nx * 13,
-          FY + OH * 0.5, FZ + tz * s * (OW * 0.5 + 0.45) + nz * 13, 0, fy, 0), 0x0B0D10, 'matte');
+      /* THE TUBE, AND WHY IT IS RINGS AND NOT A BOX.
+
+         The first attempt built four long slabs round the opening and capped
+         the far end. Every inner surface of that box is a BACK face, so
+         backface culling removes all of them and the only thing the player
+         actually sees down the hole is the near side of the end cap — one
+         flat, sky-lit, mid-grey plate at 26 m. It read as a grey rectangle
+         painted on the headwall, which is the failure the rebuild was for.
+
+         So the tube is a stack of RINGS instead: seven three-sided frames
+         marching into the hill, each one darker than the last. Every ring
+         presents a front face to the camera, so the recession is drawn rather
+         than culled, and the value ladder does the rest — 0x2A2E33 at the
+         mouth down to 0x030406 at the plug is 14:1, against a sunlit concrete
+         headwall around sRGB 190. A drive gets darker with depth because the
+         sky only reaches so far into it, and that is the one thing that makes
+         an opening read as an opening and not as a hole punched in a flat. */
+      const TUBE = [
+        [1.2, 0x2A2E33], [3.4, 0x1E2226], [6.0, 0x151920],
+        [9.2, 0x0E1116], [13.0, 0x090B0F], [17.6, 0x05070A], [22.6, 0x030406],
+      ];
+      for (const [depth, colr] of TUBE) {
+        const cx = FX + nx * depth, cz = FZ + nz * depth;
+        for (const s of [-1, 1]) {
+          put(box(T, 1.1, OH + 1.4, 1.3, cx + tx * s * (OW * 0.5 + 0.55), FY + OH * 0.5,
+            cz + tz * s * (OW * 0.5 + 0.55), 0, fy, 0), colr, 'matte');
+        }
+        put(box(T, OW + 2.2, 1.1, 1.3, cx, FY + OH + 0.55, cz, 0, fy, 0), colr, 'matte');
+        put(box(T, OW + 2.2, 0.7, 1.3, cx, FY - 0.3, cz, 0, fy, 0), colr, 'matte');
       }
-      put(box(T, OW + 1.8, 0.9, 26, FX + nx * 13, FY + OH + 0.45, FZ + nz * 13, 0, fy, 0), 0x0B0D10, 'matte');
-      put(box(T, OW + 1.8, 0.6, 26, FX + nx * 13, FY - 0.28, FZ + nz * 13, 0, fy, 0), 0x14161A, 'matte');
-      // the back of the tube, so no sky can ever show through the hill
-      put(box(T, OW + 2.0, OH + 1.6, 0.8, FX + nx * 25.6, FY + OH * 0.5, FZ + nz * 25.6, 0, fy, 0), 0x07080A, 'matte');
+      // the plug at the back, so no sky can ever show through the hill
+      put(box(T, OW + 2.2, OH + 1.8, 0.9, FX + nx * 25.4, FY + OH * 0.5, FZ + nz * 25.4, 0, fy, 0),
+        0x020304, 'matte');
 
       /* THE HEADWALL. §A.9: "massive reinforced concrete or reinforced
          shotcrete with wing walls and movement joints". Two jambs, a
@@ -2919,13 +3239,13 @@ export function createTerrain(ctx) {
       const wallCol = 0xA8A49B;
       for (let s = -1; s <= 1; s += 2) {
         const off = OW * 0.5 + 1.5;
-        put(box(T, 3.0, OH + 0.4, 2.2, FX + tx * s * off, FY + (OH + 0.4) * 0.5, FZ + tz * s * off, 0, fy, 0),
+        put(worldUV(T, box(T, 3.0, OH + 0.4, 2.2, FX + tx * s * off, FY + (OH + 0.4) * 0.5, FZ + tz * s * off, 0, fy, 0), 1.6),
           wallCol, 'slab');
         // the wing wall, raking down and out from the jamb
         for (let w = 1; w <= 3; w++) {
           const o2 = off + 1.5 + w * 2.6, h = (OH + 0.4) * (1 - w * 0.22);
           const px = FX + tx * s * o2 + nx * -1.4, pz = FZ + tz * s * o2 + nz * -1.4;
-          put(box(T, 2.7, h, 1.6, px, terrainHeight(px, pz) + h * 0.5, pz, 0, fy, 0), wallCol, 'slab');
+          put(worldUV(T, box(T, 2.7, h, 1.6, px, terrainHeight(px, pz) + h * 0.5, pz, 0, fy, 0), 1.6), wallCol, 'slab');
         }
       }
       // the arch ring: nine voussoirs on a half-circle of radius OW/2 + 0.75
@@ -2938,7 +3258,7 @@ export function createTerrain(ctx) {
             wallCol, 'slab');
         }
         // the string course over the crown, and the datum plate on it
-        put(box(T, OW + 6.4, 0.65, 2.6, FX, FY + OH + 1.5, FZ, 0, fy, 0), 0x9A968D, 'slab');
+        put(worldUV(T, box(T, OW + 6.4, 0.65, 2.6, FX, FY + OH + 1.5, FZ, 0, fy, 0), 1.6), 0x9A968D, 'slab');
         put(box(T, 1.1, 0.7, 0.06, FX + tx * 3.4 + nx * -1.35, FY + OH + 1.5, FZ + tz * 3.4 + nz * -1.35, 0, fy, 0),
           BRAND.amber, 'paint');
       }
@@ -2947,24 +3267,41 @@ export function createTerrain(ctx) {
          The old loop ran i = -3..3 straight across the opening. It now starts
          outside the wing walls, so nothing is ever drawn in front of the hole,
          and the tiers step BACK as they rise — a cut slope, not a cliff. */
+      /* THE SOLID HILL BEHIND THE BLOCKS.
+
+         The blocks are a broken SURFACE; they are not the hill. Without
+         something continuous behind them the gaps between blocks show snow
+         and sky right through the massif — visible in shots/p2-tunnel-portal
+         .png as bright slots between the boulders. One dark slab set 7 m back,
+         66 m across and 30 m tall, closes every one of them and gives the lit
+         blocks a shadowed ground to stand against, which is most of what makes
+         a rock face read as depth rather than as a pile. It is drawn in
+         region.colB darkened, i.e. the value the inside of a cut slope is. */
+      put(worldUV(T, box(T, 66, 30, 5.0, FX + nx * 7.5, FY + 9.5, FZ + nz * 7.5, 0, fy, 0), 3.0),
+        new T.Color(region.colB).multiplyScalar(0.62).getHex(), 'earth');
+
+      /* THE BROKEN FACE. Envelopes OVERLAP — 13 m wide on a 9 m pitch, 3 tiers
+         on a 4.6 m rise against 8-18 m of height — because a cut slope is one
+         mass with a ragged edge, and envelopes that merely abut produce a row
+         of separate boulders instead. */
       for (const s of [-1, 1]) {
         for (let i = 0; i < 3; i++) {
           for (let l = 0; l < 3; l++) {
-            const off = s * (OW * 0.5 + 7.5 + i * 9.0);
-            const back = l * 3.4;
+            const off = s * (OW * 0.5 + 6.5 + i * 9.0);
+            const back = l * 3.0;
             const px = FX + tx * off + nx * back, pz = FZ + tz * off + nz * back;
             const h = 8 + l * 5.0;
-            put(box(T, 9.4, h, 6.0, px, terrainHeight(px, pz) + h * 0.5 - 1.0, pz, 0, fy, 0),
-              l ? region.rock : region.colB, 'earth');
+            rockMass(put, px, terrainHeight(px, pz) + 1.0 + l * 4.6 + h * 0.35, pz, 13.0, h, 7.5, fy,
+              l ? region.rock : region.colB, (s + 2) * 31 + i * 7 + l * 3, 9);
           }
         }
       }
       // and the hillside ABOVE the crown, stepped back so the arch has a brow
       for (let l = 0; l < 3; l++) {
-        const back = 3.0 + l * 3.4, h = 9 + l * 5.0;
+        const back = 3.0 + l * 3.0, h = 9 + l * 5.0;
         const px = FX + nx * back, pz = FZ + nz * back;
-        put(box(T, OW + 8.0, h, 6.0, px, FY + OH + 1.9 + h * 0.5 - 1.0, pz, 0, fy, 0),
-          l ? region.rock : region.colB, 'earth');
+        rockMass(put, px, FY + OH + 2.4 + l * 4.6 + h * 0.30, pz, OW + 11.0, h, 7.5, fy,
+          l ? region.rock : region.colB, 200 + l * 13, 10);
       }
 
       /* ROCKFALL NETTING on the cut above the arch — §A.9 "netted, bolted
@@ -3186,30 +3523,144 @@ export function createTerrain(ctx) {
        own structure, a mobile unit is a deck with the sea visible in every
        direction — so this shares the deck and the sea and drops the derrick
        structure that boxes the fixed platform in. */
+    /* ── OFFSHORE GEOTECHNICAL SPREAD ───────────────────────────────────────
+       research/16 §A.12, which opens by saying this is "a completely different
+       picture from A10 and A11" — and the old branch drew A.10's deck with the
+       derrick taken off. It keeps its MOONPOOL, and that is correct here and
+       only here: §A.12 gives real ones at 4.0 x 4.2 m to 7.2 x 7.2 m on
+       80-100 m DP2 hulls.
+
+       The three hard negatives, stated flatly by the source: NO RISER, NO BOP,
+       NO FLARE. And the tower is "half the height of an oilfield derrick,
+       sometimes twin" — 30-40 m against a derrick's 60+.
+
+       What was missing and now is not:
+         the soil laboratory   "a large soil laboratory centrally located next
+                               to the drill floor", plus a reefer for samples.
+                               White ISO containers, plumbed in, and they are
+                               the single most identifying object on the deck.
+         the seabed CPT unit   "an open steel frame the size of a van in a deck
+                               cradle", 2.2 x 2.2 m footprint, 4 500 kg in air,
+                               with NO CONTROLS ON IT and ONE fat umbilical at
+                               a bend restrictor, on wide flat feet "because
+                               its own weight is all the reaction it has".
+         the stern A-frame     and the armoured umbilical on its traction winch
+                               — how the frame gets over the side.
+         the bulwark           a working deck is inside a hull, not a raft. */
     if (kit === 'marine') {
       for (let i = -3; i <= 3; i++) put(box(T, 24, 0.34, 0.44, 0, -0.28, i * 4.0), 0x3d464e, 'metal');
+      /* THE BULWARK. Without it the deck is a rectangle floating over open
+         water with a hard edge — shots/b0-marine-spread.png reads as a raft,
+         not as a vessel. A 1.5 m plated bulwark with a capping rail and the
+         hull side falling away below it is what puts the deck INSIDE a ship. */
       for (const side of [-1, 1]) {
         const z = side * 11.0;
-        put(box(T, 24, 0.10, 0.10, 0, 1.10, z), 0x77808a, 'metal');
-        put(box(T, 24, 0.16, 0.22, 0, 0.13, z), BRAND.amber, 'paint');
-        for (let i = -5; i <= 5; i++) put(box(T, 0.09, 1.2, 0.09, i * 2.2, 0.60, z), 0x6b747d, 'metal');
+        put(worldUV(T, box(T, 26, 1.5, 0.30, 0, 0.75, z), 2.0), 0x596670, 'metal');
+        put(box(T, 26, 0.18, 0.42, 0, 1.58, z), 0x77808a, 'metal');
+        put(box(T, 26, 0.16, 0.22, 0, 0.13, z * 0.93), BRAND.amber, 'paint');
+        // the hull side, down to and below the waterline
+        put(worldUV(T, box(T, 26, 13.0, 0.9, 0, -6.5, z + side * 0.3), 3.0), 0x2E3A44, 'paint');
+        put(worldUV(T, box(T, 26, 1.4, 1.0, 0, -13.4, z + side * 0.3), 2.0), 0x7A2B1E, 'paint');  // boot topping
       }
-      // the moonpool, and the heave-compensated tower legs beside it
-      const ring = new T.TorusGeometry(2.6, 0.18, 6, 24);
-      ring.rotateX(Math.PI / 2);
-      put(ring.translate(collarPosition.x, 0.10, collarPosition.z), BRAND.amber, 'paint');
+      // the transom, so the deck is closed at the stern too
+      put(worldUV(T, box(T, 1.0, 13.0, 22.4, 12.6, -6.5, 0), 3.0), 0x2E3A44, 'paint');
+      put(worldUV(T, box(T, 0.9, 1.5, 22.0, 12.4, 0.75, 0), 2.0), 0x596670, 'metal');
+
+      /* THE MOONPOOL AND THE DRILL TOWER. The hole is cut in the deck plate
+         itself (see buildSpecials); this is its coaming and the tower over it.
+         Four legs and a head frame at 11 m — the tower is deliberately SHORT,
+         because §A.12's is half an oilfield derrick's height and reading as a
+         production platform is the failure mode this archetype exists to
+         avoid. Heave compensation rides the head frame: published strokes are
+         4 m and 6 m, and the cylinders are drawn at that stroke. */
       for (const s of [-1, 1]) {
-        put(box(T, 0.4, 5.5, 0.4, s * 2.4, 2.75, -3.2), 0x9AA0A6, 'metal');
-        put(box(T, 0.28, 0.28, 6.4, s * 2.4, 5.4, -0.2), 0x9AA0A6, 'metal');
+        for (const t of [-1, 1]) {
+          put(box(T, 0.30, 11.0, 0.30, s * 3.3, 5.5, t * 3.0), 0x9AA0A6, 'metal');
+          for (let l = 1; l < 5; l++) {
+            put(box(T, 0.16, 0.16, 6.2, s * 3.3, l * 2.2, 0), 0x8B9199, 'metal');
+          }
+        }
+        put(box(T, 6.9, 0.16, 0.16, 0, 11.0, s * 3.0), 0x8B9199, 'metal');
+        put(box(T, 0.20, 3.4, 0.20, s * 3.3, 9.2, 0, 0, 0, s * 0.32), 0x8B9199, 'metal');
+        // the heave compensator: a cylinder and its 6 m stroke, per side
+        put(cyl(T, 0.24, 0.24, 6.0, 10, s * 1.5, 8.4, 0), 0xB6BCC2, 'metal');
+        put(cyl(T, 0.15, 0.15, 3.2, 8, s * 1.5, 4.6, 0), 0xD9DEE3, 'metal');
       }
-      // sea containers and a crane pedestal at the deck edge
+      put(box(T, 7.2, 0.5, 6.6, 0, 11.3, 0), 0x77808a, 'metal');          // head frame
+      // the moonpool coaming, and the hazard stripe round it
+      for (const s of [-1, 1]) {
+        put(box(T, 6.8, 0.34, 0.24, collarPosition.x, 0.17, collarPosition.z + s * 3.1), 0x8B9199, 'metal');
+        put(box(T, 0.24, 0.34, 6.8, collarPosition.x + s * 3.1, 0.17, collarPosition.z), 0x8B9199, 'metal');
+        put(box(T, 6.8, 0.10, 0.10, collarPosition.x, 0.40, collarPosition.z + s * 3.1), BRAND.amber, 'paint');
+      }
+
+      /* THE SOIL LABORATORY — white ISO containers plumbed in beside the drill
+         floor, with the reefer beside them. §A.12: "a large soil laboratory
+         centrally located next to the drill floor", plus a refrigerated
+         container for samples and a geological sample store. */
       for (let i = 0; i < 3; i++) {
         const c = at(-10.5, -6.5 + i * 3.0, 0);
-        put(c(box(T, 6.0, 2.6, 2.44, 0, 1.30, 0)), i === 1 ? 0xC7761F : 0x2F6A86, 'paint');
-        for (let r = -3; r <= 3; r++) put(c(box(T, 0.10, 2.4, 0.05, r * 0.8, 1.30, 1.24)), 0x1F4A5E, 'paint');
+        const reefer = i === 2;
+        put(c(box(T, 6.0, 2.6, 2.44, 0, 1.30, 0)), reefer ? 0xE3E6E4 : 0xEDEFEC, 'paint');
+        put(c(box(T, 6.1, 0.14, 2.5, 0, 2.65, 0)), 0xA7ADB2, 'metal');
+        for (let r = -3; r <= 3; r++) put(c(box(T, 0.09, 2.4, 0.05, r * 0.8, 1.30, 1.24)), 0xD3D7D4, 'paint');
+        // the door end, and a window where there is a bench inside
+        put(c(box(T, 0.06, 2.2, 2.3, -3.03, 1.25, 0)), 0xBCC1BE, 'paint');
+        if (!reefer) put(c(box(T, 1.4, 0.7, 0.06, 1.2, 1.75, 1.25)), 0x1B2129, 'glass');
+        // the reefer's condenser unit, which is what tells the two apart
+        if (reefer) {
+          put(c(box(T, 1.5, 1.5, 0.42, -2.2, 1.55, -1.35)), 0x8A8F95, 'metal');
+          put(c(cyl(T, 0.42, 0.42, 0.20, 12, -2.2, 1.55, -1.60, Math.PI / 2, 0, 0)), 0x4A4F55, 'metal');
+        }
+        // plumbed in: service lines running from the lab to the drill floor
+        put(c(cyl(T, 0.07, 0.07, 5.2, 6, 3.4, 0.42, 0, 0, 0, Math.PI / 2)), 0x8E969E, 'metal');
       }
-      put(cyl(T, 1.5, 1.8, 3.2, 12, 10.5, 1.6, 7.0), 0xB6BCC2, 'metal');
-      put(box(T, 2.4, 1.8, 2.2, 10.5, 4.1, 7.0), 0xC7761F, 'paint');
+
+      /* THE SEABED CPT UNIT IN ITS DECK CRADLE. 2.2 x 2.2 m footprint,
+         "an open steel frame the size of a van", NO CONTROLS ON IT, one fat
+         umbilical entering the top at a bend restrictor, and wide flat feet
+         because its own weight is all the reaction it has (20 t submerged is
+         about 196 kN, and you cannot push harder than the frame weighs). */
+      {
+        const c = at(6.5, -7.4, 0.22);
+        put(c(box(T, 3.0, 0.30, 3.0, 0, 0.15, 0)), 0x5A6169, 'metal');       // the cradle
+        for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+          put(c(box(T, 0.12, 2.4, 0.12, sx * 1.1, 1.55, sz * 1.1)), 0xC7761F, 'paint');
+          put(c(box(T, 0.95, 0.16, 0.95, sx * 1.1, 0.38, sz * 1.1)), 0x8B9199, 'metal');   // the wide flat feet
+        }
+        for (const y of [0.55, 1.70, 2.72]) {
+          put(c(box(T, 2.32, 0.10, 0.10, 0, y, -1.1)), 0xC7761F, 'paint');
+          put(c(box(T, 2.32, 0.10, 0.10, 0, y, 1.1)), 0xC7761F, 'paint');
+          put(c(box(T, 0.10, 0.10, 2.32, -1.1, y, 0)), 0xC7761F, 'paint');
+          put(c(box(T, 0.10, 0.10, 2.32, 1.1, y, 0)), 0xC7761F, 'paint');
+        }
+        put(c(cyl(T, 0.20, 0.20, 2.4, 10, 0, 1.5, 0)), 0x4A4F55, 'metal');    // the coiled-rod thruster
+        // the bend restrictor and the fat armoured umbilical leaving the top
+        put(c(cyl(T, 0.22, 0.14, 0.9, 10, 0.35, 3.15, 0.2)), 0x24282C, 'rubber');
+        put(c(cyl(T, 0.10, 0.10, 4.4, 8, 2.4, 3.30, 0.2, 0, 0, Math.PI / 2 - 0.22)), 0x1F2327, 'rubber');
+      }
+      /* THE STERN A-FRAME and its traction winch — how the frame goes over the
+         side, and the biggest object on a survey deck. */
+      {
+        /* All of this is at the STERN. The first placement put the umbilical
+           drum at x 1.6 — 2.7 m of black rubber four metres from the hero
+           camera, which filled a quarter of the band with a featureless disc
+           (shots/c5-marine-spread.png). A stern A-frame is at the stern. */
+        for (const s of [-1, 1]) {
+          put(box(T, 0.55, 9.6, 0.55, -19.0, 4.8, s * 6.4, 0, 0, 0.20), 0xC7761F, 'paint');
+          put(cyl(T, 0.20, 0.20, 4.2, 8, -16.4, 3.2, s * 6.4, 0, 0, -0.72), 0x9AA0A6, 'metal');
+        }
+        put(box(T, 0.55, 0.55, 13.3, -20.9, 9.5, 0), 0xC7761F, 'paint');
+        put(cyl(T, 0.40, 0.40, 0.60, 12, -20.9, 9.0, 0, 0, 0, Math.PI / 2), 0x5A6169, 'metal');  // the sheave
+        // the traction winch, and the umbilical drum behind it
+        put(box(T, 2.6, 1.5, 3.4, -14.0, 0.75, 0), 0x8A8F95, 'metal');
+        put(cyl(T, 1.05, 1.05, 2.6, 14, -11.0, 1.25, 0, 0, 0, Math.PI / 2), 0x3A3F44, 'rubber');
+        for (const s of [-1, 1]) put(cyl(T, 1.25, 1.25, 0.16, 14, -11.0, 1.25, s * 1.35, 0, 0, Math.PI / 2), 0x6E757C, 'metal');
+      }
+      // deck crane at the edge — every task offshore is a lift
+      put(cyl(T, 1.5, 1.8, 3.2, 12, -13.5, 1.6, 7.0), 0xB6BCC2, 'metal');
+      put(box(T, 2.4, 1.8, 2.2, -13.5, 4.1, 7.0), 0xC7761F, 'paint');
+      put(box(T, 0.34, 0.34, 15.0, -13.5 + 4.6, 8.0, 7.0 - 2.6, 0, 0.52, -0.50), 0x9AA0A6, 'metal');
     }
 
     if (kit === 'german') {
@@ -3246,8 +3697,46 @@ export function createTerrain(ctx) {
       }
     }
 
+    /* ── FIXED OFFSHORE PRODUCTION PLATFORM DECK ────────────────────────────
+       research/16 §A.10, and this branch drew the WRONG FEATURE.
+
+       It built a moon-pool surround. A moonpool is an opening through a HULL
+       (§A.10 line 1213 and the correction at 3279-3281): it belongs to a
+       drillship, a semi-submersible and the monohull geotechnical vessels of
+       §A.12 — not to a fixed platform, which has no hull, no air gap and no
+       water under its drill floor at all. The same paragraph rules out the
+       cantilever, which belongs to the jack-up.
+
+       WHAT A PRODUCTION PLATFORM ACTUALLY DRILLS THROUGH IS A SLOT.
+
+         well-centre spacing        1.8 to 3.0 m            [OGP-OFFS], [DM-PLATFORM]
+         slot count, multi-well     10 to more than 40      [OGP-OFFS]
+         real field centre          48 slots (Johan Sverdrup) [NORSKPET]
+         real PDQ platform          50 active slots (Mariner) [OT-MARINER]
+         conductor diameter         510-760 mm (20-30 in)   [EP0147144]
+         conductor guide spacing    ~12-18 m (40-60 ft) vertically [EP0147144]
+         the drill floor            SKIDS from well to well in two perpendicular
+                                    directions over skid beams [OGP-OFFS]
+
+       So: a rectangular well-slot opening in the drill floor, a grid of
+       conductor stubs with casing heads on a 2.4 m pitch (inside the sourced
+       1.8-3.0 m band), skid beams running under the floor in both directions,
+       and Christmas trees on the wellhead deck below — §A.10's own list at
+       3297-3300, and the two-level well bay (wellheads lower, trees upper) at
+       1218-1223.
+
+       And the silhouette test at 1268-1275: the structure "continues down into
+       the water and stays there". A boat landing and a barnacle line, and NO
+       AIR GAP under the deck — the air gap is what makes a thing a jack-up.
+
+       Deck finish is deliberately NOT asserted as fact: §A.10 says nothing
+       about grating, coating or markings (the doc's own convention), so it
+       inherits the galvanised open grating buildSpecials() already lays. */
     if (kit === 'offshore') {
-      // deck beams and handrails around the moon pool
+      const SLOT = 2.4;                        // m between well centres — [OGP-OFFS] 1.8-3.0
+      const cx = collarPosition.x, cz = collarPosition.z;
+
+      // deck beams under the plating, and the perimeter handrail + toe board
       for (let i = -3; i <= 3; i++) {
         put(box(T, 26, 0.34, 0.44, 0, -0.28, i * 4.2), 0x3d464e, 'metal');
       }
@@ -3258,10 +3747,117 @@ export function createTerrain(ctx) {
         put(box(T, 26, 0.16, 0.22, 0, 0.13, z), BRAND.amber, 'paint');
         for (let i = -6; i <= 6; i++) put(box(T, 0.09, 1.2, 0.09, i * 2.0, 0.60, z), 0x6b747d, 'metal');
       }
-      // moon-pool surround
-      const ring = new T.TorusGeometry(2.9, 0.16, 6, 26);
-      ring.rotateX(Math.PI / 2);
-      put(ring.translate(collarPosition.x, 0.10, collarPosition.z), BRAND.amber, 'paint');
+
+      /* THE WELL-SLOT DECK OPENING. A rectangle in the drill floor, 4 slots by
+         3 on a 2.4 m grid = 12 of the "10 to more than 40" a multi-well
+         platform carries, edged with a coaming and hazard-striped. The live
+         hole is the one the collar stands on; the rest are cased and capped. */
+      const NX = 4, NZ = 3;
+      const halfX = (NX - 1) * SLOT * 0.5, halfZ = (NZ - 1) * SLOT * 0.5;
+      // the coaming round the opening
+      for (const s of [-1, 1]) {
+        put(box(T, (halfX + 1.5) * 2, 0.34, 0.22, cx, 0.17, cz + s * (halfZ + 1.5)), 0x8B9199, 'metal');
+        put(box(T, 0.22, 0.34, (halfZ + 1.5) * 2, cx + s * (halfX + 1.5), 0.17, cz), 0x8B9199, 'metal');
+        put(box(T, (halfX + 1.5) * 2, 0.10, 0.10, cx, 0.40, cz + s * (halfZ + 1.5)), BRAND.amber, 'paint');
+      }
+      /* THE SKID BEAMS. Two pairs at right angles under the drill floor — the
+         drill floor moves along one pair to change row and the other to change
+         slot, which is what "skids in two perpendicular directions" means and
+         is the whole reason a platform needs no cantilever. */
+      for (let i = 0; i < NZ; i++) {
+        put(box(T, (halfX + 3.6) * 2, 0.42, 0.52, cx, -0.10, cz - halfZ + i * SLOT), 0x6E757C, 'metal');
+      }
+      for (let i = 0; i < NX; i++) {
+        put(box(T, 0.52, 0.30, (halfZ + 3.2) * 2, cx - halfX + i * SLOT, -0.44, cz), 0x5A6169, 'metal');
+      }
+      /* THE CONDUCTORS AND WELLHEADS. 610 mm outside diameter — mid-band of
+         the sourced 510-760 mm — each stub carrying a casing head, and every
+         slot but the live one carrying a Christmas tree on the deck below. */
+      for (let ix = 0; ix < NX; ix++) {
+        for (let iz = 0; iz < NZ; iz++) {
+          const px = cx - halfX + ix * SLOT, pz = cz - halfZ + iz * SLOT;
+          const live = Math.hypot(px - cx, pz - cz) < 0.4;
+          // the conductor, running down through the deck into the guide frame
+          put(cyl(T, 0.305, 0.305, 5.2, 14, px, -2.3, pz), 0x4E555C, 'metal');
+          if (live) continue;                                   // the rig stands on this one
+          // casing head and spool
+          put(cyl(T, 0.40, 0.44, 0.42, 14, px, 0.30, pz), 0x6E757C, 'metal');
+          put(cyl(T, 0.34, 0.34, 0.34, 12, px, 0.66, pz), 0x5A6169, 'metal');
+          /* THE CHRISTMAS TREE. §A.10: the well bay is two levels, wellheads
+             lower and trees upper, and the trees are what a platform deck is
+             covered in. A body, a bonnet, two wing valves and a cap. */
+          put(cyl(T, 0.24, 0.26, 1.35, 12, px, 1.55, pz), 0x2E5F7A, 'paint');
+          put(box(T, 0.85, 0.20, 0.20, px, 1.72, pz), 0x35708C, 'paint');       // wing valves
+          for (const s of [-1, 1]) put(cyl(T, 0.16, 0.16, 0.10, 10, px + s * 0.46, 1.72, pz, 0, 0, Math.PI / 2), 0xB33B2B, 'paint');
+          put(cyl(T, 0.20, 0.20, 0.26, 12, px, 2.32, pz), 0x9AA0A6, 'metal');   // bonnet
+          put(cyl(T, 0.10, 0.10, 0.30, 8, px, 2.58, pz), 0x6E757C, 'metal');
+          // the flowline leaving the tree toward the process train
+          put(cyl(T, 0.09, 0.09, 2.6, 8, px, 1.30, pz + 1.4, Math.PI / 2, 0, 0), 0x8E969E, 'metal');
+        }
+      }
+
+      /* THE STRUCTURE UNDER THE DECK — the silhouette test. Four jacket legs
+         with their bracing, running down past the water and staying there, a
+         boat landing, and a barnacle line at the splash zone. NO AIR GAP. */
+      for (const sx of [-1, 1]) {
+        for (const sz of [-1, 1]) {
+          const lx = sx * 11.0, lz = sz * 10.5;
+          put(cyl(T, 1.05, 1.35, 30, 12, lx, -15.5, lz, 0.045 * sx, 0, 0.045 * sz), 0x4A545C, 'metal');
+          put(cyl(T, 1.12, 1.12, 2.6, 12, lx, -13.6, lz), 0x2B2E27, 'matte');   // barnacle / splash band
+        }
+        // horizontal and diagonal bracing between the legs, at two elevations
+        for (const ey of [-8.5, -20.0]) {
+          put(cyl(T, 0.42, 0.42, 21.5, 10, sx * 11.0, ey, 0, Math.PI / 2, 0, 0), 0x4A545C, 'metal');
+          put(cyl(T, 0.42, 0.42, 22.4, 10, 0, ey, sx * 10.5, 0, 0, Math.PI / 2), 0x4A545C, 'metal');
+        }
+        put(cyl(T, 0.34, 0.34, 24.0, 8, sx * 11.0, -14.2, 0, Math.PI / 2 + 0.52, 0, 0), 0x444E56, 'metal');
+      }
+      // the boat landing on the near leg, and its ladder
+      {
+        const lx = -11.0, lz = 10.5;
+        for (let i = 0; i < 4; i++) {
+          put(box(T, 3.4, 0.14, 0.24, lx + 1.9, -11.5 + i * 1.5, lz + 1.4), 0x7E858C, 'metal');
+        }
+        put(box(T, 0.14, 9.0, 0.14, lx + 3.5, -8.6, lz + 1.4), 0x8B9199, 'metal');
+        for (let i = 0; i < 14; i++) put(box(T, 0.50, 0.05, 0.05, lx + 3.3, -12.4 + i * 0.62, lz + 1.4), 0x8B9199, 'metal');
+      }
+
+      /* THE NEIGHBOURS. §A.10: the drilling package is a TENANT — a boxed
+         derrick among process plant that has nothing to do with it. Separators
+         and a compressor package one side, the flare boom on its long
+         outrigger the other, a pedestal crane, and lifeboats in their davits. */
+      {
+        const c = at(-15.5, -6.0, 0.0);
+        for (let i = 0; i < 2; i++) {                                   // separators
+          put(c(cyl(T, 1.30, 1.30, 7.0, 14, 0, 2.4 + i * 0.0, i * 3.4, 0, 0, Math.PI / 2)), 0xC6C3BA, 'paint');
+          for (const s of [-1, 1]) put(c(box(T, 0.9, 2.4, 0.9, s * 2.4, 1.2, i * 3.4)), 0x6E757C, 'metal');
+        }
+        put(c(box(T, 4.2, 3.4, 3.0, 0, 1.7, -4.6)), 0x8A8F95, 'metal');  // compressor package
+        put(c(box(T, 4.4, 0.30, 3.2, 0, 3.55, -4.6)), 0x6E757C, 'metal');
+        for (let i = 0; i < 5; i++) {
+          put(c(cyl(T, 0.14, 0.14, 9.0, 8, -1.8 + i * 0.42, 4.2, -0.6, Math.PI / 2, 0, 0)), 0x8E969E, 'metal');
+        }
+      }
+      // the flare boom, out over the water on its outrigger
+      {
+        const bx = 16.0, bz = -9.0;
+        put(cyl(T, 0.55, 0.75, 26.0, 10, bx + 9.4, 8.0, bz - 5.2, -0.42, 0.62, 0.30), 0x8A8F95, 'metal');
+        for (let i = 0; i < 6; i++) {
+          put(box(T, 0.16, 0.16, 3.2, bx + 2.2 + i * 3.1, 2.4 + i * 1.55, bz - 1.2 - i * 1.7, 0, 0.62, 0.42), 0x6E757C, 'metal');
+        }
+        put(cyl(T, 0.62, 0.42, 1.6, 10, bx + 19.4, 15.6, bz - 11.6), 0x3A3F44, 'metal');   // the tip
+      }
+      // pedestal crane — §A.10 gives 15-40 t for the smaller modular rigs
+      put(cyl(T, 1.4, 1.7, 4.2, 12, 12.0, 2.1, 8.5), 0xB6BCC2, 'metal');
+      put(box(T, 2.6, 2.0, 2.4, 12.0, 5.2, 8.5), 0xC7761F, 'paint');
+      put(box(T, 0.42, 0.42, 21.0, 12.0 - 6.6, 9.6, 8.5 - 4.0, 0, 0.55, -0.46), 0x9AA0A6, 'metal');
+      // lifeboats in their davits at the deck edge
+      for (let i = 0; i < 2; i++) {
+        const px = -6.0 + i * 6.4, pz = 13.6;
+        put(cyl(T, 1.05, 0.72, 5.6, 10, px, 1.6, pz, 0, 0, Math.PI / 2), 0xD2521F, 'paint');
+        put(box(T, 5.6, 0.30, 1.9, px, 2.5, pz), 0xB6461A, 'paint');
+        for (const s of [-1, 1]) put(box(T, 0.22, 3.4, 0.22, px + s * 2.2, 2.4, pz - 1.1, 0.28, 0, 0), 0x8B9199, 'metal');
+      }
       // life buoy + cabinet
       put(box(T, 0.7, 1.5, 0.5, -9.5, 0.75, -6.5), 0xc0392b, 'paint');
     }
@@ -3791,7 +4387,14 @@ export function createTerrain(ctx) {
   function scatter(count, opts = {}) {
     const out = [];
     const minR = opts.minR ?? CFG.dressRadiusMin;
-    const maxR = opts.maxR ?? CFG.dressRadiusMax;
+    /* `dressMaxR` is the archetype saying where its own GROUND stops. An
+       open-pit bench closes a 12 m rock wall at r = 30 and the region's scree
+       scatters to r = 64, so without this every stone on the site was buried
+       inside the wall it should be lying at the foot of — an archetype that
+       builds structure out to a radius has to take the dressing back inside
+       it, which is the same "replace, never accumulate" rule as `dress`. */
+    const maxR = Math.min(opts.maxR ?? CFG.dressRadiusMax,
+      (arch && arch.dressMaxR) != null ? arch.dressMaxR : Infinity);
     // The mast-bearing rejection throws away real samples, so the try budget
     // has to cover it or the stand quietly thins out everywhere.
     const tries = count * (opts.clearAxis ? 7 : 4);
@@ -4452,7 +5055,37 @@ export function createTerrain(ctx) {
 
     if (onDeck()) {
       const tex = cachedTex('grating', texGrating, { repeat: 14 });
-      const g = new T.PlaneGeometry(56, 34, 1, 1);
+      /* THE DECK IS CUT, NOT SOLID.
+
+         A fixed platform drills through a WELL-SLOT OPENING in the drill floor
+         (research/16 §A.10) and a mobile unit through a MOONPOOL (§A.12) —
+         either way there is a hole, and a solid plate with a decorative ring
+         painted on it is the thing this archetype was criticised for. So the
+         deck is a Shape with a hole in it: rectangular over the slot grid on
+         a fixed platform, square over the moonpool on a mobile one. §A.12
+         gives real moonpools of 4.0 x 4.2 m to 7.2 x 7.2 m; 6.0 m square is
+         inside that band. */
+      const fixed = (arch && arch.deck) === 'fixed';
+      const hx = fixed ? 5.4 : 3.0, hz = fixed ? 4.2 : 3.0;
+      const outline = new T.Shape();
+      outline.moveTo(-28, -17); outline.lineTo(28, -17); outline.lineTo(28, 17);
+      outline.lineTo(-28, 17); outline.lineTo(-28, -17);
+      const hole = new T.Path();
+      // rotateX(-PI/2) below maps shape-y onto world -z, so the hole's shape-y
+      // is MINUS the collar's world z. Getting this sign wrong puts the hole on
+      // the far side of the deck from the machine standing over it.
+      const ox = collarPosition.x, oz = -collarPosition.z;
+      hole.moveTo(ox - hx, oz - hz); hole.lineTo(ox - hx, oz + hz);
+      hole.lineTo(ox + hx, oz + hz); hole.lineTo(ox + hx, oz - hz);
+      hole.lineTo(ox - hx, oz - hz);
+      outline.holes.push(hole);
+      const g = new T.ShapeGeometry(outline);
+      // ShapeGeometry builds in XY with uv in metres; lay it flat and rescale
+      // the uv to the 0..1 the grating tiling expects across the 56 m deck.
+      const uv = g.attributes.uv;
+      for (let i = 0; i < uv.count; i++) {
+        uv.setXY(i, (uv.getX(i) + 28) / 56, (uv.getY(i) + 17) / 34);
+      }
       g.rotateX(-Math.PI / 2);
       // Galvanised, salt-worn open grating — wornSteel, not concrete.
       const deckMat = mat('wornSteel', {
