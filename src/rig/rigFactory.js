@@ -9190,6 +9190,23 @@ export function createRigSystem(ctx) {
         if (dyn.kellyDriven && dyn.kelly) {
           dyn.kelly.setExt(clamp01(depth / Math.max(1, dyn.kelly.maxExt)));
           setCarriage(clamp01((depth % 3.0) / 3.0));
+        } else if ((dyn.continuousAugerFeed || dyn.augerDriven)
+          && (methodId === 'cfa' || methodId === 'cased-cfa')) {
+          // Continuous flight has no rod-length modulo. Consume metres of
+          // actual tool movement against the authored directed carriage span,
+          // retaining its collared rest offset; no invented 14 m stroke and no
+          // stretching a short machine to the contract's target. A GLB's rest
+          // pose is distinct from the upper endpoint (CFA differs by 50 mm).
+          // The procedural builder has no rest contract: its existing feed
+          // origin is range[0]. CFA's sim currently has no pumping/return pass;
+          // actionDepth will also withdraw the head if that programme is added.
+          const r = dyn.carriageRange;
+          const span = Math.abs(r[1] - r[0]);
+          const rest = dyn.carriageRest
+            ? dyn.carriageRest[dyn.carriageAxis || 'y'] : r[0];
+          const origin = span > 0 ? (rest - r[0]) / (r[1] - r[0]) : 0;
+          const movement = Number.isFinite(along) ? Math.max(0, along) : 0;
+          setCarriage(span > 0 ? origin + movement / span : 0);
         } else if (dyn.augerDriven) {
           setCarriage(clamp01(depth / 14));
         } else if (dyn.pileDriven) {

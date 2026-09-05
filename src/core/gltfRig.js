@@ -801,6 +801,11 @@ export function createGltfRigs(ctx) {
       dyn.carriageRest = carriage.position.clone();
       dyn.carriageRestRotation = carriage.rotation.clone();
       dyn.carriageRange = travel.range;
+      // cfa_rig.py parents the continuous flight directly under this carriage's
+      // spindle. Only the CFA programmes use that axial mechanism: a rotary
+      // Kelly selection must not inherit continuous feed merely from the rig ID.
+      // This is an authored mechanism mapping, not a depth-capacity claim.
+      if (prep.id === 'cfa-rig' && !travel.stationary) dyn.continuousAugerFeed = true;
       dyn.mastHeight = prep.size.y;
       if (travel.stationary || travel.axis !== 'y') {
         // The existing flex driver bends a Y feed into Z. It must not erase
