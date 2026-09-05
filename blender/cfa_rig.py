@@ -133,15 +133,45 @@ DRILL_Y     = 3.35       # [W1] mast front face + 1.000. The 1 000 mm is
                          #      1,400". Was 2.25 here on a Kelly-rig figure the
                          #      local reference explicitly warned not to reuse.
 CROWD       = 17.00      # [S1] crowd stroke 17 000; [W1] 14 670 / 17 670
+SPIN_RPM    = 28         # [S1] rotary 248 kNm, 6-28 rpm — the TOP of that band
+SPIN_KNM    = 248        # [S1] rotary 248 kNm
 DRIVE_LO_Z  = 3.60       # derived: the drive cannot come lower than the
                          #      concrete head, the collar and the base box
 DRIVE_HI_Z  = DRIVE_LO_Z + CROWD   # 20.60 — so the drive parks just under the
                          #      masthead, as it does on both source elevations
-DRIVE_Z     = 20.55      # default pose: top of stroke, auger tip at grade.
+DRIVE_Z     = 20.55      # default pose: top of stroke, auger COLLARED.
                          #      Bottom of stroke puts the tip at -17.05, so the
                          #      23.10 m mast comfortably exceeds the pile length
                          #      — the rule the game's own 21.5 m mast against a
                          #      24 m depth currently breaks.
+                         #
+                         # WHY THIS MODEL MEASURES -0.660 BELOW y=0, AND WHY
+                         # THAT IS CORRECT.  `glbinfo` flags any model reaching
+                         # more than 250 mm under the ground plane.  Here the
+                         # whole of it is the AUGER TIP, hanging off
+                         # `pivot:spindle` under `slide:carriage`: the flight
+                         # bottom sits at -0.100 and the starter head, pick
+                         # holders, tips and sacrificial toecap reach -0.660.
+                         # The machine's own statics stop at -0.030 (chassis)
+                         # and -0.100 (base box skirt) — i.e. ON grade.
+                         # A CFA rig is DEFINED by a single continuous auger
+                         # that never leaves the machine: there is no detach-
+                         # able tool to swap in, so the auger has to be in the
+                         # .glb, and an auger drawn stopping dead at the ground
+                         # plane is the one thing that would read as wrong.
+                         # DO NOT "fix" this by shortening the auger or lifting
+                         # the carriage — measure with
+                         #   node tools/glbinfo.mjs --parts public/models/cfa-rig.glb
+                         # and you will land back on `pivot:spindle` every time.
+                         #
+                         # NOT RESOLVED, recorded rather than invented: at
+                         # DRIVE_HI_Z the flight bottom is still at -0.05, so as
+                         # modelled the machine cannot withdraw its auger fully
+                         # clear of the hole. [S1] gives auger length 16 000 /
+                         # 19 000 against a 17 000 crowd stroke, so the shortfall
+                         # is in the SOURCE numbers, not in this file. Closing it
+                         # needs a sourced mast height for the CFA configuration,
+                         # which no local file and no web pass has produced.
 
 # tool [S1]/[S2]/[W1]
 AUGER_D     = 1.000      # [S1] max drilling diameter dimensioned on the drawing.
@@ -1186,11 +1216,30 @@ def build(out_path):
 
     # ── the crowd carriage, the drive, and the auger hanging off it ───────────
     carriage = empty(NODE_SLIDE, 'carriage', None, (0, DRILL_Y, DRIVE_Z))
+    # THE CARRIAGE CONTRACT.  src/core/gltfRig.js makeDyn() looks up exactly
+    # `slides.get('carriage')` and reads exactly `travel_m` off its extras.  A
+    # carriage published WITHOUT `travel_m` does not throw — `setCarriage()`
+    # then evaluates `-0 * undefined`, writes NaN into a world matrix, and the
+    # whole machine silently disappears.  This node carried no extras at all,
+    # so the 17 m crowd stroke read as zero: on a machine whose entire method
+    # is one continuous auger going down and coming up full, that is the
+    # method deleted.
+    carriage['travel_m'] = CROWD             # [S1] crowd stroke 17 000
+    carriage['axis'] = 'z'
+    # Absolute limits in the mast's own frame, so nobody has to guess whether
+    # the authored pose is the top or the bottom of the stroke.  It is the
+    # TOP — DRIVE_Z parks 50 mm under DRIVE_HI_Z.
+    carriage['travel_min_m'] = DRIVE_LO_Z
+    carriage['travel_max_m'] = DRIVE_HI_Z
     attach(carriage, mast_pivot)
     drive_parts, z_head = build_drive(carriage)
     join_by_mat(drive_parts, 'drive', carriage)
 
     spindle = empty(NODE_PIVOT, 'spindle', None, (0, DRILL_Y, z_head - 1.05))
+    # [S1] rotary drive speed and torque, so the auger can be made to TURN and
+    # not only to translate.  Without these the spindle is a bare node.
+    spindle['rpm_max'] = SPIN_RPM
+    spindle['torque_knm'] = SPIN_KNM
     attach(spindle, carriage)
     tool_mount = empty(NODE_MOUNT, 'tool', spindle, (0, 0, 0))
     auger_parts = build_auger(z_head - 1.05)
