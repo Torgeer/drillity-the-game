@@ -1,0 +1,520 @@
+{
+ "when": "2026-09-05T08:56:44.685Z",
+ "quality": "high",
+ "sites": {
+  "infrastructure-corridor": {
+   "arch": "infrastructure-corridor",
+   "region": "german-site",
+   "method": "hdd",
+   "terrainCalls": 19,
+   "surface": {
+    "calls": 70,
+    "tris": 147762
+   },
+   "terrain": {
+    "calls": 17,
+    "tris": 113554
+   },
+   "hist": {
+    "mean": 91.4,
+    "max": 250,
+    "pctBlack": 16.4,
+    "pctBright": 20.6
+   },
+   "grid": [
+    [
+     15,
+     15,
+     15,
+     15,
+     15,
+     15
+    ],
+    [
+     114,
+     125,
+     131,
+     132,
+     127,
+     117
+    ],
+    [
+     150,
+     166,
+     175,
+     175,
+     167,
+     154
+    ],
+    [
+     169,
+     186,
+     174,
+     196,
+     185,
+     172
+    ],
+    [
+     155,
+     133,
+     105,
+     148,
+     134,
+     96
+    ],
+    [
+     51,
+     39,
+     52,
+     112,
+     96,
+     42
+    ],
+    [
+     48,
+     35,
+     47,
+     66,
+     76,
+     76
+    ],
+    [
+     47,
+     55,
+     54,
+     44,
+     47,
+     33
+    ],
+    [
+     34,
+     70,
+     67,
+     63,
+     50,
+     37
+    ],
+    [
+     42,
+     118,
+     122,
+     103,
+     56,
+     18
+    ]
+   ]
+  },
+  "open-pit-bench": {
+   "arch": "open-pit-bench",
+   "region": "andes",
+   "method": "dth",
+   "terrainCalls": 20,
+   "surface": {
+    "calls": 77,
+    "tris": 172946
+   },
+   "terrain": {
+    "calls": 18,
+    "tris": 133050
+   },
+   "hist": {
+    "mean": 54.4,
+    "max": 252,
+    "pctBlack": 15.4,
+    "pctBright": 1.9
+   },
+   "grid": [
+    [
+     15,
+     15,
+     15,
+     15,
+     15,
+     15
+    ],
+    [
+     31,
+     39,
+     36,
+     55,
+     48,
+     41
+    ],
+    [
+     39,
+     35,
+     37,
+     85,
+     61,
+     38
+    ],
+    [
+     40,
+     42,
+     47,
+     103,
+     77,
+     47
+    ],
+    [
+     34,
+     46,
+     69,
+     100,
+     77,
+     77
+    ],
+    [
+     38,
+     61,
+     82,
+     103,
+     74,
+     71
+    ],
+    [
+     39,
+     37,
+     45,
+     119,
+     98,
+     80
+    ],
+    [
+     40,
+     59,
+     68,
+     52,
+     50,
+     41
+    ],
+    [
+     53,
+     55,
+     88,
+     71,
+     90,
+     89
+    ],
+    [
+     31,
+     22,
+     54,
+     54,
+     62,
+     38
+    ]
+   ]
+  },
+  "tunnel-portal": {
+   "arch": "tunnel-portal",
+   "region": "alpine",
+   "method": "top-hammer",
+   "terrainCalls": 24,
+   "surface": {
+    "calls": 85,
+    "tris": 160276
+   },
+   "terrain": {
+    "calls": 22,
+    "tris": 122728
+   },
+   "hist": {
+    "mean": 59.8,
+    "max": 244,
+    "pctBlack": 14.5,
+    "pctBright": 2.1
+   },
+   "grid": [
+    [
+     15,
+     15,
+     15,
+     15,
+     15,
+     15
+    ],
+    [
+     77,
+     71,
+     38,
+     44,
+     49,
+     53
+    ],
+    [
+     44,
+     47,
+     90,
+     116,
+     80,
+     51
+    ],
+    [
+     45,
+     47,
+     78,
+     89,
+     92,
+     49
+    ],
+    [
+     49,
+     57,
+     85,
+     95,
+     85,
+     63
+    ],
+    [
+     46,
+     66,
+     94,
+     111,
+     98,
+     49
+    ],
+    [
+     58,
+     46,
+     49,
+     100,
+     95,
+     58
+    ],
+    [
+     41,
+     53,
+     62,
+     45,
+     48,
+     34
+    ],
+    [
+     48,
+     39,
+     70,
+     66,
+     93,
+     99
+    ],
+    [
+     31,
+     21,
+     74,
+     77,
+     79,
+     56
+    ]
+   ]
+  },
+  "marine-spread": {
+   "arch": "marine-spread",
+   "region": "north-sea",
+   "method": "site-investigation",
+   "terrainCalls": 14,
+   "surface": {
+    "calls": 66,
+    "tris": 56172
+   },
+   "terrain": {
+    "calls": 12,
+    "tris": 12274
+   },
+   "hist": {
+    "mean": 90.5,
+    "max": 237,
+    "pctBlack": 15.4,
+    "pctBright": 25.4
+   },
+   "grid": [
+    [
+     15,
+     15,
+     15,
+     15,
+     15,
+     15
+    ],
+    [
+     125,
+     149,
+     146,
+     98,
+     98,
+     70
+    ],
+    [
+     165,
+     185,
+     172,
+     129,
+     131,
+     132
+    ],
+    [
+     188,
+     222,
+     214,
+     146,
+     147,
+     149
+    ],
+    [
+     146,
+     162,
+     159,
+     124,
+     67,
+     71
+    ],
+    [
+     100,
+     116,
+     113,
+     54,
+     22,
+     20
+    ],
+    [
+     69,
+     71,
+     46,
+     33,
+     22,
+     44
+    ],
+    [
+     69,
+     52,
+     62,
+     45,
+     49,
+     55
+    ],
+    [
+     97,
+     51,
+     98,
+     96,
+     125,
+     88
+    ],
+    [
+     50,
+     27,
+     66,
+     68,
+     67,
+     41
+    ]
+   ]
+  },
+  "platform-deck": {
+   "arch": "platform-deck",
+   "region": "north-sea",
+   "method": "oil-rotary",
+   "terrainCalls": 14,
+   "surface": {
+    "calls": 50,
+    "tris": 68484
+   },
+   "terrain": {
+    "calls": 11,
+    "tris": 17326
+   },
+   "hist": {
+    "mean": 66,
+    "max": 245,
+    "pctBlack": 14.1,
+    "pctBright": 8.6
+   },
+   "grid": [
+    [
+     15,
+     15,
+     15,
+     15,
+     15,
+     15
+    ],
+    [
+     117,
+     116,
+     81,
+     79,
+     79,
+     82
+    ],
+    [
+     167,
+     125,
+     109,
+     68,
+     78,
+     115
+    ],
+    [
+     150,
+     114,
+     91,
+     61,
+     70,
+     105
+    ],
+    [
+     77,
+     68,
+     65,
+     58,
+     71,
+     62
+    ],
+    [
+     53,
+     50,
+     58,
+     50,
+     66,
+     50
+    ],
+    [
+     71,
+     40,
+     58,
+     41,
+     51,
+     54
+    ],
+    [
+     64,
+     52,
+     78,
+     53,
+     45,
+     38
+    ],
+    [
+     59,
+     42,
+     60,
+     70,
+     68,
+     42
+    ],
+    [
+     48,
+     34,
+     63,
+     83,
+     69,
+     41
+    ]
+   ]
+  }
+ },
+ "errors": [
+  "[gltfRig] \"crawler-lite\" did NOT load. http://localhost:5178/models/crawler-lite.glb is not a GLB — the server answered with something else (1229 bytes). This is usually an SPA fallback page, not a model. ",
+  "[gltfRig] \"crawler-lite\" falls through to the PROCEDURAL builder for the same rig id. That is the same machine drawn the old way, not a substitute machine — but the Blender model you asked for is NOT on screen. "
+ ]
+}

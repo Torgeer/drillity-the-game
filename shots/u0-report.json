@@ -1,0 +1,70 @@
+{
+ "when": "2026-09-05T09:12:12.428Z",
+ "quality": "high",
+ "methods": {
+  "tunnel-jumbo": {
+   "contribution": {
+    "mean": 27.54,
+    "p50": 21.21,
+    "p95": 85.6,
+    "p99": 177.91,
+    "p95_p50": 4.04,
+    "p99_p50": 8.39,
+    "edge": 1.092,
+    "edgeMax": 932.3,
+    "coveragePct": 74.3
+   },
+   "frame": {
+    "mean": 58.6,
+    "p50": 38.1,
+    "p99": 233.3,
+    "pctBelowL16": 16.6,
+    "pctAboveL160": 8.5
+   }
+  },
+  "longhole": {
+   "contribution": {
+    "mean": 15.2,
+    "p50": 6.2,
+    "p95": 86.17,
+    "p99": 152.82,
+    "p95_p50": 13.89,
+    "p99_p50": 24.63,
+    "edge": 1.925,
+    "edgeMax": 910.1,
+    "coveragePct": 50.6
+   },
+   "frame": {
+    "mean": 73.4,
+    "p50": 59.5,
+    "p99": 209.7,
+    "pctBelowL16": 21,
+    "pctAboveL160": 13.1
+   }
+  },
+  "rockbolt": {
+   "contribution": {
+    "mean": 8.13,
+    "p50": 0.79,
+    "p95": 40.64,
+    "p99": 138.67,
+    "p95_p50": 51.62,
+    "p99_p50": 176.11,
+    "edge": 3.423,
+    "edgeMax": 885.8,
+    "coveragePct": 24
+   },
+   "frame": {
+    "mean": 49.9,
+    "p50": 30.7,
+    "p99": 195.7,
+    "pctBelowL16": 34.4,
+    "pctAboveL160": 5.3
+   }
+  }
+ },
+ "errors": [
+  "[gltfRig] \"crawler-lite\" did NOT load. http://localhost:5178/models/crawler-lite.glb is not a GLB — the server answered with something else (1229 bytes). This is usually an SPA fallback page, not a mo",
+  "[gltfRig] \"crawler-lite\" falls through to the PROCEDURAL builder for the same rig id. That is the same machine drawn the old way, not a substitute machine — but the Blender model you asked for is NOT "
+ ]
+}

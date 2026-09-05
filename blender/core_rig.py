@@ -306,19 +306,19 @@ def build(out_path):
         for dy in (-0.42, 0.42):
             A(R.box('handle%d%d' % (s, int(dy * 10)), (0.03, 0.14, 0.035), R.MAT_STEEL,
                     loc=(s * 0.975, eyc + dy + 0.30, 1.52)))
-    A(R.box('radiator', (0.28, 1.20, 1.10), R.MAT_DARK,
-            loc=(1.29, eyc + 0.25, 1.65), bevel=0.015))
-    fin = R.box('rad_fin', (0.02, 0.03, 1.00), R.MAT_STEEL, loc=(1.44, eyc - 0.32, 1.65))
-    arr(fin, (0, 0.045, 0), 26)
+    A(R.box('radiator', (0.28, 1.10, 1.10), R.MAT_DARK,
+            loc=(1.29, eyc + 0.14, 1.65), bevel=0.015))
+    fin = R.box('rad_fin', (0.02, 0.03, 1.00), R.MAT_STEEL, loc=(1.44, eyc - 0.38, 1.65))
+    arr(fin, (0, 0.045, 0), 24)
     A(fin)
-    A(R.box('rad_guard', (0.05, 1.24, 0.06), R.MAT_PAINT, loc=(1.42, eyc + 0.25, 2.22)))
+    A(R.box('rad_guard', (0.05, 1.14, 0.06), R.MAT_PAINT, loc=(1.42, eyc + 0.14, 2.22)))
     # exhaust stack, curving up out of the enclosure roof [MET] p.17
-    A(R.hose('exhaust', [(-0.55, 2.35, 2.22), (-0.55, 2.30, 2.52), (-0.47, 2.22, 2.66)],
+    A(R.hose('exhaust', [(-0.55, 2.48, 2.22), (-0.55, 2.43, 2.52), (-0.47, 2.35, 2.66)],
              radius=0.055, mat=R.MAT_WORN, sides=9))
-    A(disc('exh_cap', 0.075, 0.03, R.MAT_WORN, (-0.47, 2.20, 2.70), 'Z', sides=9))
+    A(disc('exh_cap', 0.075, 0.03, R.MAT_WORN, (-0.47, 2.33, 2.70), 'Z', sides=9))
     # air pre-cleaner on the roof
-    A(disc('precleaner', 0.135, 0.20, R.MAT_DARK, (0.40, 3.45, 2.40), 'Z', sides=12))
-    A(disc('precleaner_cap', 0.165, 0.05, R.MAT_STEEL, (0.40, 3.45, 2.52), 'Z', sides=12))
+    A(disc('precleaner', 0.135, 0.20, R.MAT_DARK, (0.40, 3.36, 2.40), 'Z', sides=12))
+    A(disc('precleaner_cap', 0.165, 0.05, R.MAT_STEEL, (0.40, 3.36, 2.52), 'Z', sides=12))
     # lifting eyes - every module on this class carries them [MET] p.18
     for ex, ey in ((-0.80, ENG_Y0 + 0.15), (0.80, ENG_Y0 + 0.15),
                    (-0.80, ENG_Y1 - 0.15), (0.80, ENG_Y1 - 0.15)):
@@ -368,26 +368,26 @@ def build(out_path):
     # knob, a gear indicator and an LED screen [C140] p.6; a light canopy roof
     # on posts over the standing position [MET] p.17.  The canopy top is the
     # published transport height, 2 558 mm [C140] p.6 dim F.
-    A(R.box('console_body', (0.92, 0.42, 0.90), R.MAT_PAINT, loc=(-0.86, 0.86, 1.40),
+    A(R.box('console_body', (0.92, 0.40, 0.90), R.MAT_PAINT, loc=(-0.86, 0.72, 1.40),
             bevel=0.03))
-    A(R.box('console_face', (0.86, 0.30, 0.10), R.MAT_DARK, loc=(-0.86, 0.62, 1.90),
+    A(R.box('console_face', (0.86, 0.30, 0.10), R.MAT_DARK, loc=(-0.86, 0.50, 1.90),
             rot=(-0.55, 0, 0), bevel=0.01))
-    A(R.box('console_screen', (0.30, 0.19, 0.02), R.MAT_GLASS, loc=(-1.02, 0.545, 1.945),
+    A(R.box('console_screen', (0.30, 0.19, 0.02), R.MAT_GLASS, loc=(-1.02, 0.425, 1.945),
             rot=(-0.55, 0, 0)))
     for i in range(5):
         A(disc('gauge%d' % i, 0.037, 0.03, R.MAT_STEEL,
-               (-0.72 + i * 0.055, 0.55, 1.95), 'Y', sides=10))
+               (-0.72 + i * 0.055, 0.43, 1.95), 'Y', sides=10))
     for i in range(2):
         A(R.tube('joystick%d' % i, 0.016, 0.17, R.MAT_DARK,
-                 loc=(-1.05 + i * 0.38, 0.72, 1.86), rot=(-0.35, 0, 0), sides=6))
+                 loc=(-1.05 + i * 0.38, 0.60, 1.86), rot=(-0.35, 0, 0), sides=6))
         A(disc('joyknob%d' % i, 0.032, 0.05, R.MAT_RUBBER,
-               (-1.05 + i * 0.38, 0.66, 2.02), 'Z', sides=8))
-    A(R.box('estop', (0.08, 0.08, 0.05), R.MAT_HAZARD, loc=(-0.50, 0.60, 1.92)))
-    for px, py in ((-1.44, -0.28), (-0.20, -0.28), (-1.44, 1.10), (-0.20, 1.10)):
+               (-1.05 + i * 0.38, 0.54, 2.02), 'Z', sides=8))
+    A(R.box('estop', (0.08, 0.08, 0.05), R.MAT_HAZARD, loc=(-0.50, 0.48, 1.92)))
+    for px, py in ((-1.44, -0.24), (-0.22, -0.24), (-1.44, 1.00), (-0.22, 1.00)):
         A(R.tube('canopy_post%d%d' % (int(px * 10), int(py * 10)), 0.038,
                  H_TRANSPORT - DECK_Z - 0.06, R.MAT_PAINT, loc=(px, py, DECK_Z), sides=8))
-    A(R.box('canopy', (1.36, 1.50, 0.06), R.MAT_PAINT,
-            loc=(-0.82, 0.41, H_TRANSPORT - 0.03), bevel=0.02))
+    A(R.box('canopy', (1.40, 1.44, 0.06), R.MAT_PAINT,
+            loc=(-0.83, 0.38, H_TRANSPORT - 0.03), bevel=0.02))
 
     # ── 6. DECK FURNITURE: handrails, stair, collar catwalk ─────────────────
     hr = DECK_Z + 1.05
@@ -440,7 +440,7 @@ def build(out_path):
     # 4.76 mm, up to 420 m/min, with LEVEL WIND, depth indicator and parking
     # brake - the level-wind bar across the drum face is the cheap, high-value
     # detail the reference asks for.
-    WY = 1.72
+    WY = 1.20
     for s, tag, r0, w in ((1, 'main', 0.24, 0.40), (-1, 'wire', 0.20, 0.34)):
         wx = s * 0.46
         A(R.box('winch_bed_' + tag, (w + 0.16, 0.34, 0.22), R.MAT_DARK,
@@ -744,13 +744,13 @@ def build(out_path):
     # Two rope systems over the crown, and they are very different sizes: main
     # hoist 16 mm, wireline 4.76 mm [C140] p.6.  The game currently draws one
     # rope at the main-hoist diameter and calls it the wireline.
-    A(R.hose('rope_main', [(0.46, 1.72, DECK_Z + 0.75),
+    A(R.hose('rope_main', [(0.50, 1.20, DECK_Z + 0.75),
                            (0.34, 1.30, 4.20),
                            (0.16, 0.62, 8.60),
                            (0.02, 0.44, MAST_TOP_Z - 0.34),
                            (0.0, 0.10, MAST_TOP_Z - 0.30),
                            (0.0, 0.02, 6.40)], radius=ROPE_MAIN_R, mat=R.MAT_WORN, sides=6))
-    A(R.hose('rope_wire', [(-0.46, 1.72, DECK_Z + 0.75),
+    A(R.hose('rope_wire', [(-0.50, 1.20, DECK_Z + 0.75),
                            (-0.30, 1.20, 4.60),
                            (-0.10, 0.34, 9.40),
                            (0.0, 0.02, MAST_TOP_Z - 0.12),
@@ -784,12 +784,12 @@ def build(out_path):
         mp.append(R.box('hose_clamp%d' % int(cz2 * 10), (0.30, 0.05, 0.05), R.MAT_STEEL,
                         loc=(0, MASTL_Y(0.30) + 0.09, MASTL_Z(cz2))))
     # deck hoses: pump to mast foot, valve bank to mast
-    A(R.hose('hose_water', [(0.78, 3.20, 1.10), (0.60, 2.20, 0.98),
+    A(R.hose('hose_water', [(0.42, 3.62, 1.05), (0.86, 2.20, 1.02),
                             (0.30, 0.90, 1.05), (0.10, 0.20, 0.80)],
              radius=0.034, mat=R.MAT_RUBBER, sides=6))
-    A(R.hose('hose_deck1', [(-0.30, 1.95, 1.02), (-0.24, 1.10, 1.10), (-0.12, 0.42, 0.92)],
+    A(R.hose('hose_deck1', [(-0.30, 1.60, 1.02), (-0.24, 1.00, 1.10), (-0.12, 0.42, 0.92)],
              radius=0.026, mat=R.MAT_RUBBER, sides=5))
-    A(R.hose('hose_deck2', [(0.34, 1.95, 1.02), (0.26, 1.05, 1.12), (0.14, 0.40, 0.94)],
+    A(R.hose('hose_deck2', [(0.52, 1.30, 1.10), (0.30, 0.95, 1.12), (0.14, 0.40, 0.94)],
              radius=0.026, mat=R.MAT_RUBBER, sides=5))
 
     # deck work light over the console, plus one on the power pack

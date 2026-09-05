@@ -1,0 +1,112 @@
+{
+ "when": "2026-09-05T08:45:18.970Z",
+ "quality": "high",
+ "sites": {
+  "tunnel-portal": {
+   "arch": "tunnel-portal",
+   "region": "alpine",
+   "method": "top-hammer",
+   "terrainCalls": 24,
+   "surface": {
+    "calls": 86,
+    "tris": 160570
+   },
+   "terrain": {
+    "calls": 23,
+    "tris": 122736
+   },
+   "hist": {
+    "mean": 103,
+    "max": 209,
+    "pctBlack": 11.3,
+    "pctBright": 6
+   },
+   "grid": [
+    [
+     15,
+     15,
+     15,
+     15,
+     15,
+     15
+    ],
+    [
+     87,
+     93,
+     96,
+     96,
+     90,
+     86
+    ],
+    [
+     107,
+     116,
+     119,
+     117,
+     114,
+     105
+    ],
+    [
+     110,
+     120,
+     120,
+     123,
+     121,
+     110
+    ],
+    [
+     117,
+     119,
+     128,
+     122,
+     113,
+     128
+    ],
+    [
+     139,
+     122,
+     119,
+     135,
+     141,
+     125
+    ],
+    [
+     151,
+     150,
+     126,
+     120,
+     138,
+     134
+    ],
+    [
+     151,
+     151,
+     150,
+     143,
+     145,
+     130
+    ],
+    [
+     56,
+     113,
+     99,
+     106,
+     117,
+     72
+    ],
+    [
+     28,
+     78,
+     77,
+     89,
+     80,
+     41
+    ]
+   ]
+  }
+ },
+ "errors": [
+  "[gltfRig] \"crawler-lite\" did NOT load. http://localhost:5178/models/crawler-lite.glb is not a GLB — the server answered with something else (1229 bytes). This is usually an SPA fallback page, not a model. ",
+  "[gltfRig] \"crawler-lite\" falls through to the PROCEDURAL builder for the same rig id. That is the same machine drawn the old way, not a substitute machine — but the Blender model you asked for is NOT on screen. "
+ ]
+}

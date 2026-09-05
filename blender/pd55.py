@@ -1059,8 +1059,10 @@ def build_head(mast, mast_top):
            (sx * (hw - 0.05), 1.02, 1.44), (0.55, 0, 0), bevel=0.02)
     bx('head-back', (MAST_W, 0.16, 1.30), MAT_PAINT, h,
        (0, -hd + 0.05, 0.70), bevel=0.02)
+    # Cap top = MAST_HEAD_H exactly, so MAST_Z0 + MAST_LEN + MAST_HEAD_H is
+    # the height that lands in the .glb: A = 25.70 m [P4], measured not hoped.
     bx('head-cap', (MAST_W + 0.10, 0.90, 0.16), MAT_PAINT, h,
-       (0, 0.42, MAST_HEAD_H - 0.16), bevel=0.02)
+       (0, 0.42, MAST_HEAD_H - 0.08), bevel=0.02)
     # Sheaves: main hammer line + pile line + auxiliary, on ONE cross shaft.
     # One pivot node for the block, not one per sheave: they share a shaft so
     # they share an axis, and three nodes would spend four extra draw calls

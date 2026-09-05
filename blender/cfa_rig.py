@@ -216,6 +216,18 @@ def cut(target, cutters):
     return target
 
 
+def to_mesh(o):
+    """hose() returns a CURVE, and join_by_mat only handles meshes. A hose that
+    belongs to a moving subassembly has to be converted or it stays behind at
+    the scene root while the thing it is plumbed into slides away."""
+    _mode()
+    bpy.ops.object.select_all(action='DESELECT')
+    o.select_set(True)
+    bpy.context.view_layer.objects.active = o
+    bpy.ops.object.convert(target='MESH')
+    return bpy.context.active_object
+
+
 def clone(tpl, name, loc=(0, 0, 0), rot=(0, 0, 0), scale=None):
     """A copy of a baked template. Cheap: no operator, no modifier stack."""
     o = bpy.data.objects.new(name, tpl.data.copy())
@@ -762,11 +774,11 @@ def build_drive(carriage_node):
                           (math.pi / 2, 0, 0)))
     bpy.data.objects.remove(jc, do_unlink=True)
     for i in range(3):
-        objs.append(hose('jumper',
-                         [(-0.16 + i * 0.15, DRILL_Y - 0.80, z + 0.55),
-                          (-0.30 + i * 0.34, DRILL_Y - 0.95, z + 0.74),
-                          (-0.50 + i * 0.52, DRILL_Y - 0.30, z + 0.86)],
-                         radius=0.026, mat=MAT_RUBBER, sides=6))
+        objs.append(to_mesh(hose('jumper',
+                                 [(-0.16 + i * 0.15, DRILL_Y - 0.80, z + 0.55),
+                                  (-0.30 + i * 0.34, DRILL_Y - 0.95, z + 0.74),
+                                  (-0.50 + i * 0.52, DRILL_Y - 0.30, z + 0.86)],
+                                 radius=0.026, mat=MAT_RUBBER, sides=6)))
 
     # ── the concrete head [S2] ────────────────────────────────────────────────
     objs.append(tube('cswivel', 0.235, 0.42, MAT_CAST, loc=(0, DRILL_Y, z + 1.02), sides=18))
@@ -1129,16 +1141,23 @@ def build_lights():
                      aim_dir=(0.0, -1.2, -2.0), cone_deg=62, range_m=16)
     nodes += [m, a]
 
-    # lamp housings, static geometry, one draw call with the rest of the steel
+    # lamp housings. The two on the mast have to be joined into the MAST
+    # group, not the statics: env.js reads mount:/aim: world positions every
+    # frame, so if the empty rakes with the mast and the housing does not, the
+    # light detaches from its lamp by two metres at full rake.
+    mast_objs = []
+    mast_mounts = []
     for n in nodes:
-        if n.name.startswith(NODE_MOUNT):
-            b = box('lamp', (0.24, 0.14, 0.20), MAT_DARK,
-                    loc=tuple(n.matrix_world.translation), bevel=0.02)
-            g = box('lampglass', (0.20, 0.02, 0.16), MAT_GLASS,
-                    loc=(n.matrix_world.translation[0],
-                         n.matrix_world.translation[1] + 0.08,
-                         n.matrix_world.translation[2]))
-    return nodes
+        if not n.name.startswith(NODE_MOUNT):
+            continue
+        w = n.matrix_world.translation
+        b = box('lamp', (0.24, 0.14, 0.20), MAT_DARK, loc=tuple(w), bevel=0.02)
+        g = box('lampglass', (0.20, 0.02, 0.16), MAT_GLASS,
+                loc=(w[0], w[1] + 0.08, w[2]))
+        if n.name in (NODE_MOUNT + 'mastMid', NODE_MOUNT + 'mastHead'):
+            mast_objs += [b, g]
+            mast_mounts.append(n)
+    return nodes, mast_objs, mast_mounts
 
 
 # ── main ──────────────────────────────────────────────────────────────────────
@@ -1160,9 +1179,12 @@ def build(out_path):
     mast_pivot = empty(NODE_PIVOT, 'mast', None, (0, MAST_CY, MAST_FOOT_Z + 0.20))
     mast_parts = build_mast()
     head_parts, sheave_pivots = build_masthead()
-    join_by_mat(mast_parts + head_parts, 'mast', mast_pivot)
+    light_nodes, mast_lamps, mast_mounts = build_lights()
+    join_by_mat(mast_parts + head_parts + mast_lamps, 'mast', mast_pivot)
     for sp in sheave_pivots:
         attach(sp, mast_pivot)
+    for mm in mast_mounts:
+        attach(mm, mast_pivot)
 
     # ── the crowd carriage, the drive, and the auger hanging off it ───────────
     carriage = empty(NODE_SLIDE, 'carriage', None, (0, DRILL_Y, DRIVE_Z))
@@ -1181,7 +1203,6 @@ def build(out_path):
     statics += cl_static
     statics += build_concrete_line(z_head)
     build_mast_rams()
-    build_lights()
 
     # where the ground-standing concrete pump and the spoil skip belong: the
     # rig is never alone on a CFA job, and the scene needs the anchor points

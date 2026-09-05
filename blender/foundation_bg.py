@@ -227,6 +227,30 @@ CAB_W, CAB_D, CAB_H = 1.250, 1.850, 2.150     # NOT SOURCED ([S2] §8 lists cab
 _bins = {}          # (owner_object_or_None, material_name) -> [objects]
 _order = []
 
+# ── A MEASURED CORRECTION, NOT A FUDGE ───────────────────────────────────────
+# rig.box() does `primitive_cube_add(size=1)` — a cube of EDGE 1, spanning
+# −0.5..+0.5 — and then sets `scale = size/2`, so the box it returns is HALF the
+# size asked for. Verified in Blender 5.2.1: box((4, 2, 10)) measures
+# (2.000, 1.000, 5.000); tube() is unaffected and correct.
+#
+# That is a bug in a file six machines share, so it is not fixed from here: it
+# is MEASURED here, at build time, from a probe box that is then deleted. Every
+# dimension in this file is therefore the real dimension in metres, and the day
+# rig.box() is corrected centrally, BOX_K measures 1.0 and this model does not
+# move by a millimetre. Reported for a central fix; see the notes at the foot.
+BOX_K = 1.0
+
+
+def _measure_box_scale():
+    global BOX_K
+    o = R.box('__probe__', (4.0, 2.0, 10.0), R.MAT_PAINT)
+    d = o.dimensions
+    k = (4.0 / d.x, 2.0 / d.y, 10.0 / d.z)
+    bpy.data.objects.remove(o, do_unlink=True)
+    assert abs(k[0] - k[1]) < 1e-6 and abs(k[0] - k[2]) < 1e-6, k
+    BOX_K = k[0]
+    print('BOX_K measured = %.3f (1.0 once rig.box() is fixed)' % BOX_K)
+
 
 def B(obj, owner, mat):
     """File a freshly built object into its weld bin."""
@@ -286,6 +310,7 @@ def weld_all():
 
 def bx(name, size, mat, owner, parent, loc=(0, 0, 0), rot=(0, 0, 0), bevel=0.012,
        seg=2):
+    size = (size[0] * BOX_K, size[1] * BOX_K, size[2] * BOX_K)
     o = R.box(name, size, mat, parent, loc, rot, bevel)
     if seg != 2 and 'bev' in o.modifiers:
         o.modifiers['bev'].segments = seg      # one segment is plenty on a part
@@ -320,7 +345,8 @@ def strut(name, p0, p1, r, mat, owner, parent, sides=10, square=False):
     L = d.length
     rot = d.to_track_quat('Z', 'Y').to_euler()
     if square:
-        o = R.box(name, (r * 2, r * 2, L), mat, parent, (0, 0, 0), (0, 0, 0), r * 0.25)
+        o = R.box(name, (r * 2 * BOX_K, r * 2 * BOX_K, L * BOX_K), mat, parent,
+                  (0, 0, 0), (0, 0, 0), r * 0.25)
         o.data.transform(Matrix.Translation((0, 0, L / 2)))
         o.rotation_euler = rot
         o.location = p0
@@ -1134,6 +1160,7 @@ def build(out_path):
     _bins.clear()
     del _order[:]
     R.reset()
+    _measure_box_scale()
 
     # ── the dynamic spine ────────────────────────────────────────────────────
     # slew → mast rake → crowd sledge → rotary spindle → three Kelly stages.

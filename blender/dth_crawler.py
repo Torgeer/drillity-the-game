@@ -51,7 +51,19 @@ compressor, cyclone dust collection.
 
 
 import sys, os, math
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lib'))
+
+_HERE = os.path.dirname(os.path.abspath(__file__))
+if os.path.join(_HERE, 'lib') not in sys.path:
+    sys.path.insert(0, os.path.join(_HERE, 'lib'))
+# ...and blender/ itself. build.py only adds blender/lib, and relies on Blender
+# having put the script's own directory on sys.path. R.reset() calls
+# wm.read_factory_settings(), which REBUILDS sys.path from preferences and
+# drops that entry - so the FIRST machine in build.py's MACHINES list imports,
+# and every one after it dies with ModuleNotFoundError. Re-inserting here (and
+# again in build()) keeps the machines that follow this one importable. The
+# real fix is one line in build.py: sys.path.insert(0, HERE) inside the loop.
+if _HERE not in sys.path:
+    sys.path.insert(0, _HERE)
 
 import bpy
 from mathutils import Vector, Matrix
@@ -110,7 +122,22 @@ SUCT_D     = 0.203      # 203 mm dust suction hose - CATALOGUE [B]/[R]S4.5
 CAB_W, CAB_D, CAB_H = 1.140, 1.340, 1.980   # NOT SOURCED [R]S8 #6; derived
                                             # from a 1.9 m operator in [P2]
 
-# where things sit along the machine (machine faces +Y; Blender Z is up)
+# WHERE THINGS SIT ALONG THE MACHINE
+# ----------------------------------
+# This file is AUTHORED with the machine facing Blender +Y, because every
+# number below then reads forwards: the boom foot at y = +1.38, the collar at
+# y = +5.14, the cooler face at y = -2.68.
+#
+# The FLEET's convention is the opposite. blender/crawler_th.py states it:
+# "Blender -Y is the machine's FORWARD and lands on three.js +Z - the same
+# forward the procedural rigs use", and blender/core_rig.py says "+Y is
+# rearward". src/rig/rigFactory.js agrees: buildDTHCrawler() puts the mast at
+# z = 0 and the engine at z = -4.55, so +Z is forward there too.
+#
+# So build() spins the finished machine 180 deg about Z before export. A
+# rotation, not a mirror - the cab stays on the machine's right-hand side and
+# the handedness of every thread and every hose route is preserved. Doing it
+# once at the end beats negating 400 coordinates and getting one of them wrong.
 CAB_X      =  0.640     # cab offset to the right of centreline [R]S1 "cab at
                         # the front-right". Side is NOT SOURCED - [R]S8 #6.
 CAB_Y      =  0.820
@@ -1381,6 +1408,15 @@ def build_feed(mast):
     # slide:feedExtend - the beam and everything bolted to it
     fx = R.empty(R.NODE_SLIDE, 'feedExtend', mast, (0, 0, -FEED_GRIP))
     fx['travel_m'] = FEED_EXT
+    # the rod half of the extension ram travels WITH the beam - a barrel with
+    # nothing coming out of it is the classic tell of a cylinder that was drawn
+    # rather than mechanised
+    cyl('extrod', 0.046, 1.240, R.MAT_CHROME, fx,
+        (-FEED_SEC_W / 2 - 0.150, -FEED_SEC_D / 2 - 0.060, FEED_GRIP + 0.520),
+        sides=12)
+    box('extlug', (0.150, 0.140, 0.130), R.MAT_DARK, fx,
+        (-FEED_SEC_W / 2 - 0.150, -FEED_SEC_D / 2 - 0.060, FEED_GRIP + 1.760),
+        bevel=0.008)
 
     build_feed_beam(fx)
     build_dust_package(fx)
@@ -1520,6 +1556,9 @@ def build_lights(root, boom_lift):
 
 def build(out_path):
     col = R.reset()
+    for _p in (os.path.join(_HERE, 'lib'), _HERE):     # reset() wipes sys.path
+        if _p not in sys.path:
+            sys.path.insert(0, _p)
     root = R.empty('', 'rig:dth-crawler', None, (0, 0, 0))
 
     build_undercarriage(root)
@@ -1532,6 +1571,13 @@ def build(out_path):
     build_feed(mast)
     build_support_leg(root)
     build_lights(root, bpy.data.objects[R.NODE_PIVOT + 'boomLift'])
+
+    # Everything hangs off the root, then the root turns to face the fleet's
+    # forward. See the axes note at the top of this file.
+    for o in list(bpy.context.scene.objects):
+        if o.parent is None and o is not root:
+            o.parent = root
+    root.rotation_euler = (0, 0, math.pi)
 
     bake_all()
     R.finish(out_path)

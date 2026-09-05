@@ -56,12 +56,38 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 if os.path.join(HERE, 'lib') not in sys.path:
     sys.path.insert(0, os.path.join(HERE, 'lib'))
 
-from rig import (reset, part, box, tube, hose, empty, worklight, finish,
+from rig import (reset, part, tube, hose, empty, worklight, finish,
                  NODE_MOUNT, NODE_AIM, NODE_PIVOT, NODE_SLIDE,
                  MAT_PAINT, MAT_DARK, MAT_STEEL, MAT_WORN, MAT_CAST,
                  MAT_RUBBER, MAT_GLASS, MAT_CHROME, MAT_HAZARD)
+from rig import box as _lib_box
 
 TAU = math.pi * 2
+
+
+def box(name, size, mat=MAT_PAINT, parent=None, loc=(0, 0, 0), rot=(0, 0, 0),
+        bevel=0.0):
+    """A box whose `size` is its actual extent in metres.
+
+    rig.box() builds its cube with primitive_cube_add(size=1) — a unit cube with
+    vertices at +/-0.5 — and then sets scale to size/2, so the object comes out
+    at HALF the requested extents. Measured, not guessed: a box asked for at
+    (0.26, 4.20, 0.24) exported with a bounding box of (0.13, 2.10, 0.12).
+
+    That halving is invisible while a machine is only boxes, because everything
+    shrinks together — but tube(), cone() and every hard-coded position are in
+    true metres, so in a mixed model it puts every truss member at half length
+    and leaves it floating clear of its own joints. A first render of this rig
+    showed exactly that: a stair made of disconnected sticks and a lattice with
+    daylight at every node.
+
+    rig.py is shared with the other machines being built in parallel, so it is
+    NOT edited here. This local wrapper doubles the request instead, so every
+    dimension written in this file means what it says. The bevel is applied
+    after the scale is baked, so bevel widths are unaffected by the doubling.
+    """
+    return _lib_box(name, (size[0] * 2, size[1] * 2, size[2] * 2), mat, parent,
+                    loc, rot, bevel)
 
 # ── PRINCIPAL DIMENSIONS ──────────────────────────────────────────────────────
 # rc-rig.md §8 is blunt: there is no dimensioned GA of any RC rig anywhere in the
@@ -975,8 +1001,8 @@ def build_jacks():
             bevel=0.014)
         tube('jack-rod', 0.052, 0.42, MAT_CHROME, sl, (x, y, 1.78), sides=10)
         tube('jack-pin', 0.055, 0.10, MAT_WORN, sl, (x, y, 0.16), sides=10)
-        cone('jack-pad', 0.11, 0.225, 0.08, MAT_WORN, sl, (x, y, 0.08), sides=18)
-        tube('jack-pad-plate', 0.225, 0.045, MAT_WORN, sl, (x, y, 0.035),
+        cone('jack-pad', 0.12, 0.285, 0.09, MAT_WORN, sl, (x, y, 0.085), sides=18)
+        tube('jack-pad-plate', 0.285, 0.05, MAT_WORN, sl, (x, y, 0.035),
              sides=18)
     return sl
 
@@ -1161,9 +1187,10 @@ def build_sample_train():
     # photograph actually shows, one or two bags per metre drilled
     for i in range(10):
         row, col = i // 5, i % 5
-        cone('calico-bag-row', 0.145, 0.10, 0.30, MAT_RUBBER, st,
-             (1.15 + row * 0.44, -0.62 + col * 0.34, 0.0),
-             rot=(0.10 * (i % 3) - 0.10, 1.45, 0.4 * i), sides=8)
+        b = cone('calico-bag-row', 0.145, 0.105, 0.32, MAT_RUBBER, st,
+                 (1.15 + row * 0.46, -0.66 + col * 0.36, 0.145),
+                 rot=(0.10 * (i % 3) - 0.10, math.pi / 2, 0.4 * i), sides=8)
+        b.scale = (0.86, 1.0, 1.0)      # a filled sack slumps, it is not round
 
     # chip trays on a trestle: long thin plastic cases with a row of half-cup
     # sections, one section per metre [R02 §A2]. NOT timber core boxes — that is
@@ -1318,11 +1345,11 @@ def build_hoses():
                           (0.30 + o, -2.24, DECK_Z + 0.30)],
              radius=0.017, mat=MAT_RUBBER, sides=6)
     coil = []
-    for i in range(14):
-        a = i * 1.15
-        coil.append((0.30 + math.cos(a) * 0.095, -2.26 + i * 0.008,
-                     DECK_Z + 0.34 + math.sin(a) * 0.095 + i * 0.024))
-    hose('head-conduit-coil', coil, radius=0.024, mat=MAT_RUBBER, sides=6)
+    for i in range(12):
+        a = i * 1.25
+        coil.append((0.34 + math.cos(a) * 0.070, -2.30 + i * 0.007,
+                     DECK_Z + 0.30 + math.sin(a) * 0.070 + i * 0.019))
+    hose('head-conduit-coil', coil, radius=0.018, mat=MAT_RUBBER, sides=6)
 
     hose('bull-hose', [(-2.60, 3.20, 0.06), (-1.55, 1.70, 0.07),
                        (-0.90, 0.10, 0.10), (-1.05, -1.60, 0.34),

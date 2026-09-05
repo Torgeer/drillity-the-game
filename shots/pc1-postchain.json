@@ -1,0 +1,361 @@
+{
+  "when": "2026-09-05T08:50:37.879Z",
+  "method": "dth",
+  "tiers": {
+    "low": {
+      "tier": "low",
+      "dpr": 1.5,
+      "canvas": {
+        "w": 585,
+        "h": 1266
+      },
+      "frameMs": 3.717,
+      "frameFps": 269.1,
+      "drawCalls": 154,
+      "triangles": 108999,
+      "passes": [
+        {
+          "name": "BandRenderPass",
+          "costMs": null,
+          "note": "head pass — the scene itself"
+        },
+        {
+          "name": "_UnrealBloomPass",
+          "costMs": 0.0667,
+          "spread": 1.4333,
+          "pctOfFrame": 1.8
+        },
+        {
+          "name": "DrillityGrade",
+          "costMs": 0.275,
+          "spread": 1.0833,
+          "pctOfFrame": 7.4
+        },
+        {
+          "name": "SMAAPass",
+          "costMs": 0.175,
+          "spread": 0.25,
+          "pctOfFrame": 4.7
+        }
+      ],
+      "aoPrepass": null,
+      "postScaleAB": {
+        "cells": [
+          {
+            "dprMul": 1,
+            "canvasPx": 740610,
+            "postScale": 1,
+            "smaa": false,
+            "frameMs": 3.05,
+            "frameMsSpread": 0.225,
+            "reps": 5,
+            "edges": {
+              "hardEdgePctgOf1e4": 112.54,
+              "softEdgePctgOf1e4": 330.84,
+              "meanAbsGrad": 3.5535
+            }
+          },
+          {
+            "dprMul": 1,
+            "canvasPx": 740610,
+            "postScale": 1,
+            "smaa": true,
+            "frameMs": 3.075,
+            "frameMsSpread": 0.4917,
+            "reps": 5,
+            "edges": {
+              "hardEdgePctgOf1e4": 119.48,
+              "softEdgePctgOf1e4": 328.21,
+              "meanAbsGrad": 3.588
+            }
+          },
+          {
+            "dprMul": 1,
+            "canvasPx": 740610,
+            "postScale": 1.15,
+            "smaa": false,
+            "frameMs": 3.1,
+            "frameMsSpread": 0.6417,
+            "reps": 5,
+            "edges": {
+              "hardEdgePctgOf1e4": 69.86,
+              "softEdgePctgOf1e4": 327.34,
+              "meanAbsGrad": 2.6547
+            }
+          },
+          {
+            "dprMul": 1,
+            "canvasPx": 740610,
+            "postScale": 1.15,
+            "smaa": true,
+            "frameMs": 3.175,
+            "frameMsSpread": 0.5583,
+            "reps": 5,
+            "edges": {
+              "hardEdgePctgOf1e4": 62.33,
+              "softEdgePctgOf1e4": 361.41,
+              "meanAbsGrad": 2.6495
+            }
+          }
+        ],
+        "atNativeDpr": {
+          "dprMul": 1,
+          "canvasPx": 740610,
+          "baselineMs": 3.05,
+          "noiseMs": 0.6417,
+          "supersample": {
+            "costMs": 0.05,
+            "pctOfBaseline": 1.6,
+            "hardEdgesRemovedPct": 37.9
+          },
+          "smaa": {
+            "costMs": 0.025,
+            "pctOfBaseline": 0.8,
+            "hardEdgesRemovedPct": -6.2
+          }
+        }
+      }
+    },
+    "medium": {
+      "tier": "medium",
+      "dpr": 2,
+      "canvas": {
+        "w": 780,
+        "h": 1688
+      },
+      "frameMs": 5.308,
+      "frameFps": 188.4,
+      "drawCalls": 240,
+      "triangles": 334654,
+      "passes": [
+        {
+          "name": "BandRenderPass",
+          "costMs": null,
+          "note": "head pass — the scene itself"
+        },
+        {
+          "name": "DrillityContactAO",
+          "costMs": 1.0917,
+          "spread": 0.325,
+          "pctOfFrame": 20.6
+        },
+        {
+          "name": "_UnrealBloomPass",
+          "costMs": 0.275,
+          "spread": 0.75,
+          "pctOfFrame": 5.2
+        },
+        {
+          "name": "DrillityGrade",
+          "costMs": 0.4,
+          "spread": 0.5167,
+          "pctOfFrame": 7.5
+        },
+        {
+          "name": "SMAAPass",
+          "costMs": 0.2,
+          "spread": 0.6583,
+          "pctOfFrame": 3.8
+        }
+      ],
+      "aoPrepass": "included in DrillityContactAO",
+      "postScaleAB": {
+        "cells": [
+          {
+            "dprMul": 1,
+            "canvasPx": 1316640,
+            "postScale": 1,
+            "smaa": false,
+            "frameMs": 5.4833,
+            "frameMsSpread": 0.7083,
+            "reps": 5,
+            "edges": {
+              "hardEdgePctgOf1e4": 109.29,
+              "softEdgePctgOf1e4": 675.18,
+              "meanAbsGrad": 4.4641
+            }
+          },
+          {
+            "dprMul": 1,
+            "canvasPx": 1316640,
+            "postScale": 1,
+            "smaa": true,
+            "frameMs": 5.3917,
+            "frameMsSpread": 1.225,
+            "reps": 5,
+            "edges": {
+              "hardEdgePctgOf1e4": 109.65,
+              "softEdgePctgOf1e4": 682.05,
+              "meanAbsGrad": 4.4596
+            }
+          },
+          {
+            "dprMul": 1,
+            "canvasPx": 1316640,
+            "postScale": 1.15,
+            "smaa": false,
+            "frameMs": 5.5417,
+            "frameMsSpread": 1.6667,
+            "reps": 5,
+            "edges": {
+              "hardEdgePctgOf1e4": 64.85,
+              "softEdgePctgOf1e4": 453.35,
+              "meanAbsGrad": 3.268
+            }
+          },
+          {
+            "dprMul": 1,
+            "canvasPx": 1316640,
+            "postScale": 1.15,
+            "smaa": true,
+            "frameMs": 5.5833,
+            "frameMsSpread": 1.2417,
+            "reps": 5,
+            "edges": {
+              "hardEdgePctgOf1e4": 66.72,
+              "softEdgePctgOf1e4": 449.43,
+              "meanAbsGrad": 3.2718
+            }
+          }
+        ],
+        "atNativeDpr": {
+          "dprMul": 1,
+          "canvasPx": 1316640,
+          "baselineMs": 5.4833,
+          "noiseMs": 1.6667,
+          "supersample": {
+            "costMs": 0.0584,
+            "pctOfBaseline": 1.1,
+            "hardEdgesRemovedPct": 40.7
+          },
+          "smaa": {
+            "costMs": -0.0916,
+            "pctOfBaseline": -1.7,
+            "hardEdgesRemovedPct": -0.3
+          }
+        }
+      }
+    },
+    "high": {
+      "tier": "high",
+      "dpr": 2,
+      "canvas": {
+        "w": 780,
+        "h": 1688
+      },
+      "frameMs": 5.058,
+      "frameFps": 197.7,
+      "drawCalls": 249,
+      "triangles": 432874,
+      "passes": [
+        {
+          "name": "BandRenderPass",
+          "costMs": null,
+          "note": "head pass — the scene itself"
+        },
+        {
+          "name": "DrillityContactAO",
+          "costMs": 1.25,
+          "spread": 0.3667,
+          "pctOfFrame": 24.7
+        },
+        {
+          "name": "_UnrealBloomPass",
+          "costMs": 0.3583,
+          "spread": 0.4417,
+          "pctOfFrame": 7.1
+        },
+        {
+          "name": "DrillityGrade",
+          "costMs": 0.025,
+          "spread": 1.275,
+          "pctOfFrame": 0.5
+        },
+        {
+          "name": "SMAAPass",
+          "costMs": 0.075,
+          "spread": 0.4917,
+          "pctOfFrame": 1.5
+        }
+      ],
+      "aoPrepass": "included in DrillityContactAO",
+      "postScaleAB": {
+        "cells": [
+          {
+            "dprMul": 1,
+            "canvasPx": 1316640,
+            "postScale": 1,
+            "smaa": false,
+            "frameMs": 4.175,
+            "frameMsSpread": 1.1917,
+            "reps": 5,
+            "edges": {
+              "hardEdgePctgOf1e4": 118.13,
+              "softEdgePctgOf1e4": 605.19,
+              "meanAbsGrad": 4.4088
+            }
+          },
+          {
+            "dprMul": 1,
+            "canvasPx": 1316640,
+            "postScale": 1,
+            "smaa": true,
+            "frameMs": 3.9917,
+            "frameMsSpread": 0.95,
+            "reps": 5,
+            "edges": {
+              "hardEdgePctgOf1e4": 116.71,
+              "softEdgePctgOf1e4": 611.09,
+              "meanAbsGrad": 4.4227
+            }
+          },
+          {
+            "dprMul": 1,
+            "canvasPx": 1316640,
+            "postScale": 1.15,
+            "smaa": false,
+            "frameMs": 3.9667,
+            "frameMsSpread": 0.8583,
+            "reps": 5,
+            "edges": {
+              "hardEdgePctgOf1e4": 68.24,
+              "softEdgePctgOf1e4": 410.35,
+              "meanAbsGrad": 3.1579
+            }
+          },
+          {
+            "dprMul": 1,
+            "canvasPx": 1316640,
+            "postScale": 1.15,
+            "smaa": true,
+            "frameMs": 4.05,
+            "frameMsSpread": 0.8083,
+            "reps": 5,
+            "edges": {
+              "hardEdgePctgOf1e4": 68.56,
+              "softEdgePctgOf1e4": 408.97,
+              "meanAbsGrad": 3.1529
+            }
+          }
+        ],
+        "atNativeDpr": {
+          "dprMul": 1,
+          "canvasPx": 1316640,
+          "baselineMs": 4.175,
+          "noiseMs": 1.1917,
+          "supersample": {
+            "costMs": -0.2083,
+            "pctOfBaseline": -5,
+            "hardEdgesRemovedPct": 42.2
+          },
+          "smaa": {
+            "costMs": -0.1833,
+            "pctOfBaseline": -4.4,
+            "hardEdgesRemovedPct": 1.2
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

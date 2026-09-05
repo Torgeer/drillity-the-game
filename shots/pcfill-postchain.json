@@ -1,0 +1,121 @@
+{
+  "when": "2026-09-05T08:55:28.895Z",
+  "method": "dth",
+  "tiers": {
+    "low": {
+      "tier": "low",
+      "dpr": 1.5,
+      "canvas": {
+        "w": 1755,
+        "h": 3798
+      },
+      "frameMs": 3.367,
+      "frameFps": 297,
+      "drawCalls": 151,
+      "triangles": 105901,
+      "passes": [
+        {
+          "name": "BandRenderPass",
+          "costMs": null,
+          "note": "head pass — the scene itself"
+        },
+        {
+          "name": "_UnrealBloomPass",
+          "costMs": 0.2833,
+          "spread": 0.6,
+          "pctOfFrame": 8.4
+        },
+        {
+          "name": "DrillityGrade",
+          "costMs": -0.1083,
+          "spread": 1.0583,
+          "pctOfFrame": -3.2
+        },
+        {
+          "name": "SMAAPass",
+          "costMs": 0.7083,
+          "spread": 1.0583,
+          "pctOfFrame": 21
+        }
+      ],
+      "aoPrepass": null,
+      "postScaleAB": {
+        "cells": [
+          {
+            "dprMul": 1,
+            "canvasPx": 6665490,
+            "postScale": 1,
+            "smaa": false,
+            "frameMs": 3.8833,
+            "frameMsSpread": 2.275,
+            "reps": 5,
+            "edges": {
+              "hardEdgePctgOf1e4": 62,
+              "softEdgePctgOf1e4": 246.95,
+              "meanAbsGrad": 3.0051
+            }
+          },
+          {
+            "dprMul": 1,
+            "canvasPx": 6665490,
+            "postScale": 1,
+            "smaa": true,
+            "frameMs": 3.8417,
+            "frameMsSpread": 0.375,
+            "reps": 5,
+            "edges": {
+              "hardEdgePctgOf1e4": 63.09,
+              "softEdgePctgOf1e4": 248.07,
+              "meanAbsGrad": 3.0377
+            }
+          },
+          {
+            "dprMul": 1,
+            "canvasPx": 6665490,
+            "postScale": 1.15,
+            "smaa": false,
+            "frameMs": 3.8417,
+            "frameMsSpread": 0.9333,
+            "reps": 5,
+            "edges": {
+              "hardEdgePctgOf1e4": 47.29,
+              "softEdgePctgOf1e4": 244.24,
+              "meanAbsGrad": 2.2044
+            }
+          },
+          {
+            "dprMul": 1,
+            "canvasPx": 6665490,
+            "postScale": 1.15,
+            "smaa": true,
+            "frameMs": 3.875,
+            "frameMsSpread": 1.875,
+            "reps": 5,
+            "edges": {
+              "hardEdgePctgOf1e4": 49.2,
+              "softEdgePctgOf1e4": 244.87,
+              "meanAbsGrad": 2.2097
+            }
+          }
+        ],
+        "atNativeDpr": {
+          "dprMul": 1,
+          "canvasPx": 6665490,
+          "baselineMs": 3.8833,
+          "noiseMs": 2.275,
+          "supersample": {
+            "costMs": -0.0416,
+            "pctOfBaseline": -1.1,
+            "hardEdgesRemovedPct": 23.7
+          },
+          "smaa": {
+            "costMs": -0.0416,
+            "pctOfBaseline": -1.1,
+            "hardEdgesRemovedPct": -1.8
+          }
+        }
+      }
+    }
+  },
+  "errors": []
+}

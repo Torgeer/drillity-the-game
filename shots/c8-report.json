@@ -1,0 +1,112 @@
+{
+ "when": "2026-09-05T09:07:58.036Z",
+ "quality": "high",
+ "sites": {
+  "open-pit-bench": {
+   "arch": "open-pit-bench",
+   "region": "andes",
+   "method": "dth",
+   "terrainCalls": 20,
+   "surface": {
+    "calls": 77,
+    "tris": 173718
+   },
+   "terrain": {
+    "calls": 18,
+    "tris": 133578
+   },
+   "hist": {
+    "mean": 54.3,
+    "max": 244,
+    "pctBlack": 16.4,
+    "pctBright": 0.8
+   },
+   "grid": [
+    [
+     15,
+     15,
+     15,
+     15,
+     15,
+     15
+    ],
+    [
+     33,
+     37,
+     35,
+     62,
+     46,
+     44
+    ],
+    [
+     31,
+     33,
+     36,
+     81,
+     76,
+     40
+    ],
+    [
+     31,
+     36,
+     40,
+     97,
+     85,
+     51
+    ],
+    [
+     29,
+     41,
+     53,
+     93,
+     74,
+     83
+    ],
+    [
+     39,
+     60,
+     55,
+     88,
+     83,
+     69
+    ],
+    [
+     39,
+     34,
+     31,
+     83,
+     106,
+     79
+    ],
+    [
+     40,
+     59,
+     66,
+     46,
+     55,
+     45
+    ],
+    [
+     22,
+     86,
+     79,
+     71,
+     98,
+     70
+    ],
+    [
+     24,
+     96,
+     93,
+     79,
+     76,
+     29
+    ]
+   ]
+  }
+ },
+ "errors": [
+  "[gltfRig] \"crawler-lite\" did NOT load. http://localhost:5178/models/crawler-lite.glb is not a GLB — the server answered with something else (1229 bytes). This is usually an SPA fallback page, not a model. ",
+  "[gltfRig] \"crawler-lite\" falls through to the PROCEDURAL builder for the same rig id. That is the same machine drawn the old way, not a substitute machine — but the Blender model you asked for is NOT on screen. "
+ ]
+}

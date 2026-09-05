@@ -1,0 +1,214 @@
+{
+ "when": "2026-09-05T09:01:21.622Z",
+ "quality": "high",
+ "sites": {
+  "open-pit-bench": {
+   "arch": "open-pit-bench",
+   "region": "andes",
+   "method": "dth",
+   "terrainCalls": 20,
+   "surface": {
+    "calls": 77,
+    "tris": 173766
+   },
+   "terrain": {
+    "calls": 18,
+    "tris": 133578
+   },
+   "hist": {
+    "mean": 53.2,
+    "max": 245,
+    "pctBlack": 16.5,
+    "pctBright": 0.8
+   },
+   "grid": [
+    [
+     15,
+     15,
+     15,
+     15,
+     15,
+     15
+    ],
+    [
+     32,
+     39,
+     37,
+     48,
+     45,
+     38
+    ],
+    [
+     38,
+     35,
+     37,
+     56,
+     56,
+     32
+    ],
+    [
+     40,
+     40,
+     43,
+     84,
+     70,
+     42
+    ],
+    [
+     32,
+     44,
+     54,
+     85,
+     68,
+     85
+    ],
+    [
+     38,
+     60,
+     56,
+     83,
+     83,
+     72
+    ],
+    [
+     39,
+     34,
+     33,
+     90,
+     112,
+     81
+    ],
+    [
+     40,
+     59,
+     66,
+     51,
+     50,
+     45
+    ],
+    [
+     25,
+     84,
+     73,
+     68,
+     100,
+     70
+    ],
+    [
+     25,
+     103,
+     99,
+     70,
+     78,
+     31
+    ]
+   ]
+  },
+  "marine-spread": {
+   "arch": "marine-spread",
+   "region": "north-sea",
+   "method": "site-investigation",
+   "terrainCalls": 14,
+   "surface": {
+    "calls": 66,
+    "tris": 56562
+   },
+   "terrain": {
+    "calls": 12,
+    "tris": 12274
+   },
+   "hist": {
+    "mean": 94.7,
+    "max": 237,
+    "pctBlack": 15.4,
+    "pctBright": 26.8
+   },
+   "grid": [
+    [
+     15,
+     15,
+     15,
+     15,
+     15,
+     15
+    ],
+    [
+     125,
+     149,
+     141,
+     93,
+     96,
+     70
+    ],
+    [
+     164,
+     185,
+     165,
+     126,
+     131,
+     133
+    ],
+    [
+     180,
+     222,
+     212,
+     143,
+     144,
+     148
+    ],
+    [
+     131,
+     164,
+     160,
+     143,
+     137,
+     97
+    ],
+    [
+     96,
+     118,
+     115,
+     84,
+     67,
+     41
+    ],
+    [
+     74,
+     78,
+     48,
+     58,
+     57,
+     53
+    ],
+    [
+     53,
+     69,
+     66,
+     54,
+     57,
+     47
+    ],
+    [
+     32,
+     129,
+     106,
+     96,
+     125,
+     59
+    ],
+    [
+     14,
+     76,
+     77,
+     68,
+     67,
+     25
+    ]
+   ]
+  }
+ },
+ "errors": [
+  "[gltfRig] \"crawler-lite\" did NOT load. http://localhost:5178/models/crawler-lite.glb is not a GLB — the server answered with something else (1229 bytes). This is usually an SPA fallback page, not a model. ",
+  "[gltfRig] \"crawler-lite\" falls through to the PROCEDURAL builder for the same rig id. That is the same machine drawn the old way, not a substitute machine — but the Blender model you asked for is NOT on screen. "
+ ]
+}
