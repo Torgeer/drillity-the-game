@@ -51,6 +51,22 @@ const TAG = positional[0] || 'run';
 const PORT = positional[1] || '5178';
 const ONLY = (flag('only') || '').toLowerCase();
 const AS_JSON = argv.includes('--json');
+/* ── --remove <selector> : ISOLATION, AND IT IS NOT A PASS ────────────────
+   Deletes matching nodes before every sample. It exists for one situation:
+   something OUTSIDE the code under test is standing on top of it, and you
+   need to know whether the thing underneath is itself correct.
+
+   The case it was written for: main.js's `#model-error` banner is
+   `position:fixed; inset:auto 0 0 0; z-index:99998` on document.body, so with
+   no built .glb models it covers the entire dock and the hit test reports
+   every slider, the primary action and every rail button BLOCKED — true, and
+   nothing to do with the dock's own layout.
+
+   THIS IS NOT AN EXEMPTION AND IT IS NOT DEFAULT. A run using it is stamped
+   at the top of the report, in the gates block, and in the JSON, because a
+   number measured with an obstacle deleted answers a different question from
+   the one the gate asks. Never quote such a run as a pass. */
+const REMOVE = flag('remove');
 
 const CASES = ['rockbolt', 'driven-pile', 'rc', 'dth', 'oil-rotary'];
 
@@ -59,7 +75,14 @@ export function updateStyle(id,c){let s=document.querySelector('style[data-vite-
 export function removeStyle(id){const s=document.querySelector('style[data-vite-dev-id="'+id+'"]');if(s)s.remove();}
 export function injectQuery(u){return u;} export class ErrorOverlay extends HTMLElement{}`;
 
-const measure = (p, opts = {}) => p.evaluate(`(${ENUMERATE})(${JSON.stringify(opts)})`);
+const measure = async (p, opts = {}) => {
+  if (REMOVE) {
+    await p.evaluate((sel) => {
+      for (const n of document.querySelectorAll(sel)) n.remove();
+    }, REMOVE).catch(() => { /* selector matched nothing this frame */ });
+  }
+  return p.evaluate(`(${ENUMERATE})(${JSON.stringify(opts)})`);
+};
 
 /** Put the game on the site screen running `methodId`, the ordinary way. */
 const GOTO_SITE = (mm) => {
@@ -86,6 +109,15 @@ const GOTO_SITE = (mm) => {
 
 const out = [];
 const say = (s = '') => { out.push(s); console.log(s); };
+if (REMOVE) {
+  say('###########################################################################');
+  say(`##  ISOLATION RUN — "${REMOVE}" was DELETED before every sample.`);
+  say('##  This measures what the code under test would do with that obstacle');
+  say('##  out of the way. It does NOT measure the game as it ships, and it is');
+  say('##  NOT a pass. Quote it only as "with X removed, the layout underneath');
+  say('##  measures ..." — never as a gate result.');
+  say('###########################################################################');
+}
 
 const b = await chromium.launch({ args: ['--mute-audio'], headless: false, channel: 'chrome' });
 const c = await b.newContext({
@@ -239,7 +271,12 @@ const uniqPage = [...new Set(pageErrs)];
 json.errors = uniqErrs;
 json.pageErrors = uniqPage;
 const nErr = uniqErrs.length + uniqPage.length;
+json.removedSelector = REMOVE || null;
 say('\n=== GATES ===');
+if (REMOVE) {
+  say(`  !!  ISOLATION RUN — "${REMOVE}" was deleted before every sample.`);
+  say('  !!  Nothing below is a gate result. See the banner at the top.');
+}
 say(`  build is clean ........... ${nErr === 0 ? 'PASS' : 'FAIL (' + nErr + ')'}`);
 say(`  overlaps (enumerated) .... ${anyOv === 0 ? 'PASS' : 'FAIL (' + anyOv + ')'}`);
 say(`  nothing over the 3D ...... ${anyBand === 0 ? 'PASS' : 'FAIL (' + anyBand + ')'}`);
