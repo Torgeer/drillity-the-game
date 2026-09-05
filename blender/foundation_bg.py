@@ -333,8 +333,22 @@ def hs(name, pts, r, mat, owner, parent, taut=False):
     Ropes are taut; hoses are not."""
     o = R.hose(name, pts, r, mat, parent)
     if taut:
-        for bp in o.data.splines[0].bezier_points:
-            bp.handle_left_type = bp.handle_right_type = 'VECTOR'
+        # Setting handle_*_type alone does NOT move the handles that rig.hose()
+        # already baked as AUTO — the type is metadata until something forces a
+        # recalculation, and in a background build nothing does. So the handle
+        # POSITIONS are written here, a third of the way to each neighbour,
+        # which is the definition of a vector handle. Measured before/after on
+        # the main rope: peak height 28.03 m -> 26.89 m, against a published
+        # 27.10 m machine.
+        bps = o.data.splines[0].bezier_points
+        n = len(bps)
+        for i, bp in enumerate(bps):
+            co = bp.co
+            prv = bps[i - 1].co if i > 0 else co
+            nxt = bps[i + 1].co if i < n - 1 else co
+            bp.handle_left_type = bp.handle_right_type = 'FREE'
+            bp.handle_left = co + (prv - co) / 3.0
+            bp.handle_right = co + (nxt - co) / 3.0
     return B(o, owner, mat)
 
 
@@ -1145,7 +1159,10 @@ def build_ropes_and_hoses(mast, sledge_z, head_z):
     [S2 §9-D].
     """
     own = mast
-    top = MAST_FOOT_Z + MAST_LEN + EXT_LEN
+    # The crown sheaves live inside the masthead block, whose TOP FACE is the
+    # published 27 100 mm. Reeving off the girder top, not off the overall
+    # height, is what keeps every rope under that ceiling.
+    top = GIRDER_TOP_Z
     yc = (MAST_FACE_Y + MAST_BACK_Y) / 2
     ax = DRILL_AXIS_Y
 
