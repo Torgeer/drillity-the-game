@@ -56,6 +56,7 @@ import { writeFileSync, mkdirSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ENUMERATE } from './enumerate.js';
+import { ensureServer } from '../tools/devserver.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 mkdirSync(HERE, { recursive: true });
@@ -135,6 +136,15 @@ if (REMOVE) {
   say('###########################################################################');
 }
 
+/* THIS HARNESS PROVIDES ITS OWN SUBJECT.
+   It used to open with "needs `npm run dev` on 5178" and die on
+   ERR_CONNECTION_REFUSED when it was not there — a gate with a manual
+   prerequisite, which is a gate that gets skipped, which is the empty-set
+   problem one level up: it passes for ever by never running. 
+   was given ../tools/devserver.mjs for exactly this and the file's own header
+   names this harness as the other caller. If the port already answers that
+   server is used and nothing is started. */
+const SERVER = await ensureServer(PORT, (s) => console.log(s));
 const b = await chromium.launch({ args: ['--mute-audio'], headless: false, channel: 'chrome' });
 const c = await b.newContext({
   ...devices['iPhone 13 Pro'],
@@ -166,7 +176,7 @@ p.on('pageerror', (e) => pageErrs.push(String(e).slice(0, 180)));
    on the machine. Reachability and readiness are separate questions: fail fast
    and honestly on the first, then take as long as the app needs on the second.
    127.0.0.1, not localhost — `localhost` resolves to ::1 first on Windows. */
-await p.goto(`http://127.0.0.1:${PORT}/?quality=low&shot`, { waitUntil: 'domcontentloaded', timeout: 180000 });
+await p.goto(`${SERVER.origin}/?quality=low&shot`, { waitUntil: 'domcontentloaded', timeout: 180000 });
 await p.waitForFunction(() => window.__DRILLITY?.ui?.show && window.__DRILLITY?.sim, null, { timeout: 240000 });
 await p.waitForTimeout(2200);
 
@@ -361,16 +371,59 @@ json.errors = uniqErrs;
 json.pageErrors = uniqPage;
 const nErr = uniqErrs.length + uniqPage.length;
 json.removedSelector = REMOVE || null;
+/* ── THE VERDICT IS NINE GATES, AND IT SETS THE EXIT CODE ─────────────────
+   This block printed FIVE of the nine gates the header above promises, and
+   the process exited 0 whatever any of them said.
+
+   Four gates were therefore enforced NOWHERE: clipped text, the 3D's share,
+   chrome agreement and say-it-once were computed per case, printed with
+   `<-- GATE FAIL` beside them, aggregated into `json.cases[m]`, and then
+   dropped. `nothing` — the empty-set guard, the one this project has paid
+   three rounds for — was the fifth: collected at :212, printed at :275, and
+   never once consulted by a verdict.
+
+   And the header already claimed both fixes were in: "AND THE PROCESS EXITS
+   NON-ZERO WHEN ANY OF THEM FAILS ... A gate that cannot stop a build is a
+   report." It said so while the file had no `process.exit` in it at all.
+   That is ASTRA §3.6 in miniature — the document and the code disagreed and
+   the document was the one being believed — so the CODE changes here.
+
+   Every gate the header names now has a line, every line feeds `failed`, and
+   `failed` is the exit code. */
+const anyClipped = [...new Set(Object.values(json.cases).flatMap((v) => v.clipped))];
+const anySplit = [...new Set(Object.values(json.cases).flatMap((v) => v.splitBad))];
+const anyHudDrift = [...new Set(Object.values(json.cases).flatMap((v) => v.hudDrift))];
+const anyTwice = [...new Set(Object.values(json.cases).flatMap((v) => v.saidTwice))];
+const anyNothing = [...new Set(Object.values(json.cases).flatMap((v) => v.nothing))];
+/* A run that measured no CASES is the same empty set one level up: five
+   methods were asked for and the loop produced nothing to score. Without this
+   the `[...].reduce((a,v)=>a+v, 0)` totals above are all 0 and every gate
+   below reads PASS off an empty object. */
+if (!Object.keys(json.cases).length) {
+  anyNothing.push(`no method case produced a measurement at all (asked for: ${CASES.join(', ')})`);
+}
+
+const failed = [];
+const gate = (label, ok, detail) => {
+  say(`  ${label.padEnd(25, '.')} ${ok ? 'PASS' : 'FAIL' + (detail ? ' (' + detail + ')' : '')}`);
+  if (!ok) failed.push(label.trim());
+};
+
 say('\n=== GATES ===');
 if (REMOVE) {
   say(`  !!  ISOLATION RUN — "${REMOVE}" was deleted before every sample.`);
   say('  !!  Nothing below is a gate result. See the banner at the top.');
 }
-say(`  build is clean ........... ${nErr === 0 ? 'PASS' : 'FAIL (' + nErr + ')'}`);
-say(`  overlaps (enumerated) .... ${anyOv === 0 ? 'PASS' : 'FAIL (' + anyOv + ')'}`);
-say(`  nothing over the 3D ...... ${anyBand === 0 ? 'PASS' : 'FAIL (' + anyBand + ')'}`);
-say(`  touch targets >= 44px .... ${anySmall.length === 0 ? 'PASS' : 'FAIL (' + anySmall.join(', ') + ')'}`);
-say(`  no navigation growth ..... ${grew.length === 0 ? 'PASS' : 'FAIL'}`);
+gate('build is clean ', nErr === 0, String(nErr));
+gate('overlaps (enumerated) ', anyOv === 0, String(anyOv));
+gate('nothing over the 3D ', anyBand === 0, String(anyBand));
+gate('touch targets >= 44px ', anySmall.length === 0, anySmall.join(', '));
+gate('no navigation growth ', grew.length === 0);
+gate('no clipped text ', anyClipped.length === 0, anyClipped.slice(0, 3).join(' | '));
+gate("the 3D's share ", anySplit.length === 0, anySplit.slice(0, 3).join(' | '));
+gate('chrome agreement ', anyHudDrift.length === 0, anyHudDrift.slice(0, 3).join(' | '));
+gate('said once ', anyTwice.length === 0, anyTwice.slice(0, 3).join(' | '));
+gate('measured something ', anyNothing.length === 0, anyNothing.slice(0, 3).join(' | '));
 
 /* ── A THROWN MODULE INVALIDATES EVERY OTHER NUMBER ABOVE ─────────────────
    This used to be a footnote printed under the verdict, and that is how a run
@@ -406,6 +459,26 @@ if (!uniqErrs.length && !uniqPage.length) {
   say('\nno errors on either channel — the counts above are measurements, not floors');
 }
 
+/* ── AND THE EXIT CODE ────────────────────────────────────────────────────
+   An isolation run is never a pass, whatever it printed: `--remove` deletes
+   the very element the gate is about, so its clean sheet was bought by taking
+   the subject away. The file says so at :70 in words; it now says so in the
+   exit code too, because a sentence in a banner does not stop a build.
+
+   `process.exitCode`, not `process.exit()`: the report has to be written and
+   the browser closed first, and `exit()` here would truncate both. */
+if (REMOVE) {
+  say(`\nISOLATION RUN — exiting 2. "${REMOVE}" was removed, so nothing above is a gate result.`);
+  process.exitCode = 2;
+} else if (failed.length) {
+  say(`\n${failed.length} GATE(S) FAILED: ${failed.join(', ')}`);
+  process.exitCode = 1;
+} else {
+  say('\nall gates pass');
+}
+
+json.gatesFailed = failed;
 writeFileSync(resolve(HERE, `${TAG}-report.txt`), out.join('\n'), 'utf8');
 if (AS_JSON) writeFileSync(resolve(HERE, `${TAG}-report.json`), JSON.stringify(json, null, 2), 'utf8');
 await b.close();
+SERVER.stop();

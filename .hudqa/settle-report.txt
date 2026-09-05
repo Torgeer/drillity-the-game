@@ -1,0 +1,85 @@
+
+rockbolt
+  painted     max 41 / med 41   (enumerated from *, no allowlist)
+  OVERLAPS    0  ok
+  ON THE 3D   0  ok
+  targets<44  0  ok  
+  targets     actionbtn 80x70, actionbtn 80x73, railbtn 80x45, sstrip__leave 45x45, vsl 80x70, vsl 80x73
+  clipped     0  ok  
+  split       surface 53.9 / section 46.1   (3D = 63% of stage)  ok
+  chrome      .sstrip 52px  .sitedock 260px  ctx.hud {"top":52,"bottom":260}  ok
+  said twice  0  ok
+
+driven-pile
+  painted     max 36 / med 29   (enumerated from *, no allowlist)
+  OVERLAPS    0  ok
+  ON THE 3D   0  ok
+  targets<44  0  ok  
+  targets     actionbtn 80x70, actionbtn 80x73, actionbtn 80x78.9, railbtn 80x45, sstrip__leave 45x45, vsl 80x70, vsl 80x73
+  clipped     0  ok  
+  split       surface 53.9 / section 46.1   (3D = 63% of stage)  ok
+  chrome      .sstrip 52px  .sitedock 260px  ctx.hud {"top":52,"bottom":260}  ok
+  said twice  0  ok
+
+rc
+  painted     max 39 / med 39   (enumerated from *, no allowlist)
+  OVERLAPS    0  ok
+  ON THE 3D   0  ok
+  targets<44  0  ok  
+  targets     actionbtn 80x70, actionbtn 80x73, railbtn 80x45, sstrip__leave 45x45, vsl 80x73
+  clipped     0  ok  
+  split       surface 53.9 / section 46.1   (3D = 63% of stage)  ok
+  chrome      .sstrip 52px  .sitedock 260px  ctx.hud {"top":52,"bottom":260}  ok
+  said twice  0  ok
+
+dth
+  painted     max 38 / med 38   (enumerated from *, no allowlist)
+  OVERLAPS    0  ok
+  ON THE 3D   0  ok
+  targets<44  0  ok  
+  targets     actionbtn 80x73, sstrip__leave 45x45, vsl 80x73
+  clipped     0  ok  
+  split       surface 54 / section 46   (3D = 67.3% of stage)  ok
+  chrome      .sstrip 52px  .sitedock 224px  ctx.hud {"top":52,"bottom":224}  ok
+  said twice  0  ok
+
+oil-rotary
+  painted     max 42 / med 42   (enumerated from *, no allowlist)
+  OVERLAPS    0  ok
+  ON THE 3D   0  ok
+  targets<44  0  ok  
+  targets     actionbtn 80x70, railbtn 80x45, sstrip__leave 45x45, vsl 80x73
+  clipped     0  ok  
+  split       surface 53.9 / section 46.1   (3D = 63% of stage)  ok
+  chrome      .sstrip 52px  .sitedock 260px  ctx.hud {"top":52,"bottom":260}  ok
+  said twice  0  ok
+
+
+=== REPEAT NAVIGATION: five ordinary visits to the site screen ===
+  one unmeasured warm-up lap first, so every screen on the route is already
+  built; after it, ANY movement in ANY column below is a leak.
+visit |  .sitedock |  .sstrip |  .screen nodes |  live nodes |  doc nodes |  .sitedock count |  ctx.hud
+  1   |     224 px |    52 px |         4      |      121   |     838   |         1        | {"top":52,"bottom":224}
+  2   |     224 px |    52 px |         4      |      121   |     838   |         1        | {"top":52,"bottom":224}
+  3   |     224 px |    52 px |         4      |      121   |     838   |         1        | {"top":52,"bottom":224}
+  4   |     224 px |    52 px |         4      |      121   |     838   |         1        | {"top":52,"bottom":224}
+  5   |     224 px |    52 px |         4      |      121   |     838   |         1        | {"top":52,"bottom":224}
+
+  DOCK HEIGHT 224px  ->  224px  ->  224px  ->  224px  ->  224px
+  GROWTH      none — dock, chrome and node counts identical across all five visits   ok
+
+=== GATES ===
+  build is clean .......... PASS
+  overlaps (enumerated) ... PASS
+  nothing over the 3D ..... PASS
+  touch targets >= 44px ... PASS
+  no navigation growth .... PASS
+  no clipped text ......... PASS
+  the 3D's share .......... PASS
+  chrome agreement ........ PASS
+  said once ............... PASS
+  measured something ...... PASS
+
+no errors on either channel — the counts above are measurements, not floors
+
+all gates pass
