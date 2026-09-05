@@ -542,28 +542,105 @@ export const G = {
    a texture: a swept tube riding the pitch cylinder gives the correct crest
    radius and lead, which is exactly what a driller recognises.
    ═══════════════════════════════════════════════════════════════════════════ */
+/*
+ * THREAD_SPECS — sourced, and the sources disagree with what was here before
+ * in one direction: every thread in this library was cut too DEEP.
+ *
+ * R (rope) — ISO 10208:1991, Table 1. Pitch is 12.7 mm for every R size, and
+ * the radial depth is 1.49-1.50 mm for every R size too: R22 through R38 all
+ * sit within 0.01 mm of each other. The external major diameters are 21.84 /
+ * 24.74 / 27.95 / 31.34 / 37.99 — just under the nominal name. A rope thread
+ * is therefore VERY shallow and VERY coarse: depth/pitch 0.117, depth/major
+ * 0.048, helix angle 7.6 degrees on R32. It is a corduroy wrapped round the
+ * rod, not a screw, and the old 1.8-2.4 mm depths made it look like one.
+ * R44 and R51 are not in ISO 10208 (which stops at R38); they are extrapolated
+ * on the same 12.7 mm pitch and flagged.
+ *
+ * T (trapezoidal, rounded roots) — Sandvik US4687368A, the only public
+ * dimensional table: pin major 38.20 / 44.20 / 50.80, thread height 1.60 /
+ * 1.90 / 2.20 mm, helix angle 7.17 / 6.72 / 6.31 degrees. Unlike R, T pitch
+ * SCALES with size — 15.1 / 16.4 / 17.7 mm derived from those helix angles,
+ * corroborated for T38 by a vendor's 0.610 in = 15.49. NOT a flat 15.875.
+ * T60/GT60/T76/H90 have no published table at all: extrapolated, flagged.
+ *
+ * API rotary shouldered — API Spec 7 Tables 25/26. REG uses form V-0.040:
+ * 5 TPI (pitch 5.080), thread height 2.9932, taper 3 in/ft = 1:4. NC uses
+ * V-0.038R: 4 TPI (pitch 6.350), height 3.0948, taper 2 in/ft = 1:6. Both
+ * flanks 30 degrees, roots fully rounded. `taper` here is the diametral taper
+ * per unit length, so a pin is a short cone — which is what an API pin looks
+ * like and what a cylinder cannot.
+ *
+ * Wireline — Epiroc's Diamond Driller's Technical Book, pp. 47-50: BQ/NQ/HQ/PQ
+ * are all 3 TPI, i.e. pitch 8.4667 mm, not 5.1; AQ is 4 TPI. Q-series pin
+ * length is 44.45 mm on every size. The thread is TAPERED — the parallel
+ * DCDMA thread is the W-series casing thread, a different part.
+ */
 export const THREAD_SPECS = {
-  R25:  { majorMm: 25,   pitchMm: 12.7,   depthMm: 1.8, family: 'rope' },
-  R28:  { majorMm: 28,   pitchMm: 12.7,   depthMm: 1.9, family: 'rope' },
-  R32:  { majorMm: 32,   pitchMm: 12.7,   depthMm: 2.0, family: 'rope' },
-  R38:  { majorMm: 38,   pitchMm: 12.7,   depthMm: 2.2, family: 'rope' },
-  R44:  { majorMm: 44,   pitchMm: 12.7,   depthMm: 2.3, family: 'rope' },
-  R51:  { majorMm: 51,   pitchMm: 12.7,   depthMm: 2.4, family: 'rope' },
-  T38:  { majorMm: 38,   pitchMm: 15.875, depthMm: 2.6, family: 'rope' },
-  T45:  { majorMm: 45,   pitchMm: 15.875, depthMm: 2.8, family: 'rope' },
-  T51:  { majorMm: 51,   pitchMm: 15.875, depthMm: 3.0, family: 'rope' },
-  T60:  { majorMm: 60,   pitchMm: 19.05,  depthMm: 3.4, family: 'rope' },
-  GT60: { majorMm: 60,   pitchMm: 19.05,  depthMm: 3.4, family: 'rope' },
-  T76:  { majorMm: 76,   pitchMm: 22.0,   depthMm: 3.8, family: 'rope' },
-  H90:  { majorMm: 90,   pitchMm: 25.4,   depthMm: 4.2, family: 'rope' },
-  API238: { majorMm: 60,  pitchMm: 6.35, depthMm: 2.2, family: 'api' },
-  API312: { majorMm: 89,  pitchMm: 6.35, depthMm: 2.6, family: 'api' },
-  API412: { majorMm: 114, pitchMm: 8.47, depthMm: 3.0, family: 'api' },
-  BQ:   { majorMm: 55.6, pitchMm: 5.1, depthMm: 1.4, family: 'wireline' },
-  NQ:   { majorMm: 69.9, pitchMm: 5.1, depthMm: 1.5, family: 'wireline' },
-  HQ:   { majorMm: 88.9, pitchMm: 5.1, depthMm: 1.6, family: 'wireline' },
-  PQ:   { majorMm: 114,  pitchMm: 5.1, depthMm: 1.8, family: 'wireline' },
+  R25:  { majorMm: 24.74, pitchMm: 12.7,  depthMm: 1.49, family: 'rope' },
+  R28:  { majorMm: 27.95, pitchMm: 12.7,  depthMm: 1.50, family: 'rope' },
+  R32:  { majorMm: 31.34, pitchMm: 12.7,  depthMm: 1.49, family: 'rope' },
+  R38:  { majorMm: 37.99, pitchMm: 12.7,  depthMm: 1.49, family: 'rope' },
+  R44:  { majorMm: 43.9,  pitchMm: 12.7,  depthMm: 1.55, family: 'rope' },   // extrapolated
+  R51:  { majorMm: 50.8,  pitchMm: 12.7,  depthMm: 1.60, family: 'rope' },   // extrapolated
+  T38:  { majorMm: 38.20, pitchMm: 15.1,  depthMm: 1.60, family: 'rope' },
+  T45:  { majorMm: 44.20, pitchMm: 16.4,  depthMm: 1.90, family: 'rope' },
+  T51:  { majorMm: 50.80, pitchMm: 17.7,  depthMm: 2.20, family: 'rope' },
+  T60:  { majorMm: 57.80, pitchMm: 19.0,  depthMm: 2.65, family: 'rope' },   // ST58 row
+  GT60: { majorMm: 60.0,  pitchMm: 19.0,  depthMm: 2.70, family: 'rope' },   // extrapolated
+  T76:  { majorMm: 76.0,  pitchMm: 22.0,  depthMm: 3.20, family: 'rope' },   // NOT SOURCED
+  H90:  { majorMm: 90.0,  pitchMm: 25.4,  depthMm: 3.60, family: 'rope' },   // NOT SOURCED
+  // 2 3/8, 3 1/2 and 4 1/2 REG — V-0.040, 5 TPI, 3 in/ft taper.
+  API238: { majorMm: 66.67,  pitchMm: 5.08, depthMm: 2.99, taper: 0.25, family: 'api' },
+  API312: { majorMm: 88.90,  pitchMm: 5.08, depthMm: 2.99, taper: 0.25, family: 'api' },
+  API412: { majorMm: 114.30, pitchMm: 5.08, depthMm: 2.99, taper: 0.25, family: 'api' },
+  BQ:   { majorMm: 55.6, pitchMm: 8.4667, depthMm: 1.6, taper: 0.06, family: 'wireline' },
+  NQ:   { majorMm: 69.9, pitchMm: 8.4667, depthMm: 1.8, taper: 0.06, family: 'wireline' },
+  HQ:   { majorMm: 88.9, pitchMm: 8.4667, depthMm: 2.0, taper: 0.06, family: 'wireline' },
+  PQ:   { majorMm: 114,  pitchMm: 8.4667, depthMm: 2.2, taper: 0.06, family: 'wireline' },
 };
+
+/*
+ * ROD BODIES — the body is not the thread.
+ *
+ * A rod's outside diameter, its flushing bore and the swelled collar on an MF
+ * (speed) rod are all published per thread, and none of them is derivable from
+ * the thread major: an R32 rod is 32 mm round with a 45 mm female collar, and
+ * deriving "major x 1.24" gave 39.7 mm of uniform stick. The collar is also
+ * SHORT — it is about as long as the coupling it replaces, 150-275 mm — and
+ * that short upset at one end is the single clearest way to tell an MF rod
+ * from an MM rod at a glance.
+ *
+ * [odMm, boreMm, couplingOdMm, couplingLenMm, mfCollarOdMm]
+ * Epiroc Tophammer catalogue and Sandvik Top hammer drilling tools 2024.
+ */
+export const ROD_SPECS = {
+  R25:  [25, 8.6, 33, 150, 33],
+  R28:  [28, 8.8, 38, 150, 38],
+  R32:  [32, 11.7, 44, 150, 45],
+  R38:  [38, 14.5, 55, 170, 56],
+  R44:  [44, 17, 62, 190, 62],
+  R51:  [51, 21.5, 70, 210, 70],
+  T38:  [39, 14.5, 52, 190, 56],
+  T45:  [46, 17, 63, 210, 63],
+  T51:  [52, 21.5, 72, 255, 72],
+  T60:  [60, 25, 85, 275, 85],
+  GT60: [60, 25, 85, 275, 85],
+  T76:  [76, 32, 102, 300, 102],
+  H90:  [90, 38, 118, 320, 118],
+  BQ:   [55.6, 46.0, 55.6, 0, 55.6],
+  NQ:   [69.9, 60.3, 69.9, 0, 69.9],
+  HQ:   [88.9, 77.8, 88.9, 0, 88.9],
+  PQ:   [114.3, 101.6, 114.3, 0, 114.3],
+};
+export function rodSpec(threadId) {
+  const s = ROD_SPECS[threadId];
+  if (s) return { odMm: s[0], boreMm: s[1], couplingOdMm: s[2], couplingLenMm: s[3], collarOdMm: s[4] };
+  const t = THREAD_SPECS[threadId] || THREAD_SPECS.T45;
+  return {
+    odMm: t.majorMm, boreMm: t.majorMm * 0.36, couplingOdMm: t.majorMm * 1.38,
+    couplingLenMm: t.majorMm * 4.6, collarOdMm: t.majorMm * 1.4,
+  };
+}
 
 /**
  * A helical thread crest.
@@ -590,18 +667,39 @@ export function threadGeometry(T, o) {
     radial = Math.max(3, radial - 2);
   }
   const n = Math.max(6, Math.ceil(turns * segsPerTurn));
-  const r = Math.max(mm(0.5), major - depth * 0.5);
+  const r0 = Math.max(mm(0.5), major - depth * 0.5);
+  // Diametral taper per unit length, shrinking toward the far end. An API REG
+  // pin runs 3 in/ft = 1:4 and an NC pin 2 in/ft = 1:6 — a rotary shouldered
+  // pin is a short stubby CONE, and drawing it as a cylinder loses the one
+  // thing that tells it apart from a rope thread at a glance.
+  const taper = o.taper || 0;
   const pts = [];
   for (let i = 0; i <= n; i++) {
     const u = i / n;
     const a = u * turns * TAU * hand;
+    const r = Math.max(mm(0.5), r0 - taper * 0.5 * u * length);
     pts.push(new T.Vector3(Math.cos(a) * r, y0 + dir * u * length, Math.sin(a) * r));
   }
   const curve = new T.CatmullRomCurve3(pts, false, 'centripetal', 0.5);
   return new T.TubeGeometry(curve, n, depth * 0.62, radial, false);
 }
 
-/** Male (pin) rope thread plus the core it is cut into, on the -Y end. */
+/**
+ * Male (pin) thread plus the core it is cut into, on the -Y end.
+ *
+ * What makes a pin read as a pin, in order of how far away you can see it:
+ * the RUNOUT — the thread stops short and the pin ends in a plain guide nose
+ * behind a 45-degree chamfer; then the flushing bore down the middle, which on
+ * a pin is a dark circle inside a ring of thread and on a box is hidden; then
+ * the taper, on the API and wireline families. All three were missing, and a
+ * pin and a box were the same object at two radii.
+ *
+ * The runout is measured, not invented: the one dimensioned drawing in the
+ * reference library — a 114.3 mm casing pin — ends its thread in a 2.5 x 45
+ * chamfer onto a 25 mm plain nose. API Spec 7 allows at most 12.7 mm from the
+ * shoulder to the first full-depth thread. No source could be found for a
+ * relief undercut at the root of a percussive pin, so there is not one here.
+ */
 export function addPinThread(T, ctx, parent, threadId, o) {
   o = o || {};
   const s = THREAD_SPECS[threadId] || THREAD_SPECS.T45;
@@ -609,30 +707,62 @@ export function addPinThread(T, ctx, parent, threadId, o) {
   const mat = o.mat || material(ctx, 'rawSteel');
   const y0 = o.y0 || 0;
   const dir = o.down === false ? 1 : -1;
+  const taper = o.taper !== undefined ? o.taper : (s.taper || 0);
+  const majR = mm(s.majorMm) * 0.5;
   const geo = threadGeometry(T, {
-    major: mm(s.majorMm) * 0.5, pitch: mm(s.pitchMm), depth: mm(s.depthMm),
+    major: majR, pitch: mm(s.pitchMm), depth: mm(s.depthMm), taper: taper,
     length: len, y0: y0, down: o.down, quality: o.quality, hand: o.hand,
   });
   const m = part(T, parent, geo, mat, { name: 'thread:' + threadId });
-  const coreR = mm(s.majorMm) * 0.5 - mm(s.depthMm) * 0.92;
-  part(T, parent, G.cyl(T, coreR, coreR * 0.97, len * 1.02, o.quality === 0 ? 8 : 14), mat, {
-    p: [0, y0 + dir * len * 0.5, 0],
-  });
+  const coreR = majR - mm(s.depthMm) * 0.92;
+  const endR = Math.max(mm(0.5), coreR - taper * 0.5 * len);
+  const bore = o.boreR !== undefined ? o.boreR : mm(rodSpec(threadId).boreMm) * 0.5;
+  // Core, plain nose past the thread runout, and the 45-degree chamfer onto it.
+  const nose = o.nose === false ? 0 : Math.min(len * 0.28, mm(25));
+  const ch = Math.min(mm(2.5), coreR * 0.12);
+  const prof = [
+    [Math.max(bore, mm(0.4)), 0],
+    [coreR, 0],
+    [endR, len],
+    [endR, len + nose - ch],
+    [Math.max(endR - ch, mm(0.6)), len + nose],
+    [Math.max(bore, mm(0.4)), len + nose],
+  ];
+  const solid = G.lathe(T, prof.map((p) => [p[0], dir * p[1]]), o.quality === 0 ? 8 : 14, false);
+  part(T, parent, solid, mat, { p: [0, y0, 0], name: 'pin-core' });
   return m;
 }
 
-/** Female (box) rope thread inside a bore — visible down the mouth. */
+/**
+ * Female (box) thread inside a bore — visible down the mouth.
+ *
+ * The counterbore matters as much as the thread: a real box has a plain,
+ * slightly larger mouth ahead of the first thread (API calls it Q_C and cuts
+ * the box a full 15.875 mm deeper than the pin is long, so the pin nose never
+ * bottoms), and that dark ring inside the shoulder is what reads as "female"
+ * from any distance at which the thread itself is a texture.
+ */
 export function addBoxThread(T, ctx, parent, threadId, o) {
   o = o || {};
   const s = THREAD_SPECS[threadId] || THREAD_SPECS.T45;
   const len = o.length !== undefined ? o.length : mm(s.pitchMm * 4.2);
   const mat = o.mat || material(ctx, 'wornSteel');
+  const dir = o.down === false ? 1 : -1;
+  const y0 = o.y0 || 0;
+  const taper = o.taper !== undefined ? o.taper : (s.taper || 0);
+  const majR = mm(s.majorMm) * 0.5 + mm(s.depthMm) * 0.35;
   const geo = threadGeometry(T, {
-    major: mm(s.majorMm) * 0.5 + mm(s.depthMm) * 0.35,
-    pitch: mm(s.pitchMm), depth: mm(s.depthMm),
-    length: len, y0: o.y0 || 0, down: o.down, quality: o.quality, hand: o.hand,
+    major: majR, pitch: mm(s.pitchMm), depth: mm(s.depthMm), taper: taper,
+    length: len, y0: y0, down: o.down, quality: o.quality, hand: o.hand,
   });
-  return part(T, parent, geo, mat, { name: 'boxthread:' + threadId, cast: false });
+  const m = part(T, parent, geo, mat, { name: 'boxthread:' + threadId, cast: false });
+  if (o.counterbore !== false) {
+    const cb = majR + mm(s.depthMm) * 0.9;
+    part(T, parent, G.cyl(T, cb, cb, mm(s.pitchMm) * 0.55, o.quality === 0 ? 10 : 16, true), mat, {
+      p: [0, y0 + dir * mm(s.pitchMm) * 0.27, 0], cast: false, name: 'counterbore',
+    });
+  }
+  return m;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -3494,7 +3624,17 @@ export function buildDrillRod(THREE_, ctx, opts) {
   const low = opts.lod === 'low';
   const seg = low ? 10 : 18;
   const type = opts.type === 'MM' ? 'MM' : 'MF';
-  const R = mm(ts.majorMm) * 0.5 * (type === 'MF' ? 1.24 : 1.02);
+  /* Body OD, bore and collar come off the rod tables, not off the thread. An
+     R32 rod is a 32 mm round bar with an 11.7 mm flushing hole and — if it is
+     an MF (speed) rod — a 45 mm female collar at one end. Deriving the body as
+     "thread major x 1.24" made it 39.7 mm of uniform stick and threw away the
+     collar, which is the one feature that tells MF from MM at a glance. */
+  const rs = rodSpec(thread);
+  const R = mm(rs.odMm) * 0.5;
+  const boreR = mm(rs.boreMm) * 0.5;
+  const collarR = mm(rs.collarOdMm) * 0.5;
+  // The collar is about as long as the coupling it stands in for.
+  const collarL = mm(rs.couplingLenMm || rs.odMm * 4.6) * 0.78;
   const g = new T.Group();
   g.name = 'drill-rod';
   const steel = wearMaterial(ctx, 'rawSteel', wear * 0.5);
@@ -3503,35 +3643,40 @@ export function buildDrillRod(THREE_, ctx, opts) {
   const thrL = mm(ts.pitchMm * 3.6);
 
   if (type === 'MF') {
-    // box (female) end at the top — an upset section with wrench flats
+    // Box (female) end at the top: a short swelled collar, a shoulder taper
+    // back onto the body, then the plain body all the way to the pin.
     part(T, g, G.lathe(T, [
-      [R, 0], [R, -mm(120)], [R * 0.86, -mm(150)],
-      [R * 0.80, -L + mm(150)], [R * 0.94, -L + mm(120)], [R * 0.94, -L],
-      [mm(ts.majorMm) * 0.42, -L], [mm(ts.majorMm) * 0.42, 0],
+      [collarR, 0], [collarR, -collarL], [R, -collarL - (collarR - R) * 1.6],
+      [R, -L + mm(40)], [R * 0.985, -L],
+      [boreR, -L], [boreR, 0],
     ], seg, true), steel, { name: 'body' });
     addBoxThread(T, ctx, g, thread, { y0: -mm(6), length: thrL, quality: low ? 0 : 0.6 });
     addPinThread(T, ctx, g, thread, { y0: -L + thrL, length: thrL, quality: low ? 0 : 0.6, mat: steel });
+    // Two wrench flats milled into the collar — that is where the tongs go.
     for (let i = 0; i < 2; i++) {
-      part(T, g, G.box(T, mm(4), mm(80), R * 1.5), worn, {
-        p: [Math.cos(i * Math.PI) * R * 0.92, -mm(70), 0], r: [0, i * Math.PI, 0],
+      part(T, g, G.box(T, mm(3), collarL * 0.62, collarR * 1.3), worn, {
+        p: [Math.cos(i * Math.PI) * collarR * 0.965, -collarL * 0.5, 0], r: [0, i * Math.PI, 0],
       });
     }
   } else {
     part(T, g, G.lathe(T, [
       [R, -mm(30)], [R, -L + mm(30)],
-      [mm(ts.majorMm) * 0.40, -L + mm(30)], [mm(ts.majorMm) * 0.40, -mm(30)],
+      [boreR, -L + mm(30)], [boreR, -mm(30)],
     ], seg, true), steel, { name: 'body' });
     addPinThread(T, ctx, g, thread, { y0: -mm(30), length: thrL, down: false, quality: low ? 0 : 0.6, mat: steel });
     addPinThread(T, ctx, g, thread, { y0: -L + mm(30), length: thrL, quality: low ? 0 : 0.6, mat: steel });
   }
 
   // the polished mid-band — every rod on a working rig has one
-  part(T, g, G.cyl(T, R * 0.805, R * 0.805, L * 0.30, seg), polished, { p: [0, -L * 0.5, 0] });
+  part(T, g, G.cyl(T, R * 1.002, R * 1.002, L * 0.30, seg), polished, { p: [0, -L * 0.5, 0] });
   if (wear > 0.4) {
-    // rod-holder jaw scars
+    // Rod-holder jaw scars. A rope thread wears worst on the turns nearest the
+    // shoulder — the crest rounds into a plateau and the profile loses
+    // amplitude — but at rod scale that is sub-pixel; the jaw marks are what a
+    // tired rod actually reads by.
     for (let i = 0; i < 3; i++) {
       part(T, g, G.box(T, R * 0.5, mm(26), R * 0.22), worn, {
-        p: [Math.cos(i * 2.1) * R * 0.78, -L * (0.34 + i * 0.06), Math.sin(i * 2.1) * R * 0.78],
+        p: [Math.cos(i * 2.1) * R * 0.9, -L * (0.34 + i * 0.06), Math.sin(i * 2.1) * R * 0.9],
         r: [0, -i * 2.1, 0], cast: false,
       });
     }
@@ -3541,7 +3686,9 @@ export function buildDrillRod(THREE_, ctx, opts) {
     id: 'drill-rod', family: 'Drill String & Rods / Drill Rods (Threaded)',
     name: 'Drillity ' + thread + ' Drill Rod ' + Math.round(L * 1000) + ' mm ' + type,
     thread: thread, type: type, lengthMm: opts.lengthMm || 3660,
-    odMm: Math.round(R * 2000), material: '34CrNiMo6, induction hardened ends',
+    odMm: rs.odMm, boreMm: rs.boreMm,
+    collarOdMm: type === 'MF' ? rs.collarOdMm : undefined,
+    material: '34CrNiMo6, induction hardened ends',
     method: 'top-hammer', priceEur: Math.round(70 + ts.majorMm * 2.6 * ((opts.lengthMm || 3660) / 3660)),
   }, opts);
 }
@@ -3554,35 +3701,57 @@ export function buildCouplingSleeve(THREE_, ctx, opts) {
   const wear = clamp01(opts.wear || 0);
   const low = opts.lod === 'low';
   const seg = low ? 12 : 22;
-  const R = mm(ts.majorMm) * 0.5 * 1.42;
-  const L = mm(ts.pitchMm * 11);
+  /* Coupling OD and length are published per thread — R32 44 x 150, T38 52 x
+     190, T45 63 x 210, T51 72 x 255, GT60 85 x 275 — and the previous
+     derivation (major x 1.42, pitch x 11) came out 30 mm short on a T45. */
+  const rs = rodSpec(thread);
+  const R = mm(rs.couplingOdMm) * 0.5;
+  const L = mm(rs.couplingLenMm);
+  const boreR = mm(ts.majorMm) * 0.5 * 0.86;
   const g = new T.Group();
   g.name = 'coupling-sleeve';
   const steel = wearMaterial(ctx, 'rawSteel', wear * 0.6);
   const worn = material(ctx, 'wornSteel');
 
+  /* A coupling is ONE forged barrel with a spanner band across its waist and a
+     stop ring in the bore, not two cans welded together — the mid-length weld
+     bead that used to sit here read as a joint and cut the sleeve in half.
+     The band needs its own profile rows: a radiusFn can only modulate rows
+     that exist, and with the barrel described by four rows the flats it asked
+     for were never evaluated anywhere. */
+  const bandTop = -L * 0.30;
+  const bandBot = -L * 0.70;
+  const ch = mm(3.5);
   part(T, g, profiledLathe(T, [
-    [R * 0.92, 0], [R, -mm(14)], [R, -L + mm(14)], [R * 0.92, -L],
-    [mm(ts.majorMm) * 0.5 * 0.86, -L], [mm(ts.majorMm) * 0.5 * 0.86, -L * 0.54],
-    [mm(ts.majorMm) * 0.42, -L * 0.5], [mm(ts.majorMm) * 0.5 * 0.86, -L * 0.46],
-    [mm(ts.majorMm) * 0.5 * 0.86, 0],
+    [R * 0.90, 0], [R, -ch], [R, bandTop + mm(6)],
+    [R * 0.965, bandTop], [R * 0.965, bandBot], [R, bandBot - mm(6)],
+    [R, -L + ch], [R * 0.90, -L],
+    [boreR, -L], [boreR, -L * 0.56],
+    [boreR * 0.82, -L * 0.52], [boreR * 0.82, -L * 0.48],   // the stop ring
+    [boreR, -L * 0.44], [boreR, 0],
   ], {
     segments: seg,
     radiusFn: (th, r, y) => {
-      if (r < R * 0.85 || y < -L * 0.66 || y > -L * 0.34) return 1;
-      const a = ((th * 6) % TAU + TAU) % TAU;   // hex wrench band
+      if (r < R * 0.9 || y > bandTop + mm(6.1) || y < bandBot - mm(6.1)) return 1;
+      const a = ((th * 6) % TAU + TAU) % TAU;   // six spanner flats
       const d = Math.min(a, TAU - a) / Math.PI;
-      return 1 - 0.05 * Math.max(0, 1 - d * 2.6);
+      return 1 - 0.085 * Math.max(0, 1 - d * 2.6);
     },
   }), steel, { name: 'sleeve' });
   addBoxThread(T, ctx, g, thread, { y0: -mm(4), length: mm(ts.pitchMm * 4.2), quality: low ? 0 : 0.6 });
   addBoxThread(T, ctx, g, thread, { y0: -L + mm(4), length: mm(ts.pitchMm * 4.2), down: false, quality: low ? 0 : 0.6 });
-  part(T, g, weldBead(T, R * 0.999, mm(1.6), low ? 12 : 20), worn, { p: [0, -L * 0.5, 0], cast: false });
+  if (wear > 0.35) {
+    // Both faces mushroom: they take the blow every time a rod is broken out,
+    // and the lip rolls over the OD.
+    for (const y of [-mm(1), -L + mm(1)]) {
+      part(T, g, G.torus(T, R * 0.995, mm(1.4) * wear, 5, low ? 12 : 20), worn, { p: [0, y, 0], cast: false });
+    }
+  }
 
   return finalise(T, g, {
     id: 'coupling-sleeve', family: 'Top Hammer Tools / Coupling Sleeves',
     name: 'Drillity Coupling ' + thread,
-    thread: thread, odMm: Math.round(R * 2000), lengthMm: Math.round(L * 1000),
+    thread: thread, odMm: rs.couplingOdMm, lengthMm: rs.couplingLenMm,
     stop: 'Semi-bridged', material: '34CrNiMo6', method: 'top-hammer',
     priceEur: Math.round(45 + ts.majorMm * 1.8),
   }, opts);
@@ -3695,23 +3864,69 @@ export function buildToolHolder(THREE_, ctx, opts) {
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /** Kelly box adapter (the square/keyed head every foundation tool hangs from). */
+/**
+ * The square drive stub every European Kelly tool is hung on.
+ *
+ * 200 x 200 mm is the standard: Bauer prints "Kellybox 200 mm" on all fourteen
+ * of its tool families, EMDE quotes "Kellybox SW 200 … for torque up to
+ * 250 kNm", and Liebherr's belling bucket lists the same. 130 and 150 exist on
+ * lighter Casagrande and STDS tooling; 150 was the default here, which is the
+ * exception rather than the rule.
+ */
 function kellyHead(T, ctx, parent, o) {
-  const boxMm = o.boxMm || 150;
+  const boxMm = o.boxMm || 200;
   const steel = o.mat;
   const s = mm(boxMm);
-  part(T, parent, G.box(T, s * 1.34, mm(150), s * 1.34), steel, { p: [0, -mm(75), 0] });
-  part(T, parent, G.box(T, s, mm(120), s), steel, { p: [0, mm(60), 0] });
-  // U-pin through the box
-  part(T, parent, G.cyl(T, mm(20), mm(20), s * 1.8, 10), material(ctx, 'chrome'), {
-    p: [0, mm(60), 0], r: [0, 0, Math.PI / 2],
+  part(T, parent, G.box(T, s * 1.34, mm(30), s * 1.34), steel, { p: [0, -mm(15), 0] });
+  part(T, parent, G.box(T, s * 1.16, mm(110), s * 1.16), steel, { p: [0, -mm(85), 0] });
+  part(T, parent, G.box(T, s, mm(150), s), steel, { p: [0, mm(75), 0] });
+  // Kelly eye and its U-pin, through the top of the stub.
+  part(T, parent, G.cyl(T, mm(24), mm(24), s * 1.5, 10), material(ctx, 'chrome'), {
+    p: [0, mm(115), 0], r: [0, 0, Math.PI / 2],
   });
   return parent;
 }
 
 /**
- * Kelly auger — central stem, twin helical flights, bolt-on cutting head with
- * round-shank picks and a pilot stinger.
- * opts: { diameterMm, turns, wear, boxMm }
+ * FLIGHT PITCH — the number that separates a Kelly auger from a CFA.
+ *
+ * EMDE tabulates it per diameter (catalogue pp. 12-16, column P): 500→250,
+ * 600→300, 800→375, 900→450, 1060→500, 1180→550, 1350→600, 1650→700,
+ * 1800-2300→800. That is P/D ≈ 0.48, falling to 0.35 at the top, stepped to
+ * 25 mm; Casagrande's "pitch 300/600 mm over 520-2500" agrees.
+ *
+ * A CFA is a different animal. Liebherr's CFA-AU data gives 500→350, 600→450,
+ * 900→650, 1200→900 — P/D ≈ 0.72-0.75. A CFA flight is half again as open as a
+ * Kelly auger flight of the same diameter, and that is what lets it carry the
+ * whole soil column instead of a bucketful. The Kelly auger here was built on
+ * 0.72 D — a CFA's pitch — so an 800 mm auger ran 576 mm coarse against a
+ * catalogue 375, with under two turns on it where there should be four.
+ */
+export function kellyFlightPitch(diaMm) {
+  return Math.min(800, Math.max(200, 25 * Math.round(0.48 * diaMm / 25)));
+}
+export function cfaFlightPitch(diaMm) {
+  return Math.min(950, Math.max(250, 25 * Math.round(0.735 * diaMm / 25)));
+}
+
+/**
+ * Kelly auger — central stem, helical flights, the tooth line ON THE LEADING
+ * EDGE OF THE BOTTOM FLIGHT, and a pilot below it.
+ * opts: { diameterMm, wear, boxMm, starts, workingMm }
+ *
+ * What was wrong here, in the order it mattered:
+ *
+ *  · The pitch was a CFA's (0.72 D). At 800 mm that is 576 mm against EMDE's
+ *    375, and with a fixed 1.6 turns the tool carried a third of the flight
+ *    area it should. Working length is now EMDE's NL = 1500 mm and the turn
+ *    count falls out of it — four turns on an 800, five and a half on a 600.
+ *  · The teeth sat on two straight box arms bolted under the stem. A Kelly
+ *    auger has no such arms: the picks are welded along the leading edge of
+ *    the bottom flight — which is a radial line at the foot of the helix —
+ *    with the pick boxes welded to a Hardox cutting bar along that edge, and
+ *    every third tooth kicked outboard so the kerf clears the flight.
+ *  · The stem was scaled off the diameter. Casagrande builds every tool in the
+ *    520-2500 mm range on one of two central pipes, Ø159 or Ø203.
  */
 export function buildKellyAuger(THREE_, ctx, opts) {
   const T = THREE_ || THREE; ctx = ctx || {}; opts = opts || {};
@@ -3720,64 +3935,129 @@ export function buildKellyAuger(THREE_, ctx, opts) {
   const low = opts.lod === 'low';
   const seg = low ? 12 : 22;
   const R = mm(diaMm) * 0.5;
-  const stemR = mm(clampv(diaMm * 0.28, 90, 190)) * 0.5;
-  const turns = opts.turns || 1.6;
-  const pitch = mm(diaMm * 0.72);
+  // Casagrande: central pipe Ø159 or Ø203, wall 25/30, over the whole range.
+  const stemR = mm(diaMm >= 1000 ? 203 : 159) * 0.5;
+  const pitch = mm(opts.pitchMm || kellyFlightPitch(diaMm));
+  const NL = mm(opts.workingMm || 1500);              // EMDE working length
+  const turns = NL / pitch;
+  // Bauer: 540-615 mm of stem and kelly head above the top flight.
+  const above = mm(560);
   const g = new T.Group();
   g.name = 'kelly-auger';
   const steel = wearMaterial(ctx, 'paintedSteel', wear * 0.5);
   const worn = wearMaterial(ctx, 'wornSteel', wear);
-  const headY = -mm(300) - turns * pitch;
+  const topY = -above;
+  const edgeY = topY - NL;                            // the cutting edge
 
-  kellyHead(T, ctx, group(T, g, 'kelly-head'), { boxMm: opts.boxMm || 150, mat: steel });
-  part(T, g, G.cyl(T, stemR, stemR, mm(300) + turns * pitch + mm(120), seg), steel, {
-    p: [0, -(mm(300) + turns * pitch + mm(120)) * 0.5, 0],
+  kellyHead(T, ctx, group(T, g, 'kelly-head'), { boxMm: opts.boxMm || 200, mat: steel });
+  part(T, g, G.cyl(T, stemR, stemR, above + NL + mm(40), seg), steel, {
+    p: [0, -(above + NL + mm(40)) * 0.5, 0],
   });
 
-  const starts = opts.starts || 2;
+  // EMDE: "double-start design especially for drilling-pipe diameters above
+  // 900 mm"; Bauer recommends it for uncased bores and secant walls.
+  const starts = opts.starts || (diaMm >= 900 ? 2 : 1);
+  /* Flight wear runs from the OUTER edge of the BOTTOM flight inward and
+     upward: the rim is where the plate is thinnest and the peripheral speed
+     highest, so the auger loses effective diameter from the bottom turn first
+     while the top turns stay near enough untouched. `rimAt(u)` is that
+     gradient — u = 0 at the top of the helix, 1 at the cutting edge. */
+  const rimLoss = mm(clampv(diaMm * 0.022, 8, 30)) * wear;
+  const rimAt = (u) => R - rimLoss * u * u;
   for (let s = 0; s < starts; s++) {
+    const rot = (s / starts) * TAU;
+    // Lead (bottom) flight plate 40 mm, the turns above it 30 mm — STDS-Jantz
+    // and Casagrande both build them that way.
     const fg = flightGeometry(T, {
       rInner: stemR * 0.96, rOuter: R, pitch: pitch, turns: turns,
-      thickness: mm(20), y0: -mm(300), segsPerTurn: low ? 12 : 22,
+      thickness: mm(30), y0: topY, segsPerTurn: low ? 12 : 22,
     });
-    part(T, g, fg, steel, { r: [0, (s / starts) * TAU, 0], name: 'flight' + s });
-    // wear strip on the outer edge of each flight
+    // Taper the rim in as the flight approaches the cutting edge.
+    if (rimLoss > 1e-6) {
+      const p = fg.attributes.position;
+      const uv = fg.attributes.uv;
+      for (let i = 0; i < p.count; i++) {
+        if (uv.getY(i) < 0.9) continue;               // outer band only
+        const u = clamp01(uv.getX(i) / turns);
+        const k = rimAt(u) / R;
+        p.setX(i, p.getX(i) * k);
+        p.setZ(i, p.getZ(i) * k);
+      }
+      fg.computeVertexNormals();
+    }
+    part(T, g, fg, steel, { r: [0, rot, 0], name: 'flight' + s });
+    /* The armoured rim. Bauer sells it three ways — Verschleisswinkel (an
+       angle section on the edge), Verschleissstreifen (flat strips) and
+       Auftragsschweissung (hard-facing beads) — and EMDE just says "flight
+       edges armoured all round". It is sacrificial: it is what goes first. */
     const wg = flightGeometry(T, {
-      rInner: R * 0.94, rOuter: R * 1.004, pitch: pitch, turns: turns,
-      thickness: mm(24), y0: -mm(300), segsPerTurn: low ? 12 : 22,
+      rInner: R * 0.945, rOuter: R * 1.004, pitch: pitch, turns: turns,
+      thickness: mm(36), y0: topY, segsPerTurn: low ? 12 : 22,
     });
-    part(T, g, wg, worn, { r: [0, (s / starts) * TAU, 0], name: 'wearstrip' + s, cast: false });
-  }
+    if (rimLoss > 1e-6) {
+      const p = wg.attributes.position;
+      const uv = wg.attributes.uv;
+      for (let i = 0; i < p.count; i++) {
+        const u = clamp01(uv.getX(i) / turns);
+        const k = lerp(1, rimAt(u) / R, uv.getY(i));
+        p.setX(i, p.getX(i) * k);
+        p.setZ(i, p.getZ(i) * k);
+      }
+      wg.computeVertexNormals();
+    }
+    part(T, g, wg, worn, { r: [0, rot, 0], name: 'wearstrip' + s, cast: false });
 
-  // bolt-on cutting head
-  const head = group(T, g, 'cutting-head', { p: [0, headY, 0] });
-  part(T, head, G.cyl(T, stemR * 1.3, stemR * 1.3, mm(70), seg), worn, { p: [0, -mm(35), 0] });
-  for (let i = 0; i < 2; i++) {
-    const a = (i / 2) * TAU;
-    const arm = group(T, head, 'arm' + i, { r: [0, -a, 0] });
-    part(T, arm, G.box(T, R * 0.94, mm(70), mm(46)), worn, { p: [R * 0.47, -mm(70), 0], r: [0, 0, -0.10] });
-    const nPick = Math.max(3, Math.round(diaMm / 190));
+    /* The cutting edge: a Hardox bar along the foot of this flight, carrying
+       the pick boxes. EMDE's round-shank counts for a single-start auger run
+       3 at 500 mm to 12 at 1350 — roughly D/130 — and every third pick is
+       kicked outboard by up to 30 degrees so the kerf is wider than the plate
+       (US 6,619,413). Picks are set at about a 45-degree attack angle with a
+       deliberate skew, which is what makes them rotate in their boxes and
+       wear evenly instead of on one side. */
+    const edgeA = -turns * TAU + rot;
+    const bar = group(T, g, 'cutting-edge' + s, { r: [0, edgeA, 0], p: [0, edgeY, 0] });
+    const barLen = R - stemR * 0.96;
+    part(T, bar, G.box(T, barLen, mm(60), mm(45)), worn, {
+      p: [stemR * 0.96 + barLen * 0.5, -mm(28), 0],
+    });
+    const nPick = Math.max(2, Math.round(diaMm / 130));
     for (let k = 0; k < nPick; k++) {
       const t = (k + 0.5) / nPick;
-      const pk = buildRoundShankPick(T, ctx, { shankMm: 25, wear: wear, lod: opts.lod, merge: false });
-      pk.position.set(lerp(stemR * 1.2, R * 0.96, t), -mm(96), 0);
-      pk.rotation.z = -0.34;
-      pk.scale.setScalar(1.35);
-      arm.add(pk);
+      const pk = buildRoundShankPick(T, ctx, {
+        shankMm: 25, wear: clamp01(wear * lerp(0.75, 1.25, t)), lod: opts.lod, merge: false,
+      });
+      pk.position.set(lerp(stemR * 1.1, R * 0.985, t), -mm(58), (k % 3 === 2 ? mm(16) : 0));
+      pk.rotation.set(0, k % 3 === 2 ? 0.45 : 0, -0.79);   // 45 deg attack
+      pk.scale.setScalar(1.25);
+      bar.add(pk);
     }
   }
-  // pilot stinger
-  part(T, head, G.cyl(T, mm(34), mm(34), mm(180), low ? 8 : 14), worn, { p: [0, -mm(150), 0] });
-  const st = buildRoundShankPick(T, ctx, { shankMm: 30, wear: wear, lod: opts.lod, merge: false });
-  st.position.set(0, -mm(230), 0);
-  st.scale.setScalar(1.5);
-  head.add(st);
+
+  /* The pilot. EMDE's round-shank pilots are VB 210 / 250 / 280 mm bodies
+     carrying 2, 3, 4 or 5 picks, plugged into an 85 or 100 mm square socket in
+     the auger nose; Bauer's standard for rock is the four-pick RP4. It leads
+     the cut and is what keeps the tool on centre. */
+  const pilotN = diaMm >= 1200 ? 5 : (diaMm >= 800 ? 4 : 3);
+  const pilotR = mm(diaMm >= 1200 ? 280 : (diaMm >= 800 ? 250 : 210)) * 0.5;
+  const head = group(T, g, 'pilot', { p: [0, edgeY, 0] });
+  part(T, head, G.box(T, mm(100), mm(120), mm(100)), worn, { p: [0, -mm(60), 0] });
+  part(T, head, G.box(T, pilotR * 2, mm(50), mm(50)), worn, { p: [0, -mm(140), 0] });
+  for (let k = 0; k < pilotN; k++) {
+    const t = pilotN === 1 ? 0 : (k / (pilotN - 1)) * 2 - 1;
+    const pk = buildRoundShankPick(T, ctx, { shankMm: 30, wear: wear, lod: opts.lod, merge: false });
+    pk.position.set(pilotR * 0.86 * t, -mm(172), 0);
+    pk.rotation.set(0, 0, Math.abs(t) < 0.2 ? Math.PI : -0.79 * Math.sign(t || 1));
+    pk.scale.setScalar(1.35);
+    head.add(pk);
+  }
 
   return finalise(T, g, {
     id: 'kelly-auger', family: 'Rotary & Kelly Foundation Tools / Kelly Augers',
     name: 'Drillity Kelly Auger ' + diaMm + ' mm',
-    diameterMm: diaMm, flights: starts, turns: turns,
-    pitchMm: Math.round(pitch * 1000), kellyBoxMm: opts.boxMm || 150,
+    diameterMm: diaMm, flights: starts, turns: Math.round(turns * 100) / 100,
+    pitchMm: Math.round(pitch * 1000), workingMm: Math.round(NL * 1000),
+    stemOdMm: Math.round(stemR * 2000), kellyBoxMm: opts.boxMm || 200,
+    picks: Math.max(2, Math.round(diaMm / 130)) * starts + pilotN,
     teeth: 'Round-shank picks, 25 mm shank', material: 'S355J2 / Hardox wear edge',
     method: 'rotary-kelly', priceEur: Math.round(2600 + diaMm * 9),
   }, opts);
@@ -3792,8 +4072,17 @@ export function buildCFAFlight(THREE_, ctx, opts) {
   const low = opts.lod === 'low';
   const seg = low ? 12 : 20;
   const R = mm(diaMm) * 0.5;
-  const stemR = mm(clampv(diaMm * 0.32, 114, 273)) * 0.5;
-  const pitch = mm(diaMm * 0.78);
+  /* Hollow-stem series, off Bauer's CFA starter matrix: Ø500-630 run the
+     254 mm stem, Ø750-770 the 254 or 368, Ø880-1180 the 368 or 470. Liebherr's
+     CFA-AU data agrees (500 and 600 → 254, 900 and 1200 → 355). Scaling the
+     stem off the flight diameter — the old clampv(D x 0.32) — gave a 600 mm
+     auger a 192 mm stem where the whole industry uses 254. */
+  const stemOd = opts.stemOdMm
+    || (diaMm >= 1180 ? 470 : (diaMm >= 770 ? 368 : (diaMm >= 520 ? 254 : (diaMm >= 380 ? 219 : 168))));
+  const stemR = mm(stemOd) * 0.5;
+  // The concreting line down the middle: Bauer Ø120, Liebherr Ø125.
+  const boreR = mm(opts.concreteBoreMm || 120) * 0.5;
+  const pitch = mm(opts.pitchMm || cfaFlightPitch(diaMm));
   const L = mm(lenMm);
   const turns = L / pitch;
   const g = new T.Group();
@@ -3801,54 +4090,97 @@ export function buildCFAFlight(THREE_, ctx, opts) {
   const steel = wearMaterial(ctx, 'paintedSteel', wear * 0.5);
   const worn = wearMaterial(ctx, 'wornSteel', wear);
 
-  part(T, g, pipeGeometry(T, { od: stemR * 2, id: stemR * 2 - mm(24), length: L, seg: seg }), steel, { name: 'stem' });
+  part(T, g, pipeGeometry(T, { od: stemR * 2, id: boreR * 2, length: L, seg: seg }), steel, { name: 'stem' });
   const fg = flightGeometry(T, {
     rInner: stemR * 0.96, rOuter: R, pitch: pitch, turns: turns,
     thickness: mm(18), y0: -mm(40), segsPerTurn: low ? 10 : 18,
   });
   part(T, g, fg, steel, { name: 'flight' });
+  /* The armoured rim. On a CFA it runs the WHOLE working length — STDS-Jantz:
+     "flight edge hard-faced over the entire working length and width" — because
+     unlike a Kelly auger the whole string is in the ground for the whole hole. */
   const wg = flightGeometry(T, {
     rInner: R * 0.95, rOuter: R * 1.004, pitch: pitch, turns: turns,
     thickness: mm(22), y0: -mm(40), segsPerTurn: low ? 10 : 18,
   });
   part(T, g, wg, worn, { name: 'wear-edge', cast: false });
-  // top drive connection flange
-  part(T, g, G.cyl(T, stemR * 1.3, stemR * 1.3, mm(40), seg), worn, { p: [0, -mm(20), 0] });
-  boltRing(T, ctx, g, { count: 8, radius: stemR * 1.12, y: -mm(2), acrossFlats: mm(24), height: mm(16) });
+  /* Top connector. Liebherr is explicit that "hollow stem and connector have
+     the same diameter … no narrowing of the cross-section in the flight", so
+     the flight runs straight across the joint and there is no bolted flange
+     here — only the octagonal spanner band (SW175 below Ø750, SW250 above)
+     that the crew puts a wrench on. The bolt circle that used to sit here was
+     the wrong idea about how a CFA string is made up. */
+  const swR = mm(diaMm >= 750 ? 250 : 175) * 0.5;
+  part(T, g, profiledLathe(T, [
+    [stemR, 0], [stemR, -mm(180)],
+  ], {
+    segments: 8, closedProfile: false,
+    radiusFn: () => Math.max(1, swR / stemR),
+  }), worn, { name: 'sw-collar', cast: false });
 
   if (opts.withHead !== false) {
-    const head = group(T, g, 'auger-head', { p: [0, -L, 0] });
-    part(T, head, G.cyl(T, stemR * 1.2, stemR * 0.9, mm(120), seg), worn, { p: [0, -mm(60), 0] });
-    const nPick = Math.max(3, Math.round(diaMm / 150));
-    for (let i = 0; i < 2; i++) {
-      const arm = group(T, head, 'arm' + i, { r: [0, (i / 2) * TAU, 0] });
-      part(T, arm, G.box(T, R * 0.9, mm(60), mm(40)), worn, { p: [R * 0.45, -mm(110), 0], r: [0, 0, -0.12] });
-      for (let k = 0; k < nPick; k++) {
-        const pk = buildRoundShankPick(T, ctx, { shankMm: 25, wear: wear, lod: opts.lod, merge: false });
-        pk.position.set(lerp(stemR * 1.2, R * 0.96, (k + 0.5) / nPick), -mm(134), 0);
-        pk.rotation.z = -0.32;
-        pk.scale.setScalar(1.3);
-        arm.add(pk);
-      }
-    }
-    // sacrificial concrete cap on the tip
-    part(T, head, G.cone(T, stemR * 0.86, mm(150), low ? 8 : 14), material(ctx, '__paintDark'), {
-      p: [0, -mm(200), 0], r: [Math.PI, 0, 0],
+    /* Cutting head. Bauer's CFA geometries are AF (flat teeth), AF-K (flat
+       teeth plus a collar plate) and AFF-K (round-shank plus collar plate) —
+       all of them a tooth line on the LEADING EDGE of the bottom flight, not
+       arms bolted under the stem. The concrete outlet sits "between the
+       cutting edges", which is why the toe plug is on the axis. */
+    const edgeA = -turns * TAU;
+    const head = group(T, g, 'auger-head', { p: [0, -L, 0], r: [0, edgeA, 0] });
+    const barLen = R - stemR * 0.96;
+    part(T, head, G.box(T, barLen, mm(55), mm(40)), worn, {
+      p: [stemR * 0.96 + barLen * 0.5, -mm(26), 0],
     });
+    const nPick = Math.max(2, Math.round(diaMm / 130));
+    for (let k = 0; k < nPick; k++) {
+      const t = (k + 0.5) / nPick;
+      const pk = buildRoundShankPick(T, ctx, {
+        shankMm: 25, wear: clamp01(wear * lerp(0.75, 1.25, t)), lod: opts.lod, merge: false,
+      });
+      pk.position.set(lerp(stemR * 1.05, R * 0.985, t), -mm(54), (k % 3 === 2 ? mm(14) : 0));
+      pk.rotation.set(0, k % 3 === 2 ? 0.4 : 0, -0.79);
+      pk.scale.setScalar(1.2);
+      head.add(pk);
+    }
+    /* The sacrificial plug. It is a flat cast-iron disc a little proud of the
+       bore, knocked off by concrete pressure when pumping starts — not a
+       drilling point. Modelling it as a cone made the CFA look like it drilled
+       on its stem, which is the one thing a CFA does not do. */
+    part(T, head, G.lathe(T, [
+      [0, 0], [boreR * 1.28, 0], [boreR * 1.28, -mm(14)], [boreR * 0.9, -mm(22)], [0, -mm(22)],
+    ], low ? 10 : 16, false), material(ctx, '__paintDark'), { p: [0, -mm(30), 0], name: 'lost-cap' });
   }
 
   return finalise(T, g, {
     id: 'cfa-flight', family: 'Rotary & Kelly Foundation Tools / CFA & Hollow-Stem Augers',
     name: 'Drillity CFA Flight ' + diaMm + ' mm',
-    diameterMm: diaMm, lengthMm: lenMm, stemOdMm: Math.round(stemR * 2000),
+    diameterMm: diaMm, lengthMm: lenMm, stemOdMm: stemOd,
+    concreteBoreMm: opts.concreteBoreMm || 120,
+    connector: 'Octagonal SW' + (diaMm >= 750 ? 250 : 175),
     pitchMm: Math.round(pitch * 1000), material: 'S355J2 flight, Hardox wear edge',
     method: 'cfa', priceEur: Math.round(1800 + diaMm * 6 * (lenMm / 3000)),
   }, opts);
 }
 
 /**
- * Drilling bucket — cylindrical body, hinged bottom doors, twin cutting arms
- * with teeth, bail frame and Kelly box. opts.open (0..1) swings the doors.
+ * Drilling bucket — barrel, ROTATING hinged bottom, cutting arms on the two
+ * bottom edges, ventilation channel, Kelly box. opts.open (0..1) swings it.
+ *
+ * The bottom was the thing that was wrong. This had two flaps hinged on
+ * opposite sides of the rim, swinging down like bomb-bay doors. A European
+ * Kelly bucket does not work that way and never has: the bottom is a
+ * DREHBODEN — one fixed half-plate welded to the barrel and one half-plate
+ * that ROTATES about the bucket's own axis under it. Leffer: "the rotating
+ * hinged bottom can be opened by turning clockwise and closed by turning
+ * counterclockwise; on smaller models the bucket is closed using a rotary
+ * latch, on larger diameters with a hook-and-flap mechanism." Bauer sells a
+ * stepped version of the same thing as the Progressivdrehboden. (US practice
+ * does use hinged dump bottoms — that is a different tool, not this one.)
+ *
+ * The other corrections are proportional. Bauer's shell length RL is 1200 or
+ * 1500 mm across the WHOLE 520-2500 mm diameter range, so a 2.5 m bucket is a
+ * wide squat drum and not a tall one; deriving height from diameter made every
+ * size the same silhouette. Casagrande's build: 20 mm cylinder, 30/40 mm
+ * bottom plate, 70 mm Hardox blades, 130 or 200 mm cast kelly box.
  */
 export function buildDrillingBucket(THREE_, ctx, opts) {
   const T = THREE_ || THREE; ctx = ctx || {}; opts = opts || {};
@@ -3858,78 +4190,131 @@ export function buildDrillingBucket(THREE_, ctx, opts) {
   const low = opts.lod === 'low';
   const seg = low ? 14 : 26;
   const R = mm(diaMm) * 0.5;
-  const H = mm(diaMm * (cleaning ? 0.85 : 1.15));
+  // Bauer RL: 1200 or 1500 mm, diameter-independent. A clean-out bucket is
+  // shallower — its GL runs 1950/2250 against a drilling bucket's 2150/2450.
+  const H = mm(opts.shellMm || (cleaning ? 1000 : (diaMm >= 1200 ? 1500 : 1200)));
   const open = clamp01(opts.open || 0);
-  const animated = opts.animated !== false;   // false → merge the doors in
+  const animated = opts.animated !== false;   // false → merge the bottom in
   const g = new T.Group();
   g.name = cleaning ? 'cleaning-bucket' : 'drilling-bucket';
   const steel = wearMaterial(ctx, 'paintedSteel', wear * 0.5);
   const worn = wearMaterial(ctx, 'wornSteel', wear);
 
-  // bail / head frame
-  const bail = group(T, g, 'bail');
-  kellyHead(T, ctx, bail, { boxMm: opts.boxMm || 150, mat: steel });
-  for (let i = 0; i < 2; i++) {
-    const s = i ? 1 : -1;
-    part(T, bail, G.box(T, mm(40), mm(340), mm(90)), steel, {
-      p: [s * R * 0.5, -mm(260), 0], r: [0, 0, s * 0.28],
+  // Head: a top plate straight onto the Kelly box. There is no bail — the
+  // bucket hangs on the Kelly bar, not on a rope.
+  const headTop = -mm(60);
+  kellyHead(T, ctx, group(T, g, 'kelly-head'), { boxMm: opts.boxMm || 200, mat: steel });
+  part(T, g, G.cyl(T, R * 0.98, R * 0.98, mm(30), seg), steel, { p: [0, headTop, 0], name: 'top-plate' });
+  // Gussets from the box out to the top plate — the whole crowd load goes here.
+  for (let i = 0; i < 4; i++) {
+    const a = (i / 4) * TAU + 0.4;
+    part(T, g, G.box(T, R * 0.78, mm(150), mm(22)), steel, {
+      p: [Math.cos(a) * R * 0.42, headTop - mm(80), Math.sin(a) * R * 0.42], r: [0, -a, 0],
     });
   }
-  // barrel
-  const bodyTop = -mm(420);
-  part(T, g, pipeGeometry(T, { od: R * 2, id: R * 2 - mm(20), length: H, y0: bodyTop, seg: seg }), steel, { name: 'barrel' });
-  part(T, g, G.torus(T, R * 0.995, mm(14), 5, low ? 16 : 28), worn, { p: [0, bodyTop - mm(20), 0] });
-  part(T, g, G.torus(T, R * 0.995, mm(12), 5, low ? 16 : 28), worn, { p: [0, bodyTop - H + mm(40), 0] });
-  // side discharge opening frame
-  part(T, g, G.box(T, mm(20), H * 0.62, mm(24)), worn, { p: [R * 0.99, bodyTop - H * 0.5, -R * 0.42] });
-  part(T, g, G.box(T, mm(20), H * 0.62, mm(24)), worn, { p: [R * 0.99, bodyTop - H * 0.5, R * 0.42] });
 
-  // hinged bottom doors + cutting arms
+  const bodyTop = headTop - mm(15);
   const baseY = bodyTop - H;
-  const doors = [];
-  for (let i = 0; i < 2; i++) {
-    const s = i ? 1 : -1;
-    const hinge = group(T, g, 'door' + i, {
-      p: [0, baseY + mm(20), s * R * 0.92], r: [s * open * 1.15, 0, 0], dynamic: animated,
+  part(T, g, pipeGeometry(T, { od: R * 2, id: R * 2 - mm(20), length: H, y0: bodyTop, seg: seg }), steel, { name: 'barrel' });
+  part(T, g, G.torus(T, R * 0.995, mm(12), 5, low ? 16 : 28), worn, { p: [0, bodyTop - mm(30), 0], cast: false });
+  // The rim rubs the casing and polishes bright long before anything else does.
+  part(T, g, G.cyl(T, R * 1.001, R * 1.001, mm(90), seg, true), worn, { p: [0, baseY + mm(45), 0], cast: false });
+
+  /* Ventilation. Every maker fits one and every maker names it differently —
+     Bauer's Saugkanal, Leffer's flow channel, Casagrande's "ventilation system
+     to prevent the formation of vacuum during extraction". Without it the
+     bucket sucks itself to the bottom of the hole. It is a channel from under
+     the bottom plate up the shell to atmosphere, not a perforated barrel. */
+  part(T, g, G.cyl(T, mm(45), mm(45), H * 0.96, low ? 8 : 12), worn, {
+    p: [R * 0.96, bodyTop - H * 0.5, 0], name: 'vent',
+  });
+
+  /* The side discharge slot: how the spoil actually leaves once the bottom is
+     swung open over the tip point. */
+  for (const s of [-1, 1]) {
+    part(T, g, G.box(T, mm(18), H * 0.5, mm(22)), worn, {
+      p: [R * 0.985, bodyTop - H * 0.42, s * R * 0.40],
     });
-    const shape = new T.Shape();
-    shape.absarc(0, 0, R * 0.94, s > 0 ? Math.PI : 0, s > 0 ? TAU : Math.PI, false);
-    shape.closePath();
-    const geo = new T.ExtrudeGeometry(shape, { depth: mm(22), bevelEnabled: false, curveSegments: low ? 6 : 12 });
-    geo.rotateX(-Math.PI / 2);
-    part(T, hinge, geo, steel, { p: [0, -mm(22), -s * R * 0.92], name: 'flap' });
-    // cutting arm with teeth on the leading edge of each door
-    part(T, hinge, G.box(T, R * 1.7, mm(70), mm(44)), worn, {
-      p: [0, -mm(56), -s * R * 0.92 + s * R * 0.30], r: [0, 0, 0],
-    });
-    const nT = Math.max(4, Math.round(diaMm / 170));
-    for (let k = 0; k < nT; k++) {
-      const x = lerp(-R * 0.82, R * 0.82, (k + 0.5) / nT);
-      const pk = buildRoundShankPick(T, ctx, { shankMm: 25, wear: wear, lod: opts.lod, merge: false });
-      pk.position.set(x, -mm(84), -s * R * 0.92 + s * R * 0.30);
-      pk.rotation.x = s * 0.30;
-      pk.scale.setScalar(1.4);
-      hinge.add(pk);
-    }
-    doors.push(hinge);
   }
-  // pilot stinger through the centre
-  part(T, g, G.cyl(T, mm(36), mm(30), mm(220), low ? 8 : 14), worn, { p: [0, baseY - mm(70), 0] });
+
+  /* The bottom. Two half-plates on the same axis: the fixed one is part of the
+     barrel, the moving one turns under it. The cutting edge of each carries a
+     Hardox blade and the picks. */
+  const plateT = mm(diaMm >= 1200 ? 40 : 30);
+  const halfPlate = (r, t) => {
+    const shape = new T.Shape();
+    shape.moveTo(0, 0);
+    shape.absarc(0, 0, r, 0, Math.PI, false);
+    shape.lineTo(0, 0);
+    const geo = new T.ExtrudeGeometry(shape, {
+      depth: t, bevelEnabled: false, curveSegments: low ? 8 : 16,
+    });
+    geo.rotateX(Math.PI / 2);      // shape XY → XZ, extrusion +Z → -Y
+    return geo;
+  };
+  const nT = Math.max(3, Math.round(diaMm / 170));
+  /* Bauer welds the chisel holders straight to the base body, and the outer
+     stations wear fastest — standard site practice is to rotate the less-worn
+     picks outboard rather than change the set, so a used bucket has a gradient
+     along the arm and not a uniform row. */
+  const armOn = (parent, sign) => {
+    part(T, parent, G.box(T, R * 1.88, mm(70), mm(46)), worn, {
+      p: [0, -plateT - mm(30), sign * R * 0.16], name: 'blade',
+    });
+    for (let k = 0; k < nT; k++) {
+      const u = (k + 0.5) / nT;
+      const x = lerp(-R * 0.9, R * 0.9, u);
+      const pk = buildRoundShankPick(T, ctx, {
+        shankMm: 25, wear: clamp01(wear * lerp(0.7, 1.3, Math.abs(x) / R)),
+        lod: opts.lod, merge: false,
+      });
+      pk.position.set(x, -plateT - mm(66), sign * R * 0.16);
+      pk.rotation.set(sign * 0.45, 0, 0);
+      pk.scale.setScalar(1.35);
+      parent.add(pk);
+    }
+  };
+
+  const fixed = group(T, g, 'bottom-fixed', { p: [0, baseY, 0] });
+  part(T, fixed, halfPlate(R * 0.985, plateT), steel, { name: 'plate' });
+  armOn(fixed, 1);
+
+  const door = group(T, g, 'bottom-rotating', {
+    p: [0, baseY - plateT - mm(2), 0], r: [0, Math.PI + open * 2.6, 0], dynamic: animated,
+  });
+  part(T, door, halfPlate(R * 0.985, plateT), steel, { name: 'plate' });
+  // Same sign as the fixed arm: the door's own half-turn is what puts this
+  // blade on the far side of the diameter. Mirroring it here as well stacked
+  // the two cutting arms on top of each other, so half the bucket had no teeth.
+  armOn(door, 1);
+
+  /* Rotary latch: the lug on the barrel and the hook on the moving plate that
+     holds it shut against the weight of a full bucket. */
+  part(T, g, G.box(T, mm(60), mm(80), mm(26)), worn, {
+    p: [R * 0.94, baseY + mm(60), R * 0.30], name: 'latch-lug',
+  });
+  part(T, door, G.box(T, mm(46), mm(90), mm(22)), worn, {
+    p: [R * 0.86, mm(40), R * 0.26], name: 'latch-hook',
+  });
+
+  // Pilot stinger through the middle of the two plates.
+  part(T, g, G.cyl(T, mm(38), mm(32), mm(200), low ? 8 : 14), worn, { p: [0, baseY - mm(90), 0] });
 
   const out = finalise(T, g, {
     id: cleaning ? 'cleaning-bucket' : 'drilling-bucket',
     family: 'Rotary & Kelly Foundation Tools / ' + (cleaning ? 'Clean-Out Buckets' : 'Drilling Buckets'),
     name: 'Drillity ' + (cleaning ? 'Clean-Out' : 'Drilling') + ' Bucket ' + diaMm + ' mm',
-    diameterMm: diaMm, heightMm: Math.round(H * 1000), doors: 2,
-    kellyBoxMm: opts.boxMm || 150, teeth: 'Round-shank picks',
+    diameterMm: diaMm, heightMm: Math.round(H * 1000),
+    bottom: 'Rotating hinged bottom, rotary latch',
+    kellyBoxMm: opts.boxMm || 200, teeth: 'Round-shank picks, 25 mm shank',
+    picks: nT * 2,
     capacityL: Math.round(Math.PI * R * R * H * 1000 * 0.8),
-    material: 'S355J2 body, Hardox cutting arms', method: 'rotary-kelly',
+    material: 'S355J2 body 20 mm, Hardox HB400 blades', method: 'rotary-kelly',
     priceEur: Math.round(3200 + diaMm * 7),
   }, opts);
   out.userData.setOpen = animated ? (v) => {
-    const k = clamp01(v);
-    for (let i = 0; i < doors.length; i++) doors[i].rotation.x = (i ? 1 : -1) * k * 1.15;
-  } : () => { /* built merged: the doors are part of the body */ };
+    door.rotation.y = Math.PI + clamp01(v) * 2.6;
+  } : () => { /* built merged: the bottom is part of the body */ };
   return out;
 }
 

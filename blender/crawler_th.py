@@ -579,6 +579,38 @@ def build_superstructure():
     bpy.data.objects.remove(gbar, do_unlink=True)
     bx('cab_door_frame', (0.045, CAB_D - 0.12, CAB_H - 0.10), R.MAT_DARK,
        loc=(CAB_X - CAB_W / 2 - 0.012, cy, cz), bevel=0.010)
+    # An empty glazed box is the thing that gives a cab away.  Seat, backrest,
+    # the low console with two joystick pods, and the roof-window grab handle:
+    # all `paintedDark`, a bucket the statics already own, so the whole
+    # interior costs triangles and not one draw call.  [S2] lists a fully
+    # adjustable operator's seat, cab heating and a rig inclination indicator —
+    # this is a driller's office, and it should look occupied through the glass.
+    sy = cy + 0.10
+    bx('seat_pan', (0.46, 0.44, 0.10), R.MAT_DARK, loc=(CAB_X, sy, DECK_Z + 0.50),
+       bevel=0.03)
+    bx('seat_back', (0.46, 0.12, 0.56), R.MAT_DARK,
+       loc=(CAB_X, sy + 0.22, DECK_Z + 0.80), rot=(-0.16, 0, 0), bevel=0.03)
+    bx('seat_head', (0.26, 0.11, 0.16), R.MAT_DARK,
+       loc=(CAB_X, sy + 0.30, DECK_Z + 1.10), bevel=0.03)
+    tb('seat_post', 0.055, 0.24, R.MAT_WORN, None, (CAB_X, sy, DECK_Z + 0.22),
+       (0, 0, 0), 10)
+    bx('seat_base', (0.34, 0.34, 0.10), R.MAT_DARK, loc=(CAB_X, sy, DECK_Z + 0.10),
+       bevel=0.014)
+    for sx in (-1, 1):                       # the two armrest control pods
+        bx('pod_%d' % sx, (0.16, 0.36, 0.11), R.MAT_DARK,
+           loc=(CAB_X + sx * 0.32, sy - 0.06, DECK_Z + 0.62), bevel=0.016)
+        tb('joystick_%d' % sx, 0.020, 0.16, R.MAT_DARK, None,
+           (CAB_X + sx * 0.32, sy - 0.16, DECK_Z + 0.66), (0.2, 0, 0), 8)
+        tb('joyknob_%d' % sx, 0.036, 0.07, R.MAT_DARK, None,
+           (CAB_X + sx * 0.32, sy - 0.19, DECK_Z + 0.81), (0.2, 0, 0), 8)
+    bx('console', (0.62, 0.20, 0.30), R.MAT_DARK,
+       loc=(CAB_X, cy - CAB_D / 2 + 0.24, DECK_Z + 0.62), rot=(0.35, 0, 0), bevel=0.02)
+    bx('screen', (0.26, 0.02, 0.18), R.MAT_GLASS,
+       loc=(CAB_X + 0.14, cy - CAB_D / 2 + 0.16, DECK_Z + 0.72), rot=(0.35, 0, 0),
+       bevel=0.006)
+    tb('grab_handle', 0.018, 0.34, R.MAT_WORN, None,
+       (CAB_X - 0.34, cy - CAB_D / 2 + 0.10, DECK_Z + CAB_H - 0.18),
+       (-math.pi / 2, 0, 0), 8)
     bx('wiper', (0.016, 0.016, 0.52), R.MAT_DARK,
        loc=(CAB_X + 0.16, cy - CAB_D / 2 - 0.06, cz + 0.02), rot=(0.5, 0, 0), bevel=0.003)
     bx('mirror', (0.20, 0.05, 0.15), R.MAT_DARK,
