@@ -534,6 +534,30 @@ export function createSiteScreen(app) {
   const { C, state, fmtMoney } = app;
   const ctx = app.ctx;
 
+  /* ═══ REACH — THE SORT IS THE DESIGN DECISION ══════════════════════════
+     Every interactive thing on this screen is one of two kinds, and which
+     kind it is decides where it may sit:
+
+       'drilling'  touched WITH THE HOLE RUNNING, one-handed, while the other
+                   hand is on something else. It must fall inside the thumb's
+                   arc for BOTH hands — `tools/checkreach.mjs` gates it.
+       'between'   touched between jobs, or once a run, with the option of
+                   two hands. It may sit outside the arc, and sometimes it
+                   SHOULD: `.sstrip__leave` abandons a contract and forfeits
+                   the payout, so a thumb finding it by accident is the
+                   failure, not a thumb having to stretch for it.
+
+     Declared here, in the screen, rather than inferred by the harness from
+     `el.closest('.sitedock')` — which is what it did before. That proxy has
+     a silent hole in exactly the direction that matters: a control the
+     player uses while drilling, placed anywhere but the dock, was not gated
+     at all, and nothing would ever have said so. A container is not a
+     statement of intent; this is.
+
+     An undeclared interactive target is a GATE FAILURE, not a pass. An
+     element nobody sorted is an element nobody thought about. */
+  const reach = (el, kind) => { el.dataset.reach = kind; return el; };
+
   /* ═══ THE STATUS STRIP ═════════════════════════════════════════════════
      One of exactly TWO permanent regions on this screen, and the first row of
      the stacked column. Flush to the top edge, opaque, fixed height — chrome,
@@ -565,8 +589,16 @@ export function createSiteScreen(app) {
 
   /* The leave control is a cell of the strip. It used to be a 44px disc
      floating on its own over the surface band — a whole extra region over the
-     3D, permanently, for a control that is pressed once a run. */
-  const pauseBtn = C.h('button.sstrip__leave', { type: 'button', 'aria-label': 'Pause and leave the hole' }, C.Icon('close', 18));
+     3D, permanently, for a control that is pressed once a run.
+
+     'between', and OUT OF THE THUMB'S ARC ON PURPOSE. It is measured hard for
+     both hands at (363, 25) and that is the correct answer, not a defect:
+     pressing it abandons the contract and forfeits the payout and the metres
+     already drilled. For a control like that the failure mode is a thumb
+     finding it BY ACCIDENT while the hole is running, so the far top corner
+     — the one place a one-handed grip cannot get to without deliberately
+     shifting — is where it belongs. It is confirm-gated as well. */
+  const pauseBtn = reach(C.h('button.sstrip__leave', { type: 'button', 'aria-label': 'Pause and leave the hole' }, C.Icon('close', 18)), 'between');
 
   const stripSteady = C.h('div.sstrip__face.sstrip__steady',
     lvlEl,
@@ -964,6 +996,8 @@ export function createSiteScreen(app) {
   const feedSl = C.VSlider({ label: 'Weight on bit', short: 'WOB', kind: 'feed', value: state.drill?.wob ?? 0.5, onChange: (v) => pushControl('wob', v) });
   const rotSl = C.VSlider({ label: 'Rotation', short: 'ROTATION', kind: 'rot', value: state.drill?.rpm ?? 0.5, onChange: (v) => pushControl('rpm', v) });
   const flushSl = C.VSlider({ label: 'Flushing', short: 'FLUSH', kind: 'flush', value: state.drill?.flush ?? 0.5, onChange: (v) => pushControl('flush', v) });
+  // The three the thumb rides continuously with the hole running.
+  reach(feedSl.el, 'drilling'); reach(rotSl.el, 'drilling'); reach(flushSl.el, 'drilling');
 
   // Cached at build time; the frame loop never queries the DOM.
   const feedName = feedSl.el.querySelector('.vsl__name');
@@ -1036,8 +1070,11 @@ export function createSiteScreen(app) {
   /* ── Contextual action ─────────────────────────────────────────────────── */
   const actLabel = C.h('span.actionbtn__l', { text: 'Hold' });
   const actSub = C.h('span.actionbtn__s', { text: 'Steady on the groove' });
-  const actionBtn = C.h('button.actionbtn.actionbtn--ghost', { type: 'button', 'aria-label': 'Contextual action' },
-    C.h('span.actionbtn__ico', C.Icon('bit', 20)), actLabel, actSub);
+  /* The PRIMARY action, pressed with the hole running — the single control
+     this screen exists to put under a thumb. It is the one that was measured
+     HARD for the right hand, which is two-thirds of one-handed players. */
+  const actionBtn = reach(C.h('button.actionbtn.actionbtn--ghost', { type: 'button', 'aria-label': 'Contextual action' },
+    C.h('span.actionbtn__ico', C.Icon('bit', 20)), actLabel, actSub), 'drilling');
   let actionMode = 'idle';
   let actionTimer = 0;
 
@@ -1221,7 +1258,8 @@ export function createSiteScreen(app) {
   const railEl = C.h('div.actrail', { hidden: true, role: 'group', 'aria-label': 'Machine actions' });
   for (let i = 0; i < RAIL_MAX; i++) {
     const lab = C.h('span.railbtn__l', { text: '' });
-    const btn = C.h('button.railbtn', { type: 'button', hidden: true }, lab);
+    // Discrete machine actions offered while the hole is running.
+    const btn = reach(C.h('button.railbtn', { type: 'button', hidden: true }, lab), 'drilling');
     const slot = { btn, lab, id: null, label: '', due: false, crit: false, armed: false };
     C.tap(btn, () => firePulse(slot.id, slot), { pattern: 'medium' });
     railBtns.push(slot);
@@ -1244,8 +1282,9 @@ export function createSiteScreen(app) {
     unitRows.appendChild(el0);
     return { el: el0, k, v };
   });
-  const unitCard = C.h('div.unitcard', { hidden: true, role: 'status', 'aria-live': 'polite' },
-    unitTitle, unitRows, unitNote);
+  // Tapped away mid-run, so it is sorted with the drilling controls.
+  const unitCard = reach(C.h('div.unitcard', { hidden: true, role: 'status', 'aria-live': 'polite' },
+    unitTitle, unitRows, unitNote), 'drilling');
   C.tap(unitCard, () => hideUnit(), { pattern: 'light' });
 
   /* ═══ THE DRIVING RECORD ═══════════════════════════════════════════════

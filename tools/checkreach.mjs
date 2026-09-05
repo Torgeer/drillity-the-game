@@ -50,13 +50,28 @@
  * If a real measurement of this game's own players ever exists, those three
  * constants are the only things to replace.
  *
- * ── THE GATE ───────────────────────────────────────────────────────────────
+ * ── THE GATE, AND WHERE THE SORT COMES FROM ────────────────────────────────
  * Controls the player touches WHILE DRILLING must be reachable; controls
- * touched between jobs need not be. The site dock is the former and is gated.
- * Everything else is reported, not gated — moving the shop out of the thumb
- * arc is a legitimate design choice, leaving the feed control there is not.
+ * touched between jobs need not be, and some of them should not be — moving
+ * the shop out of the thumb arc is a legitimate design choice, leaving the
+ * feed control there is not, and putting ABANDON CONTRACT under a resting
+ * thumb would be a defect in the opposite direction.
  *
- * Exits 0 clean, 1 on any drilling control outside the arc for either hand.
+ * That sort is the design decision and the layout follows from it, so the
+ * screen states it and this file reads it: `site.js` writes
+ * `data-reach="drilling"` or `data-reach="between"` beside each control,
+ * with the reason in the comment above it.
+ *
+ * It used to be inferred here instead, as `el.closest('.sitedock')`. A
+ * container is not a statement of intent, and that proxy was blind in
+ * exactly the direction that matters: a control used while drilling but
+ * placed outside the dock was silently scored as not-a-drilling-control and
+ * waved through. An UNDECLARED interactive target is now a failure — an
+ * element nobody sorted is an element nobody thought about.
+ *
+ * Exits 0 clean, 1 on any drilling control outside the arc for either hand,
+ * on any undeclared target, and on any screen where the gate found nothing
+ * to measure.
  */
 import { chromium, devices } from 'playwright';
 import { writeFileSync } from 'node:fs';
@@ -168,11 +183,23 @@ const COLLECT = () => {
     const cls = (typeof el.className === 'string' && el.className.trim())
       ? el.className.trim().split(/\s+/)[0]
       : el.tagName.toLowerCase();
+    /* THE SORT IS DECLARED BY THE SCREEN, NOT GUESSED BY THE HARNESS.
+       This read `drilling: !!el.closest('.sitedock')` — a container standing
+       in for an intention. That proxy has a hole in exactly the direction
+       that matters: a control the player uses WHILE DRILLING, placed
+       anywhere but the dock, was not gated at all and nothing would ever
+       have said so. The reverse mistake is harmless, which is what makes the
+       proxy feel safe. `site.js` now writes `data-reach="drilling"` or
+       `"between"` beside each control together with the reason.
+       `closest`, not the element's own attribute, so a composite control
+       declares once at its root and its parts inherit. */
+    const decl = el.closest('[data-reach]')?.dataset.reach || null;
     out.push({
       cls,
       x: r.x, y: r.y, w: r.width, h: r.height,
-      // Is it in the dock the player works from while the hole is running?
-      drilling: !!el.closest('.sitedock'),
+      reach: decl,
+      drilling: decl === 'drilling',
+      inDock: !!el.closest('.sitedock'),
     });
   }
   return out;
@@ -293,35 +320,63 @@ for (const m of CASES) {
     return { ...t, cx: Math.round(cx), cy: Math.round(cy), right, left, worst };
   });
 
-  const dock = rows.filter((r) => r.drilling);
-  const bad = dock.filter((r) => r.worst === 'hard');
-  const stretched = dock.filter((r) => r.worst === 'stretch');
-  const elsewhereHard = rows.filter((r) => !r.drilling && r.worst === 'hard');
+  const drilling = rows.filter((r) => r.reach === 'drilling');
+  const between = rows.filter((r) => r.reach === 'between');
+  /* AN UNDECLARED TARGET IS A FAILURE, NOT A PASS. An element nobody sorted
+     is an element nobody thought about, and under the old container proxy it
+     would simply have been scored as "not a drilling control" and waved
+     through — the empty-set problem wearing a different hat. */
+  const unsorted = rows.filter((r) => !r.reach);
+  const bad = drilling.filter((r) => r.worst === 'hard');
+  const stretched = drilling.filter((r) => r.worst === 'stretch');
+  const betweenHard = between.filter((r) => r.worst === 'hard');
+  /* Declared 'drilling' but not in the dock, or in the dock but not declared
+     drilling: either is a layout that has drifted from its own sort, and it
+     is the thing the container proxy could never see. Reported, so the sort
+     and the layout are visibly one decision. */
+  const misplaced = rows.filter((r) => (r.reach === 'drilling') !== r.inDock);
 
-  json.cases[m] = { targets: rows.length, dock: dock.length, hard: bad.map((r) => r.cls), rows };
+  json.cases[m] = {
+    targets: rows.length, drilling: drilling.length, between: between.length,
+    hard: bad.map((r) => r.cls), unsorted: unsorted.map((r) => r.cls), rows,
+  };
   if (bad.length) fails.push(...bad.map((r) => `${m}: .${r.cls} at (${r.cx},${r.cy})`));
+  if (unsorted.length) {
+    fails.push(...unsorted.map((r) => `${m}: .${r.cls} at (${r.cx},${r.cy}) declares no data-reach`));
+  }
 
   say(`\n${m}`);
-  say(`  targets      ${rows.length}   of which in the drilling dock: ${dock.length}`);
+  say(`  targets      ${rows.length}   drilling ${drilling.length}   between ${between.length}   undeclared ${unsorted.length}`);
   if (!rows.length) {
     // A harness that sees nothing and says "ok" is worse than no harness: it
     // produces a confident false negative and the project stops looking. This
     // file did exactly that on its first run, against the boot screen.
     fails.push(`${m}: the page had NO interactive targets at all — the harness measured nothing`);
     say('  NOTHING      no interactive targets on the page  <-- GATE FAIL');
-  } else if (!dock.length) {
-    fails.push(`${m}: no .sitedock — the drilling controls were not found`);
-    say('  NO DOCK      nothing matched .sitedock  <-- GATE FAIL');
+  } else if (!drilling.length) {
+    /* Not "no .sitedock" any more: the question is whether anything on this
+       screen is declared as touched while drilling. A site screen with no
+       drilling control is a screen that cannot be played, and it is also a
+       gate with nothing left to test. */
+    fails.push(`${m}: nothing on the screen declares data-reach="drilling" — the arc gate tested nothing`);
+    say('  NO SUBJECT   no control is declared as touched while drilling  <-- GATE FAIL');
   } else {
-    const easy = dock.length - bad.length - stretched.length;
-    say(`  dock zones   easy ${easy}   stretch ${stretched.length}   hard ${bad.length}`
+    const easy = drilling.length - bad.length - stretched.length;
+    say(`  drilling     easy ${easy}   stretch ${stretched.length}   hard ${bad.length}`
       + (bad.length ? '  <-- GATE FAIL' : '  ok'));
     for (const r of bad) say(`     HARD      .${r.cls}  centre (${r.cx},${r.cy})  right=${r.right} left=${r.left}`);
     for (const r of stretched) say(`     stretch   .${r.cls}  centre (${r.cx},${r.cy})  right=${r.right} left=${r.left}`);
   }
-  if (elsewhereHard.length) {
-    say('  outside the dock, hard to reach (reported, not gated): '
-      + elsewhereHard.map((r) => '.' + r.cls).join(', '));
+  for (const r of unsorted) {
+    say(`  UNDECLARED   .${r.cls}  centre (${r.cx},${r.cy})  — sort it in site.js  <-- GATE FAIL`);
+  }
+  if (betweenHard.length) {
+    say('  between jobs, outside the arc (reported — for some of these that is the point): '
+      + betweenHard.map((r) => '.' + r.cls).join(', '));
+  }
+  if (misplaced.length) {
+    say('  sort vs layout disagree (reported): '
+      + misplaced.map((r) => `.${r.cls} declares ${r.reach || 'nothing'}, ${r.inDock ? 'is' : 'is not'} in the dock`).join('; '));
   }
 }
 
