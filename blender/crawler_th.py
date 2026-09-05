@@ -466,16 +466,26 @@ def build_superstructure():
 
     # cooling: the vertical louvre grille [R1] §4 calls a strong striped
     # texture.  One slat, cloned — triangles, not draw calls.
+    # rear panel: vertical slats, twisted about Z so each blade turns its edge
+    # to the viewer — that twist is what makes a grille read as a grille
     slat = bx('slat_src', (0.030, 0.022, 0.86), R.MAT_DARK, loc=(0, 0, -50), bevel=0.004, seg=1)
     for i in range(26):
         clone(slat, (-1.02 + 2.04 * i / 25.0, ENC_Y1 + 0.015, DECK_Z + ENC_H * 0.50),
               (0, 0, 0.42), name='louvre_r%d' % i)
-    for i in range(16):
-        clone(slat, (1.155, ey + ed * 0.30, DECK_Z + 0.22 + 0.86 * i / 15.0),
-              (0, math.pi / 2, 0.42), name='louvre_s%d' % i)
+    # side panel: HORIZONTAL slats running fore-and-aft, tilted about their own
+    # long axis.  Its own source, because re-using the vertical one and turning
+    # it 90 degrees about Y throws a 0.86 m blade straight out sideways.
+    sslat = bx('sslat_src', (0.030, 0.86, 0.055), R.MAT_DARK, loc=(0, 0, -50),
+               bevel=0.004, seg=1)
+    for i in range(15):
+        clone(sslat, (1.152, ey + 0.30, DECK_Z + 0.26 + 0.80 * i / 14.0),
+              (0, 0.55, 0), name='louvre_s%d' % i)
     bx('louvre_frame_r', (2.16, 0.05, 0.98), R.MAT_DARK,
        loc=(0, ENC_Y1 + 0.035, DECK_Z + ENC_H * 0.50), bevel=0.012)
+    bx('louvre_frame_s', (0.05, 0.92, 0.92), R.MAT_DARK,
+       loc=(1.148, ey + 0.30, DECK_Z + 0.66), bevel=0.012)
     bpy.data.objects.remove(slat, do_unlink=True)
+    bpy.data.objects.remove(sslat, do_unlink=True)
 
     tb('exhaust', 0.075, 0.62, R.MAT_WORN, None,
        (0.74, ENC_Y1 - 0.24, DECK_Z + ENC_H + 0.02), (0, 0, 0), 12)
@@ -561,12 +571,12 @@ def build_superstructure():
     bpy.data.objects.remove(post, do_unlink=True)
 
     bx('ladder_stile_a', (0.04, 0.05, 1.05), R.MAT_DARK,
-       loc=(BODY_W / 2 + 0.06, ENC_Y0 - 1.08, DECK_Z - 0.52), bevel=0.008)
+       loc=(BODY_W / 2 - 0.06, ENC_Y0 - 1.08, DECK_Z - 0.52), bevel=0.008)
     bx('ladder_stile_b', (0.04, 0.05, 1.05), R.MAT_DARK,
-       loc=(BODY_W / 2 + 0.06, ENC_Y0 - 0.62, DECK_Z - 0.52), bevel=0.008)
-    rung = bx('rung_src', (0.16, 0.42, 0.035), R.MAT_WORN, loc=(0, 0, -50), bevel=0.006, seg=1)
+       loc=(BODY_W / 2 - 0.06, ENC_Y0 - 0.62, DECK_Z - 0.52), bevel=0.008)
+    rung = bx('rung_src', (0.26, 0.42, 0.035), R.MAT_WORN, loc=(0, 0, -50), bevel=0.006, seg=1)
     for i in range(3):
-        clone(rung, (BODY_W / 2 + 0.06, ENC_Y0 - 0.85, DECK_Z - 0.95 + i * 0.32),
+        clone(rung, (BODY_W / 2 - 0.06, ENC_Y0 - 0.85, DECK_Z - 0.95 + i * 0.32),
               name='rung%d' % i)
     bpy.data.objects.remove(rung, do_unlink=True)
 
@@ -577,8 +587,8 @@ def build_superstructure():
 
     hz('hz_rear_l', (0.44, 0.03, 0.16), None, (-0.92, ENC_Y1 + 0.05, DECK_Z + 0.12))
     hz('hz_rear_r', (0.44, 0.03, 0.16), None, (0.92, ENC_Y1 + 0.05, DECK_Z + 0.12))
-    hz('hz_step', (0.30, 0.34, 0.03), None,
-       (BODY_W / 2 + 0.06, ENC_Y0 - 0.85, DECK_Z + 0.06))
+    hz('hz_step', (0.26, 0.34, 0.03), None,
+       (BODY_W / 2 - 0.06, ENC_Y0 - 0.85, DECK_Z + 0.06))
 
     # A blank data plate.  DOMAIN.md §10: geometry only — the runtime paints the
     # rig's own invented marque onto it.  Nothing is lettered here.
