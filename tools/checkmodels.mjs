@@ -156,6 +156,57 @@ if (existsSync(BUILD_PY)) {
   }
 }
 
+/* ── 4. every material a model asks for must EXIST ───────────────────────────
+   A .glb ships material NAMES only — `src/core/assets.js` generates all 33-odd
+   texture kinds procedurally at runtime with wear and dirt driven by gameplay,
+   so a baked map would be discarded and blow the texture budget. That is
+   contract 2 of the pipeline, stated at the top of `blender/lib/rig.py`.
+
+   It was broken by the pipeline itself. `rig.py` has named its chassis material
+   `paintedDark` since the day it was written — "chassis, frames, guarding" —
+   and assets.js had no such kind, so `resolve()` fell through to its `rawSteel`
+   default and every frame, track guard and walkway on every Blender machine
+   rendered as BRIGHT BARE METAL where the real machine is dark paint.
+   Fleet-wide, and the only symptom was one warning line per model in a console
+   nobody was reading.
+
+   This reads the names out of the exported GLB rather than out of rig.py,
+   because the GLB is what the loader will actually ask for — a hand-written
+   material in one machine module would never appear in rig.py's MAT_ table. */
+{
+  const src = readFileSync(join(ROOT, 'src/core/assets.js'), 'utf8');
+  const kinds = new Set([
+    ...[...src.matchAll(/^      ([A-Za-z][A-Za-z0-9_]*):\s*\{/gm)].map((m) => m[1]),
+    ...[...src.matchAll(/KINDS\.([A-Za-z0-9_]+)\s*=/g)].map((m) => m[1]),
+  ]);
+  for (const f of models) {
+    let names = [];
+    try {
+      const buf = readFileSync(join(MODELS, f));
+      if (buf.length > 12 && buf.readUInt32LE(0) === 0x46546c67) {
+        let off = 12;
+        while (off + 8 <= buf.length) {
+          const len = buf.readUInt32LE(off);
+          const type = buf.readUInt32LE(off + 4);
+          if (type === 0x4e4f534a) {
+            const j = JSON.parse(buf.slice(off + 8, off + 8 + len).toString('utf8'));
+            names = (j.materials || []).map((m) => m.name).filter(Boolean);
+            break;
+          }
+          off += 8 + len;
+        }
+      }
+    } catch (e) { warn.push(`${f}: could not read materials — ${e.message}`); continue; }
+    const unknown = [...new Set(names)].filter((n) => !kinds.has(n));
+    if (unknown.length) {
+      fail.push(`${f} asks for material(s) assets.js does not have: ${unknown.join(', ')}. `
+        + `They will be silently substituted with rawSteel — bare metal where the `
+        + `machine should be painted. Add the kind to assets.js, or use one of: `
+        + `${[...kinds].slice(0, 8).join(', ')}…`);
+    }
+  }
+}
+
 /* ── what has been modelled, and what has not ────────────────────────────── */
 const modelled = new Set([...byRig.keys()]);
 const haveModule = new Set(modules.map(intended).filter(Boolean));

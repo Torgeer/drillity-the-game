@@ -72,6 +72,28 @@ export const BRAND = {
    */
   amberPlant: '#D9992E',   // H 37.5° · S 0.788 · V 0.851
 
+  /**
+   * Machine CHASSIS dark — undercarriage, frames, guarding, walkway steel.
+   *
+   * `blender/lib/rig.py` has always named this material `paintedDark`, and
+   * assets.js had no such kind, so every frame and track guard on every
+   * Blender machine was silently substituted with `rawSteel` — bright bare
+   * metal where the real machine is dark paint. Fleet-wide, invisible in the
+   * log except for one warning line per model.
+   *
+   * On a real machine the bodywork is the maker's colour and the undercarriage
+   * is a dark neutral; this sits in the RAL 7021 / 7016 region that plant is
+   * actually painted.
+   *
+   * HONESTY NOTE: unlike `amberPlant` above, this value has NOT been derived
+   * from a render measurement. Amber needed that because the light chain adds
+   * ~0.123 of saturation and drove the hue past amber into yellow; a near
+   * neutral has almost no saturation to drift. What could still be wrong is
+   * the VALUE — too dark and the chassis loses its form in shadow. Measure it
+   * the way amberPlant was measured before trusting it.
+   */
+  plantDark: '#33383D',    // H 210° · S 0.11 · V 0.24 — NOT render-derived
+
   // Steel blue accent
   steel:     '#3F92A6', // hsl(199 45% 45%)
   steelSoft: '#6FB6C7',

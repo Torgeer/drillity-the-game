@@ -449,6 +449,38 @@ has a double-weighted domain-truth axis and a measured HUD-restraint gate.
 
 ### Found 2026-09-05, all measured, none fixed
 
+**The cable-percussion RIG and the cable-percussion MODEL are two different
+machines, and only one of them can be right.**
+
+`data.js` describes an **American truck-mounted spudder**: 9.4 t, 82 kW,
+`depthCapacity: 250`, *"a folding derrick over a walking beam, three lines off
+one winch — drilling line, sand line, casing line — and a spudding rate of
+forty to sixty strokes a minute"*, making *"a straight 250 mm well through a
+boulder bed"*. That is coherent, and it matches the depth the `cable-tool`
+method is written for.
+
+`blender/cable_percussion.py` and `research/rigs/cable-percussion.md` describe
+a **British shell-and-auger tripod**: measured 2.37 × 6.68 × 5.37 m, sourced at
+**13 kW and 1,700–2,250 kg**, working to a few tens of metres. Its in-game name
+agrees with the model — *"Shellhand"* is shell and auger — and its family is
+`rigGeotech`.
+
+So the machine on screen will be **roughly a quarter the mass its own shop card
+claims**, drilling a 250 m well with a rig rated for site investigation.
+
+**This is a design decision, not a typo, and it was deliberately not made
+unilaterally.** Both directions have real consequences:
+
+- Making the data match the model means dropping `depthCapacity` to perhaps 60.
+  `depthWindow()` is now **capped by the deepest rig that runs the method**, so
+  that would shrink every `cable-tool` contract in the game at a stroke.
+- Making the model match the data means rebuilding it as a spudder, and
+  discarding a reference whose geometry closes on itself to 4 mm by two
+  independent routes.
+
+The name and the family both point at the tripod. The depth and the method
+point at the spudder. **Somebody has to pick.**
+
 **~~`box()` in `blender/lib/rig.py` returns boxes at HALF the size asked for~~ —
 FIXED 2026-09-05, with all eight per-machine workarounds removed in the same
 pass.** `primitive_cube_add(size=1)` makes a cube of EDGE 1, and the next line

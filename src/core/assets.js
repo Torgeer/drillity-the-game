@@ -3928,6 +3928,36 @@ export function createAssets(ctx = {}) {
       },
     };
 
+    /* ── paintedDark — the same painted steel, in chassis grey ──────────────
+       `blender/lib/rig.py` has named this material `paintedDark` since the
+       pipeline was written, for "chassis, frames, guarding". assets.js had no
+       such kind, so `resolve()` fell through to its `rawSteel` default and
+       every frame, track guard and walkway on every Blender machine rendered
+       as BRIGHT BARE METAL where the real machine is dark paint. Fleet-wide,
+       and invisible except for one warning line per model in the console.
+
+       It is derived from `paintedSteel` rather than written afresh because
+       that is what it physically IS: the same rolled steel, the same panel
+       mapping, the same dirt gradient down the lower half, the same flake — a
+       different albedo. 134 lines of authored surface behaviour that would
+       otherwise be copied and then drift.
+
+       Two deliberate differences from bodywork:
+         - `wear` is higher. The undercarriage is where the machine touches the
+           ground; it is chipped and mud-caked long before the bonnet is.
+         - `variants` is halved. Chassis is seen at a distance and in shadow,
+           and the texture budget (55 MB HIGH against a ~90 MB cap) is better
+           spent on the parts the player looks at. */
+    KINDS.paintedDark = {
+      ...KINDS.paintedSteel,
+      cls: 'plant', prio: 3, variants: 2,
+      defaults: (p) => ({
+        ...KINDS.paintedSteel.defaults(p),
+        color: BRAND.plantDark,
+        wear: 0.46,
+      }),
+    };
+
     /* ── generic map application ───────────────────────────────────────── */
     function applySet(kind, spec, mat, set, d) {
       const rep = d && d.repeat;
