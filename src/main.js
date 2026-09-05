@@ -72,6 +72,7 @@ window.__DRILLITY = ctx; // dev/QA handle — used by the screenshot harness
 const MODULES = {
   renderer:    () => import('./core/renderer.js'),
   assets:      () => import('./core/assets.js'),
+  gltfRigs:    () => import('./core/gltfRig.js'),
   env:         () => import('./core/env.js'),
   geology:     () => import('./world/geology.js'),
   terrain:     () => import('./world/terrain.js'),
@@ -148,6 +149,114 @@ function showFatalContentError(err) {
   }
 }
 
+/**
+ * THE BLENDER MACHINES — which ones are fetched, and when.
+ *
+ * `src/core/gltfRig.js` streams a `.glb` per machine from `models/` rather
+ * than carrying it in the single-file bundle (see vite.config.js). The rule
+ * this function exists to enforce is: **only the machines the player owns**.
+ * Never the fleet. Eighteen machines are never in memory at once, and a player
+ * who owns one crawler fetches one crawler.
+ *
+ * "Owns" is `state.unlocked.rigs` — the machines they can actually select —
+ * plus whatever is in the garage right now, which on a fresh save is the same
+ * single machine. Typically one to three ids.
+ */
+function ownedRigIds() {
+  const st = ctx.state || {};
+  const owned = (st.unlocked && st.unlocked.rigs) || [];
+  const inGarage = st.garage && st.garage.rigId;
+  return inGarage ? owned.concat([inGarage]) : owned.slice();
+}
+
+/**
+ * Fetch the models for the owned machines.
+ *
+ * At boot this is AWAITED, because rigFactory caches a build per rig id and
+ * the first build wins: a model that lands after the machine has been built
+ * procedurally will not be seen until the next session. Everywhere else it is
+ * fire-and-forget — the machine on screen is already correct, and the fetch is
+ * warming the one the player is about to be able to pick.
+ *
+ * The boot await is RACED against a timeout. A model is served from the same
+ * origin as the page, so it should arrive in milliseconds; if something is
+ * wrong with the host, the game must still boot rather than hang on a splash
+ * screen. A slow model then simply misses this session, and says so.
+ */
+const MODEL_BOOT_TIMEOUT_MS = 4000;
+
+async function warmOwnedModels(blocking) {
+  const g = ctx.gltfRigs;
+  if (!g) return;
+  const ids = ownedRigIds().filter((id) => !g.has(id));
+  if (!ids.length) return;
+  const work = g.warm(ids).then((rows) => {
+    const bad = rows.filter((r) => !r.ok).map((r) => r.id);
+    if (bad.length) showModelError(bad, g.problems());
+  });
+  if (!blocking) return;
+  let timer = null;
+  await Promise.race([
+    work.finally(() => clearTimeout(timer)),
+    new Promise((r) => {
+      timer = setTimeout(() => {
+        console.warn('[boot] machine models did not arrive within '
+          + MODEL_BOOT_TIMEOUT_MS + ' ms — booting without them');
+        r();
+      }, MODEL_BOOT_TIMEOUT_MS);
+    }),
+  ]);
+}
+
+/**
+ * A machine did not load. Say so where it cannot be missed.
+ *
+ * This is deliberately loud (HANDOFF §8A). The models ship with the build, so
+ * a missing one is a bug and not a network condition, and the failure it
+ * replaces — quietly drawing something else and letting three review rounds
+ * photograph it — is the single most expensive pattern in this project's
+ * history. Standalone DOM with inline styles, for the same reason
+ * `showFatalContentError` is: the UI may not have mounted.
+ */
+function showModelError(ids, problems) {
+  try {
+    let wrap = document.getElementById('model-error');
+    if (!wrap) {
+      wrap = document.createElement('div');
+      wrap.id = 'model-error';
+      wrap.setAttribute('role', 'alert');
+      wrap.style.cssText = [
+        'position:fixed', 'inset:auto 0 0 0', 'z-index:99998',
+        'margin:0', 'padding:14px calc(14px + env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) calc(14px + env(safe-area-inset-left))',
+        'background:#1A1610', 'border-top:2px solid #F59E0B',
+        'color:#F4F6F8', 'font:600 13px/1.5 Inter,system-ui,-apple-system,sans-serif',
+        '-webkit-font-smoothing:antialiased',
+      ].join(';');
+      (document.body || document.documentElement).appendChild(wrap);
+    }
+    wrap.textContent = '';
+
+    const h = document.createElement('p');
+    h.textContent = 'Machine model unavailable';
+    h.style.cssText = 'margin:0 0 4px;font-size:15px;font-weight:800;color:#FCD34D;letter-spacing:-0.01em';
+
+    const p = document.createElement('p');
+    p.textContent = ids.join(', ') + ' could not be loaded. '
+      + 'The machine you see is the same rig drawn the old way, not a different '
+      + 'machine — but this is a bug, please report it.';
+    p.style.cssText = 'margin:0 0 6px;color:#C9BFAE;font-weight:500';
+
+    const d = document.createElement('p');
+    d.textContent = (problems || []).map((x) => x.id + ' — ' + x.message).join('  ·  ');
+    d.style.cssText = 'margin:0;font:500 11px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;'
+      + 'color:#8A8172;word-break:break-word';
+
+    wrap.append(h, p, d);
+  } catch (e) {
+    console.error('[boot] could not render the model-error banner', e);
+  }
+}
+
 async function boot() {
   /**
    * game/data.js is the content authority — every method, region, rig,
@@ -178,6 +287,7 @@ async function boot() {
   // Order matters: renderer → assets → env → world → rig → sim → vfx → ui → audio
   await loadSystem('renderer', 'createRenderer');
   await loadSystem('assets', 'createAssets');
+  await loadSystem('gltfRigs', 'createGltfRigs');
   await loadSystem('env', 'createEnvironment');
   await loadSystem('geology', 'createGeology');
   await loadSystem('terrain', 'createTerrain');
@@ -199,6 +309,12 @@ async function boot() {
   for (let i = 0; i < rest.length; i++) {
     const s = rest[i];
     try { ui?.setLoadingProgress?.(i / rest.length, s.__name); } catch { /* non-fatal */ }
+    // The Blender machines must be in memory BEFORE rigFactory runs, because
+    // its build cache is keyed by rig id and the first build of an id wins.
+    if (s.__name === 'rig') {
+      try { ui?.setLoadingProgress?.(i / rest.length, 'machine'); } catch { /* non-fatal */ }
+      await warmOwnedModels(true);
+    }
     if (s.init) { try { await s.init(); } catch (e) { console.error(`[init] ${s.__name}`, e); } }
     // Yield so the boot screen can actually paint between heavy systems.
     await new Promise((r) => requestAnimationFrame(() => r()));
@@ -214,6 +330,23 @@ async function boot() {
   resize();
   window.addEventListener('resize', resize, { passive: true });
   window.addEventListener('orientationchange', () => setTimeout(resize, 120));
+
+  /**
+   * Keep the owned set warm.
+   *
+   * A rig change is announced SYNCHRONOUSLY on the bus and a fetch is not, so
+   * warming on RIG_CHANGE alone would always be one step late. The set is
+   * therefore warmed when a screen the player can change machines on opens —
+   * the garage and the shop — which is minutes of wall-clock before they press
+   * anything. RIG_CHANGE is still handled, for the machine they have just
+   * bought and for the next time they select it.
+   */
+  const rewarm = () => { warmOwnedModels(false); };
+  ctx.bus.on(EVENTS.RIG_CHANGE, rewarm);
+  ctx.bus.on(EVENTS.SCENE_CHANGE, (p) => {
+    const sc = p && p.scene;
+    if (sc === SCENES.GARAGE || sc === SCENES.SHOP) rewarm();
+  });
 
   installQABridge();
 
@@ -332,6 +465,29 @@ function installQABridge() {
 
     setScene(id) { ctx.ui?.show?.(id); },
     state: () => ctx.state,
+
+    /**
+     * What the Blender pipeline actually delivered this session — measured,
+     * not assumed. `prims` is the draw-call floor for the rig; compare it with
+     * `renderer.info.render.calls`. `problems` is every model that was asked
+     * for and did not arrive.
+     */
+    models() {
+      const g = ctx.gltfRigs;
+      if (!g) return { available: false };
+      return {
+        available: true,
+        owned: ownedRigIds(),
+        loaded: g.loaded().map((id) => g.info(id)),
+        problems: g.problems(),
+        log: g.logLines(),
+      };
+    },
+    async loadModel(id) {
+      if (!ctx.gltfRigs) throw new Error('gltfRigs system is not up');
+      await ctx.gltfRigs.load(id);
+      return ctx.gltfRigs.info(id);
+    },
   };
 }
 
