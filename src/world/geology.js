@@ -228,6 +228,43 @@ const CFG = {
   flightSeg: 512,        // ribbon segments over that length: at a 305 mm hole's
                          // 1.19 m drawn pitch that is 23 per turn
 
+  /* ── LOOK-AHEAD UNCERTAINTY ───────────────────────────────────────────────
+     The model is in lookUnc() (GLSL_STRATA) and the drive is applySurvey().
+     These four numbers are the drawing decisions it needs, and per
+     PLATFORM_TRUTH Part C rule 7 here is exactly where each one stands.
+
+     NOT SOURCED, AND THEY CANNOT BE. There is no published figure for "how
+     wrong is an interpolated bed depth", because the answer depends on the
+     spacing of the holes that produced the interpretation, and this game does
+     not model a hole spacing. What IS well established, and is the reason the
+     feature exists at all, is the ASYMMETRY it draws: ground investigation
+     misjudging rockhead depth and bed thickness between boreholes is the
+     single largest source of differing-site-conditions claims in ground
+     engineering, while nobody argues about WHICH rock it turned out to be.
+     The numbers below are therefore honest drawing choices calibrated against
+     the one hard constraint the band does impose — it shows about 14 m of
+     undrilled ground at once — and not measurements dressed up as facts.
+
+     CONTROL DISTANCE runs with confidence because that is the one physical
+     statement available: a grade-control hole is metres from its neighbours
+     and a greenfield step-out is hundreds. The band cannot draw hundreds, so
+     the range is compressed onto what the band can show — sharp across the
+     whole frame at the top of the scale, gone within two rods at the bottom.
+
+     The CEILING is 1 - confidence, deliberately with no constant of its own:
+     the contract's confidence is already a 0..1 statement of how well the
+     ground is known, and inventing a curve on top of it would be a second
+     opinion about a number data.js already owns. */
+  controlNear: 1.4,      // m of control distance at confidence 0 (a wildcat)
+  controlFar: 18.0,      // …and at confidence 1 (the log is already on file)
+  surveyWander: 1.8,     // extra gain on the LOW-frequency boundary term at
+                         // full uncertainty. Only the low octave: an
+                         // interpolation error is a long-wavelength thing —
+                         // a bed sits deeper than drawn, it does not jitter.
+  surveyDefault: 0.55,   // confidence for a contract that states none. Same
+                         // value generateProfile() already defaults to, so
+                         // this introduces no second opinion.
+
   boulderCap: 96,
   fractureCap: 220,
   cavityCap: 6,          // must match uCav[] in the shaders
@@ -998,6 +1035,83 @@ uniform float uDepth0;        // TVD (m) at section y = 0
 
 float depthAt(vec2 wp){ return uDepth0 - wp.y + wp.x * uDip; }
 
+/* ── LOOK-AHEAD: HOW FAR PAST THE BIT IS THIS ROCK, AND HOW WELL IS IT KNOWN?
+   ═══════════════════════════════════════════════════════════════════════════
+   Until this existed, ground the bit had not reached was drawn EXACTLY like
+   ground it had already cut, so the section told the player nothing they did
+   not already know. It was scenery. The whole input is the metres-ahead field
+   and the contract's own survey confidence.
+
+   WHAT THE SECTION IS ACTUALLY A PICTURE OF, and therefore what "uncertain"
+   has to look like. It is not a photograph of the ground and it is not a
+   guess: it is a GEOLOGIST'S INTERPRETATION BETWEEN CONTROL POINTS. That
+   carries a specific and very unequal pair of claims —
+
+     · a bed's EXISTENCE and its LITHOLOGY are fairly well known. They come
+       from regional mapping and from whatever holes have already gone down
+       nearby. "There is gneiss under this till" is a claim a geologist will
+       make from a map and be right about.
+     · a bed's DEPTH and THICKNESS are INTERPOLATED between those holes, and
+       the interpolation error grows with distance from the nearest control.
+       "The gneiss is at 15.4 m" is a claim nobody can make from a map.
+
+   THE BIT IS THE CONTROL POINT. That asymmetry is the whole design, and it
+   is why the treatment below is deliberately NOT a fog overlay: a veil laid
+   over the lower half of the band reads as a graphics effect — as though
+   something were in the way — and it hides bed identity, which is the half
+   of the picture that IS known. What degrades ahead of the bit is, in order:
+
+     1. the POSITION of every contact — it wanders, and the drawn line stops
+        being a line at all. An inferred contact is given exactly the
+        character this file already gives a GRADATIONAL one, because in both
+        cases the section cannot honestly claim an edge. That reuse is the
+        point: the vocabulary for "there is no line here" was already in the
+        file, authored and tuned, and it means one thing.
+     2. the TEXTURE inside a bed — grain, joints, clasts. That is a core-box
+        observation and there is no core yet.
+     3. the CONTRAST between beds — last, and least, because that is bed
+        identity, and identity is the part that is genuinely known.
+
+   IT MUST NEVER LIE. Every term is multiplied by a function of aheadM() that
+   is exactly 0 at and behind the bit, so a metre that has been drilled is
+   drawn bit-for-bit as it was before this feature existed, and matches what
+   the sim resolved. A player who catches the section retconning a bed will
+   never trust it again. Proof, not assertion: run the band at uSurvey.x = 0
+   and at uSurvey.x = 1 and diff the region above the bit — the difference
+   must be zero pixels. (.probe-look.mjs does exactly that.)
+
+   ONE LINEAR FORM FOR FIVE MODES. "Ahead" is not always downward: on a
+   heading the unknown ground is horizontally past the face, and on an HDD
+   profile it is past the drilled station. Rather than branch per mode inside
+   a fragment shader that has already taken the GPU process down once
+   (HANDOFF §8G), the CPU — which knows the mode — supplies the coefficients
+   of a plane and the shader evaluates one dot product:
+
+       ahead(m) = depth * uLook.x + wp.x * uLook.y + uLook.z
+
+     vertical / pile   (1, 0, -bitDepth)         ahead = depth - bitDepth
+     raise stage >= 1  ceiling forced to 0 — the pilot hole already logged
+                       the whole column, so nothing ahead of the reamer is
+                       unknown. That is what a pilot hole IS FOR.
+     heading           (0, mPerUnitX, -faceX * mPerUnitX)
+     profile           (0, mPerUnitX, -xOrigin * mPerUnitX - drilledStation)
+
+   uLook.w is 1 / the CONTROL DISTANCE: the metres ahead at which the
+   interpretation has lost ~63 % of everything it is going to lose. */
+uniform vec4 uLook;    // (d/depth, d/sectionX, const, 1/controlDistance)
+uniform vec2 uSurvey;  // x = uncertainty ceiling 0..1 ; y = boundary wander gain
+
+/** Metres of ground between this sample and the deepest thing actually cut. */
+float aheadM(vec2 wp, float d){ return d * uLook.x + wp.x * uLook.y + uLook.z; }
+
+/** 0 where the ground has been drilled, rising to uSurvey.x far ahead of it. */
+float lookUnc(vec2 wp, float d){
+  /* Saturating, not linear, because that is the shape of the real thing: the
+     first metre past the bit is very nearly as good as drilled, and 30 m
+     ahead is no better known than 25 m ahead. */
+  return uSurvey.x * (1.0 - exp(-max(aheadM(wp, d), 0.0) * uLook.w));
+}
+
 // section-space y (negative down) -> lookup coordinate, no warp
 float colU(float sy, float x){
   float d = uDepth0 - sy + x * uDip;
@@ -1024,7 +1138,29 @@ float colUWarp(vec2 wp){
   float d = uDepth0 - wp.y + wp.x * uDip;
   float u0 = clamp(d / max(uProfileDepth, 1.0), 0.0006, 0.9994);
   float amp = uWarp * (0.30 + 1.95 * texture2D(uStrataD, vec2(u0, 0.5)).g);
-  d += (fbm3n(wp * vec2(0.30, 0.13) + 11.0) - 0.5) * amp * 0.80;
+  /* THE BOUNDARY WANDERS WHERE IT HAS NOT BEEN PROVED. This gain rides the
+     LOW octave only, and only that one, for a physical reason: what is
+     uncertain about an unproved contact is a long-wavelength thing — the bed
+     sits deeper or shallower or thicker than the interpretation drew it — not
+     a jitter. Adding uncertainty to the fine octaves would draw a boundary
+     that is noisy, which is a different and untrue claim.
+
+     It costs no extra noise call: the term was already being evaluated and
+     only its amplitude moves.
+
+     It rides the CONTACT'S OWN character (amp already carries D.g) rather
+     than being a flat addition, and that is right rather than convenient: a
+     scoured unconformity or a weathering front genuinely is harder to
+     interpolate between holes than a conformable bedding plane between two
+     limestones, which is very nearly a geometric surface.
+
+     AND IT IS SELF-CANCELLING AT THE BIT. lookUnc() is 0 at and behind the
+     working point, so the drawn boundary migrates into its true position as
+     the bit comes down on it and is exactly where the un-warped section
+     always put it by the time it is cut. Nothing is retconned; the estimate
+     is simply replaced by the observation, which is what drilling is. */
+  float wander = 1.0 + lookUnc(wp, d) * uSurvey.y;
+  d += (fbm3n(wp * vec2(0.30, 0.13) + 11.0) - 0.5) * amp * 0.80 * wander;
   d += (fbm4n(wp * vec2(0.40, 0.62) + 3.0) - 0.5) * amp * 0.34;
   d += (fbm2n(wp * vec2(1.7, 2.4)) - 0.5) * amp * 0.10;
   return clamp(d / max(uProfileDepth, 1.0), 0.0006, 0.9994);
@@ -1366,9 +1502,25 @@ float clastField(vec2 wp, float freq, float rnd, float pack, float seed,
    where there is no line at all — a silt passes into a clay over half a metre
    and a driller reads the change, not an edge. D.b says which this is, and the
    two ends of it look genuinely different: sharp gives a hard thin line with a
-   lit lip, gradational gives a wide soft change with no line in it. */
-vec3 contactMarksK(float aChan, float side, float sharp){
+   lit lip, gradational gives a wide soft change with no line in it.
+
+   AND THAT IS ALSO WHAT AN UNDRILLED CONTACT LOOKS LIKE. unc is the
+   look-ahead uncertainty at this sample (see lookUnc() above) and it enters
+   in exactly one place: it knocks the contact's drawn SHARPNESS down. A
+   knife-edge boundary the bit has not reached is not a knife edge on this
+   drawing — it is a depth somebody interpolated, and the honest way to say
+   "the contact is somewhere around here" is the way this file already says
+   "the change happens over half a metre": a wide soft band with no line in
+   it. So an inferred contact borrows the gradational vocabulary, and locks
+   to its true character as the bit arrives and unc goes to 0.
+
+   Note what does NOT go to zero. At unc = 1 the parting still carries 0.22
+   of its weight and the soft band is at its widest — the contact is still
+   VISIBLE, just unplaceable. That is the asymmetry the model is built on:
+   the bed's existence is known, its depth is not. */
+vec3 contactMarksK(float aChan, float side, float sharp, float unc){
   float d = aChan * uEdgeRange;
+  sharp *= 1.0 - unc;
   float w = uPartW * mix(2.40, 0.90, sharp);
   float part = (1.0 - smoothstep(w * 0.45, w * 1.05, d)) * (0.22 + 0.78 * sharp);
   float lip  = smoothstep(w * 0.85, w * 1.05, d)
@@ -1833,9 +1985,34 @@ void main(){
   vec4 D = texture2D(uStrataD, vec2(u, 0.5));
   float pat = floor(B.r * 255.0 / 32.0 + 0.5);
 
+  /* How well this rock is known. 0 everywhere the bit has been; see lookUnc()
+     for the model and for why the drilled section is untouched by it. */
+  float unc = lookUnc(wp, depthAt(wp));
+
   float spark;
   vec3 nPat;
   vec3 col = patternShade(pat, B.g, wp, A.rgb, C.r, C.b, D.r, D.a, spark, nPat);
+
+  /* ── WHAT AN UNDRILLED BED IS NOT ENTITLED TO CLAIM ──────────────────────
+     Texture goes FIRST and it goes furthest, and the reason is not
+     aesthetic. Grain, clast shape, joint spacing, foresets, mica sheen — all
+     of it is a CORE BOX observation. It is what you learn by having the rock
+     in your hand, and there is no core from ground the bit has not reached.
+     A section that draws the fabric of an unpenetrated bed is claiming the
+     one thing nobody could have told it.
+
+     A.rgb is the bed's own colour before patternShade() wrote any texture
+     into it, so mixing back toward it removes the fabric and keeps the
+     identity — which is exactly the asymmetry this whole feature is built
+     on. The bed stays legible as gneiss; it stops pretending anyone has seen
+     its joints.
+
+     spark is the hardest claim of the three (visible metal, a mica flash
+     catching the key) so it goes to zero, and the pattern's own normal goes
+     with the pattern it belongs to. */
+  col = mix(col, A.rgb, unc * 0.72);
+  nPat *= 1.0 - unc * 0.85;
+  spark *= 1.0 - unc;
 
   /* ── THE ORE BODY ────────────────────────────────────────────────────────
      You cannot see it before you drill it. The body is drawn at full strength
@@ -1950,6 +2127,26 @@ void main(){
   vec3 L = normalize(vec3(-0.42, 0.60, 0.68));
   float ndl = max(dot(N, L), 0.0);
   float sky = 0.5 + 0.5 * N.y;
+
+  /* ── CONTRAST GOES LAST, AND ONLY PART WAY ───────────────────────────────
+     The third and weakest of the three look-ahead terms, and deliberately
+     so: contrast between beds is bed IDENTITY, and identity is the half of
+     the interpretation that is genuinely known. What is dropped is not the
+     bed's colour, it is the claim that anyone has seen it as a LIT SURFACE.
+     Ahead of the bit the face stops being a photograph of rock and becomes a
+     drawing of rock, which is what it honestly is.
+
+     The two lighting variables are pushed toward the MODAL values this
+     shader's own rebalance was solved at — ndl 0.68 and sky 0.5, named in
+     the comment block above and in contract.js's palette solve. That choice
+     is load-bearing rather than tidy: pushing toward the mode preserves each
+     bed's MEAN appearance exactly and removes only its swing, so nothing
+     drifts off the palette and no bed changes colour as the bit approaches.
+     It also means this cannot become a grey veil — there is no grey in it,
+     only less modelling. */
+  float flatK = unc * 0.62;
+  ndl = mix(ndl, 0.68, flatK);
+  sky = mix(sky, 0.5, flatK);
   float cool = clamp(((A.b - A.r) / (A.b + A.r + 0.02)) * 2.2, 0.0, 1.0);
   vec3 lit = col * (uAmbientCool * (0.60 + 0.90 * sky) * (1.0 + cool * 0.90)
                   + uKeyWarm * (0.62 + 1.06 * ndl));
@@ -1967,13 +2164,15 @@ void main(){
      line; a silt passing into a clay is not a line at all, it is half a metre
      of change, and drawing both with the same 1.5 px parting is the second
      clearest tell that this is a diagram. contactMarksK() reads the character
-     and draws the two differently. */
-  vec3 mk = contactMarksK(A.a, C.a, D.b);
+     and draws the two differently — and it takes the look-ahead uncertainty
+     for the same reason, because an inferred contact is not a line either. */
+  vec3 mk = contactMarksK(A.a, C.a, D.b, unc);
   lit *= 1.0 - mk.z * 0.26;              // tight soft contact occlusion
   lit *= 1.0 - mk.x * 0.45;              // the parting itself
   lit += lit * mk.y * 0.25;              // the lip catching the key
   lit += uKeyWarm * mk.y * 0.020;
-  lit *= 1.0 - vEdge * 0.16;             // broad undercut AO
+  // the geometric undercut is a landform along a contact nobody has cut yet
+  lit *= 1.0 - vEdge * 0.16 * (1.0 - flatK);
   /* Crevice occlusion from the fine relief, plus the broad form term. vAO is a
      per-VERTEX quantity interpolated across a 0.32 m lattice, so at a 3.3x
      range it was a bed-independent 0.5 m value swing laid over every stratum
@@ -1982,8 +2181,11 @@ void main(){
      as crevice occlusion and no longer competes with the horizons. The value
      range it used to supply now comes from the pattern's own normal, which is
      per-pixel and knows what rock it is in. */
-  lit *= 0.66 + 0.34 * smoothstep(-0.17, 0.11, vAO);
-  lit *= 0.72 + 0.28 * smoothstep(-1.15, 0.45, vZ);
+  // 0.83 and 0.86 are these two terms AT THEIR OWN MODAL INPUT, so flattening
+  // them ahead of the bit holds the bed's mean and drops only its crevice
+  // detail — the same discipline as the ndl / sky flatten above.
+  lit *= mix(0.66 + 0.34 * smoothstep(-0.17, 0.11, vAO), 0.83, flatK);
+  lit *= mix(0.72 + 0.28 * smoothstep(-1.15, 0.45, vZ), 0.86, flatK);
 
   /* ── contact shadow where the opening is cut ─────────────────────────────
      Written against the opening's SIGNED DISTANCE rather than against
@@ -2606,6 +2808,16 @@ void main(){
   vec4 A = texture2D(uStrataA, vec2(u, 0.5));
   a *= smoothstep(0.0, uEdgeShade * 2.4, A.a * uEdgeRange);
 
+  /* A JOINT SET IS THE LEAST KNOWABLE THING ON THIS DRAWING. Bed order can be
+     had from a map; joint spacing, orientation and aperture cannot be had
+     from anything except the rock itself — core, a televiewer, or the face.
+     Drawing a named fracture network through ground nobody has touched is the
+     single most confident claim the section makes, and it was making it at
+     full strength. It fades with the look-ahead and comes back as the bit
+     arrives (lookUnc() is 0 at and behind the working point), so the joints
+     the player actually drills into are the joints they were shown. */
+  a *= 1.0 - lookUnc(vWP, depthAt(vWP)) * 0.88;
+
   /* And they are destroyed in the annulus — over-gauge wall, cuttings, the rod
      and the bit all live in there. Cut the column out entirely, drilled or
      not, so nothing can draw across the shank again. */
@@ -2772,6 +2984,16 @@ export function createGeology(ctx) {
     uWarp:        { value: 1.15 },
     uHoleR:       { value: holeR },
     uDepth:       { value: 0 },
+    /* ── LOOK-AHEAD (see lookUnc() in GLSL_STRATA for the whole model) ──────
+       uLook  (d/depth, d/sectionX, const, 1/controlDistance) — the CPU-side
+              coefficients of the metres-ahead plane, so the shader branches
+              on nothing. (1, 0, 0, …) with uSurvey.x = 0 is the section
+              exactly as it was before look-ahead existed, which is the state
+              every non-drilling frame sits in.
+       uSurvey x uncertainty ceiling 0..1, driven from the contract's survey
+              confidence by applySurvey(); y boundary wander gain. */
+    uLook:        { value: new T.Vector4(1, 0, 0, 1 / CFG.controlFar) },
+    uSurvey:      { value: new T.Vector2(0, 0) },
     uWaterY:      { value: -6 },
     uTime:        { value: 0 },
     uHalfW:       { value: halfW },
@@ -3799,6 +4021,10 @@ export function createGeology(ctx) {
       oreConfidence: inSpec.oreConfidence == null ? 0.55
                    : clamp(+inSpec.oreConfidence || 0, 0, 1),
     };
+    /* Knowledge bought for the LAST hole is not knowledge about this one. A
+       new profile is new ground, so anything setSurveyConfidence() was told
+       dies with the profile that earned it. */
+    surveyBought = 0;
     applyHoleDiameter();
 
     const recipe = REGIONS[spec.regionId] || REGIONS.nordic;
@@ -6732,6 +6958,84 @@ export function createGeology(ctx) {
    * pre-support fan, the reamer head climbing a raise — get a matrix write,
    * and there are never more than about thirty of those.
    */
+  /**
+   * SURVEY CONFIDENCE — the one number that decides how much of this section
+   * the player is being shown for free, and the gameplay in the feature.
+   *
+   * Read the model in lookUnc() (GLSL_STRATA) first. This drives it, and it is
+   * the ONLY place the two uniforms are written.
+   *
+   * WHERE THE CONFIDENCE COMES FROM. data.js already carries `oreConfidence`
+   * on every contract — 0.25-0.55 on mineral exploration, 0.6-0.9 on mining,
+   * and exactly 0 on the fourteen applications that are not looking for a
+   * body. That zero is NOT "we know nothing", it is "this contract has no ore
+   * body to know about", so treating it as a wildcat would draw a routine
+   * urban piling job as a blank. A contract that states no confidence gets
+   * CFG.surveyDefault, which is the value generateProfile() already defaults
+   * to — so this function introduces no second opinion about a number data.js
+   * owns (HANDOFF §8B: two tables describing one thing).
+   *
+   * ONE EXCEPTION, AND IT IS THE METHOD'S OWN DEFINITION. On a
+   * site-investigation contract the log IS the deliverable — GAMEDESIGN §3a:
+   * "Nobody is paying for the hole, they are paying for the log." A job whose
+   * entire product is the ground model cannot begin by showing you the ground
+   * model. It is held at the wildcat end whatever the contract says.
+   *
+   * WHAT WOULD MAKE THIS BUYABLE — the hook another agent needs, described
+   * and NOT built here, because the economy is not this file's:
+   *
+   *   geology.setSurveyConfidence(v, reason)  (public API, added below)
+   *
+   * raises the confidence for the rest of the hole and the section sharpens
+   * over the next few frames. A client borehole log or a seismic line bought
+   * mid-job is exactly a call to that with a higher number. What the economy
+   * side needs to add is (a) a price — economy.js already prices per-run
+   * consumables, so a survey line is the same shape — (b) a debit through
+   * progression.addMoney() while state.drill.active is true, which no existing
+   * path does, and (c) a rule for what a purchase is worth, for which
+   * data.js's own ORE_STAGES ladder is the natural answer: a purchase moves
+   * the job up one stage (greenfield -> extension -> definition ->
+   * grade-control) rather than to an invented number. `contract.oreStage` is
+   * written by data.js today and read by nothing at all; this would be its
+   * first consumer.
+   */
+  let surveyBought = 0;
+  function surveyConfidence() {
+    /* > 0 is the discriminator, not != null: data.js writes a hard 0 for the
+       non-ore applications and 0.25-0.90 for the rest, so zero can only ever
+       mean "no body, therefore no statement". */
+    let c = spec.oreConfidence > 0 ? spec.oreConfidence : CFG.surveyDefault;
+    if (spec.applicationId === 'site-investigation'
+        || spec.methodId === 'site-investigation') c = Math.min(c, 0.18);
+    return clamp(Math.max(c, surveyBought), 0, 1);
+  }
+
+  function applySurvey() {
+    const conf = surveyConfidence();
+    /* A raise is reamed up a hole its own pilot already drilled. There is no
+       unknown ground ahead of the reamer — that is what a pilot hole is for —
+       so stage 2 states nothing rather than pretending to a doubt it does not
+       have. */
+    const known = layout.id === 'raise' && stage >= 1;
+    U.uSurvey.value.set(known ? 0 : 1 - conf, CFG.surveyWander);
+    U.uLook.value.w = 1 / Math.max(lerp(CFG.controlNear, CFG.controlFar, conf), 0.2);
+
+    /* The coefficients of the metres-ahead plane. One dot product in the
+       shader, all five modes, no branch — see lookUnc(). */
+    const L = U.uLook.value;
+    if (layout.id === 'heading') {
+      // ahead is horizontally past the face, in metres of chainage
+      L.set(0, layout.metresPerUnitX, -U.uTun.value.z * layout.metresPerUnitX, L.w);
+    } else if (layout.id === 'profile') {
+      /* uBore.x is the drilled extent in HORIZONTAL metres, which is the same
+         quantity alongAt() returns, so the two cannot disagree. */
+      L.set(0, layout.metresPerUnitX,
+            -layout.xOrigin * layout.metresPerUnitX - U.uBore.value.x, L.w);
+    } else {
+      L.set(1, 0, -Math.max(smoothDepth, 0), L.w);
+    }
+  }
+
   const _fmMtx = new T.Matrix4();
   const _fmQ = new T.Quaternion();
   const _fmE = new T.Euler();
@@ -6898,6 +7202,9 @@ export function createGeology(ctx) {
 
     /* ── the mode's own furniture ── */
     updateModeFurniture(act);
+
+    /* ── what the section is allowed to claim about ground it has not cut ── */
+    applySurvey();
 
     /* ── borehole ── */
     // NOTE: wall / rod / casing keep identity transforms — their vertex shaders
@@ -7246,6 +7553,28 @@ export function createGeology(ctx) {
      *  unaffected: what the section draws and what the sim knows are separate
      *  questions, and only the drawing is suppressed. */
     setOreHidden(v) { U.uOreD.value.w = v ? 1 : 0; },
+
+    /* ── SURVEY CONFIDENCE ─────────────────────────────────────────────────
+       How sharply the section is allowed to draw ground the bit has not
+       reached. Read applySurvey() for the whole model, including the note on
+       what an economy-side purchase hook would need.
+
+       Reading it is free. Writing it is a claim that the player now KNOWS
+       more than the contract said they did — a client borehole log, a
+       seismic line — so it only ever goes up, and it is cleared with the
+       profile. `reason` is not decoration: it is the string that will make a
+       silently sharpened section traceable when somebody asks why. */
+    get surveyConfidence() { return surveyConfidence(); },
+    setSurveyConfidence(v, reason = '') {
+      const n = clamp(+v || 0, 0, 1);
+      if (!(n > surveyBought)) return surveyConfidence();
+      surveyBought = n;
+      if (typeof console !== 'undefined') {
+        console.info(`[geology] survey confidence raised to ${n.toFixed(2)}`
+          + (reason ? ` — ${reason}` : ''));
+      }
+      return surveyConfidence();
+    },
     /** The generated body, or null: kind, geometry, grades, the predicted
      *  horizon the contract advertised, and the confidence behind it. */
     get oreBody() { return ore; },
