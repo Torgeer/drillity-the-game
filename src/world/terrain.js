@@ -479,6 +479,14 @@ const ARCHETYPES = {
     /* A hoarded plot in a built block. Nothing self-seeded survives on it; the
        only green is whatever is on the far side of the hoarding. */
     dress: { spruce: 0, birch: 0.14, rock: 0, stone: 0.15, grass: 0.10, scree: 0, scrub: 0.10, ice: 0 },
+    // Authored compound/road/facades replace the urban kit and its scattered
+    // suburban vegetation. Keep the original kit when the export is absent.
+    model: 'urban-plot',
+    replaces: ['birch-bark', 'birch-leaves', 'stones', 'tufts', 'scrub'],
+    // NOT SOURCED layout bounds, not an engineered platform specification.
+    // The Blender furniture is authored at grade, through the rear facades;
+    // suppress the decorative pad crown, but retain the live collar spoil.
+    flatR: 76, flatFalloff: 100, padCrown: 0,
   },
   'infrastructure-corridor': {
     kit: 'corridor', plane: 'surface', groundKind: 'gravel', pad: 9.5, farAmp: 0.55,
@@ -1819,7 +1827,7 @@ export function createTerrain(ctx) {
     const k = 1 - smoothstep(clamp((r - CFG.padRadius) / (CFG.padFalloff - CFG.padRadius)));
     let h = lerp(n, 0, k);
     // a compacted crown and a shallow bund around the pad edge
-    if (r > CFG.padRadius * 0.8 && r < CFG.padFalloff * 1.12) {
+    if (arch?.padCrown !== 0 && r > CFG.padRadius * 0.8 && r < CFG.padFalloff * 1.12) {
       const t = smoothstep(clamp((r - CFG.padRadius * 0.8) / (CFG.padFalloff * 0.32)));
       h += (1 - Math.abs(t * 2 - 1)) * 0.28 * k;
     }
@@ -2602,7 +2610,7 @@ export function createTerrain(ctx) {
        over a forest. What it DOES cost is taken back in ARCHETYPES['urban-plot']
        .dress, which removes the spruce, the birch, the rock and the scree that
        a hoarded plot would never have. */
-    if (kit === 'urban') {
+    if (kit === 'urban' && !siteModelReady()) {
       const HX = 21, HZ = 20;                 // the plot: 42 x 40 m inside the hoarding
       const HH = 2.6;                         // hoarding height, above eye line
 
@@ -3945,7 +3953,7 @@ export function createTerrain(ctx) {
        bench. It must never quietly stand in for the model in a review frame —
        `loadSiteModel()` logs every failure with its URL, and `siteModel` on the
        public API says which of the two is on screen. */
-    if (kit === 'quarry' && !siteModelLive()) {
+    if (kit === 'quarry' && !siteModelReady()) {
       // pale limestone rubble piles + a haul-road berm
       for (let i = 0; i < 6; i++) {
         const a = rand.range(0, TAU), r = rand.range(16, 30);
@@ -4169,7 +4177,7 @@ export function createTerrain(ctx) {
        Gated on the model being LIVE, not on it being declared: a fresh clone
        has no `public/models` at all, and there the scatter must still draw. */
     if (opts.replaceable !== false && arch && arch.replaces
-        && arch.replaces.includes(name) && siteModelLive()) return null;
+        && arch.replaces.includes(name) && siteModelReady()) return null;
     const im = new T.InstancedMesh(geo, material, list.length);
     const mtx = new T.Matrix4();
     const q = new T.Quaternion();
@@ -4526,7 +4534,9 @@ export function createTerrain(ctx) {
   }
 
   function buildDressing() {
-    for (const im of instanced) { root.remove(im); }
+    // BufferGeometry disposal alone does not release instanceMatrix/instanceColor
+    // GPU buffers. InstancedMesh has its own disposal event for those attributes.
+    for (const im of instanced) { root.remove(im); im.dispose(); }
     instanced.length = 0;
     windMats.length = 0;
 
@@ -6149,10 +6159,12 @@ export function createTerrain(ctx) {
   /** archetype id -> { scene, nodes } once parsed; `false` once failed. */
   const siteMasters = new Map();
   const siteInflight = new Map();
-  const siteKinds = new Map();          // kind name -> the one live material
+  const siteControllers = new Map();
+  const siteKinds = new Map();          // kind + vertex-colour mode -> live material
+  const siteProblems = new Map();
   let siteNode = null;                  // what is in the scene right now
-  let siteProblem = null;
   let gltfLibP = null;
+  let disposed = false;
 
   const siteUrl = (id) => new URL(
     SITE_DIR + id + '.glb',
@@ -6226,13 +6238,15 @@ export function createTerrain(ctx) {
    * asks for it. `mat()` already clones out of the assets cache and registers
    * the clone for disposal.
    */
-  function siteMaterial(kind, id) {
-    let m = siteKinds.get(kind);
+  function siteMaterial(kind, id, vertexColors) {
+    const key = `${kind}:${vertexColors ? 'vertex' : 'plain'}`;
+    let m = siteKinds.get(key);
     if (m) return m;
-    m = mat(kind, {});
+    // Match the procedural prop pool: bake white, then multiply by authored
+    // linear vertex colours. Uncoloured sites retain their existing kind tint.
+    m = mat(kind, vertexColors ? { color: 0xffffff, vertexColors: true } : {});
     /* THE TRANSMISSION RULE, ENFORCED AND NOT ASSUMED.
-       `assets.material('glass')` comes back with transmission 0.92 today, and
-       transmission above zero anywhere in the visible list makes three.js
+       Transmission above zero anywhere in the visible list makes three.js
        re-render the WHOLE opaque list into a transmission target: +65 to +81
        draw calls, measured, and it does not scale with the object. Site glazing
        — a cabin window, a car windscreen — is precisely where this gets
@@ -6242,7 +6256,7 @@ export function createTerrain(ctx) {
       console.warn(`[terrain] site "${id}": pinned transmission to 0 on "${kind}" `
         + '(it costs +65..81 draw calls whatever the object size).');
     }
-    siteKinds.set(kind, m);
+    siteKinds.set(key, m);
     return m;
   }
 
@@ -6289,6 +6303,7 @@ export function createTerrain(ctx) {
         return kind;
       });
       o.userData.siteKinds = names;
+      o.material = null; // imported stubs are disposed, never cache references
       o.castShadow = true;
       o.receiveShadow = true;
     });
@@ -6301,24 +6316,33 @@ export function createTerrain(ctx) {
       if (!o.isMesh) return;
       const names = o.userData.siteKinds;
       if (!names || !names.length) return;
-      const live = names.map((k) => (k ? siteMaterial(k, id) : o.material));
+      const live = names.map((k) => (k ? siteMaterial(k, id, !!o.geometry?.getAttribute('color')) : o.material));
       o.material = names.length > 1 ? live : live[0];
     });
   }
 
   async function loadSiteModel(id) {
+    if (disposed) return false;
     if (siteMasters.has(id)) return siteMasters.get(id);
     if (siteInflight.has(id)) return siteInflight.get(id);
 
     const url = siteUrl(id);
+    const controller = new AbortController();
+    siteControllers.set(id, controller);
+    let parsedScene = null;
+    const assertActive = () => {
+      if (disposed) throw new DOMException('Terrain disposed', 'AbortError');
+    };
     const p = (async () => {
       const t0 = (typeof performance !== 'undefined' ? performance.now() : 0);
-      const res = await fetch(url);
+      const res = await fetch(url, { signal: controller.signal });
+      assertActive();
       if (!res.ok) {
         throw new Error(`HTTP ${res.status} for ${url} — the filename must be the `
           + 'ARCHETYPE ID verbatim, hyphens and all (ASTRA §4.4).');
       }
       const buf = await res.arrayBuffer();
+      assertActive();
       /* Four bytes, before anything expensive. A dev server answers an unknown
          path with index.html, and handing THAT to GLTFLoader produces a parse
          error that reads like a corrupt model. */
@@ -6327,9 +6351,12 @@ export function createTerrain(ctx) {
           + "server's SPA fallback page, not a model.");
       }
       const { GLTFLoader, MeshoptDecoder } = await gltfLib();
+      assertActive();
       const loader = new GLTFLoader();
       if (MeshoptDecoder) loader.setMeshoptDecoder(MeshoptDecoder);
       const gltf = await loader.parseAsync(buf, '');
+      parsedScene = gltf.scene;
+      assertActive();
       restoreSiteNames(gltf, id);
       const scene = gltf.scene;
       scene.name = `site:${id}`;
@@ -6339,7 +6366,7 @@ export function createTerrain(ctx) {
       const nodes = new Map();
       scene.traverse((o) => {
         if (o.isMesh && o.geometry) {
-          prims += Array.isArray(o.material) ? o.material.length : 1;
+          prims += o.userData.siteKinds.length;
           const ix = o.geometry.index;
           tris += (ix ? ix.count : (o.geometry.attributes.position?.count || 0)) / 3;
         }
@@ -6347,38 +6374,59 @@ export function createTerrain(ctx) {
       });
       const ms = Math.round((typeof performance !== 'undefined' ? performance.now() : 0) - t0);
       console.info(`[terrain] site "${id}" ${(buf.byteLength / 1024) | 0} kB · `
-        + `${prims} draw calls · ${tris | 0} tris · ${nodes.size} named nodes · `
+        + `${prims} primitives · ${tris | 0} tris · ${nodes.size} named nodes · `
         + `materials ${kinds.join(', ')} · ${ms} ms`);
       /* The .glb's cost is its material count, and the budget lives in
          blender/lib/site.py where it is enforced at build time. This is the
          other end of the same measurement: if a model ever gets past that gate
          the game says so rather than quietly spending the surface band. */
       if (prims > 6) {
-        console.warn(`[terrain] site "${id}" submits ${prims} draw calls against a `
+        console.warn(`[terrain] site "${id}" contains ${prims} primitives against a `
           + 'budget of 6. See THE BUDGET in blender/lib/site.py.');
       }
       return { scene, nodes, prims, tris };
     })()
-      .then((m) => { siteMasters.set(id, m); siteInflight.delete(id); return m; })
+      .then((m) => { assertActive(); siteMasters.set(id, m); siteProblems.delete(id); return m; })
       .catch((e) => {
+        if (parsedScene) disposeSiteMaster(parsedScene);
+        if (disposed) return false;
         siteMasters.set(id, false);
-        siteInflight.delete(id);
-        siteProblem = `${id}: ${e.message}`;
+        siteProblems.set(id, `${id}: ${e.message}`);
         /* Loud, once, with the URL — and the procedural kit still draws, which
            is correct on a fresh clone (public/models is gitignored and built by
            `npm run blender`). What must never happen is this being INVISIBLE. */
         console.warn(`[terrain] site model "${id}" did not load; drawing the `
           + `procedural site instead. ${e.message}`);
         return false;
-      });
+      })
+      .finally(() => { siteInflight.delete(id); siteControllers.delete(id); });
 
     siteInflight.set(id, p);
     return p;
   }
 
-  /** Is a modelled site standing in the scene for this archetype right now? */
+  /** Ready geometry may replace procedural content during a synchronous rebuild. */
+  function siteModelReady() {
+    return !!(!disposed && !ugSpec && arch?.model && siteMasters.get(arch.model));
+  }
+
+  /** Diagnostics describe the attached instance, never just its cached master. */
   function siteModelLive() {
-    return !!(arch && arch.model && siteMasters.get(arch.model));
+    return !!(siteModelReady() && siteNode?.parent === root && siteNode.name === `site:${arch.model}`);
+  }
+
+  /** Free a parsed master, including late parser results after disposal. */
+  function disposeSiteMaster(node) {
+    const resources = new Set();
+    node.traverse((o) => {
+      if (o.geometry) resources.add(o.geometry);
+      for (const m of Array.isArray(o.material) ? o.material : [o.material]) {
+        if (!m) continue;
+        resources.add(m);
+        for (const value of Object.values(m)) if (value?.isTexture) resources.add(value);
+      }
+    });
+    for (const resource of resources) resource.dispose();
   }
 
   /** Put the archetype's model in the scene, or start fetching it. */
@@ -6397,7 +6445,7 @@ export function createTerrain(ctx) {
          model lands one rebuild later. Guarded on the archetype still being
          the same one: a contract can change while a fetch is in flight. */
       const want = archId;
-      loadSiteModel(id).then((m) => { if (m && archId === want) rebuild(); });
+      loadSiteModel(id).then((m) => { if (!disposed && m && archId === want) rebuild(); });
       return;
     }
     if (!master) return;                // known failure — procedural kit stands
@@ -6440,6 +6488,7 @@ export function createTerrain(ctx) {
   }
 
   function rebuild() {
+    if (disposed) return;
     purgeMaterials();
     rand = makeRandom(hashStr(regionId) ^ 0x5EED);
     hSeed = (hashStr(regionId) % 997) * 0.37 + 3.1;
@@ -6453,7 +6502,7 @@ export function createTerrain(ctx) {
       if (ground) { root.remove(ground); ground.geometry.dispose(); ground = null; }
       if (decal) { root.remove(decal); decal.geometry.dispose(); decal = null; }
       if (collarGroup) { root.remove(collarGroup); disposeTree(collarGroup); collarGroup = null; }
-      for (const im of instanced) root.remove(im);
+      for (const im of instanced) { root.remove(im); im.dispose(); }
       instanced.length = 0;
       windMats.length = 0;
       for (const m of propMeshes) { root.remove(m); m.geometry.dispose(); }
@@ -6482,7 +6531,7 @@ export function createTerrain(ctx) {
     buildFarField();
     buildSpecials();
     /* LAST, and after buildDressing() on purpose: `addInstances()` asks
-       `siteModelLive()` whether this archetype's model is standing before it
+       `siteModelReady()` whether this archetype's model can replace it
        spends a draw call on scatter the model replaces, and the answer has to
        be the same for the whole build. Attaching first would be answering it
        with a node that is not in the scene yet. */
@@ -6671,10 +6720,15 @@ export function createTerrain(ctx) {
   function disposeTree(obj) {
     obj.traverse((o) => {
       if (o.geometry) o.geometry.dispose?.();
+      if (o.isInstancedMesh) o.dispose();
     });
   }
 
   function dispose() {
+    if (disposed) return;
+    disposed = true;
+    for (const controller of siteControllers.values()) controller.abort();
+    siteControllers.clear();
     disposeDrive();
     disposeTree(root);
     for (const d of disposables) d?.dispose?.();
@@ -6685,6 +6739,11 @@ export function createTerrain(ctx) {
     if (fallbackLights) { scene?.remove(fallbackLights); fallbackLights = null; }
     scene?.remove(root);
     root.clear();
+    siteNode = null;
+    for (const master of siteMasters.values()) if (master) disposeSiteMaster(master.scene);
+    siteMasters.clear();
+    siteKinds.clear();
+    siteProblems.clear();
     instanced.length = 0;
     propMeshes = [];
   }
@@ -6715,7 +6774,7 @@ export function createTerrain(ctx) {
         wanted: (arch && arch.model) || null,
         model: siteModelLive() ? arch.model : null,
         procedural: !siteModelLive(),
-        problem: siteProblem,
+        problem: siteProblems.get(arch?.model) || null,
         drawCalls: siteModelLive() ? (siteMasters.get(arch.model).prims || 0) : 0,
       };
     },
