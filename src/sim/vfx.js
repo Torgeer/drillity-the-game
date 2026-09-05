@@ -1412,6 +1412,20 @@ const SECTION_Z_BIAS = 0.16;
    no CDN, no dependency on ctx.assets — this module is self-sufficient.
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/* ── A MISSING CONTRACT HAS TO MAKE A NOISE ─────────────────────────────────
+   Not one `console.warn` existed on any missing-contract path in `src/`, and
+   this file was one of the places it cost the most: three of the four fallbacks
+   in `activeMethodId`/`resolveMedium` read fields nothing in the repository
+   ever wrote, so the picture went wrong in silence and stayed wrong. Emission
+   runs every frame, so every warning here fires ONCE per distinct message —
+   a warning that floods is a warning nobody reads. */
+const _warned = new Set();
+function warnOnce(key, ...msg) {
+  if (_warned.has(key)) return;
+  _warned.add(key);
+  try { console.warn(...msg); } catch { /* no console in some harnesses */ }
+}
+
 /* Deterministic value noise + fbm, used to erode smoke/foam/mud alpha so the
    puffs read as real turbulent volumes instead of gaussian blobs. */
 function hash2(x, y, s) {
@@ -3774,23 +3788,90 @@ export function createVFX(ctx) {
    * garage's default by a RIG_CHANGE the shell emits on the way out. Both
    * failures are silent and both change the picture rather than breaking it.
    *
-   * drilling.js publishes a `methodId` getter that is the running method by
-   * construction, so ask the sim first and keep the rest as fallbacks for
-   * previews and for the harness, where there is no sim at all.
+   * ── THREE OF THE FOUR LINKS IN THIS CHAIN WERE DEAD ──
+   * `state.drill.methodId`, `state.garage.methodId`, `state.drill.flushMedium`
+   * and `ctx.sim.flushMedium` were all read here as though they were live
+   * defences. **Nothing in the repository ever wrote any of them.** They could
+   * not be true, they had never been true, and they made this resolution look
+   * four-deep when it was two-deep — which is precisely why nobody looked at it
+   * while the picture was wrong. A fallback that cannot fire is not a defence,
+   * it is camouflage. They are gone.
+   *
+   * What is left is the chain that can actually answer:
+   *
+   *   1. `ctx.sim.methodId` — the running method BY CONSTRUCTION. `startHole()`
+   *      assigns it before it emits a single event, so unlike the `state.drill`
+   *      mirror (copied in this module's own update(), one frame behind the
+   *      bus) it is never stale on the first frames of a run. That frame of lag
+   *      is not theoretical: it is what threw carbide sparks off a driven pile.
+   *   2. `state.world.site.methodId` — the durable site descriptor.
+   *      progression.js publishes it on ACCEPT and only marks it `live: false`
+   *      at settlement, so it still names the method while the results screen
+   *      is up and the site is still on screen behind it. `state.contract` is
+   *      null by then.
+   *   3. THE LAST GOOD VALUE. When both are missing, hold what we had rather
+   *      than reverting to a default — `audio.js` setMethod()'s rule, and the
+   *      only consumer of this fact that has never shipped a wrong picture:
+   *      *"the previous method is always the better guess than an arbitrary
+   *      one."* A first frame with nothing at all still has to draw something,
+   *      and that — and only that — is the seed below.
    */
   function activeMethodId() {
-    return ctx?.sim?.methodId
+    const id = ctx?.sim?.methodId
       || ctx?.state?.contract?.methodId
-      || ctx?.state?.drill?.methodId
-      || currentMethod;
+      || ctx?.state?.world?.site?.methodId;
+    // Hold the last good id. An id we do not have a picture for is not an
+    // answer either, so it does not displace one we do.
+    if (id && FLUSH_MEDIUM[id]) currentMethod = id;
+    return id || currentMethod;
   }
 
-  function resolveMedium(state) {
-    const explicit = state?.drill?.flushMedium || ctx?.sim?.flushMedium;
-    if (explicit) return explicit;
-    return FLUSH_MEDIUM[activeMethodId()] || 'air';
+  /**
+   * What comes back at the collar.
+   *
+   * ONE TABLE, ONE ANSWER. The two "explicit" reads that used to sit in front
+   * of this (`state.drill.flushMedium`, `ctx.sim.flushMedium`) were both dead —
+   * see above — and reinstating them as a live override would only let the
+   * picture disagree with `FLUSH_MEDIUM` without anything noticing. The medium
+   * is a property of the METHOD (`game/data.js` METHODS `flushMedium`), and
+   * `tools/checkdata.mjs` is what keeps this table honest against that one.
+   */
+  function resolveMedium() {
+    const id = activeMethodId();
+    const fm = FLUSH_MEDIUM[id];
+    if (fm) return fm;
+    /* A method with no row draws AIR, and air is a dust plume at the collar —
+       so a method that circulates nothing gets one anyway. That is a visible,
+       wrong answer, and it is exactly how a driven pile ended up emitting a
+       three-stage air-flush plume. Say so, once. */
+    warnOnce(`medium:${id}`,
+      `[vfx] no FLUSH_MEDIUM row for method "${id}" — drawing an AIR collar `
+      + 'plume, which is wrong for anything that circulates water, mud, foam or '
+      + 'nothing at all. Add the method to FLUSH_MEDIUM in sim/vfx.js.');
+    return 'air';
   }
+  /** Seed only. After the first resolution this is the LAST GOOD method id. */
   let currentMethod = 'auger';
+
+  /**
+   * Take a method id off an event, audio.js's rule.
+   *
+   * An id this file has no picture for KEEPS the current one rather than
+   * replacing it: a typo in a payload must not turn a jet grouting collar into
+   * a dust plume halfway through a column, and the previous method is always a
+   * better guess than an arbitrary one. It still warns, because an id nobody
+   * has a row for is a content gap, not a non-event.
+   */
+  function adoptMethod(id) {
+    if (!id) return;
+    if (!FLUSH_MEDIUM[id]) {
+      warnOnce(`adopt:${id}`,
+        `[vfx] method "${id}" has no FLUSH_MEDIUM row — keeping "${currentMethod}" `
+        + 'rather than drawing an unknown method. Add the row in sim/vfx.js.');
+      return;
+    }
+    currentMethod = id;
+  }
 
   function driveFromTelemetry(dt, state) {
     const d = state?.drill;
@@ -4155,8 +4236,8 @@ export function createVFX(ctx) {
     const on = (evt, fn) => { const off = bus.on(evt, fn); if (off) unsubs.push(off); };
 
     on(EVENTS.DRILL_START, (p) => {
-      currentMethod = p?.methodId || currentMethod;
-      medium = resolveMedium(ctx?.state);
+      adoptMethod(p?.methodId);
+      medium = resolveMedium();
       tickAge = 0;
       flowPhase = 0;
       stress = 0; waterAmt = 0; cavityAmt = 0; collapseAmt = 0;
@@ -4402,8 +4483,8 @@ export function createVFX(ctx) {
     on(EVENTS.QUALITY_CHANGE, (p) => { if (p?.tier) setQuality(p.tier); });
 
     on(EVENTS.RIG_CHANGE, (p) => {
-      if (p?.methodId) currentMethod = p.methodId;
-      medium = resolveMedium(ctx?.state);
+      adoptMethod(p?.methodId);
+      medium = resolveMedium();
       burstKind(kindOf.puffSoft, 20 * loadScale, 1.4, 1,
         collarAnchor(0), collarAnchor(1), collarAnchor(2));
     });
@@ -4446,8 +4527,16 @@ export function createVFX(ctx) {
     shimmer = new ShimmerQuad(EFFECTS.heatShimmer);
 
     windSpeed = REGION_WIND[ctx?.state?.world?.regionId] ?? 1.4;
-    currentMethod = ctx?.state?.contract?.methodId || ctx?.state?.garage?.methodId || 'auger';
-    medium = resolveMedium(ctx?.state);
+    /* `state.garage.methodId` used to be the second link here. `state.garage`
+       is `{ rigId, loadout, condition, owned }` and has never carried a method
+       id, so that link could not fire. The site descriptor can, and does —
+       it is the one thing that still names the method with no contract in
+       hand. `activeMethodId()` holds whatever it finds as the last good value,
+       so the seed is only ever the first frame's answer. */
+    currentMethod = ctx?.state?.contract?.methodId
+      || ctx?.state?.world?.site?.methodId
+      || 'auger';
+    medium = resolveMedium();
 
     const s0 = ctx?.state?.world?.strata?.[0];
     if (s0) adoptStratum(s0);
@@ -4602,7 +4691,7 @@ export function createVFX(ctx) {
       motesSeeded = false;
       if (birds) birds.clear();
     }
-    medium = resolveMedium(st);
+    medium = resolveMedium();
     /* A piezocone replaces its parent method wholesale rather than being a
        mode of it, so it is looked up by programme and everything else by
        method id. */
