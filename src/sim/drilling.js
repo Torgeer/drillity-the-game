@@ -3158,6 +3158,17 @@ export function createDrillSim(ctx = {}) {
           heat: pr.heat, returns: pr.returns, stability: g.stability,
           combo: pr.combo, casing: false, torque01: pr.torque,
           stageRopMul: nz(rev.ropMul, 1),
+          /* A LIFTED PASS HAS NO RATE OF PENETRATION, and par has to walk it
+             through the same branch the run will. `env()` mirrors both of the
+             stage's rate controls into the live model; this loop mirrored only
+             the first, so par walked a jet grouting lift through the ROTARY
+             model — pricing the monitor as if it were re-cutting the soil it
+             is being pulled back out of, at a rate set by ground it is not
+             touching. Measured: 18 m priced at 113 s against 258 s actually
+             run at the stage optimum, so `time` scored 0.000 on a pass played
+             correctly — exactly the way raise-boring scored zero before the
+             second pass was priced at all. */
+          stageLiftMaxMh: nz(rev.liftMaxMh, 0),
         });
         back += step / Math.max(0.2, r.rop);
       }
