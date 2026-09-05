@@ -268,3 +268,401 @@ COV_SIDE   = 2.000   # reach either side of rig centre on the walls, with
                      # 2.4 m bolts                                [BS]p.7 diagram
 COV_UP     = 4.000   # reach up the back, same condition          [BS]p.7 diagram
                      # Grid on that diagram is 500 mm.            [BS]p.7
+
+
+# =============================================================================
+# S2  BUILD HELPERS
+# =============================================================================
+
+def _assert_box_is_true():
+    """Refuse to build a machine at the wrong size, loudly.
+
+    See the box() note in the file header. This measures the shared library
+    rather than trusting it: it asks for a box of known, deliberately
+    asymmetric size and reads the dimensions back off the object. If lib/rig.py
+    is still halving, it raises with the measurement in the message instead of
+    exporting a half-size machine that nothing downstream can detect.
+
+    It does NOT compensate. A x2 wrapper is right for exactly as long as the
+    library is broken and wrong forever after, and this tree has already
+    shipped two double-size machines that way.
+    """
+    probe = R.box('_boxprobe', (4.0, 2.0, 10.0), R.MAT_DARK)
+    bpy.context.view_layer.update()
+    got = tuple(round(v, 4) for v in probe.dimensions)
+    bpy.data.objects.remove(probe, do_unlink=True)
+    if got != (4.0, 2.0, 10.0):
+        raise RuntimeError(
+            'blender/lib/rig.py box() is not true-size: asked (4.0, 2.0, 10.0), '
+            'measured %s. primitive_cube_add(size=1) makes a cube of EDGE 1 and '
+            'the next line sets scale = size/2, so every box comes out at half. '
+            'blender/bolter.py is authored in TRUE METRES against a correct '
+            'box() and deliberately carries no compensation, because a static '
+            'x2 doubles this machine the moment the library is fixed. Fix '
+            'box() (size=2, or scale=size) and rebuild.' % (got,))
+    print('BOLTER box() verified true-size: %s' % (got,))
+
+
+def bake(o):
+    """Apply every modifier, so a later join cannot silently drop a bevel."""
+    if o.type != 'MESH' or not o.modifiers:
+        return o
+    bpy.context.view_layer.objects.active = o
+    for m in list(o.modifiers):
+        try:
+            bpy.ops.object.modifier_apply(modifier=m.name)
+        except RuntimeError:
+            o.modifiers.remove(m)
+    return o
+
+
+def to_mesh(o):
+    """Convert a CURVE - every hose and the trailing cable is one - to a mesh.
+
+    finish() and join_by_mat only look at MESH objects, so an unconverted hose
+    exports as its own draw call. This machine's hose routing is its loudest
+    visual feature ([R]S4.7, S5.3) and it carries a lot of them; converted
+    first, the static ones all collapse into the single 'rubber' bucket.
+    """
+    if o.type != 'CURVE':
+        return o
+    bpy.ops.object.select_all(action='DESELECT')
+    o.select_set(True)
+    bpy.context.view_layer.objects.active = o
+    bpy.ops.object.convert(target='MESH')
+    bpy.ops.object.select_all(action='DESELECT')
+    return o
+
+
+def bake_all():
+    for o in list(bpy.context.scene.objects):
+        to_mesh(o)
+    for o in list(bpy.context.scene.objects):
+        bake(o)
+
+
+def join_by_mat(parent, label):
+    """Join every MESH child of `parent` by material.
+
+    finish() refuses to touch anything under a pivot:/slide: node, because it
+    has to move independently - so a dynamic subassembly would otherwise export
+    one draw call per box. This collapses each one to one call per material,
+    which is the floor.
+    """
+    for o in list(parent.children):
+        to_mesh(o)
+    kids = [o for o in parent.children if o.type == 'MESH']
+    for o in kids:
+        bake(o)
+    groups = {}
+    for o in kids:
+        key = o.data.materials[0].name if o.data.materials else 'none'
+        groups.setdefault(key, []).append(o)
+    out = []
+    for key, objs in groups.items():
+        if len(objs) > 1:
+            bpy.ops.object.select_all(action='DESELECT')
+            for o in objs:
+                o.select_set(True)
+            bpy.context.view_layer.objects.active = objs[0]
+            bpy.ops.object.join()
+        objs[0].name = '%s_%s' % (label, key)
+        out.append(objs[0])
+    bpy.ops.object.select_all(action='DESELECT')
+    return out
+
+
+def box(name, size, mat=R.MAT_PAINT, parent=None, loc=(0, 0, 0), rot=(0, 0, 0),
+        bevel=0.008, seg=2):
+    """R.box() with this machine's default bevel and a bevel-segment knob.
+
+    NO SIZE COMPENSATION - see _assert_box_is_true(). `size` is metres and
+    means metres. `seg` drops to a one-segment bevel for parts repeated dozens
+    of times, where a second segment costs ~130 tris apiece and buys nothing.
+    """
+    o = R.box(name, size, mat, parent, loc, rot, bevel)
+    if seg != 2 and o.modifiers:
+        o.modifiers[0].segments = seg
+    return o
+
+
+def cheapbox(name, size, mat, parent=None, loc=(0, 0, 0), rot=(0, 0, 0), bev=0.005):
+    return box(name, size, mat, parent, loc, rot, bevel=bev, seg=1)
+
+
+def cyl(name, r, h, mat, parent=None, loc=(0, 0, 0), rot=(0, 0, 0), sides=12):
+    """tube() is correct in the shared library - measured - so it is used raw."""
+    return R.tube(name, r, h, mat, parent, loc, rot, sides)
+
+
+def cone(name, r1, r2, h, mat, parent=None, loc=(0, 0, 0), rot=(0, 0, 0), sides=12):
+    bpy.ops.mesh.primitive_cone_add(radius1=r1, radius2=r2, depth=h, vertices=sides)
+    o = bpy.context.active_object
+    o.data.transform(Matrix.Translation((0, 0, h / 2)))
+    return R.part(name, o, mat, parent, loc, rot)
+
+
+def torus_ring(name, major, minor, mat, parent=None, loc=(0, 0, 0),
+               rot=(0, 0, 0), maj=18, min_=8):
+    bpy.ops.mesh.primitive_torus_add(major_radius=major, minor_radius=minor,
+                                     major_segments=maj, minor_segments=min_)
+    o = bpy.context.active_object
+    return R.part(name, o, mat, parent, loc, rot)
+
+
+def aim_tube(name, r, a, b, mat, parent=None, sides=10, shrink=0.0):
+    """A cylinder spanning two points. Every link rod, tie and stay uses it."""
+    a, b = Vector(a), Vector(b)
+    d = b - a
+    L = d.length - shrink
+    if L <= 0.001:
+        return None
+    q = d.to_track_quat('Z', 'Y')
+    return cyl(name, r, L, mat, parent, tuple(a + d.normalized() * (shrink / 2)),
+               tuple(q.to_euler()), sides)
+
+
+def aim_box(name, w, d, a, b, mat, parent=None, bev=0.010):
+    """A box spanning two points - a fabricated member rather than a tube."""
+    a, b = Vector(a), Vector(b)
+    v = b - a
+    L = v.length
+    if L <= 0.001:
+        return None
+    q = v.to_track_quat('Z', 'Y')
+    return box(name, (w, d, L), mat, parent, tuple((a + b) / 2),
+               tuple(q.to_euler()), bevel=bev)
+
+
+def bolt_ring(parent, name, radius, count, r_bolt, h, mat, loc, rot=(0, 0, 0)):
+    """A ring of hex bolt heads round a flange. Pure triangle spend, and
+    triangles are the lane this pipeline is allowed to spend in."""
+    for i in range(count):
+        a = TAU * i / count
+        cyl('%s_b%d' % (name, i), r_bolt, h, mat, parent,
+            (loc[0] + radius * math.cos(a), loc[1] + radius * math.sin(a), loc[2]),
+            rot, sides=6)
+
+
+def louvres(parent, name, count, x, y0, y1, z0, z1, mat=R.MAT_DARK, depth=0.028):
+    """Pressed intake louvres. Triangles, not draw calls."""
+    n = max(2, count)
+    step = (z1 - z0) / n
+    for i in range(n):
+        z = z0 + step * (i + 0.5)
+        cheapbox('%s_l%d' % (name, i), (depth, y1 - y0, step * 0.60), mat,
+                 parent, (x, (y0 + y1) / 2, z), (math.radians(-26), 0, 0))
+
+
+def handrail(parent, name, pts, h=1.020, r=0.021, mat=R.MAT_PAINT, posts=True):
+    """A top rail, a knee rail and posts, following a polyline at deck level.
+
+    [R]S4.6 makes the platforms and their handrails a DEFINING feature of a
+    bolter rather than trim: they are what lets the feed swing back to the
+    operator so he loads bolts without walking under unsupported ground
+    ([BM] printed p.3). [R]S9 W10 records their absence as the biggest missing
+    feature on the game's procedural bolter.
+    """
+    for lvl, frac in (('top', 1.0), ('knee', 0.52)):
+        for i in range(len(pts) - 1):
+            a = (pts[i][0], pts[i][1], pts[i][2] + h * frac)
+            b = (pts[i + 1][0], pts[i + 1][1], pts[i + 1][2] + h * frac)
+            aim_tube('%s_%s%d' % (name, lvl, i), r, a, b, mat, parent, sides=8)
+    if posts:
+        for i, p in enumerate(pts):
+            cyl('%s_post%d' % (name, i), r * 1.25, h, mat, parent, p, sides=8)
+
+
+# =============================================================================
+# S3  CARRIER - two frames, a vertical hinge between them, and FOUR TYRES
+#
+#     [R]S5 lists the two silhouette facts that decide whether this reads as an
+#     underground machine at all:
+#       * "The break in the middle" - a visible vertical articulation pin with
+#         the steering cylinders across it. If the model has a slew ring
+#         instead, it stops being an underground machine ([R]S4.1).
+#       * "No tracks." Four rubber tyres, wheelbase only 28 % of the machine's
+#         length (2 800 of 10 020 [BS]p.7), so the wheels bunch in the middle
+#         third and both overhangs are enormous. [R]S9 closes on this: "there
+#         is no sprocket, no idler, no track roller and no track shoe on this
+#         machine."
+#
+#     DRAW-CALL DECISION - the wheels are STATIC.
+#     finish() excludes anything under a pivot:/slide: node from the join, so
+#     four pivot:wheel-* nodes would cost 4 x 2 materials = 8 draw calls out of
+#     70. Nothing consumes them: src/core/gltfRig.js binds only `mast`,
+#     `carriage`, `tool` and the mount:/aim: lamps, and this machine is seen
+#     parked at the face with its jacks down, not tramming. Static, the wheels
+#     cost nothing and the 8 calls go to the boom and the bolting unit, which
+#     is what the player is actually looking at. Promoting them later is one
+#     line each and a known +8.
+# =============================================================================
+
+CLEAR_ANGLE_R = math.radians(15.0)   # clearance outside the rear axle [BS]p.5
+CLEAR_ANGLE_F = math.radians(22.0)   # front. NOT in [BS]; [BM]p.6 for the same
+                                     # carrier family. The front end is cut back
+                                     # much more steeply than the rear [R]S4.2.
+
+
+def build_wheel(parent, name, x, y):
+    """One wheel: carcass, chunky block tread, dished rim, nut ring.
+
+    9.00 x R20 [BS]p.5 -> 966 mm dia over a 508 mm rim, 229 mm section
+    ([R]S3.1, derived from the tyre code and flagged as derived there).
+    Tread is "deep, chunky, near-square block with wide voids - not an
+    agricultural lug pattern and not a smooth industrial tyre" ([R]S4.2, off
+    the [BM] printed p.2-3 photograph).
+    """
+    ry = (0, math.pi / 2, 0)          # tube() builds along +Z; lay it along X
+    cyl(name + '_carcass', WHEEL_R * 0.90, WHEEL_W, R.MAT_RUBBER, parent,
+        (x - WHEEL_W / 2 * (1 if x > 0 else 1), y, WHEEL_R), ry, sides=20)
+    # sidewall shoulders, so the tyre is not a plain drum
+    for s, ox in ((1, WHEEL_W * 0.5), (-1, -WHEEL_W * 0.5)):
+        cone(name + ('_wall%d' % (s > 0)), WHEEL_R * 0.90, WHEEL_R * 0.80,
+             WHEEL_W * 0.16, R.MAT_RUBBER, parent,
+             (x - WHEEL_W / 2 + (WHEEL_W if s > 0 else 0), y, WHEEL_R),
+             (0, math.pi / 2 if s > 0 else -math.pi / 2, 0), sides=20)
+    # 18 blocks with wide voids, full section width
+    n_lug = 18
+    for i in range(n_lug):
+        a = TAU * i / n_lug
+        cheapbox('%s_lug%d' % (name, i),
+                 (WHEEL_W * 0.86, 0.105, 0.075), R.MAT_RUBBER, parent,
+                 (x, y + math.sin(a) * (WHEEL_R - 0.036),
+                  WHEEL_R + math.cos(a) * (WHEEL_R - 0.036)),
+                 (a, 0, 0))
+    # rim: a shallow-dish centre with a ring of nuts [R]S4.2
+    cyl(name + '_rim', RIM_R, WHEEL_W * 0.72, R.MAT_DARK, parent,
+        (x - WHEEL_W * 0.36, y, WHEEL_R), ry, sides=16)
+    cone(name + '_dish', RIM_R * 0.92, RIM_R * 0.40, 0.052, R.MAT_DARK, parent,
+         (x + WHEEL_W * 0.36, y, WHEEL_R), (0, math.pi / 2, 0), sides=16)
+    bolt_ring(parent, name + '_nut', RIM_R * 0.42, 8, 0.020, 0.026, R.MAT_DARK,
+              (x + WHEEL_W * 0.40, y, WHEEL_R), (0, math.pi / 2, 0))
+    cyl(name + '_hub', RIM_R * 0.26, 0.070, R.MAT_DARK, parent,
+        (x + WHEEL_W * 0.40, y, WHEEL_R), ry, sides=12)
+
+
+def build_mudguard(parent, name, x, y, back, fwd):
+    """A bolted arch plate hugging the tyre, plus a side skirt.
+
+    "Rigid steel mudguards / wheel arches ... bolted to the frame" [R]S4.2, and
+    on the dedicated-bolter elevation "mudguards are bolted arch plates hugging
+    the tyre closely, front and rear" [R]S4.0. Dark, because everything that
+    meets the ground on this machine is the second, darker paint [R]S6.
+    """
+    r = WHEEL_R + 0.070
+    a0, a1 = -math.radians(back), math.radians(fwd)
+    n = 7
+    for i in range(n):
+        a = a0 + (a1 - a0) * (i + 0.5) / n
+        seg = (a1 - a0) * r / n
+        cheapbox('%s_arch%d' % (name, i), (WHEEL_W + 0.100, seg * 1.10, 0.026),
+                 R.MAT_DARK, parent,
+                 (x, y + math.sin(a) * r, WHEEL_R + math.cos(a) * r), (a, 0, 0))
+    # the outer skirt that closes the arch off from the side
+    sx = x + (WHEEL_W / 2 + 0.048) * (1 if x > 0 else -1)
+    cheapbox(name + '_skirt', (0.020, (a1 - a0) * r * 0.92, 0.180), R.MAT_DARK,
+             parent, (sx, y, WHEEL_R + r * 0.62), (0, 0, 0))
+
+
+def build_axle(parent, name, y):
+    """Live axle between the wheels, with its differential housing.
+
+    [BS]p.5 lists a proprietary short axle with automatic differential lock and
+    limited slip; no dimensions are published, so the tube diameter and the
+    housing are NOT SOURCED and sized to sit inside the 365 mm belly line.
+    """
+    cyl(name + '_tube', 0.082, 2 * TRACK_X, R.MAT_DARK, parent,
+        (-TRACK_X, y, WHEEL_R), (0, math.pi / 2, 0), sides=10)
+    cyl(name + '_diff', 0.185, 0.300, R.MAT_CAST, parent,
+        (-0.150, y, WHEEL_R), (0, math.pi / 2, 0), sides=14)
+    cyl(name + '_pinion', 0.100, 0.220, R.MAT_CAST, parent,
+        (0.020, y, WHEEL_R), (math.pi / 2, 0, 0), sides=10)
+
+
+def build_frame(parent, name, y0, y1, nose=False, tail=False):
+    """One frame module: two heavy box-section side rails, a full-length
+    sloping belly skid plate, and cross members.
+
+    "Heavy fabricated box-section side rails in dark grey/graphite, plainly a
+    different colour from the ... superstructure" and "full-length sloping
+    belly skid plate ... the machine's floor-contact surface and always the
+    dirtiest, most scraped part of the whole machine" [R]S4.1.
+    """
+    L = y1 - y0
+    yc = (y0 + y1) / 2
+    for s in (-1, 1):
+        box('%s_rail%d' % (name, s > 0), (RAIL_W, L, FRAME_D), R.MAT_DARK,
+            parent, (s * RAIL_X, yc, FRAME_Z0 + FRAME_D / 2), bevel=0.012)
+    box(name + '_belly', (2 * RAIL_X + RAIL_W, L * 0.94, 0.030), R.MAT_DARK,
+        parent, (0, yc, FRAME_Z0 + 0.015), bevel=0.010)
+    for i in range(3):
+        y = y0 + L * (0.22 + 0.28 * i)
+        cheapbox('%s_xmem%d' % (name, i), (2 * RAIL_X - RAIL_W, 0.110, 0.140),
+                 R.MAT_DARK, parent, (0, y, FRAME_Z1 - 0.080))
+    if nose:
+        # "The nose below the boom pedestal slopes down and forward into a low
+        # bumper/skid" [R]S4.0, at the 22 deg front clearance angle [BM]p.6.
+        run = FRAME_D / math.tan(CLEAR_ANGLE_F)
+        box(name + '_noseslope', (2 * RAIL_X + RAIL_W, run, 0.030), R.MAT_DARK,
+            parent, (0, y1 - run / 2 + 0.02, FRAME_Z0 + FRAME_D / 2 - 0.02),
+            (CLEAR_ANGLE_F - math.pi / 2, 0, 0), bevel=0.010)
+        box(name + '_bumper', (W * 0.78, 0.160, 0.230), R.MAT_DARK, parent,
+            (0, y1 - 0.080, FRAME_Z0 + 0.150), bevel=0.020)
+        for s in (-1, 1):     # tow eyes
+            cheapbox('%s_tow%d' % (name, s > 0), (0.028, 0.180, 0.130),
+                     R.MAT_WORN, parent,
+                     (s * 0.230, y1 - 0.060, FRAME_Z0 + 0.150))
+    if tail:
+        run = FRAME_D / math.tan(CLEAR_ANGLE_R)
+        box(name + '_tailslope', (2 * RAIL_X + RAIL_W, run, 0.030), R.MAT_DARK,
+            parent, (0, y0 + run / 2 - 0.02, FRAME_Z0 + FRAME_D / 2 - 0.02),
+            (math.pi / 2 - CLEAR_ANGLE_R, 0, 0), bevel=0.010)
+
+
+def build_articulation(parent):
+    """The vertical hinge and the two steering cylinders across it.
+
+    "They meet at a vertical articulation pin ... the steering cylinders sit
+    across the joint, one each side, and at full lock the two modules break
+    into a visible V" [R]S4.1. Steering is +/-40 deg [BS]p.5.
+
+    The pin is a pivot: node so the game can break the machine at the hinge,
+    but NOTHING is parented to it - the two frames are modelled straight,
+    because a bolter at the face is set on its jacks and square to the drive.
+    A hinge that is present, named and at zero is honest; a hinge that bends
+    the rear module with no driver would just be a bent machine.
+    """
+    art = R.empty(R.NODE_PIVOT, 'articulation', parent, (0, Y_PIN, 0.760))
+    art['range_deg'] = ART_DEG          # [BS]p.5
+    cyl('art_pin', 0.105, 0.560, R.MAT_CAST, parent,
+        (0, Y_PIN, FRAME_Z0 + 0.130), sides=14)
+    for z in (FRAME_Z0 + 0.100, FRAME_Z0 + 0.560):
+        cyl('art_knuckle%d' % int(z * 100), 0.165, 0.130, R.MAT_CAST, parent,
+            (0, Y_PIN, z - 0.065), sides=14)
+    for s in (-1, 1):
+        a = (s * 0.520, Y_PIN + 0.680, 0.760)     # anchored on the front frame
+        b = (s * 0.250, Y_PIN - 0.640, 0.760)     # ... and on the rear frame
+        v = Vector(b) - Vector(a)
+        mid = Vector(a) + v * 0.46
+        aim_tube('steer_barrel%d' % (s > 0), 0.058, a, tuple(mid), R.MAT_DARK,
+                 parent, sides=12)
+        aim_tube('steer_rod%d' % (s > 0), 0.032, tuple(mid), b, R.MAT_CHROME,
+                 parent, sides=10)
+        cyl('steer_eyeA%d' % (s > 0), 0.048, 0.090, R.MAT_WORN, parent,
+            (a[0], a[1], a[2] - 0.045), sides=10)
+        cyl('steer_eyeB%d' % (s > 0), 0.048, 0.090, R.MAT_WORN, parent,
+            (b[0], b[1], b[2] - 0.045), sides=10)
+    return art
+
+
+def build_carrier(root):
+    build_frame(None, 'rearframe', Y_TAIL, Y_PIN - 0.060, tail=True)
+    build_frame(None, 'frontframe', Y_PIN + 0.060, Y_NOSE, nose=True)
+    build_articulation(None)
+    for y, tag in ((Y_AXLE_R, 'r'), (Y_AXLE_F, 'f')):
+        build_axle(None, 'axle_' + tag, y)
+        for s in (-1, 1):
+            build_wheel(None, 'wheel_%s%d' % (tag, s > 0), s * TRACK_X, y)
+            build_mudguard(None, 'guard_%s%d' % (tag, s > 0), s * TRACK_X, y,
+                           58 if tag == 'r' else 52, 58)
