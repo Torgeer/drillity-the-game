@@ -535,6 +535,19 @@ def bake(o):
     o.select_set(True)
     bpy.context.view_layer.objects.active = o
     bpy.ops.object.convert(target='MESH')
+    # AND BAKE THE ROTATION INTO THE MESH, because a consumer measures this file
+    # with an AXIS-ALIGNED box.  `src/core/gltfRig.js` sizes a machine with
+    # THREE.Box3().setFromObject(root), which expands each mesh's own bounding
+    # box through its world matrix - and the AABB of a ROTATED box is bigger
+    # than the box.  finish() joins statics into whichever object is active, so
+    # every static inherits the rotation of one raking leg, and the whole
+    # machine measures large: 6.05 x 8.25 x 6.99 against a true
+    # 2.37 x 6.68 x 5.37, with `spec.mastM` reading 8.25 m for a 6.65 m derrick.
+    # Nothing is wrong with the geometry; the local axes are simply not the
+    # world's.  Applying the rotation costs nothing and makes the number the
+    # game reports off the mesh the true one - which is the whole point of
+    # HANDOFF.md section 8E.
+    bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
     return bpy.context.active_object
 
 
@@ -795,13 +808,13 @@ def build(out_path):
     A(disc('sheave_axle', 0.026, SHEAVE_W + 0.11, R.MAT_STEEL,
            (0, SHEAVE_R, SHEAVE_Z), 'X', sides=8))
     for s in (-1, 1):
-        # the cheeks bracket DOWN from the casting to carry the sheave clear of
-        # it, which is what leaves [ST]'s 5.200 m of clear height underneath
-        # NARROW STRAPS, not plates.  At 0.40 m fore-and-aft the cheeks were as
-        # deep as the sheave is wide and buried it completely - the crown read as
-        # a blank slab with a rope disappearing behind it.  A strap a third of
+        # The cheeks bracket DOWN from the casting to carry the sheave clear
+        # of it, which is what leaves [ST]'s 5.200 m of clear height under it.
+        # They are NARROW STRAPS, not plates: at 0.40 m fore-and-aft they were
+        # as deep as the sheave is wide and buried it completely, and the crown
+        # read as a blank slab with a rope disappearing behind it.  A third of
         # that leaves the rim showing front and back, which is the whole point
-        # of a sheave: you can see that it is a wheel and that it turns.
+        # of a sheave - you can see that it is a wheel and that it turns.
         A(R.box('sheave_cheek%d' % s, (0.014, 0.135, HEAD_Z0 + 0.06 - UNDER_SHEAVE),
                 R.MAT_CAST,
                 loc=(s * (SHEAVE_W / 2 + 0.013), SHEAVE_R,
