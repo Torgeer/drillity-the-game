@@ -361,7 +361,37 @@ export const ENUMERATE = function measureScreen(opts) {
     }
   }
 
-  /* ── DOM census: the growth check ──────────────────────────────────────── */
+  /* ── DOM census: the growth check ────────────────────────────────────────
+     `liveNodes` and `docNodes` are two document-wide scalars, and two scalars
+     cannot answer the question they raise. When `docNodes` moved by +648
+     across five navigations this instrument could say THAT 648 elements had
+     appeared and nothing whatever about WHICH — and that ambiguity cost this
+     project a whole investigation, twice, because "the DOM grew" reads like a
+     leak and lazy instantiation reads exactly the same way.
+
+     So the census is now per screen. `screen--garage: 533` appearing between
+     visit 1 and visit 2 and never moving again is a screen being built the
+     first time it is opened; the same row climbing on every visit is a leak.
+     The reader does not have to guess which, and does not have to go and
+     bisect the route to find out.
+
+     `document.querySelectorAll('.screen')`, not `.screens > .screen`: the boot
+     screen is retained outside that container and is 27.8 s of shader compile
+     with a subtree of its own, so a census that could not see it would leave
+     part of `docNodes` unexplained — and an unexplained remainder is the same
+     ambiguity one level down. `elsewhere` closes the books for the rest:
+     docNodes = Σ(1 + subtreeCount) over the top-level screens, plus elsewhere.
+     Nested screens are counted once, under their outermost ancestor, or the
+     sum would double-count them and `elsewhere` would go negative. */
+  const allScreens = [...document.querySelectorAll('.screen')];
+  const perScreen = allScreens.map((s) => ({
+    className: s.className,
+    subtreeCount: s.querySelectorAll('*').length,   // descendants, as liveNodes counts them
+    hidden: !!s.hidden,
+  }));
+  const topScreens = allScreens.filter((s) => !s.parentElement || !s.parentElement.closest('.screen'));
+  const inScreens = topScreens.reduce((a, s) => a + 1 + s.querySelectorAll('*').length, 0);
+
   const dom = {
     screens: screenNodes.length,
     liveNodes: live.querySelectorAll('*').length,
@@ -370,6 +400,18 @@ export const ENUMERATE = function measureScreen(opts) {
     stripH: (() => { const s = live.querySelector('.sstrip'); return s ? Math.round(s.getBoundingClientRect().height) : null; })(),
     dockCount: document.querySelectorAll('.sitedock').length,
     hud: (window.__DRILLITY && window.__DRILLITY.hud) ? { ...window.__DRILLITY.hud } : null,
+    /* One row per `.screen` in the document, in document order — which is
+       stable across visits, so visit N and visit N+1 line up row for row.
+       `className` is the raw list on purpose: `is-entering` / `is-leaving`
+       are transient and a diff should key on the `screen--*` modifier, but
+       stripping them here would be the instrument hiding state from its own
+       report. */
+    perScreen,
+    /* Every element that is not inside a `.screen`: the boot host, the canvas,
+       overlays, toasts, and main.js's `#model-error` banner. Named so that
+       `docNodes` is fully accounted for and a move in it always lands
+       somewhere a reader can point at. */
+    elsewhere: document.querySelectorAll('*').length - inScreens,
   };
 
   return {
