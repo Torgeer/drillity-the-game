@@ -126,6 +126,28 @@ export const ECON = Object.freeze({
   overheadRateGrowth: 0.25,
   /** Flat safety net: the smallest job the board will ever offer. */
   emergencyContractFloor: 1100,
+  /**
+   * The wallet balance below which the board starts offering the call-out job.
+   *
+   * ⚠ IT WAS A BARE `400` IN TWO FILES. `progression.isBroke()` and
+   * `simulateCareer`'s own "take the rescue" branch each carried the literal,
+   * so the simulator that BALANCES the safety net and the game that OFFERS it
+   * were two independent copies of one rule — free to drift, and the drift
+   * would show up as a simulator that says the net is never needed while
+   * players hit it constantly, or the reverse. One constant, two readers.
+   *
+   * ⚠ AND THE VALUE DOES NOT MEAN WHAT `isBroke()`'s DOC SAYS. That doc reads
+   * "cannot fund the cheapest useful purchase"; measured, the cheapest auger
+   * bit on the shelf is EUR 486 and the cheapest auger flight section EUR 560,
+   * so a player holding EUR 450 is not "broke" by this number and cannot
+   * re-tool the starter method either. The number is NOT changed here, because
+   * it turns out not to matter and guessing a better one would be worse:
+   * `progression.applyWear()` never refuses to fit a tool the player does not
+   * own — the item comes back fresh and the run is billed by the metre — so
+   * nobody is ever blocked from working by an empty shelf. The gap is real,
+   * the consequence is not, and both are now written down instead of implied.
+   */
+  brokeBelow: 400,
 });
 
 /** Letter grade to payout multiplier. D is a real loss, S is worth chasing. */
@@ -1945,7 +1967,7 @@ export function simulateCareer(hours = 600, opts = {}) {
     }
 
     // Nothing runnable, or the wallet is empty: take the call-out job.
-    if (!best || sim.money < 400) {
+    if (!best || sim.money < ECON.brokeBelow) {
       const c = emergencyContract(sim.level, 'nordic');
       const loadout = { bit: 'auger-flight-std', rod: 'rod-r32' };
       best = {

@@ -29,7 +29,7 @@ import {
   settleRun, priceWithMarkup, resaleValue, travelCost, certCost,
   resolveSkills, emergencyContract, wearFromRun, rigServiceCost, rigWearPerHour,
   PAY_UNITS, BOLTS_PER_DRIVE_METRE, ropBasisFactor, holeMetresFor,
-  materialsCoveredSlots,
+  materialsCoveredSlots, ECON,
 } from './economy.js';
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -1151,9 +1151,17 @@ export function createProgression(ctx) {
     return emergencyContract(state.player.level, state.unlocked.regions[0] || 'nordic');
   }
 
-  /** True when the wallet cannot fund the cheapest useful purchase. */
+  /**
+   * True when the board should start offering the call-out job.
+   *
+   * The threshold is `ECON.brokeBelow` rather than a literal, because this
+   * function and `economy.simulateCareer`'s "take the rescue" branch each
+   * carried their own copy of the same 400 — the simulator that BALANCES the
+   * safety net and the game that OFFERS it, free to drift apart. See the
+   * constant for what the number is measured to mean, and what it does not.
+   */
   function isBroke() {
-    return state.player.money < 400;
+    return state.player.money < ECON.brokeBelow;
   }
 
   /* ── travel ──────────────────────────────────────────────────────────── */
