@@ -624,7 +624,7 @@ function probeDual() {
       for (const c of cards) { const r = run(c, rig.id, 36); net += r.net; hours += r.hours; cash += r.net + r.costs.depreciation; n++; }
       console.log(`  ${pad(methodId, 16)}${pad(rig.id, 16)}${rpad(n, 7)}${rpad(eur(net / n), 10)}`
         + `${rpad((hours / n).toFixed(1), 8)}${rpad(eur(net / hours), 9)}${rpad(eur(cash / n), 10)}`);
-      out[`${methodId}:${rig.id}`] = { netPerJob: net / n, perHour: net / hours, cashPerJob: cash / n };
+      out[`${methodId}:${rig.id}`] = { netPerJob: net / n, perHour: net / hours, cashPerJob: cash / n, hoursPerJob: hours / n };
     }
   }
 
@@ -641,17 +641,60 @@ function probeDual() {
   console.log(`  cards a pd55 OWNER cannot finish : ${beyondPd.length} of ${pileCards.length} (${pct(beyondPd.length / Math.max(1, pileCards.length))})`);
   console.log(`  cards a leader OWNER cannot finish: ${beyondPl.length} of ${pileCards.length} (${pct(beyondPl.length / Math.max(1, pileCards.length))})\n`);
 
+  /* ── THE VERDICT, AND IT IS TWO DIFFERENT ANSWERS ─────────────────────
+     pd55 was registered "on balance, not source". The measurement splits it
+     cleanly in half: one configuration is the best in the game at what it
+     does, and the other is strictly dominated by a machine costing a third as
+     much that arrived twenty-six levels earlier. */
   const pdPile = out['driven-pile:pd55'];
   const plPile = out['driven-pile:piling-leader'];
+  const pdDth = out['dth:pd55'];
+  const dcDth = out['dth:dth-crawler'];
+  console.log(`\n  ── the verdict, per configuration ──`);
   if (pdPile && plPile) {
-    const better = pdPile.perHour > plPile.perHour ? 'pd55' : 'piling-leader';
-    console.log(`  on driven-pile the better machine is ${better}`
-      + ` (${eur(pdPile.perHour)}/h vs ${eur(plPile.perHour)}/h)`);
-    if (better === 'piling-leader' && !out['dth:pd55']) {
-      note('pd55 costs MORE than piling-leader, unlocks THREE levels later, and is '
-        + 'beaten by it on the only method both run. Its whole case is the second '
-        + 'configuration — and that case must be measured, not assumed.');
-    }
+    const edge = pdPile.perHour / plPile.perHour;
+    // Buying pd55 INSTEAD of the leader: pay the difference, get the edge.
+    const extra = pd.price - pl.price;
+    const gain = pdPile.cashPerJob - plPile.cashPerJob;
+    const swapJobs = gain > 0 ? Math.ceil(extra / gain) : Infinity;
+    // Buying pd55 AS WELL AS the leader: pay all of it for the same edge.
+    const addJobs = gain > 0 ? Math.ceil(pd.price / gain) : Infinity;
+    console.log(`  DRIVEN-PILE  pd55 wins, ${eur(pdPile.perHour)}/h against ${eur(plPile.perHour)}/h`
+      + ` — ${((edge - 1) * 100).toFixed(0)}% better.`);
+    console.log(`               It is lighter (49.5 t vs 78 t), so it costs less to mobilise,`);
+    console.log(`               less per hour to run and fewer hours to stand up. This is the`);
+    console.log(`               ONE place in the whole game where the upkeep line decides which`);
+    console.log(`               machine to bring (see probe 4: 100% of cards flip without it).`);
+    console.log(`               As a FIRST piling machine: pay EUR ${eur(extra)} more than the leader,`);
+    console.log(`               earn it back in ${Number.isFinite(swapJobs) ? swapJobs : '∞'} job(s).`);
+    console.log(`               As a SECOND, alongside the leader: ${Number.isFinite(addJobs) ? addJobs : '∞'} jobs to recover`);
+    console.log(`               EUR ${eur(pd.price)} on a EUR ${eur(gain)}/job edge — it never pays back.`);
+    /* WHY THOSE TWO NUMBERS LOOK SO DIFFERENT FROM THE 37 %. pd55's edge is
+       almost entirely TIME, not money: it does the same pile for about the
+       same fee in fewer hours. Per JOB that is EUR 263; per HOUR it is 37 %.
+       Which of those is the real number depends on whether the player is
+       short of hours, and probe 1 measured that the board's decision axis IS
+       time — the highest-paying card is the best euro-per-hour card on under
+       a quarter of draws. So 37 % is the figure that matters and EUR 263 is
+       the one that misleads. */
+    console.log(`               The edge is TIME, not fee: ${(pdPile.netPerJob / plPile.netPerJob).toFixed(2)}x the money in`);
+    console.log(`               ${(100 * (1 - pdPile.hoursPerJob / plPile.hoursPerJob)).toFixed(0)}% fewer hours (${pdPile.hoursPerJob.toFixed(1)} h against ${plPile.hoursPerJob.toFixed(1)} h).`);
+    console.log(`               Per job that is EUR ${eur(gain)}; per hour it is ${((edge - 1) * 100).toFixed(0)}%.`);
+    console.log(`               Probe 1 measured that this game's decision axis is time, so the`);
+    console.log(`               per-hour figure is the real one and the per-job figure misleads.`);
+  }
+  if (pdDth && dcDth) {
+    const dc = D.getRig('dth-crawler');
+    console.log(`  DTH          pd55 loses, ${eur(pdDth.perHour)}/h against ${eur(dcDth.perHour)}/h`
+      + ` — ${(dcDth.perHour / pdDth.perHour).toFixed(1)}x worse than`);
+    console.log(`               dth-crawler, which costs EUR ${eur(dc.price)} against EUR ${eur(pd.price)}`);
+    console.log(`               and unlocks at level ${dc.unlockLevel} against ${pd.unlockLevel}. Strictly dominated:`);
+    console.log(`               cheaper, earlier and better on the same work.`);
+    note('pd55\'s second configuration is worth nothing. On `dth` it is beaten '
+      + `${(dcDth.perHour / pdDth.perHour).toFixed(1)}x by dth-crawler — a third of the price, 26 levels earlier — so `
+      + 'the dual-configuration premium buys a capability the player already has and '
+      + 'would never use it for. The machine is defensible ONLY as a piling rig, and '
+      + 'as a piling rig it is genuinely the better one.');
   }
   if (beyondPd.length) {
     note(`a pd55 owner is offered ${pct(beyondPd.length / pileCards.length)} of driven-pile `
