@@ -125,6 +125,18 @@ if (noSim.length) {
   warn.push(`no sim tuning at all for: ${noSim.join(', ')} — these fall back to a default model.`);
 }
 
+/* data.js's own self-check -------------------------------------------------
+   `validateData()` is ~200 lines of invariants written alongside the tables it
+   guards — the underground rule, the depth windows, the payout/cost trap, the
+   method-reach floor. It had NO CALLER anywhere in the tree, so none of it had
+   ever run outside a REPL. Everything it asserts is about data.js against
+   itself, which is exactly the half this file said it was leaving to it. */
+{
+  const problems = data.validateData();
+  for (const p of problems) fail.push(`validateData: ${p}`);
+  console.log(`selfcheck data.js  ${problems.length} problem(s)`);
+}
+
 /* Report ------------------------------------------------------------------- */
 console.log(`methods   data.js ${methodIds.size}   renderer ${Object.keys(METHOD_RIGS).length}`);
 console.log(`rigs      data.js ${rigIds.size}   builders ${buildable.size}`);

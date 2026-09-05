@@ -4636,7 +4636,7 @@ const OFFSHORE_PRE_COLLAR_M = Infinity;
  * @param {Method} method
  * @param {string|null} archetypeId  a SITE_ARCHETYPES id, or null for "surface"
  */
-function preCollarFor(method, archetypeId) {
+export function preCollarFor(method, archetypeId) {
   const arch = archetypeId ? getArchetype(archetypeId) : null;
   if (arch && arch.plane === 'underground') return UNDERGROUND_WEAK_BAND_M;
   if (arch && arch.plane === 'offshore') return OFFSHORE_PRE_COLLAR_M;
@@ -4812,7 +4812,7 @@ const DEPTH_BY_METHOD_APPLICATION = Object.freeze({
  *        everywhere.
  * @returns {[number, number]}
  */
-function depthWindow(method, applicationId, archetypeId = null) {
+export function depthWindow(method, applicationId, archetypeId = null) {
   const row = (DEPTH_BY_METHOD_APPLICATION[method.id] || {})[applicationId];
   const w = Array.isArray(row)
     ? row
@@ -5249,6 +5249,67 @@ function bottomableBed(column, method, maxDepth = Infinity, archetypeId = null) 
 }
 
 /**
+ * How many times a column may be re-rolled before the generator gives up and
+ * takes the mean one. Sixteen is far past the tail: the worst pairing in the
+ * game (top-hammer in the Andes, where 9 m of gravel over 12 m of till can
+ * exceed the method's own 15 m pre-collar) fails a single roll about one time
+ * in twenty, so sixteen independent rolls miss about once in 10^21 cards.
+ */
+const MAX_COLUMN_ROLLS = 16;
+
+/**
+ * A rolled ground column the method can actually BOTTOM A HOLE IN, and the bed
+ * it bottoms in.
+ *
+ * THE BUG THIS EXISTS TO KILL. `methodsForRegion()` and the `usableSites`
+ * filter both decide whether a pairing is playable against `nominalColumn()` —
+ * the MEAN column, where a lens that is only there half the time counts for
+ * half of itself and every thickness is its own average. `makeContract()` then
+ * drills the ROLLED column, where that lens is either wholly there or wholly
+ * absent and each thickness is a fresh sample. The two disagree in the tail.
+ *
+ * When they did, `bottomableBed()` returned null and the caller fell back to
+ * `column[0]` — the TOP bed, whether the method could drill it or not. So the
+ * board advertised a hole that cannot be finished: the player accepts it,
+ * drills, and stops in ground the rig was never able to take. Measured over
+ * 6,400 cards it hit **43 in 800 Andean cards (5.4 %)**, and it reached Nordic
+ * and German sites too. `tools/checkbeds.mjs` is the guard; it prints the
+ * failing seeds so a fix is checked against the cards that failed.
+ *
+ * RE-ROLLING IS THE HONEST FIX, not a retry loop hiding a data problem. The
+ * client hired a contractor for THIS method, so the site is one where the
+ * method works — conditioning the geology on that is the same statement the
+ * contract already makes. What is not honest is drawing a site the method
+ * cannot drill and printing it on the card anyway.
+ *
+ * The fallback is the nominal column, which is the exact column
+ * `methodsForRegion()` used to declare the pairing playable in the first place,
+ * so it bottoms by construction. `checkdata.mjs` asserts that statically for
+ * every offerable region x method x site, which is what keeps the last resort
+ * below unreachable rather than merely unlikely.
+ */
+function rollDrillableColumn(region, method, underground, rand, maxDepth, dHi, archetypeId) {
+  for (let i = 0; i < MAX_COLUMN_ROLLS; i++) {
+    const column = buildGroundColumn(region, maxDepth, rand, method, underground);
+    const bed = bottomableBed(column, method, dHi, archetypeId);
+    if (bed) return { column, bed, rolls: i + 1 };
+  }
+  const column = nominalColumn(region, method, underground);
+  const bed = bottomableBed(column, method, dHi, archetypeId);
+  if (bed) return { column, bed, rolls: MAX_COLUMN_ROLLS, nominal: true };
+  // Unreachable while checkdata.mjs passes. If it is ever reached, the pairing
+  // was offered by one of the two escape hatches above (`siteOptions` falling
+  // back to `allSites`, or `sharedApps` being empty) and there is no honest
+  // column at all — so give the method the one bed in this region it can drill
+  // rather than a bed it cannot. Same rule buildGroundColumn() already uses
+  // when a profile rolls away to nothing.
+  const vg = new Set(method.validGround);
+  const first = region.groundProfile.find((g) => vg.has(g.id)) || region.groundProfile[0];
+  const only = { id: first.id, top: 0, bottom: maxDepth, thickness: maxDepth };
+  return { column: [only], bed: only, rolls: MAX_COLUMN_ROLLS, degenerate: true };
+}
+
+/**
  * Truncate the column at the bed the hole bottoms in and extend that bed to the
  * target depth — the same rule the file has always used for the last bed, moved
  * onto the last bed the METHOD CAN DRILL. Everything below it is ground this
@@ -5664,8 +5725,10 @@ export function makeContract(regionId, level = 1, rand = makeRandom(Date.now() &
   const biased = constraint.groundBias
     ? { ...rand, range: (a, b) => a + (0.45 + 0.55 * rand.f()) * (b - a) }
     : rand;
-  const column = buildGroundColumn(region, Math.max(dHi, targetDepth) * 1.15, biased, method, underground);
-  const bed = bottomableBed(column, method, dHi, archetypeId) || column[0];
+  const rolled = rollDrillableColumn(
+    region, method, underground, biased, Math.max(dHi, targetDepth) * 1.15, dHi, archetypeId);
+  const column = rolled.column;
+  const bed = rolled.bed;
   // The hole may not bottom ABOVE the bed it is meant to end in, and it may
   // never be pushed past the method's own rating to get there.
   targetDepth = clamp(
@@ -6754,6 +6817,45 @@ export function validateData() {
       // will still be excusing something years after it stopped applying.
       if (n >= 2 && excused) {
         problems.push(`method ${m.id}: is listed in SOLE_REGION_METHODS but now reaches ${n} regions — delete the entry, the world caught up`);
+      }
+    }
+  }
+
+  /* ── EVERY OFFERABLE JOB MUST HAVE SOMEWHERE ITS HOLE CAN BOTTOM ──────────
+     `methodsForRegion()` asks whether SOME site in a region works for a method.
+     `makeContract()` then picks an APPLICATION first and only afterwards a site
+     from `archetypesFor(method, region, application)` — a narrower list. Both
+     of its fallbacks are silent: an empty `sharedApps` takes
+     `method.applications[0]` whether the region has that work or not, and an
+     empty `usableSites` takes a site the ground under it does not support.
+
+     Downstream of those two hatches, `rollDrillableColumn()` has a last resort
+     that hands the method the one bed in the region it can drill. It is a
+     truthful floor rather than a lie, but it is still a floor, and a floor that
+     is reachable is a floor that will be stood on. This is the check that keeps
+     it unreachable: for every pairing the board can actually deal, at least one
+     application and at least one of its sites must bottom in the MEAN column.
+
+     The rolled column is checked separately and at scale by
+     `tools/checkbeds.mjs`, which found 49 undrillable cards in 6,400 before
+     the re-roll existed. */
+  for (const region of REGIONS) {
+    for (const method of methodsForRegion(region.id, MAX_LEVEL)) {
+      const sharedApps = method.applications.filter(
+        (a) => region.applications.includes(a) && archetypesFor(method.id, region.id, a).length);
+      if (!sharedApps.length) {
+        problems.push(`method ${method.id} in ${region.id}: is offered there but shares no application with the region that has a site — makeContract falls back to ${method.applications[0]}, which the region may not do at all`);
+        continue;
+      }
+      for (const app of sharedApps) {
+        const sites = archetypesFor(method.id, region.id, app);
+        const usable = sites.filter((site) => {
+          const col = nominalColumn(region, method, isUndergroundSite(site));
+          return !!bottomableBed(col, method, depthWindow(method, app, site)[1], site);
+        });
+        if (!usable.length) {
+          problems.push(`method ${method.id} in ${region.id} for ${app}: none of its sites [${sites.join(', ')}] has ground the method can bottom a hole in within its own depth window — the contract falls back to a site it cannot drill`);
+        }
       }
     }
   }
