@@ -30,6 +30,74 @@ T450XD / T685 exploration rigs; Foremost Explorer / Prospector; Hydco and
 Sandvik DE-series RC packages; plus dealer and auction walkaround photo sets and
 site video of RC rigs working with the cyclone deployed.
 
+DIMENSIONED GENERAL ARRANGEMENTS — FOUND 2026-09-05.  rc-rig.md §8 says "no
+dimensioned general arrangement of any RC rig exists" in what was searched, and
+ASTRA.md §7.5 repeats it.  Both are now out of date: TWO manufacturer brochures
+carry a dimensioned three-view of a TRACKED RC exploration rig.
+
+  [E235]  Epiroc Explorac 235, doc 9868 0310 01f, brochure p.7 — dimensioned
+          3-view, working AND transport pose.  Spec tables pp.4-6.
+          https://www.epiroc.com/content/dam/epiroc/surface-and-exploration/
+          2-exploration-drill-rigs/explorac/explorac-235/web_pdf_e235/
+          9868%200310%2001f%20Explorac%20235%20Epiroc%20Brochure_English_WEB.pdf
+            transport   11 100 L x 3 450 W x 4 640 H mm
+            mast erected 90 deg              11 220 mm
+            mast at 45 deg                    8 050 mm
+            track shoe / grouser                500 mm
+            feed stroke                       7 680 mm ; pullback 220 kN
+            operating weight       46 500 kg (GMM) ; min 35 100 kg
+            engine 522 kW ; compressor 555 l/s @ 35 bar (1 250 cfm @ 510 psi)
+            rods 6 m (20 ft), OD 4-1/2 in (114.3 mm), 50 in the rack
+          Its mast on p.7 is unmistakably an OPEN LATTICE with diagonal web
+          bracing between two chords, full length.  That settles rc-rig.md
+          §9.A: for a big tracked RC rig the lattice truss this file builds is
+          RIGHT, and it is now sourced to a manufacturer drawing.
+
+  [E100]  Epiroc Explorac 100, doc 9868 0018 01f (2022-10), brochure p.7
+          lettered GA with the letter table on p.6.
+          https://www.epiroc.com/content/dam/epiroc/surface-and-exploration/
+          2-exploration-drill-rigs/explorac/explorac-100/pdfs/
+          9868%200018%2001f%20Epiroc%20Explorac%20100%20brochure%20Eng_WEB.pdf
+            A overall height, mast erected      7 840 mm
+            B overall length, working           6 120 mm
+            D transport height, max             2 980 mm
+            E transport length                  7 730 mm
+            F transport width  2 240 mm w/o rod rack / 2 800 mm with
+            weight 14 400 kg ; feed travel 4 400 mm ; rods 3 m, OD 114.3 mm
+          Same page: "Shipping dimensions 7 800 x 3 000 x 2 300 mm".  Its mast
+          is a CLOSED BOX feed beam — so lattice-vs-box splits by size class,
+          and both answers are sourced.
+
+WHAT THAT MEANS FOR THIS MODEL, MEASURED NOT ASSUMED
+----------------------------------------------------
+`node tools/glbinfo.mjs public/models/rc-rig.glb` reports 7.883 x 7.214 x 7.606.
+`--parts` and a per-primitive sweep put the MACHINE inside x = +/-1.561 (over
+the deployed jacks; BODY_W is 2.42), and the drill floor / mast / deck all
+inside that.  So the machine itself is 3.12 m over jacks — squarely between
+[E100]'s 2.80 and [E235]'s 3.45, and NOT too wide.
+
+The 7.883 m bounding box is the SITE SPREAD: the free-standing cyclone stand,
+the calico bag rows, the chip trays and the reject pile run out to x = +5.250,
+and the bull hose to x = -2.633.  ASTRA.md §5 is exactly on point — that is a
+`cfa_rig` concrete-line situation, not a `piling_leader` too-wide situation, and
+the content is correct and worth keeping.  It is in the WRONG NODE, not the
+wrong place: `src/core/gltfRig.js` line ~500 derives `prep.size` and
+`prep.radius` from the whole scene graph with no exclusion, so `frameRadius`
+(and with it placement, culling and collision) inherits 2.4 m of ground props.
+There is no blender-side lever for this — the fix is a runtime one and is
+reported as a cross-file need, not bodged here by deleting good geometry.
+
+NOT RESOLVED, recorded rather than guessed: this machine is built at
+[E100] SIZE (mast 5.45 m, 3.05 m rods, 7.2 m tall erected against [E100]'s
+7.84 m and 7.6 m long against its 7.73 m transport length — both inside 9 %)
+but with [E235] FEATURES (open lattice mast, on-board power-and-air pack sized
+on [R16 §A.8]'s "roughly 1000 cfm at 500 psi").  Those two belong to different
+size classes.  Committing to [E235] means re-scaling the whole machine by ~1.45
+and going to 6 m rods; committing to [E100] means tearing out the lattice that
+rc-rig.md §9.A asked for and the model critique singles out as the best
+identification in the fleet.  That is a design decision with real consequences
+either way and it is not made here.
+
 NAMING (DOMAIN.md §10): no manufacturer name and no model designation appears in
 any exported string. Object names are generic or are game node names. Provenance
 lives in these comments and nowhere else, which is the same separation a racing
@@ -349,9 +417,10 @@ def build_undercarriage():
              rot=(0, math.pi / 2, 0), sides=14)
         for t in range(13):
             a = t / 13 * TAU
+            # 26 sprocket teeth, no bevel — see the note on the shoes below.
             box('uc-tooth', (TRACK_W - 0.12, 0.10, 0.13), MAT_WORN,
                 loc=(x, half + math.sin(a) * R * 0.72, cz + math.cos(a) * R * 0.72),
-                rot=(-a, 0, 0), bevel=0.012)
+                rot=(-a, 0, 0))
         tube('uc-final-drive', 0.24, 0.16, MAT_CAST,
              loc=(x + s * (TRACK_W / 2 - 0.02), half, cz),
              rot=(0, s * math.pi / 2, 0), sides=14)
@@ -388,11 +457,17 @@ def build_undercarriage():
             a = math.pi + i * math.pi / n_arc
             pts.append((-half + math.sin(a) * R, cz - math.cos(a) * R, a))
         for (py, pz, ang) in pts:
+            # NO BEVEL, and this is the single biggest triangle decision in
+            # the file. 120 shoes x 3 grousers = 480 objects; a bevelled box is
+            # 108 triangles against a plain box's 12, so the bevel alone cost
+            # 46,080 triangles — 27 % of the whole machine — on chamfers 4 to
+            # 6 mm wide that are two pixels at any distance the tracks are
+            # visible from. Bevel the STRUCTURE, never the ARRAY.
             sh = box('uc-shoe', (TRACK_W, 0.158, 0.036), MAT_WORN,
-                     loc=(x, py, pz), rot=(-ang, 0, 0), bevel=0.006)
+                     loc=(x, py, pz), rot=(-ang, 0, 0))
             for g in (-0.050, 0.0, 0.050):     # triple grouser
                 box('uc-grouser', (TRACK_W - 0.03, 0.022, 0.042), MAT_WORN,
-                    parent=sh, loc=(0, g, 0.038), bevel=0.004)
+                    parent=sh, loc=(0, g, 0.038))
     for y in (-1.35, 1.35):
         box('uc-crossmember', (GAUGE + 0.20, 0.30, 0.26), MAT_DARK,
             loc=(0, y, cz + 0.02), bevel=0.02)
@@ -589,12 +664,12 @@ def build_body():
     for grp in (-1.05, 0.30, 1.62):
         lv = box('pp-louvre', (0.024, 0.86, 0.030), MAT_DARK,
                  loc=(px - pw / 2 - 0.004, py + grp, DECK_Z + 0.26),
-                 rot=(0.42, 0, 0), bevel=0.004)
+                 rot=(0.42, 0, 0))          # arrayed x9 — no bevel
         arrayed(lv, 9, (0, 0, 0.064))
     for grp in (-0.70, 1.20):
         lv = box('pp-louvre', (0.024, 0.72, 0.030), MAT_DARK,
                  loc=(px + pw / 2 + 0.004, py + grp, DECK_Z + 0.26),
-                 rot=(0.42, 0, 0), bevel=0.004)
+                 rot=(0.42, 0, 0))          # arrayed x9 — no bevel
         arrayed(lv, 9, (0, 0, 0.064))
     # a separate darker panel where the maker's badge goes. Deliberately blank:
     # DOMAIN.md §10, and rc-rig.md §4.7 says "do not reproduce the badge".
@@ -745,8 +820,12 @@ def build_mast():
     n_link = int((L - 0.42) / 0.060)
     for sx in (-1, 1):
         for face in (-1, 1):
+            # 4 runs x 83 links = 332 bevelled boxes = 35,856 triangles, all
+            # of it inside a 0.95 x 4.98 x 1.04 m box. The chain has to read as
+            # a continuous fine-toothed dark BAND, which is a silhouette and a
+            # pitch, not a chamfer. No bevel.
             lk = box('feed-chain-link', (0.030, 0.054, 0.056), MAT_WORN, pv,
-                     (sx * (hw + 0.030), face * (hd + 0.045), 0.22), bevel=0.004)
+                     (sx * (hw + 0.030), face * (hd + 0.045), 0.22))
             arrayed(lk, n_link, (0, 0, 0.060))
             pin = tube('feed-chain-pin', 0.012, 0.056, MAT_STEEL, pv,
                        (sx * (hw + 0.030) - 0.028, face * (hd + 0.045), 0.250),
@@ -882,7 +961,20 @@ def build_head(pv):
     # 1.64 + 1.55 = 3.19 m of stroke, against a 3.05 m rod — just over a rod
     # length, which is what a real feed frame gives you, and in the same country
     # as the 3400 mm published for a comparable published crawler RC rig.
-    sl['range_m'] = [-1.64, 1.55]
+    #
+    # THE KEY IS `travel_m`, AND IT IS THE ONLY KEY THE RUNTIME READS.
+    # This node used to declare `range_m: [-1.64, 1.55]` and nothing else. The
+    # data was present and correct; it was under a name src/core/gltfRig.js has
+    # never looked at. makeDyn() reads `carriage.userData.travel_m`, and with it
+    # undefined `carriageRange` collapses to [y, y] — the head could not travel
+    # at all. (`range_m` is a real key in this pipeline, but it belongs to
+    # `mount:` lamps, where it is a spotlight THROW in metres. Two different
+    # meanings under one name is how this went unnoticed.)
+    CARR_LO = -1.64                      # carriage-local, bottom of travel
+    CARR_HI = 1.55                       # carriage-local, top of travel
+    sl['travel_m'] = CARR_HI - CARR_LO   # 3.19 m of stroke
+    sl['travel_min_m'] = (MAST_LEN - 2.05) + CARR_LO   # absolute, mast frame
+    sl['travel_max_m'] = (MAST_LEN - 2.05) + CARR_HI
     hw, hd = MAST_W / 2, MAST_D / 2
 
     box('carriage-plate', (MAST_W + 0.22, 0.16, 0.86), MAT_PAINT, sl,
@@ -1090,7 +1182,7 @@ def build_cyclone(parent):
         a = t / 12 * TAU
         box('cyc-flange-bolt', (0.028, 0.028, 0.022), MAT_WORN, parent,
             (math.cos(a) * (r + 0.025), math.sin(a) * (r + 0.025), z_cone0),
-            rot=(0, 0, a), bevel=0.003)
+            rot=(0, 0, a))                 # ring of 12 — no bevel
     box('cyc-inlet-head', (r * 2.0, r * 2.0, 0.34), MAT_PAINT, parent,
         (0, 0, z_top + 0.17), bevel=0.03)
     tube('cyc-inlet-flange', 0.105, 0.22, MAT_DARK, parent,
@@ -1205,8 +1297,8 @@ def build_sample_train():
     for t in range(8):
         a = t / 8 * TAU
         box('split-bolt', (0.026, 0.026, 0.020), MAT_WORN, st,
-            (math.cos(a) * 0.24, math.sin(a) * 0.24, sz + 0.325), rot=(0, 0, a),
-            bevel=0.003)
+            (math.cos(a) * 0.24, math.sin(a) * 0.24, sz + 0.325),
+            rot=(0, 0, a))                 # ring of 8 — no bevel
     for sx in (-1, 1):
         box('drop-box', (0.28, 0.30, 0.34), MAT_PAINT, st,
             (sx * 0.34, 0.02, sz - 0.10), bevel=0.02)
@@ -1321,7 +1413,7 @@ def build_cyclone_arm():
         a = t / 10 * TAU
         box('cyc-arm-base-bolt', (0.028, 0.028, 0.020), MAT_WORN,
             loc=(bx + math.cos(a) * 0.27, by + math.sin(a) * 0.27, bz - 0.18),
-            rot=(0, 0, a), bevel=0.003)
+            rot=(0, 0, a))                 # ring of 10 — no bevel
     pv = empty(NODE_PIVOT, 'cyclone-arm', None, (bx, by, bz))
     pv['axis'] = 'z'
     pv['range_deg'] = [-95.0, 15.0]
