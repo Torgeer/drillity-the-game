@@ -150,7 +150,7 @@ TRACK_LIFT = 0.16      # the rig WORKS ON ITS JACKS with the tracks hanging clea
 BODY_W = 2.42
 JACK_X = 1.28          # outboard of the track outer edge at 0.90 [rc-rig.md §9.L]
 
-CYC_X, CYC_Y = 2.78, -1.55    # sample train, forward-right of the machine
+CYC_X, CYC_Y = 3.02, -1.55    # sample train, forward-right of the machine
 CYC_BARREL_D = 0.70           # ratios only [MIN p.13, rc-rig.md §9.I]:
 CYC_BARREL_H = 0.70           #   barrel about 1 diameter tall
 CYC_CONE_H = 1.10             #   cone about 1.55 diameters long
@@ -168,7 +168,7 @@ CYC_INLET = (CYC_X - CYC_BARREL_D / 2 - 0.26,
              CYC_Y + CYC_BARREL_D / 2 * 0.55,
              CYC_OUT_Z + CYC_CONE_H + CYC_BARREL_H + 0.17)
 ARM_BASE = (1.05, -2.05, DECK_Z + 0.20)      # slew base bolted to the deck
-ARM_TIP = (2.12, -2.36, 3.02)                # where the hose loop rides
+ARM_TIP = (2.30, -2.40, 3.02)                # where the hose loop rides
 
 
 # ── local helpers ─────────────────────────────────────────────────────────────
@@ -190,12 +190,30 @@ def torus(name, major, minor, mat=MAT_STEEL, parent=None, loc=(0, 0, 0),
 
 
 def arrayed(obj, count, offset, name='arr'):
-    """ARRAY modifier — lattice bays, track shoes, chain links, louvres, cups."""
+    """ARRAY modifier whose `offset` is given in the object's PARENT space.
+
+    The modifier's own constant_offset_displace is in the object's LOCAL space,
+    so on a rotated object it marches the copies off in a direction the caller
+    did not ask for. That is not hypothetical. The feed-chain pins are cylinders
+    rotated 90 deg about Y; with a naive (0, 0, pitch) they laid an 83-link,
+    five-metre steel rod horizontally across the site at knee height, and it took
+    a bounding-box sweep of the scene to find it because from most angles it read
+    as a scratch on the ground. The perforated guard panels had the same fault:
+    the second array ran into the plate's thickness instead of up its face, so
+    the punched grid was a single row of holes repeated inside the steel.
+
+    Converting here means every caller says where it wants the copies to go and
+    gets that, whatever the object's own rotation is.
+    """
     m = obj.modifiers.new(name, 'ARRAY')
     m.count = count
     m.use_relative_offset = False
     m.use_constant_offset = True
-    m.constant_offset_displace = offset
+    if obj.rotation_mode == 'QUATERNION':
+        rot = obj.rotation_quaternion.to_matrix()
+    else:
+        rot = obj.rotation_euler.to_matrix()
+    m.constant_offset_displace = rot.inverted() @ Vector(offset)
     return obj
 
 
@@ -615,7 +633,7 @@ def build_body():
               MAT_PAINT)
 
     # control stand + FOPS canopy
-    sx, sy = -0.98, -1.55
+    sx, sy = -0.55, -1.58
     box('control-console', (0.72, 0.42, 0.30), MAT_PAINT,
         loc=(sx, sy, DECK_Z + 0.92), rot=(-0.35, 0, 0), bevel=0.02)
     box('console-pedestal', (0.34, 0.30, 0.78), MAT_DARK,
@@ -625,14 +643,14 @@ def build_body():
              loc=(sx + lx, sy - 0.06, DECK_Z + 1.03),
              rot=(-0.35 + (i % 2) * 0.12, 0, 0))
     for s in (-1, 1):
-        strut('canopy-post', (sx + s * 0.55, sy - 0.45, DECK_Z),
-              (sx + s * 0.55, sy - 0.45, DECK_Z + 2.05), 0.075, MAT_PAINT)
-        strut('canopy-post', (sx + s * 0.55, sy + 0.55, DECK_Z),
-              (sx + s * 0.55, sy + 0.55, DECK_Z + 2.05), 0.075, MAT_PAINT)
-    box('canopy-roof', (1.35, 1.20, 0.06), MAT_PAINT,
-        loc=(sx, sy + 0.05, DECK_Z + 2.08), bevel=0.018)
-    perforated_panel('canopy-fops', 1.20, 0.50,
-                     loc=(sx, sy - 0.47, DECK_Z + 1.74))
+        strut('canopy-post', (sx + s * 0.52, sy - 0.44, DECK_Z),
+              (sx + s * 0.52, sy - 0.44, DECK_Z + 1.94), 0.070, MAT_PAINT)
+        strut('canopy-post', (sx + s * 0.52, sy + 0.52, DECK_Z),
+              (sx + s * 0.52, sy + 0.52, DECK_Z + 1.94), 0.070, MAT_PAINT)
+    box('canopy-roof', (1.28, 1.16, 0.06), MAT_PAINT,
+        loc=(sx, sy + 0.04, DECK_Z + 1.97), bevel=0.018)
+    perforated_panel('canopy-fops', 1.14, 0.46,
+                     loc=(sx, sy - 0.46, DECK_Z + 1.66))
     box('op-seat', (0.44, 0.42, 0.10), MAT_RUBBER,
         loc=(sx, sy + 0.52, DECK_Z + 0.62), bevel=0.02)
     box('op-seat-back', (0.44, 0.10, 0.46), MAT_RUBBER,
@@ -1090,7 +1108,7 @@ def build_sample_train():
     POST = 3.20
     for (sx, sy) in ((-1, -1), (1, -1), (-1, 1), (1, 1)):
         strut('stand-post', (sx * 0.68, sy * 0.68, 0), (sx * 0.60, sy * 0.60, POST),
-              0.115, MAT_PAINT, st)
+              0.085, MAT_PAINT, st)
         box('stand-foot', (0.30, 0.30, 0.04), MAT_WORN, st,
             (sx * 0.68, sy * 0.68, 0.020), bevel=0.005)
     for z in (0.78, 1.58, POST - 0.06):
@@ -1111,7 +1129,7 @@ def build_sample_train():
             f0 = 1 - (z0 / POST) * 0.12
             f1 = 1 - (z1 / POST) * 0.12
             strut('stand-brace', (ax * 0.66 * f0, ay * 0.66 * f0, z0),
-                  (bx * 0.66 * f1, by * 0.66 * f1, z1), 0.055, MAT_PAINT, st)
+                  (bx * 0.66 * f1, by * 0.66 * f1, z1), 0.042, MAT_PAINT, st)
     box('stand-walkway', (1.36, 1.36, 0.04), MAT_DARK, st, (0, 0, 1.60),
         bevel=0.008)
     for i in range(4):
@@ -1179,15 +1197,21 @@ def build_sample_train():
     for (bx, by, fill, rz) in ((-0.20, 0.50, 0.86, 0.3), (0.22, 0.52, 0.72, -0.5),
                                (0.02, 0.82, 0.40, 1.1)):
         h = 0.20 + 0.20 * fill
-        b = cone('calico-bag', 0.115 + 0.035 * fill, 0.085, h, MAT_RUBBER, st,
+        # MAT_WORN, not MAT_RUBBER. rc-rig.md §6: the bags are PALE CLOTH and
+        # 'the lightest objects in the scene'. The nine MAT_ names carry no
+        # cloth, and rubber reads near-black — the worst possible value for the
+        # one thing that has to stand out under the cone. wornSteel is the least
+        # wrong of the nine. assets.js does have a `sampleBag` KIND; wiring that
+        # in is a job for whoever owns the loader (see the report).
+        b = cone('calico-bag', 0.115 + 0.035 * fill, 0.085, h, MAT_WORN, st,
                  (bx, by, 0.92 - h), rot=(0, 0, rz), sides=8)
         b.scale = (1.0, 0.82, 1.0)
-        tube('bag-neck', 0.055, 0.09, MAT_RUBBER, st, (bx, by, 0.91), sides=8)
+        tube('bag-neck', 0.055, 0.09, MAT_WORN, st, (bx, by, 0.91), sides=8)
     # and laid out in rows on the dirt — [R16 §A.8] says that is what the
     # photograph actually shows, one or two bags per metre drilled
     for i in range(10):
         row, col = i // 5, i % 5
-        b = cone('calico-bag-row', 0.145, 0.105, 0.32, MAT_RUBBER, st,
+        b = cone('calico-bag-row', 0.145, 0.105, 0.32, MAT_WORN, st,
                  (1.15 + row * 0.46, -0.66 + col * 0.36, 0.145),
                  rot=(0.10 * (i % 3) - 0.10, math.pi / 2, 0.4 * i), sides=8)
         b.scale = (0.86, 1.0, 1.0)      # a filled sack slumps, it is not round
