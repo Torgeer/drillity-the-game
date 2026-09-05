@@ -53,8 +53,9 @@ it.
 ### The gates
 
 ```bash
-npm run check          # checkfacts + checkdata + checkbeds + checkmodels
-npm run check:reach    # thumb reach — needs `npm run dev` running. CURRENTLY FAILS (§7.3)
+npm run check          # checkfacts + checkdata + checkbeds + checkmodels + checkreach
+npm run check:reach     # thumb reach, both hands. PASSES. Starts its own vite if 5178
+                        # is dead (tools/devserver.mjs) and needs HEADED Chrome
 npm run blender        # builds every machine, per-machine PASS/FAIL, non-zero exit on any failure
 ```
 
@@ -337,16 +338,44 @@ other side is worse: geology authors its log gutter and ruler in **section
 units**, and `adoptCameraScale()` clamps to a ceiling of 32.35 px/m, so 54.58 is
 unreachable from that side at all.
 
-### 7.3 — The two controls nobody can press
+### 7.3 — The two controls nobody could press — **CLOSED**
 
-`npm run check:reach` **currently fails**, identically on all five methods:
+> `npm run check:reach` **passes** on all five methods — 0 hard, 0 stretch,
+> 0 undeclared — and is now wired into `npm run check`.
+>
+> The layout failure quoted below was already fixed by `57e5035`
+> (`--reach-floor`, which lifts the controls row to a centre 92 px above the
+> bottom edge, out of the fold for both hands). What was still broken is that
+> **the gate could not run, so nobody could see it pass.**
+> `tools/devserver.mjs` resolved its vite binary with
+> `require.resolve('vite/bin/vite.js')`, which throws
+> ERR_PACKAGE_PATH_NOT_EXPORTED on every install of vite 5 — the package's
+> `exports` map does not list that subpath — and the gate then reported
+> *"vite is not installed here (run `npm install`)"* against a tree with vite
+> 5.4.21 fully installed. A confident false negative aimed at the operator.
+> Fixed in `478bed4`.
+>
+> The **sort** is now declared by the screen rather than inferred by the
+> harness: `site.js` writes `data-reach="drilling" | "between"` beside each
+> control with the reason, and an **undeclared interactive target fails the
+> gate** (`6c229af`). The old proxy — `el.closest('.sitedock')` — was blind in
+> the one direction that matters: a control used while drilling but placed
+> outside the dock was scored as not-a-drilling-control and waved through.
+> `.sstrip__leave` is declared `between` and measures hard for both hands **on
+> purpose**: it abandons the contract, so a thumb finding it by accident is the
+> failure.
+>
+> The reasoning below is kept, because it is the reasoning, and because the
+> model's three constants are still assumed rather than sourced.
+
+`npm run check:reach` used to fail, identically on all five methods:
 
 ```
 .actionbtn   centre (334, 795)   right = HARD   left = easy
 .vsl         centre  (54, 795)   right = easy   left = HARD
 ```
 
-Both bottom corners. **The primary action button fails for the right thumb**,
+Both bottom corners. **The primary action button failed for the right thumb**,
 which is two-thirds of one-handed users.
 
 This is not the "bottom third is fine" rule failing at the edges — it is that
@@ -361,8 +390,7 @@ the thumb**"*. A control is only as reachable as its **worse** hand.
 *touched between jobs* first — that sort is the design decision, the layout
 follows. The model and its three assumed constants are documented in
 `tools/checkreach.mjs`'s header; if you think the model is wrong, **argue with
-numbers and change the gate**. When it passes, wire `check:reach` into
-`npm run check`.
+numbers and change the gate**.
 
 ### 7.4 — Look-ahead uncertainty in the section (not started)
 
@@ -410,10 +438,24 @@ the section must match what the sim resolved.
   either way** — `depthWindow()` is now fleet-capped, so matching the data to the
   model would shrink every `cable-tool` contract in the game. Somebody has to
   pick.
-- **`.hudqa` measured DOM growth 163 → 811 nodes (+648)** across five ordinary
-  visits to the site screen. A hard gate failure. The last agent on it said
-  *"both remaining failures trace to one cross-file cause"* and **that cause is
-  not written down anywhere** — re-derive it.
+- ~~**`.hudqa` measured DOM growth 163 → 811 nodes (+648)**~~ — **NOT A LEAK,
+  and closed.** The cause, re-derived and now written down in
+  `.hudqa/measure.mjs`'s own header: `ui/shell.js instantiate()` builds a
+  screen the first time it is shown and then KEEPS it, in the `screens` Map and
+  as a hidden node under `.screens`. Measured cold, visit 1 saw a document with
+  no garage in it and visit 2 saw one with a garage in it — the whole +648
+  arrives in ONE step and is then flat, which is not what a leak looks like.
+  `.screen` nodes go 2 → 4 on the same step and stop at 4 against a ceiling of
+  8. The repair was to make visit 1 and visit 5 comparable with an unmeasured
+  warm-up lap, after which the gate is absolute. Measured flat at 838 nodes
+  across five visits.
+
+  A **real** leak was found underneath it, invisible to any node count:
+  `components.js` `mountPreview()` re-armed a `requestAnimationFrame` chain on
+  `canvas.isConnected`, which is true of every canvas on every retained screen
+  while `clientWidth` is 0 behind `display:none` — so one `resize` off the
+  garage left **nineteen** chains reallocating canvas backing stores every
+  frame for the rest of the session. Fixed in `b534bc5`.
 - ~~`pd55` is modelled but not registered.~~ **DONE.** It is a rig — 19 now —
   with every stat cited against the datasheet and `renderRigId: 'piling-leader'`
   as its procedural stand-in. The `NOT_A_RIG` exemption `checkmodels.mjs` was
