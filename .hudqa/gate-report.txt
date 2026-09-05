@@ -1,0 +1,80 @@
+
+rockbolt
+  painted     max 41 / med 41   (enumerated from *, no allowlist)
+  OVERLAPS    0  ok
+  ON THE 3D   0  ok
+  targets<44  4  <-- GATE FAIL  railbtn BLOCKED (box 119x34, centre owned by something on top), railbtn BLOCKED (box 103x34, centre owned by something on top), vsl BLOCKED (box 85x80, centre owned by something on top), actionbtn BLOCKED (box 88x80, centre owned by something on top)
+  targets     actionbtn BLOCKED, railbtn BLOCKED, sstrip__leave 45x45, vsl BLOCKED
+  clipped     0  
+  split       surface 54 / section 46   (3D = 66.9% of stage)
+  chrome      .sstrip 52px  .sitedock 227px  ctx.hud {"top":52,"bottom":227}
+
+driven-pile
+  painted     max 36 / med 29   (enumerated from *, no allowlist)
+  OVERLAPS    0  ok
+  ON THE 3D   0  ok
+  targets<44  4  <-- GATE FAIL  vsl BLOCKED (box 85x80, centre owned by something on top), actionbtn BLOCKED (box 88x80, centre owned by something on top), railbtn BLOCKED (box 122x34, centre owned by something on top), railbtn BLOCKED (box 130x34, centre owned by something on top)
+  targets     actionbtn BLOCKED, railbtn BLOCKED, sstrip__leave 45x45, vsl BLOCKED
+  clipped     0  
+  split       surface 54 / section 46   (3D = 66.9% of stage)
+  chrome      .sstrip 52px  .sitedock 227px  ctx.hud {"top":52,"bottom":227}
+
+rc
+  painted     max 39 / med 39   (enumerated from *, no allowlist)
+  OVERLAPS    0  ok
+  ON THE 3D   0  ok
+  targets<44  3  <-- GATE FAIL  vsl BLOCKED (box 85x80, centre owned by something on top), actionbtn BLOCKED (box 88x80, centre owned by something on top), railbtn BLOCKED (box 110x34, centre owned by something on top)
+  targets     actionbtn BLOCKED, railbtn BLOCKED, sstrip__leave 45x45, vsl BLOCKED
+  clipped     0  
+  split       surface 54 / section 46   (3D = 66.9% of stage)
+  chrome      .sstrip 52px  .sitedock 227px  ctx.hud {"top":52,"bottom":227}
+
+dth
+  painted     max 38 / med 38   (enumerated from *, no allowlist)
+  OVERLAPS    0  ok
+  ON THE 3D   0  ok
+  targets<44  2  <-- GATE FAIL  vsl BLOCKED (box 85x80, centre owned by something on top), actionbtn BLOCKED (box 88x80, centre owned by something on top)
+  targets     actionbtn BLOCKED, sstrip__leave 45x45, vsl BLOCKED
+  clipped     0  
+  split       surface 54.1 / section 45.9   (3D = 71.4% of stage)
+  chrome      .sstrip 52px  .sitedock 189px  ctx.hud {"top":52,"bottom":189}
+
+oil-rotary
+  painted     max 42 / med 42   (enumerated from *, no allowlist)
+  OVERLAPS    0  ok
+  ON THE 3D   0  ok
+  targets<44  3  <-- GATE FAIL  railbtn BLOCKED (box 80x34, centre owned by something on top), vsl BLOCKED (box 85x80, centre owned by something on top), actionbtn BLOCKED (box 88x80, centre owned by something on top)
+  targets     actionbtn BLOCKED, railbtn BLOCKED, sstrip__leave 45x45, vsl BLOCKED
+  clipped     0  
+  split       surface 54 / section 46   (3D = 66.9% of stage)
+  chrome      .sstrip 52px  .sitedock 227px  ctx.hud {"top":52,"bottom":227}
+
+
+=== REPEAT NAVIGATION: five ordinary visits to the site screen ===
+  one unmeasured warm-up lap first, so every screen on the route is already
+  built; after it, ANY movement in ANY column below is a leak.
+visit |  .sitedock |  .sstrip |  .screen nodes |  live nodes |  doc nodes |  .sitedock count |  ctx.hud
+  1   |     189 px |    52 px |         4      |      121   |     816   |         1        | {"top":52,"bottom":189}
+  2   |     189 px |    52 px |         4      |      121   |     816   |         1        | {"top":52,"bottom":189}
+  3   |     189 px |    52 px |         4      |      121   |     816   |         1        | {"top":52,"bottom":189}
+  4   |     189 px |    52 px |         4      |      121   |     816   |         1        | {"top":52,"bottom":189}
+  5   |     189 px |    52 px |         4      |      121   |     816   |         1        | {"top":52,"bottom":189}
+
+  DOCK HEIGHT 189px  ->  189px  ->  189px  ->  189px  ->  189px
+  GROWTH      none — dock, chrome and node counts identical across all five visits   ok
+
+=== GATES ===
+  build is clean ........... FAIL (2)
+  overlaps (enumerated) .... PASS
+  nothing over the 3D ...... PASS
+  touch targets >= 44px .... FAIL (railbtn BLOCKED (box 119x34, centre owned by something on top), railbtn BLOCKED (box 103x34, centre owned by something on top), vsl BLOCKED (box 85x80, centre owned by something on top), actionbtn BLOCKED (box 88x80, centre owned by something on top), railbtn BLOCKED (box 122x34, centre owned by something on top), railbtn BLOCKED (box 130x34, centre owned by something on top), railbtn BLOCKED (box 110x34, centre owned by something on top), railbtn BLOCKED (box 80x34, centre owned by something on top))
+  no navigation growth ..... PASS
+
+!!  ERRORS WERE LOGGED — ACCOUNT FOR EACH ONE  !!
+    These were caught and printed, so the caller MAY have recovered — a
+    deliberate loud failure (HANDOFF §8A) reads exactly like this. It may
+    equally be a caught abort: `[init] geology ReferenceError` was logged
+    this way while the entire section band was missing behind it. The
+    counts above stand only for the parts you have confirmed still built:
+      [gltfRig] "crawler-lite" did NOT load. http://localhost:5184/models/crawler-lite.glb is not a GLB — the server answered with something else (1229 byte
+      [gltfRig] "crawler-lite" falls through to the PROCEDURAL builder for the same rig id. That is the same machine drawn the old way, not a substitute mac

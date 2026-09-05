@@ -1,5 +1,5 @@
 {
-  "tag": "base2",
+  "tag": "final2",
   "cases": {
     "rockbolt": {
       "painted": {
@@ -9,7 +9,18 @@
       "overlaps": 0,
       "overlapList": [],
       "onBand3D": [],
-      "smallTargets": [],
+      "smallTargets": [
+        "railbtn BLOCKED (box 119x34, centre owned by something on top)",
+        "railbtn BLOCKED (box 103x34, centre owned by something on top)",
+        "vsl BLOCKED (box 85x80, centre owned by something on top)",
+        "actionbtn BLOCKED (box 88x80, centre owned by something on top)"
+      ],
+      "targetsSeen": [
+        "actionbtn BLOCKED",
+        "railbtn BLOCKED",
+        "sstrip__leave 45x45",
+        "vsl BLOCKED"
+      ],
       "clipped": [],
       "split": {
         "surfPct": 54,
@@ -28,26 +39,37 @@
       },
       "dom": {
         "screens": 2,
-        "liveNodes": 120,
-        "docNodes": 163,
+        "liveNodes": 121,
+        "docNodes": 168,
         "dockH": 227,
         "stripH": 52,
         "dockCount": 1,
         "hud": {
-          "top": 51,
-          "bottom": 224
+          "top": 52,
+          "bottom": 227
         }
       }
     },
     "driven-pile": {
       "painted": {
         "max": 36,
-        "med": 30
+        "med": 29
       },
       "overlaps": 0,
       "overlapList": [],
       "onBand3D": [],
-      "smallTargets": [],
+      "smallTargets": [
+        "vsl BLOCKED (box 85x80, centre owned by something on top)",
+        "actionbtn BLOCKED (box 88x80, centre owned by something on top)",
+        "railbtn BLOCKED (box 122x34, centre owned by something on top)",
+        "railbtn BLOCKED (box 130x34, centre owned by something on top)"
+      ],
+      "targetsSeen": [
+        "actionbtn BLOCKED",
+        "railbtn BLOCKED",
+        "sstrip__leave 45x45",
+        "vsl BLOCKED"
+      ],
       "clipped": [],
       "split": {
         "surfPct": 54,
@@ -66,8 +88,8 @@
       },
       "dom": {
         "screens": 2,
-        "liveNodes": 120,
-        "docNodes": 163,
+        "liveNodes": 121,
+        "docNodes": 168,
         "dockH": 227,
         "stripH": 52,
         "dockCount": 1,
@@ -85,7 +107,17 @@
       "overlaps": 0,
       "overlapList": [],
       "onBand3D": [],
-      "smallTargets": [],
+      "smallTargets": [
+        "vsl BLOCKED (box 85x80, centre owned by something on top)",
+        "actionbtn BLOCKED (box 88x80, centre owned by something on top)",
+        "railbtn BLOCKED (box 110x34, centre owned by something on top)"
+      ],
+      "targetsSeen": [
+        "actionbtn BLOCKED",
+        "railbtn BLOCKED",
+        "sstrip__leave 45x45",
+        "vsl BLOCKED"
+      ],
       "clipped": [],
       "split": {
         "surfPct": 54,
@@ -104,8 +136,8 @@
       },
       "dom": {
         "screens": 2,
-        "liveNodes": 120,
-        "docNodes": 163,
+        "liveNodes": 121,
+        "docNodes": 168,
         "dockH": 227,
         "stripH": 52,
         "dockCount": 1,
@@ -123,7 +155,15 @@
       "overlaps": 0,
       "overlapList": [],
       "onBand3D": [],
-      "smallTargets": [],
+      "smallTargets": [
+        "vsl BLOCKED (box 85x80, centre owned by something on top)",
+        "actionbtn BLOCKED (box 88x80, centre owned by something on top)"
+      ],
+      "targetsSeen": [
+        "actionbtn BLOCKED",
+        "sstrip__leave 45x45",
+        "vsl BLOCKED"
+      ],
       "clipped": [],
       "split": {
         "surfPct": 54.1,
@@ -142,8 +182,8 @@
       },
       "dom": {
         "screens": 2,
-        "liveNodes": 120,
-        "docNodes": 163,
+        "liveNodes": 121,
+        "docNodes": 168,
         "dockH": 189,
         "stripH": 52,
         "dockCount": 1,
@@ -155,13 +195,23 @@
     },
     "oil-rotary": {
       "painted": {
-        "max": 49,
-        "med": 49
+        "max": 42,
+        "med": 42
       },
       "overlaps": 0,
       "overlapList": [],
       "onBand3D": [],
-      "smallTargets": [],
+      "smallTargets": [
+        "railbtn BLOCKED (box 80x34, centre owned by something on top)",
+        "vsl BLOCKED (box 85x80, centre owned by something on top)",
+        "actionbtn BLOCKED (box 88x80, centre owned by something on top)"
+      ],
+      "targetsSeen": [
+        "actionbtn BLOCKED",
+        "railbtn BLOCKED",
+        "sstrip__leave 45x45",
+        "vsl BLOCKED"
+      ],
       "clipped": [],
       "split": {
         "surfPct": 54,
@@ -180,8 +230,8 @@
       },
       "dom": {
         "screens": 2,
-        "liveNodes": 120,
-        "docNodes": 163,
+        "liveNodes": 121,
+        "docNodes": 168,
         "dockH": 227,
         "stripH": 52,
         "dockCount": 1,
@@ -195,9 +245,9 @@
   "nav": [
     {
       "visit": 1,
-      "screens": 2,
-      "liveNodes": 120,
-      "docNodes": 163,
+      "screens": 4,
+      "liveNodes": 121,
+      "docNodes": 816,
       "dockH": 189,
       "stripH": 52,
       "dockCount": 1,
@@ -206,67 +256,73 @@
         "bottom": 189
       },
       "overlaps": 0,
-      "painted": 38
+      "painted": 30
     },
     {
       "visit": 2,
       "screens": 4,
-      "liveNodes": 120,
-      "docNodes": 811,
+      "liveNodes": 121,
+      "docNodes": 816,
       "dockH": 189,
       "stripH": 52,
       "dockCount": 1,
       "hud": {
-        "top": 51,
-        "bottom": 186
+        "top": 52,
+        "bottom": 189
       },
       "overlaps": 0,
-      "painted": 38
+      "painted": 30
     },
     {
       "visit": 3,
       "screens": 4,
-      "liveNodes": 120,
-      "docNodes": 811,
+      "liveNodes": 121,
+      "docNodes": 816,
       "dockH": 189,
       "stripH": 52,
       "dockCount": 1,
       "hud": {
-        "top": 51,
-        "bottom": 186
+        "top": 52,
+        "bottom": 189
       },
       "overlaps": 0,
-      "painted": 38
+      "painted": 30
     },
     {
       "visit": 4,
       "screens": 4,
-      "liveNodes": 120,
-      "docNodes": 811,
+      "liveNodes": 121,
+      "docNodes": 816,
       "dockH": 189,
       "stripH": 52,
       "dockCount": 1,
       "hud": {
-        "top": 51,
-        "bottom": 186
+        "top": 52,
+        "bottom": 189
       },
       "overlaps": 0,
-      "painted": 38
+      "painted": 30
     },
     {
       "visit": 5,
       "screens": 4,
-      "liveNodes": 120,
-      "docNodes": 811,
+      "liveNodes": 121,
+      "docNodes": 816,
       "dockH": 189,
       "stripH": 52,
       "dockCount": 1,
       "hud": {
-        "top": 51,
-        "bottom": 186
+        "top": 52,
+        "bottom": 189
       },
       "overlaps": 0,
-      "painted": 38
+      "painted": 30
     }
-  ]
+  ],
+  "errors": [
+    "[gltfRig] \"crawler-lite\" did NOT load. http://localhost:5184/models/crawler-lite.glb is not a GLB — the server answered with something else (1229 bytes). This is usually an SPA fal",
+    "[gltfRig] \"crawler-lite\" falls through to the PROCEDURAL builder for the same rig id. That is the same machine drawn the old way, not a substitute machine — but the Blender model y"
+  ],
+  "pageErrors": [],
+  "removedSelector": null
 }

@@ -1,0 +1,31 @@
+=== main.js debug.showResults() — the QA bridge ===
+  Its breakdown is FLAT: parSec/actualSec/total at the top level, and no
+  .time/.straightness/.bit/.safety objects at all. Nothing is published,
+  so nothing may be scored — and its hard-coded grade "B" sits beside its
+  own total of 0.51, which is band C.
+  live screen results screen screen--results screen--solid is-entering
+  stamp       C
+  verdict     Contract closed
+  speed         —   [marked unmeasured]
+  straightness  —   [marked unmeasured]
+  tool care     —   [marked unmeasured]
+  safety        —   [marked unmeasured]
+  consistency score 51 % is band C; stamp says C
+
+=== a real sim-shaped payload — every criterion published ===
+  breakdown.total 0.5312 is band C
+  live screen results screen screen--results screen--solid is-entering
+  stamp       C
+  verdict     Nordic Forest · Overburden / Duplex Drilling
+  speed         67%
+  straightness  98%
+  tool care     59%
+  safety        55%
+
+=== GATES ===
+  no invented number ....... PASS
+
+  warnings the screen raised (these are the instrument working, not a fault):
+     [progression] HOLE_COMPLETE with no contract anywhere — the hole is not settled: no money, no XP, no wear, no reputation {depth: 28.5, timeSec: 12361, grade: B, breakdown
+     [ui] results: HOLE_COMPLETE carried a breakdown but no score for speed, straightness, toolCare, safety — those criteria are shown as unmeasured. The sim publishes breakdo
+     [ui] results: payload says grade "B" but its own breakdown.total 0.5100 falls in band "C" (C starts at 0.44). Showing the band the score is actually in — a letter that co
