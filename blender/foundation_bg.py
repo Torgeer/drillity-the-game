@@ -523,10 +523,14 @@ def build_upper(slew):
                (sx * (CW_W / 2 - 0.30), CW_FACE_Y + CW_D / 2, z + 0.18), bevel=0.02)
         bx('cw-bolt-strip', (CW_W * 0.9, 0.06, 0.05), R.MAT_WORN, own, slew,
            (0, CW_FACE_Y - 0.01, z), bevel=0.01)
-    bx('cw-hazard-l', (0.16, CW_D, CW_H), R.MAT_HAZARD, own, slew,
-       (-CW_W / 2 - 0.05, CW_FACE_Y + CW_D / 2, cwz + CW_H / 2), bevel=0.02)
-    bx('cw-hazard-r', (0.16, CW_D, CW_H), R.MAT_HAZARD, own, slew,
-       (CW_W / 2 + 0.05, CW_FACE_Y + CW_D / 2, cwz + CW_H / 2), bevel=0.02)
+    # Hazard marking is a corner band, not a panel: striping the whole end face
+    # buries the slab, and the slab is half of what makes this silhouette
+    # asymmetric front-to-back [S2 §5.3].
+    for sx in (-1, 1):
+        bx('cw-hazard-edge', (0.13, 0.13, CW_H - 0.20), R.MAT_HAZARD, own, slew,
+           (sx * (CW_W / 2 + 0.02), CW_FACE_Y + 0.03, cwz + CW_H / 2), bevel=0.02)
+    bx('cw-hazard-sill', (CW_W + 0.06, 0.10, 0.16), R.MAT_HAZARD, own, slew,
+       (0, CW_FACE_Y - 0.01, cwz + 0.22), bevel=0.02)
 
     # ── power pack ───────────────────────────────────────────────────────────
     # The house fills the deck between the kinematics pedestals and the
@@ -829,13 +833,16 @@ def build_mast(mast):
     # mast-mounted service ladder with a fall-arrest rail
     z = MAST_FOOT_Z + 0.45
     while z < GIRDER_TOP_Z - 0.5:
-        bx('mast-rung', (0.40, 0.045, 0.035), R.MAT_WORN, own, mast,
-           (-0.78, MAST_BACK_Y - 0.22, z), bevel=0.006, seg=1)
+        bx('mast-rung', (0.34, 0.040, 0.032), R.MAT_WORN, own, mast,
+           (-0.44, MAST_BACK_Y - 0.20, z), bevel=0.006, seg=1)
         z += 0.31
-    for sx in (-0.19, 0.19):
-        strut('mast-ladder-rail', (-0.78 + sx, MAST_BACK_Y - 0.26, MAST_FOOT_Z + 0.35),
-              (-0.78 + sx, MAST_BACK_Y - 0.26, GIRDER_TOP_Z - 0.4),
-              0.026, R.MAT_HAZARD, own, mast, sides=6)
+    for sx in (-0.16, 0.16):
+        strut('mast-ladder-rail', (-0.44 + sx, MAST_BACK_Y - 0.23, MAST_FOOT_Z + 0.35),
+              (-0.44 + sx, MAST_BACK_Y - 0.23, GIRDER_TOP_Z - 0.4),
+              0.024, R.MAT_DARK, own, mast, sides=6)
+    strut('mast-fall-arrest', (-0.44, MAST_BACK_Y - 0.31, MAST_FOOT_Z + 0.40),
+          (-0.44, MAST_BACK_Y - 0.31, GIRDER_TOP_Z - 0.4),
+          0.016, R.MAT_STEEL, own, mast, sides=6)
 
 
 def build_sledge_and_drive(sledge, spindle):
@@ -872,11 +879,14 @@ def build_sledge_and_drive(sledge, spindle):
 
     # arms out to the drill axis — this is the 1 400 mm stand-off, in the metal
     for sx in (-1, 1):
-        strut('sledge-arm', (sx * 0.62, MAST_FACE_Y + 0.30, 0.45),
-              (sx * 0.52, DRILL_AXIS_Y - 0.20, 0.45), 0.09, R.MAT_DARK, own, sledge,
+        strut('sledge-arm', (sx * 0.62, MAST_FACE_Y + 0.24, 0.45),
+              (sx * 0.52, DRILL_AXIS_Y - 0.18, 0.45), 0.135, R.MAT_DARK, own, sledge,
               square=True)
-        strut('sledge-arm-lo', (sx * 0.62, MAST_FACE_Y + 0.30, -0.72),
-              (sx * 0.52, DRILL_AXIS_Y - 0.20, -0.72), 0.09, R.MAT_DARK, own, sledge,
+        strut('sledge-arm-lo', (sx * 0.62, MAST_FACE_Y + 0.24, -0.72),
+              (sx * 0.52, DRILL_AXIS_Y - 0.18, -0.72), 0.135, R.MAT_DARK, own, sledge,
+              square=True)
+        strut('sledge-arm-diag', (sx * 0.60, MAST_FACE_Y + 0.26, -0.70),
+              (sx * 0.52, DRILL_AXIS_Y - 0.18, 0.40), 0.062, R.MAT_DARK, own, sledge,
               square=True)
         bx('sledge-pin-boss', (0.24, 0.30, 0.30), R.MAT_WORN, own, sledge,
            (sx * 0.52, DRILL_AXIS_Y - 0.28, 0.45), bevel=0.02)
@@ -887,26 +897,32 @@ def build_sledge_and_drive(sledge, spindle):
 
     # ── rotary drive body: 2 630 × 1 490, 7.2 t [S1 p.23] ────────────────────
     ax = DRILL_AXIS_Y
-    bx('drive-housing', (KDK_W, KDK_D, KDK_H * 0.60), R.MAT_PAINT, own, sledge,
-       (0, ax, 0.42), bevel=0.05)
+    # The stack has to add up to the published 2 630 mm, measured from the
+    # drive's lower face at local -0.70: output housing 0.34 + gearcase 0.55 +
+    # main housing 1.58 + cap 0.16 = 2.63.
+    body_z0, body_h = -0.36 + 0.55, KDK_H * 0.60
+    bx('drive-housing', (KDK_W, KDK_D, body_h), R.MAT_PAINT, own, sledge,
+       (0, ax, body_z0 + body_h / 2), bevel=0.05)
+    bx('drive-housing-rib', (KDK_W + 0.06, KDK_D - 0.22, 0.10), R.MAT_DARK, own, sledge,
+       (0, ax, body_z0 + body_h * 0.62), bevel=0.02)
     bx('drive-top-cap', (KDK_W - 0.12, KDK_D - 0.10, 0.16), R.MAT_DARK, own, sledge,
-       (0, ax, 0.42 + KDK_H * 0.30 + 0.08), bevel=0.03)
+       (0, ax, body_z0 + body_h + 0.08), bevel=0.03)
     for sx in (-1, 1):                       # lifting eyes — it comes off
-        bx('drive-lift-eye', (0.09, 0.26, 0.24), R.MAT_WORN, own, sledge,
-           (sx * (KDK_W / 2 - 0.18), ax, 0.42 + KDK_H * 0.30 + 0.20), bevel=0.02)
+        bx('drive-lift-eye', (0.09, 0.26, 0.26), R.MAT_WORN, own, sledge,
+           (sx * (KDK_W / 2 - 0.18), ax, body_z0 + body_h + 0.24), bevel=0.02)
     # radial-piston motor pods round the gear ring
     for i in range(4):
         th = math.pi / 4 + i * math.pi / 2
-        tb('drive-motor', 0.155, 0.42, R.MAT_CAST, own, sledge,
-           (math.cos(th) * 0.52, ax + math.sin(th) * 0.42, 0.42 + KDK_H * 0.30),
+        tb('drive-motor', 0.165, 0.46, R.MAT_CAST, own, sledge,
+           (math.cos(th) * 0.54, ax + math.sin(th) * 0.44, body_z0 + 0.18),
            (0, 0, 0), sides=12)
-        bx('drive-motor-block', (0.28, 0.26, 0.20), R.MAT_CAST, own, sledge,
-           (math.cos(th) * 0.52, ax + math.sin(th) * 0.42, 0.42 + KDK_H * 0.30 + 0.50),
+        bx('drive-motor-block', (0.30, 0.28, 0.22), R.MAT_CAST, own, sledge,
+           (math.cos(th) * 0.54, ax + math.sin(th) * 0.44, body_z0 + 0.75),
            bevel=0.02)
     # gearbox belly and the hollow output housing
-    tb('drive-gearcase', 0.46, 0.55, R.MAT_CAST, own, sledge,
+    tb('drive-gearcase', 0.48, 0.55, R.MAT_CAST, own, sledge,
        (0, ax, -0.36), sides=24)
-    tb('drive-output-housing', 0.36, 0.34, R.MAT_CAST, own, sledge,
+    tb('drive-output-housing', 0.38, 0.34, R.MAT_CAST, own, sledge,
        (0, ax, -0.70), sides=20)
 
     # bulkhead plate on the drive — every hose in the package lands here [S4]
@@ -968,8 +984,11 @@ def build_kelly(spindle, top0):
            (0, 0, top - KELLY_L), sides=16 if i == 0 else 12)
 
         # six welded drive keys, full length, 60° apart [S3]
-        kp = 0.045 if i == 0 else 0.030       # how far a key stands proud
-        kw = 0.090 if i == 0 else 0.070
+        # [S2 SS3] transport diameter E = 826 mm over a 470 mm pipe, so the
+        # keys and the head stand a long way out of the tube. That is
+        # silhouette, not trim: it is what stops the bar reading as pipe.
+        kp = 0.070 if i == 0 else 0.042       # how far a key stands proud
+        kw = 0.110 if i == 0 else 0.080
         for k in range(KELLY_KEYS):
             th = k * math.tau / KELLY_KEYS
             bx('kelly-key-%d' % (i + 1), (kw, kp * 2.0, KELLY_L - 0.35), R.MAT_WORN,
@@ -1095,7 +1114,9 @@ def build_ropes_and_hoses(mast, sledge_z, head_z):
     for i in range(6):
         x = -0.62 + (i - 2.5) * 0.062
         hs('hose-main-%d' % (i + 1),
-           [(x, y0, MAST_FOOT_Z + 1.15),
+           [(x + 1.55, 1.95, DECK_Z + 0.50),                # carrier bulkhead
+            (x + 0.85, 2.40, DECK_Z + 1.35),
+            (x, y0, MAST_FOOT_Z + 1.15),
             (x, y0 - 0.12, MAST_FOOT_Z + 5.0),
             (x, y0 - 0.16, sledge_z + 2.60),              # the catenary crest
             (x - 0.05, y0 + 0.55, sledge_z + 1.10),
