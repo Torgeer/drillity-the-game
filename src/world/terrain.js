@@ -235,11 +235,35 @@ const CLASSES = {
  * Every material kind src/core/assets.js knows about. Nothing in this file may
  * ask for a name that is not on this list — an unknown kind silently falls back
  * to rawSteel, which is how the whole site kit ended up wearing concrete.
+ *
+ * THIS LIST HELD TWENTY NAMES AND `assets.js` HAS THIRTY-FOUR KINDS. That is
+ * "two tables describing one thing will drift, and the one that is wrong will
+ * be believed" (ASTRA.md §5) caught in the act. Fourteen perfectly real kinds
+ * — `blastedRock`, `shotcrete`, `precastConcrete`, `galvanised`, `mesh`,
+ * `timber`, `paintedDark` among them — were rejected by `mat()` below with one
+ * console warning and silently swapped for `dirt`, in the one file whose whole
+ * job is dressing PLACES out of exactly those materials. A `blastedRock`
+ * highwall would have loaded, passed `checkmodels.mjs`, and rendered as mud.
+ *
+ * Completed rather than deleted, because the check is still worth having: it
+ * turns a typo into one loud warning here instead of a silent `rawSteel`
+ * substitution three layers down in `assets.js`. It is a MIRROR of that file's
+ * `KINDS` and must be updated with it. `blender/lib/site.py` takes the better
+ * route — it PARSES `assets.js` and carries no list at all — and that is the
+ * right fix here too the next time this drifts.
  */
 const KIND_NAMES = [
-  'paintedSteel', 'rawSteel', 'wornSteel', 'carbide', 'castIron', 'chrome',
-  'rubber', 'hose', 'plastic', 'glass', 'dirt', 'concrete', 'gravel', 'grass',
-  'snow', 'sand', 'rockFace', 'foam', 'safetyStripe', 'brandedPanel',
+  // rig and plant bodywork
+  'paintedSteel', 'paintedDark', 'rawSteel', 'wornSteel', 'carbide', 'castIron',
+  'chrome', 'galvanised', 'mesh',
+  // flexible and soft
+  'rubber', 'hose', 'plastic', 'foam', 'glass', 'resin', 'timber',
+  // ground and rock
+  'dirt', 'concrete', 'castConcrete', 'precastConcrete', 'shotcrete', 'gravel',
+  'grass', 'snow', 'sand', 'rockFace', 'blastedRock',
+  // markings, consumables, samples
+  'safetyStripe', 'brandedPanel', 'anfoHose', 'detCord', 'sampleBag',
+  'coreTray', 'cyclone',
 ];
 
 /** The params assets.js bakes or keys on. Everything else stays terrain-side. */
@@ -465,6 +489,33 @@ const ARCHETYPES = {
   'quarry-bench': {
     kit: 'quarry', plane: 'surface', groundKind: 'gravel', pad: 0, farAmp: 0.8,
     dress: { spruce: 0.15, birch: 0.15, rock: 1.1, stone: 1.3, grass: 0.25, scree: 1.4, scrub: 0.6, ice: 0.3 },
+    /* ── THE FIRST ARCHETYPE BUILT IN BLENDER ────────────────────────────
+       `model` names a .glb in `public/models/sites/`, built by
+       `blender/sites/quarry_bench.py`. The filename is the archetype id
+       verbatim, the same contract the machines are under (ASTRA §4.4).
+
+       `replaces` is the other half of it and is NOT optional. A site .glb
+       costs ONE DRAW CALL PER MATERIAL, while the procedural site kit is free
+       — it merges into a 6-mesh vertex-coloured pool however much goes into
+       it. So a .glb is pure addition, and the surface band is ALREADY over
+       its ceiling of 80 in eight of twenty-one method states with no .glb on
+       any site (measured, shots/s0-report.txt). An archetype that loads a
+       model must therefore give the calls back, and these three are what this
+       model actually replaces: its highwall, muckpile, windrow and floor
+       debris are the same rock these instanced scatters were standing in for,
+       authored instead of sprinkled. See THE BUDGET in blender/lib/site.py.
+
+       `flatR` is the bench floor. [F] research/16 §A.4 / [HSE-L118] Reg 13:
+       benches are "designed, constructed and maintained so as to allow
+       vehicles and plant to be used and moved upon them safely" — a quarry
+       bench is an engineered flat, not ground with a rig on it, so the model
+       stands on a real flat rather than on a fudge. The distance is set by
+       the model's own near footprint (its rock reaches ~30 m) and NOT by any
+       sourced bench width, because §A.4 is explicit that no such figure
+       exists. */
+    model: 'quarry-bench',
+    replaces: ['outcrops', 'scree', 'stones'],
+    flatR: 46, flatFalloff: 70,
   },
   'open-pit-bench': {
     kit: 'pit', plane: 'surface', groundKind: 'gravel', pad: 0, farAmp: 0.35,
@@ -1746,7 +1797,23 @@ export function createTerrain(ctx) {
     // exactly as it stands on a surface pad.
     if (ugSpec) return 0;
     if (onDeck()) return 0;             // steel deck: everything sits at y = 0
-    const n = naturalHeight(x, z);
+    let n = naturalHeight(x, z);
+    /* AN ENGINEERED FLOOR, WHERE THE ARCHETYPE HAS ONE.
+       `flatR` is the archetype declaring that the ground it stands on is a
+       BUILT SURFACE rather than the country's own — a quarry bench, a graded
+       pad, a haul floor. [HSE-L118] Reg 13 makes exactly that claim for a
+       quarry: benches "designed, constructed and maintained so as to allow
+       vehicles and plant to be used and moved upon them safely".
+
+       It is applied before the working-pad blend rather than instead of it, so
+       the collar spoil ring, the pad crown and `heightAt()` all keep working
+       untouched — and because it feeds `naturalHeight`'s result, the rig agent
+       and this module still cannot disagree about where the ground is. */
+    if (arch && arch.flatR) {
+      const rr = Math.hypot(x, z);
+      const fo = arch.flatFalloff || arch.flatR * 1.5;
+      n *= smoothstep(clamp((rr - arch.flatR) / Math.max(1e-3, fo - arch.flatR)));
+    }
     const dx = x - padCenter.x, dz = z - padCenter.z;
     const r = Math.hypot(dx, dz);
     const k = 1 - smoothstep(clamp((r - CFG.padRadius) / (CFG.padFalloff - CFG.padRadius)));
@@ -3862,7 +3929,23 @@ export function createTerrain(ctx) {
       put(box(T, 0.7, 1.5, 0.5, -9.5, 0.75, -6.5), 0xc0392b, 'paint');
     }
 
-    if (kit === 'quarry') {
+    /* ── QUARRY BENCH ───────────────────────────────────────────────────────
+       THIS BRANCH IS NOW THE FALLBACK, NOT THE SITE.
+
+       `blender/sites/quarry_bench.py` builds the real one — a blasted highwall
+       with drill traces at the shot's own spacing, a catch berm, a muckpile,
+       the pattern pegged out on a sourced burden and spacing, the danger-zone
+       marking, edge protection along the crest, and the plant below — and it
+       loads from `public/models/sites/quarry-bench.glb`.
+
+       What survives here is six cones and a berm, and it is worth being honest
+       about what that was: it was thirteen lines and it was not a quarry. It
+       stays because `public/models` is GITIGNORED and built by `npm run
+       blender`, so a fresh clone has no model and something has to stand on the
+       bench. It must never quietly stand in for the model in a review frame —
+       `loadSiteModel()` logs every failure with its URL, and `siteModel` on the
+       public API says which of the two is on screen. */
+    if (kit === 'quarry' && !siteModelLive()) {
       // pale limestone rubble piles + a haul-road berm
       for (let i = 0; i < 6; i++) {
         const a = rand.range(0, TAU), r = rand.range(16, 30);
@@ -4074,6 +4157,19 @@ export function createTerrain(ctx) {
 
   function addInstances(name, geo, material, list, opts = {}) {
     if (!list.length) return null;
+    /* THE ARCHETYPE'S MODEL PAYS FOR ITSELF HERE, AND THIS IS THE ONLY PLACE
+       IT CAN. A site .glb costs one draw call per material; every one of these
+       InstancedMeshes is one draw call. `replaces` names the scatters whose job
+       the model has taken over — on `quarry-bench` its authored highwall,
+       muckpile, windrow and floor debris ARE the rock that `outcrops`, `scree`
+       and `stones` were standing in for — so they come out in the same breath
+       the model goes in. Without this the model is pure addition to a surface
+       band that is already over its ceiling in eight of twenty-one states.
+
+       Gated on the model being LIVE, not on it being declared: a fresh clone
+       has no `public/models` at all, and there the scatter must still draw. */
+    if (opts.replaceable !== false && arch && arch.replaces
+        && arch.replaces.includes(name) && siteModelLive()) return null;
     const im = new T.InstancedMesh(geo, material, list.length);
     const mtx = new T.Matrix4();
     const q = new T.Quaternion();
@@ -6019,6 +6115,309 @@ export function createTerrain(ctx) {
   }
 
   /* ═══════════════════════════════════════════════════════════════════════
+     SITE MODELS — the archetype, built in Blender
+
+     `blender/sites/<archetype>.py` -> `public/models/sites/<archetype>.glb`,
+     and this is the route that puts it on screen. It is deliberately the same
+     shape as `src/core/gltfRig.js`, which does the machines, and it is a
+     SEPARATE implementation for one reason: gltfRig's product is a
+     RIG_BUILDERS-shaped builder with `dyn`, `spec`, pivots, slides, work
+     lights and a carriage range, and a place has none of those. Sharing the
+     file would mean a site pretending to be a machine.
+
+     What is NOT re-derived is the part that is hard, because getting it wrong
+     is silent every time. Four things below are lifted from gltfRig's hard-won
+     behaviour and each one has a comment saying why:
+
+       1. `restoreSiteNames()` — three.js DELETES `:` from node names on load.
+       2. materials are swapped BY NAME, never used as imported.
+       3. `transmission` is pinned to 0 on every one of them.
+       4. geometry is cloned on instantiate; materials are shared.
+
+     THE FALLBACK IS DELIBERATELY LOUD AND DELIBERATELY NOT SILENT-CLEAN.
+     `public/models/` is gitignored and built by `npm run blender`, so a fresh
+     clone has no models at all and the procedural kit MUST still draw. But
+     "a silent fallback that works is the most expensive kind of failure"
+     (ASTRA §8): every failure here logs once, with the URL, and
+     `siteModelProblem` is readable off the public API so a harness can grade
+     it. A frame that quietly photographed the six-cone procedural quarry while
+     believing it was the Blender one is the exact thing that hid six unloaded
+     machines for a week.
+     ═══════════════════════════════════════════════════════════════════════ */
+  const SITE_DIR = 'models/sites/';
+  const NAMED_RE = /^(pivot:|slide:|mount:|aim:)/;
+  /** archetype id -> { scene, nodes } once parsed; `false` once failed. */
+  const siteMasters = new Map();
+  const siteInflight = new Map();
+  const siteKinds = new Map();          // kind name -> the one live material
+  let siteNode = null;                  // what is in the scene right now
+  let siteProblem = null;
+  let gltfLibP = null;
+
+  const siteUrl = (id) => new URL(
+    SITE_DIR + id + '.glb',
+    (typeof document !== 'undefined' && document.baseURI) || './',
+  ).href;
+
+  function gltfLib() {
+    /* Imported lazily and in parallel, exactly as gltfRig.js does it: the
+       loader is ~40 kB that a session which never reaches a modelled site
+       should not pay for, and vite inlines both into the single-file build. */
+    if (!gltfLibP) {
+      gltfLibP = Promise.all([
+        import('three/examples/jsm/loaders/GLTFLoader.js'),
+        import('three/examples/jsm/libs/meshopt_decoder.module.js'),
+      ]).then(([a, b]) => ({ GLTFLoader: a.GLTFLoader, MeshoptDecoder: b.MeshoptDecoder }));
+    }
+    return gltfLibP;
+  }
+
+  /**
+   * THE ONE THAT IS SILENT WHEN IT BREAKS.
+   *
+   * three.js's GLTFLoader runs every node name through
+   * `PropertyBinding.sanitizeNodeName()`, which DELETES `[ ] . : /`. So
+   * `mount:site-collar` arrives in the scene graph called `mountsite-collar`
+   * and every anchor in the file is invisible to a prefix test — with no error
+   * anywhere, because nothing failed. The names are restored from the glTF JSON
+   * through `parser.associations`, which still maps each Object3D back to its
+   * source node index.
+   *
+   * Then the counts are CROSS-CHECKED. A gate over an empty set passes forever
+   * (ASTRA §8): if the file declares four prefixed nodes and only three reach
+   * the scene, that is a real fault and must be an error, not a shrug.
+   */
+  function restoreSiteNames(gltf, id) {
+    const parser = gltf.parser;
+    const json = parser && parser.json;
+    const assoc = parser && parser.associations;
+    if (!json || !assoc) {
+      throw new Error(`[terrain] site "${id}": GLTFLoader gave no parser.associations, `
+        + 'so node names cannot be un-sanitised. Every mount: on this site would be lost.');
+    }
+    const nodes = json.nodes || [];
+    let restored = 0;
+    assoc.forEach((ref, obj) => {
+      if (!obj || !obj.isObject3D || !ref || ref.nodes === undefined) return;
+      const src = nodes[ref.nodes];
+      if (src && src.name && obj.name !== src.name) { obj.name = src.name; restored++; }
+    });
+    const declared = nodes.filter((n) => NAMED_RE.test(n.name || '')).length;
+    let live = 0;
+    gltf.scene.traverse((o) => { if (NAMED_RE.test(o.name || '')) live++; });
+    if (live < declared) {
+      throw new Error(`[terrain] site "${id}": the file declares ${declared} prefixed `
+        + `node(s) and only ${live} reached the scene graph. Named nodes are the `
+        + 'contract (ASTRA §4.1); a partial restore is worse than none.');
+    }
+    return restored;
+  }
+
+  /**
+   * Materials are NAMES, not surfaces.
+   *
+   * `assets.js` generates every texture procedurally with wear and dirt driven
+   * by gameplay state, so what a .glb ships is a name and nothing else. The
+   * imported stub is read for its name, then disposed — and so is any baked map
+   * that somehow arrived on it, because a baked map opts the object out of the
+   * wear system AND spends the texture budget twice.
+   *
+   * One live material per KIND, shared across every mesh in every site that
+   * asks for it. `mat()` already clones out of the assets cache and registers
+   * the clone for disposal.
+   */
+  function siteMaterial(kind, id) {
+    let m = siteKinds.get(kind);
+    if (m) return m;
+    m = mat(kind, {});
+    /* THE TRANSMISSION RULE, ENFORCED AND NOT ASSUMED.
+       `assets.material('glass')` comes back with transmission 0.92 today, and
+       transmission above zero anywhere in the visible list makes three.js
+       re-render the WHOLE opaque list into a transmission target: +65 to +81
+       draw calls, measured, and it does not scale with the object. Site glazing
+       — a cabin window, a car windscreen — is precisely where this gets
+       reached for. No list of "hot" kinds is kept: look at what came back. */
+    if (m && m.transmission > 0) {
+      m.transmission = 0;
+      console.warn(`[terrain] site "${id}": pinned transmission to 0 on "${kind}" `
+        + '(it costs +65..81 draw calls whatever the object size).');
+    }
+    siteKinds.set(kind, m);
+    return m;
+  }
+
+  /**
+   * Read every mesh's material NAME, record it, and throw the imported stub
+   * away.
+   *
+   * THE KIND IS RECORDED ON THE MESH, NOT RESOLVED ONCE AND KEPT.
+   * `purgeMaterials()` disposes everything `mat()` made on every rebuild, and
+   * the site's materials come from `mat()`. If the parsed master held live
+   * material references, the first rebuild after a load would leave the master
+   * pointing at disposed materials and the NEXT attach would clone them — a
+   * black site, two rebuilds after the change that caused it, with nothing in
+   * the log. So the master carries `userData.siteKinds` (names) and
+   * `attachSiteModel()` re-resolves against the live cache every time.
+   */
+  function swapSiteMaterials(scene, id) {
+    const seen = new Set();
+    const kinds = new Set();
+    scene.traverse((o) => {
+      if (!o.isMesh || !o.material) return;
+      const list = Array.isArray(o.material) ? o.material : [o.material];
+      const names = list.map((old) => {
+        const kind = old && old.name;
+        if (!kind) {
+          console.error(`[terrain] site "${id}": a material arrived with no name. `
+            + 'blender/lib/site.py exports names only — see rig.py contract 2.');
+          return null;
+        }
+        kinds.add(kind);
+        if (!seen.has(old.uuid)) {
+          seen.add(old.uuid);
+          for (const slot of ['map', 'normalMap', 'roughnessMap', 'metalnessMap',
+            'aoMap', 'emissiveMap', 'alphaMap']) {
+            if (old[slot]) {
+              console.warn(`[terrain] site "${id}": "${kind}" shipped a baked ${slot}. `
+                + 'That opts it out of the wear system and spends the texture '
+                + 'budget twice; discarding it.');
+              old[slot].dispose?.();
+            }
+          }
+          old.dispose?.();
+        }
+        return kind;
+      });
+      o.userData.siteKinds = names;
+      o.castShadow = true;
+      o.receiveShadow = true;
+    });
+    return [...kinds];
+  }
+
+  /** Bind the live `assets.js` materials onto a freshly cloned site node. */
+  function bindSiteMaterials(node, id) {
+    node.traverse((o) => {
+      if (!o.isMesh) return;
+      const names = o.userData.siteKinds;
+      if (!names || !names.length) return;
+      const live = names.map((k) => (k ? siteMaterial(k, id) : o.material));
+      o.material = names.length > 1 ? live : live[0];
+    });
+  }
+
+  async function loadSiteModel(id) {
+    if (siteMasters.has(id)) return siteMasters.get(id);
+    if (siteInflight.has(id)) return siteInflight.get(id);
+
+    const url = siteUrl(id);
+    const p = (async () => {
+      const t0 = (typeof performance !== 'undefined' ? performance.now() : 0);
+      const res = await fetch(url);
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status} for ${url} — the filename must be the `
+          + 'ARCHETYPE ID verbatim, hyphens and all (ASTRA §4.4).');
+      }
+      const buf = await res.arrayBuffer();
+      /* Four bytes, before anything expensive. A dev server answers an unknown
+         path with index.html, and handing THAT to GLTFLoader produces a parse
+         error that reads like a corrupt model. */
+      if (buf.byteLength < 12 || new DataView(buf).getUint32(0, true) !== 0x46546c67) {
+        throw new Error(`${url} is not a GLB (bad magic). This is usually the dev `
+          + "server's SPA fallback page, not a model.");
+      }
+      const { GLTFLoader, MeshoptDecoder } = await gltfLib();
+      const loader = new GLTFLoader();
+      if (MeshoptDecoder) loader.setMeshoptDecoder(MeshoptDecoder);
+      const gltf = await loader.parseAsync(buf, '');
+      restoreSiteNames(gltf, id);
+      const scene = gltf.scene;
+      scene.name = `site:${id}`;
+      const kinds = swapSiteMaterials(scene, id);
+
+      let prims = 0, tris = 0;
+      const nodes = new Map();
+      scene.traverse((o) => {
+        if (o.isMesh && o.geometry) {
+          prims += Array.isArray(o.material) ? o.material.length : 1;
+          const ix = o.geometry.index;
+          tris += (ix ? ix.count : (o.geometry.attributes.position?.count || 0)) / 3;
+        }
+        if (NAMED_RE.test(o.name || '')) nodes.set(o.name, o);
+      });
+      const ms = Math.round((typeof performance !== 'undefined' ? performance.now() : 0) - t0);
+      console.info(`[terrain] site "${id}" ${(buf.byteLength / 1024) | 0} kB · `
+        + `${prims} draw calls · ${tris | 0} tris · ${nodes.size} named nodes · `
+        + `materials ${kinds.join(', ')} · ${ms} ms`);
+      /* The .glb's cost is its material count, and the budget lives in
+         blender/lib/site.py where it is enforced at build time. This is the
+         other end of the same measurement: if a model ever gets past that gate
+         the game says so rather than quietly spending the surface band. */
+      if (prims > 6) {
+        console.warn(`[terrain] site "${id}" submits ${prims} draw calls against a `
+          + 'budget of 6. See THE BUDGET in blender/lib/site.py.');
+      }
+      return { scene, nodes, prims, tris };
+    })()
+      .then((m) => { siteMasters.set(id, m); siteInflight.delete(id); return m; })
+      .catch((e) => {
+        siteMasters.set(id, false);
+        siteInflight.delete(id);
+        siteProblem = `${id}: ${e.message}`;
+        /* Loud, once, with the URL — and the procedural kit still draws, which
+           is correct on a fresh clone (public/models is gitignored and built by
+           `npm run blender`). What must never happen is this being INVISIBLE. */
+        console.warn(`[terrain] site model "${id}" did not load; drawing the `
+          + `procedural site instead. ${e.message}`);
+        return false;
+      });
+
+    siteInflight.set(id, p);
+    return p;
+  }
+
+  /** Is a modelled site standing in the scene for this archetype right now? */
+  function siteModelLive() {
+    return !!(arch && arch.model && siteMasters.get(arch.model));
+  }
+
+  /** Put the archetype's model in the scene, or start fetching it. */
+  function attachSiteModel() {
+    if (siteNode) {
+      root.remove(siteNode);
+      disposeTree(siteNode);            // geometry only — the materials are shared
+      siteNode = null;
+    }
+    const id = arch && arch.model;
+    if (!id) return;
+    const master = siteMasters.get(id);
+    if (master === undefined) {
+      /* Not fetched yet. rebuild() is synchronous and always will be, so the
+         first build of a modelled archetype draws the procedural site and the
+         model lands one rebuild later. Guarded on the archetype still being
+         the same one: a contract can change while a fetch is in flight. */
+      const want = archId;
+      loadSiteModel(id).then((m) => { if (m && archId === want) rebuild(); });
+      return;
+    }
+    if (!master) return;                // known failure — procedural kit stands
+
+    /* Geometry is CLONED, materials are NOT.
+       `Object3D.clone()` shares geometry, and `disposeTree()` disposes it
+       unconditionally — so tearing this site down would free the buffers out
+       from under the master and the next archetype change would draw nothing.
+       The materials are the shared `assets.js`-derived ones and `purgeMaterials`
+       already owns them. */
+    const node = master.scene.clone(true);
+    node.traverse((o) => { if (o.isMesh && o.geometry) o.geometry = o.geometry.clone(); });
+    bindSiteMaterials(node, id);
+    node.name = `site:${id}`;
+    node.position.set(0, 0, 0);         // the .glb's origin IS the collar
+    root.add(node);
+    siteNode = node;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
      LIFECYCLE
      ═══════════════════════════════════════════════════════════════════════ */
   /** Free everything mat()/depthFor() made last rebuild (the ground material
@@ -6031,6 +6430,13 @@ export function createTerrain(ctx) {
     }
     disposables.length = 0;
     for (const k of keep) disposables.push(k);
+    /* The site model's materials came from `mat()`, so they are in
+       `disposables` and have just been disposed with everything else. The cache
+       MUST be dropped in the same breath: a Map still holding a disposed
+       material is not an optimisation, it is a black mesh two rebuilds later
+       that nothing in the log will explain. The .glb's parsed master is kept —
+       it holds geometry, not materials. */
+    siteKinds.clear();
   }
 
   function rebuild() {
@@ -6054,6 +6460,12 @@ export function createTerrain(ctx) {
       propMeshes = [];
       if (signMesh) { root.remove(signMesh); disposeTree(signMesh); signMesh = null; }
       if (farField) { root.remove(farField); farField.geometry.dispose(); farField = null; }
+      /* The surface archetype's model is surface furniture. `attachSiteModel()`
+         only runs on the surface path, so without this a quarry bench would
+         still be standing inside the rock of the drive the player just went
+         into — the same class of fault as the site kit, and invisible from
+         inside a tube until the camera clipped through it. */
+      if (siteNode) { root.remove(siteNode); disposeTree(siteNode); siteNode = null; }
       buildSpecials();               // clears the deck / sea / shimmer
       buildDrive();
       collarPosition.set(CFG.collar.x, 0, CFG.collar.z);
@@ -6069,6 +6481,12 @@ export function createTerrain(ctx) {
     buildDressing();
     buildFarField();
     buildSpecials();
+    /* LAST, and after buildDressing() on purpose: `addInstances()` asks
+       `siteModelLive()` whether this archetype's model is standing before it
+       spends a draw call on scatter the model replaces, and the answer has to
+       be the same for the whole build. Attaching first would be answering it
+       with a node that is not in the scene yet. */
+    attachSiteModel();
     padCenter.set(CFG.pad.x, terrainHeight(CFG.pad.x, CFG.pad.z), CFG.pad.z);
     collarPosition.set(CFG.collar.x, 0, CFG.collar.z);
     groundUniforms.uWet.value = clamp(region.wet * 0.5 + weather.wet * 0.8);
@@ -6280,6 +6698,27 @@ export function createTerrain(ctx) {
     get drive() { return ugSpec; },
     /** the SITE_ARCHETYPES id this site is built as — never null once update() runs */
     get archetype() { return archId; },
+    /**
+     * Which of the two sites is actually on screen: the Blender-built model or
+     * the procedural fallback.
+     *
+     * This exists so a review harness cannot photograph the fallback while
+     * believing it photographed the model. Six machines were modelled, exported
+     * and never once drawn for a week because the loader fell through to the
+     * procedural builder exactly as designed and every log line said OK
+     * (ASTRA §4.4, §8). The same trap is laid for sites and this is the
+     * tripwire: `model` is a string only when the .glb is in the scene, and
+     * `problem` carries the reason when it is not.
+     */
+    get siteModel() {
+      return {
+        wanted: (arch && arch.model) || null,
+        model: siteModelLive() ? arch.model : null,
+        procedural: !siteModelLive(),
+        problem: siteProblem,
+        drawCalls: siteModelLive() ? (siteMasters.get(arch.model).prims || 0) : 0,
+      };
+    },
     get methodId() { return methodId; },
 
     /* extras other systems find useful */
