@@ -24,6 +24,60 @@ PRIMARY SOURCE  (read in full, text-extracted from the PDF this session)
         general-arrangement drawing, p.11 "Technical Specifications",
         p.16 "Application – Kelly Drilling" GA + Kelly tables,
         p.22–23 "Transport – Dimensions and Weights".
+
+RE-VERIFIED FIRST-HAND 2026-09-05, INCLUDING THE DRAWINGS
+---------------------------------------------------------
+ASTRA.md §7.5 lists this machine as having "no first-hand dimensional source at
+all" and says of the 27.100 m height: "it is not [sourced]".  **That note is
+stale.**  [S1] was re-fetched from the URL above and read again — this time the
+GA drawings were RASTERISED and looked at, not only text-extracted.  (The
+earlier passes could not: `research/rigs/crawler-th.md` §8 records poppler
+missing on this machine.  It is not needed — **PyMuPDF is installed**, and
+`page.get_pixmap(matrix=Matrix(3,3)).save(...)` renders any page of any of
+these catalogues at readable resolution.  Anyone hitting "I cannot read the
+dimensioned drawing" in this repo should reach for that first.)
+
+What the pages actually say, verbatim:
+
+  p.10  "Dimensions – Basic Version", front + side elevation, "Operating weight
+        112 t (as shown)".  Callouts: 25600 · 23390 · 19640 · Stroke 10000 ·
+        13630 · 3630 · 1100 · 1170 · 4040-5540* · 5680 · R 4640 · 1500 ·
+        3380-4580 · 800 · BK 420/470/3/36 · 5°/5°/5°/15°.
+  p.16  "Application – Kelly Drilling", TWO GAs side by side.  Basic version
+        repeats p.10.  **Upgraded version: 27100 · 24110 · 19640 ·
+        Stroke 10000 · 13630 · 3630 · 1400 · 1170 · 4340-5840* · R 4640 ·
+        3000 · BK 420/470/4/48**, over a table reading "Mast extension 3 m /
+        Upper Kelly guide with / Drilling axis 1,400 mm / Max. drilling
+        diameter uncased 2,500 mm cased 2,200 mm / Operating weight approx.
+        131 t".
+  p.11  "Overall length of crawlers (Standard) 5,680 / 6,090 / 6,090 mm";
+        "Track shoes 800 / 900 mm"; KDK 340 K and KDK 385 S at 342 / 385 kNm
+        and 40 / 53 rpm; "Max. sledge stroke with 3 m mast extension 20,090 mm".
+  p.23  Crawler unit dimensioned **6090 long x 1070 wide x 1130 high**, G = 2 x
+        9.8 t.  Table "Width of crawlers retracted / extended": 800 mm shoes
+        **3,400 – 4,600 mm**; 900 mm shoes **3,500 – 4,700 mm** (Standard and
+        Upgraded), 4,000 – 4,800 (Transport optimized).  "Transport with UW 110
+        Transport Optimized Version ... G = 63.9 t, B = 3,000 mm".
+
+So **27.100 m IS sourced**, to [S1] p.16, upgraded configuration — and the
+decode below is confirmed by the drawing rather than only by arithmetic:
+4 460 + 19 640 + 1 500 = 25 600 and 4 460 + 19 640 + 3 000 = 27 100, both
+printed.  A figure that survives two independent equations and then turns up
+verbatim on the rendered page is not a guess.
+
+Two things the re-read DID find:
+  * the machine measured **5.065 m wide** against a published 4.700 — see the
+    track-guard and cab notes at those two call sites.  Now 4.700 exactly.
+  * **CW_H's citation is wrong.**  It claims 1 720 is "the printed slab
+    dimension on the same page"; on the rendered p.23 the counterweight is
+    dimensioned **950 x 450** with B = 3,000 mm, and **1 720 is the ROTARY
+    DRIVE's width** in the adjacent "Rotary drive" panel.  Left as-is on
+    purpose: neither number reconciles with the published mass.  1 x 4.9 t +
+    4 x 2.5 t = 14.9 t, but 2.90 x 0.95 x 1.72 m of steel is ~37 t and a
+    five-plate 2.25 m stack is ~48 t, so the modelled slab is a SHAPE that
+    stands in for a plate stack, not a solved volume.  Fixing it properly means
+    modelling five bolted 450 mm plates and deriving the depth from the mass —
+    a real job, not a constant edit.  Do not quote 1.720 as sourced.
   [S2]  research/rigs/foundation-bg.md  (the owner's OEM-catalogue digest:
         Kelly-bar construction, drive-key count, hose-package routing, tool
         sizes, the "NOT SOURCED" list).
@@ -430,10 +484,27 @@ def build_undercarriage(root):
            (cx, WHEEL_CTR + 0.20, WHEEL_R + 0.02), bevel=0.05)
         bx('track-frame-tail-' + tag, (0.58, 1.05, 0.52), R.MAT_DARK, own, par,
            (cx, -WHEEL_CTR - 0.20, WHEEL_R + 0.02), bevel=0.05)
-        # track guide guards over the top run
+        # Track guide guards over the top run.  OFFSET INBOARD by half the
+        # difference between the crawler unit and the shoe.
+        #
+        # Two [S1] figures both have to hold and they are not the same number:
+        #   * p.23 dimensions the crawler unit as a transport item at
+        #     6 090 x 1 070 x 1 130 — so the UNIT is 1 070 wide (FRAME_W), which
+        #     is 170 mm more than the 900 mm shoe.
+        #   * p.23's table "Width of crawlers retracted / extended" gives
+        #     3 500 - 4 700 mm for 900 mm shoes, and 3 400 - 4 600 mm for 800 mm
+        #     shoes.  The two rows differ by exactly one shoe-width step, which
+        #     proves the table is measured OVER THE SHOES and that the centre
+        #     gauge is 2 600 retracted / 3 800 extended in both.
+        # Centred, a 1 070 guard on a 3 800 gauge measures 4 870 across — 170 mm
+        # past the published machine width, and it WAS the widest thing on the
+        # undercarriage.  The 170 mm is real; it just lives on the inboard face,
+        # where the final drive and the frame boss are.  So the guard keeps its
+        # sourced size and its OUTER face sits flush with the shoe at 2.350.
+        GUARD_IN = (FRAME_W - SHOE_W) / 2          # 0.085 m, inboard
         for gy in (-1.15, 0.0, 1.15):
             bx('track-guard-' + tag, (FRAME_W, 0.55, 0.14), R.MAT_DARK, own, par,
-               (cx, gy, TRACK_H + 0.02), bevel=0.02)
+               (cx - side * GUARD_IN, gy, TRACK_H + 0.02), bevel=0.02)
 
         # sprocket (rear, driven) and idler (front)
         tb('sprocket-' + tag, WHEEL_R * 0.78, 0.44, R.MAT_WORN, own, par,
@@ -580,7 +651,22 @@ def build_upper(slew):
     # ── cab: full-height front screen, side screen, ROOF window ──────────────
     # The roof window is not decoration; the operator has to watch the masthead
     # and the Kelly head 20 m up while the drive is at the bottom of its stroke.
-    cx0, cy0, cz0 = -1.62, 1.35, DECK_Z + 0.10
+    # CAB X POSITION IS SOURCED, and it was 745 mm out.
+    # [S1 p.23] "Transport with UW 110 Transport Optimized Version ... G = 63.9 t,
+    # B = 3,000 mm", with the two crawler units listed separately at 2 x 9.8 t.
+    # B is "Width, overall", so with the crawlers off, the whole uppercarriage —
+    # cab included — is 3 000 mm across: nothing on it may pass +/-1.500 m.
+    # (The same page's counterweight is B = 3,000 mm, and this file's engine
+    # house already obeys the rule at HW = 1.45.  The cab did not: at
+    # cx0 = -1.62 its outer face stood at -2.245, i.e. 745 mm outside the
+    # envelope and only 105 mm inboard of the track shoe.)
+    # Its wing mirror then reached -2.630 and became the widest thing on the
+    # whole machine — ASTRA.md sec.5 exactly: the overall bound was a MIRROR,
+    # not a width.  With the cab at -0.875 the outer face is flush with the
+    # 3 000 mm body edge, the mirror falls to -1.860, and the model's overall
+    # width becomes the track shoes at 4.700 m = [S1 p.23] to the millimetre.
+    CAB_X_OUT = 1.500                             # [S1 p.23] B = 3 000 mm / 2
+    cx0, cy0, cz0 = -(CAB_X_OUT - CAB_W / 2), 1.35, DECK_Z + 0.10
     bx('cab-shell', (CAB_W, CAB_D, CAB_H), R.MAT_PAINT, own, slew,
        (cx0, cy0, cz0 + CAB_H / 2), bevel=0.05)
     bx('cab-glass-front', (CAB_W - 0.14, 0.05, CAB_H - 0.40), R.MAT_GLASS, own, slew,
