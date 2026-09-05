@@ -60,7 +60,7 @@ import bmesh
 from mathutils import Matrix, Vector
 
 from rig import (
-    reset, box, tube, hose, empty, worklight, finish,
+    reset, part, box, tube, hose, empty, worklight, finish,
     NODE_MOUNT, NODE_AIM, NODE_PIVOT, NODE_SLIDE,
     MAT_PAINT, MAT_DARK, MAT_STEEL, MAT_WORN, MAT_CAST,
     MAT_RUBBER, MAT_GLASS, MAT_CHROME, MAT_HAZARD,
@@ -167,9 +167,40 @@ def bake(o):
     return o
 
 
+def cube(name, size, mat=MAT_PAINT, parent=None, loc=(0, 0, 0), rot=(0, 0, 0),
+         bevel=BEV):
+    """A box of exactly `size` metres. Modifiers left unapplied.
+
+    DELIBERATELY NOT rig.box(). That helper does
+
+        bpy.ops.mesh.primitive_cube_add(size=1)   # a 1 m cube, -0.5 .. +0.5
+        o.scale = (size[0] / 2, size[1] / 2, size[2] / 2)
+
+    so everything it makes comes out at HALF the dimension asked for. Measured,
+    not guessed: a 0.36 m hazard plate placed at x = 1.05 exported spanning
+    0.96 to 1.14 — 0.18 m wide. Every dimension in this file traces to a
+    datasheet page, so it has to be that dimension that lands in the .glb.
+
+    rig.py is shared and other machines are being built against it right now,
+    so the fix is local rather than a change made under somebody else's feet.
+    It should be fixed there: either primitive_cube_add(size=2) with the
+    existing scaling, or size=1 with `o.scale = size`.
+    """
+    bpy.ops.mesh.primitive_cube_add(size=1)
+    o = bpy.context.active_object
+    o.scale = size
+    bpy.ops.object.transform_apply(scale=True)
+    if bevel > 0:
+        m = o.modifiers.new('bev', 'BEVEL')
+        m.width = bevel
+        m.segments = 2
+        m.limit_method = 'ANGLE'
+    return part(name, o, mat, parent, loc, rot)
+
+
 def bx(name, size, mat=MAT_PAINT, parent=None, loc=(0, 0, 0), rot=(0, 0, 0),
        bevel=BEV):
-    return bake(box(name, size, mat, parent, loc, rot, bevel))
+    return bake(cube(name, size, mat, parent, loc, rot, bevel))
 
 
 def tb(name, r, ln, mat=MAT_STEEL, parent=None, loc=(0, 0, 0), rot=(0, 0, 0),
@@ -205,6 +236,29 @@ def weld(group, tag):
             bpy.ops.object.join()
         objs[0].name = tag + ':' + key
     return group
+
+
+def hs(name, pts, r, mat, parent=None, sides=6):
+    """hose() but converted to a mesh.
+
+    A curve object is one draw call that weld() cannot touch — weld only sees
+    MESH children — so four hose runs on the upper carriage were four draw
+    calls for geometry that all shares one material. Converting on the spot
+    folds them into the group's rubber mesh and costs nothing but triangles,
+    which is the lane we are told to spend in.
+    """
+    o = hose(name, pts, r, mat, None, sides)
+    bpy.ops.object.select_all(action='DESELECT')
+    o.select_set(True)
+    bpy.context.view_layer.objects.active = o
+    bpy.ops.object.convert(target='MESH')
+    o = bpy.context.active_object
+    o.name = name
+    if not o.data.materials:
+        o.data.materials.append(bpy.data.materials[mat])
+    if parent is not None:
+        o.parent = parent
+    return o
 
 
 def bmesh_obj(name, verts_fn, mat, parent=None, loc=(0, 0, 0)):
@@ -286,10 +340,6 @@ def build_undercarriage(root):
     """Type UW 60 F [P9]. The frames extend 3.20 -> 4.70 m; working and
     transport stances differ visibly, so both track frames hang off slide:
     nodes and the extension beams they ride on are modelled."""
-    uc = node(NODE_PIVOT, 'undercarriage', root)   # not driven; keeps the
-    uc.name = 'undercarriage'                      # carbody out of the weld
-    uc = bpy.data.objects['undercarriage']
-
     # carbody: the fixed centre frame the slew ring sits on
     bx('carbody', (1.55, 2.90, 0.62), MAT_DARK, root, (0, TRACK_Y, 0.72), bevel=0.03)
     bx('carbody-nose', (1.10, 0.70, 0.34), MAT_DARK, root, (0, TRACK_Y + 1.70, 0.62))
@@ -324,7 +374,7 @@ def build_undercarriage(root):
             bx('sprocket-tooth', (0.30, 0.11, 0.14), MAT_WORN, g,
                (0, TRACK_Y - WHEELBASE / 2 + math.cos(a) * 0.395,
                 TUMBLER_R + math.sin(a) * 0.395), (a, 0, 0), bevel=0.012)
-        tb('sprocket-hub', 0.20, 0.12, MAT_CAST, g,
+        tb('sprocket-hub', 0.20, 0.12, MAT_WORN, g,
            (0.15, TRACK_Y - WHEELBASE / 2, TUMBLER_R), (0, math.pi / 2, 0), sides=16)
         tb('idler', 0.40, 0.34, MAT_WORN, g,
            (-0.17, TRACK_Y + WHEELBASE / 2, TUMBLER_R), (0, math.pi / 2, 0), sides=20)
@@ -337,7 +387,7 @@ def build_undercarriage(root):
             tb('carrier-roller', 0.115, 0.24, MAT_WORN, g,
                (-0.12, yy, 2 * TUMBLER_R - 0.115), (0, math.pi / 2, 0), sides=10)
         # track tensioner grease cylinder, forward of the idler
-        tb('tensioner', 0.09, 0.55, MAT_CHROME, g,
+        tb('tensioner', 0.09, 0.55, MAT_WORN, g,
            (0, TRACK_Y + WHEELBASE / 2 - 0.55, TUMBLER_R + 0.02),
            (-math.pi / 2, 0, 0), sides=10)
         weld(g, 'track-' + side)
@@ -481,8 +531,8 @@ def build_house(slew):
     bx('roof-deck', (UPPER_W - 0.06, d - 0.06, 0.05), MAT_STEEL, slew,
        (0, cy, z1 + 0.03), bevel=0.01)
     # grating slats via ARRAY: one bar, 24 copies, applied.
-    slat = box('roof-grate', (UPPER_W - 0.16, 0.045, 0.035), MAT_STEEL, slew,
-               (0, y0 + 0.14, z1 + 0.07), bevel=0.006)
+    slat = cube('roof-grate', (UPPER_W - 0.16, 0.045, 0.035), MAT_STEEL, slew,
+                (0, y0 + 0.14, z1 + 0.07), bevel=0.006)
     am = slat.modifiers.new('arr', 'ARRAY')
     am.count = 24
     am.use_relative_offset = False
@@ -506,8 +556,8 @@ def build_house(slew):
     for sy in (-0.24, 0.24):
         bx('ladder-stringer', (0.06, 0.09, lz1 - lz0), MAT_PAINT, slew,
            (lx, ly + sy, (lz0 + lz1) / 2), bevel=0.01)
-    rung = box('ladder-rung', (0.05, 0.44, 0.035), MAT_PAINT, slew,
-               (lx - 0.03, ly, lz0 + 0.14), bevel=0.006)
+    rung = cube('ladder-rung', (0.05, 0.44, 0.035), MAT_PAINT, slew,
+                (lx - 0.03, ly, lz0 + 0.14), bevel=0.006)
     rm = rung.modifiers.new('arr', 'ARRAY')
     rm.count = 9
     rm.use_relative_offset = False
@@ -534,14 +584,19 @@ def build_house(slew):
        (0, CW_Y0 - 0.02, CW_Z0 + 0.10), bevel=0.006)
 
     # ── rear support unit [P2 item 3] ───────────────────────────────────
+    # Both jacks on ONE slide node: they are a single hydraulic function and
+    # two nodes would triple the draw calls for no visible gain.
+    g = node(NODE_SLIDE, 'rear-support', slew, (0, HOUSE_Y0 - 0.55, 0))
+    bx('jack-beam', (2.60, 0.34, 0.36), MAT_PAINT, g, (0, 0.12, DECK_Z + 0.10),
+       bevel=0.02)
     for sx in (-1.05, 1.05):
-        g = node(NODE_SLIDE, 'rear-support-%s' % ('l' if sx < 0 else 'r'), slew,
-                 (sx, HOUSE_Y0 - 0.55, 0))
-        bx('jack-body', (0.30, 0.30, 0.70), MAT_PAINT, g, (0, 0, DECK_Z - 0.30),
-           bevel=0.02)
-        tb('jack-rod', 0.075, 0.62, MAT_CHROME, g, (0, 0, 0.18), sides=12)
-        tb('jack-pad', 0.30, 0.09, MAT_WORN, g, (0, 0, 0.06), sides=16)
-        weld(g, 'rear-support')
+        bx('jack-body', (0.34, 0.34, 0.78), MAT_PAINT, g,
+           (sx, 0, DECK_Z - 0.34), bevel=0.02)
+        tb('jack-rod', 0.075, 0.62, MAT_CHROME, g, (sx, 0, 0.18), sides=12)
+        tb('jack-pad', 0.30, 0.09, MAT_WORN, g, (sx, 0, 0.06), sides=16)
+        bx('jack-hazard', (0.36, 0.05, 0.14), MAT_HAZARD, g,
+           (sx, -0.18, DECK_Z - 0.02), bevel=0.006)
+    weld(g, 'rear-support')
 
     # data plate — the game stamps the marque on this, not a maker's wordmark
     node(NODE_MOUNT, 'plate', slew, (-UPPER_W / 2 - 0.02, HOUSE_Y1 - 0.35,
@@ -608,22 +663,6 @@ def build_winches(slew):
 # ═══════════════════════════════════════════════════════════════════════════
 #  KINEMATICS  (four-bar, high pivot, mast held plumb)
 # ═══════════════════════════════════════════════════════════════════════════
-
-def strut(name, parent, a, b, w, t, mat=MAT_PAINT, bevel=0.025):
-    """A box member between two (y,z) points, centred on x=0 unless the caller
-    parents it under an offset empty."""
-    dy, dz = b[0] - a[0], b[1] - a[1]
-    ln = math.hypot(dy, dz)
-    ang = math.atan2(dz, dy) - math.pi / 2      # +Z of the box along the member
-    o = bx(name, (w, t, ln), mat, parent,
-           ((a[0] + b[0]) / 2, 0, 0), (0, 0, 0), bevel=bevel)
-    # rebuild: easier to place directly
-    bpy.data.objects.remove(o, do_unlink=True)
-    o = bx(name, (w, t, ln), mat, parent, (0, 0, 0), (0, 0, 0), bevel=bevel)
-    o.location = (0, (a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
-    o.rotation_euler = (ang, 0, 0)
-    return o
-
 
 def build_kinematics(slew):
     """[P3][P8] "Parallelogrammkinematik", high mast pivot point, minimised
@@ -870,16 +909,22 @@ def build_head(mast, mast_top):
        (0, -hd + 0.05, 0.70), bevel=0.02)
     bx('head-cap', (MAST_W + 0.10, 0.90, 0.16), MAT_PAINT, h,
        (0, 0.42, MAST_HEAD_H - 0.10), bevel=0.02)
-    # sheaves: main hammer line + pile line + auxiliary, on one cross shaft
+    # Sheaves: main hammer line + pile line + auxiliary, on ONE cross shaft.
+    # One pivot node for the block, not one per sheave: they share a shaft so
+    # they share an axis, and three nodes would spend four extra draw calls
+    # animating something no player can see turn separately.
     tb('head-shaft', 0.055, MAST_W + 0.16, MAT_CHROME, h,
        (-(MAST_W + 0.16) / 2, 0.92, 1.52), (0, math.pi / 2, 0), sides=12)
-    for i, sx in enumerate((-0.26, 0.0, 0.26)):
-        s = node(NODE_PIVOT, 'sheave-%d' % (i + 1), h, (sx, 0.92, 1.52),
-                 (0, math.pi / 2, 0))
-        tb('sheave', 0.30, 0.11, MAT_CAST, s, (0, 0, -0.055), sides=20)
-        tb('sheave-groove', 0.27, 0.13, MAT_WORN, s, (0, 0, -0.065), sides=20)
-        tb('sheave-hub', 0.10, 0.15, MAT_CAST, s, (0, 0, -0.075), sides=12)
-        weld(s, 'sheave-%d' % (i + 1))
+    sh = node(NODE_PIVOT, 'sheaves', h, (0, 0.92, 1.52), (0, math.pi / 2, 0))
+    for sx in (-0.26, 0.0, 0.26):
+        tb('sheave', 0.30, 0.11, MAT_CAST, sh, (0, 0, sx - 0.055), sides=20)
+        tb('sheave-groove', 0.27, 0.13, MAT_WORN, sh, (0, 0, sx - 0.065), sides=20)
+        tb('sheave-hub', 0.10, 0.15, MAT_CAST, sh, (0, 0, sx - 0.075), sides=12)
+        for k in range(6):                        # web lightening holes
+            a = k * math.pi / 3
+            tb('sheave-web', 0.055, 0.13, MAT_CAST, sh,
+               (math.cos(a) * 0.19, math.sin(a) * 0.19, sx - 0.065), sides=8)
+    weld(sh, 'sheaves')
     # rope guards over the sheaves
     for sx in (-0.40, 0.40):
         bx('rope-guard', (0.06, 0.72, 0.10), MAT_STEEL, h,
@@ -976,57 +1021,95 @@ def build_carriage(mast):
 #  ROPES, HOSES, LIGHTS
 # ═══════════════════════════════════════════════════════════════════════════
 
-def build_ropes(root, head_z):
+def build_ropes(root):
     """Two reeved lines, drawn in the pose the machine is exported in.
 
-    hose() is a Bezier with a bevel, so the long unloaded fall between the
-    head and the drum actually sags instead of reading as a wire. Both are
-    parented under slide: nodes so finish() leaves them alone and the game can
-    replace or re-point them as the mast travels.
+    hs() is a Bezier with a bevel, so the long unloaded lead between the head
+    and the drum actually sags instead of reading as a wire — a straight
+    cylinder never looks like rope. Both leads sit on one slide: node (they
+    are one visual system and the game re-points them together); the working
+    fall down to the tool gets its own, because it travels with the carriage.
     """
     top = MAST_Z0 + MAST_LEN + 1.52
+    g = node(NODE_SLIDE, 'rope-leads', root)
     for name, sx, wx, r in (('main', 0.0, 0.62, 0.020),
                             ('pile', -0.26, -0.62, 0.016)):
-        g = node(NODE_SLIDE, 'rope-' + name, root)
-        hose('rope-' + name, [
+        hs('rope-' + name, [
             (wx, WINCH_Y, WINCH_Z + 0.30),
             (wx * 0.7, MAST_Y + 0.30, top * 0.55),
             (sx, MAST_Y + 0.60, top - 0.40),
             (sx, MAST_Y + 0.92, top),
-        ], radius=r, mat=MAT_WORN, parent=g, sides=6)
-    # the dead fall from the head down the working line to the hammer
-    g = node(NODE_SLIDE, 'rope-fall', root)
-    hose('rope-fall', [
+        ], r, MAT_WORN, g, sides=6)
+    weld(g, 'rope-leads')
+    f = node(NODE_SLIDE, 'rope-fall', root)
+    hs('rope-fall', [
         (0.0, MAST_Y + 0.92, top),
         (0.0, PILE_Y - 0.05, top - 2.6),
         (0.0, PILE_Y, MAST_Z0 + MAST_LEN - 5.05),
-    ], radius=0.020, mat=MAT_WORN, parent=g, sides=6)
+    ], 0.020, MAT_WORN, f, sides=6)
+    weld(f, 'rope-fall')
 
 
-def build_hoses(slew, carrier):
+def build_hoses(slew, carrier, mast):
     """Hose routing is one of the clearest tells that a machine was modelled
-    from a photograph rather than from memory. Runs read off the cover render
-    [P1]: a fat pair out of the house front, up behind the rear column, into
-    the gusset; a thinner pair to the winch block; and the drag-chain bundle
-    breaking out at the mast foot."""
-    hose('hose-main-a', [
+    from a photograph rather than from memory.
+
+    Runs read off the cover render [P1]: a fat pair out of the house front, up
+    behind the rear column and into the gusset; a thinner pair down to the
+    winch block; the tool bundle breaking out of the drag chain at the guide;
+    and the loop that follows the mast up its inboard flank.
+    """
+    hs('hose-main-a', [
         (0.30, -0.80, HOUSE_TOP - 0.20), (0.36, 0.55, 2.30),
         (0.30, KIN_REAR_FOOT[0] + 0.30, 3.20), (0.26, 1.60, 5.10),
         (0.22, 2.30, 5.50),
-    ], radius=0.045, mat=MAT_RUBBER, parent=slew, sides=6)
-    hose('hose-main-b', [
+    ], 0.045, MAT_RUBBER, slew, sides=6)
+    hs('hose-main-b', [
         (0.46, -0.80, HOUSE_TOP - 0.28), (0.52, 0.55, 2.20),
         (0.46, KIN_REAR_FOOT[0] + 0.32, 3.10), (0.40, 1.60, 5.00),
         (0.34, 2.30, 5.42),
-    ], radius=0.045, mat=MAT_RUBBER, parent=slew, sides=6)
-    hose('hose-winch', [
+    ], 0.045, MAT_RUBBER, slew, sides=6)
+    hs('hose-winch', [
         (-0.30, -1.00, HOUSE_TOP - 0.35), (-0.42, 0.40, 2.60),
         (-0.55, 1.25, 2.95), (-0.66, WINCH_Y, WINCH_Z + 0.10),
-    ], radius=0.030, mat=MAT_RUBBER, parent=slew, sides=6)
-    hose('hose-tool', [
+    ], 0.030, MAT_RUBBER, slew, sides=6)
+    hs('hose-tank', [
+        (-0.62, -2.60, HOUSE_TOP - 0.10), (-0.70, -1.40, HOUSE_TOP - 0.55),
+        (-0.62, -0.60, 2.10), (-0.50, 0.30, 1.70),
+    ], 0.036, MAT_RUBBER, slew, sides=6)
+    hs('hose-tool-a', [
         (-0.80, 2.30, 5.30), (-0.74, MAST_Y - 0.50, 5.05),
         (-0.62, MAST_Y - 0.70, 4.40), (-0.58, MAST_Y - 0.68, 3.70),
-    ], radius=0.036, mat=MAT_RUBBER, parent=carrier, sides=6)
+    ], 0.036, MAT_RUBBER, carrier, sides=6)
+    hs('hose-tool-b', [
+        (-0.66, 2.30, 5.20), (-0.60, MAST_Y - 0.46, 4.95),
+        (-0.50, MAST_Y - 0.64, 4.30), (-0.46, MAST_Y - 0.62, 3.62),
+    ], 0.036, MAT_RUBBER, carrier, sides=6)
+    hd = MAST_D / 2
+    hs('hose-mast', [
+        (-MAST_W / 2 - 0.20, -hd - 0.13, MAST_Z0 + 0.6),
+        (-MAST_W / 2 - 0.27, -hd - 0.21, MAST_Z0 + 5.0),
+        (-MAST_W / 2 - 0.22, -hd - 0.16, MAST_Z0 + 10.5),
+        (-MAST_W / 2 - 0.18, -hd - 0.13, MAST_Z0 + MAST_LEN - 0.8),
+    ], 0.030, MAT_RUBBER, mast, sides=6)
+
+
+def lamp(name, group, loc, aim_dir, cone, rng):
+    """A lamp housing plus the two nodes env.js needs.
+
+    The housing is parented to the GROUP, not to the mount: empty — a mesh
+    under mount: sits inside a dynamic subtree that weld() never reaches, so
+    four lamps were eight extra draw calls. The mount:/aim: pair stays exactly
+    where env.js expects it; only the metal moved.
+    """
+    m, a_ = worklight(name, group, loc, aim_dir=aim_dir, cone_deg=cone,
+                      range_m=rng)
+    bx('lamp-bracket', (0.09, 0.13, 0.17), MAT_DARK, group,
+       (loc[0], loc[1] - 0.11, loc[2] - 0.14), bevel=0.01)
+    bx('lamp-can', (0.25, 0.21, 0.25), MAT_DARK, group, loc, bevel=0.025)
+    bx('lamp-lens', (0.19, 0.04, 0.19), MAT_GLASS, group,
+       (loc[0], loc[1] + 0.11, loc[2]), bevel=0.0)
+    return [m, a_]
 
 
 def build_lights(slew, carrier, head):
@@ -1035,31 +1118,18 @@ def build_lights(slew, carrier, head):
 
     env.js reads mount:/aim: world positions EVERY FRAME and re-aims the real
     spotlights at them, which is why a lamp on the guide sweeps as the
-    kinematics work. Names are what env.js binds by, not indices.
+    kinematics work. It binds by NAME, never by index.
     """
     out = []
-    # two on the mast guide, throwing down the working line
     for side, sx in (('l', -1), ('r', 1)):
-        m, a = worklight('guide-work-light-' + side, carrier,
-                         (sx * (MAST_W / 2 + 0.34), MAST_Y + 0.42, GUIDE_Z1 + 0.18),
-                         aim_dir=(-sx * 0.25, 1.30, -3.20), cone_deg=52, range_m=30)
-        bx('lamp-can', (0.24, 0.20, 0.24), MAT_DARK, m, (0, 0, 0), bevel=0.02)
-        bx('lamp-lens', (0.19, 0.04, 0.19), MAT_GLASS, m, (0, 0.11, 0), bevel=0.0)
-        out += [m, a]
-    # one on the cab roof, on the pile
-    m, a = worklight('cab-work-light', slew,
-                     (-UPPER_W / 2 + 0.30, CAB_Y1 - 0.06, CAB_ROOF + 0.16),
-                     aim_dir=(0.6, 3.20, -2.40), cone_deg=58, range_m=26)
-    bx('lamp-can', (0.24, 0.20, 0.24), MAT_DARK, m, (0, 0, 0), bevel=0.02)
-    bx('lamp-lens', (0.19, 0.04, 0.19), MAT_GLASS, m, (0, 0.11, 0), bevel=0.0)
-    out += [m, a]
-    # one on the mast head, down the mast at the travelling tool
-    m, a = worklight('head-work-light', head,
-                     (MAST_W / 2 + 0.10, 0.40, 0.30),
-                     aim_dir=(-0.4, 0.9, -3.40), cone_deg=44, range_m=34)
-    bx('lamp-can', (0.22, 0.18, 0.22), MAT_DARK, m, (0, 0, 0), bevel=0.02)
-    bx('lamp-lens', (0.17, 0.04, 0.17), MAT_GLASS, m, (0, 0.10, 0), bevel=0.0)
-    out += [m, a]
+        out += lamp('guide-work-light-' + side, carrier,
+                    (sx * (MAST_W / 2 + 0.34), MAST_Y + 0.42, GUIDE_Z1 + 0.18),
+                    (-sx * 0.25, 1.30, -3.20), 52, 30)
+    out += lamp('cab-work-light', slew,
+                (-UPPER_W / 2 + 0.30, CAB_Y1 - 0.06, CAB_ROOF + 0.16),
+                (0.6, 3.20, -2.40), 58, 26)
+    out += lamp('head-work-light', head, (MAST_W / 2 + 0.10, 0.40, 0.30),
+                (-0.4, 0.9, -3.40), 44, 34)
     return out
 
 
@@ -1074,7 +1144,11 @@ def build(out_path):
 
     build_undercarriage(root)
 
-    slew = node(NODE_PIVOT, 'slew', root, (0, 0, 1.12))
+    # The slew empty sits AT the origin. Rotation about Z is identical at any
+    # height, and every z below build_house/build_cab/build_kinematics is an
+    # absolute height above ground — putting the empty at deck height would
+    # silently lift the whole upper carriage by that much.
+    slew = node(NODE_PIVOT, 'slew', root, (0, 0, 0))
     build_house(slew)
     build_cab(slew)
     build_winches(slew)
@@ -1083,9 +1157,9 @@ def build(out_path):
     mast, mast_top = build_mast(carrier)
     head = build_head(mast, mast_top)
     build_carriage(mast)
-    build_hoses(slew, carrier)
+    build_hoses(slew, carrier, mast)
     build_lights(slew, carrier, head)
-    build_ropes(root, mast_top)
+    build_ropes(root)
 
     # weld the slew and the carrier LAST: their dynamic children are empties,
     # never meshes, so nothing that has to move gets swallowed.

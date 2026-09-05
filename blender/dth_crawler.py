@@ -67,15 +67,20 @@ GAUGE      = W - SHOE_W # 2.100 m between track centres
 TRK_LEN    = 3.900      # track length over sprocket/idler. DERIVED: [R]S8
                         # item 4 says it is not sourced. 1.47 x W is the
                         # excavator-carrier norm and matches the game's 3.9.
-TUMBLER_R  = 0.360      # sprocket / idler pitch radius. DERIVED from shoe
+TUMBLER_R  = 0.340      # sprocket / idler pitch radius. DERIVED from shoe
                         # width and the track height in [P2].
-TUMBLER_Y  = (TRK_LEN - 2 * TUMBLER_R) / 2      # 1.590
+TUMBLER_Y  = (TRK_LEN - 2 * TUMBLER_R) / 2      # 1.610
 SHOE_T     = 0.070      # shoe plate thickness   DERIVED from [P2]
-TRK_TOP    = TUMBLER_R * 2 + SHOE_T             # 0.790 top of track envelope
+GROUSER_H  = 0.084      # chain line to grouser tip: half the shoe plus the
+                        # bar. Sets where the chain has to sit for the machine
+                        # to stand ON the ground rather than in it.
+CHAIN_Z0   = GROUSER_H  # bottom run's chain line, so the tips touch z = 0
+TRK_TOP    = CHAIN_Z0 + 2 * TUMBLER_R + GROUSER_H   # 0.848 track envelope top
+OSC_Z      = 0.620      # oscillation roll axis, on the machine centreline
 
-DECK_Z     = 1.000      # main frame top face. DERIVED: track top + 0.21
+DECK_Z     = 1.060      # main frame top face. DERIVED: track top + 0.21
                         # clearance for the oscillation trunnion, read off [P2]
-FRAME_Z0   = 0.560      # frame belly - ground clearance. NOT SOURCED [R]S8 #5
+FRAME_Z0   = 0.520      # frame belly - ground clearance. NOT SOURCED [R]S8 #5
 
 BODY_W     = 2.440      # superstructure width - narrower than the tracks [P2]
 BODY_Y0    = -2.680     # rear cooler face (overhangs the tracks) [P1][P2]
@@ -262,102 +267,131 @@ def bolt_ring(parent, name, radius, count, r_bolt, h, mat, loc, rot=(0, 0, 0)):
 # ═════════════════════════════════════════════════════════════════════════════
 
 def track_path_points(n):
-    """Centreline of the chain: two straights joined by two half-wraps."""
-    pts = []
+    """Centreline of the chain: two straights joined by two half-wraps.
+
+    Returns (y, z, theta) per link, with z = 0 at the BOTTOM run's chain line
+    and theta the rotation about X that turns a link's local +Z into the
+    outward normal - so the grouser always points away from the machine, which
+    is the whole reason to place links on a path rather than array them.
+    """
+    r = TUMBLER_R
     straight = TUMBLER_Y * 2
-    arc = math.pi * TUMBLER_R
+    arc = math.pi * r
     total = straight * 2 + arc * 2
+    pts = []
     for i in range(n):
         s = total * i / n
-        if s < straight:                                   # bottom run, -Y->+Y
-            pts.append((-TUMBLER_Y + s, TUMBLER_R, -math.pi / 2))
-        elif s < straight + arc:                           # front idler wrap
-            a = (s - straight) / TUMBLER_R
-            pts.append((TUMBLER_Y + TUMBLER_R * math.sin(a),
-                        TUMBLER_R - TUMBLER_R * (1 - math.cos(a)) + 0,
-                        -math.pi / 2 + a))
-        elif s < straight * 2 + arc:                       # top run, +Y->-Y
+        if s < straight:                                    # bottom, -Y -> +Y
+            pts.append((-TUMBLER_Y + s, 0.0, math.pi))
+        elif s < straight + arc:                            # front idler wrap
+            a = (s - straight) / r
+            pts.append((TUMBLER_Y + r * math.sin(a), r - r * math.cos(a),
+                        math.pi + a))
+        elif s < straight * 2 + arc:                        # top, +Y -> -Y
             t = s - straight - arc
-            pts.append((TUMBLER_Y - t, -TUMBLER_R, math.pi / 2))
-        else:                                              # rear sprocket wrap
-            a = (s - straight * 2 - arc) / TUMBLER_R
-            pts.append((-TUMBLER_Y - TUMBLER_R * math.sin(a),
-                        -TUMBLER_R + TUMBLER_R * (1 - math.cos(a)),
-                        math.pi / 2 + a))
-    # y above is measured from the tumbler axis; lift to world Z
-    return [(y, TUMBLER_R + z, ang) for (y, z, ang) in pts]
+            pts.append((TUMBLER_Y - t, 2 * r, 0.0))
+        else:                                               # rear sprocket wrap
+            a = (s - straight * 2 - arc) / r
+            pts.append((-TUMBLER_Y - r * math.sin(a), r + r * math.cos(a), a))
+    return pts
 
 
 def build_track(parent, side):
-    """One track frame: chain of grouser shoes, tumblers, rollers, guards."""
+    """One track frame: chain of grouser shoes, tumblers, rollers, guards.
+
+    Built in machine coordinates and then shifted down by OSC_Z, because the
+    parent is the oscillation pivot and that sits on the roll axis, not on the
+    ground. Getting this wrong floats the whole machine.
+    """
     sx = side * GAUGE / 2
     tag = 'l' if side < 0 else 'r'
-    o = []
+    dz = -OSC_Z
+    axis = CHAIN_Z0 + TUMBLER_R                 # tumbler centre height
 
     # -- track frame box and its roller guard skirt ---------------------------
-    o.append(R.box('trkframe_%s' % tag, (0.320, TRK_LEN - 0.45, 0.400),
-                   R.MAT_DARK, parent, (sx, 0, TUMBLER_R + 0.055), bevel=0.022))
-    o.append(R.box('trkguard_%s' % tag, (0.560, TRK_LEN * 0.52, 0.140),
-                   R.MAT_DARK, parent, (sx, 0.10, TUMBLER_R + 0.335), bevel=0.014))
-    # track adjuster / idler yoke housing at the front
-    o.append(R.box('trkadj_%s' % tag, (0.240, 0.560, 0.230), R.MAT_DARK, parent,
-                   (sx, TUMBLER_Y - 0.30, TUMBLER_R), bevel=0.014))
+    R.box('trkframe_%s' % tag, (0.330, TRK_LEN - 0.42, 0.380), R.MAT_DARK,
+          parent, (sx, 0, axis + 0.020 + dz), bevel=0.022)
+    R.box('trkguard_%s' % tag, (0.580, TRK_LEN * 0.54, 0.130), R.MAT_DARK,
+          parent, (sx, 0.10, axis + 0.250 + dz), bevel=0.014)
+    R.box('trkadj_%s' % tag, (0.250, 0.560, 0.240), R.MAT_DARK, parent,
+          (sx, TUMBLER_Y - 0.32, axis + dz), bevel=0.014)
+    # bolted covers over the roller line - plate, not a smooth extrusion
+    for i in range(4):
+        R.box('trkcov_%s%d' % (tag, i), (0.030, 0.680, 0.230), R.MAT_DARK,
+              parent, (sx - 0.180, -1.20 + 0.80 * i, axis - 0.030 + dz),
+              bevel=0.008)
 
     # -- drive sprocket (rear) and idler (front) ------------------------------
-    # Sprocket at the rear is the excavator convention with the idler leading.
-    # NOT SOURCED for this class - derived from [P2].
-    for end, r, nm in ((-TUMBLER_Y, TUMBLER_R, 'spr'), (TUMBLER_Y, TUMBLER_R, 'idl')):
-        o.append(cyl('%s_hub_%s' % (nm, tag), r * 0.62, 0.300, R.MAT_CAST, parent,
-                     (sx - 0.150, end, TUMBLER_R), (0, math.radians(90), 0),
-                     sides=16))
-        o.append(cyl('%s_rim_%s' % (nm, tag), r * 0.93, 0.150, R.MAT_WORN, parent,
-                     (sx - 0.075, end, TUMBLER_R), (0, math.radians(90), 0),
-                     sides=18))
-        o += bolt_ring(parent, '%s_bolt_%s' % (nm, tag), r * 0.40, 8, 0.026,
-                       0.030, R.MAT_WORN,
-                       (sx + 0.152, end, TUMBLER_R), (0, math.radians(90), 0))
-    # sprocket teeth - an ARRAY around the rear tumbler, radially placed
+    # Sprocket at the rear with the idler leading is the excavator convention.
+    # NOT SOURCED for this class - read off [P2].
+    for end, nm in ((-TUMBLER_Y, 'spr'), (TUMBLER_Y, 'idl')):
+        cyl('%s_hub_%s' % (nm, tag), TUMBLER_R * 0.60, 0.300, R.MAT_CAST,
+            parent, (sx - 0.150, end, axis + dz), (0, math.radians(90), 0),
+            sides=16)
+        cyl('%s_rim_%s' % (nm, tag), TUMBLER_R * 0.90, 0.160, R.MAT_WORN,
+            parent, (sx - 0.080, end, axis + dz), (0, math.radians(90), 0),
+            sides=18)
+        torus_ring('%s_face_%s' % (nm, tag), TUMBLER_R * 0.42, 0.040,
+                   R.MAT_WORN, parent, (sx + 0.152, end, axis + dz),
+                   (0, math.radians(90), 0), maj=14, min_=6)
+    # sprocket teeth, radially placed round the rear tumbler
     for i in range(18):
         a = TAU * i / 18
-        o.append(cheapbox('sprtooth_%s%d' % (tag, i), (0.140, 0.070, 0.090),
-                       R.MAT_WORN, parent,
-                       (sx, -TUMBLER_Y + (TUMBLER_R * 0.99) * math.sin(a),
-                        TUMBLER_R + (TUMBLER_R * 0.99) * math.cos(a)),
-                       (a, 0, 0), bev=0.008))
+        cheapbox('sprtooth_%s%d' % (tag, i), (0.150, 0.075, 0.095), R.MAT_WORN,
+                 parent, (sx, -TUMBLER_Y + TUMBLER_R * 0.97 * math.sin(a),
+                          axis + TUMBLER_R * 0.97 * math.cos(a) + dz),
+                 (a, 0, 0), bev=0.007)
 
-    # -- bottom track rollers and top carrier rollers -------------------------
+    # -- bottom track rollers (on the bottom run) and top carrier rollers ----
     nrol = 7                       # NOT SOURCED [R]S8 #4 - derived from a
     for i in range(nrol):          # 3.9 m frame at the usual ~0.45 m pitch
         y = -TUMBLER_Y + 0.34 + (TUMBLER_Y * 2 - 0.68) * i / (nrol - 1)
-        o.append(cyl('rol_%s%d' % (tag, i), 0.115, 0.230, R.MAT_CAST, parent,
-                     (sx - 0.115, y, 0.150), (0, math.radians(90), 0), sides=12))
-    for i, y in enumerate((-0.72, 0.86)):
-        o.append(cyl('carrol_%s%d' % (tag, i), 0.085, 0.170, R.MAT_CAST, parent,
-                     (sx - 0.085, y, TUMBLER_R * 2 - 0.055),
-                     (0, math.radians(90), 0), sides=10))
+        cyl('rol_%s%d' % (tag, i), 0.115, 0.240, R.MAT_CAST, parent,
+            (sx - 0.120, y, CHAIN_Z0 + 0.119 + 0.115 + dz),
+            (0, math.radians(90), 0), sides=12)
+    for i, y in enumerate((-0.74, 0.88)):
+        cyl('carrol_%s%d' % (tag, i), 0.085, 0.180, R.MAT_CAST, parent,
+            (sx - 0.090, y, CHAIN_Z0 + 2 * TUMBLER_R - 0.119 - 0.085 + dz),
+            (0, math.radians(90), 0), sides=10)
 
-    # -- the chain: a grouser shoe per link, placed on the real path ----------
-    shoes = 48                     # pitch ~0.19 m round a 9.26 m perimeter
-    for i, (y, z, ang) in enumerate(track_path_points(shoes)):
-        o.append(cheapbox('shoe_%s%d' % (tag, i), (SHOE_W, 0.185, SHOE_T),
-                          R.MAT_WORN, parent, (sx, y, z), (ang + math.pi / 2, 0, 0),
-                          bev=0.006))
-        o.append(cheapbox('grouser_%s%d' % (tag, i), (SHOE_W * 0.94, 0.045, 0.058),
-                          R.MAT_WORN, parent,
-                          (sx, y + math.cos(ang + math.pi / 2) * 0.055,
-                           z + math.sin(ang + math.pi / 2) * 0.055),
-                          (ang + math.pi / 2, 0, 0), bev=0.0))
-    return o
+    # -- the chain: a grouser shoe per link, on the real path ----------------
+    shoes = 46                     # ~0.19 m pitch round the perimeter
+    for i, (y, z, th) in enumerate(track_path_points(shoes)):
+        zz = CHAIN_Z0 + z + dz
+        cheapbox('shoe_%s%d' % (tag, i), (SHOE_W, 0.180, SHOE_T), R.MAT_WORN,
+                 parent, (sx, y, zz), (th, 0, 0), bev=0.006)
+        # grouser bar, always on the OUTWARD face
+        ny, nz = -math.sin(th), math.cos(th)
+        cheapbox('grouser_%s%d' % (tag, i), (SHOE_W * 0.92, 0.048, 0.058),
+                 R.MAT_WORN, parent,
+                 (sx, y + ny * 0.055, zz + nz * 0.055), (th, 0, 0), bev=0.0)
+        # link pin bosses, inboard - the chain is a chain, not a belt
+        if i % 2 == 0:
+            cheapbox('link_%s%d' % (tag, i), (0.150, 0.100, 0.070), R.MAT_WORN,
+                     parent, (sx, y - ny * 0.052, zz - nz * 0.052), (th, 0, 0),
+                     bev=0.005)
 
 
 def build_undercarriage(root):
-    osc = R.empty(R.NODE_PIVOT, 'oscillation', root, (0, 0.10, TRK_TOP * 0.5))
+    """Track frames on pivot:oscillation.
+
+    [R]S3.1 gives 405 mm of track oscillation (* k = 0.429 m): the frames roll
+    relative to the body, which is why this machine can stand on a blasted
+    bench at all. One pivot carries BOTH frames because that is what an
+    oscillating axle does - it is a single roll degree of freedom about the
+    machine's longitudinal axis, not two independent frames.
+    """
+    osc = R.empty(R.NODE_PIVOT, 'oscillation', root, (0, 0.10, OSC_Z))
     osc['osc_m'] = OSC                      # 405 mm * k [R]S3.1
+    osc['axis'] = 'roll'
     for side in (-1, 1):
         build_track(osc, side)
     # the oscillation trunnion itself - a longitudinal tube through the frame
-    cyl('osc_trunnion', 0.130, GAUGE + 0.20, R.MAT_CAST, osc,
-        (-(GAUGE + 0.20) / 2, 0.10, 0.0), (0, math.radians(90), 0), sides=14)
+    cyl('osc_trunnion', 0.135, GAUGE + 0.24, R.MAT_CAST, osc,
+        (-(GAUGE + 0.24) / 2, 0.10, 0.0), (0, math.radians(90), 0), sides=14)
+    for s in (-1, 1):
+        R.box('osc_arm%d' % s, (0.300, 0.260, 0.300), R.MAT_DARK, osc,
+              (s * (GAUGE / 2 - 0.10), 0.10, -0.020), bevel=0.014)
     join_by_mat(osc, 'under')
     return osc
 
@@ -575,6 +609,9 @@ def build_access(root):
                    (-BODY_W / 2 - 0.44, -1.10, DECK_Z + 0.030), bevel=0.005))
     # ladder up the right flank to the cab door
     lx = BODY_W / 2 + 0.14
+    for dy in (-0.10, -0.52):
+        o.append(R.box('ladbkt', (0.230, 0.045, 0.045), R.MAT_PAINT, root,
+                       (lx - 0.10, CAB_Y + dy, DECK_Z - 0.040), bevel=0.006))
     for side in (-1, 1):
         o.append(cyl('ladstile%d' % side, 0.024, 1.10, R.MAT_PAINT, root,
                      (lx, CAB_Y - 0.30 + side * 0.22, DECK_Z - 1.02), sides=8))
@@ -1205,9 +1242,11 @@ def build_feed(mast):
 def build_support_leg(root):
     """Single rear hydraulic support leg [R]S4.8. Not four outriggers."""
     lx, ly = 0.0, BODY_Y0 - 0.060
-    R.box('leghousing', (0.420, 0.360, 0.560), R.MAT_DARK, root,
-          (lx, ly, DECK_Z - 0.420), bevel=0.016)
-    cyl('legbarrel', 0.115, 0.640, R.MAT_DARK, root, (lx, ly, 0.220), sides=14)
+    R.box('legbkt', (0.560, 0.420, 0.130), R.MAT_DARK, root,
+          (lx, ly + 0.16, DECK_Z - 0.090), bevel=0.012)
+    R.box('leghousing', (0.420, 0.360, DECK_Z - 0.700), R.MAT_DARK, root,
+          (lx, ly, (DECK_Z + 0.720) / 2 - 0.090), bevel=0.016)
+    cyl('legbarrel', 0.115, 0.560, R.MAT_DARK, root, (lx, ly, 0.240), sides=14)
     cyl('leggland', 0.098, 0.070, R.MAT_CAST, root, (lx, ly, 0.180), sides=14)
     for i, s in enumerate((-1, 1)):
         R.hose('leghose%d' % i,

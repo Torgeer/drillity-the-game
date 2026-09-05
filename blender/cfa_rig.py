@@ -36,7 +36,33 @@ research/rigs/cfa-rig.md):
        deck, sprocket REAR / idler FRONT, ~8 bottom + 2 carrier rollers,
        round lightening holes in the mast plate, drive = cylindrical drum
        with round lightening holes and a toothed lower flange.
-  [S7] Web pass, 2026-09-05 — see WEB[] notes at the bottom of this header.
+  [W1] Web pass 2026-09-05: manufacturer PremiumLine brochure PDF for a ~84 t
+       H-series rotary drilling rig, page 18 "Application - CFA Drilling".
+       A fully dimensioned CFA-configured side elevation, TWO configurations.
+       This is a second, independent CFA general arrangement and it settles
+       several things the local library could not:
+         * "1000" is dimensioned from the MAST FRONT FACE to the AUGER AXIS,
+           and the options list reads "masthead for drill axis 1,000 mm
+           expandable to 1,400 mm". The 1,400 option exists because the max
+           2,500 mm tool needs 1,250 mm of radius plus clearance - which is
+           what proves the dimension is measured from the mast face and not
+           from the slewing axis.
+         * R 4300 = tail swing radius, slewing axis to the back of the
+           counterweight. Slewing axis sits at the CENTRE of the crawler.
+         * crawler length 5,430 (basic) / 5,500 (upgraded); over-tracks
+           3,000-4,400 on 800 shoes, 3,300-4,500 on 900.
+         * uppercarriage top 2,960 / 3,020 above ground; crawler 1,060 / 1,130.
+         * CFA crowd stroke 14,670 / 17,670; auger length 16,000 / 19,000;
+           mast 18,540; overall height 22,160 basic, 25,220 + 8,000 of auger
+           standing above the head = 31,910 on the extended machine.
+         * max CFA diameter 900 mm basic / 1,200 mm upgraded, depth 14.1 /
+           25.1 m, extraction 730 / 660 kN. The game's maxDiaMm 900 is right.
+       Read off the drawing itself (scaled against the 5,500 crawler): drill
+       axis about 3.3 m forward of the slewing axis, mast box about 0.76 m
+       deep, mast standing ahead of the cab with the auger clear of the
+       crawler nose. The concrete hose hangs from the swan neck at the top of
+       the string as a long near-vertical line FORWARD of the auger, down to
+       the ground - not strapped up the mast.
 
 DERIVED, NOT SOURCED (flagged again in the report):
   - mast box cross-section (no plan or section exists in any local source)
@@ -55,52 +81,93 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 if os.path.join(HERE, 'lib') not in sys.path:
     sys.path.insert(0, os.path.join(HERE, 'lib'))
 
-from rig import (reset, box, tube, hose, empty, worklight, part, finish,
+from rig import (reset, tube, hose, empty, worklight, part, finish,
                  NODE_MOUNT, NODE_AIM, NODE_PIVOT, NODE_SLIDE,
                  MAT_PAINT, MAT_DARK, MAT_STEEL, MAT_WORN, MAT_CAST,
                  MAT_RUBBER, MAT_GLASS, MAT_CHROME, MAT_HAZARD)
+
+
+# ── rig.box() IS HALF SCALE — LOCAL REPLACEMENT ───────────────────────────────
+# `rig.box()` does primitive_cube_add(size=1), which in Blender is a cube of
+# SIDE 1 (-0.5 .. +0.5), and then scales it by size/2. The result is a box half
+# the size asked for in every axis. rig.tube() is correct, so a machine built
+# with the shared helpers comes out with correct cylinders and half-size boxes —
+# which is exactly what this rig looked like until it was measured: a 24.4 m
+# mast exported 12.2 m tall, a 1.10 m mast box exported 0.55 m wide.
+#
+# rig.py is shared with every other machine being built right now, and silently
+# doubling every box in every one of them mid-flight is not mine to do. So this
+# is fixed HERE and reported. The real fix is `primitive_cube_add(size=2)` (or
+# scaling by `size`, not `size/2`) in rig.py, once, with every machine re-tuned
+# in the same pass.
+def box(name, size, mat=MAT_PAINT, parent=None, loc=(0, 0, 0), rot=(0, 0, 0),
+        bevel=0.0):
+    """A box that is actually `size` metres. Bevel in metres — a bevelled edge
+    is what stops steel reading as cardboard, and it costs triangles, not draw
+    calls."""
+    bpy.ops.mesh.primitive_cube_add(size=1)
+    o = bpy.context.active_object
+    o.scale = (size[0], size[1], size[2])
+    bpy.ops.object.transform_apply(scale=True)
+    if bevel > 0:
+        m = o.modifiers.new('bev', 'BEVEL')
+        m.width = bevel
+        m.segments = 2
+        m.limit_method = 'ANGLE'
+    return part(name, o, mat, parent, loc, rot)
 
 TAU = math.pi * 2.0
 
 # ── DIMENSIONS ────────────────────────────────────────────────────────────────
 # every constant carries its source tag. metres. Z up, +Y is machine FRONT.
 
-# undercarriage [S1]
-TRACK_LEN   = 5.755      # [S1] chassis / track-frame length
+# undercarriage [S1] crawler length, [W1] tail radius and stance
+TRACK_LEN   = 5.755      # [S1] chassis / track-frame length. [W1] 5 430 / 5 500
 SHOE_W      = 0.800      # [S1] track shoe width
-GAUGE       = 3.60       # [S1] extended working stance: 4.40 over tracks,
-                         #      inside the sourced 3.000-4.500 retractable band
-TRACK_H     = 1.00       # derived: idler/sprocket pitch radius 0.47 + shoe
-TRACK_CY    = -0.15      # derived: slew centre sits slightly forward of centre
+GAUGE       = 3.60       # [S1] extended working stance -> 4.40 over tracks,
+                         #      inside 3.000-4.500 [S1] and 3.000-4.400 [W1]
+RR          = 0.500      # derived: idler / sprocket pitch radius, so the crawler
+                         #      stands 1.06 high against [W1] 1 060 / 1 130
+TRACK_CY    = 0.00       # [W1] the slewing axis sits at the CENTRE of the crawler
 
 # uppercarriage
-DECK_Z      = 1.30       # derived from slew ring on top of the car body
+DECK_Z      = 1.30       # derived: car body + slew ring on top of the crawler
 BODY_W      = 3.00       # [S1] transport width 3 000 governs the superstructure
-CW_BACK     = -4.70      # [S1] working length 9 663 split about the slew axis
-HOUSE_Z     = 2.98       # derived: walkway height on a 73 t class deck
+CW_BACK     = -4.45      # [W1] tail swing radius R 4300, +0.15 for the heavier
+                         #      counterweight this 73 t machine carries
+HOUSE_Z     = 3.02       # [W1] uppercarriage top 2 960 / 3 020 above ground
 
-# mast [S1]
-MAST_W      = 1.15       # DERIVED - no section drawing exists in any source
-MAST_D      = 0.95       # DERIVED
+# mast — position now comes from [W1], which is dimensioned and unambiguous
+MAST_D      = 0.80       # [W1] scaled off the CFA elevation against the 5 500
+                         #      crawler: mast box about 0.76 m deep
+MAST_W      = 1.10       # DERIVED - no plan or section exists in any source
 MAST_FOOT_Z = 0.40       # derived
-MAST_TOP_Z  = 25.60      # derived so head + arch reach the sourced 28 120
-HEAD_TOP_Z  = 27.25      # derived
+MAST_TOP_Z  = 24.80      # derived: mast / overall = 18 540 / 22 160 on [W1]
+HEAD_TOP_Z  = 26.90      # derived
 ARCH_TOP_Z  = 28.12      # [S1] overall height, working state
-MAST_CY     = 1.10       # derived
-DRILL_Y     = 2.25       # DERIVED: mast front face 1.575 + auger radius 0.50
-                         #  + 0.175 clearance. [S1] shows clear air between the
-                         #  auger and the mast but dimensions no stand-off.
-CROWD       = 17.00      # [S1] crowd stroke
+MAST_CY     = 1.95       # [W1] mast front face 2.35 forward of the slewing axis
+DRILL_Y     = 3.35       # [W1] mast front face + 1.000. The 1 000 mm is
+                         #      dimensioned mast-face-to-auger-axis on the CFA
+                         #      elevation and named in the options list as
+                         #      "masthead for drill axis 1,000 expandable to
+                         #      1,400". Was 2.25 here on a Kelly-rig figure the
+                         #      local reference explicitly warned not to reuse.
+CROWD       = 17.00      # [S1] crowd stroke 17 000; [W1] 14 670 / 17 670
 DRIVE_LO_Z  = 2.20       # derived bottom of stroke
 DRIVE_HI_Z  = DRIVE_LO_Z + CROWD   # 19.20
+DRIVE_Z     = 19.10      # default pose: near top of stroke, auger tip at grade
 
-# tool [S1]/[S2]
-AUGER_D     = 1.000      # [S1] max drilling diameter dimensioned on the drawing
+# tool [S1]/[S2]/[W1]
+AUGER_D     = 1.000      # [S1] max drilling diameter dimensioned on the drawing.
+                         #      [W1] 900 basic / 1 200 upgraded — 1 000 sits
+                         #      between them and matches the game's maxDiaMm 900.
 AUGER_R     = AUGER_D / 2
 STEM_R      = 0.2225     # [S2] central pipe 445 x 10 for the large sizes
-PITCH       = 0.320      # [S2] flight pitch 250-400 for large diameter
-TURNS       = 56         # derived to fill the stroke
-AUGER_LEN   = PITCH * TURNS          # 17.92
+PITCH       = 0.400      # [S2] flight pitch 250-400 mm for large diameter; the
+                         #      [W1] elevation draws pitch/diameter near 0.45, so
+                         #      take the top of the sourced band, not the middle
+TURNS       = 45
+AUGER_LEN   = PITCH * TURNS          # 18.0; [W1] auger length 16 000 / 19 000
 FLIGHT_T    = 0.022      # [S2] flight plate thickness S
 CLEANER_Z   = 1.10       # [S1] auger cleaner height above ground
 BASEBOX_H   = 1.630      # [S1] base / drilling-table box height
@@ -214,7 +281,7 @@ def build_undercarriage():
     objs = []
     y0 = TRACK_CY - TRACK_LEN / 2
     y1 = TRACK_CY + TRACK_LEN / 2
-    rr = 0.47                      # idler / sprocket pitch radius (derived)
+    rr = RR
 
     # one grousered shoe, baked, then cloned round the chain path
     plate = box('shoe_tpl', (SHOE_W, 0.185, 0.030), MAT_WORN, bevel=0.008)
@@ -304,8 +371,8 @@ def build_uppercarriage():
     """Deck, engine housing with hinged doors, counterweight slab, walkway and
     the handrails that wrap the whole upper deck [S6]."""
     objs = []
-    objs.append(box('deck', (BODY_W, 6.05, 0.18), MAT_DARK,
-                    loc=(0, -1.35, DECK_Z - 0.09), bevel=0.02))
+    objs.append(box('deck', (BODY_W, 6.90, 0.18), MAT_DARK,
+                    loc=(0, -1.10, DECK_Z - 0.09), bevel=0.02))
 
     # engine housing, long hinged access doors down the side [S6]
     objs.append(box('house', (BODY_W - 0.06, 3.05, HOUSE_Z - DECK_Z), MAT_PAINT,
@@ -328,6 +395,10 @@ def build_uppercarriage():
                     loc=(0, CW_BACK + 0.46, DECK_Z + 0.86), bevel=0.05))
     objs.append(box('cwtstripe', (BODY_W - 0.10, 0.03, 0.20), MAT_HAZARD,
                     loc=(0, CW_BACK + 0.005, DECK_Z + 0.20)))
+    # it is stacked elements, not one casting [W1]: 2 x 4.9 t + 1 x 2.5 t
+    for zz in (0.62, 1.16):
+        objs.append(box('cwtsplit', (BODY_W + 0.02, 0.98, 0.045), MAT_DARK,
+                        loc=(0, CW_BACK + 0.46, DECK_Z + zz), bevel=0.012))
     for side in (-1, 1):
         objs.append(tube('cwtpin', 0.05, 0.22, MAT_STEEL,
                          loc=(side * 0.95, CW_BACK + 0.46, DECK_Z + 1.72), sides=10))
@@ -373,7 +444,7 @@ def build_cab():
     """Cab forward-left, low, glazed on three sides, slanted front screen,
     roof guard [S1]."""
     objs = []
-    cx, cy = -1.06, 0.62
+    cx, cy = -1.04, 0.95
     w, d, h = 1.16, 1.70, 1.96
     z0 = DECK_Z
     objs.append(box('cabshell', (w, d, h), MAT_PAINT,
@@ -422,8 +493,11 @@ def build_mast():
     n = int((L - 2.2) / 1.15)
     for i in range(n):
         z = MAST_FOOT_Z + 1.30 + i * 1.15
-        c = tube('hole', 0.215, MAST_W + 0.4, MAT_PAINT,
-                 loc=(-(MAST_W / 2 + 0.2), MAST_CY, z), rot=(0, math.pi / 2, 0), sides=14)
+        # OVAL, standing on end. [S1] calls them oval lightening/handling holes
+        # and the [W1] elevation draws rounded slots taller than they are wide.
+        c = tube('hole', 0.125, MAST_W + 0.4, MAT_PAINT,
+                 loc=(-(MAST_W / 2 + 0.2), MAST_CY, z), rot=(0, math.pi / 2, 0), sides=16)
+        c.scale = (1.75, 1.0, 1.0)      # local X becomes world Z: a standing oval
         cutters.append(c)
     cut(body, cutters)
     objs.append(body)
@@ -454,6 +528,21 @@ def build_mast():
         for dy in (-0.22, 0.10):
             objs.append(box('grabarm', (0.20, 0.05, 0.05), MAT_STEEL,
                             loc=(-(MAST_W / 2 + 0.09), MAST_CY + dy, z), bevel=0.012))
+
+    # rope deflection sheave block about a third of the way up, projecting
+    # sideways [S1] item 6; the [W1] elevation shows two spoked wheels here
+    for i, zz in enumerate((MAST_FOOT_Z + 6.10, MAST_FOOT_Z + 7.55)):
+        objs.append(box('defbracket', (0.62, 0.34, 0.46), MAT_DARK,
+                        loc=(-(MAST_W / 2 + 0.20), MAST_CY + 0.10, zz), bevel=0.02))
+        objs.append(tube('defsheave', 0.30, 0.11, MAT_CAST,
+                         loc=(-(MAST_W / 2 + 0.46), MAST_CY + 0.10, zz),
+                         rot=(0, math.pi / 2, 0), sides=18))
+        objs.append(tube('defsheaverim', 0.335, 0.02, MAT_CAST,
+                         loc=(-(MAST_W / 2 + 0.40), MAST_CY + 0.10, zz),
+                         rot=(0, math.pi / 2, 0), sides=18))
+        objs.append(tube('defhub', 0.075, 0.20, MAT_STEEL,
+                         loc=(-(MAST_W / 2 + 0.50), MAST_CY + 0.10, zz),
+                         rot=(0, math.pi / 2, 0), sides=10))
 
     # valve manifold block bolted to the mast side [S4]
     objs.append(box('manifold', (0.14, 0.36, 0.52), MAT_CAST,
@@ -512,6 +601,15 @@ def build_masthead():
         f2.rotation_euler = (0, math.pi / 2, 0)
         join_by_mat([d, f1, f2], 'sheave%d' % (i + 1), pv)
         pivots.append(pv)
+    # the head is braced back to the mast by a heavy diagonal, not cantilevered
+    # off a plain box [W1]
+    for side in (-1, 1):
+        objs.append(box('headstrut', (0.13, 0.22, 2.15), MAT_PAINT,
+                        loc=(side * (MAST_W / 2 - 0.05), MAST_CY + 0.62,
+                             hz0 - 0.55), rot=(-0.52, 0, 0), bevel=0.02))
+        objs.append(box('headgusset', (0.06, 0.75, 0.55), MAT_PAINT,
+                        loc=(side * (MAST_W / 2 + 0.19), MAST_CY + 0.95,
+                             hz0 + 0.35), bevel=0.015))
     # rope guards over the sheaves
     objs.append(box('ropeguard', (1.05, 0.55, 0.05), MAT_DARK,
                     loc=(0, DRILL_Y - 0.30, hz1 + 0.02), bevel=0.012))
@@ -550,7 +648,7 @@ def build_drive(carriage_node):
     vertical stub is the wrong shape and the elbow is the recognisable one.
     """
     objs = []
-    z = DRIVE_HI_Z - 0.60          # default pose: near top of stroke
+    z = DRIVE_Z                    # default pose: near top of stroke
     # crowd carriage running on the mast rails
     objs.append(box('carriage', (MAST_W + 0.10, 0.34, 1.60), MAT_PAINT,
                     loc=(0, MAST_CY + MAST_D / 2 + 0.17, z + 0.30), bevel=0.03))
@@ -603,12 +701,17 @@ def build_drive(carriage_node):
     objs.append(tube('celbowup', 0.145, 0.30, MAT_STEEL,
                      loc=(0, DRILL_Y, z + 1.49), sides=14))
     # the 90 degree bend that turns HORIZONTAL - this is the recognisable shape
-    objs.append(tube('celbowout', 0.145, 0.62, MAT_STEEL,
-                     loc=(0, DRILL_Y, z + 1.86), rot=(math.pi / 2, 0, 0), sides=14))
+    # the 90 deg swan neck turns FORWARD, away from the mast and over the
+    # auger, and the hose leaves it going down the front [W1]
+    objs.append(tube('celbowout', 0.145, 0.66, MAT_STEEL,
+                     loc=(0, DRILL_Y, z + 1.86), rot=(-math.pi / 2, 0, 0), sides=14))
     objs.append(tube('celbowknee', 0.155, 0.20, MAT_STEEL,
-                     loc=(0, DRILL_Y - 0.02, z + 1.80), sides=14))
+                     loc=(0, DRILL_Y + 0.02, z + 1.80), sides=14))
     objs.append(tube('cflange', 0.215, 0.05, MAT_STEEL,
-                     loc=(0, DRILL_Y - 0.62, z + 1.86), rot=(math.pi / 2, 0, 0), sides=16))
+                     loc=(0, DRILL_Y + 0.66, z + 1.86), rot=(-math.pi / 2, 0, 0), sides=16))
+    for i, a, cx, cz in ring(8, 0.185, 0.0, z + 1.86):
+        objs.append(tube('cflangebolt', 0.020, 0.06, MAT_STEEL,
+                         loc=(cx, DRILL_Y + 0.66, cz), rot=(-math.pi / 2, 0, 0), sides=6))
     # adapter frustum stepping down to the square coupling [S2]
     objs.append(tube('cadapter', 0.30, 0.22, MAT_DARK, loc=(0, DRILL_Y, z - 0.92), sides=16))
     objs.append(box('csquare', (0.30, 0.30, 0.30), MAT_STEEL,
@@ -700,19 +803,23 @@ def build_mastfoot_and_linkage():
     objs = []
     rams = []
     # front frame on the deck
-    objs.append(box('frontframe', (2.30, 1.10, 0.80), MAT_PAINT,
-                    loc=(0, 1.15, DECK_Z + 0.42), bevel=0.04))
+    objs.append(box('frontframe', (2.40, 1.60, 0.86), MAT_PAINT,
+                    loc=(0, MAST_CY - 0.85, DECK_Z + 0.45), bevel=0.04))
     for side in (-1, 1):
-        # A-frame lower link
-        objs.append(box('link', (0.22, 1.35, 0.30), MAT_DARK,
-                        loc=(side * 0.62, 1.42, DECK_Z + 0.60),
-                        rot=(0.30, 0, 0), bevel=0.02))
-        objs.append(tube('pin', 0.105, 0.34, MAT_STEEL,
-                         loc=(side * 0.62 - 0.17, 1.98, DECK_Z + 0.86),
+        # A-frame lower link, deck to mast foot, with very large pin joints
+        objs.append(box('link', (0.24, 1.55, 0.34), MAT_DARK,
+                        loc=(side * 0.66, MAST_CY - 0.62, DECK_Z + 0.62),
+                        rot=(0.34, 0, 0), bevel=0.02))
+        objs.append(tube('pin', 0.115, 0.36, MAT_STEEL,
+                         loc=(side * 0.66 - 0.18, MAST_CY - 0.05, DECK_Z + 0.90),
                          rot=(0, math.pi / 2, 0), sides=12))
-        objs.append(tube('pin', 0.105, 0.34, MAT_STEEL,
-                         loc=(side * 0.62 - 0.17, 0.86, DECK_Z + 0.34),
+        objs.append(tube('pin', 0.115, 0.36, MAT_STEEL,
+                         loc=(side * 0.66 - 0.18, MAST_CY - 1.30, DECK_Z + 0.34),
                          rot=(0, math.pi / 2, 0), sides=12))
+        # upper parallelogram link running up to mid-mast
+        objs.append(box('uplink', (0.20, 0.30, 1.90), MAT_DARK,
+                        loc=(side * 0.80, MAST_CY - 0.72, DECK_Z + 1.55),
+                        rot=(-0.22, 0, 0), bevel=0.02))
     # mast foot shoe
     objs.append(box('mastfoot', (MAST_W + 0.20, MAST_D + 0.24, 0.60), MAT_DARK,
                     loc=(0, MAST_CY, MAST_FOOT_Z + 0.10), bevel=0.03))
@@ -720,31 +827,37 @@ def build_mastfoot_and_linkage():
 
 
 def build_mast_rams():
-    """Two heavy diagonal mast cylinders, deck to mid-mast, bright chrome rods
-    [S1]. Barrel on a pivot, rod on a slide, so the game can rake the mast."""
+    """Two heavy diagonal mast cylinders running from the deck up and FORWARD to
+    mid-mast, bright chrome rods [S1][W1]. Barrel on a pivot, rod on a slide, so
+    the game can rake the mast — sourced kinematics are strongly asymmetric,
+    5 deg forward and 90 deg back [S1]."""
     nodes = []
+    ang = -0.30                      # lean toward +Y, ~17 deg off vertical
+    dy, dz = -math.sin(ang), math.cos(ang)
     for side, tag in ((-1, 'L'), (1, 'R')):
-        base = (side * 0.86, -0.55, DECK_Z + 0.55)
-        pv = empty(NODE_PIVOT, 'mastRam' + tag, None, base, (0.86, 0, 0))
-        brl = tube('rambarrel', 0.165, 2.90, MAT_PAINT, sides=14)
+        base = (side * 0.88, MAST_CY - 1.55, DECK_Z + 0.55)
+
+        def at(t):
+            return (base[0], base[1] + dy * t, base[2] + dz * t)
+
+        pv = empty(NODE_PIVOT, 'mastRam' + tag, None, base, (ang, 0, 0))
+        brl = tube('rambarrel', 0.170, 3.10, MAT_PAINT, sides=14)
         brl.location = base
-        brl.rotation_euler = (0.86, 0, 0)
-        eye = tube('rameye', 0.10, 0.30, MAT_CAST, sides=12)
-        eye.location = base
+        brl.rotation_euler = (ang, 0, 0)
+        shoulder = tube('ramshoulder', 0.195, 0.26, MAT_CAST, sides=14)
+        shoulder.location = at(2.86)
+        shoulder.rotation_euler = (ang, 0, 0)
+        eye = tube('rameye', 0.105, 0.32, MAT_CAST, sides=12)
+        eye.location = (base[0] - 0.16, base[1], base[2])
         eye.rotation_euler = (0, math.pi / 2, 0)
-        join_by_mat([brl, eye], 'ramBarrel' + tag, pv)
-        sl = empty(NODE_SLIDE, 'mastRod' + tag, pv, (0, 0, 2.60))
-        rod = tube('ramrod', 0.095, 1.85, MAT_CHROME, sides=12)
-        rod.location = (base[0], base[1] + 2.60 * math.sin(0.86) * -1.0,
-                        base[2] + 2.60 * math.cos(0.86))
-        rod.location = (base[0],
-                        base[1] - 2.60 * math.sin(0.86),
-                        base[2] + 2.60 * math.cos(0.86))
-        rod.rotation_euler = (0.86, 0, 0)
-        tipeye = tube('rodeye', 0.095, 0.26, MAT_CAST, sides=12)
-        tipeye.location = (base[0],
-                           base[1] - (2.60 + 1.85) * math.sin(0.86),
-                           base[2] + (2.60 + 1.85) * math.cos(0.86))
+        join_by_mat([brl, shoulder, eye], 'ramBarrel' + tag, pv)
+
+        sl = empty(NODE_SLIDE, 'mastRod' + tag, pv, (0, 0, 3.05))
+        rod = tube('ramrod', 0.098, 1.75, MAT_CHROME, sides=12)
+        rod.location = at(3.05)
+        rod.rotation_euler = (ang, 0, 0)
+        tipeye = tube('rodeye', 0.098, 0.28, MAT_CAST, sides=12)
+        tipeye.location = (base[0] - 0.14, at(4.80)[1], at(4.80)[2])
         tipeye.rotation_euler = (0, math.pi / 2, 0)
         join_by_mat([rod, tipeye], 'ramRod' + tag, sl)
         nodes += [pv, sl]
@@ -822,47 +935,70 @@ def build_winches():
 
 
 def build_ropes():
-    """Reeved rope. hose() gives the Bezier sag a straight cylinder never will."""
+    """Reeved rope. hose() gives the Bezier sag a straight cylinder never will.
+    [W1] shows both ropes running the full mast length on the BACK face of the
+    mast, not out in the open air; main rope 32 mm, auxiliary 20 mm [S1]."""
     objs = []
+    back = MAST_CY - MAST_D / 2 - 0.09
     objs.append(hose('mainrope',
-                     [(-0.34, -1.55, HOUSE_Z - 0.30),
-                      (-0.34, 0.60, HEAD_TOP_Z * 0.55),
-                      (-0.34, MAST_CY + 1.0, HEAD_TOP_Z - 0.42),
+                     [(-0.34, -1.55, HOUSE_Z - 0.28),
+                      (-0.34, back - 0.55, HOUSE_Z + 1.20),
+                      (-0.34, back, 7.40),
+                      (-0.34, back, HEAD_TOP_Z - 1.60),
+                      (-0.34, MAST_CY + 0.70, HEAD_TOP_Z - 0.40),
                       (-0.34, DRILL_Y - 0.30, HEAD_TOP_Z - 0.42),
-                      (-0.34, DRILL_Y - 0.02, HEAD_TOP_Z - 0.80)],
+                      (-0.34, DRILL_Y - 0.06, HEAD_TOP_Z - 1.15)],
                      radius=0.016, mat=MAT_WORN, sides=6))
     objs.append(hose('auxrope',
-                     [(0.60, -1.55, HOUSE_Z - 0.30),
-                      (0.42, 0.70, HEAD_TOP_Z * 0.60),
-                      (0.34, MAST_CY + 1.0, HEAD_TOP_Z - 0.42),
+                     [(0.62, -1.55, HOUSE_Z - 0.28),
+                      (0.52, back - 0.55, HOUSE_Z + 1.20),
+                      (0.40, back, 7.40),
+                      (0.34, back, HEAD_TOP_Z - 1.60),
+                      (0.34, MAST_CY + 0.70, HEAD_TOP_Z - 0.40),
                       (0.34, DRILL_Y - 0.30, HEAD_TOP_Z - 0.42),
-                      (0.34, DRILL_Y + 0.32, HEAD_TOP_Z - 2.6)],
+                      (0.34, DRILL_Y + 0.40, HEAD_TOP_Z - 3.40)],
                      radius=0.010, mat=MAT_WORN, sides=6))
     return objs
 
 
 def build_concrete_line(z_head):
-    """The CFA rig's signature and no other foundation machine has it: a fat
-    concrete line from a ground-standing pump, across the ground, up the mast,
-    into the horizontal elbow on top of the drive [S2].
+    """The CFA rig's signature, and no other foundation machine has it: a fat
+    concrete line from a ground-standing pump, across the ground and up to the
+    swan neck on top of the string [S2] item 1.
 
+    ROUTING CORRECTED FROM [W1]: on the dimensioned CFA elevation the hose is
+    the single heaviest line in the drawing and it hangs from the swan neck as
+    one long, near-vertical run standing about a metre FORWARD of the auger,
+    clear of the flights, down to the ground. It is not strapped up the mast —
+    that is the hydraulic package, which is a different object entirely [S4].
     The game currently stops this hose in mid-air a fifth of the way up the
-    mast. It has to reach the ground.
+    mast; it has to reach the ground or the machine does not read as CFA.
     """
     objs = []
+    fy = DRILL_Y + 1.05          # the hose hangs this far forward of the auger
     objs.append(hose('concreteline',
-                     [(0.0, DRILL_Y - 0.62, z_head + 1.86),
-                      (0.35, DRILL_Y - 1.35, z_head - 1.60),
-                      (0.95, MAST_CY - 0.30, z_head * 0.55),
-                      (1.35, MAST_CY + 0.20, z_head * 0.22),
-                      (1.55, DRILL_Y + 0.60, 1.10),
-                      (2.30, DRILL_Y + 1.90, 0.16),
-                      (3.60, DRILL_Y + 2.40, 0.14)],
+                     [(0.0, DRILL_Y + 0.66, z_head + 1.86),
+                      (0.10, fy, z_head + 1.30),
+                      (0.16, fy + 0.06, z_head * 0.62),
+                      (0.20, fy + 0.02, z_head * 0.24),
+                      (0.34, fy - 0.10, 1.55),
+                      (0.95, fy + 0.55, 0.22),
+                      (2.20, fy + 1.05, 0.13),
+                      (3.70, DRILL_Y + 2.30, 0.13)],
                      radius=0.085, mat=MAT_RUBBER, sides=9))
-    # steel end couplings, the heavy clamped joints on a concrete line
-    for p in ((1.55, DRILL_Y + 0.60, 1.10), (2.30, DRILL_Y + 1.90, 0.16)):
-        objs.append(tube('clinecoupling', 0.105, 0.16, MAT_STEEL,
-                         loc=p, rot=(1.2, 0, 0.6), sides=12))
+    # heavy clamped steel couplings — a concrete line is jointed, not continuous
+    for i, (px, py, pz, rx, rz) in enumerate((
+            (0.16, fy + 0.05, z_head * 0.62, 0.06, 0.0),
+            (0.22, fy + 0.00, z_head * 0.30, 0.06, 0.0),
+            (0.55, fy + 0.28, 0.60, 1.25, 0.5))):
+        objs.append(tube('clinecoupling', 0.108, 0.17, MAT_STEEL,
+                         loc=(px, py, pz), rot=(rx, 0, rz), sides=12))
+    # a guide shoe on the mast that keeps the line off the flights
+    objs.append(box('clineguide', (0.34, 0.30, 0.16), MAT_DARK,
+                    loc=(0.20, MAST_CY + 1.15, 5.40), bevel=0.02))
+    objs.append(tube('clineroller', 0.11, 0.26, MAT_WORN,
+                     loc=(0.33, MAST_CY + 1.15, 5.40),
+                     rot=(0, math.pi / 2, 0), sides=10))
     return objs
 
 
@@ -873,12 +1009,12 @@ def build_lights():
     # cab roof pair, looking at the hole
     for side, nm in ((-1, 'cabL'), (1, 'cabR')):
         m, a = worklight('cab' + ('L' if side < 0 else 'R'), None,
-                         (-1.06 + side * 0.44, 1.50, DECK_Z + 2.22),
-                         aim_dir=(0.5 * side, 2.2, -2.4), cone_deg=58, range_m=26)
+                         (-1.04 + side * 0.44, 1.82, DECK_Z + 2.22),
+                         aim_dir=(0.5 * side, 2.4, -2.4), cone_deg=58, range_m=26)
         nodes += [m, a]
     # mast foot flood on the auger cleaner and the collar
-    m, a = worklight('collar', None, (-1.00, MAST_CY + 0.55, 3.35),
-                     aim_dir=(1.0, 1.6, -3.2), cone_deg=48, range_m=18)
+    m, a = worklight('collar', None, (-1.05, MAST_CY + 0.62, 3.35),
+                     aim_dir=(1.0, 1.7, -3.2), cone_deg=48, range_m=18)
     nodes += [m, a]
     # mid-mast lamp washing the flights - this is the one that sweeps
     m, a = worklight('mastMid', None, (MAST_W / 2 + 0.26, MAST_CY + 0.30, 9.20),
@@ -929,7 +1065,7 @@ def build(out_path):
         attach(sp, mast_pivot)
 
     # ── the crowd carriage, the drive, and the auger hanging off it ───────────
-    carriage = empty(NODE_SLIDE, 'carriage', None, (0, DRILL_Y, DRIVE_HI_Z - 0.60))
+    carriage = empty(NODE_SLIDE, 'carriage', None, (0, DRILL_Y, DRIVE_Z))
     attach(carriage, mast_pivot)
     drive_parts, z_head = build_drive(carriage)
     join_by_mat(drive_parts, 'drive', carriage)

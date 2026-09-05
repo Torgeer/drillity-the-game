@@ -141,6 +141,13 @@ RAIL_X        = 0.500   # DERIVED: sledge rails inboard of the 1.20 m mast face
 SLEDGE_LO_Z   = 3.630   # [S1 p.10] bottom of the crowd stroke (drive underside)
 SLEDGE_HI_Z   = 13.630  # [S1 p.10] top of the crowd stroke
 CROWD_STROKE  = SLEDGE_HI_Z - SLEDGE_LO_Z     # 10.000 [S1 p.10] "Stroke 10000"
+MASTHEAD_H    = 1.150   # DERIVED: the crown block has to live INSIDE the
+                        # published 27 100 mm, not on top of it.
+GIRDER_LEN    = MAST_LEN + EXT_LEN - MASTHEAD_H           # 21.49 m of girder
+GIRDER_TOP_Z  = MAST_FOOT_Z + GIRDER_LEN                  # 25.95
+# 4.460 + 19.640 + 3.000 = 27.100 exactly, which is the published max height,
+# so nothing may stand proud of it.
+assert abs(MAST_FOOT_Z + MAST_LEN + EXT_LEN - OVERALL_H) < 1e-9
 
 # ── rotary drive ─────────────────────────────────────────────────────────────
 KDK_H         = 2.630   # [S1 p.23] rotary-drive transport drawing
@@ -158,15 +165,23 @@ RPM_MAX       = 53      # [S1 p.11] speed of rotation max — the game's 27 rpm
 KELLY_A       = 15.30   # [S1 p.16] retracted length
 KELLY_B       = 49.80   # [S1 p.16] extended length, unlocked
 KELLY_MASS_KG = 12600   # [S1 p.16]
-KELLY_HEAD_L  = 1.250   # NOT SOURCED as a number.  [S3] calls the long Kelly
-                        # head standard, specifically so an upper Kelly guide
-                        # can be run; sized here off the 470 tube.
+KELLY_HEAD_L  = 0.950   # NOT SOURCED as a number.  [S3] calls the long Kelly
+KELLY_STUB_A  = 1.140   # head standard, specifically so an upper Kelly guide
+                        # can be run; head and stub assembly sized off the 470
+                        # tube so that head + tube + stub closes on A exactly.
 KELLY_ELEMS   = 4
-# DERIVED element length: with n elements of length L and (n−1) overlaps of v,
-#   A = L + head,  B = A + (n−1)(L − v).   L = A − head = 14.05,
-#   v = L − (B − A)/(n−1) = 14.05 − 34.5/3 = 2.55 m of engaged overlap.
-KELLY_L       = KELLY_A - KELLY_HEAD_L        # 14.05 m per element
+# DERIVED element length.  A is measured over the whole retracted bar, so
+#   A = head + L + stub  →  L = 15.30 − 0.95 − 1.14 = 13.21 m per element, and
+#   B = A + (n−1)(L − v) →  L − v = (49.80 − 15.30)/3 = 11.50 m per stage,
+#   leaving v = 1.71 m of engaged overlap between elements when fully extended.
+# The 1.14 m stub figure is the modelled stack — shock spring, shoulder, then
+# the 200 mm square — so the bottom of the exported stub lands on grade at 0.000
+# with the drive parked at the bottom of its stroke, which is checkable.
+# The overlap is the check: under ~1.5 m it would not carry the torque, over
+# ~3 m the arithmetic stops closing on the published A and B.
+KELLY_L       = KELLY_A - KELLY_HEAD_L - KELLY_STUB_A     # 13.21 m per element
 KELLY_STAGE   = (KELLY_B - KELLY_A) / (KELLY_ELEMS - 1)   # 11.50 m per stage
+KELLY_OVERLAP = KELLY_L - KELLY_STAGE                     # 1.90 m engaged
 KELLY_D0      = 0.470   # [S1 p.16 type code / S2 §3] outer pipe Ø
 STUB_MM       = 0.200   # [S3] 200 mm square drive stub — the SAME on every bar
                         # in the range, BK 110 through BK 500.  The only square
@@ -252,7 +267,12 @@ def weld_all():
         for o in objs:
             _apply_mods(o)
         owner, mat = key
-        name = ('%s~%s' % (owner, mat)) if owner else ('static:' + mat)
+        # A welded mesh must NOT inherit its owner's prefix: gltfRig.js indexes
+        # every node whose name starts with pivot:/slide:/mount: and would file
+        # these meshes as game nodes. Strip the prefix; keep the owner's name so
+        # the report still says which subassembly a primitive belongs to.
+        base = owner.split(':', 1)[1] if ':' in owner else owner
+        name = ('%s-%s' % (base, mat)) if owner else ('static:' + mat)
         if len(objs) == 1:
             objs[0].name = name
             continue
@@ -264,12 +284,23 @@ def weld_all():
         bpy.context.active_object.name = name
 
 
-def bx(name, size, mat, owner, parent, loc=(0, 0, 0), rot=(0, 0, 0), bevel=0.012):
-    return B(R.box(name, size, mat, parent, loc, rot, bevel), owner, mat)
+def bx(name, size, mat, owner, parent, loc=(0, 0, 0), rot=(0, 0, 0), bevel=0.012,
+       seg=2):
+    o = R.box(name, size, mat, parent, loc, rot, bevel)
+    if seg != 2 and 'bev' in o.modifiers:
+        o.modifiers['bev'].segments = seg      # one segment is plenty on a part
+    return B(o, owner, mat)                    # that appears a hundred times
 
 
 def tb(name, r, l, mat, owner, parent, loc=(0, 0, 0), rot=(0, 0, 0), sides=12):
     return B(R.tube(name, r, l, mat, parent, loc, rot, sides), owner, mat)
+
+
+def hs(name, pts, r, mat, owner, parent):
+    """A draping curve — hose, rope, cable — filed into a weld bin so it does
+    not spend a draw call of its own. rig.hose() gives the sag; weld_all()
+    converts it to mesh and folds it in with everything else on that material."""
+    return B(R.hose(name, pts, r, mat, parent), owner, mat)
 
 
 def strut(name, p0, p1, r, mat, owner, parent, sides=10, square=False):
@@ -373,10 +404,10 @@ def build_undercarriage(root):
            (cx - 0.22, -WHEEL_CTR, WHEEL_R), (0, math.pi / 2, 0), sides=22)
         for t in range(22):                      # sprocket teeth — cheap, reads
             a = t * math.tau / 22
-            bx('sprocket-tooth-' + tag, (0.40, 0.13, 0.16), R.MAT_WORN, own, par,
+            bx('sprocket-tooth-' + tag, (0.40, 0.13, 0.16), R.MAT_WORN, own, par,  # noqa
                (cx, -WHEEL_CTR + math.sin(a) * WHEEL_R * 0.86,
                 WHEEL_R + math.cos(a) * WHEEL_R * 0.86),
-               (a, 0, 0), bevel=0.02)
+               (a, 0, 0), bevel=0.02, seg=1)
         tb('idler-' + tag, WHEEL_R * 0.86, 0.42, R.MAT_WORN, own, par,
            (cx - 0.21, WHEEL_CTR, WHEEL_R), (0, math.pi / 2, 0), sides=20)
         # bottom track rollers and top carrier rollers
@@ -416,10 +447,11 @@ def build_undercarriage(root):
                 py = WHEEL_CTR + math.sin(a) * rpath
                 pz = WHEEL_R + math.cos(a) * rpath
                 pa = math.pi - a
-            bx('shoe-' + tag, (SHOE_W, SHOE_PITCH * 0.94, 0.075), R.MAT_WORN, own, par,
-               (cx, py, pz), (pa, 0, 0), bevel=0.008)
-            bx('grouser-' + tag, (SHOE_W * 0.92, 0.055, 0.075), R.MAT_WORN, own, par,
-               (cx, py + math.cos(pa) * 0.0, pz), (pa, 0, 0), bevel=0.006)
+            bx('shoe-' + tag, (SHOE_W, SHOE_PITCH * 0.94, 0.070), R.MAT_WORN, own, par,
+               (cx, py, pz), (pa, 0, 0), bevel=0.007, seg=1)
+            # grouser bar, standing proud of the shoe plate on the ground side
+            bx('grouser-' + tag, (SHOE_W * 0.90, 0.055, 0.045), R.MAT_WORN, own, par,
+               (cx, py, pz - math.cos(pa) * 0.052, ), (pa, 0, 0), bevel=0.005, seg=1)
 
 
 def build_upper(slew):
@@ -613,9 +645,9 @@ def build_aframe_and_kinematics(slew, mast):
         B(R.tube('ram-mast-eye', 0.10, 0.30, R.MAT_STEEL, slew,
                  (x - 0.15, -0.70, 3.20), (0, math.pi / 2, 0), 12), slew, R.MAT_STEEL)
         # the pair of feed hoses that every big ram wears
-        R.hose('ram-hose', [(x + 0.16, -0.55, 3.35),
-                            (x + 0.30, 0.35, 4.10),
-                            (x + 0.22, 1.30, 5.20)], 0.026, R.MAT_RUBBER, slew)
+        hs('ram-hose', [(x + 0.16, -0.55, 3.35),
+                        (x + 0.30, 0.35, 4.10),
+                        (x + 0.22, 1.30, 5.20)], 0.026, R.MAT_RUBBER, slew, slew)
 
 
 def build_mast(mast):
@@ -628,13 +660,13 @@ def build_mast(mast):
     """
     own = mast
     yc = (MAST_FACE_Y + MAST_BACK_Y) / 2          # mast box centre in Y
-    total = MAST_LEN + EXT_LEN
+    total = GIRDER_LEN
     zc = MAST_FOOT_Z + total / 2
 
     # side plates, punched. 13 holes at 1.55 m pitch through the main leader.
     holes = []
     z = MAST_FOOT_Z + 1.55
-    while z < MAST_TOP_Z - 1.0:
+    while z < GIRDER_TOP_Z - 1.0:
         holes.append(((0, yc + 0.02, z), 0.30, 2.0))
         z += 1.55
     for sx in (-1, 1):
@@ -649,7 +681,7 @@ def build_mast(mast):
        (0, MAST_BACK_Y, zc), bevel=0.008)
     # internal diaphragms show through the holes and stop it reading hollow
     z = MAST_FOOT_Z + 0.80
-    while z < MAST_FOOT_Z + total - 0.5:
+    while z < GIRDER_TOP_Z - 0.5:
         bx('mast-diaphragm', (MAST_W - 0.12, MAST_D - 0.10, 0.035), R.MAT_DARK, own, mast,
            (0, yc, z), bevel=0.006)
         z += 1.55
@@ -662,7 +694,7 @@ def build_mast(mast):
             for sx in (-1, 1):
                 bx('mast-flange-bolt', (0.05, 0.05, 0.10), R.MAT_STEEL, own, mast,
                    (sx * (MAST_W / 2 + 0.045), yc - MAST_D / 2 + 0.12 + i * 0.16, z),
-                   bevel=0.008)
+                   bevel=0.008, seg=1)
 
     # sledge rails: two heavy rails standing proud of the front face, full length
     for sx in (-1, 1):
@@ -693,18 +725,20 @@ def build_mast(mast):
     bx('mast-foot-hazard', (MAST_W + 0.26, 0.06, 0.30), R.MAT_HAZARD, own, mast,
        (0, MAST_FACE_Y + 0.14, MAST_FOOT_Z + 0.10), bevel=0.01)
 
-    # ── masthead ─────────────────────────────────────────────────────────────
-    top = MAST_FOOT_Z + total
-    bx('masthead-box', (MAST_W + 0.20, MAST_D + 0.55, 1.15), R.MAT_DARK, own, mast,
-       (0, yc + 0.20, top + 0.55), bevel=0.04)
+    # ── masthead.  Its top face IS the published 27 100 mm max height. ──────
+    top = GIRDER_TOP_Z
+    bx('masthead-box', (MAST_W + 0.20, MAST_D + 0.55, MASTHEAD_H), R.MAT_DARK, own, mast,
+       (0, yc + 0.20, top + MASTHEAD_H / 2), bevel=0.04)
     # crown sheaves — main rope, auxiliary rope, crowd rope
-    for i, (sx, r) in enumerate(((-0.30, 0.42), (0.0, 0.42), (0.30, 0.34))):
+    for (sx, r) in ((-0.30, 0.40), (0.0, 0.40), (0.30, 0.32)):
         tb('crown-sheave', r, 0.10, R.MAT_CAST, own, mast,
-           (sx - 0.05, yc + 0.20, top + 0.55), (0, math.pi / 2, 0), sides=20)
+           (sx - 0.05, yc + 0.20, top + 0.58), (0, math.pi / 2, 0), sides=20)
+        tb('crown-sheave-hub', r * 0.34, 0.14, R.MAT_STEEL, own, mast,
+           (sx - 0.07, yc + 0.20, top + 0.58), (0, math.pi / 2, 0), sides=12)
     tb('crown-shaft', 0.075, 1.05, R.MAT_STEEL, own, mast,
-       (-0.52, yc + 0.20, top + 0.55), (0, math.pi / 2, 0), sides=12)
-    bx('crown-guard', (MAST_W, 0.10, 0.95), R.MAT_DARK, own, mast,
-       (0, yc + 0.72, top + 0.55), bevel=0.02)
+       (-0.52, yc + 0.20, top + 0.58), (0, math.pi / 2, 0), sides=12)
+    bx('crown-guard', (MAST_W, 0.10, 0.88), R.MAT_DARK, own, mast,
+       (0, yc + 0.72, top + 0.58), bevel=0.02)
 
     # ── upper Kelly guide ────────────────────────────────────────────────────
     # [S1 p.16] the upgraded configuration is the one WITH an upper Kelly guide,
@@ -712,7 +746,7 @@ def build_mast(mast):
     # be used without conversion.  It is also what physically sets the visible
     # 1 400 mm air gap between the leader face and the Kelly [S2 §9-H] — the gap
     # is the single detail that stops the machine reading as a crane jib.
-    gz = MAST_TOP_Z + 1.35
+    gz = GIRDER_TOP_Z - 1.05
     strut('kelly-guide-arm-l', (-0.45, MAST_FACE_Y, gz),
           (-0.42, DRILL_AXIS_Y - 0.05, gz), 0.075, R.MAT_DARK, own, mast, square=True)
     strut('kelly-guide-arm-r', (0.45, MAST_FACE_Y, gz),
@@ -734,13 +768,13 @@ def build_mast(mast):
 
     # mast-mounted service ladder with a fall-arrest rail
     z = MAST_FOOT_Z + 0.45
-    while z < MAST_TOP_Z - 0.5:
+    while z < GIRDER_TOP_Z - 0.5:
         bx('mast-rung', (0.40, 0.045, 0.035), R.MAT_WORN, own, mast,
-           (-0.78, MAST_BACK_Y - 0.22, z), bevel=0.006)
+           (-0.78, MAST_BACK_Y - 0.22, z), bevel=0.006, seg=1)
         z += 0.31
     for sx in (-0.19, 0.19):
         strut('mast-ladder-rail', (-0.78 + sx, MAST_BACK_Y - 0.26, MAST_FOOT_Z + 0.35),
-              (-0.78 + sx, MAST_BACK_Y - 0.26, MAST_TOP_Z - 0.4),
+              (-0.78 + sx, MAST_BACK_Y - 0.26, GIRDER_TOP_Z - 0.4),
               0.026, R.MAT_HAZARD, own, mast, sides=6)
 
 
@@ -839,7 +873,7 @@ def build_sledge_and_drive(sledge, spindle):
            (math.cos(th) * 0.335, math.sin(th) * 0.335, -0.98), bevel=0.01)
 
 
-def build_kelly(spindle):
+def build_kelly(spindle, top0):
     """The telescopic Kelly bar — the part that makes this rig THIS rig.
 
     Fixed against [S2 §9-A], which lists three errors in the current game model
@@ -854,16 +888,17 @@ def build_kelly(spindle):
     stage, 15.30 m retracted → 49.80 m extended [S1 p.16].
     """
     nodes = []
-    host = spindle
+    host = R.empty('', 'kelly-1', spindle, (0, 0, top0))
+    top = 0.0
     for i in range(KELLY_ELEMS):
         d = KELLY_D0 * (KELLY_STEP ** i)
         r = d / 2
         if i == 0:
-            node = spindle
-            top = 0.0
+            node = host
         else:
             node = R.empty(R.NODE_SLIDE, 'kelly-%d' % (i + 1), host, (0, 0, 0))
-            top = 0.0
+            node['travel_m'] = -KELLY_STAGE     # each stage drops 11.50 m
+            node['overlap_m'] = KELLY_OVERLAP
         own = node
         # the tube. Origin of each element at its own top.
         tb('kelly-tube-%d' % (i + 1), r, KELLY_L, R.MAT_WORN, own, node,
@@ -894,10 +929,10 @@ def build_kelly(spindle):
             tb('kelly-head-collar', r * 1.46, 0.18, R.MAT_WORN, own, node,
                (0, 0, KELLY_HEAD_L - 0.30), sides=16)
             for sx in (-1, 1):
-                bx('kelly-eye-plate', (0.06, 0.34, 0.52), R.MAT_STEEL, own, node,
-                   (sx * 0.12, 0, KELLY_HEAD_L + 0.20), bevel=0.02)
+                bx('kelly-eye-plate', (0.06, 0.34, 0.50), R.MAT_STEEL, own, node,
+                   (sx * 0.12, 0, KELLY_HEAD_L - 0.19), bevel=0.02)
             tb('kelly-eye-pin', 0.05, 0.30, R.MAT_STEEL, own, node,
-               (-0.15, 0, KELLY_HEAD_L + 0.28), (0, math.pi / 2, 0), sides=10)
+               (-0.15, 0, KELLY_HEAD_L - 0.11), (0, math.pi / 2, 0), sides=10)
             # dewatering bore holes near the foot of the outer tube [S3 p.6]
             for k in range(8):
                 th = k * math.tau / 8
@@ -928,7 +963,7 @@ def build_kelly(spindle):
     return nodes
 
 
-def build_ropes_and_hoses(mast, sledge_z):
+def build_ropes_and_hoses(mast, sledge_z, head_z):
     """Main hoist rope and swivel, crowd reeving, and the hose PACKAGE.
 
     [S4] is the only document that says where the hoses actually run, and it is
@@ -945,59 +980,71 @@ def build_ropes_and_hoses(mast, sledge_z):
     ax = DRILL_AXIS_Y
 
     # main hoist rope: crown sheave → down the drill axis → swivel → Kelly eye
-    R.hose('rope-main', [(-0.35, yc + 0.20, top + 0.95),
-                         (-0.20, ax - 0.55, top + 0.30),
-                         (-0.02, ax, top - 1.20),
-                         (0.0, ax, sledge_z + 4.60)],
-           MAIN_ROPE_D / 2, R.MAT_WORN, mast)
-    # the rope swivel — 890 mm body, not a plain shackle [S2 §9-I]
+    # main hoist rope, and the swivel it ends in.  The rope swivel is a 890 mm
+    # body with Ø216 eyes and Ø80 pins at this rating [S2 §3] — a real component
+    # between the rope and the Kelly eye, not a shackle [S2 §9-I].  It sits
+    # directly on top of the Kelly head in the parked pose modelled here.
+    sw_bot = head_z + 0.18
+    hs('rope-main', [(-0.35, yc + 0.20, top + 0.92),
+                     (-0.20, ax - 0.55, top + 0.28),
+                     (-0.02, ax, top - 1.40),
+                     (0.0, ax, sw_bot + SWIVEL_L)],
+       MAIN_ROPE_D / 2, R.MAT_WORN, own, mast)
     tb('swivel-body', SWIVEL_D / 2, SWIVEL_L * 0.62, R.MAT_CAST, own, mast,
-       (0, ax, sledge_z + 4.05), sides=16)
-    tb('swivel-neck', SWIVEL_D / 2 * 0.55, 0.20, R.MAT_STEEL, own, mast,
-       (0, ax, sledge_z + 4.05 + SWIVEL_L * 0.62), sides=12)
+       (0, ax, sw_bot + 0.16), sides=16)
+    tb('swivel-neck', SWIVEL_D / 2 * 0.55, 0.24, R.MAT_STEEL, own, mast,
+       (0, ax, sw_bot + 0.16 + SWIVEL_L * 0.62), sides=12)
     for sx in (-1, 1):
-        bx('swivel-eye', (0.05, 0.26, 0.42), R.MAT_STEEL, own, mast,
-           (sx * 0.10, ax, sledge_z + 3.82), bevel=0.02)
+        bx('swivel-eye', (0.05, 0.26, 0.34), R.MAT_STEEL, own, mast,
+           (sx * 0.10, ax, sw_bot + 0.02), bevel=0.02)
     tb('swivel-pin', 0.042, 0.28, R.MAT_STEEL, own, mast,
-       (-0.14, ax, sledge_z + 3.70), (0, math.pi / 2, 0), sides=10)
+       (-0.14, ax, sw_bot - 0.06), (0, math.pi / 2, 0), sides=10)
 
     # crowd reeving: up the back, over the crown, down the face to the sledge
-    R.hose('rope-crowd-up', [(0.34, MAST_BACK_Y - 0.30, MAST_FOOT_Z + 0.60),
-                             (0.32, MAST_BACK_Y - 0.20, top * 0.55),
-                             (0.31, yc + 0.30, top + 0.72),
-                             (0.34, MAST_FACE_Y + 0.42, sledge_z + 1.05)],
-           CROWD_ROPE_D / 2, R.MAT_WORN, mast)
-    R.hose('rope-crowd-down', [(0.34, MAST_BACK_Y - 0.34, MAST_FOOT_Z + 0.45),
-                               (0.36, MAST_FACE_Y + 0.30, MAST_FOOT_Z + 0.25),
-                               (0.34, MAST_FACE_Y + 0.42, sledge_z - 1.05)],
-           CROWD_ROPE_D / 2, R.MAT_WORN, mast)
+    hs('rope-crowd-up', [(0.34, MAST_BACK_Y - 0.30, MAST_FOOT_Z + 0.60),
+                         (0.32, MAST_BACK_Y - 0.20, top * 0.55),
+                         (0.31, yc + 0.30, top + 0.72),
+                         (0.34, MAST_FACE_Y + 0.42, sledge_z + 1.05)],
+       CROWD_ROPE_D / 2, R.MAT_WORN, own, mast)
+    hs('rope-crowd-down', [(0.34, MAST_BACK_Y - 0.34, MAST_FOOT_Z + 0.45),
+                           (0.36, MAST_FACE_Y + 0.30, MAST_FOOT_Z + 0.25),
+                           (0.34, MAST_FACE_Y + 0.42, sledge_z - 1.05)],
+       CROWD_ROPE_D / 2, R.MAT_WORN, own, mast)
     tb('crowd-foot-sheave', 0.30, 0.09, R.MAT_CAST, own, mast,
        (0.29, MAST_FACE_Y + 0.30, MAST_FOOT_Z + 0.10), (0, math.pi / 2, 0), sides=18)
 
     # auxiliary rope over the third crown sheave
-    R.hose('rope-aux', [(0.30, yc + 0.20, top + 0.90),
-                        (0.42, ax + 0.35, top - 0.60),
-                        (0.44, ax + 0.55, sledge_z + 7.5)],
-           AUX_ROPE_D / 2, R.MAT_WORN, mast)
+    # auxiliary rope over the third crown sheave, hanging on its hook block
+    hook_z = sledge_z + 7.5
+    hs('rope-aux', [(0.30, yc + 0.20, top + 0.88),
+                    (0.46, ax + 0.42, top - 0.60),
+                    (0.48, ax + 0.62, hook_z + 0.55)],
+       AUX_ROPE_D / 2, R.MAT_WORN, own, mast)
+    bx('aux-hook-block', (0.26, 0.20, 0.46), R.MAT_CAST, own, mast,
+       (0.48, ax + 0.62, hook_z + 0.30), bevel=0.03)
+    tb('aux-hook-shank', 0.05, 0.34, R.MAT_STEEL, own, mast,
+       (0.48, ax + 0.62, hook_z - 0.26), sides=10)
+    tb('aux-hook-bill', 0.055, 0.26, R.MAT_STEEL, own, mast,
+       (0.48, ax + 0.62, hook_z - 0.26), (0.9, 0, 0), sides=10)
 
     # ── the hose package: a flat ordered bundle, six lines wide + a cable ────
     y0, y1 = MAST_BACK_Y - 0.30, MAST_FACE_Y + 0.30
     for i in range(6):
         x = -0.62 + (i - 2.5) * 0.062
-        R.hose('hose-main-%d' % (i + 1),
-               [(x, y0, MAST_FOOT_Z + 1.15),
-                (x, y0 - 0.12, MAST_FOOT_Z + 5.0),
-                (x, y0 - 0.16, sledge_z + 2.60),          # the catenary crest
-                (x - 0.05, y0 + 0.55, sledge_z + 1.10),
-                (x - 0.10, ax - 0.30, sledge_z + 0.60)],
-               0.030, R.MAT_RUBBER, mast)
-    R.hose('hose-electric',
+        hs('hose-main-%d' % (i + 1),
+           [(x, y0, MAST_FOOT_Z + 1.15),
+            (x, y0 - 0.12, MAST_FOOT_Z + 5.0),
+            (x, y0 - 0.16, sledge_z + 2.60),              # the catenary crest
+            (x - 0.05, y0 + 0.55, sledge_z + 1.10),
+            (x - 0.10, ax - 0.30, sledge_z + 0.60)],
+           0.030, R.MAT_RUBBER, own, mast)
+    hs('hose-electric',
            [(-0.62 + 3.5 * 0.062, y0, MAST_FOOT_Z + 1.15),
             (-0.62 + 3.5 * 0.062, y0 - 0.12, MAST_FOOT_Z + 5.0),
             (-0.62 + 3.5 * 0.062, y0 - 0.16, sledge_z + 2.60),
             (-0.67 + 3.5 * 0.062, y0 + 0.55, sledge_z + 1.10),
             (-0.72 + 3.5 * 0.062, ax - 0.30, sledge_z + 0.60)],
-           0.020, R.MAT_RUBBER, mast)
+           0.020, R.MAT_RUBBER, own, mast)
     # the flat tarpaulin bag the bundle actually lives in — strap clamps
     for z in (MAST_FOOT_Z + 2.6, MAST_FOOT_Z + 5.4, sledge_z + 2.35):
         bx('hose-bag-strap', (0.46, 0.20, 0.07), R.MAT_RUBBER, own, mast,
@@ -1016,13 +1063,11 @@ def build_lights(slew, mast, sledge):
                 aim_dir=(0.6, 1.6, -1.0), cone_deg=58, range_m=26)
     R.worklight('lamp-deck-rear', slew, (1.55, -4.30, DECK_Z + 1.15),
                 aim_dir=(-0.4, -1.0, -0.9), cone_deg=64, range_m=18)
-    R.worklight('lamp-mast-head', mast, (-0.70, MAST_FACE_Y + 0.26, MAST_TOP_Z - 2.2),
+    R.worklight('lamp-mast-head', mast,
+                (-0.70, MAST_FACE_Y + 0.26, GIRDER_TOP_Z - 2.2),
                 aim_dir=(0.5, 1.2, -1.6), cone_deg=46, range_m=34)
     R.worklight('lamp-drive', sledge, (-0.78, MAST_FACE_Y + 0.50, 0.95),
                 aim_dir=(0.7, 1.1, -1.4), cone_deg=52, range_m=22)
-    for (parent, loc) in ((slew, (-1.62, 2.30, DECK_Z + 2.32)),
-                          (slew, (1.55, -4.30, DECK_Z + 1.15))):
-        pass
 
 
 def build_lamp_housings(slew, mast, sledge):
@@ -1030,10 +1075,15 @@ def build_lamp_housings(slew, mast, sledge):
     for (own, par, loc, rot) in (
             (slew, slew, (-1.62, 2.30, DECK_Z + 2.32), (0.55, 0, 0)),
             (slew, slew, (1.55, -4.30, DECK_Z + 1.15), (-0.5, 0, 0)),
-            (mast, mast, (-0.70, MAST_FACE_Y + 0.26, MAST_TOP_Z - 2.2), (0.7, 0, 0)),
+            (mast, mast, (-0.70, MAST_FACE_Y + 0.26, GIRDER_TOP_Z - 2.2), (0.7, 0, 0)),
             (sledge, sledge, (-0.78, MAST_FACE_Y + 0.50, 0.95), (0.7, 0, 0))):
+        # Only the two deck lamps get a glass lens: the uppercarriage already
+        # spends a glass draw call on the cab so lenses there are free, whereas
+        # a 12-triangle glass primitive on the mast and another on the sledge
+        # would each cost a whole draw call. Those get a steel reflector face.
+        lens = R.MAT_GLASS if own is slew else R.MAT_STEEL
         bx('lamp-housing', (0.30, 0.16, 0.24), R.MAT_DARK, own, par, loc, rot, bevel=0.02)
-        bx('lamp-lens', (0.24, 0.04, 0.19), R.MAT_GLASS, own, par,
+        bx('lamp-lens', (0.24, 0.04, 0.19), lens, own, par,
            (loc[0], loc[1] + 0.09, loc[2] - 0.03), rot, bevel=0.0)
         bx('lamp-bracket', (0.06, 0.10, 0.16), R.MAT_WORN, own, par,
            (loc[0], loc[1] - 0.09, loc[2] + 0.10), (0, 0, 0), bevel=0.01)
@@ -1049,33 +1099,53 @@ def build(out_path):
     R.reset()
 
     # ── the dynamic spine ────────────────────────────────────────────────────
-    # slew → mast rake → crowd sledge → rotary spindle → four Kelly stages.
-    # rigFactory.js looks these up BY STRING; they are the contract.
+    # slew → mast rake → crowd sledge → rotary spindle → three Kelly stages.
+    # gltfRig.js indexes these BY STRING; they are the contract.
     slew = R.empty(R.NODE_PIVOT, 'slew', None, (0, 0, 0))
-    mast = R.empty(R.NODE_PIVOT, 'mast', slew, (0, MAST_BACK_Y + 0.02, 5.20))
-    # mast children are authored in machine coordinates, so the node sits at the
-    # lower kinematics pin and its children carry absolute Z. Keep the node's
-    # own transform at identity minus the pin offset:
-    mast.location = (0, 0, 0)
 
-    sledge_home = 9.60          # parked mid-stroke: 3.63 + 10.00/2 ≈ 8.6 plus
-                                # the drive's own half height. [S1 p.10]
-    sledge = R.empty(R.NODE_SLIDE, 'carriage', mast, (0, 0, sledge_home))
+    # The rake pivot sits at the leader foot, not at the origin. Everything
+    # inside the mast is authored in absolute machine coordinates, so a second,
+    # unprefixed node undoes the pin offset and the leader's own numbers stay
+    # readable against the datasheet.
+    yc = (MAST_FACE_Y + MAST_BACK_Y) / 2
+    mast = R.empty(R.NODE_PIVOT, 'mast', slew, (0, yc, MAST_FOOT_Z))
+    mast['rake_fwd_deg'] = 5.0        # [S1 p.10] the leader stands vertical and
+    mast['rake_back_deg'] = 5.0       # trims a few degrees; it does NOT rake
+    mast['rake_side_deg'] = 5.0       # like a driven-pile leader [S2 §5]
+    frame = R.empty('', 'mast-frame', mast, (0, -yc, -MAST_FOOT_Z))
+
+    # Carriage home = the BOTTOM of the crowd stroke, because gltfRig.js reads
+    # carriageRange as [y, y + travel_m]. The drive's lower face is the
+    # datasheet's reference, and it sits 0.70 m below the sledge origin.
+    DRIVE_FACE_OFF = 0.70
+    sledge_home = SLEDGE_LO_Z + DRIVE_FACE_OFF        # 4.33
+    sledge = R.empty(R.NODE_SLIDE, 'carriage', frame, (0, 0, sledge_home))
+    sledge['travel_m'] = CROWD_STROKE                 # 10.000 [S1 p.10]
     spindle = R.empty(R.NODE_PIVOT, 'spindle', sledge, (0, DRILL_AXIS_Y, -1.06))
+    spindle['rpm_max'] = RPM_MAX                      # 53 rpm [S1 p.11]
+    spindle['torque_knm'] = TORQUE_KNM                # 385 kNm [S1 p.11]
 
-    # useful fixed references for the game
+    # Kelly hang height. With the drive at the bottom of its stroke the bar is
+    # retracted and its drive stub is AT GRADE — head high, stub on the ground,
+    # which is the pose [S2 §3] describes and the one the machine parks in.
+    #   stub bottom 0.000 → head top 15.300 (= A) → outer-tube top 14.350
+    #   spindle at 4.330 − 1.060 = 3.270 → the tube top is 11.080 above it.
+    kelly_top = (KELLY_A - KELLY_HEAD_L) - (sledge_home - 1.06)
+
+    # fixed references the game can ask for
     R.empty(R.NODE_MOUNT, 'drill-axis', slew, (0, DRILL_AXIS_Y, 0))
     R.empty(R.NODE_MOUNT, 'slew-centre', None, (0, 0, 0))
 
     build_undercarriage(None)
     build_upper(slew)
     build_aframe_and_kinematics(slew, mast)
-    build_mast(mast)
+    build_mast(frame)
     build_sledge_and_drive(sledge, spindle)
-    build_kelly(spindle)
-    build_ropes_and_hoses(mast, sledge_home)
-    build_lamp_housings(slew, mast, sledge)
-    build_lights(slew, mast, sledge)
+    build_kelly(spindle, kelly_top)
+    build_ropes_and_hoses(frame, sledge_home, kelly_top + (sledge_home - 1.06)
+                          + KELLY_HEAD_L)
+    build_lamp_housings(slew, frame, sledge)
+    build_lights(slew, frame, sledge)
 
     weld_all()
     return R.finish(out_path)

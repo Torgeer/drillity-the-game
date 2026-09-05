@@ -84,18 +84,36 @@ HOLE_DIA = 0.124       # 124 mm, one of the two standard RC hole sizes [R02 §A2
 #   mast slenderness                 = 8.5 : 1  (long thin open truss)
 #   mast rake in that photograph     = 19 deg from vertical, leaning back
 #   overall silhouette width         = 0.73 x standing height
-DECK_Z = 2.20          # deck plate top. DERIVED, not sourced (§8 item 5): the
-                       # jacked-crawler deck height that makes the sourced ratios
-                       # produce a mast able to take a 3.05 m rod.
-MAST_LEN = 5.45        # = 0.94 x 5.80 m standing height. Built VERTICAL; the
-                       # game rakes it on pivot:mast, and at the reference 19 deg
-                       # this reproduces the photograph's 1.61:1 exactly, with
-                       # 1.64 m of mast hanging below deck level — which is where
-                       # the breakout table and rod clamp actually live.
+DECK_Z = 2.30          # deck plate top. DERIVED, not sourced (§8 item 5).
+MAST_LEN = 5.45        # built VERTICAL; the game rakes it on pivot:mast.
 MAST_W = 0.58          # across the machine (X)
-MAST_D = 0.66          # fore/aft (Y). 5.45 / 0.64 = 8.5 : 1 [MET p.22 §3b]
-MAST_FOOT = 0.60       # mast foot pin height above ground
+MAST_D = 0.66          # fore/aft (Y). 5.45 / 0.64 = 8.5 : 1 [MET p.22 §3b] — the
+                       # one ratio that is held exactly, because §5 makes the
+                       # long thin open truss an identification cue.
+MAST_FOOT = 1.15       # mast foot pin height above ground
+DRILL_FLOOR = 1.50     # the lower working floor at the mast foot, reached from
+                       # the deck by four steps
 
+# WHERE THIS SCALE COMES FROM, AND WHERE IT DEVIATES.
+# The vertical ratio measured off [MET p.22] is mast-above-deck : deck-to-ground
+# = 1.64 : 1. Held exactly, with a deck at a credible jacked-crawler height, that
+# gives a mast too short to swallow a 3.05 m rod, and rc-rig.md §9.F anticipates
+# precisely this: "either the mast is long for its rods, or the deck is low, or
+# the reference is a smaller machine... whoever changes it should decide the rod
+# length first and let the mast follow." So the rod wins, because the rod length
+# is sourced and the ratio is measured off a foreshortened studio photograph of a
+# machine whose absolute size is unknown (§8).
+# Result: at the reference 19 deg rake this model stands 6.30 m to the crown with
+# a ratio of 1.74 : 1 against the photograph's 1.61 : 1 — about 8 % taller in the
+# mast. Declared, not hidden.
+# Web cross-check, and it is the first absolute scale anyone has had for this
+# class: a published crawler RC rig of the same capability (JCDrill JRC1200,
+# 90-400 mm holes, 13 t) gives shipping 7550 x 2260 x 2700 mm, 300 mm ground
+# clearance, 3400 mm FEED STROKE and 4 / 4.5 m pipe. A 3.4 m stroke needs a mast
+# of about 5.4 m once the head, the crown and the foot clamp are taken out —
+# which is what MAST_LEN already was, derived independently from the rod. The
+# same source is why BODY_W came down from 2.55 to 2.42: 2260 mm shipping width
+# plus the handrails.
 HOLE_Y = -2.85         # drill centre, 0.70 m forward of the track nose (-2.15)
 TRACK_LEN = 4.30
 TRACK_W = 0.62         # triple-grouser shoe width. NOT SOURCED (§8 item 3)
@@ -103,7 +121,7 @@ GAUGE = 1.18           # track centres. NOT SOURCED
 TRACK_LIFT = 0.16      # the rig WORKS ON ITS JACKS with the tracks hanging clear
                        # [MET p.22, rc-rig.md §4.9] — that is the whole stance,
                        # and it changes the silhouette more than any single part.
-BODY_W = 2.55
+BODY_W = 2.42
 JACK_X = 1.28          # outboard of the track outer edge at 0.90 [rc-rig.md §9.L]
 
 CYC_X, CYC_Y = 2.78, -1.55    # sample train, forward-right of the machine
@@ -262,9 +280,9 @@ def build_undercarriage():
     half = TRACK_LEN / 2 - R
     for s in (-1, 1):
         x = s * GAUGE / 2
-        box('uc-frame', (0.34, TRACK_LEN - 0.55, 0.52), MAT_DARK,
+        box('uc-frame', (0.42, TRACK_LEN - 0.55, 0.54), MAT_DARK,
             loc=(x, 0, cz), bevel=0.03)
-        box('uc-frame-web', (0.20, TRACK_LEN - 0.10, 0.22), MAT_DARK,
+        box('uc-frame-web', (0.26, TRACK_LEN - 0.10, 0.24), MAT_DARK,
             loc=(x, 0, cz), bevel=0.02)
         tube('uc-idler', R * 0.80, TRACK_W - 0.10, MAT_WORN,
              loc=(x - (TRACK_W - 0.10) / 2, -half, cz),
@@ -282,18 +300,23 @@ def build_undercarriage():
              rot=(0, s * math.pi / 2, 0), sides=14)
         for i in range(6):
             y = -half + 0.16 + i * (2 * half - 0.32) / 5
-            tube('uc-roller', 0.115, TRACK_W - 0.16, MAT_CAST,
-                 loc=(x - (TRACK_W - 0.16) / 2, y, TRACK_LIFT + 0.115),
+            tube('uc-roller', 0.115, TRACK_W - 0.28, MAT_CAST,
+                 loc=(x - (TRACK_W - 0.28) / 2, y, TRACK_LIFT + 0.115),
                  rot=(0, math.pi / 2, 0), sides=10)
         for i in range(2):
-            tube('uc-carrier', 0.075, 0.16, MAT_CAST,
-                 loc=(x - 0.08, -0.75 + i * 1.5, cz + R - 0.02),
+            tube('uc-carrier', 0.075, 0.14, MAT_CAST,
+                 loc=(x - 0.07, -0.75 + i * 1.5, cz + R - 0.02),
                  rot=(0, math.pi / 2, 0), sides=8)
         box('uc-track-guard', (TRACK_W + 0.06, TRACK_LEN * 0.62, 0.05), MAT_DARK,
             loc=(x, 0.1, cz + R + 0.10), bevel=0.012)
 
-        # the chain: shoes on a stadium path around idler and sprocket
-        n_str, n_arc = 13, 9
+        # The chain: real shoes on a stadium path around idler and sprocket.
+        # Pitch is set from the SHOE LENGTH so the run is continuous — spaced by
+        # a fixed count it comes out as a dotted line, which is exactly what a
+        # first render showed and exactly what a painted-on track looks like.
+        pitch = 0.162
+        n_str = int(round(2 * half / pitch)) + 1
+        n_arc = max(6, int(round(math.pi * R / pitch)))
         pts = []
         for i in range(n_str):
             t = i / (n_str - 1)
@@ -369,16 +392,40 @@ def build_deck():
         box('deck-xbeam', (BODY_W - 0.05, 0.14, 0.26), MAT_DARK,
             loc=(0, y, DECK_Z - 0.20), bevel=0.018)
 
-    # front frame: fabricated nose from the deck out to the mast foot
-    box('front-frame', (0.92, 1.30, 0.30), MAT_DARK,
-        loc=(0, HOLE_Y + 0.72, MAST_FOOT + 0.28), bevel=0.022)
+    # ── the drill floor: a LOWER working deck at the mast foot ──────────────
+    # This is what falls out of holding the reference ratio honestly. [MET p.22]
+    # puts 1.6 m of mast below deck level, so the rod clamp and the breakout
+    # table sit well under the walking deck — which only makes sense if there is
+    # a second, lower floor around the mast foot that the crew works the rods
+    # from, reached from the main deck by a short stair. Web walkarounds of
+    # exploration crawlers of this class show exactly that split-level layout.
+    box('drill-floor-front', (2.10, 0.40, 0.05), MAT_DARK,
+        loc=(0, HOLE_Y - 0.60, DRILL_FLOOR), bevel=0.008)
+    box('drill-floor-rear', (2.10, 0.40, 0.05), MAT_DARK,
+        loc=(0, HOLE_Y + 0.50, DRILL_FLOOR), bevel=0.008)
     for s in (-1, 1):
-        strut('front-frame-brace', (s * 0.44, -2.32, DECK_Z - 0.30),
-              (s * 0.38, HOLE_Y + 0.30, MAST_FOOT + 0.34), 0.12, MAT_DARK)
-    box('front-frame-deck', (1.92, 0.62, 0.05), MAT_DARK,
-        loc=(0, HOLE_Y + 1.14, MAST_FOOT + 0.46), bevel=0.01)
-    box('toe-board', (1.92, 0.04, 0.16), MAT_HAZARD,
-        loc=(0, HOLE_Y + 0.84, MAST_FOOT + 0.56), bevel=0.008)
+        box('drill-floor-side', (0.65, 0.70, 0.05), MAT_DARK,
+            loc=(s * 0.725, HOLE_Y - 0.05, DRILL_FLOOR), bevel=0.008)
+        strut('drill-floor-beam', (s * 0.90, HOLE_Y - 0.78, DRILL_FLOOR - 0.14),
+              (s * 0.62, -1.60, DRILL_FLOOR - 0.14), 0.16, MAT_DARK)
+        box('drill-floor-kick', (0.05, 1.70, 0.16), MAT_HAZARD,
+            loc=(s * 1.02, HOLE_Y - 0.05, DRILL_FLOOR + 0.10), bevel=0.006)
+    box('drill-floor-kick-f', (2.10, 0.05, 0.16), MAT_HAZARD,
+        loc=(0, HOLE_Y - 0.78, DRILL_FLOOR + 0.10), bevel=0.006)
+    # fabricated nose carrying the mast foot out past the track front
+    box('front-frame', (0.98, 1.55, 0.34), MAT_DARK,
+        loc=(0, HOLE_Y + 0.62, DRILL_FLOOR - 0.36), bevel=0.024)
+    for s in (-1, 1):
+        strut('front-frame-brace', (s * 0.48, -1.55, DECK_Z - 0.46),
+              (s * 0.40, HOLE_Y + 0.24, DRILL_FLOOR - 0.30), 0.14, MAT_DARK)
+    # steps from the main deck down to the drill floor
+    for i in range(3):
+        t = (i + 1) / 4.0
+        box('drill-floor-step', (0.58, 0.20, 0.028), MAT_HAZARD,
+            loc=(-0.72, -2.20 - 0.42 * t, DECK_Z - 0.80 * t + 0.02), bevel=0.005)
+    for s in (-1, 1):
+        strut('drill-floor-stringer', (-0.72 + s * 0.30, -2.16, DECK_Z),
+              (-0.72 + s * 0.30, -2.68, DRILL_FLOOR + 0.03), 0.06, MAT_PAINT)
 
     # handrails and stanchions along the deck edges, plain round tube
     for s in (-1, 1):
@@ -430,6 +477,37 @@ def build_body():
     the 25.5 m3/min at 24.1 bar in [R02 §A2] is the HAMMER's demand, met by a
     separate compressor standing on the pad, not by this box.
     """
+    # ── the machine house: the mass UNDER the deck ──────────────────────────
+    # A first render of this model made the mistake worth recording: with only a
+    # deck plate on beams over the tracks, the machine read as a scaffold, not as
+    # a machine — thin rails everywhere and daylight through the middle. Real
+    # crawler rigs of this class fill the whole band between the track top and
+    # the deck with a fabricated frame carrying the tanks, the pumps and the
+    # valve bank behind bolted access panels. That mass is most of the silhouette
+    # below the mast, and REVIEW_RUBRIC axis 4 fails a machine that lacks it.
+    hy0, hy1 = -1.75, 2.35
+    box('house', (BODY_W - 0.10, hy1 - hy0, 1.02), MAT_PAINT,
+        loc=(0, (hy0 + hy1) / 2, 1.51), bevel=0.045)
+    for s in (-1, 1):
+        for i, (pcy, pcl) in enumerate(((-1.05, 1.05), (0.30, 1.10),
+                                        (1.62, 1.05))):
+            box('house-panel', (0.03, pcl, 0.74), MAT_PAINT,
+                loc=(s * (BODY_W / 2 - 0.03), pcy, 1.53), bevel=0.012)
+            for hz in (1.23, 1.83):        # panel fixings, top and bottom rows
+                bolt = box('house-panel-bolt', (0.02, 0.03, 0.03), MAT_WORN,
+                           loc=(s * (BODY_W / 2 - 0.005), pcy - pcl / 2 + 0.10,
+                                hz))
+                arrayed(bolt, max(2, int(pcl / 0.26)), (0, 0.26, 0))
+        box('house-sill', (0.10, hy1 - hy0, 0.10), MAT_DARK,
+            loc=(s * (BODY_W / 2 - 0.05), (hy0 + hy1) / 2, 1.02), bevel=0.014)
+    box('house-front', (BODY_W - 0.30, 0.06, 0.90), MAT_DARK,
+        loc=(0, hy0 - 0.03, 1.50), bevel=0.014)
+    # battery box and toolbox slung under the deck edge, right side
+    box('toolbox', (0.28, 0.72, 0.36), MAT_DARK,
+        loc=(BODY_W / 2 - 0.05, -1.35, 1.02), bevel=0.02)
+    box('battery-box', (0.26, 0.46, 0.30), MAT_DARK,
+        loc=(-BODY_W / 2 + 0.04, 1.95, 1.02), bevel=0.02)
+
     px, py, pw, pd, ph = -0.42, 0.15, 1.60, 2.20, 1.16
     box('powerpack', (pw, pd, ph), MAT_PAINT, loc=(px, py, DECK_Z + ph / 2),
         bevel=0.035)
@@ -474,12 +552,27 @@ def build_body():
          loc=(ax + 0.30 - 0.275, ay - 1.20, DECK_Z + 0.85),
          rot=(0, math.pi / 2, 0), sides=14)
 
-    box('fuel-tank', (0.42, 1.45, 0.52), MAT_PAINT,
-        loc=(-BODY_W / 2 + 0.24, -1.20, DECK_Z - 0.36), bevel=0.03)
-    box('hyd-tank', (0.42, 1.05, 0.52), MAT_PAINT,
-        loc=(-BODY_W / 2 + 0.24, 1.35, DECK_Z - 0.36), bevel=0.03)
-    tube('tank-filler', 0.07, 0.12, MAT_WORN,
-         loc=(-BODY_W / 2 + 0.24, -1.20, DECK_Z - 0.10))
+    # tank fillers and sight gauges standing proud of the house, left side
+    tube('tank-filler', 0.075, 0.13, MAT_WORN,
+         loc=(-BODY_W / 2 + 0.30, -1.05, DECK_Z + 0.02))
+    tube('tank-filler', 0.075, 0.13, MAT_WORN,
+         loc=(-BODY_W / 2 + 0.30, 1.62, DECK_Z + 0.02))
+    box('sight-gauge', (0.06, 0.05, 0.34), MAT_CHROME,
+        loc=(-BODY_W / 2 - 0.01, 1.62, 1.62), bevel=0.006)
+
+    # sample-hose reel: the reel takes the hose up as the head travels, and it
+    # is a named catalogue item on this class of machine [MIN p.12, §4.3 item 6]
+    tube('hose-reel-drum', 0.24, 0.46, MAT_PAINT,
+         loc=(BODY_W / 2 - 0.32, -1.98, DECK_Z + 0.52),
+         rot=(0, math.pi / 2, 0), sides=16)
+    for s in (0, 1):
+        tube('hose-reel-flange', 0.36, 0.035, MAT_PAINT,
+             loc=(BODY_W / 2 - 0.32 + s * 0.46, -1.98, DECK_Z + 0.52),
+             rot=(0, math.pi / 2, 0), sides=18)
+    for s in (-1, 1):
+        strut('hose-reel-stand', (BODY_W / 2 - 0.09 + s * 0.28, -1.98, DECK_Z),
+              (BODY_W / 2 - 0.09 + s * 0.28, -1.98, DECK_Z + 0.52), 0.07,
+              MAT_PAINT)
 
     # control stand + FOPS canopy
     sx, sy = -0.98, -1.55
@@ -566,16 +659,19 @@ def build_mast():
     # At any distance this is a continuous fine-toothed dark band down both
     # edges of the mast — one of the strongest texture cues on the machine
     # [MET p.22; rc-rig.md §4.1 and §9.B, which notes the builder has no chain].
-    n_link = int((L - 0.45) / 0.062)
+    # Pitch 0.060 against a 0.056 link: at 0.062/0.048 the first render came out
+    # as two DOTTED lines rather than the continuous fine-toothed dark band the
+    # photograph shows. The gap between links has to be a seam, not a space.
+    n_link = int((L - 0.42) / 0.060)
     for sx in (-1, 1):
         for face in (-1, 1):
-            lk = box('feed-chain-link', (0.028, 0.052, 0.048), MAT_WORN, pv,
-                     (sx * (hw + 0.036), face * (hd + 0.055), 0.22), bevel=0.004)
-            arrayed(lk, n_link, (0, 0, 0.062))
-            pin = tube('feed-chain-pin', 0.011, 0.052, MAT_STEEL, pv,
-                       (sx * (hw + 0.036) - 0.026, face * (hd + 0.055), 0.246),
+            lk = box('feed-chain-link', (0.030, 0.054, 0.056), MAT_WORN, pv,
+                     (sx * (hw + 0.030), face * (hd + 0.045), 0.22), bevel=0.004)
+            arrayed(lk, n_link, (0, 0, 0.060))
+            pin = tube('feed-chain-pin', 0.012, 0.056, MAT_STEEL, pv,
+                       (sx * (hw + 0.030) - 0.028, face * (hd + 0.045), 0.250),
                        rot=(0, math.pi / 2, 0), sides=6)
-            arrayed(pin, n_link, (0, 0, 0.062))
+            arrayed(pin, n_link, (0, 0, 0.060))
 
     box('mast-foot-hood', (MAST_W + 0.16, MAST_D + 0.20, 0.42), MAT_PAINT, pv,
         (0, 0, 0.20), bevel=0.03)
