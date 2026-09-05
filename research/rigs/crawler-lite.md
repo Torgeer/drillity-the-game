@@ -499,3 +499,187 @@ maker's name on the track frame ID plates (KLEMM photos 04, 05), or the remote-c
 maker plate (p. 7). **Copy the *layout* - a red wordmark of that size in that place, a yellow
 pictogram plate of that size in that place - and fill it with the game's own marks.** DOMAIN.md
 Section 10.
+
+---
+
+## 10. Second pass, 2026-09-05 — measured for the Blender build
+
+Written while building `blender/crawler_lite.py`. Everything here is either a
+figure read off a manufacturer's own drawing with a stated method, or a new
+source that closes a gap §8 left open. Nothing below is estimated.
+
+### 10.1 The GA measured properly, and how
+
+§3 scaled the GEO 305 general arrangement off a 300 dpi page render and reported
+±5 %. It can be done better. The GA is an **embedded raster at a native
+768 × 616**, so the page render was upsampling it — no extra detail was ever
+available above native — and at native the scale can be solved exactly:
+
+```python
+import pymupdf
+d = pymupdf.open(r"C:\Users\henri\Downloads\Comacchio-GEO-305Pres_2023_FULL_WEB.pdf")
+pymupdf.Pixmap(d, 61).save("ga.png")        # xref 61 — the GA, 768 x 616 native
+```
+
+**The raster is placed on the page anisotropically, so the two axes have
+different scales.** Solving each from two printed callouts:
+
+| axis | from | scale | cross-check |
+|---|---|---|---|
+| horizontal | 3840 mm across 367 px (extension lines at px 118 and 485, row y = 594) | **10.463 mm/px** | 1500 mm across 144 px = 10.417 — 0.4 % apart |
+| vertical | 6200 mm across 495 px (col x = 26, y 38 → 533) | **12.525 mm/px** | — |
+
+Datums: the **ground line is row y = 532.5** and the **drill axis is column
+x = 118**, the left extension line of the 3840 dimension. That the 3840 datum is
+the drill axis and not the machine's forward-most point is provable from the
+drawing itself — ink extends 105 mm *past* it at the clamp, while the rear
+extension line lands exactly on the machine's tail. So **3840 is measured from
+the hole**, and the hole is therefore the right origin for a model.
+
+Confirmed independently by isolating the red head in the raster: its chuck and
+rod stub (z 3551–3776) span x −21…+52 mm, i.e. **centred within 10 mm of the
+datum**.
+
+### 10.2 Component geometry, measured
+
+All in mm; `y` is measured **rearward from the drill axis**, `z` above ground.
+Tolerance about ±25 mm, i.e. two pixels.
+
+| Component | Measured |
+|---|---|
+| Track loop, front → rear | y **785 → 2760** (length **1975**) |
+| Idler centre / sprocket centre | y **1015** / **2522** — 1507 apart, printed 1500 |
+| Track band outer radius | **230** at the idler, **238** at the sprocket, **250** from the band height — reconcile at 240 |
+| Track band height | **≈ 500**, ground to top of the loop |
+| Main frame (dark), top | z **695** — the deck |
+| Main frame, fore and aft | y **600 → 3450**; it **overhangs the track at both ends** |
+| Body, low front section | y **1130 → 1900**, roof z **1545** |
+| Body, engine enclosure | y **1900 → 3360**, roof z **1747** — printed 1700 |
+| Tail unit, round-faced, on a swing arm | y **3495 → 3840**, z **870 → 1108** |
+| Stabiliser jacks | y **690** front, **3160** rear |
+| Mast section, front face → back face | y **345 → 659**, depth **≈ 300** |
+| Mast width, front elevation | **≈ 345** |
+| Mast + crown envelope, fore and aft | y **−100 → 800** |
+| Crown top | z **6156–6206** — printed 6200 |
+| Clamp / breakout block | y **−105 → 335**, z **95 → 660** |
+| Rotary head body | y **−241 → 157**, z **4302 → 4829**: 440 deep, standing **188 mm clear of the mast face on a cantilever bracket** |
+| Head, front elevation | **≈ 510 wide**, offset to one side of the mast centreline |
+| Overall across the tracks, front elevation as drawn | **≈ 1550** — so the GA is drawn at an **intermediate gauge**, between the printed 1400 and 1700 |
+
+**Two things this settles that §4 could only describe.** First, the mast's front
+face stands **345 mm behind the hole**, and the head reaches forward off a
+bracket to get to it. That offset is why the crown has to hook forward at all,
+and it is most of why the silhouette is an L. Second, the frame **overhangs the
+track at both ends**, which is what puts the mast carrier ahead of the front
+idler and the tail unit behind the sprocket.
+
+### 10.3 New sources, and what they close in §8
+
+**[M1] Montabert (Komatsu) HC 25 hydraulic drifter spec sheet** —
+`komatsu.com/.../spec-sheet/drifter-retrofits/hc25-hydraulic-drifter.pdf`, with
+the range table *Montabert Hydraulic Drifters HC Series*, 86715521-EN (09-10).
+
+> 72 kg · body **694–702 mm** long without the shank, **779–839** with it ·
+> **200 mm wide** · **191.5 mm high**, of which **83.5 mm is above the shank
+> axis** · 6–8 kW output on 16 kW input · 150 bar at 65 l/min · **3 900 bpm** ·
+> 117 J · rotation **300 rpm at 251–401 Nm** · shanks female R32, male R32,
+> male R38 · water flush 20–50 l/min · front-end lubricating air 300 l/min at
+> 3 bar · hole range 32–51 mm.
+
+**This closes the biggest single risk in §8 for anyone modelling the head.** The
+range table also fixes the class boundary, and it is worth stating plainly
+because it is routinely got wrong: **6–8 kW is a 4–5 t machine's drifter.** The
+14–16 kW drifters (Sandvik HL510 at 130 kg, Furukawa HD709 at 199 kg) go on 10 t
+machines, and Sandvik's own 3 250 kg machine uses a **5.5 kW** drifter. Fitting a
+16 kW drifter here would be a scale error of a whole weight class.
+
+Shape, from [M1]'s drawings and the drifter photography behind them: a long, low
+body of **bolted modules**, roughly 3.5 : 1 in plan. Front to back — protruding
+splined shank, front head, a **flushing head that is a separate block on the
+SIDE**, the rotation housing with a **big round motor boss standing proud of one
+flank about two thirds back**, the long percussion cylinder, and a back head
+carrying **two cylindrical accumulator caps and a port cluster**. All the hoses
+leave the **back** in a bundle; nothing significant enters at the front, which is
+shank and flushing only.
+
+**[E1] Epiroc "Tophammer drilling tools" product catalogue.** Closes §8's *"Rod
+diameter and thread actually used on this class"*:
+
+| | Section | Flushing hole | Catalogue lengths (mm) |
+|---|---|---|---|
+| **Rnd 32**, R32 thread | **32 mm** | 11.7 mm | 915 · 1000 · **1220 · 1525 · 1830** · 2200 · 2400 · 3050 · 3660 · 4000 · 4310 |
+| **Hex 25**, R32 thread | 28.4 across corners | 8.6 mm | 915 · 1000 · 1220 · 1525 · 1830 · 2400 · 2800 · 3050 |
+| **Rnd 38**, T38 thread | 38 mm | 14.5 mm | 1830 · 3050 · 3660 · 4000 · 4270 |
+
+R32 = 1¼ in. And the distinction a modeller has to know: an **extension rod is
+male/male and needs a separate coupling sleeve at every joint**, while a **speed
+rod is male/female** and does not. *A rack of extension rods drawn with no
+couplings is a rack that cannot make a hole.* A hex-bodied rod is also not a
+plain prism — a Hex 25 body carries an R32 thread, so the ends are **upset larger
+than the body** and there is a visible shoulder where the flats run out.
+
+**This corrects §9.4.** The game's `rodLenM: 1.5` is the catalogue's **1525 mm**
+rod rounded — right machine, right rod. But the game's **45 mm rod diameter
+matches no R32 rod in the catalogue**: R32 round is **32 mm**, hex is 28.4 across
+corners. 45 mm was never sourced and should be corrected to 32.
+
+**[C1] Doosan Portable Power range specification P 4443392-EN (01-12)**, with
+O&M 46671281-A-02/15 — the towed screw compressor a small contractor pulls behind
+this machine to run a drifter. The 2.5 m³/min (90 cfm) at 7 bar unit:
+
+> towed on a fixed drawbar **2923 × 1390 × 1235 mm** · body on its subframe
+> **1764 × 940 × 1145** · ground clearance **220** · **575 kg** net, 615 working
+> · **2 × ¾ in BSPT** outlets · tyre **155 R13** on a 4.5J × 13 wheel at 2.4 bar
+> · **jockey wheel standard** · 21.2 kW.
+
+Neighbours for cross-checking: Atlas Copco XAS 47 Kd — 2.5 m³/min, body
+1580 × 1018 × 870, towed 2820 × 1305 × 1151, 650 kg. Chicago Pneumatic CPS 90 —
+2946 × 1308 × 1194, 556 kg, galvanised steel canopy on two gas struts, folding
+drawbar. Kaeser M 43 — 4.2 m³/min, 730 kg, 2 × G¾. All are single-axle, and the
+canopy is either roto-moulded polyethylene or sheet steel, as a one-piece bonnet
+hinged at the drawbar end.
+
+**[C2] Atlas Copco XAS 37/47 Kd operator manual 2954 2520 40 (12/2005)** — read
+for layout and safety rules rather than for dimensions. Its general arrangement
+puts the **outlet valves and the control panel low on ONE side at the DRAWBAR
+end**, the air receiver immediately behind them, the engine mid to rear, and the
+cooler and radiator at the far end. Two rules worth modelling because they are
+visible: **the hose end at an outlet valve must be secured by a safety cable
+anchored next to the valve** — a whipcheck — and **no load may be hung on the
+outlet valves**, so in-line water separators and lubricators are supported
+separately and never screwed straight onto the manifold. On a rotary screw the
+receiver is **inside** the machine; no external receiver appears in any
+manufacturer layout read in this pass.
+
+### 10.4 One thing the model found that a drawing cannot tell you
+
+**A double head does not fit this machine.** §4.2 recommends drifter-over-rotary
+as "the visual tell of anchor/overburden work", and it is — on a bigger mast.
+Stacked, [M1]'s drifter plus a rotary head plus the chuck is about **1.4 m**. On
+the 4.2 m mast that the game's own camera solve requires (`renderer.js`: *"a
+4.2 m mast on a 0.14 m pivot, ~4.6 m overall"*), the top of a 2.2 m stroke puts
+that stack **300 mm through the crown**.
+
+So on the *short-mast* machine it is one head or the other. The build carries the
+**rotary head** — which is what the GA draws, and what `data.js`'s 4.2 kNm
+describes, sitting between the 3.2 and 5.0 kNm heads of KLEMM p. 13 — and stows
+the **drifter on the tank deck** as the interchangeable module KLEMM p. 5 sells
+it as. Which is also, conveniently, the honest picture of how a small contractor
+comes to own both.
+
+### 10.5 Struck from §8, and one thing added to it
+
+- ~~Rod diameter and thread actually used on this class~~ — [E1] above.
+- ~~Whether a drifter body can be sized at all~~ — [M1] above.
+- **Still open, and still not guessed:** the GEO 305's own operating weight; the
+  mast structure length as a separate printed number; ground clearance; track
+  ground-contact length; roller count and spacing; sprocket tooth count; shoe
+  pitch; mast slew and tilt ranges in degrees; engine make and the position of
+  the exhaust, radiator and fillers; where the driller is meant to stand; the
+  identity of the round-faced tail unit; paint codes.
+- **Added, and honest:** no source found in either pass supports a **canopy** on
+  this class. The GEO 305 has none; KLEMM's photo plate has none. It is in the
+  model only because `data.js` says *"an open canopy and a heater that works when
+  it feels like it"*, which is content authority and not geometry evidence. It is
+  marked `NOT SOURCED` in the build, and it is a roof on posts — no walls, no
+  doors and **no glass**, per §9.3.
