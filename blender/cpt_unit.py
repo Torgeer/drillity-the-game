@@ -357,30 +357,6 @@ def hz(name, size, parent, loc, rot=(0, 0, 0)):
     return bx(name, size, R.MAT_HAZARD, parent, loc, rot, bevel=0.004)
 
 
-def ram(name, parent, base, tip, barrel_r=0.055, rod_r=0.032, mat_b=R.MAT_DARK,
-        mat_eye=R.MAT_CAST):
-    """A hydraulic cylinder drawn between two points: barrel, bare chrome rod,
-    gland nut and two cast eye-ends.  Without those it is two cylinders."""
-    bxx, byy, bzz = base
-    dx, dy, dz = tip[0] - bxx, tip[1] - byy, tip[2] - bzz
-    L = math.sqrt(dx * dx + dy * dy + dz * dz)
-    ry = math.atan2(math.sqrt(dx * dx + dy * dy), dz)
-    rz = math.atan2(dy, dx) - math.pi / 2
-    rot = (0.0, ry, rz)
-    bl = L * 0.58
-    f = bl / L
-    return [
-        tb(name + '_barrel', barrel_r, bl, mat_b, parent, base, rot, 12),
-        tb(name + '_rod', rod_r, L, R.MAT_CHROME, parent, base, rot, 10),
-        tb(name + '_gland', barrel_r * 1.16, 0.05, R.MAT_WORN, parent,
-           (bxx + dx * f, byy + dy * f, bzz + dz * f), rot, 12),
-        tb(name + '_eyeA', barrel_r * 1.05, 0.07, mat_eye, parent, base,
-           (rot[0], rot[1] + math.pi / 2, rot[2]), 10),
-        tb(name + '_eyeB', rod_r * 1.7, 0.058, mat_eye, parent, tip,
-           (rot[0], rot[1] + math.pi / 2, rot[2]), 10),
-    ]
-
-
 def lamp(name, parent, loc, aim, cone=54, rng=24, watt=70):
     """A work light: housing, stone guard, and the two named nodes
     `src/core/env.js` reads EVERY FRAME to re-aim its spotlight.

@@ -52,6 +52,46 @@ below is tagged **[A]** or **[B]** so the modeller does not mix scales.
 | `C:\Users\henri\Downloads\Atpa\` (full listing, sampled) | — | A **drilling-tool** photo set — drill heads, casing shoes, overburden systems. No site-investigation rig in it. | **NO** |
 | `C:\Users\henri\Downloads` root images (~200 files listed) | — | Overwhelmingly Drillity brand/UI screenshots and AI-generated art. **No photograph of this rig class found loose in Downloads.** | **NO** |
 
+### 1b. Manufacturer and standards sources read on the web, 2026-09-05
+
+Added while building `blender/si_rig.py`. §3 of this file said the Class A overall
+dimensions "could not be traced to any local file or to any source read here". They can
+now, and the match is close enough that it is plainly where the game's numbers came from.
+
+| Source | What it gives | Useful? |
+|---|---|---|
+| **Dando "Terrier"** specification sheet, published by Soil Engineering — `soil-engineering.co.uk/wp-content/uploads/2024/07/Dando-Terrier.pdf` | **The Class A machine this file could not find.** Transport **2700 × 800 × 1500 mm**; working **2800 × 1000 × 2850 mm**; **1300 kg**; 19 hp 3-cylinder diesel; the 800 mm travelling width sold on fitting through a domestic doorway. Dynamic sampling to 15 m, dynamic probing to 30 m. | **YES — primary, and see the table below.** |
+| **Dando "Terrier Mk2"** brochure — `dando.co.uk/wp-content/uploads/2016/05/terrier-mk2.pdf` | 1100 kg; mast **2.22–2.85 m**; **feed stroke 1.3 m**; pulldown 1000 kgf, pullback 7000 kgf; a **300 mm hydraulic mast dump** so the rig tracks hole-to-hole with the mast erect; **controls mounted at the SIDE** with an E-stop and a system pressure gauge, moved forward for visibility of the borehole, plus **tracking controls at the REAR on a folding foot plate**; **folding stabiliser legs with ball-jointed adjustable feet**; tilting undercarriage to 30° slopes; **built-in workpiece clamp and rod racking**. Rotary head: hydraulic motor + 2-speed manual gearbox 7:1 to 1:1, a **¾" integral side-inlet air/water swivel with a BW rod connection**, a **200 mm effective-ID guide ring**, motor options to **2240 Nm at 35 rpm**. **DRIVE HAMMER: a SPLIT weight, 63.5 kg dropping to 50 kg by removing eight bolts, on a SINGLE guide bar (the earlier machine used two), which SWINGS OUT OF THE DRILL LINE at any height, fully guarded, 0–50 blows/min, drop 500–750 mm.** | **YES — primary. This closes §8 item 6.** |
+| **ASTM D1586** full text — `azmanco.com/blog/wp-content/uploads/2020/08/D1586.17074.pdf` | Hammer 140 ± 2 lbf; drop 30 ± 1.0 in; **steel on steel** onto the anvil; a fall guide permitting unimpeded fall; **total hammer-assembly mass bearing on the rods ≤ 113 ± 5 kg**. Split-barrel Fig. 2: barrel **457–762 mm**, shoe ID **34.93 ± 0.13**, split-barrel ID **38.1**, shoe wall **2.54 ± 0.25**, OD **50.8 mm**, shoe taper **16°–23°**. Sampling rods ≥ "A" rod, **41.3 mm OD / 28.5 mm ID**. Three 150 mm increments, the first a seating drive; **refusal at 50 blows in one increment, 100 total, or no advance in 10 successive blows** — which is exactly what `src/sim/drilling.js` implements. | **YES** |
+| **Ground Engineering, May 2010**, Reading/Lovell/Spires/Powell (Equipe/Geolabs), "The implications of the measurement of energy ratio (Er) for the SPT" | **The construction figure this file was missing.** Names the parts — anvil, drop weight, outer tube/sleeve, lifting swivel, guide rod, lifting pawl — and states that the common winch-rope hammer **trips when its pawls reach a raised section on the guide rod, and the anvil-to-raised-section distance IS the 760 mm drop**. Whole drive-weight assembly **115 kg**; drive head/anvil **15–20 kg**; weights **machined from a cylindrical steel mass to a pre-determined diameter and length**. Measured energy ratios in the field: **43–81 %**. | **YES — this is how to model the hammer.** |
+| **Archway Engineering SPT trip hammer** — `archway-engineering.com/product/spt-trip-hammer/` | The only published external envelope: 63.5 kg, 760 mm free fall, **total 105 kg**, **1.8 m unextended / 2.6 m extended**, a **lifting eye at the crown**, an **outer tube sliding over an inner guide shaft**, an anvil in a **BW or 1½" BSW box**, and a **safety cross bolt** locking the sleeve to the guide rod for transport. | **YES** |
+| **EN ISO 22476-2 Table 1** (dynamic probing), via insitutek.com | DPSH-A: 63.5 ± 0.5 kg, drop 500 ± 10 mm, cone **16 cm² / 45.0 ± 0.3 mm**, 90° apex, anvil incl. guide rod ≤ 18 kg, blow rate 15–30/min. And the one hard geometric rule available for the hammer BODY: **50 < d < 0.5·D_h** — the body must be more than twice the anvil diameter, so > 100 mm and realistically 150–250. | **YES — it is the only bound on hammer-body diameter that exists.** |
+| **Comacchio GEO 205** sheets (Geotron/SOCOTEC/Drilltechniques) | The Class B end of the same family for comparison: 2.6–2.8 t; transport 4.83 × 1.14 × 1.94 m, working 3.3 m long / 4.80 m high; **variable-width tracks 750–1150 mm**; feed stroke 1200–2950 mm; feed and retract both 25 kN; head 200–420 daNm at 80–810 rpm, clamp 45–220 mm; Kubota 42 hp; **two deck-mounted flush pumps** (an 85 l/min piston pump and a 60 l/min progressive-cavity pump); a **fully interlocked rotation safety cage with large stop buttons on each side**. | **YES — comparator** |
+
+### 1c. The Class A dimensions, resolved
+
+| | `data.js` / `rigFactory.js` | **[Terrier], published** |
+|---|---|---|
+| mass | 1,250 kg (`transportTons: 1.25`) | **1,300 kg** |
+| width | 790 mm | **800 mm** (travelling) |
+| length | 2,729 mm | **2,700 mm** transport / **2,800 mm** working |
+| transport height | 1,460 mm | **1,500 mm** |
+| work height | 2,857 mm | **2,850 mm** |
+| rotary-head torque | 2.2 kNm | **2,240 Nm** at 35 rpm |
+| rod length | 1.0 m | 1.0 m |
+
+**Five independent figures within 3 %.** §3's "`NOT SOURCED` at Class A" is therefore
+CLOSED — the game's numbers are this machine's, and `blender/si_rig.py` is built to the
+published ones. What is still open is listed in the revised §8.
+
+**One correction this raises, in a file I do not own.** `data.js`'s `description` for
+`si-rig` says the machine has "a detachable power pack on hoses" — but every dimension in
+the same row is the ON-BOARD-diesel machine's, and `[K-8]` is explicit that the moment the
+diesel goes on board the minimum width jumps from **750 mm to 950 mm**. The two readings
+cannot both be true of one 790 mm, 1.25 t machine. The Blender model follows the
+dimensions (on-board engine hood, per [Terrier]'s 19 hp three-cylinder) because five
+figures outvote one adjective, and the `description` string is the thing to change.
+
 ---
 
 ## 2. What the machine IS
@@ -344,21 +384,40 @@ above; extract them from there rather than hunting the folder again.
 
 Honest list. Nothing below was invented to fill a gap.
 
-1. **Class A overall dimensions.** Length, height, mast height, track gauge and track length
-   for a sub-1.5 t SI crawler. No dimensioned drawing of one exists in this folder. The game's
-   2,729 / 1,460 / 2,857 mm are unsupported (and uncontradicted).
-2. **The game's 1,250 kg at 790 mm width as a pairing.** The only sourced 780 mm machine is
-   4.9 t `[K-8]`; the only sourced ~910 kg machine has no published width in anything read
-   here. Plausible, unverified.
+> **§8 was written before the sources in §1b were read. Items 1, 2 and 6 are now CLOSED and
+> are struck through with what closed them. Everything not struck through is still a real
+> gap, and `blender/si_rig.py` marks each of them at the point of use.**
+
+1. ~~**Class A overall dimensions.**~~ **CLOSED 2026-09-05 — see §1c.** Transport
+   **2700 × 800 × 1500 mm**, working **2800 × 1000 × 2850 mm**, **1300 kg**, feed stroke
+   **1.3 m**, head **2240 Nm** [Terrier / Terrier Mk2, §1b]. Five of the game's figures land
+   within 3 % of these, so they are not unsupported — they are this machine's.
+   `blender/si_rig.py` builds to the published ones and `tools/glbinfo.mjs` measures
+   **1.000 × 2.850 × 2.800 m** off the exported file.
+2. ~~**The game's 1,250 kg at 790 mm width as a pairing.**~~ **CLOSED.** The pairing is real:
+   **1,300 kg at 800 mm** is a catalogued machine. Note the distinction §0 was reaching for
+   and can now state: the sub-800 mm 4.9–6.2 t KLEMM rows are *confined-access anchor
+   drills*, a different job at a similar width; the 1.3 t / 800 mm rig is the SI machine.
 3. **Whether the 1,500 mm on `[C-16]` is ground-contact length or sprocket–idler centres.** The
    drawing does not say. Both readings recorded above; neither picked.
 4. **Rubber-track pitch, shoe count, roller count, sprocket tooth count** for any machine in
    this class. No drawing at that resolution exists locally.
 5. **Mast cross-section dimensions** (the box's width × depth). Photographs only; no section.
-6. **Where the SPT trip hammer actually mounts on the rig.** No source read shows an SPT hammer
-   fitted to a machine. The tool is well documented *as a tool* (63.5 kg, 760 mm, ISO 22476-3)
-   but its **mounting geometry on the mast is `NOT SOURCED`**. The game's side-bracket
-   arrangement is a guess and should be labelled as one until a source turns up.
+6. ~~**Where the SPT trip hammer actually mounts on the rig.**~~ **CLOSED — and it is better
+   than a bracket.** [Terrier Mk2, §1b] describes the fitted hammer in detail: a **SPLIT
+   weight, 63.5 kg dropping to 50 kg by removing eight bolts** so one hammer covers SPT and
+   dynamic probing; it runs on a **SINGLE stainless guide bar** (the earlier machine used
+   two); it **swings out of the drill line at any height**; it is fully guarded, has a
+   hydraulic automatic stop at end of stroke, runs at **0–50 blows/min**, and its PTO takes
+   20 l/min at 152 bar. [Ground Engineering, §1b] adds the mechanism: the weight is lifted
+   by pawls and **trips when they reach a raised section on the guide rod — and the
+   anvil-to-raised-section distance IS the 760 mm drop**. So the drop height is a *modelled
+   dimension* on the guide bar, not a number in a table.
+   Still open: the **drop weight's own outside diameter**, which no manufacturer publishes.
+   `blender/si_rig.py` COMPUTES it instead — 63.5 kg of steel at 7,850 kg/m³ is 8.089 litres,
+   and with a 50 mm bore a 200 mm OD gives a 275 mm long weight — and says "computed" at the
+   point of use. EN ISO 22476-2's anvil rule (**50 < d < 0.5·D_h**) is the only published
+   bound and puts the body above ~100 mm, which 200 satisfies.
 7. **Ground pressure for these specific machines.** `[P16]` gives ~170 g/cm² for a
    low-ground-pressure window-sampler variant; nothing for the Comacchio or KLEMM machines.
 8. **Cylinder bore and rod diameters, outrigger stroke, jack pad diameter.** Photographs only.
@@ -395,3 +454,59 @@ Read against `rigFactory.js` `buildSIRig()` (lines 6297–6480) and its `spec` b
 | 12 | No `cabGlass` on this rig. | **Correct** — this class has no cab and no glazing. | — (correct) |
 | 13 | `tools.js` `spt-hammer`. | **Correct and well done.** 63.5 kg, 760 mm, automatic-trip free fall, ISO 22476-3 tolerance `63.5 ± 0.5 kg, 760 ± 10 mm`, cage bars, guide rod, anvil, and the N60 energy-ratio note. No correction needed — only the *mounting* is unsourced (§8 item 6). | — (correct) |
 | 14 | `spec.name: 'Rynnval SI-30 Probeline'`. | **Correct practice** under DOMAIN.md §10 — an invented badge, no real OEM name. Keep it, and do not let any decal or texture reintroduce a real one from the photographs cited in §7. | — (correct) |
+
+---
+
+## 10. The Blender model — what it took from this file, 2026-09-05
+
+`blender/si_rig.py`. Registered in `blender/build.py`; exports `public/models/si-rig.glb`.
+
+**Measured off the exported file** (`node tools/glbinfo.mjs public/models/si-rig.glb`):
+
+| | sourced | measured |
+|---|---|---|
+| width | **1.00 m** working [Terrier] | **1.000** — set by the outer edge of the deployed jack pads |
+| height | **2.85 m** working [Terrier] | **2.850** — set by the top of the mast head |
+| length | **2.80 m** working [Terrier] | **2.800** — guard cage at the front, tracking foot plate at the rear |
+| feed stroke | **1.3 m** [Terrier Mk2] | `slide:carriage travel_m 1.3` |
+| head torque | **2,240 Nm** [Terrier Mk2] | `slide:carriage torque_nm 2240` |
+| SPT hammer | **63.5 kg / 760 mm** [ASTM D1586, EN ISO 22476-3] | `slide:spt-hammer mass_kg 63.5 drop_mm 760` |
+| ground pressure | ~**170 g/cm²** `[P16]` | **168** from 2 × 1.55 m × 250 mm shoes under 1,300 kg |
+| draw-call floor | ≤ 70 | **43** |
+| triangles | the lane to spend in | 22,024 |
+| materials | names only, no textures | 9 names, 0 images |
+
+The three dimensions are **solved, not placed**: the mast's fore-aft station is derived from
+where the guard cage's front face has to land, the jack legs from where the pad's outer edge
+has to land, and the mast head's height from what is left between the mast top and 2,850 mm.
+Change one published figure and the machine re-solves; nothing is dialled in by eye.
+
+**Which of §9's warnings it answers:**
+
+| § | warning | in the model |
+|---|---|---|
+| 1 | percussive **drifter** instead of a rotary head — *wrong machine family* | a rotary **gear case** with the spindle out of the bottom, a bellows dust boot, and the water swivel with its gooseneck above. No percussion at the head anywhere. |
+| 2 | **no guarding at all** — the strongest silhouette cue missing | a hinged rotation guard at the mast foot: painted tube frame, **galvanised mesh** infill (two different materials, which §6 says is most of why a cage looks right), a diagonal brace, hinges, latch, handle and an interlock. |
+| 3 | a handheld **pendant** replacing the console | the side-mounted, steeply angled **lever console** — ten ball-topped spool levers, two gauges, a shroud, an E-stop — plus [Terrier Mk2]'s separate **rear tracking controls on a folding foot plate**. |
+| 4 | the **curved tubular boom** is missing and the mast sits inboard | the mast stands **entirely ahead of the tracks** on a segmented curved boom with a flattened lifting eye and a fold cylinder. |
+| 8 | a 2.4 m mast is barely a rod + head + hammer | the tension is real and it is **resolved in the machine's favour**: 2.40 m of beam plus a 0.17 m head reaches [Terrier]'s published 2,850 mm, the feed is [Terrier Mk2]'s 1.3 m, and 1.3 m of stroke does take a 1.0 m rod. This rig genuinely cannot swallow a 3 m core barrel and the model says so by being that size. |
+| 9 | 200 mm shoes on a machine sold on low ground pressure | **250 mm** shoes, chosen so the ground pressure lands on `[P16]`'s sourced ~170 g/cm². |
+| 11 | feed chain, tensioner, mast-top sheave, lightening slots, energy chain all absent | all five are in, and all five share materials the machine already carries, so they cost triangles and no draw calls. |
+
+**Two things the model adds that this file had not asked for**, both from [Terrier Mk2]:
+
+- **`slide:mast-dump`** — the 300 mm hydraulic mast dump, so the rig tracks hole-to-hole
+  with the mast still erect. A real named feature and a free animation.
+- **`pivot:hammer-swing`** — the hammer swings out of the drill line at any height, which is
+  how the rotary head gets the hole back after a test. The model is posed with the hammer
+  **IN** the line and the head parked at the top of the feed, because SPT is the method
+  `src/sim/drilling.js` has the player performing.
+
+**Still a judgement, labelled at the point of use:** mast cross-section, track pitch and
+roller count, cylinder bores, stabiliser stroke, jack pad diameter, the drop weight's own
+diameter (computed, see §8 item 6), and paint — of which this class has no authority (§8
+item 9).
+
+---
+
+*status: complete; §1b, §1c and §10 added 2026-09-05 alongside `blender/si_rig.py`*

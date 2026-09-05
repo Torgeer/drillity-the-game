@@ -22,6 +22,20 @@ status: complete
 | `research\11-oem-anchor-geotech-hdd.md` | §A.14 (l.759–812), §B.5 (l.1118–1127), §D.5 (l.1407–1432) | The OEM layer: A.P. van den Berg truck/crawler, the HYSON inverted-cylinder detail, Pagani TG naming decode and masses. | **YES** |
 | `src\rig\rigFactory.js` | l.6486–6740 (`buildCPTUnit`) | The current builder. Compared against everything above in §9. | reference |
 
+### 1b. Manufacturer sources read on the web, 2026-09-05 — these close most of §8
+
+Added while building `blender/cpt_unit.py`. §8 item 1 previously said that **every
+overall dimension of the game's actual subject** was unsourced. It no longer is.
+
+| Source | What it gives | Useful? |
+|---|---|---|
+| **A.P. van den Berg, "CPT Crawler on tracks"** — `apvandenberg.com/onshore-cone-penetration-testing-cpt-crawler/` | **The dimensioned envelope this file was missing.** Three weight classes with overall L × W × H: **10–12 t → 4.5 × 2.2 × 2.8 m**, **12–16 t → 4.6 × 2.5 × 2.8 m**, **16–21 t → 5.7 × 2.5 × 2.8 m**. Sold on 200 kN and CPTs to 40 m. Available diesel, **hybrid or 100 % electric**. A **Morooka low-ground-pressure 15 t chassis** variant with travel speeds over 12 km/h. The 2.2 m model is marketed for inner-city work. | **YES — primary, and it is the game's machine.** `transportTons: 20` puts `cpt-unit` in the **16–21 t class**, so its envelope is **5.70 × 2.50 × 2.80 m**. |
+| **A.P. van den Berg, "HYSON pushing system"** — `apvandenberg.com/hyson-cpt-penetrometer/` | Confirms the inverted-cylinder detail **in the manufacturer's own words**: a "double cylinder set in an **H-shape, with the piston rods attached to the vehicle frame and the cylinders themselves moving**". Max **300 kN**; pushing speed **1.5–2.5 cm/sec**; **hardened** piston rods; 5, 10 and 15 cm² cones. | **YES — this is the §9.1 correction, first-hand.** |
+| **A.P. van den Berg, "CPT Truck with HYSON 200 kN"** leaflet — `downloadFile.asp?id=MzQ1TWpjeE5nPT1jZGQ` | The truck body on the same penetrometer: **6 × 6**, **18–22 t**, **8.4 × 2.55 × 3.75 m with HYSON**, pushing forces **up to 210 kN**. Cabin fitout: "workbenches and storage space", "heating system and **CPT rack**". Diesel or hybrid. | **YES — closes §8 item 8 partially.** It is a *cabin* with a bench and a rod rack, not a canopy, which settles §9.5. |
+| **Gouda Geo-Equipment, "Crawler-Truck CPT Penetrometer Rig"** — `gouda-geo.com` | **"200 kN penetrometer pusher (pulling force 260 kN, stroke 1350 mm)"** — the STROKE, which §8 item 2 listed as unknown. Crawler undercarriage with **700 mm track shoes**, D3 frame. **Levelling by 4 hydraulic cylinders.** | **YES — closes §8 items 2 and 5.** |
+| **AGS, "Introduction to Cone Penetration Testing"**, 2022-09 — `ags.org.uk` | "series of **1-metre-long rods**"; "standard CPT rod is only **36 mm** in diameter"; penetration rate **two centimetres per second**; "most rigs will push between **10-20 tonnes**"; smaller crawler rigs 1.5–3 t. | **YES**, with a caveat — see the rod-diameter note in §3.1. |
+| Insitutek / trade description of automatic CPT rod handling | The **automatic rod screwer**: the operator inserts the rod and an integrated sensor engages the screw, reversing on extraction. Tramming by **remote control**; the penetrometer run from a **touch screen or joystick**. | **YES — a function, not a shape.** Its geometry remains NOT SOURCED. |
+
 ## 2. What the machine IS
 
 A **CPT (cone penetration test) push unit** is not a drill rig and a driller will tell you
@@ -472,29 +486,51 @@ CPT content. See §8.
 
 Everything here is a real gap. Do not let anyone fill it with a plausible-sounding number.
 
-1. **Every overall dimension of the game's actual subject.** No length, width, height, track
-   gauge, shoe width, wheelbase or deck height for a **20 t ballasted CPT crawler or a 6×6
-   CPT truck** exists anywhere in this folder. The masses (20–22 t) and the thrust (200 kN)
-   are well sourced; the *geometry* is not sourced at all. The only dimensioned drawing in
-   the folder is a different, much smaller machine (Comacchio GEO 305).
-2. **Mast/push-frame height for the ballasted machine.** The game uses 2.05 m. Nothing
-   supports or contradicts it. It must be at least one rod (1.0 m) plus clamps plus
-   crosshead, so ≥ ~1.6 m is a floor, but the actual figure is unknown.
+> **§8 was written before the manufacturer sources in §1b were read. Items 1, 2, 5 and part
+> of 8 are now CLOSED and are struck through below with what closed them. Everything not
+> struck through is still a real gap.**
+
+1. ~~**Every overall dimension of the game's actual subject.**~~ **CLOSED 2026-09-05.**
+   A.P. van den Berg publish overall **L × W × H for three CPT-crawler weight classes**
+   (§1b): 10–12 t → 4.5 × 2.2 × 2.8, 12–16 t → 4.6 × 2.5 × 2.8, **16–21 t → 5.7 × 2.5 ×
+   2.8 m**. `data.js` gives `cpt-unit` `transportTons: 20`, so it is the third row and its
+   envelope is **5.70 × 2.50 × 2.80 m**. The 6 × 6 truck is separately published at
+   **18–22 t, 8.4 × 2.55 × 3.75 m with HYSON, up to 210 kN**. `blender/cpt_unit.py` is
+   built to the crawler figures and `tools/glbinfo.mjs` measures **2.500 × 2.860 × 5.700**
+   off the exported file — the extra 60 mm of height is the model being posed WORKING, with
+   the jacks down and the tracks off the ground, while a product-page L × W × H is a
+   TRANSPORT envelope. Do not "correct" that 60 mm away.
+2. ~~**Mast/push-frame height for the ballasted machine.**~~ **CLOSED for the stroke, still
+   open for the frame.** Gouda Geo publish a **200 kN penetrometer pusher with a 1350 mm
+   stroke** (pulling force 260 kN). That is the number the frame is designed around and it
+   is the reason the class does not use a 1 m stroke: one stroke has to swallow a whole 1 m
+   rod **plus the height of the clamp gripping it**. The frame's overall height is still
+   not published, but it is no longer free — a fixed piston rod must be at least
+   `stroke + cylinder body` of free length, which is what sets it.
 3. **How the 20 t of ballast is packaged.** Integral heavy chassis, cast blocks, or removable
-   plates with lifting slots? Unknown. The game's plate stack is a guess.
+   plates with lifting slots? Still unknown. The game's plate stack is a judgement, and
+   `blender/cpt_unit.py` labels it as one at the point of use.
 4. **The Pagani / light-machine anchoring method.** Pack 11 §A.14 flags it `UNVERIFIED`. Pack
    06 §A.2.8 says the 3.5 t `[INSITU]` machine uses **four hydraulically driven screw
    anchors**, which is sourced — but the anchor's own geometry (flight diameter, pitch,
    length, drive head) is not.
-5. **Track gauge and shoe width for any CPT machine.** Only the Comacchio comparator has
-   numbers (300 mm shoe / 1400–1700 mm gauge) and it is a ~4 t machine, not a 20 t one.
+5. ~~**Track gauge and shoe width for any CPT machine.**~~ **CLOSED for the shoe.** Gouda Geo
+   publish a CPT crawler undercarriage with **700 mm track shoes** on a D3 frame (§1b). At
+   [V1]'s 2.50 m overall width that leaves a **1.80 m gauge**, which is how
+   `blender/cpt_unit.py` derives it. Note how far the shipping procedural builder is from
+   this: 620 mm shoes on a 1.64 m gauge. The *gauge* itself is still not published.
 6. **Handrail, ladder, walkway and step geometry** for this class. Nothing dimensioned
    anywhere. Model to sensible EU practice and label it as judgement.
 7. **Hose DN sizes, bend radii, and hose colours.** The Bauer catalogue is a 2-page
    image-based sales sheet — it gives the *architecture* (packages, bulkhead plates, six main
    lines, cable inside the bundle, tarp wrap) but **no dimensional table at all**.
-8. **Cab vs canopy on the ballasted machine.** Pack 06 §E.3(a) says "cabin"; no photograph or
-   drawing of one exists in the folder. Its glazing, door position and size are unknown.
+8. **Cab vs canopy on the ballasted machine.** ~~Pack 06 §E.3(a) says "cabin"; no photograph or
+   drawing of one exists in the folder.~~ **The QUESTION is closed, the DIMENSIONS are not.**
+   The CPT Truck leaflet (§1b) describes a real cabin with **workbenches and storage space,
+   a heating system and a CPT rack** — that is an enclosed room a person works in, not a
+   canopy, and it settles §9.5 against the shipping builder's four-post hood. Its glazing,
+   door position and size are still unknown; `blender/cpt_unit.py` solves its height from
+   [V1]'s 2.80 m and its sightline from the collar position, and labels both.
 9. **Paint colour for the ballasted school.** Sourced colours exist only for the Nordic
    (orange), Comacchio (cream/red) and Bauer (yellow) machines. Pick one and own it.
 10. **Rod magazine capacity and layout on a real CPT machine.** The 30–40 m depth implies
@@ -610,6 +646,51 @@ mass'` are **correct practice** under DOMAIN.md §10 — an invented badge over 
 class. Nothing in this document may be used as a product name: not *A.P. van den Berg*,
 *HYSON*, *Pagani*, *TG 63-100*, *Geotech*, *Geotech 220/404/505/608*, *Geomek*, *NOVA*,
 *SCPT-GS2*, *Comacchio*, *GEO 305*, *Bauer*, nor *BG 28 H*. Model the shapes. Invent the badge.
+
+---
+
+## 10. The Blender model — what it took from this file, 2026-09-05
+
+`blender/cpt_unit.py`. Registered in `blender/build.py`; exports `public/models/cpt-unit.glb`.
+
+**Measured off the exported file** (`node tools/glbinfo.mjs public/models/cpt-unit.glb`),
+because a dimension nobody has read back is a dimension nobody knows (HANDOFF §8E):
+
+| | sourced | measured |
+|---|---|---|
+| width | **2.50 m** [V1] | **2.500** |
+| height | **2.80 m** [V1] transport | **2.860** = 2.80 + the 60 mm the jacks lift it |
+| length | **5.70 m** [V1] | **5.700** |
+| draw-call floor | ≤ 70 | **31** |
+| triangles | the lane to spend in | 28,134 |
+| materials | names only, no textures | 9 names, 0 images |
+| `transmission` | must be 0 (HANDOFF §8F) | never set |
+
+**Which of §9's defects it answers:**
+
+- **§9.1, the inside-out cylinders** — fixed at the root. The two **chrome piston rods are
+  fixed structure** spanning the whole frame, and the **fat dark cylinder bodies are the
+  moving part**, per [V2] verbatim. The visible chrome never changes length.
+- **§9.2, the gap in the load path** — impossible by construction: the cylinder bodies ride
+  the columns for the whole 1.35 m stroke and cannot leave them.
+- **§9.3, stroke and magazine** — stroke is [G1]'s sourced **1350 mm**, which is what
+  swallows a 1 m rod plus its clamp; the rack holds **40 rods** for the sourced 40 m depth,
+  not 18.
+- **§9.5, canopy vs cabin** — an enclosed cabin, with [V3]'s bench, storage and CPT rack.
+- **§9.6, hose routing** — a bolted **bulkhead plate** at each end and a tight bundle
+  between them, not four independent snakes.
+- **§9.7, the missing parts** — the **rubber rod wiper** is in, the **jacks visibly unload
+  the tracks** (the model is posed with 60 mm of daylight under them), and the saturation
+  oil, spare slot filter and thread-grease tub are on the deck by the cone case.
+
+**What it did NOT do, on purpose:** it did not add a mast, a rotary head, a flush pump, a
+mud tank or a cuttings pile. §5's whole argument is that this machine is identified by
+absence, and the model is built to that.
+
+**Still a judgement, and labelled as one in the source:** the ballast packaging (§8 item 3),
+the handrails and steps (item 6), the rod-rack layout (item 10), the cabin's own dimensions
+(item 8), and the track length and deck height, all of which are solved against [V1]'s real
+5.7 × 2.5 × 2.8 box rather than guessed in free space.
 
 ---
 
