@@ -398,6 +398,10 @@ Eighteen agents were running when the handover was called. They were stopped
 deliberately, in waves, and the tree was then verified: **the build and all
 seven gates pass.**
 
+All of it is **committed and pushed** — as `4ddbdbf`, deliberately labelled WIP
+— rather than left on one machine's disk, so this table describes files you can
+actually see. **`git show 4ddbdbf` is your review queue.**
+
 But green gates prove the **data** is sound. They do not prove this code is
 finished. **None of the six files below was reviewed by its own author** — each
 agent was killed mid-thought. Read the diff before trusting any of it.
@@ -425,6 +429,42 @@ and commit them in separate commits with honest messages.**
 
 Sixteen agent briefs were live. Each is real work with a measurement behind it.
 **This is a floor, not a ceiling** (§0).
+
+### 8.0 Read `research/CRITIQUE.md` first — 841 lines, 18 measured findings
+
+A second harsh critic was pointed at **the game as it renders**, not at the
+Blender files, and its verdict is the most useful single page in the repo:
+
+> *"The research, the domain model and the instrumentation are better than the
+> game… this is a serious piece of work and almost none of it is visible. What
+> is visible is a machine made of woven fabric standing in front of a floating
+> card."*
+
+Every finding carries a number the author took or a capture the author made,
+plus a reproduction and the file that owns the fix; anything unmeasured is
+marked **SUSPICION** and explicitly is not a finding. Six are severe:
+
+| # | finding |
+|---|---|
+| 2 | **`pd55` is purchasable, downloaded, parsed — and the renderer refuses it** |
+| 3 | **Eight of nineteen machines draw no drill string and no bit**, and two cannot hold a tool at all |
+| 8 | **The performance harness prints `VERDICT: FAIL` and exits 0** — 35 of 39 reports on disk say FAIL |
+| 15 | **`dist/` ships 35.7 MB of models that can never be requested** |
+| 16 | `teststub.glb` ships, `glbinfo` calls it INCOMPLETE, and exits 0 |
+| 17 | A shader in the section band has an **uninitialised variable, on every frame** |
+
+And #4 is the pattern rather than the bug: **the fix for #3 was applied per
+machine and never gated, so the two newest machines shipped with the identical
+defect.** That is this codebase's most expensive habit (§10), found
+independently by someone who had not read this file.
+
+Also there: #1 every painted surface reads as woven fabric (an agent was
+mid-fix), #9 the drilling HUD is a floating card and the 3D gets 66 % of the
+screen against a spec of ~82 %, #10 the only way out of a job is a 30 × 30 px
+button in the worst corner **and the reach gate is written to excuse it**,
+#11 the contract board — the first real decision in the game — truncates five
+strings and offers no decision, #14 the section band's scales are declared but
+the labels are not legible.
 
 ### 8.1 Blender owns everything the player sees and feels
 
