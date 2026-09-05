@@ -1155,33 +1155,100 @@ def build(out_path):
     #  Real published skid sizes [W1]; see PACK_X for why they stand closer
     #  than the real 15-30 m umbilicals would put them.
     # ═══════════════════════════════════════════════════════════════════════
-    def skid(tag, size, at, louvre=True, cab=False):
+    def skid(tag, size, at, louvre=True, cab=False, panel=False):
+        """One skid-mounted pack: "The hydraulic power unit is SKID-MOUNTED"
+        [W5], and the whole set is craned or dragged into the chamber.
+
+        These three boxes are close to half the machine's silhouette - the
+        drive pack alone is 3.6 m long against a 2.0 m derrick - so they carry
+        real enclosure detail rather than being three yellow bricks.  All of it
+        shares a material with the box it is on, so after finish() the entire
+        lot costs triangles and NOT ONE draw call.  That is the lane the
+        pipeline says to spend in, and this is where it is widest.
+        """
         w, d, h = size
+        x, y = at
+        z0 = 0.14
         R.box(tag + '-skid', (w + 0.10, d + 0.10, 0.14), R.MAT_DARK,
-              loc=(at[0], at[1], 0.07), bevel=0.008)
+              loc=(x, y, 0.07), bevel=0.008)
         R.box(tag + '-body', (w, d, h), R.MAT_PAINT,
-              loc=(at[0], at[1], 0.14 + h / 2), bevel=0.022)
-        # skid runners, so it reads as something that was dragged in
+              loc=(x, y, z0 + h / 2), bevel=0.022)
+        # skid runners and fork pockets - it was dragged in and it gets lifted
         for s in (-1, 1):
             R.box(tag + '-runner-%d' % (s > 0), (0.12, d + 0.30, 0.16),
-                  R.MAT_WORN, loc=(at[0] + s * (w / 2 - 0.10), at[1], 0.08))
+                  R.MAT_WORN, loc=(x + s * (w / 2 - 0.10), y, 0.08))
+            R.box(tag + '-fork-%d' % (s > 0), (w + 0.12, 0.22, 0.09), R.MAT_DARK,
+                  loc=(x, y + s * d * 0.22, 0.045))
+        # corner posts and a top rail: an enclosure is a FRAME with panels
+        # hung on it, and that frame is what stops it reading as one extrusion
+        for sx in (-1, 1):
+            for sy in (-1, 1):
+                R.box(tag + '-post-%d%d' % (sx > 0, sy > 0),
+                      (0.075, 0.075, h), R.MAT_DARK,
+                      loc=(x + sx * (w / 2 - 0.030), y + sy * (d / 2 - 0.030),
+                           z0 + h / 2))
+                R.box(tag + '-lug-%d%d' % (sx > 0, sy > 0), (0.05, 0.14, 0.13),
+                      R.MAT_DARK, loc=(x + sx * (w / 2 - 0.03),
+                                       y + sy * (d / 2 - 0.14), z0 + h + 0.055))
+        for s in (-1, 1):
+            R.box(tag + '-rail-x-%d' % (s > 0), (w + 0.02, 0.075, 0.075),
+                  R.MAT_DARK, loc=(x, y + s * (d / 2 - 0.03), z0 + h - 0.035))
+            R.box(tag + '-rail-y-%d' % (s > 0), (0.075, d + 0.02, 0.075),
+                  R.MAT_DARK, loc=(x + s * (w / 2 - 0.03), y, z0 + h - 0.035))
+        # roof ribs, so the top is not a flat lid seen from every high camera
+        rib = R.box(tag + '-rib', (w - 0.10, 0.06, 0.05), R.MAT_DARK,
+                    loc=(x, y - d / 2 + 0.24, z0 + h + 0.020))
+        arr(rib, (0, (d - 0.48) / 4.0, 0), 5)
         if louvre:
-            louvres(tag + '-louvre', w * 0.62, h * 0.55, 0.14 + h * 0.30,
-                    R.MAT_DARK, at[0], at[1] + d / 2 + 0.012)
+            louvres(tag + '-louvre', w * 0.62, h * 0.55, z0 + h * 0.30,
+                    R.MAT_DARK, x, y + d / 2 + 0.012)
+        # ACCESS DOORS.  Everything on a pack is serviced from outside, so
+        # every long face is doors: two leaves, hinges, handles and a latch.
+        for j, dy in enumerate((-1, 1)):
+            for k, off in enumerate((-0.26, 0.26)):
+                R.box('%s-door-%d%d' % (tag, j, k), (w * 0.40, 0.022, h * 0.66),
+                      R.MAT_DARK, loc=(x + off * w, y + dy * (d / 2 + 0.012),
+                                       z0 + h * 0.48))
+                R.tube('%s-handle-%d%d' % (tag, j, k), 0.017, 0.17, R.MAT_STEEL,
+                       loc=(x + off * w + w * 0.16, y + dy * (d / 2 + 0.045),
+                            z0 + h * 0.40), sides=8)
+                for hg in (-1, 1):
+                    R.tube('%s-hinge-%d%d%d' % (tag, j, k, hg > 0), 0.020, 0.09,
+                           R.MAT_STEEL, sides=8,
+                           loc=(x + off * w - w * 0.19,
+                                y + dy * (d / 2 + 0.030),
+                                z0 + h * 0.48 + hg * h * 0.24))
         if cab:
             # the enclosed electrical cabinet [W5] lives INSIDE the drive pack
-            # [W1] - so it is a door on this box, not a fifth object
-            R.box(tag + '-door', (w * 0.52, 0.03, h * 0.68), R.MAT_DARK,
-                  loc=(at[0], at[1] - d / 2 - 0.016, 0.14 + h * 0.50))
-            for j in (-1, 1):
-                R.tube(tag + '-handle-%d' % (j > 0), 0.018, 0.16, R.MAT_STEEL,
-                       loc=(at[0] + w * 0.20, at[1] - d / 2 - 0.05,
-                            0.14 + h * 0.50 + j * 0.10), sides=8)
-        R.box(tag + '-lift-lug', (w * 0.80, 0.10, 0.10), R.MAT_DARK,
-              loc=(at[0], at[1], 0.14 + h + 0.05))
+            # [W1] - so it is a door and a panel on this box, not a fifth object
+            R.box(tag + '-cab-door', (w * 0.46, 0.03, h * 0.72), R.MAT_PAINT,
+                  loc=(x, y - d / 2 - 0.026, z0 + h * 0.50), bevel=0.008)
+            R.box(tag + '-cab-vent', (w * 0.30, 0.02, 0.10), 'galvanised',
+                  loc=(x, y - d / 2 - 0.042, z0 + h * 0.78))
+            # the cable glands the 20-30 m umbilicals [W1] actually enter by
+            for i in range(4):
+                R.tube('%s-gland-%d' % (tag, i), 0.045, 0.10, R.MAT_STEEL,
+                       loc=(x - w * 0.30 + i * w * 0.20, y - d / 2 - 0.05,
+                            z0 + 0.16), rot=(math.pi / 2, 0, 0), sides=10)
+        if panel:
+            # gauges and an isolator: the pack is where the pressures are read
+            R.box(tag + '-gaugeplate', (0.42, 0.03, 0.34), R.MAT_DARK,
+                  loc=(x + w * 0.32, y - d / 2 - 0.026, z0 + h * 0.62))
+            for i in range(3):
+                R.tube('%s-gauge-%d' % (tag, i), 0.055, 0.035, R.MAT_STEEL,
+                       loc=(x + w * 0.32 - 0.13 + i * 0.13, y - d / 2 - 0.045,
+                            z0 + h * 0.62), rot=(math.pi / 2, 0, 0), sides=14)
+                R.tube('%s-glass-%d' % (tag, i), 0.044, 0.012, R.MAT_GLASS,
+                       loc=(x + w * 0.32 - 0.13 + i * 0.13, y - d / 2 - 0.062,
+                            z0 + h * 0.62), rot=(math.pi / 2, 0, 0), sides=14)
+            R.box(tag + '-isolator', (0.20, 0.14, 0.26), R.MAT_DARK,
+                  loc=(x - w * 0.34, y - d / 2 - 0.08, z0 + h * 0.60))
+            R.tube(tag + '-isolator-lever', 0.020, 0.16, R.MAT_HAZARD,
+                   loc=(x - w * 0.34, y - d / 2 - 0.17, z0 + h * 0.60),
+                   rot=(1.2, 0, 0), sides=8)
 
-    skid('drive-pack', PACK_DRIVE, (PACK_X, 1.30), cab=True)
-    skid('thrust-pack', PACK_THRUST, (PACK_X + 0.30, -1.95))
+    skid('drive-pack', PACK_DRIVE, (PACK_X, 1.30), cab=True, panel=True)
+    skid('thrust-pack', PACK_THRUST, (PACK_X + 0.30, -1.95), panel=True)
     skid('cooling-unit', PACK_COOL, (PUMP_X, 1.55))
     # the cooler's fan stack, which is the only thing that tells the cooling
     # unit apart from the other two boxes at a glance
@@ -1201,8 +1268,40 @@ def build(out_path):
            loc=(PUMP_X + 0.06, -1.35, 0.13), rot=(0, math.pi / 2, 0), sides=16)
     R.tube('water-pump-volute', 0.26, 0.16, R.MAT_CAST,
            loc=(PUMP_X + 0.20, -1.35, 0.30), sides=16)
+    # the suction tank.  [W9] wants "min 800 litres/min of water for efficient
+    # flushing" on the pilot pass, so there is a real tank here and not a
+    # token: 1.05 x 1.20 x 0.90 is about 1 100 litres, i.e. well under a
+    # minute and a half of flush - which is exactly why it is a TANK being fed
+    # by a line and not a reservoir.
+    twx, twy = PUMP_X + 0.30, -2.55
     R.box('water-tank', (1.05, 1.20, 0.90), R.MAT_PAINT,
-          loc=(PUMP_X + 0.30, -2.55, 0.45), bevel=0.02)
+          loc=(twx, twy, 0.45), bevel=0.02)
+    for s in (-1, 1):                                # corner angles and feet
+        for t in (-1, 1):
+            R.box('water-tank-post-%d%d' % (s > 0, t > 0), (0.06, 0.06, 0.90),
+                  R.MAT_DARK, loc=(twx + s * 0.50, twy + t * 0.57, 0.45))
+            R.box('water-tank-foot-%d%d' % (s > 0, t > 0), (0.16, 0.16, 0.05),
+                  R.MAT_DARK, loc=(twx + s * 0.46, twy + t * 0.53, 0.025))
+    rib = R.box('water-tank-rib', (1.07, 0.05, 0.05), R.MAT_DARK,
+                loc=(twx, twy - 0.40, 0.30))
+    arr(rib, (0, 0.40, 0), 3)
+    R.tube('water-tank-manway', 0.20, 0.09, R.MAT_DARK,
+           loc=(twx - 0.24, twy, 0.90), sides=16)
+    bolts('water-tank-manway-bolt', 8, 0.235, 0.965, 0.034, 0.020,
+          R.MAT_DARK, cx=twx - 0.24, cy=twy)
+    R.tube('water-tank-vent', 0.055, 0.22, R.MAT_STEEL,
+           loc=(twx + 0.30, twy + 0.34, 0.90), sides=10)
+    # a sight gauge, because a tank with no level indication is a prop
+    R.tube('water-tank-gauge', 0.022, 0.62, R.MAT_GLASS,
+           loc=(twx - 0.53, twy + 0.30, 0.16), sides=8)
+    for j in (0, 1):
+        R.tube('water-tank-gauge-cock-%d' % j, 0.035, 0.07, R.MAT_STEEL,
+               loc=(twx - 0.53, twy + 0.30, 0.13 + j * 0.62), sides=8)
+    # suction line, tank to pump
+    R.hose('water-suction',
+           [(twx - 0.50, twy + 0.10, 0.22), (PUMP_X + 0.35, -2.00, 0.16),
+            (PUMP_X + 0.26, -1.60, 0.16), (PUMP_X + 0.22, -1.35, 0.20)],
+           radius=0.062, sides=8)
 
     # THE OPERATOR.  [W1] "trolley mounted operator panel with full-colour
     # display" - a wheeled console, NOT a cab; [W8] "the operator is generally
@@ -1274,11 +1373,51 @@ def build(out_path):
              [(ox - 0.30, oy, 0.55), (1.50, -1.20, 0.10),
               (0.70, -0.90, 0.10), (FRAME_W / 2 + 0.02, -0.70, tz + 0.22)],
              radius=0.030, sides=6))
-    for h in H:
-        bake(h)                              # curve -> mesh, so finish() joins it
+    del H                                    # baked in one sweep below
     # a cable tray up the frame, so the runs have somewhere to land
     R.box('cable-tray', (0.16, 0.05, 0.90), 'galvanised',
           loc=(-FRAME_W / 2 - 0.06, -0.55, tz + 0.30))
+
+    # THE HOSE TRACK.  [W1] lists a "hose chain for drive hoses" as an option,
+    # and something has to carry the drive's hydraulics and its flushing water
+    # up to a head that travels 1.71 m.  It also does real compositional work:
+    # the bay between the parked drive and the headframe is 700 mm of bare
+    # column, and in a side elevation that reads as a table on a post.  The
+    # track is the only thing that belongs in that volume - it hangs off the
+    # headframe's rear member at y = -0.850 +/- 0.150, which is clear of
+    # everything the crosshead sweeps (the gearbox oval reaches y = 0.640 and
+    # the guide sleeves y = 0.225).
+    trk_y = -(FRAME_D / 2 - 0.06)
+    trk_z0, trk_z1 = TABLE_TOP, COL_TOP - HEADFRAME_H
+    R.box('hose-track', (0.22, 0.09, trk_z1 - trk_z0), R.MAT_DARK,
+          loc=(0.0, trk_y, (trk_z0 + trk_z1) / 2), bevel=0.008)
+    R.box('hose-track-back', (0.30, 0.03, trk_z1 - trk_z0), 'galvanised',
+          loc=(0.0, trk_y - 0.06, (trk_z0 + trk_z1) / 2))
+    clamp = R.box('hose-track-clamp', (0.28, 0.13, 0.045), R.MAT_STEEL,
+                  loc=(0.0, trk_y, trk_z0 + 0.30))
+    arr(clamp, (0, 0, (trk_z1 - trk_z0 - 0.60) / 7.0), 8)
+    for s in (-1, 1):                       # the brackets that hold it out
+        R.box('hose-track-bkt-%d' % (s > 0), (0.06, 0.20, 0.14), R.MAT_DARK,
+              loc=(s * 0.14, trk_y + 0.10, trk_z1 - 0.12))
+    # the drive's own hydraulic pair, riding the track up to the crosshead
+    for i, dx in enumerate((-0.065, 0.065)):
+        R.hose('drive-riser-%d' % i,
+               [(dx, trk_y + 0.10, TABLE_TOP + 0.10),
+                (dx, trk_y + 0.09, trk_z1 - 0.55),
+                (dx * 1.6, trk_y + 0.34, DRIVE_LO + XHEAD_H * 0.72),
+                (dx * 2.2, -0.62, DRIVE_LO + XHEAD_H * 0.55)],
+               radius=0.042, sides=6)
+
+    # ONE BAKE SWEEP over every curve in the scene, immediately before the
+    # export.  R.hose() makes CURVES, and finish()'s join only looks at
+    # o.type == 'MESH' - so a hose left as a curve is its own draw call, and
+    # eleven of them would be eleven draw calls for nothing.  Baked, they all
+    # fold into `static:rubber` for one.  Done here rather than at each call
+    # site so that a hose added later cannot quietly miss it, which is exactly
+    # what happened to the four routed after the first bake loop.
+    for o in list(bpy.context.scene.objects):
+        if o.type == 'CURVE':
+            bake(o)
 
     return R.finish(out_path)
 
