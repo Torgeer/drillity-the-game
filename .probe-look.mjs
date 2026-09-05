@@ -103,13 +103,21 @@ const px = (img, x, y) => { const i = (y * w + x) << 2; return [img.data[i], img
 let bitRows = [];
 for (let y = y0; y < y1; y++) {
   let n = 0;
-  for (let x = w - 130; x < w - 6; x++) {
+  for (let x = w - 170; x < w - 2; x++) {
     const [r, g, b] = px(A, x, y);
-    if (r > 190 && g > 120 && g < 210 && b < 110) n++;
+    if (r > 140 && r - b > 55 && g > 80) n++;
   }
-  if (n > 3) bitRows.push(y);
+  if (n > 6) bitRows.push(y);
 }
-const bitY = bitRows.length ? Math.round((bitRows[0] + bitRows[bitRows.length - 1]) / 2) : -1;
+/* Take the LONGEST contiguous run: the ruler's own amber major ticks are also
+   in this window and would drag a naive first/last midpoint off the bit. */
+let best = [0, -1], run = [0, -1];
+for (let i = 0; i < bitRows.length; i++) {
+  if (i > 0 && bitRows[i] === bitRows[i - 1] + 1) run[1] = i; else run = [i, i];
+  if (run[1] - run[0] > best[1] - best[0]) best = [run[0], run[1]];
+}
+const bitY = best[1] >= best[0] && bitRows.length
+  ? Math.round((bitRows[best[0]] + bitRows[best[1]]) / 2) : -1;
 
 /* Geology columns only: past the drill-log strip on the left, short of the
    depth ruler on the right, and outside the borehole down the middle. */

@@ -2739,6 +2739,26 @@ void main(){
      displaced plane can. */
   vec3 lit = c * (uAmbientCool * (0.42 + 0.62 * fill) + uKeyWarm * (0.34 + 1.62 * ndl));
   lit += uKeyWarm * pow(ndl, 26.0) * 0.35;
+
+  /* ── A BOULDER YOU HAVE NOT HIT IS THE STRONGEST CLAIM IN THE FRAME ──────
+     and this one is gameplay, not decoration. GAMEDESIGN §3 makes boulder
+     strike a live hazard: torque spikes, back off feed, raise percussion. A
+     section that draws every boulder below the bit at full resolution has
+     already told the player where every hazard is, and there is no hazard
+     left to have.
+
+     What the log honestly says is "this bed carries boulders". What it cannot
+     say is where they are or how big. So an unproved boulder is not deleted —
+     deleting it would be its own lie, and a boulder bed IS logged as one — it
+     is UNRESOLVED: it loses its vein, its facets, its own texture and most of
+     its value separation from the bed, and reads as a swelling in the ground
+     rather than a stone with an edge. It hardens into a stone as the bit comes
+     down on it, which is the moment it starts to matter.
+
+     vTint is the boulder's own colour, so what it fades toward is still
+     itself — the same discipline as the face's mix back to A.rgb. */
+  float bUnc = lookUnc(vWP, depthAt(vWP));
+  lit = mix(lit, vTint * (uAmbientCool * 0.73 + uKeyWarm * 1.15), bUnc * 0.80);
   gl_FragColor = vec4(lit, 1.0);
   #include <tonemapping_fragment>
   #include <colorspace_fragment>
@@ -6474,27 +6494,51 @@ export function createGeology(ctx) {
       return g.measureText(txt).width <= textW;
     };
 
+    /* ── THE LOG IS ONLY A LOG WHERE THERE IS A HOLE ────────────────────────
+       This strip was printing "60 MPa" beside rock the bit had not reached,
+       which is the same failure the cut beside it had (see lookUnc()) but in
+       the harder form, because a NUMBER cannot be read as an impression. A
+       compressive strength is a laboratory result on a core sample. You
+       cannot have one for ground nobody has cored, and a log that prints one
+       is not a log, it is a fabrication with a unit on it.
+
+       The assay track at the foot of this function already refuses to plot
+       ahead of the bit and says why. This is the same rule applied to the
+       lithology, and both take their uncertainty from lookUncAt(), which is
+       the same curve the shader uses — so the strip and the cut can never
+       disagree about which ground is known. */
+    const loggedTo = depthForStation(depth);
+
     for (const s of strata) {
       const y0 = (s.top - topDepth) * pxPerM;
       const y1 = (s.bottom - topDepth) * pxPerM;
       if (y1 < -20 || y0 > H + 20) continue;
       const yy0 = Math.max(-20, y0), yy1 = Math.min(H + 20, y1);
       const hh = yy1 - yy0;
+      /* Per BED, not per pixel: what the log claims is "this bed's top is at
+         that depth", so the uncertainty of the claim is the uncertainty at
+         the contact it is drawn from. */
+      const unc = lookUncAt(s.top - loggedTo);
+      const entered = s.top <= loggedTo;
 
       // hatch column, filled with the bed's LIT colour, not its albedo
       g.save();
       g.beginPath(); g.rect(colX, yy0, colW, hh); g.clip();
       g.fillStyle = litSwatch(s);
       g.fillRect(colX, yy0, colW, hh);
+      // the hatch is the bed's FABRIC, and fabric is a core-box observation
+      g.globalAlpha = 1 - unc * 0.72;
       (HATCH[s.pattern] || HATCH.clay)(g, colX, yy0, colW, hh, k);
       g.restore();
 
       // the contact, drawn the same way the 3D draws it: a dark parting with a
-      // lighter lip on the bed above
+      // lighter lip on the bed above — and softened by the same doubt, so the
+      // strip agrees with the cut about where a boundary is only a projection
       const cy = Math.round(y0) + 0.5;
-      g.fillStyle = 'rgba(6,9,13,0.85)';
+      const ck = 1 - unc * 0.70;
+      g.fillStyle = `rgba(6,9,13,${(0.85 * ck).toFixed(3)})`;
       g.fillRect(colX, cy, colW, Math.max(1, css(1.0)));
-      g.fillStyle = 'rgba(223,181,82,0.30)';
+      g.fillStyle = `rgba(223,181,82,${(0.30 * ck).toFixed(3)})`;
       g.fillRect(colX, cy - Math.max(1, css(0.7)), colW, Math.max(1, css(0.7)));
 
       /* Choose a label that fits the BED, then a form of it that fits the
@@ -6550,16 +6594,49 @@ export function createGeology(ctx) {
         let ly = Math.min(Math.max(mid - css(blockCss) * 0.5, top), Math.max(bot, top));
         g.textAlign = 'right';
         g.textBaseline = 'top';
-        g.fillStyle = 'rgba(250,250,250,0.86)';
+        /* The NAME survives the doubt almost intact, and that is the same
+           asymmetry the cut draws: which rock it is comes off a map and is
+           fairly well known, where its top sits does not. It dims a little
+           so the logged part of the strip reads as the firmer statement. */
+        g.fillStyle = `rgba(250,250,250,${(0.86 * (1 - unc * 0.34)).toFixed(3)})`;
         g.font = `600 ${css(size)}px ${BRAND.fontSans}`;
         for (const wd of lines) { g.fillText(wd, textR, ly); ly += css(LOG_T.step); }
-        if (showUcs) {
+        /* THE STRENGTH IS A LAB RESULT ON A CORE SAMPLE, so it exists for a
+           bed the bit has entered and for no other. Not dimmed, not qualified
+           — absent. A number on a log is either measured or it is a
+           fabrication, and there is no third rendering of it. */
+        if (showUcs && entered) {
           g.fillStyle = 'rgba(150,160,174,0.62)';
           g.font = `500 ${css(LOG_T.ucs)}px ${BRAND.fontMono}`;
           g.fillText(ucsTxt, textR, ly - css(trail));
         }
       }
     }
+    /* ── WHERE THE LOG STOPS BEING A LOG ────────────────────────────────────
+       One rule and one word, drawn once. Everything above this line was
+       observed by the bit; everything below it is interpolation, and the
+       section spends most of its area on the second kind. Naming the
+       convention costs 7 CSS px of type and removes the need for a tutorial
+       to say what the softening below it means — which is the cheaper way to
+       teach it than a legend, a tooltip or a HUD panel.
+
+       It is suppressed when there is nothing to qualify: a fully surveyed job
+       (ceiling 0, and a reamed raise) has no projected half, and a line
+       announcing one would be chrome. */
+    const ceil = surveyCeiling();
+    if (ceil > 0.02) {
+      const ly = (loggedTo - topDepth) * pxPerM;
+      if (ly > -2 && ly < H - css(2)) {
+        g.fillStyle = 'rgba(223,181,82,0.55)';
+        g.fillRect(0, Math.round(ly), W, Math.max(1, css(0.8)));
+        g.textAlign = 'left';
+        g.textBaseline = 'top';
+        g.fillStyle = 'rgba(223,181,82,0.62)';
+        g.font = `700 ${css(7)}px ${BRAND.fontSans}`;
+        g.fillText('PROJECTED', css(1.5), Math.round(ly) + css(1.5));
+      }
+    }
+
     /* ── THE ASSAY TRACK ────────────────────────────────────────────────────
        A real section log carries a grade strip beside the lithology, and this
        is that strip: bars growing right from the left edge of the hatch column
@@ -7010,15 +7087,29 @@ export function createGeology(ctx) {
     return clamp(Math.max(c, surveyBought), 0, 1);
   }
 
+  /** The ceiling lookUnc() rises to. A raise past stage 1 is reamed up a hole
+   *  its own pilot already drilled: there is no unknown ground ahead of the
+   *  reamer — that is what a pilot hole is for — so it states nothing rather
+   *  than pretending to a doubt it does not have. */
+  function surveyCeiling() {
+    if (layout.id === 'raise' && stage >= 1) return 0;
+    return 1 - surveyConfidence();
+  }
+  function surveyInvLead() {
+    return 1 / Math.max(lerp(CFG.controlNear, CFG.controlFar, surveyConfidence()), 0.2);
+  }
+  /** THE CPU'S COPY OF lookUnc(), and the only one. The 2D instrument strips
+   *  are drawn on a canvas and cannot call the shader, but a drill log that
+   *  disagreed with the cut beside it about which ground is known would be
+   *  worse than either alone — so both read this, and the shader gets the same
+   *  two numbers through uSurvey / uLook below. */
+  function lookUncAt(aheadMetres) {
+    return surveyCeiling() * (1 - Math.exp(-Math.max(aheadMetres, 0) * surveyInvLead()));
+  }
+
   function applySurvey() {
-    const conf = surveyConfidence();
-    /* A raise is reamed up a hole its own pilot already drilled. There is no
-       unknown ground ahead of the reamer — that is what a pilot hole is for —
-       so stage 2 states nothing rather than pretending to a doubt it does not
-       have. */
-    const known = layout.id === 'raise' && stage >= 1;
-    U.uSurvey.value.set(known ? 0 : 1 - conf, CFG.surveyWander);
-    U.uLook.value.w = 1 / Math.max(lerp(CFG.controlNear, CFG.controlFar, conf), 0.2);
+    U.uSurvey.value.set(surveyCeiling(), CFG.surveyWander);
+    U.uLook.value.w = surveyInvLead();
 
     /* The coefficients of the metres-ahead plane. One dot product in the
        shader, all five modes, no branch — see lookUnc(). */
@@ -7330,9 +7421,24 @@ export function createGeology(ctx) {
       drawRuler(nt);
       ruler.mesh.position.y = secYForDepth(nt + ruler.span * 0.5);
     }
-    if (logStrip && (topDepth < logStrip.top + 1.0 || botDepth > logStrip.top + logStrip.span - 1.0)) {
-      const nt = Math.floor((topDepth - viewMetres * 0.22) * 2) / 2;
+    /* The log now carries the LOGGED/PROJECTED divider and hides the strength
+       of a bed the bit has not entered, so it is a function of the bit as well
+       as of the window and cannot only be redrawn when the window scrolls. It
+       is repainted every 0.15 m of bit travel — 2.9 CSS px at the reference
+       scale, so the divider never visibly steps — and the guard is a scalar
+       compare, so a still bit costs exactly what it did before. */
+    const loggedNow = depthForStation(depth);
+    const logStale = logStrip
+      && Math.abs(loggedNow - (logStrip.loggedAt ?? -1e9)) > 0.15
+      && loggedNow < botDepth + 1.0;
+    if (logStrip && (topDepth < logStrip.top + 1.0
+                     || botDepth > logStrip.top + logStrip.span - 1.0 || logStale)) {
+      const nt = logStale && !(topDepth < logStrip.top + 1.0
+                               || botDepth > logStrip.top + logStrip.span - 1.0)
+        ? logStrip.top                                   // repaint in place
+        : Math.floor((topDepth - viewMetres * 0.22) * 2) / 2;
       drawLog(nt);
+      logStrip.loggedAt = loggedNow;
       logStrip.mesh.position.y = secYForDepth(nt + logStrip.span * 0.5);
     }
     if (horiz) {
