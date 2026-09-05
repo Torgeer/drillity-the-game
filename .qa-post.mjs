@@ -173,23 +173,43 @@ for (const tier of TIERS) {
       const smaa = comp.passes.find((p) => p.constructor.name === 'SMAAPass');
       const baseDpr = gl.getPixelRatio();
       const W = window.innerWidth, H = window.innerHeight;
-      const cells = [];
-      for (const dprMul of [1]) {
-        c.renderer.resize(W, H, baseDpr * dprMul);
-        for (const ss of [1.0, 1.15]) {
-          for (const aa of (smaa ? [false, true] : [false])) {
-            if (smaa) smaa.enabled = aa;
-            c.renderer.__qaPostScale(ss);
-            if (smaa) { const s2 = comp.passes.find((p) => p.constructor.name === 'SMAAPass'); if (s2) s2.enabled = aa; }
-            for (let i = 0; i < 4; i++) await time(9);
-            const ms = await time(25);
-            c.renderer.render(0.016);
-            cells.push({ dprMul, canvasPx: gl.domElement.width * gl.domElement.height,
-              postScale: ss, smaa: aa,
-              frameMs: +ms.toFixed(4), edges: edgeMetric() });
-          }
+      /* PAIRED, NOT BLOCKED. This used to time each of the four cells ONCE,
+         in order, after a warm-up. That is a blocked design: any drift in GPU
+         clock, thermal state or background load across the ~20 s the sweep
+         takes lands entirely on the later cells and is reported as their
+         cost. The per-pass costs above are already paired for exactly that
+         reason; the AA trade — the decision this file exists to make — was
+         not, and it is the one place where being wrong is expensive.
+
+         Now: REPEATS interleaved sweeps of the four cells, so every cell sees
+         the same slice of the machine's day. Each cell's frame time is the
+         MEDIAN across repeats, and the spread is reported beside it so a
+         reader can see whether the gap between two cells is larger than the
+         gap between two readings of the same cell. */
+      const REPEATS = 5;
+      const combos = [];
+      for (const ss of [1.0, 1.15]) for (const aa of (smaa ? [false, true] : [false])) combos.push({ ss, aa });
+      const acc = combos.map((k) => ({ ...k, ms: [], edges: null }));
+      c.renderer.resize(W, H, baseDpr);
+      for (let rep = 0; rep < REPEATS; rep++) {
+        for (let ci = 0; ci < combos.length; ci++) {
+          const { ss, aa } = combos[ci];
+          c.renderer.__qaPostScale(ss);
+          const s2 = comp.passes.find((p) => p.constructor.name === 'SMAAPass');
+          if (s2) s2.enabled = aa;
+          await time(6);                        // settle this configuration
+          acc[ci].ms.push(await time(11));
+          if (rep === REPEATS - 1) { c.renderer.render(0.016); acc[ci].edges = edgeMetric(); }
         }
       }
+      const cells = acc.map((a) => {
+        const s = a.ms.slice().sort((x, y) => x - y);
+        return { dprMul: 1, canvasPx: gl.domElement.width * gl.domElement.height,
+          postScale: a.ss, smaa: a.aa,
+          frameMs: +s[s.length >> 1].toFixed(4),
+          frameMsSpread: +(s[s.length - 1] - s[0]).toFixed(4),
+          reps: s.length, edges: a.edges };
+      });
       c.renderer.resize(W, H, baseDpr);
       c.renderer.__qaPostScale(null);
       if (smaa) { const s3 = comp.passes.find((p) => p.constructor.name === 'SMAAPass'); if (s3) s3.enabled = true; }
@@ -204,6 +224,9 @@ for (const tier of TIERS) {
           / Math.max(1e-6, base.edges.hardEdgePctgOf1e4)).toFixed(1);
         const row = {
           dprMul: m, canvasPx: base.canvasPx, baselineMs: base.frameMs,
+          /* the largest single-cell spread across repeats. Any difference
+             below this is inside the instrument's own noise. */
+          noiseMs: +Math.max(...cells.map((x) => x.frameMsSpread || 0)).toFixed(4),
           supersample: { costMs: +(withSS.frameMs - base.frameMs).toFixed(4),
             pctOfBaseline: +(100 * (withSS.frameMs - base.frameMs) / base.frameMs).toFixed(1),
             hardEdgesRemovedPct: dEdge(withSS) },
@@ -237,7 +260,7 @@ for (const tier of TIERS) {
     for (const key of ['atNativeDpr']) {
       const r = out.postScaleAB[key];
       if (!r) continue;
-      console.log(`   ${key} (${(r.canvasPx / 1e6).toFixed(2)} Mpx, baseline ${r.baselineMs} ms)`);
+      console.log(`   ${key} (${(r.canvasPx / 1e6).toFixed(2)} Mpx, baseline ${r.baselineMs} ms, cell noise ±${r.noiseMs} ms, ${out.postScaleAB.cells[0].reps} paired reps)`);
       console.log(`      supersample 1.15  +${r.supersample.costMs} ms (${r.supersample.pctOfBaseline} %)  hard edges -${r.supersample.hardEdgesRemovedPct} %`);
       if (r.smaa) console.log(`      SMAA              +${r.smaa.costMs} ms (${r.smaa.pctOfBaseline} %)  hard edges -${r.smaa.hardEdgesRemovedPct} %`);
     }
