@@ -1189,7 +1189,36 @@ def build_carriage(mast):
     # helmet and dolly under the hammer — a loose fit, on purpose
     tb('helmet', 0.42, 0.55, MAT_WORN, ham, (0, 0, -4.05), sides=16)
     tb('dolly', 0.34, 0.22, MAT_WORN, ham, (0, 0, -4.22), sides=14)
-    node(NODE_MOUNT, 'tool', ham, (0, 0, -4.30))
+
+    # THE DRIVE AXIS.  This machine is registered in src/game/data.js for TWO
+    # methods, `driven-pile` AND `dth` — and DTH rotates.  With no
+    # `pivot:spindle` in the file, gltfRig.js makeDyn() left `dyn.spindle`
+    # null and rigFactory's `dyn.spindle.rotation.y = cur.spin` had nothing to
+    # write to: a rotary method on a machine whose rotary did not turn, with
+    # no warning anywhere.  checkmodels.mjs reported the absence on every run
+    # (correctly, for cable-percussion and cpt-unit, which have nothing that
+    # turns) and this machine sat in that list as a defect.
+    #
+    # The exported trim is the PILING trim [P2]: hammer on the line, helmet
+    # and dolly under it.  The DTH trim [P5] bolts an `MB 100 DTH` rotary head
+    # to the same tiltable sledge and drives on the SAME axis — the mast's
+    # working line — so the node goes where that head's output would be, at
+    # the top face of the helmet, and the tool mount hangs off it.  It carries
+    # no geometry on purpose: the rotating parts of the DTH trim are not in
+    # this trim, and an empty pivot costs no draw call, where moving the
+    # helmet and dolly under it would have cost one (weld() collapses per
+    # dynamic group, so wornSteel here and wornSteel there are two calls).
+    #
+    # Nothing on screen changes in piling trim: `driven-pile` declares no
+    # rotation control in data.js, so cur.rot — and therefore cur.spin — stays
+    # 0 and the node never turns.
+    sp = node(NODE_PIVOT, 'spindle', ham, (0, 0, -3.775))
+    sp['axis'] = 'z'
+    sp['torque_knm'] = 150.0   # [P7] admissible torque, DTH configuration
+    # No rotation SPEED is published for the MB 100 DTH anywhere in [DS], and
+    # rm20-leader.md sec.3 lists thrust, pull, breaking moment and jaw range
+    # without one. NOT SOURCED — so no rpm_min/rpm_max is stated here.
+    node(NODE_MOUNT, 'tool', sp, (0, 0, -0.525))
     weld(ham, 'hammer')
     weld(t, 'sledge-tilt')
     weld(c, 'carriage')
