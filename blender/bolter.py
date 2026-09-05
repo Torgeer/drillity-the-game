@@ -879,3 +879,209 @@ def build_rear_module(root):
     build_cable_reel(root)
     build_water_reel(None)
     build_air_water_package(None)
+
+
+# =============================================================================
+# S5  OPERATOR STATION - the protective roof, the platforms, and the stair
+#
+#     This is the half of the machine that exists for a safety reason, and
+#     [R]S9 W10 records its absence as "the biggest missing feature" on the
+#     game's procedural bolter. Three sourced facts drive the geometry:
+#
+#     1. PROTECTIVE ROOF AS STANDARD, enclosed cabin as an option [BM]p.6. The
+#        canopy version is "a flat, thick steel roof plate on four heavy posts,
+#        open at the sides, ROPS/FOPS certified", with "a louvred / slotted
+#        front edge and a broad flat cap" [R]S4.6. This model builds the
+#        CANOPY, which is also why MAT_GLASS never appears in this file - and
+#        with no glazing there is no way for a transmission > 0 material to get
+#        in (HANDOFF S8F).
+#     2. THE ROOF GOES UP AND DOWN. 2 841 mm working, 2 100 mm tramming
+#        [BS]p.7 - 741 mm, a quarter of the machine's height, every time it
+#        moves. [R]S9 W14b: "a big, animatable, very characteristic movement
+#        the game is missing." Here it is slide:roof.
+#     3. SIDE PLATFORMS AND A LIT STAIR. The feed swings all the way back to
+#        the platform so the operator loads bolts "without having to pass in
+#        front of the machine into areas with an unsupported roof" ([BM]
+#        printed p.3, quoted in [R]S2 and S4.6). "Illuminated stairs for
+#        platform" is a listed item [BS]p.5; the elevation shows "a three- or
+#        four-tread open stair with a checker-plate landing" [R]S4.0.
+#
+#     The machine is AUTHORED IN THE WORKING POSE: roof up, jacks down, boom
+#     raised. slide:roof therefore travels NEGATIVE to tram.
+# =============================================================================
+
+DECK_Y0    = 0.150   # deck plate, rear edge (just ahead of the hinge)
+DECK_Y1    = 2.050   # ... and front edge (just behind the boom pedestal)
+CAN_X0, CAN_X1 = -1.000, 0.120     # canopy footprint, on the LEFT
+CAN_Y0, CAN_Y1 = 0.480, 1.760
+POST_R     = 0.055   # "four heavy posts" [R]S4.6. NOT SOURCED as a figure.
+ROOF_UND   = ROOF_Z_UP - ROOF_T    # 2.751 roof underside, working
+ROOF_W     = (CAN_X1 - CAN_X0) + 0.220
+ROOF_D     = (CAN_Y1 - CAN_Y0) + 0.260
+
+
+def build_deck(parent):
+    """Checker-plate deck, its edge kerb, and the platform handrails.
+
+    The deck stops 37 mm inside the machine half-width (DECK_HALF vs HALF_W)
+    so the handrail, not the platform, is the widest thing above the tyres and
+    nothing overhangs the 2 115 mm envelope [BS]p.7.
+    """
+    yc = (DECK_Y0 + DECK_Y1) / 2
+    box('deck_plate', (2 * DECK_HALF, DECK_Y1 - DECK_Y0, 0.026), R.MAT_DARK,
+        parent, (0, yc, DECK_Z - 0.013), bevel=0.006)
+    # bearers under it, on the frame rails
+    for s in (-1, 1):
+        cheapbox('deck_bearer%d' % (s > 0), (0.070, DECK_Y1 - DECK_Y0, 0.048),
+                 R.MAT_DARK, parent, (s * RAIL_X, yc, DECK_Z - 0.050))
+    # toe boards - hazard striped, because they are the edge of a working
+    # platform 920 mm above a wet floor
+    for s in (-1, 1):
+        box('deck_toe%d' % (s > 0), (0.022, DECK_Y1 - DECK_Y0, 0.110),
+            R.MAT_HAZARD, parent, (s * DECK_HALF, yc, DECK_Z + 0.055),
+            bevel=0.004)
+    box('deck_toe_front', (2 * DECK_HALF, 0.022, 0.110), R.MAT_HAZARD, parent,
+        (0, DECK_Y1, DECK_Z + 0.055), bevel=0.004)
+
+    # THE BOLT-LOADING PLATFORM, right flank, full length of the deck. This is
+    # the one the feed swings back to [BM]p.3.
+    handrail(parent, 'rail_right', [
+        (DECK_HALF - 0.030, DECK_Y0 + 0.060, DECK_Z),
+        (DECK_HALF - 0.030, DECK_Y1 - 0.060, DECK_Z),
+        (0.200, DECK_Y1 - 0.060, DECK_Z),
+    ])
+    # the second platform, on the operator's side ahead of the canopy
+    handrail(parent, 'rail_left', [
+        (-0.220, DECK_Y1 - 0.060, DECK_Z),
+        (-DECK_HALF + 0.030, DECK_Y1 - 0.060, DECK_Z),
+        (-DECK_HALF + 0.030, CAN_Y1 - 0.020, DECK_Z),
+    ])
+    # and the return behind the operator, at the head of the stair
+    handrail(parent, 'rail_rear', [
+        (-DECK_HALF + 0.030, CAN_Y0 - 0.240, DECK_Z),
+        (-DECK_HALF + 0.030, DECK_Y0 + 0.060, DECK_Z),
+        (0.200, DECK_Y0 + 0.060, DECK_Z),
+    ])
+
+
+def build_stair(parent):
+    """The lit access stair and its checker-plate landing [R]S4.0, [BS]p.5.
+
+    Four levels from a 365 mm belly line to a 920 mm floor: treads at 0.32,
+    0.52 and 0.72, then the landing. The bottom tread clears the belly, which
+    is the constraint that sets the pitch.
+    """
+    x = -(DECK_HALF - 0.140)
+    y0 = DECK_Y0 - 0.560
+    for i, z in enumerate((0.320, 0.520, 0.720)):
+        y = y0 + 0.150 * i
+        box('stair_tread%d' % i, (0.520, 0.230, 0.024), R.MAT_DARK, parent,
+            (x, y, z), bevel=0.005)
+        cheapbox('stair_riser%d' % i, (0.520, 0.020, 0.090), R.MAT_DARK,
+                 parent, (x, y - 0.105, z - 0.050))
+    # stringers
+    for s in (-1, 1):
+        aim_box('stair_stringer%d' % (s > 0), 0.018, 0.150,
+                (x + s * 0.270, y0 - 0.130, 0.280),
+                (x + s * 0.270, DECK_Y0 + 0.040, DECK_Z - 0.020),
+                R.MAT_DARK, parent, bev=0.006)
+    handrail(parent, 'stair_rail', [
+        (x - 0.290, y0 - 0.120, 0.300),
+        (x - 0.290, DECK_Y0 + 0.020, DECK_Z),
+    ], h=0.940, r=0.019)
+    # "illuminated stairs for platform" [BS]p.5 - a lamp in the stringer
+    cheapbox('stair_lamp_housing', (0.070, 0.130, 0.080), R.MAT_DARK, parent,
+             (x + 0.280, y0 + 0.120, 0.560))
+
+
+def build_canopy(parent):
+    """The protective roof: four posts, a thick plate, and 741 mm of travel.
+
+    Authored ROOF UP. slide:roof carries `travel_m = -0.741`, i.e. the node
+    travels NEGATIVE in its own Z to reach the 2 100 mm tramming height. The
+    sign is explicit here because a roof that rises above 2 841 mm is a roof
+    that hits the back.
+
+    The posts telescope: the outer sleeves are static on the deck, the inner
+    posts and the plate ride the slide. That is how the real adjustment works
+    ([BM]p.6 gives the canopy -80/+310 mm of MOUNTING adjustment on top of it)
+    and it means the machine still has four legs at either height.
+    """
+    posts = [(CAN_X0, CAN_Y0), (CAN_X1, CAN_Y0), (CAN_X0, CAN_Y1), (CAN_X1, CAN_Y1)]
+    for i, (px, py) in enumerate(posts):
+        cyl('canopy_sleeve%d' % i, POST_R * 1.30, 0.840, R.MAT_PAINT, parent,
+            (px, py, DECK_Z), sides=10)
+        # the sleeve's clamp collar - the thing that actually holds the height
+        cyl('canopy_collar%d' % i, POST_R * 1.55, 0.070, R.MAT_DARK, parent,
+            (px, py, DECK_Z + 0.790), sides=10)
+
+    roof = R.empty(R.NODE_SLIDE, 'roof', parent, (0, 0, 0))
+    roof['travel_m'] = -ROOF_TRAV          # negative Z = down to tram
+    roof['height_up_m'] = ROOF_Z_UP        # 2.841 [BS]p.7
+    roof['height_down_m'] = ROOF_Z_DN      # 2.100 [BS]p.7
+    for i, (px, py) in enumerate(posts):
+        cyl('canopy_post%d' % i, POST_R, ROOF_UND - (DECK_Z + 0.520), R.MAT_PAINT,
+            roof, (px, py, DECK_Z + 0.520), sides=10)
+    cx, cy = (CAN_X0 + CAN_X1) / 2, (CAN_Y0 + CAN_Y1) / 2
+    box('canopy_plate', (ROOF_W, ROOF_D, ROOF_T), R.MAT_DARK, roof,
+        (cx, cy, ROOF_UND + ROOF_T / 2), bevel=0.016)
+    # "a broad flat cap" over the plate, and the "louvred / slotted front
+    # edge" [R]S4.6 - the FOPS grille that lets an operator see the back
+    box('canopy_cap', (ROOF_W - 0.120, ROOF_D - 0.120, 0.028), R.MAT_PAINT,
+        roof, (cx, cy, ROOF_Z_UP + 0.014), bevel=0.010)
+    n = 7
+    for i in range(n):
+        sx = cx - ROOF_W / 2 + ROOF_W * (i + 0.5) / n
+        cheapbox('canopy_slot%d' % i, (ROOF_W / n * 0.62, 0.150, 0.030),
+                 R.MAT_DARK, roof, (sx, cy + ROOF_D / 2 - 0.075, ROOF_UND - 0.020))
+    # corner gussets, because a FOPS roof is welded not bolted at the corners
+    for i, (px, py) in enumerate(posts):
+        cheapbox('canopy_gusset%d' % i, (0.140, 0.140, 0.026), R.MAT_PAINT,
+                 roof, (px + (0.07 if px < cx else -0.07),
+                        py + (0.07 if py < cy else -0.07), ROOF_UND - 0.020))
+    return roof
+
+
+def build_controls(parent):
+    """Two operator panels for standing operation [BM]p.6, and the swingable
+    seat [BS]p.5.
+
+    The seat swings because the operator faces the boom to drill and forwards
+    to tram - "a fixed forward-facing seat is a truck, not a bolter" [R]S4.6.
+    It is modelled STATIC, turned to the drilling attitude, because the machine
+    is authored working; a pivot: here would cost draw calls for a 30 cm prop
+    that the player never sees move.
+    """
+    for i, (px, py, ry) in enumerate(((-0.760, 1.480, 0.42), (-0.150, 1.480, -0.42))):
+        box('panel%d_console' % i, (0.320, 0.220, 0.140), R.MAT_DARK, parent,
+            (px, py, DECK_Z + 0.960), (math.radians(-22), 0, ry), bevel=0.014)
+        box('panel%d_stand' % i, (0.110, 0.110, 0.960), R.MAT_PAINT, parent,
+            (px, py, DECK_Z + 0.480), bevel=0.010)
+        for j in range(2):      # joysticks
+            cyl('panel%d_stick%d' % (i, j), 0.017, 0.140, R.MAT_DARK, parent,
+                (px + (j - 0.5) * 0.150, py - 0.030, DECK_Z + 1.020),
+                (math.radians(-18), 0, ry), sides=8)
+            cyl('panel%d_knob%d' % (i, j), 0.028, 0.055, R.MAT_RUBBER, parent,
+                (px + (j - 0.5) * 0.150, py - 0.070, DECK_Z + 1.140),
+                (math.radians(-18), 0, ry), sides=10)
+        for j in range(4):      # the row of buttons a real console carries
+            cyl('panel%d_btn%d' % (i, j), 0.013, 0.014, R.MAT_HAZARD, parent,
+                (px - 0.110 + j * 0.072, py + 0.060, DECK_Z + 1.035),
+                (math.radians(-22), 0, ry), sides=6)
+    # the seat, swung to the drilling attitude
+    seat_x, seat_y, seat_r = -0.470, 1.080, math.radians(58)
+    cyl('seat_column', 0.070, 0.400, R.MAT_DARK, parent,
+        (seat_x, seat_y, DECK_Z), sides=10)
+    box('seat_pan', (0.420, 0.420, 0.090), R.MAT_RUBBER, parent,
+        (seat_x, seat_y, DECK_Z + 0.445), (0, 0, seat_r), bevel=0.026)
+    box('seat_back', (0.420, 0.100, 0.480), R.MAT_RUBBER, parent,
+        (seat_x - math.sin(seat_r) * 0.200, seat_y - math.cos(seat_r) * 0.200,
+         DECK_Z + 0.730), (math.radians(-9), 0, seat_r), bevel=0.026)
+
+
+def build_operator_station(root):
+    build_deck(None)
+    build_stair(None)
+    roof = build_canopy(None)
+    build_controls(None)
+    return roof
