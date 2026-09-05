@@ -382,13 +382,17 @@ they are indistinguishable in a one-line dimension table:
 
 **Nothing is broken. Nothing needs repairing before work resumes.**
 
-One caveat stated precisely, because §10 is about not overclaiming: the table
-above is measured — the gates were run, the build was run, the `.glb` files were
-counted on disk. A **full `npm run blender` rebuild was still running when this
-was written**, so "all 19 still build from source" is the one line here that was
-not confirmed end-to-end. `blender/rc_rig.py` was edited by an agent that was
-killed mid-pass (§7), so **run `npm run blender` first and expect
-`built=19 failed=0`.** If it says anything else, that file is where to look.
+Every line above is measured, not assumed. The full `npm run blender` rebuild
+was still running when this file was first written and has since finished:
+**`BUILD_SUMMARY built=19 failed=0`**, every machine including `rc_rig` — the
+one an agent was killed mid-pass inside (§7) — and `sonic_truck`. `check:models`
+re-run against the fresh exports: **19 rigs, 19 Blender modules, 19 exported
+models, 1 non-machine (`teststub`), OK.**
+
+One open note the model gate prints rather than fails on: **five machines have
+no `pivot:spindle`** — `cable-percussion`, `cpt-unit`, `crawler-lite`,
+`piling-leader`, `si-rig` — meaning nothing on them rotates, or nothing turns
+what does. An agent was briefed on two of them when the handover was called.
 
 ---
 
