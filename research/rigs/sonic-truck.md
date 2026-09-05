@@ -1,6 +1,10 @@
 # Rig reference — `sonic-truck` (truck-mounted sonic / resonant drilling rig)
 
-status: COMPLETE - all nine sections written and sourced
+status: COMPLETE - nine sections from the local library, plus §10 and §11
+added 2026-09-05 when the machine was actually modelled. **§8 item 1, the big
+hole in this document - "a truck-mounted sonic rig, anywhere in the local
+material" - is now CLOSED by published web sources.** Read §10 before §3:
+§3 is a compact CRAWLER and the game's machine is a TRUCK.
 
 > **Naming rule (DOMAIN.md §10):** this document cites real manufacturers and
 > model designations so the geometry can be verified against a real object. The
@@ -331,13 +335,14 @@ and `Atpa/Atpa products` likewise. Checked by filename sweep across the root and
 
 Every one of these is a real hole. **Do not invent a number to fill one.**
 
-1. **A truck-mounted sonic rig. Anywhere in the local material.** This is the big
-   one and it is the whole subject of the brief. Both sonic photographs the owner
-   supplied are **tracked crawlers**, and both are captioned as such. Truck-mounted
-   sonic rigs are real and are the dominant configuration in North American
-   environmental work (Terra Sonic International builds them), but **no dimension,
-   drawing or photograph of one exists in `C:/Users/henri/Downloads`**. Every
-   number in section 3 belongs to a compact crawler. See 9.1.
+1. ~~**A truck-mounted sonic rig. Anywhere in the local material.**~~ **CLOSED
+   2026-09-05 - see §10.** Still true that no truck-mounted sonic rig exists in
+   `C:/Users/henri/Downloads`; both local photographs are tracked crawlers. But
+   Terra Sonic International publishes a full dimensioned spec sheet for the
+   **TSi 150CT**, a compact truck-mounted sonic rig, *and names its carrier*
+   (International HV607). That is now the model's primary source and every
+   figure in §10 is cited to it. Section 3 remains a compact CRAWLER and must
+   not be used for the truck.
 2. **Machine mass.** Neither the Comacchio deck nor the brochure gives an
    operating weight for any sonic rig or carrier. The game asserts 21,000 kg
    (`rigFactory.js`); nothing in the folder supports or refutes it.
@@ -345,15 +350,23 @@ Every one of these is a real hole. **Do not invent a number to fill one.**
    sourced sonic-rig engine figure is **180 kW Stage V** for a Terra Sonic TSi
    150CC, via `research/11` A.13 (web-sourced there, not from a local file). The
    game asserts 205 kW - unsourced.
-4. **Head physical dimensions.** No source gives the oscillator housing's height,
-   width or depth in millimetres. The brochure p2 render gives **ratios only** (the
-   housing about 2.2x as wide as tall; pipe about 0.13x the housing width). Head
-   *weight* about 520 kg (Toa Tone SP-50 with water swivel) is the only absolute.
+4. **Head physical dimensions.** STILL OPEN. No source anywhere - local or web -
+   gives the oscillator housing's height, width or depth in millimetres. The
+   brochure p2 render gives **ratios only** (the housing about 2.2x as wide as
+   tall; pipe about 0.13x the housing width), and the model solves the housing
+   from those ratios against the sourced 100 mm core barrel.
+   **Head MASS is now partly closed:** Royal Eijkelkamp is the only publisher
+   anywhere that prints one - LargeRotoSonic 50K (227 kN, 0-150 Hz)
+   **1,200 kg**; CompactRotoSonic HO (150 kN) **600 kg**; SmallRotoSonic
+   **370 kg**. The brochure's 520 kg is the Toa Tone SP-50, a **65 kN** head, and
+   is the wrong figure for a 222 kN machine.
 5. **Mast cross-section dimensions.** No width, depth or wall thickness for the
    mast box section. Only the overall 6,200 mm height and 3,600 mm stroke.
 6. **Mast tilt / angle range for the sonic configuration.** Comacchio p16 and p17
    show the mast vertical and folded, nothing between. The only sourced angle
    figure is **0 to 45 degrees** for a Terra Sonic TSi 150CC via `research/11`.
+   **The transport-pose ANGLE is still not published by anyone** - see §11.1,
+   where it matters more than it looks.
 7. **Rod carousel / magazine.** No source shows one on a sonic rig. Whether this
    class carries an on-board magazine at all is unverified; the photographs show
    ground-laid rods, a trestle and hand stabbing.
@@ -365,11 +378,11 @@ Every one of these is a real hole. **Do not invent a number to fill one.**
     where Y is the mast length - **the deck never states what Y is** for any mast
     option, so absolute transport length is unknown.
 11. **Exact paint codes / RAL numbers** for either scheme.
-12. **Sonic tooling geometry** - the sonic core barrel, override casing and
-    carbide drive shoe. `src/rig/tools.js` has **no sonic tooling builder at all**
-    (checked: no match for "sonic" in that file), and no local source gives the
-    shoe or barrel geometry. `research/02` E5 and `research/16` A.16 describe them
-    in words only.
+12. **Sonic tooling geometry** - the carbide drive shoe is still unsourced, and
+    `src/rig/tools.js` still has **no sonic tooling builder at all** (checked: no
+    match for "sonic" in that file). But the **barrel and casing geometry is now
+    sourced** - see §10.5. Two makers publish full OD/ID/wall tables and both
+    sell the class as PAIRS.
 13. **The 30 mm disagreement** between p16 (3,840 mm undercarriage length) and p17
     (3,870 mm) is unresolved. Both recorded; neither picked.
 14. **Sonicor 33K oscillator force.** The brochure prints the same 50,000 lbf as
@@ -384,6 +397,11 @@ plus `src/game/data.js` and `src/rig/tools.js`. **I own none of these files and
 changed none of them.** Ranked by how badly a driller would react.
 
 ### 9.1 The carrier is a truck, and every sonic rig in the owner's own material is a crawler
+
+> **SETTLED 2026-09-05, option (b), and it is no longer unsourced.** The brief
+> settled the carrier as a truck, and the search then found a published
+> truck-mounted sonic rig with a named carrier. §10 replaces the two options
+> below. The text is kept because it is the record of how the decision was made.
 
 `buildSonicTruck` builds an **8.2 m, three-axle truck chassis** with a cab, a
 walkway, a handrail and four outriggers, and `data.js` line 1225 calls it a
@@ -521,3 +539,240 @@ as a product name, a decal, a badge or a mast sticker. The game's own name for
 this rig ("Corvara SN-6 Resonant", `data.js` line 1225) is correct practice.
 Copy the geometry; invent the badge.
 
+---
+
+## 10. The truck-mounted machine, as sourced and as built (2026-09-05)
+
+This section is what `blender/sonic_truck.py` is built from. **§3 is a compact
+crawler; this is the truck.** Every figure is quoted from a public document.
+
+### 10.1 The rig - Terra Sonic **TSi 150CT**, "compact truck-mounted"
+
+`terrasonicinternational.com/wp-content/uploads/2025/04/150CT.pdf`, REV 11/2024.
+The only truck-mounted sonic rig found anywhere that publishes a full dimensioned
+spec **and names its carrier**: *"Design: From Selected Truck Base Model
+International HV607"*.
+
+| Dimension | Published | Metric used in the model |
+|---|---|---|
+| Transport width | 8 ft 3 in | **2.5146 m** |
+| Transport length | 23 ft | **7.0104 m** |
+| Transport height | 13 ft | **3.9624 m** (a CHECK - the model is authored working) |
+| Weight | 25,600 lb std / 33,000 lb optioned | 11,612 / 14,969 kg |
+| Mast overall length | 20 ft 1.5 in | **6.1341 m** |
+| Head travel / stroke | 14 ft 1 in | **4.2926 m** |
+| Mast dump | 55 in | **1.3970 m** |
+| Pull-back | 16,800 lbf | 74.7 kN |
+| Pull-down | 11,300 lbf | 50.3 kN |
+| Oscillator force | 50,000 lbf | 222 kN |
+| Oscillator frequency | 0-150 Hz | - |
+| Torque / speed | 4,677 ft-lb / 0-62 rpm | 6,341 Nm |
+| Jacklegs | 3.5 in x 24 in | 89 mm bore, 610 mm stroke |
+| Ground clearance | 9.5 in | 241 mm |
+
+**Two defects in this sheet - do not propagate them.**
+
+1. The spec table says the mast is *"20 ft 1-1/2 in (6.1 m)"*; the feature list on
+   the same PDF says *"Standard 19 ft 1 in (5.8 m) Long Mast"*. They disagree by a
+   foot. The model uses the spec table and records the disagreement.
+2. Several metric conversions are wrong - *"24 in (618 mm)"*, *"6 in (15.24 mm)"*,
+   *"20 in (6.1 M)"*. **Where imperial and metric disagree on a TSi sheet, the
+   imperial figure is the internally consistent one.**
+
+**Stroke / mast = 4.293 / 6.134 = 0.700**, against **0.581** for the compact
+crawler in §3. A truck rig uses more of its mast. That is a real published
+difference between the two carriers, not a modelling liberty.
+
+### 10.2 The larger truck - Terra Sonic **TSi 150T**, for cross-check only
+
+`.../2025/04/150T_vF.pdf`: 8 ft 6 in x 33 ft 10 in x 12 ft 4 in; 42,000 lb;
+stroke 24 ft 5 in; pull-back 22,000 lbf; pull-down 15,000 lbf; 50,000 lbf at
+0-150 Hz; *"Max Tooling Length: 20 ft (6 m)"*; driller platform *"7 ft 1/4 in
+(2 m) L x 12 ft (3.7 m) W"*; jacklegs 4 in x 36 in front, 4 in x 30 in rear.
+
+The class spans further than that in both directions. **Versa-Drill Versa-Sonic**
+on a *"Peterbilt 548 6x4"*: 35 ft 10 in x 8 ft, derrick up 40 ft, derrick down
+13 ft 2 in, 26 ft top-head stroke, 25,000 lb pullback. **Sonic Drill Corporation
+SDC500-28E**: *"MAST: Tubular Construction, 28 FT Head Travel, 37 FT - 8" Overall
+Length"*, carrier *"Class 7 or 8 Tandem Axle, Double Wall Frame"*, *"(4) 4" x 36"
+Jacklegs"*. **Boart Longyear LS250** is the outlier on frequency: *"Output Force
+182 kN / 41,000 lbs"*, *"Frequency Range 0 - 75 Hz"* - i.e. the two-tier
+frequency split in §4.2 is real and the low tier is still being sold.
+
+### 10.3 The carrier - International **HV607** 6x4
+
+`gibbstrucks.com/brochures/hv-specsheet-607-06.pdf` and the HV series brochure:
+*"107" BBC / 40.3" BA"*, set-back front axle; frame *"11.25" x .5" thick super
+single rail"*; wheelbase options **136-340 in**; GVW **68,000 lb (6x4)**.
+
+Supporting chassis geometry, all published:
+
+- **Frame width.** There is **no International "Frame System Overall Width"
+  table** - full-text searches of the MV, WorkStar and DuraStar body-builder
+  books return nothing of the kind. What International publishes is the *inside*
+  figure: *"33.5 (851) BETWEEN FRAME RAILS"*, with rail thicknesses 0.312 /
+  0.375 / 0.438 in. **34.25 in is sound arithmetic (33.5 + 2 x 3/8), not a
+  published table**, and 34.875 in matches no rail/outsert pair International
+  tabulates. Volvo is the one maker that does publish an overall width (Body
+  Builder Instructions §7: rails *"1078, 1080, 1082 and 1085 mm (outside
+  edges)"* at the front, *"848, 850, 852 and 855 mm (inside edges)"* to the
+  rear); Mack states the same splayed shape.
+- **Frame height, and the datum trap.** International MV Body Builder Book:
+  *"Frame Height at centerline of front axle: unloaded - 33.69", loaded -
+  31.73""* and *"...rear axle: unloaded - 35.56", loaded - 32.02""*, with the
+  caveat that values *"may vary up to 0.5 inches"*. International's own formula
+  **Y = Df + R2 + F** lands on the **TOP of the rail**. PACCAR is the other way:
+  *"All heights are given from the bottom of the frame rail."* **The two
+  conventions differ by a full rail height, about 10.5 in.** And the MV figures
+  are MEDIUM-duty: put an HV607's 11.25 in rail under 32.02 in and the rail
+  bottom lands 30 mm above the axle centreline, which cannot be built. The model
+  therefore solves its rail height from the running gear and says so.
+- **Tandem spacing is an option menu, not a constant.** Peterbilt HD Body Builder
+  Manual Table 3-11 lists **52 and 54 in**; International WorkStar lists **52, 55
+  and 60 in** (IROS air spring) and **55, 60** (Hendrickson HAS). Peterbilt's own
+  caveat: *"Actual axle spacing can depart from nominal ... by more than an
+  inch."* The model uses **55 in**, because the carrier is an International.
+- **Wheelbase / CA.** *"CA - Cab to axle. Measured from the back of the cab to
+  the centerline of the rear axle(s)"*; *"AF - After Frame"*. A published HV607
+  build sheet reads *"Wheelbase: 242.00, CA: 174.90, Axle to Frame: 59.00"*.
+- **Cab exterior width is NOT PUBLISHED BY ANY US MAKER.** Checked International,
+  Peterbilt, Mack, Freightliner and Western Star. The nearest published figure is
+  Peterbilt's *"95" Overall Roof Height"* for a 567 UltraLow day cab, and that is
+  measured from the frame, not the ground. Cab width, roof height and hood line
+  in the model are therefore all flagged NOT SOURCED.
+
+### 10.4 Tyres, track and the legal envelope
+
+- **MICHELIN Truck Tire Data Book, 21st ed.**, X WORKS Z (the on/off-road line,
+  which is the right family for a drill truck): **11R22.5 H - overall diameter
+  41.8 in / 1,061 mm, loaded radius 19.6 in / 498 mm, overall width 11.3 in /
+  288 mm.** Also 12R22.5 1,089 mm; 315/80R22.5 1,089; 11R24.5 1,111.
+  **Use the LOADED RADIUS for ride height, not half the overall diameter** - the
+  difference is 63 mm, and modelling a tyre at OD/2 about a loaded axle centre
+  buries 32 mm of the machine below ground.
+- **Peterbilt HD Body Builder Manual Table 3-21**, drive axles, 11R22.5 dual 4-4
+  offset: **Track 73.3 in, Overall Width 97.8 in**. The wide-track rows are
+  **103.7 and 103.9 in** - a wide-track tandem on this very tyre is already over
+  the federal limit before any body goes on. Dual spacing is then arithmetic
+  rather than invention: 97.8/2 - 11.3/2 - 73.3/2 gives **334 mm**.
+- **23 CFR 658.15(a):** *"No State shall impose a width limitation of more or
+  less than 102 inches, or its approximate metric equivalent, 2.6 meters
+  (102.36 inches) on a vehicle operating on the National Network."* **658.16**
+  excludes mirrors, turn signals, cab handholds, spray suppressants and tyre
+  bulge, and says each exclusion *"may not be combined with other excluded
+  devices"*. Note that 658.15(b) exempts *"special mobile equipment"*, defined in
+  658.5 to include *"road construction or maintenance machinery"* - a drill rig
+  plausibly falls there, so 102 in is a strong guide rather than a hard wall.
+
+### 10.5 Tooling - and the two diameters are now fully sourced
+
+- **Terra Sonic tooling catalogue**
+  (`.../00042_TSi_Tooling_Catalog_Listing_vF.pdf`): core barrels 3.75 / 4.75 / 6 /
+  7 / 8 in OD in **5.5 ft and 10.5 ft** lengths; casing 4.75 / 6 / 7 / 8.1 / 9.25
+  / 10.5 / 12 in OD in **2, 2.5, 5 and 10 ft and 1.5 and 3 m**. The half-foot
+  offset on the barrels is deliberate: **the barrel leads the casing.** Rods and
+  barrels right-hand thread, **casing left hand** - which is exactly what
+  `data.js` already ships.
+- **Geoprobe** (`geoprobe.com/tooling/sonic-tooling`) sells conventional sonic
+  sampling as **4x6, 6x8 and 8x10** - *"a 4 in. core barrel overcased with a 6 in.
+  casing"*. Casing sections 120, 60, 24, 18, 12 and 6 in. Liner: DT60 lay-flat,
+  4.500 OD / 4.430 ID / 0.035 wall in.
+- **Boart Longyear**: *"the core barrel is advanced 10 ft (3.05 m) using sonic
+  frequencies. After the core barrel is in place, casing is sonically advanced
+  over the core barrel."*
+
+So `data.js`'s **100 mm barrel inside a 150 mm casing at 3 m** is a real pairing
+at the small end of the published range, near Geoprobe's 4 in x 6 in. **Two
+visibly different diameters on the rack is not a stylistic choice - it is the
+method**, and drawing one diameter remains the commonest way to get this machine
+wrong (§9.3).
+
+### 10.6 Outriggers
+
+Nobody publishes an outrigger PAD for a sonic rig. What is published:
+
+- Terra Sonic jackleg CYLINDERS - 150CT *"3-1/2 in (89 mm) x 24 in"*; 150T
+  *"4 in x 36 in front, 4 in x 30 in rear"*; SDC500 *"(4) 4" x 36""*.
+- Geoprobe 8150LS sonic: *"Front outrigger travel 26 in (660 mm); rear outrigger
+  travel 26 in (660 mm)"*, four-point stabilisation. Geoprobe 3230DT publishes a
+  **stabilizer spread of 78 in (1,981 mm)**.
+
+Pad size and spread for a truck-mounted sonic rig: **NOT FOUND.**
+
+### 10.7 What is still NOT FOUND after the search
+
+- **Cab exterior width**, any US maker, any model. The most-wanted number.
+- **Head weight** for the TSi 150, Geoprobe GV4/GV5, Sonicor 50K or Boart
+  Longyear heads. Only Eijkelkamp publishes masses (370 / 600 / 1,200 kg).
+- **GVWR for the TSi 150CT or 150T** as rigs. The HV607's own 68,000 lb 6x4 GVW
+  is published, but not as the rig's rating.
+- **Outrigger cylinder bore/stroke** on any drill-rig sheet beyond the jackleg
+  sizes above.
+- **ASTM D6914** tooling diameters (paywalled).
+- Boart Longyear's `Sonic-Rig-Specifications-US.pdf` failed TLS on every attempt
+  and is likely the richest un-retrieved source. Worth another try.
+
+---
+
+## 11. Three cross-file findings from building the model
+
+**None of these files is mine and none was touched.** They are recorded here so
+the next reader does not have to re-derive them.
+
+### 11.1 The game's transport tilt is shallower than any real truck sonic rig
+
+`src/rig/rigFactory.js` line 7599 hands every `.glb` machine
+`transportTilt = -1.32` rad - the mast parked **14.4 degrees above horizontal** -
+and `src/core/gltfRig.js`'s `makeDyn()` never reads a machine's own figure, so a
+model **cannot declare one**. Measured against published transport heights, the
+real machines park far steeper: TSi 150CT at **13 ft (3.962 m)** and TSi 150T at
+**12 ft 4 in (3.759 m)**. The model as built lands at **3.66 m**, and the whole
+0.30 m of that difference is the one constant.
+
+Without the mast dump the constant would be worse than cosmetic: **a 6.13 m mast
+pinned at deck level folds straight through the cab of a 7.01 m truck at 14.4
+degrees, whatever else is done.** What saves it is that the TSi publishes **55 in
+of mast dump**, so the tilt pin sits 1.4 m above the mast foot and the mast folds
+from high enough to land on a rest above the cab roof.
+
+**The fix is two lines** in `makeDyn()`, beside where it already reads `travel_m`
+off the carriage:
+
+```js
+const t = mastPivot.userData.transport_tilt_rad;
+if (typeof t === 'number') dyn.transportTilt = t;
+```
+
+`blender/sonic_truck.py` already publishes `transport_tilt_rad` on `pivot:mast`,
+so the day somebody adds those lines every machine that declares one is right.
+
+### 11.2 `data.js` describes a bigger machine than its own tooling does
+
+| | mass | pull-back | tooling section |
+|---|---|---|---|
+| TSi 150CT | 11.6-15.0 t | 74.7 kN | 3 m / 10 ft |
+| TSi 150T | 19.1 t | 97.9 kN | up to 6 m |
+| `data.js` `sonic-truck` | **18 t** | **90 kN** | **3.0 m** |
+
+The mass and the pull-back point at the **larger** machine; the tooling length
+points at the **smaller** one. The model is built as the 150CT class, because
+that is the machine with a published carrier and a published mast, and because
+`rodLength: 3.0` is what the game actually simulates with. Somebody who owns
+`data.js` has to pick - this is the same shape of problem as the
+`cable-percussion` data-vs-model split recorded in `ASTRA.md` §7.5.
+
+Also still open from §9.2 and §9.8, and unchanged by this work:
+`rigFactory.js` `oscillatorKn: 180` matches no real head (use **222 kN at
+150 Hz**), `data.js` "running 90-160 Hz" matches no published figure (the sourced
+numbers are 67, 133 and 150 Hz), and `weightKg: 21000` / `powerKw: 205` have no
+support anywhere.
+
+### 11.3 One measured note on `blender/preview.py`
+
+`preview.py`'s `bounds()` sums `o.bound_box` - the eight corners of each object's
+LOCAL AABB - which is a strict over-estimate on any joined mesh whose object
+transform carries a rotation. On this model it prints
+`size=(2.51, 10.17, 7.53)` against `tools/glbinfo.mjs`'s exact
+**2.515 x 7.630 x 7.304**. It only affects camera framing, so it is cosmetic -
+but it is the same approximation that produced four false findings in
+`ASTRA.md` §5, and it should be read as framing, never quoted as a dimension.
