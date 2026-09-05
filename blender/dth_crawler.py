@@ -3,50 +3,52 @@
 In-game marque: "Brenner DH-750 Ironvein". Real class: mid-size surface DTH
 crawler, ~22-24 t, boom-carried aluminium feed, on-board two-stage screw
 compressor, cyclone dust collection.
-
-=============================================================================
-SOURCES  (DOMAIN.md S10: real names live in code comments ONLY - never in an
-          object name, a material name, or any string that can reach a player)
-=============================================================================
-[R]   research/rigs/dth-crawler.md  - the owner's engineering reference for
-      this machine, itself sourced from two OEM studio renders in Downloads
-      plus a manufacturer brochure. Section numbers below are that file's.
-[B]   Manufacturer brochure for a 22.6-24.1 t surface DTH crawler
-      (Atlas Copco / Epiroc SmartROC D65, NV5038797_A49 + the Mk2 web
-      brochure, spec pages "HEIGHT AND LENGTH" / "CARRIER" / "COMPRESSOR" /
-      "ALUMINIUM FEED"). Reached through [R] S3; fetched again 2026-09-05.
-[E]   Epiroc DTH product catalog.pdf p.20-21, 30-33 - hammer OD/length, drill
-      pipe OD/length, the 90-254 mm DTH blasthole window.
-[P1]  Downloads/Surface_Drill_Rig_1000_0001.jpg   - working pose, boom out.
-[P2]  Downloads/surface-drill-rig-for-quarrying-and-mining-smartroc-d65-3d-
-      model-77345d1f1d.webp - detail reference, boom folded, feed erect.
-[H]   Bauer-Maschinen hydraulic hose catalogue - hose bundling, bulkhead
-      plates, hose sizes (NS 6-100).
-
-SCALE DECISION - read this before changing a number
----------------------------------------------------
-[R] S3.2 says the game's carrier is correctly sized (2.65 m over tracks for a
-19.5 t crawler, research/11 S D.3) and that the FEED, not the carrier, is what
-is proportionally wrong: real feed = 3.76 x width over tracks, game = 2.72.
-Its explicit recommendation: "raise the feed rather than shrink the carrier -
-to hit the real proportion at the game's existing track width the feed should
-be ~9.9 m". This model follows that instruction literally. So:
-
-    W  = 2.650 m  width over tracks           (game carrier, research/11 band)
-    k  = W / 2.500 = 1.060                    (brochure machine is 2.500 m [B])
-
-Ratios from [R] S3.2 are applied to W directly. Brochure absolutes with no
-ratio are scaled by k and marked "* k". CATALOGUE sizes - drill tube OD and
-length, hammer OD, suction hose bore - are NOT scaled: they are standard
-stock sizes and stay at their real values [E][B].
-
-DRAW CALLS
-----------
-finish() joins statics by material, but anything under a pivot:/slide: node is
-left alone, so every dynamic mesh is its own draw call. This file therefore
-joins each dynamic subassembly by material itself (join_by_mat) and applies
-modifiers first so per-part bevel widths survive the join.
 """
+
+# =============================================================================
+# SOURCES  (DOMAIN.md S10: real names live in code comments ONLY - never in an
+#           object name, a material name, or any string that can reach a player)
+# =============================================================================
+# [R]   research/rigs/dth-crawler.md  - the owner's engineering reference for
+#       this machine, itself sourced from two OEM studio renders in Downloads
+#       plus a manufacturer brochure. Section numbers below are that file's.
+# [B]   Manufacturer brochure for a 22.6-24.1 t surface DTH crawler
+#       (Atlas Copco / Epiroc SmartROC D65, NV5038797_A49 + the Mk2 web
+#       brochure, spec pages "HEIGHT AND LENGTH" / "CARRIER" / "COMPRESSOR" /
+#       "ALUMINIUM FEED"). Reached through [R] S3; fetched again 2026-09-05.
+# [E]   Epiroc DTH product catalog.pdf p.20-21, 30-33 - hammer OD/length, drill
+#       pipe OD/length, the 90-254 mm DTH blasthole window.
+# [P1]  Downloads/Surface_Drill_Rig_1000_0001.jpg   - working pose, boom out.
+# [P2]  Downloads/surface-drill-rig-for-quarrying-and-mining-smartroc-d65-3d-
+#       model-77345d1f1d.webp - detail reference, boom folded, feed erect.
+# [H]   Bauer-Maschinen hydraulic hose catalogue - hose bundling, bulkhead
+#       plates, hose sizes (NS 6-100).
+#
+# SCALE DECISION - read this before changing a number
+# ---------------------------------------------------
+# [R] S3.2 says the game's carrier is correctly sized (2.65 m over tracks for a
+# 19.5 t crawler, research/11 S D.3) and that the FEED, not the carrier, is what
+# is proportionally wrong: real feed = 3.76 x width over tracks, game = 2.72.
+# Its explicit recommendation: "raise the feed rather than shrink the carrier -
+# to hit the real proportion at the game's existing track width the feed should
+# be ~9.9 m". This model follows that instruction literally. So:
+#
+#     W  = 2.650 m  width over tracks           (game carrier, research/11 band)
+#     k  = W / 2.500 = 1.060                    (brochure machine is 2.500 m [B])
+#
+# Ratios from [R] S3.2 are applied to W directly. Brochure absolutes with no
+# ratio are scaled by k and marked "* k". CATALOGUE sizes - drill tube OD and
+# length, hammer OD, suction hose bore - are NOT scaled: they are standard
+# stock sizes and stay at their real values [E][B].
+#
+# DRAW CALLS
+# ----------
+# finish() joins statics by material, but anything under a pivot:/slide: node is
+# left alone, so every dynamic mesh is its own draw call. This file therefore
+# joins each dynamic subassembly by material itself (join_by_mat) and applies
+# modifiers first so per-part bevel widths survive the join.
+#
+
 
 import sys, os, math
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lib'))
@@ -84,7 +86,8 @@ FRAME_Z0   = 0.520      # frame belly - ground clearance. NOT SOURCED [R]S8 #5
 
 BODY_W     = 2.440      # superstructure width - narrower than the tracks [P2]
 BODY_Y0    = -2.680     # rear cooler face (overhangs the tracks) [P1][P2]
-BODY_Y1    =  1.500     # front bulkhead, boom foot pins here
+BODY_Y1    =  1.520     # front edge of the deck; the boom foot pins
+                        # to a bulkhead just behind it
 CANOPY_Z   = 2.820      # engine/compressor canopy roof. Must clear the dumped
                         # feed at H1 = 1.40 W = 3.71 m [R]S3.1/S3.2.
 TRANSPORT_H = 1.40 * W  # 3.710  feed dumped [R]S3.2
@@ -104,13 +107,13 @@ TUBE_LEN   = 5.000      # 5 m tube - CATALOGUE [B]. Pairs with FEED_TRAV:
                         # 5.00 tube + 0.72 head/carriage = 5.72 travel.
 SUCT_D     = 0.203      # 203 mm dust suction hose - CATALOGUE [B]/[R]S4.5
 
-CAB_W, CAB_D, CAB_H = 1.140, 1.460, 1.980   # NOT SOURCED [R]S8 #6; derived
+CAB_W, CAB_D, CAB_H = 1.140, 1.340, 1.980   # NOT SOURCED [R]S8 #6; derived
                                             # from a 1.9 m operator in [P2]
 
 # where things sit along the machine (machine faces +Y; Blender Z is up)
 CAB_X      =  0.640     # cab offset to the right of centreline [R]S1 "cab at
                         # the front-right". Side is NOT SOURCED - [R]S8 #6.
-CAB_Y      =  0.720
+CAB_Y      =  0.820
 BOOM_X     = -0.320     # boom foot left of centreline so the operator in the
                         # right-hand cab sees the collar past it [P1][P2]
 BOOM_FOOT  = (BOOM_X, 1.380, 1.180)   # boom foot pin, on the front bulkhead
@@ -429,16 +432,27 @@ def build_canopy(root):
     """Engine + two-stage screw compressor canopy: 403 kW diesel, FAD 470 l/s
     at 30 bar [R]S3.1/S4.4. This is the dominant mass of the machine."""
     o = []
-    cy0, cy1 = BODY_Y0, 0.320          # canopy runs from cooler face to cab
+    cy0, cy1 = BODY_Y0, 0.100          # canopy runs from cooler face to cab
     cw = BODY_W
     # main canopy shell
     o.append(R.box('canopy', (cw, cy1 - cy0, CANOPY_Z - DECK_Z), R.MAT_PAINT,
                    root, (0, (cy0 + cy1) / 2, (DECK_Z + CANOPY_Z) / 2),
                    bevel=0.045))
-    # roof cap with a slight crown and a raised lip round the edge
+    # roof cap with a raised lip, and a raised plenum over the cooler pack -
+    # the machine is "nose-light and tail-heavy" [R]S5 #2 and the roofline is
+    # where that reads.
     o.append(R.box('canopyroof', (cw + 0.06, cy1 - cy0 + 0.06, 0.070),
                    R.MAT_PAINT, root, (0, (cy0 + cy1) / 2, CANOPY_Z + 0.020),
                    bevel=0.018))
+    o.append(R.box('coolerplenum', (cw - 0.06, 1.320, 0.320), R.MAT_PAINT, root,
+                   (0, cy0 + 0.680, CANOPY_Z + 0.190), bevel=0.026))
+    o.append(R.box('plenumlip', (cw + 0.02, 1.380, 0.055), R.MAT_PAINT, root,
+                   (0, cy0 + 0.680, CANOPY_Z + 0.362), bevel=0.012))
+    for i in range(7):                       # extract grille on the plenum top
+        o.append(R.box('plengrill%d' % i, (cw - 0.28, 0.060, 0.030),
+                       R.MAT_STEEL, root,
+                       (0, cy0 + 0.180 + 0.170 * i, CANOPY_Z + 0.352),
+                       bevel=0.004))
     # service door frames on both flanks - shut lines are what stop a canopy
     # reading as one extruded box [P2]
     for side in (-1, 1):
@@ -495,6 +509,47 @@ def build_canopy(root):
                  sides=16))
     o.append(torus_ring('recv_end', 0.215, 0.030, R.MAT_PAINT, root,
                         (0.86, -1.14, CANOPY_Z + 0.28), (math.radians(90), 0, 0)))
+    return o
+
+
+def build_front_deck(root):
+    """What fills the deck between the canopy and the boom foot.
+
+    A carrier this size has to put its diesel and its hydraulic oil somewhere,
+    and on every reference photograph that somewhere is the front deck beside
+    the cab, under the boom. Tank sizes are NOT SOURCED - proportioned to the
+    403 kW engine and a shift's drilling, and recorded as derived.
+    """
+    o = []
+    # bulkhead the boom foot cheeks stand on, just behind the pin
+    o.append(R.box('frontbulk', (BODY_W - 0.14, 0.110, 0.760), R.MAT_DARK, root,
+                   (0, 0.980, DECK_Z + 0.360), bevel=0.016))
+    for sx in (-1, 1):
+        o.append(R.box('bulkrib%d' % sx, (0.045, 0.420, 0.640), R.MAT_DARK,
+                       root, (sx * 0.880, 0.780, DECK_Z + 0.300), bevel=0.010))
+    # hydraulic oil tank, on the deck to the left of the boom foot
+    o.append(R.box('hydtank', (0.500, 1.180, 0.800), R.MAT_PAINT, root,
+                   (-0.900, 0.800, DECK_Z + 0.400), bevel=0.028))
+    o.append(cyl('hydfill', 0.090, 0.110, R.MAT_WORN, root,
+                 (-0.900, 0.420, DECK_Z + 0.830), sides=12))
+    o.append(R.box('hydgauge', (0.050, 0.080, 0.380), R.MAT_GLASS, root,
+                   (-1.155, 1.120, DECK_Z + 0.400), bevel=0.006))
+    o.append(R.box('hydcap', (0.540, 1.220, 0.055), R.MAT_PAINT, root,
+                   (-0.900, 0.800, DECK_Z + 0.815), bevel=0.012))
+    # toolbox and the extinguisher bracket, out on the walkway
+    o.append(R.box('toolbox', (0.420, 0.720, 0.400), R.MAT_PAINT, root,
+                   (-1.450, -0.260, DECK_Z + 0.210), bevel=0.018))
+    o.append(cyl('extinguisher', 0.072, 0.380, R.MAT_HAZARD, root,
+                 (-1.450, -0.880, DECK_Z + 0.070), sides=10))
+    # hose bulkhead plate on the carrier - the package terminates here, it does
+    # not run end to end [H] "Schottplatte"
+    o.append(R.box('carrierbulk', (0.360, 0.030, 0.280), R.MAT_WORN, root,
+                   (-0.320, BODY_Y1 - 0.14, DECK_Z + 0.170), bevel=0.006))
+    for i in range(8):
+        o.append(cyl('cbcoup%d' % i, 0.020, 0.080, R.MAT_WORN, root,
+                     (-0.440 + 0.070 * (i % 4), BODY_Y1 - 0.17,
+                      DECK_Z + 0.110 + 0.120 * (i // 4)),
+                     (math.radians(90), 0, 0), sides=6))
     return o
 
 
@@ -637,6 +692,34 @@ def aim_tube(name, r, a, b, mat, parent=None, sides=10, shrink=0.0):
     L = d.length - shrink
     rot = d.to_track_quat('Z', 'Y').to_euler()
     return R.tube(name, r, L, mat, parent, a, rot, sides)
+
+
+def catmull(pts, n):
+    """Sample a Catmull-Rom spline through `pts`, returning (point, tangent).
+
+    rig.hose() builds a Bezier with AUTO handles, which is very close to a
+    Catmull-Rom through the same control points. Sampling one here lets the
+    corrugation rings of the dust hose sit ON the hose instead of near it -
+    and a fat corrugated hose whose rings float beside it is worse than no
+    rings at all.
+    """
+    P = [Vector(p) for p in pts]
+    P = [P[0] + (P[0] - P[1])] + P + [P[-1] + (P[-1] - P[-2])]
+    out = []
+    segs = len(P) - 3
+    for i in range(n):
+        u = segs * i / max(1, n - 1)
+        k = min(int(u), segs - 1)
+        t = u - k
+        p0, p1, p2, p3 = P[k], P[k + 1], P[k + 2], P[k + 3]
+        t2, t3 = t * t, t * t * t
+        pos = 0.5 * ((2 * p1) + (-p0 + p2) * t +
+                     (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 +
+                     (-p0 + 3 * p1 - 3 * p2 + p3) * t3)
+        tan = 0.5 * ((-p0 + p2) + (2 * p0 - 5 * p1 + 4 * p2 - p3) * 2 * t +
+                     (-p0 + 3 * p1 - 3 * p2 + p3) * 3 * t2)
+        out.append((pos, tan.normalized() if tan.length > 1e-6 else Vector((0, 0, 1))))
+    return out
 
 
 def aim_box(name, w, d, a, b, mat, parent=None, bev=0.012):
@@ -1013,21 +1096,17 @@ def build_dust_package(fx):
     # THE hose: 203 mm corrugated, hood at the collar up to the cyclone inlet.
     # At 8 in this is unmissable at thumbnail size and nothing else in the
     # game's fleet has it [R]S5 #3.
-    R.hose('suctionhose',
-           [(-0.18, STRING_Y + 0.30, 0.62),
-            (DUST_X + 0.55, STRING_Y + 0.55, 1.55),
-            (DUST_X + 0.10, STRING_Y + 0.10, 2.90),
-            (DUST_X + 0.34, -0.16, 4.30),
-            (DUST_X + 0.30, -0.24, 4.52)],
-           radius=SUCT_D / 2, mat=R.MAT_RUBBER, parent=fx, sides=12)
-    # corrugation rings on the suction hose - triangles, not draw calls
-    for i in range(14):
-        t = i / 13.0
-        z = 0.75 + t * 3.60
-        x = -0.18 + (DUST_X + 0.30 + 0.18) * (t ** 0.65)
-        y = STRING_Y + 0.30 - (STRING_Y + 0.54) * (t ** 1.3)
-        torus_ring('corr%d' % i, SUCT_D / 2 + 0.014, 0.016, R.MAT_RUBBER, fx,
-                   (x, y, z), (math.radians(20 * (1 - t)), 0, 0), maj=12, min_=5)
+    path = [(-0.18, STRING_Y + 0.30, 0.62),
+            (DUST_X + 0.62, STRING_Y + 0.58, 1.50),
+            (DUST_X + 0.06, STRING_Y + 0.06, 2.85),
+            (DUST_X + 0.34, -0.16, 4.28),
+            (DUST_X + 0.30, -0.24, 4.52)]
+    R.hose('suctionhose', path, radius=SUCT_D / 2, mat=R.MAT_RUBBER, parent=fx,
+           sides=12)
+    # corrugation rings, sampled ON the spline. Triangles, not draw calls.
+    for i, (pos, tan) in enumerate(catmull(path, 22)[1:-1]):
+        torus_ring('corr%d' % i, SUCT_D / 2 + 0.013, 0.015, R.MAT_RUBBER, fx,
+                   pos, tan.to_track_quat('Z', 'Y').to_euler(), maj=12, min_=5)
 
 
 def build_carousel(fx):
@@ -1040,8 +1119,13 @@ def build_carousel(fx):
     drum['tubes'] = 6
     drum['tube_od_m'] = TUBE_OD
     drum['tube_len_m'] = TUBE_LEN
-    for z in (-(TUBE_LEN / 2) - 0.09, (TUBE_LEN / 2) + 0.09):
-        cyl('carplate', 0.360, 0.075, R.MAT_DARK, drum, (0, 0, z), sides=16)
+    for z in (-(TUBE_LEN / 2) - 0.09, 0.0, (TUBE_LEN / 2) + 0.09):
+        cyl('carplate', 0.375, 0.075, R.MAT_DARK, drum, (0, 0, z), sides=16)
+        for i in range(6):                      # tube pockets in each plate
+            a = TAU * i / 6
+            R.box('carpocket%d' % i, (0.150, 0.100, 0.090), R.MAT_DARK, drum,
+                  (0.280 * math.cos(a), 0.280 * math.sin(a), z + 0.075),
+                  (0, 0, a), bevel=0.006)
     cyl('carshaft', 0.075, TUBE_LEN + 0.18, R.MAT_DARK, drum,
         (0, 0, -(TUBE_LEN / 2) - 0.09), sides=12)
     for i in range(6):
@@ -1060,6 +1144,13 @@ def build_carousel(fx):
           (cx - 0.180, cy, z0 - 0.220), bevel=0.012)
     R.box('carframe2', (0.520, 0.240, 0.180), R.MAT_DARK, fx,
           (cx - 0.180, cy, z1 + 0.220), bevel=0.012)
+    # spine tying the two magazine bearings together, and its guard rail
+    R.box('carspine', (0.110, 0.140, TUBE_LEN + 0.44), R.MAT_DARK, fx,
+          (cx - 0.400, cy, (z0 + z1) / 2), bevel=0.010)
+    for i in range(4):
+        R.box('carstay%d' % i, (0.320, 0.070, 0.070), R.MAT_DARK, fx,
+              (cx - 0.320, cy, z0 + 0.55 + (TUBE_LEN - 1.10) * i / 3),
+              bevel=0.006)
     arm = R.empty(R.NODE_PIVOT, 'rodArm', fx, (cx - 0.150, cy, z1 - 0.520))
     arm['reach_m'] = 0.760
     R.box('rodarm', (0.700, 0.130, 0.110), R.MAT_DARK, arm, (-0.330, 0, 0),
@@ -1254,15 +1345,17 @@ def build_support_leg(root):
                 (lx + s * 0.22, ly + 0.02, 0.62),
                 (lx + s * 0.13, ly + 0.06, 0.30)],
                radius=0.018, mat=R.MAT_RUBBER, sides=4)
-    leg = R.empty(R.NODE_SLIDE, 'supportLeg', root, (lx, ly, 0.180))
+    # Rest pose is RETRACTED - the foot sits just clear of grade. The game
+    # drops it on slide:supportLeg when the rig sets up on a hole.
+    leg = R.empty(R.NODE_SLIDE, 'supportLeg', root, (lx, ly, 0.360))
     leg['stroke_m'] = 0.560
-    cyl('legrod', 0.070, 0.360, R.MAT_CHROME, leg, (0, 0, -0.360), sides=12)
-    cyl('legpivot', 0.080, 0.180, R.MAT_CAST, leg, (-0.090, 0, -0.360),
+    cyl('legrod', 0.070, 0.300, R.MAT_CHROME, leg, (0, 0, -0.300), sides=12)
+    cyl('legpivot', 0.082, 0.190, R.MAT_CAST, leg, (-0.095, 0, -0.300),
         (0, math.radians(90), 0), sides=10)
-    R.box('legfoot', (0.480, 0.480, 0.070), R.MAT_WORN, leg, (0, 0, -0.400),
+    R.box('legfoot', (0.500, 0.500, 0.075), R.MAT_WORN, leg, (0, 0, -0.340),
           bevel=0.012)
-    R.box('legfoothaz', (0.500, 0.090, 0.050), R.MAT_HAZARD, leg,
-          (0, 0.230, -0.372), bevel=0.006)
+    R.box('legfoothaz', (0.520, 0.090, 0.050), R.MAT_HAZARD, leg,
+          (0, 0.240, -0.312), bevel=0.006)
     join_by_mat(leg, 'supportleg')
     return leg
 
@@ -1341,6 +1434,7 @@ def build(out_path):
     build_frame(None)
     build_canopy(None)
     build_cab(None)
+    build_front_deck(None)
     build_access(None)
     mast = build_boom(root)
     build_feed(mast)

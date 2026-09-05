@@ -315,6 +315,18 @@ def build_front_frame(art):
             loc=(s * BOOM_X, y1 - 0.30, BOOM_Z - 0.16), bevel=0.03)
     box('ff-bumper', (WIDTH - 0.30, 0.10, 0.24), MAT_WORN, g,
         loc=(0, y1 + 0.05, FRAME_BOT + 0.14), bevel=0.03)
+    # The dense crossing bundle at the boom base brackets [A 4.10 item 3]. Every
+    # hydraulic line for two booms, two feeds and two rock drills leaves the
+    # frame here, and a jumbo without this bundle looks like a toy from any
+    # angle that shows the nose.
+    for _, s in BOOMS:
+        for i, dx in enumerate((-0.10, -0.03, 0.04, 0.11)):
+            hose('ff-boombundle-%d%d' % (int(s), i),
+                 [(s * BOOM_X + dx, y1 - 1.10, FRAME_TOP - 0.04),
+                  (s * BOOM_X + dx * 1.4, y1 - 0.72, FRAME_TOP + 0.20),
+                  (s * BOOM_X + dx * 1.3, y1 - 0.40, BOOM_Z - 0.02),
+                  (s * BOOM_X + dx, y1 - 0.26, BOOM_Z - 0.16)],
+                 radius=0.019 if i % 2 else 0.015, parent=g)
     # towing eyes
     for s in (-1, 1):
         box('ff-eye', (0.05, 0.20, 0.14), MAT_WORN, g,
@@ -660,7 +672,9 @@ def build_feed(feed, nm):
     nose_y = FEED_LEN + 0.13
     box(nm + '-centraliser', (0.20, 0.16, 0.20), MAT_DARK, feed,
         loc=(0, nose_y, 0.01), bevel=0.02)
-    tube(nm + '-bushing', 0.036, 0.17, MAT_WORN, feed,
+    # same material as the centraliser it sits in: two singleton meshes on a
+    # moving node are two draw calls, and this block is one object in the metal
+    tube(nm + '-bushing', 0.036, 0.17, MAT_DARK, feed,
          loc=(0, nose_y - 0.085, 0.01), rot=(-math.pi / 2, 0, 0), sides=10)
     # rear stop and hose gallery
     box(nm + '-rearstop', (FEED_W + 0.04, 0.09, FEED_H + 0.06), MAT_DARK, feed,

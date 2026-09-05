@@ -176,30 +176,30 @@ def disc(name, r, t, mat, loc, axis='X', sides=16, parent=None):
     return o
 
 
-def mesh_panel(name, w, h, mat, loc, rot=(0, 0, 0), pitch=0.13, bar=0.014):
+def mesh_panel(name, w, h, mat, loc, rot=(0, 0, 0), pitch=0.17, bar=0.013):
     """Expanded-metal / mesh infill, built as real crossed bars.
 
     The reference calls for an alpha-mapped plane, but assets.js owns every
-    texture at runtime and a .glb here may not ship maps - so the mesh is
-    geometry.  It is cheap: one ARRAY each way, ~30 boxes, ~400 triangles, and
-    it shares a material with the frame so it costs no draw call at all.
-    Panel is built in its own XZ plane, centred on `loc`.
+    texture at runtime and this .glb ships no maps at all - so the mesh is
+    geometry.  It is cheap: one ARRAY each way, ~25 boxes, ~300 triangles, and
+    it shares a material with the frame it hangs in, so it costs no draw call.
+
+    The panel is authored in its own XZ plane and centred on its OBJECT ORIGIN
+    - the offset to the first bar is baked into the mesh data, not into the
+    object location - so that `rot` turns the whole panel about `loc` instead of
+    firing the bars off down a world axis.  (First version got this wrong and
+    the guards came out as a starburst of loose sticks.)
     """
-    out = []
-    nx = max(2, int(w / pitch))
-    nz = max(2, int(h / pitch))
-    v = R.box(name + '_v', (bar, bar, h), mat, loc=(-w / 2, 0, 0), rot=(0, 0, 0))
+    from mathutils import Matrix
+    nx = max(2, int(round(w / pitch)) + 1)
+    nz = max(2, int(round(h / pitch)) + 1)
+    v = R.box(name + '_v', (bar, bar, h), mat, loc=loc, rot=rot)
+    v.data.transform(Matrix.Translation((-w / 2, 0, 0)))
     arr(v, (w / (nx - 1), 0, 0), nx)
-    out.append(v)
-    z = R.box(name + '_h', (w, bar, bar), mat, loc=(0, 0, -h / 2))
-    z.data.materials.clear()
-    z.data.materials.append(bpy.data.materials[mat])
+    z = R.box(name + '_h', (w, bar, bar), mat, loc=loc, rot=rot)
+    z.data.transform(Matrix.Translation((0, 0, -h / 2)))
     arr(z, (0, 0, h / (nz - 1)), nz)
-    out.append(z)
-    for o in out:
-        o.location = (o.location[0] + loc[0], o.location[1] + loc[1], o.location[2] + loc[2])
-        o.rotation_euler = rot
-    return out
+    return [v, z]
 
 
 def rail(name, pts, r, mat, parent=None):
@@ -501,10 +501,9 @@ def build(out_path):
     for s in (-1, 1):
         mp.append(disc('crown_boss%d' % s, 0.07, 0.06, R.MAT_CAST,
                        (s * 0.38, 0.10, cz - 0.02), 'X', sides=10))
-        mp.append(R.hose('crown_handle%d' % s, [(s * 0.24, -0.34, cz + 0.33),
-                                                (s * 0.30, -0.34, cz + 0.46),
-                                                (s * 0.24, -0.20, cz + 0.46)],
-                         radius=0.018, mat=R.MAT_STEEL, sides=6))
+        # the two lifting/tie-off lugs on the crown roof [GA]
+        mp.append(R.box('crown_lug%d' % s, (0.05, 0.16, 0.13), R.MAT_STEEL,
+                        loc=(s * 0.26, -0.22, cz + 0.38)))
         mp.append(R.box('crown_gusset%d' % s, (0.03, 0.34, 0.34), R.MAT_PAINT,
                         loc=(s * 0.30, 0.0, cz - 0.42), rot=(0.5, 0, 0)))
     # work lights: crown pair aimed at the collar, plus one over the deck.
@@ -558,6 +557,20 @@ def build(out_path):
                     loc=(0, MASTL_Y(-0.66), gz + 0.74)))
     mp.append(R.box('barrier_stripe', (1.32, 0.06, 0.10), R.MAT_HAZARD,
                     loc=(0, MASTL_Y(-0.68), gz - 0.70)))
+
+    # rod kicker: the arm that positions a rod off the rack onto the drill
+    # centreline.  "It has a rod kicker for rod positioning" [CS14] p.2 - the
+    # cheapest piece of story on the whole machine, and it is what makes the
+    # rack read as a magazine rather than a bin.
+    kz = MASTL_Z(2.30)
+    mp.append(R.box('kicker_mount', (0.16, 0.20, 0.30), R.MAT_DARK,
+                    loc=(BEAM_DX / 2 + 0.06, -0.06, kz), bevel=0.012))
+    mp.append(R.box('kicker_arm', (0.62, 0.09, 0.09), R.MAT_PAINT,
+                    loc=(BEAM_DX / 2 + 0.38, -0.24, kz + 0.06), rot=(0, 0, -0.35)))
+    mp.append(R.box('kicker_fork', (0.10, 0.24, 0.16), R.MAT_STEEL,
+                    loc=(BEAM_DX / 2 + 0.66, -0.34, kz + 0.06)))
+    mp.append(disc('kicker_cyl', 0.045, 0.34, R.MAT_CHROME,
+                   (BEAM_DX / 2 + 0.30, -0.02, kz - 0.16), 'X', sides=8))
 
     # ── 9b. CROWN SHEAVES (rotate) ──────────────────────────────────────────
     shm = R.empty(R.NODE_PIVOT, 'sheave-main', mast, (0, 0.16, cz - 0.02))
@@ -620,33 +633,49 @@ def build(out_path):
     # view gives it as 2.9 m long x 0.9 m deep.  Capacity follows rod size:
     # B 25 / N 20 / H 15 / P 11 [C140] p.10 - twenty N-size rods here.
     rr_node = R.empty(R.NODE_PIVOT, 'rodrack', mast,
-                      (0.62, MASTL_Y(-0.62), MASTL_Z(0.55)), rot=(0.10, 0, 0))
+                      (0.60, MASTL_Y(-0.60), MASTL_Z(0.52)), rot=(0.20, 0, 0))
     rp = []
-    RK_L, RK_W, RK_D = 3.05, 0.96, 0.62
+    RK_L, RK_W, RK_D = 3.05, 0.94, 0.50     # [GA] transport view: 2.9 x 0.9 m
+    # an OPEN basket: two mesh sides, a mesh floor, end plates, and cradle
+    # cross-bars the rods actually lie on.  It has to read as a cage at 64 px,
+    # because after the mast it is the largest object in the silhouette and it
+    # is the one thing no other drilling machine carries [MET] pp.17, 18.
     for s in (-1, 1):
         rp += mesh_panel('rack_side%d' % s, RK_L, RK_D, R.MAT_PAINT,
-                         (s * RK_W / 2, 0, RK_L / 2), rot=(0, math.pi / 2, math.pi / 2))
-    rp += mesh_panel('rack_floor', RK_W, RK_L, R.MAT_PAINT, (0, RK_D / 2, RK_L / 2),
-                     rot=(math.pi / 2, 0, 0))
-    for e in (0.0, RK_L):
-        rp.append(R.box('rack_end%d' % int(e * 10), (RK_W + 0.08, RK_D + 0.06, 0.07),
-                        R.MAT_PAINT, loc=(0, 0.06, e), bevel=0.015))
+                         (s * RK_W / 2, RK_D / 2 - 0.04, RK_L / 2),
+                         rot=(0, math.pi / 2, math.pi / 2), pitch=0.20)
+        rp.append(R.box('rack_top%d' % s, (0.06, 0.06, RK_L), R.MAT_PAINT,
+                        loc=(s * RK_W / 2, RK_D - 0.05, RK_L / 2)))
+        rp.append(R.box('rack_bot%d' % s, (0.06, 0.06, RK_L), R.MAT_PAINT,
+                        loc=(s * RK_W / 2, 0.02, RK_L / 2)))
+    rp += mesh_panel('rack_floor', RK_W, RK_L, R.MAT_PAINT, (0, 0.02, RK_L / 2),
+                     rot=(math.pi / 2, 0, 0), pitch=0.20)
+    for e in (0.05, RK_L - 0.05):
+        rp.append(R.box('rack_end%d' % int(e * 10), (RK_W + 0.10, RK_D, 0.06),
+                        R.MAT_PAINT, loc=(0, RK_D / 2 - 0.02, e), bevel=0.012))
+    for cz in (0.55, 1.55, 2.55):
+        rp.append(R.box('rack_cradle%d' % int(cz * 10), (RK_W, 0.05, 0.05),
+                        R.MAT_WORN, loc=(0, 0.04, cz)))
+    # mounting arms back to the mast foot
     for s in (-1, 1):
-        rp.append(R.box('rack_rail%d' % s, (0.07, 0.07, RK_L), R.MAT_PAINT,
-                        loc=(s * (RK_W / 2 + 0.02), 0.30, RK_L / 2)))
-        rp.append(R.box('rack_arm%d' % s, (0.09, 0.52, 0.09), R.MAT_PAINT,
-                        loc=(s * 0.30, -0.26, 0.22), rot=(0.5, 0, 0)))
+        rp.append(R.box('rack_arm%d' % s, (0.10, 0.62, 0.10), R.MAT_PAINT,
+                        loc=(s * 0.34, -0.30, 0.30), rot=(0.42, 0, 0)))
+    rp.append(R.box('rack_spine', (0.12, 0.12, RK_L * 0.8), R.MAT_PAINT,
+                    loc=(0, -0.06, RK_L / 2)))
     # rods: bare rust-brown mild steel, NOT chrome, NOT painted [C140] p.9.
-    # Wrist-thick, not thigh-thick: 70 mm OD on a 117 mm spindle bore.
+    # Wrist-thick, not thigh-thick: 70 mm OD against a 117 mm spindle bore
+    # [CS14] p.3 - the single most commonly botched proportion on a core rig.
+    # Twenty N-size rods; the rack capacity follows the size being run,
+    # B 25 / N 20 / H 15 / P 11 [C140] p.10.
     n = 0
-    for row in range(3):
-        for col in range(7):
+    for row, cols in ((0, 7), (1, 7), (2, 6)):
+        for col in range(cols):
             if n >= 20:
                 break
             rp.append(R.tube('rod%d' % n, ROD_R, ROD_LEN, R.MAT_WORN,
-                             loc=(-RK_W / 2 + 0.10 + col * 0.128,
-                                  RK_D / 2 - 0.09 - row * 0.075,
-                                  0.02), sides=8))
+                             loc=(-RK_W / 2 + 0.11 + col * 0.12,
+                                  0.08 + row * 0.076 + (0.06 if row == 2 else 0),
+                                  0.03), sides=7))
             n += 1
     weld(rp, rr_node, 'rodrack')
 

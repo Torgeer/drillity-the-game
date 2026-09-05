@@ -130,6 +130,20 @@ CYC_BARREL_H = 0.70           #   barrel about 1 diameter tall
 CYC_CONE_H = 1.10             #   cone about 1.55 diameters long
 CYC_OUT_Z = 1.98              # outlet height, so a splitter and a bag fit under
 
+# Derived attachment points, computed rather than typed, so the sample hose
+# still lands on the hose tail and in the cyclone inlet after any of the
+# dimensions above is changed. Getting this wrong is invisible in a wireframe
+# and glaring in a render — an earlier pass had the hose starting 0.9 m off the
+# head because the numbers were written out by hand.
+CARRIAGE_Z = MAST_LEN - 2.05                 # carriage rest height on the mast
+HEAD_PIVOT = (0.0, HOLE_Y - MAST_D / 2 - 0.30, MAST_FOOT + CARRIAGE_Z + 0.10)
+HEAD_OUT = (HEAD_PIVOT[0] + 0.90, HEAD_PIVOT[1] - 0.16, HEAD_PIVOT[2] - 0.735)
+CYC_INLET = (CYC_X - CYC_BARREL_D / 2 - 0.26,
+             CYC_Y + CYC_BARREL_D / 2 * 0.55,
+             CYC_OUT_Z + CYC_CONE_H + CYC_BARREL_H + 0.17)
+ARM_BASE = (1.05, -2.05, DECK_Z + 0.20)      # slew base bolted to the deck
+ARM_TIP = (2.12, -2.36, 3.02)                # where the hose loop rides
+
 
 # ── local helpers ─────────────────────────────────────────────────────────────
 def cone(name, r1, r2, length, mat=MAT_PAINT, parent=None, loc=(0, 0, 0),
@@ -626,8 +640,8 @@ def build_mast():
 
     for sx in (-1, 1):
         for sy in (-1, 1):
-            box('mast-chord', (0.085, 0.085, L), MAT_DARK, pv,
-                (sx * (hw - 0.043), sy * (hd - 0.043), L / 2), bevel=0.008)
+            box('mast-chord', (0.098, 0.098, L), MAT_DARK, pv,
+                (sx * (hw - 0.049), sy * (hd - 0.049), L / 2), bevel=0.009)
 
     bay = 0.615                       # gives the ~45 deg X the photograph shows
     nbay = int(L / bay)
@@ -636,9 +650,9 @@ def build_mast():
         z1 = z0 + bay
         for sx in (-1, 1):            # X-web on the two OUTER (visible) faces
             x = sx * (hw - 0.043)
-            strut('mast-web', (x, -hd + 0.043, z0), (x, hd - 0.043, z1), 0.05,
+            strut('mast-web', (x, -hd + 0.049, z0), (x, hd - 0.049, z1), 0.056,
                   MAT_DARK, pv)
-            strut('mast-web', (x, hd - 0.043, z0), (x, -hd + 0.043, z1), 0.05,
+            strut('mast-web', (x, hd - 0.049, z0), (x, -hd + 0.049, z1), 0.056,
                   MAT_DARK, pv)
         strut('mast-web-back', (-hw + 0.043, hd - 0.043, z0),
               (hw - 0.043, hd - 0.043, z1), 0.045, MAT_DARK, pv)
@@ -1050,9 +1064,9 @@ def build_sample_train():
     POST = 3.20
     for (sx, sy) in ((-1, -1), (1, -1), (-1, 1), (1, 1)):
         strut('stand-post', (sx * 0.68, sy * 0.68, 0), (sx * 0.60, sy * 0.60, POST),
-              0.085, MAT_PAINT, st)
-        box('stand-foot', (0.24, 0.24, 0.03), MAT_WORN, st,
-            (sx * 0.68, sy * 0.68, 0.015), bevel=0.004)
+              0.115, MAT_PAINT, st)
+        box('stand-foot', (0.30, 0.30, 0.04), MAT_WORN, st,
+            (sx * 0.68, sy * 0.68, 0.020), bevel=0.005)
     for z in (0.78, 1.58, POST - 0.06):
         f = 1 - (z / POST) * 0.12
         for i in range(4):
@@ -1062,9 +1076,16 @@ def build_sample_train():
                                0.06 if along else 1.36 * f, 0.06), MAT_PAINT, st,
                 (0 if along else sgn * 0.68 * f,
                  sgn * 0.68 * f if along else 0, z), bevel=0.006)
-    for (sx, sy) in ((-1, -1), (1, 1)):
-        strut('stand-brace', (sx * 0.66, sy * 0.66, 0.80),
-              (sx * 0.30, sy * 0.62, 1.55), 0.045, MAT_PAINT, st)
+    # full X-bracing on all four faces: a first render had the cyclone floating
+    # on four wires. A tower carrying a cyclone plus a wet sample load is braced.
+    for face in range(4):
+        ax, ay = ((-1, -1), (1, -1), (1, 1), (-1, 1))[face]
+        bx, by = ((1, -1), (1, 1), (-1, 1), (-1, -1))[face]
+        for (z0, z1) in ((0.10, 0.78), (0.78, 1.58), (1.58, POST - 0.06)):
+            f0 = 1 - (z0 / POST) * 0.12
+            f1 = 1 - (z1 / POST) * 0.12
+            strut('stand-brace', (ax * 0.66 * f0, ay * 0.66 * f0, z0),
+                  (bx * 0.66 * f1, by * 0.66 * f1, z1), 0.055, MAT_PAINT, st)
     box('stand-walkway', (1.36, 1.36, 0.04), MAT_DARK, st, (0, 0, 1.60),
         bevel=0.008)
     for i in range(4):
@@ -1163,15 +1184,42 @@ def build_sample_train():
                    loc=(tx - 0.55, y, z + 0.014), sides=8)
         arrayed(cup, 20, (0.058, 0, 0))
 
-    # bulk reject pile, growing all shift under the splitter
-    bpy.ops.mesh.primitive_cone_add(vertices=18, radius1=0.95, radius2=0.06,
-                                    depth=0.62)
-    pile = bpy.context.active_object
-    pile.data.transform(Matrix.Translation((0, 0, 0.31)))
-    for v in pile.data.vertices:
-        v.co.x *= 1.0 + 0.18 * math.sin(v.co.y * 6.0 + v.co.z * 3.0)
-        v.co.y *= 1.0 + 0.14 * math.sin(v.co.x * 5.0 - v.co.z * 4.0)
-    part('reject-pile', pile, MAT_WORN, None, (CYC_X + 0.35, CYC_Y - 1.45, 0))
+    # Bulk reject pile, growing all shift under the splitter's reject spout.
+    # Built as a radial mound with multi-frequency noise on radius AND height,
+    # not as a cone primitive: REVIEW_RUBRIC axis 4 makes "a primitive left
+    # visible as a primitive" an automatic fail, and a first render of this model
+    # had a clean 18-sided cone on the pad looking like a circus tent. Angle of
+    # repose about 35 deg, which is where dry rock chips actually stand.
+    R, H, RINGS, SEG = 1.05, 0.52, 6, 26
+    verts, faces = [], []
+    for ri in range(RINGS + 1):
+        fr = ri / RINGS
+        for si in range(SEG):
+            a = si / SEG * TAU
+            n = (0.13 * math.sin(a * 3.0 + fr * 2.2)
+                 + 0.08 * math.sin(a * 7.0 - fr * 4.1)
+                 + 0.05 * math.sin(a * 13.0 + fr * 1.3))
+            r = R * fr * (1.0 + n * (0.4 + 0.6 * fr))
+            z = H * (1.0 - fr ** 1.45) * (1.0 + 0.10 * math.sin(a * 5.0 + fr * 6))
+            verts.append((math.cos(a) * r, math.sin(a) * r, max(0.0, z)))
+    for ri in range(RINGS):
+        for si in range(SEG):
+            a0 = ri * SEG + si
+            a1 = ri * SEG + (si + 1) % SEG
+            faces.append((a0, a1, a1 + SEG, a0 + SEG))
+    me = bpy.data.meshes.new('reject-pile')
+    me.from_pydata(verts, [], faces)
+    me.update()
+    pile = bpy.data.objects.new('reject-pile', me)
+    bpy.context.collection.objects.link(pile)
+    part('reject-pile', pile, MAT_WORN, None, (CYC_X - 0.15, CYC_Y - 1.25, 0))
+    for i in range(14):               # loose chips at the toe of the pile
+        a = i * 2.399
+        rr = 1.06 + (i % 4) * 0.13
+        box('reject-chip', (0.09 + 0.03 * (i % 3), 0.07, 0.045), MAT_WORN,
+            loc=(CYC_X - 0.15 + math.cos(a) * rr,
+                 CYC_Y - 1.25 + math.sin(a) * rr, 0.022),
+            rot=(0, 0.1 * (i % 3), a), bevel=0.006)
     return st
 
 
@@ -1184,29 +1232,34 @@ def build_cyclone_arm():
     cantilevered off the rig deck, hydraulically raised and rotatable. This is
     the fix rc-rig.md §9.H asks for.
     """
-    bx, by = 1.05, -2.05
-    box('cyc-arm-base', (0.44, 0.44, 0.20), MAT_DARK,
-        loc=(bx, by, DECK_Z + 0.10), bevel=0.018)
+    bx, by, bz = ARM_BASE
+    box('cyc-arm-base', (0.46, 0.46, 0.20), MAT_DARK, loc=(bx, by, bz - 0.10),
+        bevel=0.018)
     for t in range(10):
         a = t / 10 * TAU
         box('cyc-arm-base-bolt', (0.028, 0.028, 0.020), MAT_WORN,
-            loc=(bx + math.cos(a) * 0.26, by + math.sin(a) * 0.26, DECK_Z + 0.02),
+            loc=(bx + math.cos(a) * 0.27, by + math.sin(a) * 0.27, bz - 0.18),
             rot=(0, 0, a), bevel=0.003)
-    pv = empty(NODE_PIVOT, 'cyclone-arm', None, (bx, by, DECK_Z + 0.20))
+    pv = empty(NODE_PIVOT, 'cyclone-arm', None, (bx, by, bz))
     pv['axis'] = 'z'
     pv['range_deg'] = [-95.0, 15.0]
-    tube('cyc-arm-post', 0.13, 1.35, MAT_PAINT, pv, (0, 0, 0), sides=14)
-    strut('cyc-arm-boom', (0, 0, 1.24), (1.62, 0.42, 1.66), 0.16, MAT_PAINT, pv)
-    strut('cyc-arm-tie', (0, 0, 0.70), (1.02, 0.26, 1.42), 0.07, MAT_PAINT, pv)
-    strut('cyc-arm-cyl', (0.10, 0.16, 0.34), (0.86, 0.32, 1.12), 0.075,
-          MAT_PAINT, pv)
-    strut('cyc-arm-rod', (0.86, 0.32, 1.12), (1.16, 0.38, 1.40), 0.030,
-          MAT_CHROME, pv)
-    torus('hose-saddle', 0.14, 0.030, MAT_PAINT, pv, (1.66, 0.44, 1.72),
-          rot=(math.pi / 2, 0.25, 0), mseg=14, nseg=6)
-    empty(NODE_MOUNT, 'hose-saddle', pv, (1.66, 0.44, 1.78))
-    worklight('sample-arm', pv, (1.50, 0.30, 1.60), aim_dir=(1.2, 0.4, -1.8),
-              cone_deg=64, range_m=20)
+    ex, ey, ez = (ARM_TIP[0] - bx, ARM_TIP[1] - by, ARM_TIP[2] - bz)
+    tube('cyc-arm-post', 0.14, 0.62, MAT_PAINT, pv, (0, 0, 0), sides=14)
+    strut('cyc-arm-boom', (0, 0, 0.52), (ex, ey, ez), 0.17, MAT_PAINT, pv)
+    strut('cyc-arm-knee', (0, 0, 0.10), (ex * 0.30, ey * 0.30, ez * 0.30 + 0.44),
+          0.10, MAT_PAINT, pv)
+    strut('cyc-arm-cyl', (0.10, 0.20, 0.02), (ex * 0.52, ey * 0.52, ez * 0.52),
+          0.080, MAT_PAINT, pv)
+    strut('cyc-arm-rod', (ex * 0.52, ey * 0.52, ez * 0.52),
+          (ex * 0.78, ey * 0.78, ez * 0.78 + 0.06), 0.032, MAT_CHROME, pv)
+    torus('hose-saddle', 0.15, 0.032, MAT_PAINT, pv, (ex, ey, ez + 0.04),
+          rot=(math.pi / 2, 0.20, 0), mseg=14, nseg=6)
+    for s in (-1, 1):        # the saddle's guide horns keep the loop on the arm
+        box('hose-saddle-horn', (0.04, 0.10, 0.26), MAT_PAINT, pv,
+            (ex + s * 0.16, ey, ez + 0.16), rot=(0, s * 0.35, 0), bevel=0.008)
+    empty(NODE_MOUNT, 'hose-saddle', pv, (ex, ey, ez + 0.10))
+    worklight('sample-arm', pv, (ex * 0.8, ey * 0.8, ez + 0.30),
+              aim_dir=(1.2, 0.9, -1.6), cone_deg=64, range_m=20)
     return pv
 
 
@@ -1265,10 +1318,10 @@ def build_hoses():
                           (0.30 + o, -2.24, DECK_Z + 0.30)],
              radius=0.017, mat=MAT_RUBBER, sides=6)
     coil = []
-    for i in range(16):
-        a = i * 1.05
-        coil.append((0.30 + math.cos(a) * 0.15, -2.30 + i * 0.010,
-                     DECK_Z + 0.55 + math.sin(a) * 0.15 + i * 0.028))
+    for i in range(14):
+        a = i * 1.15
+        coil.append((0.30 + math.cos(a) * 0.095, -2.26 + i * 0.008,
+                     DECK_Z + 0.34 + math.sin(a) * 0.095 + i * 0.024))
     hose('head-conduit-coil', coil, radius=0.024, mat=MAT_RUBBER, sides=6)
 
     hose('bull-hose', [(-2.60, 3.20, 0.06), (-1.55, 1.70, 0.07),
@@ -1292,11 +1345,10 @@ def build_sample_hose():
     sl = empty(NODE_SLIDE, 'sample-hose', None, (0, 0, 0))
     sl['axis'] = 'z'
     sl['range_m'] = [0.0, 0.0]     # not translated; the game rebuilds the curve
-    a = (0.90, HOLE_Y + 0.10, MAST_FOOT + 3.05)     # head hose tail
-    b = (1.72, HOLE_Y + 0.55, MAST_FOOT + 1.55)     # the sag
-    c = (2.71, -2.11, MAST_FOOT + 1.92)             # over the arm saddle
-    d = (CYC_X - 0.61, CYC_Y + 0.385,
-         CYC_OUT_Z + CYC_CONE_H + CYC_BARREL_H + 0.17)   # cyclone inlet
+    a = (HEAD_OUT[0] + 0.08, HEAD_OUT[1] + 0.02, HEAD_OUT[2] - 0.04)
+    b = (1.42, HOLE_Y + 0.20, MAST_FOOT + 1.28)     # the lazy sag
+    c = (ARM_TIP[0] - 0.06, ARM_TIP[1] + 0.02, ARM_TIP[2] + 0.10)  # arm saddle
+    d = CYC_INLET                                   # cyclone inlet
     h = hose('sample-hose', [a, b, c, d], radius=0.062, mat=MAT_RUBBER,
              parent=sl, sides=10)
     h.data.bevel_resolution = 4

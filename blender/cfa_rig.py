@@ -142,8 +142,8 @@ MAST_D      = 0.80       # [W1] scaled off the CFA elevation against the 5 500
                          #      crawler: mast box about 0.76 m deep
 MAST_W      = 1.10       # DERIVED - no plan or section exists in any source
 MAST_FOOT_Z = 0.40       # derived
-MAST_TOP_Z  = 24.80      # derived: mast / overall = 18 540 / 22 160 on [W1]
-HEAD_TOP_Z  = 26.90      # derived
+MAST_TOP_Z  = 23.10      # derived: [W1] mast / overall = 18 540 / 22 160
+HEAD_TOP_Z  = 26.30      # derived
 ARCH_TOP_Z  = 28.12      # [S1] overall height, working state
 MAST_CY     = 1.95       # [W1] mast front face 2.35 forward of the slewing axis
 DRILL_Y     = 3.35       # [W1] mast front face + 1.000. The 1 000 mm is
@@ -153,9 +153,15 @@ DRILL_Y     = 3.35       # [W1] mast front face + 1.000. The 1 000 mm is
                          #      1,400". Was 2.25 here on a Kelly-rig figure the
                          #      local reference explicitly warned not to reuse.
 CROWD       = 17.00      # [S1] crowd stroke 17 000; [W1] 14 670 / 17 670
-DRIVE_LO_Z  = 2.20       # derived bottom of stroke
-DRIVE_HI_Z  = DRIVE_LO_Z + CROWD   # 19.20
-DRIVE_Z     = 19.10      # default pose: near top of stroke, auger tip at grade
+DRIVE_LO_Z  = 3.60       # derived: the drive cannot come lower than the
+                         #      concrete head, the collar and the base box
+DRIVE_HI_Z  = DRIVE_LO_Z + CROWD   # 20.60 — so the drive parks just under the
+                         #      masthead, as it does on both source elevations
+DRIVE_Z     = 20.55      # default pose: top of stroke, auger tip at grade.
+                         #      Bottom of stroke puts the tip at -17.05, so the
+                         #      23.10 m mast comfortably exceeds the pile length
+                         #      — the rule the game's own 21.5 m mast against a
+                         #      24 m depth currently breaks.
 
 # tool [S1]/[S2]/[W1]
 AUGER_D     = 1.000      # [S1] max drilling diameter dimensioned on the drawing.
@@ -166,7 +172,7 @@ STEM_R      = 0.2225     # [S2] central pipe 445 x 10 for the large sizes
 PITCH       = 0.400      # [S2] flight pitch 250-400 mm for large diameter; the
                          #      [W1] elevation draws pitch/diameter near 0.45, so
                          #      take the top of the sourced band, not the middle
-TURNS       = 45
+TURNS       = 49         # [W1] auger length 16 000 / 19 000 mm
 AUGER_LEN   = PITCH * TURNS          # 18.0; [W1] auger length 16 000 / 19 000
 FLIGHT_T    = 0.022      # [S2] flight plate thickness S
 CLEANER_Z   = 1.10       # [S1] auger cleaner height above ground
@@ -572,69 +578,92 @@ def build_mast():
 
 
 def build_masthead():
-    """A fabricated head that cantilevers FORWARD of the mast carrying two large
-    rope sheaves side by side, the big flat hose-deflection drum on its end
-    face, and above everything the slim inverted-U auger top guide [S1][S4]."""
+    """A fabricated head that cantilevers FORWARD of the mast on two cheek
+    plates, carrying two large rope sheaves side by side on a cross beam, the
+    big flat hose-deflection drum on its end face, and above everything the
+    slim auger top guide the string passes through [S1][S4][W1].
+
+    [W1] shows this as an open braced structure with a diagonal back to the
+    mast, wider than the mast and visibly a separate assembly — not a solid box.
+    """
     objs = []
     pivots = []
     hz0, hz1 = MAST_TOP_Z, HEAD_TOP_Z
-    # head box, wider than the mast, reaching forward over the drill axis
-    objs.append(box('headbox', (MAST_W + 0.42, 1.95, hz1 - hz0), MAT_PAINT,
-                    loc=(0, MAST_CY + 0.62, (hz0 + hz1) / 2), bevel=0.04))
-    objs.append(box('headplate', (MAST_W + 0.46, 0.09, hz1 - hz0 - 0.15), MAT_DARK,
-                    loc=(0, MAST_CY + 1.58, (hz0 + hz1) / 2), bevel=0.012))
-    # the two rope sheaves on a cross beam, side by side [S1]
-    objs.append(tube('sheaveaxle', 0.075, MAST_W + 0.60, MAT_STEEL,
-                     loc=(-(MAST_W + 0.60) / 2, DRILL_Y - 0.30, hz1 - 0.42),
+    yb = MAST_CY - MAST_D / 2
+    yf = DRILL_Y + 0.55
+    # the head root continues the mast section for a metre, then the cheeks go
+    objs.append(box('headroot', (MAST_W + 0.12, MAST_D + 0.12, 1.10), MAT_PAINT,
+                    loc=(0, MAST_CY, hz0 + 0.50), bevel=0.03))
+    for side in (-1, 1):
+        x = side * (MAST_W / 2 + 0.09)
+        cheek = box('headcheek', (0.075, yf - yb, hz1 - hz0 - 0.15), MAT_PAINT,
+                    loc=(x, (yb + yf) / 2, (hz0 + hz1) / 2 + 0.05), bevel=0.012)
+        # lighten it, the way a real fabricated cheek plate is lightened
+        cutters = []
+        for cy, cz, cr in (((yb + yf) / 2 + 0.30, (hz0 + hz1) / 2 + 0.35, 0.44),
+                           ((yb + yf) / 2 - 0.55, (hz0 + hz1) / 2 - 0.55, 0.28)):
+            c = tube('hh', cr, 0.5, MAT_PAINT, loc=(x - 0.25 * side, cy, cz),
+                     rot=(0, math.pi / 2, 0), sides=14)
+            c.location = (x - 0.25 * side, cy, cz)
+            cutters.append(c)
+        cut(cheek, cutters)
+        objs.append(cheek)
+        # top chord and the sloped nose
+        objs.append(box('headchord', (0.10, yf - yb + 0.10, 0.18), MAT_PAINT,
+                        loc=(x, (yb + yf) / 2, hz1 - 0.12), bevel=0.015))
+        # diagonal back-brace down to the mast [W1]
+        objs.append(box('headstrut', (0.11, 0.20, 2.30), MAT_PAINT,
+                        loc=(x, MAST_CY + 0.30, hz0 - 0.55),
+                        rot=(-0.42, 0, 0), bevel=0.018))
+    # cross beams tying the cheeks
+    for yy, zz in ((yf - 0.22, hz1 - 0.55), (MAST_CY + 0.35, hz1 - 0.20),
+                   (yf - 0.22, hz0 + 1.15)):
+        objs.append(box('headtie', (MAST_W + 0.26, 0.20, 0.20), MAT_PAINT,
+                        loc=(0, yy, zz), bevel=0.018))
+
+    # the two rope sheaves side by side on a cross beam [S1]
+    objs.append(tube('sheaveaxle', 0.075, MAST_W + 0.44, MAT_STEEL,
+                     loc=(-(MAST_W + 0.44) / 2, DRILL_Y - 0.18, hz1 - 0.90),
                      rot=(0, math.pi / 2, 0), sides=12))
-    for i, sx in enumerate((-0.34, 0.34)):
+    for i, sx in enumerate((-0.32, 0.32)):
         pv = empty(NODE_PIVOT, 'sheave%d' % (i + 1), None,
-                   (sx, DRILL_Y - 0.30, hz1 - 0.42), (0, math.pi / 2, 0))
-        d = tube('shv', 0.36, 0.10, MAT_CAST, sides=20)
-        d.location = (sx, DRILL_Y - 0.30, hz1 - 0.47)
+                   (sx, DRILL_Y - 0.18, hz1 - 0.90), (0, math.pi / 2, 0))
+        d = tube('shv', 0.38, 0.10, MAT_CAST, sides=20)
+        d.location = (sx, DRILL_Y - 0.18, hz1 - 0.95)
         d.rotation_euler = (0, math.pi / 2, 0)
-        f1 = tube('shvf', 0.40, 0.022, MAT_CAST, sides=20)
-        f1.location = (sx, DRILL_Y - 0.30, hz1 - 0.47)
+        f1 = tube('shvf', 0.425, 0.024, MAT_CAST, sides=20)
+        f1.location = (sx, DRILL_Y - 0.18, hz1 - 0.95)
         f1.rotation_euler = (0, math.pi / 2, 0)
-        f2 = tube('shvf', 0.40, 0.022, MAT_CAST, sides=20)
-        f2.location = (sx, DRILL_Y - 0.30, hz1 - 0.37)
+        f2 = tube('shvf', 0.425, 0.024, MAT_CAST, sides=20)
+        f2.location = (sx, DRILL_Y - 0.18, hz1 - 0.85)
         f2.rotation_euler = (0, math.pi / 2, 0)
         join_by_mat([d, f1, f2], 'sheave%d' % (i + 1), pv)
         pivots.append(pv)
-    # the head is braced back to the mast by a heavy diagonal, not cantilevered
-    # off a plain box [W1]
-    for side in (-1, 1):
-        objs.append(box('headstrut', (0.13, 0.22, 2.15), MAT_PAINT,
-                        loc=(side * (MAST_W / 2 - 0.05), MAST_CY + 0.62,
-                             hz0 - 0.55), rot=(-0.52, 0, 0), bevel=0.02))
-        objs.append(box('headgusset', (0.06, 0.75, 0.55), MAT_PAINT,
-                        loc=(side * (MAST_W / 2 + 0.19), MAST_CY + 0.95,
-                             hz0 + 0.35), bevel=0.015))
-    # rope guards over the sheaves
-    objs.append(box('ropeguard', (1.05, 0.55, 0.05), MAT_DARK,
-                    loc=(0, DRILL_Y - 0.30, hz1 + 0.02), bevel=0.012))
+    objs.append(box('ropeguard', (1.00, 0.60, 0.05), MAT_DARK,
+                    loc=(0, DRILL_Y - 0.18, hz1 - 0.42), bevel=0.012))
 
     # hose-deflection drum: a big plain dark disc on the head end face [S4]
     objs.append(tube('hosedrum', 0.46, 0.16, MAT_RUBBER,
-                     loc=(MAST_W / 2 + 0.30, MAST_CY + 0.15, hz0 - 0.55),
+                     loc=(MAST_W / 2 + 0.28, MAST_CY + 0.10, hz0 - 0.75),
                      rot=(0, math.pi / 2, 0), sides=22))
     objs.append(tube('hosedrumhub', 0.11, 0.24, MAT_STEEL,
-                     loc=(MAST_W / 2 + 0.26, MAST_CY + 0.15, hz0 - 0.55),
+                     loc=(MAST_W / 2 + 0.24, MAST_CY + 0.10, hz0 - 0.75),
                      rot=(0, math.pi / 2, 0), sides=10))
 
-    # the auger top guide: a slim inverted-U standing above everything [S1]
+    # the auger top guide: the string passes UP through it when the drive is
+    # high, which is why it stands above everything else [S1] item 1, [W1]
     for side in (-1, 1):
-        objs.append(box('archleg', (0.11, 0.13, ARCH_TOP_Z - hz1 + 0.10), MAT_PAINT,
-                        loc=(side * 0.62, DRILL_Y, (hz1 + ARCH_TOP_Z) / 2 - 0.05),
+        objs.append(box('archleg', (0.13, 0.15, ARCH_TOP_Z - hz1 + 0.55), MAT_PAINT,
+                        loc=(side * 0.66, DRILL_Y, (hz1 + ARCH_TOP_Z) / 2 - 0.28),
                         bevel=0.02))
-    objs.append(box('archtop', (1.36, 0.13, 0.13), MAT_PAINT,
-                    loc=(0, DRILL_Y, ARCH_TOP_Z - 0.07), bevel=0.02))
-    objs.append(tube('archroller', 0.075, 0.30, MAT_STEEL,
-                     loc=(-0.15, DRILL_Y, ARCH_TOP_Z - 0.30),
-                     rot=(0, math.pi / 2, 0), sides=10))
-    # lifting eye under the head [S4]
+    objs.append(box('archtop', (1.45, 0.15, 0.16), MAT_PAINT,
+                    loc=(0, DRILL_Y, ARCH_TOP_Z - 0.08), bevel=0.02))
+    for side in (-1, 1):
+        objs.append(tube('archroller', 0.075, 0.34, MAT_STEEL,
+                         loc=(side * 0.52 - 0.17, DRILL_Y, ARCH_TOP_Z - 0.42),
+                         rot=(0, math.pi / 2, 0), sides=10))
     objs.append(tube('lifteye', 0.09, 0.05, MAT_HAZARD,
-                     loc=(0, MAST_CY + 1.50, hz0 - 0.28), rot=(math.pi / 2, 0, 0), sides=12))
+                     loc=(0, yf - 0.10, hz0 + 0.30), rot=(math.pi / 2, 0, 0), sides=12))
     return objs, pivots
 
 
@@ -664,7 +693,7 @@ def build_drive(carriage_node):
                     bevel=0.03))
 
     # drive drum with round lightening holes in the casing [S6]
-    drum = tube('drum', 0.62, 1.02, MAT_PAINT, loc=(0, DRILL_Y, z - 0.30), sides=22)
+    drum = tube('drum', 0.64, 1.20, MAT_PAINT, loc=(0, DRILL_Y, z - 0.42), sides=22)
     cutters = []
     for i, a, cx, cy in ring(8, 0.9, 0.0, DRILL_Y):
         c = tube('dh', 0.135, 1.0, MAT_PAINT, loc=(cx, cy, z + 0.22),
@@ -675,10 +704,10 @@ def build_drive(carriage_node):
     cut(drum, cutters)
     objs.append(drum)
     # toothed lower flange [S6]
-    objs.append(tube('drumflange', 0.70, 0.10, MAT_CAST, loc=(0, DRILL_Y, z - 0.34), sides=26))
+    objs.append(tube('drumflange', 0.73, 0.12, MAT_CAST, loc=(0, DRILL_Y, z - 0.46), sides=26))
     tooth = bake(box('dtooth_tpl', (0.07, 0.07, 0.09), MAT_CAST))
-    for i, a, cx, cy in ring(24, 0.72, 0.0, DRILL_Y):
-        objs.append(clone(tooth, 'dtooth', (cx, cy, z - 0.38), (0, 0, a)))
+    for i, a, cx, cy in ring(24, 0.75, 0.0, DRILL_Y):
+        objs.append(clone(tooth, 'dtooth', (cx, cy, z - 0.50), (0, 0, a)))
     bpy.data.objects.remove(tooth, do_unlink=True)
     # gearbox top plate
     objs.append(tube('gearbox', 0.58, 0.34, MAT_DARK, loc=(0, DRILL_Y, z + 0.72), sides=20))
@@ -690,9 +719,34 @@ def build_drive(carriage_node):
         objs.append(tube('hmotorcap', 0.10, 0.10, MAT_STEEL,
                          loc=(cx * 1.55, DRILL_Y + (cy - DRILL_Y) * 1.55, z + 0.86),
                          rot=(math.pi / 2, 0, -a - math.pi / 2), sides=10))
+    # a rotary drive is a FABRICATED assembly, not a bare drum: side plates,
+    # a top cap, lifting eyes [W1] draws it as an angular block a good deal
+    # taller than it is wide
+    for side in (-1, 1):
+        objs.append(box('drvplate', (0.07, 1.30, 1.55), MAT_PAINT,
+                        loc=(side * 0.70, DRILL_Y - 0.05, z + 0.16), bevel=0.015))
+        objs.append(box('drvrib', (0.16, 0.14, 1.35), MAT_PAINT,
+                        loc=(side * 0.62, DRILL_Y + 0.54, z + 0.16), bevel=0.012))
+        objs.append(tube('drvlift', 0.075, 0.05, MAT_HAZARD,
+                         loc=(side * 0.44, DRILL_Y - 0.05, z + 1.06),
+                         rot=(math.pi / 2, 0, 0), sides=10))
+    objs.append(box('drvcap', (1.52, 1.34, 0.10), MAT_PAINT,
+                    loc=(0, DRILL_Y - 0.05, z + 0.95), bevel=0.015))
     # second bulkhead plate on the drive, short jumper hoses to the motors [S4]
-    objs.append(box('kdkbulkhead', (0.44, 0.05, 0.30), MAT_STEEL,
-                    loc=(0.0, DRILL_Y - 0.72, z + 1.00), bevel=0.008))
+    objs.append(box('kdkbulkhead', (0.46, 0.05, 0.32), MAT_STEEL,
+                    loc=(0.0, DRILL_Y - 0.74, z + 0.55), bevel=0.008))
+    jc = bake(tube('jc_tpl', 0.030, 0.10, MAT_STEEL, sides=8))
+    for i in range(6):
+        objs.append(clone(jc, 'jumpercpl',
+                          (-0.19 + i * 0.076, DRILL_Y - 0.78, z + 0.55),
+                          (math.pi / 2, 0, 0)))
+    bpy.data.objects.remove(jc, do_unlink=True)
+    for i in range(3):
+        objs.append(hose('jumper',
+                         [(-0.16 + i * 0.15, DRILL_Y - 0.80, z + 0.55),
+                          (-0.30 + i * 0.34, DRILL_Y - 0.95, z + 0.74),
+                          (-0.50 + i * 0.52, DRILL_Y - 0.30, z + 0.86)],
+                         radius=0.026, mat=MAT_RUBBER, sides=6))
 
     # ── the concrete head [S2] ────────────────────────────────────────────────
     objs.append(tube('cswivel', 0.235, 0.42, MAT_CAST, loc=(0, DRILL_Y, z + 1.02), sides=18))

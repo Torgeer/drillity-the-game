@@ -156,6 +156,8 @@ def main():
     hi2 = Vector((hi.x, hi.y, 8.0))
     shoot(lo2, hi2, -55, 16, stem + '-lower.png', res=(1300, 900))
     shoot(lo2, hi2, 0, 0, stem + '-lower-side.png', res=(1300, 900), ortho=True)
+    shoot(lo2, hi2, 180, 0, stem + '-cabside.png', res=(1300, 900), ortho=True)
+    shoot(lo2, hi2, -145, 14, stem + '-cab34.png', res=(1300, 900))
     shoot(lo2, hi2, -125, 22, stem + '-deck.png', res=(1300, 900))
     lo3 = Vector((-2.0, 0.5, 1.0))
     hi3 = Vector((2.0, 5.5, 7.5))
