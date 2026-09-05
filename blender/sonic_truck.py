@@ -456,17 +456,30 @@ def join_under(node):
 # `rigFactory.js` line 7599 hands every .glb machine `transportTilt = -1.32`
 # rad - 75.6 degrees off vertical, i.e. the mast parked 14.4 degrees above
 # horizontal - and `gltfRig.js`'s `makeDyn()` never reads a machine's own
-# figure, so a model cannot declare one.  Measured against the published
-# transport heights: [TSI-CT] parks at 13 ft (3.962 m) and [TSI-T] at
-# 12 ft 4 in (3.759 m), both of which need a mast raked far steeper than 14.4
-# degrees.  This model lands at 3.66 m (see the CHECK lines in `build()`) -
-# 0.30 m under [TSI-CT]'s published figure, and the whole of that difference is
-# the tilt constant.  THE FIX IS ONE LINE in `gltfRig.js`'s `makeDyn()`, beside
-# where it already reads `travel_m` off the carriage:
+# figure, so a model CANNOT DECLARE ONE.
+#
+# THE TRANSPORT POSE WAS BUILT AND MEASURED rather than argued about.  Rotating
+# `pivot:mast` by -1.32 rad about Blender X (which is exactly what the game does
+# - a three.js X rotation and a Blender X rotation are the same rotation under
+# three_y = bl_z, three_z = -bl_y) and transforming every vertex gives:
+#
+#     measured  2.515 W x 8.090 L x 3.912 H
+#     [TSI-CT]  2.515 W x 7.010 L x 3.962 H   (8 ft 3 in, 23 ft, 13 ft)
+#
+# Width exact, height 50 mm under.  So for THIS machine the game's fixed tilt
+# happens to land on the published pose, and an earlier draft of this comment
+# claiming it could not was REASONING, not measurement - the measurement
+# contradicted it and the claim is withdrawn.  The 1.08 m of extra length is the
+# mast FOOT, which swings out behind the tailboard as the mast lies down; the
+# published 23 ft is evidently measured over the chassis.
+#
+# What remains true, and is the reason the node carries the extra: a machine has
+# no way to state its own transport rake, so the next one whose real pose is not
+# 14.4 degrees will be silently wrong.  THE FIX IS TWO LINES in `gltfRig.js`'s
+# `makeDyn()`, beside where it already reads `travel_m` off the carriage:
 #     const t = mastPivot.userData.transport_tilt_rad;
 #     if (typeof t === 'number') dyn.transportTilt = t;
-# This file already publishes `transport_tilt_rad` on `pivot:mast` so that the
-# day somebody adds those two lines, every machine that declares one is right.
+# `pivot:mast` already publishes `transport_tilt_rad`.
 # ═════════════════════════════════════════════════════════════════════════════
 D2R = math.pi / 180.0
 IN = 0.0254             # every imperial figure below is converted HERE, once,
@@ -1205,9 +1218,10 @@ def build_station():
 #         3.020 - it clears by 28 mm and lands on the roof-mounted mast rest at
 #         CRADLE_Y = 5.020, which is exactly where a compact truck rig carries
 #         its rest.
-#       * transport height comes out at 3.66 m against [TSI-CT]'s published
-#         13 ft (3.962 m).  The 0.30 m is the game's shallow tilt, not the
-#         model - see THE TRANSPORT TILT note at the head of this file.
+#       * the pose was BUILT AND MEASURED, not predicted: 2.515 x 8.090 x
+#         3.912 m against [TSI-CT]'s published 8 ft 3 in x 23 ft x 13 ft
+#         (2.515 x 7.010 x 3.962).  Width exact, height 50 mm under, and the
+#         extra length is the mast foot swinging out behind the tailboard.
 #     WITHOUT THE MAST DUMP none of this works: a 6.13 m mast pinned at deck
 #     level folds THROUGH the cab of a 7.01 m truck at this angle, whatever
 #     else is done.  The 55 in is what buys the geometry.
@@ -1441,9 +1455,17 @@ def build_carriage(dump):
     # ── the rest of the stack: rotation unit, water swivel, manifold.  [BR] p3:
     # "hose manifold and gearbox box at the top, a cylindrical rotation unit
     # below it".  This is what makes the head read taller than wide as fitted.
+    # THE WHOLE STACK IS ONE MATERIAL AND IT IS NOT THE CARRIER'S.  [REF]
+    # section 5 item 3 and section 6: the head is a bought-in item from another
+    # factory and its colour does NOT match the carrier - red on the Toa Tone
+    # ([BR] p3), white on the SDC 50K ([BR] p7).  The fleet's material list has
+    # exactly one machine-body paint, so the head is given the CASTING material
+    # instead: it reads as a separate grey mass against an amber machine, which
+    # is the read the photographs have.  It also costs nothing - `castIron` is
+    # already a draw call under this carriage.
     ztop = 0.535 + HEAD_H + 0.090
-    tube('rot_unit', 0.185, 0.330, MAT_PAINT, carr, (0, 0, ztop), sides=16)
-    box('gearbox', (0.560, 0.400, 0.300), MAT_PAINT, carr,
+    tube('rot_unit', 0.185, 0.330, MAT_CAST, carr, (0, 0, ztop), sides=16)
+    box('gearbox', (0.560, 0.400, 0.300), MAT_CAST, carr,
         (0, 0.020, ztop + 0.480), bevel=0.018)
     tube('swivel', 0.090, 0.190, MAT_CAST, carr, (0, 0, ztop + 0.630),
          sides=12)
@@ -1453,7 +1475,7 @@ def build_carriage(dump):
     # the mast by an air cushion at 0.7 MPa on a minimum of 8 l/min.  [REF]
     # section 9.6 records it as missing today - without it the model has no
     # explanation for why the mast survives a 150 Hz source bolted to it.
-    tube('damper_vessel', 0.088, 0.360, MAT_PAINT, carr,
+    tube('damper_vessel', 0.088, 0.360, MAT_DARK, carr,
          (0.330, 0.170, ztop + 0.120), sides=12)
     tube('damper_cap', 0.094, 0.030, MAT_WORN, carr,
          (0.330, 0.170, ztop + 0.480), sides=12)
@@ -1685,10 +1707,10 @@ def build(out_path):
           'authored deployed because the model is posed WORKING - ASTRA '
           'section 5, use --parts before believing this number)'
           % (ln, LENGTH))
-    print('SONIC_CHECK height=%.3f  (mast VERTICAL, the working pose; '
-          '[TSI-CT] publishes only the 13 ft transport height, which this '
-          'model reaches at 3.66 m - see the TRANSPORT TILT note)'
-          % h)
+    print('SONIC_CHECK height=%.3f  (mast VERTICAL, the working pose.  '
+          '[TSI-CT] publishes only the TRANSPORT height, 13 ft = 3.962; folding '
+          'this model at the fixed -1.32 rad and measuring every vertex gives '
+          '3.912 - see THE TRANSPORT TILT note)' % h)
     print('SONIC_CHECK ground=%.3f  (the tyre stands at its LOADED radius '
           '%.3f [MICH], so nothing is below z=0)' % (min(zs), LOADED_R))
     print('SONIC_CHECK mast_len=%.3f stroke=%.3f ratio=%.3f  ([TSI-CT] '

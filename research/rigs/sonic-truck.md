@@ -719,32 +719,46 @@ Pad size and spread for a truck-mounted sonic rig: **NOT FOUND.**
 **None of these files is mine and none was touched.** They are recorded here so
 the next reader does not have to re-derive them.
 
-### 11.1 The game's transport tilt is shallower than any real truck sonic rig
+### 11.1 A model cannot declare its own transport rake
 
 `src/rig/rigFactory.js` line 7599 hands every `.glb` machine
 `transportTilt = -1.32` rad - the mast parked **14.4 degrees above horizontal** -
 and `src/core/gltfRig.js`'s `makeDyn()` never reads a machine's own figure, so a
-model **cannot declare one**. Measured against published transport heights, the
-real machines park far steeper: TSi 150CT at **13 ft (3.962 m)** and TSi 150T at
-**12 ft 4 in (3.759 m)**. The model as built lands at **3.66 m**, and the whole
-0.30 m of that difference is the one constant.
+model **cannot declare one**.
 
-Without the mast dump the constant would be worse than cosmetic: **a 6.13 m mast
-pinned at deck level folds straight through the cab of a 7.01 m truck at 14.4
-degrees, whatever else is done.** What saves it is that the TSi publishes **55 in
-of mast dump**, so the tilt pin sits 1.4 m above the mast foot and the mast folds
-from high enough to land on a rest above the cab roof.
+**The transport pose was built and measured, not argued about.** Rotating
+`pivot:mast` by -1.32 rad and transforming every vertex gives:
 
-**The fix is two lines** in `makeDyn()`, beside where it already reads `travel_m`
-off the carriage:
+| | measured | published [TSi 150CT] |
+|---|---|---|
+| width | **2.515 m** | 8 ft 3 in = 2.515 m |
+| length | 8.090 m | 23 ft = 7.010 m |
+| height | **3.912 m** | 13 ft = 3.962 m |
+
+Width exact, height **50 mm** under. So for this machine the game's fixed tilt
+lands on the published pose. An earlier draft of this note claimed it could not -
+that was reasoning, the measurement contradicted it, and the claim is withdrawn.
+The 1.08 m of extra length is the mast **foot**, which swings out behind the
+tailboard as the mast lies down; the published 23 ft is evidently measured over
+the chassis.
+
+**What made it work is the mast dump, and that is worth saying plainly.** A
+6.13 m mast pinned at deck level folds straight through the cab of a 7.01 m truck
+at 14.4 degrees, whatever else is done. The TSi publishes **55 in of mast dump**,
+so the tilt pin sits 1.4 m above the mast foot and the mast folds from high
+enough to land on a rest above the cab roof. Without that published figure this
+machine could not have been built to its own published transport height.
+
+What remains true: the next machine whose real transport rake is not 14.4 degrees
+has no way to say so. **The fix is two lines** in `makeDyn()`, beside where it
+already reads `travel_m` off the carriage:
 
 ```js
 const t = mastPivot.userData.transport_tilt_rad;
 if (typeof t === 'number') dyn.transportTilt = t;
 ```
 
-`blender/sonic_truck.py` already publishes `transport_tilt_rad` on `pivot:mast`,
-so the day somebody adds those lines every machine that declares one is right.
+`blender/sonic_truck.py` already publishes `transport_tilt_rad` on `pivot:mast`.
 
 ### 11.2 `data.js` describes a bigger machine than its own tooling does
 
