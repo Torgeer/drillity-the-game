@@ -25,6 +25,7 @@
 import { pathToFileURL } from 'node:url';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { blenderRigIds, checkRigLoader } from './checkrigloader.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const load = (rel) => import(pathToFileURL(join(ROOT, rel)).href);
@@ -41,7 +42,9 @@ const warn = [];
 const methodIds = new Set(data.METHODS.map((m) => m.id));
 const rigIds = new Set(data.RIGS.map((r) => r.id));
 const METHOD_RIGS = rigf.METHOD_RIGS || {};
-const buildable = new Set(rigf.RIG_IDS || []);
+const procedural = new Set(rigf.RIG_IDS || []);
+const blender = new Set(blenderRigIds());
+const buildable = new Set([...procedural, ...blender]);
 
 /* 1. Every selectable method must be drawable. ------------------------------ */
 for (const id of methodIds) {
@@ -57,12 +60,13 @@ for (const id of methodIds) {
   }
 }
 
-/* 2. Every purchasable rig must have a builder (or declare its stand-in). ---- */
+/* 2. Every purchasable rig needs a registered source or declared stand-in. --- */
 for (const rig of data.RIGS) {
   const target = rig.renderRigId || rig.id;
   if (buildable.has(target)) {
-    // A stand-in that is no longer needed is worth removing, not tolerating.
-    if (rig.renderRigId && buildable.has(rig.id)) {
+    // A procedural source needs no stand-in; a Blender-only rig still needs
+    // its declared stand-in when a model is unavailable in normal mode.
+    if (rig.renderRigId && procedural.has(rig.id)) {
       // Not a misrender: rigRenderId() prefers the rig's own builder when one
       // exists. The fallback is simply dead weight now, and a stale line that
       // says "draw this as something else" invites someone to believe it.
@@ -212,9 +216,18 @@ for (const m of data.METHODS) {
   console.log(`selfcheck data.js  ${problems.length} problem(s)`);
 }
 
+/* A declared GLB source is insufficient if the runtime refuses to select it.
+ * Exercise init/setRig/getSpec/preview plus strict failure and late-load cleanup. */
+try {
+  const result = await checkRigLoader();
+  console.log(`rig runtime       ${result.checks} assertions, GLB-only selection and disposal`);
+} catch (e) {
+  fail.push(`rig runtime: ${e.message}`);
+}
+
 /* Report ------------------------------------------------------------------- */
 console.log(`methods   data.js ${methodIds.size}   renderer ${Object.keys(METHOD_RIGS).length}`);
-console.log(`rigs      data.js ${rigIds.size}   builders ${buildable.size}`);
+console.log(`rigs      data.js ${rigIds.size}   sources ${buildable.size} (${procedural.size} procedural, ${blender.size} Blender)`);
 if (forward.length) console.log(`\nforward capability (renderer ahead of data — allowed):\n  methods: ${forward.join(' ')}`);
 if (forwardRigs.length) console.log(`  rigs:    ${forwardRigs.join(' ')}`);
 

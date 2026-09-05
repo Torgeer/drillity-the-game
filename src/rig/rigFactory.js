@@ -7560,38 +7560,66 @@ export function createRigSystem(ctx) {
    * fall-through with nothing to fall from — the pattern commit `36d1b36`
    * named: it reads as a live defence and is camouflage.
    */
-  function ensureBuild(id) {
-    if (builds.has(id)) return builds.get(id);
+  const strictModels = () => ctx?.qs?.get('glb') === 'strict';
+  const declaredFallback = (id) => {
+    const rows = ctx.data?.RIGS || ctx.game?.RIGS || [];
+    return rows.find((r) => r.id === id)?.renderRigId || null;
+  };
 
-    const glbFn = (ctx.gltfRigs && ctx.gltfRigs.builder)
-      ? ctx.gltfRigs.builder(id) : null;
-    const fn = glbFn || RIG_BUILDERS[id];
-    if (!fn) return null;
-    let b = null;
-    try {
-      b = fn(T, ctx);
-    } catch (e) {
-      if (typeof console !== 'undefined') console.error('[rig] build "' + id + '" failed —', e);
-      // A model that loaded but cannot be BUILT is a different failure from one
-      // that never arrived, and it must not take the machine off screen. Fall
-      // back to the procedural builder and SAY SO — a silent substitution here
-      // would be the same defect this whole comment is about.
-      //
-      // Under ?glb=strict there is deliberately no second chance: that mode
-      // exists to make a missing or broken model impossible to miss, and
-      // builder() has already handed us a thrower to guarantee it.
-      const alt = glbFn ? RIG_BUILDERS[id] : null;
-      if (!alt) return null;
-      if (typeof console !== 'undefined') {
-        console.warn('[rig] "' + id + '" built from .glb FAILED; drawing the procedural machine instead');
-      }
+  /** The same live source choice keys scene and thumbnail caches. A .glb that
+   * arrives after a procedural build must become visible on the next request. */
+  function sourceKey(id, seen = new Set()) {
+    if (!id || seen.has(id)) return 'missing:' + id;
+    seen.add(id);
+    if (ctx.gltfRigs?.has?.(id) && ctx.gltfRigs?.builder?.(id)) return 'glb:' + id;
+    if (strictModels()) return 'missing:' + id;
+    if (RIG_BUILDERS[id]) return 'procedural:' + id;
+    const fallback = declaredFallback(id);
+    return fallback ? sourceKey(fallback, seen) : 'missing:' + id;
+  }
+
+  /** Build one independent copy, regardless of whether its source is Blender
+   * or procedural. Only data.js may nominate another machine as a stand-in. */
+  function buildMachine(id, seen = new Set()) {
+    if (!id || seen.has(id)) return null;
+    seen.add(id);
+    const glb = ctx.gltfRigs?.builder?.(id);
+    const candidates = [];
+    if (glb) candidates.push({ fn: glb, source: 'glb' });
+    if (!strictModels() && RIG_BUILDERS[id]) candidates.push({ fn: RIG_BUILDERS[id], source: 'procedural' });
+    for (const { fn, source } of candidates) {
+      let b;
       try {
-        b = alt(T, ctx);
-      } catch (e2) {
-        if (typeof console !== 'undefined') console.error('[rig] procedural "' + id + '" also failed —', e2);
-        return null;
+        b = fn(T, ctx);
+        if (!b?.root?.isObject3D || !b.dyn || !b.spec) throw new Error('builder returned no complete root/dyn/spec');
+        b.spec.source = source;
+        return b;
+      } catch (e) {
+        if (b?.root?.isObject3D) disposeObject(b.root);
+        console.error('[rig] ' + source + ' build "' + id + '" failed —', e);
+        if (strictModels()) return null;
+        if (source === 'glb') console.warn('[rig] "' + id + '" .glb could not build; trying its declared fallback');
       }
     }
+    if (strictModels()) {
+      console.warn('[rig] ?glb=strict: "' + id + '" has no loaded Blender builder; nothing substituted');
+      return null;
+    }
+    const fallback = declaredFallback(id);
+    if (fallback && !seen.has(fallback)) {
+      console.warn('[rig] "' + id + '" unavailable; data.js declares "' + fallback + '" as its stand-in');
+      return buildMachine(fallback, seen);
+    }
+    console.warn('[rig] no builder for "' + id + '"');
+    return null;
+  }
+
+  function ensureBuild(id) {
+    const cached = builds.get(id);
+    const key = sourceKey(id);
+    if (cached && cached.sourceKey === key) return cached;
+    const b = buildMachine(id);
+    if (!b) return null;
     mergeStatic(T, b.root);
     b.root.visible = false;
     b.dyn.bodyBaseY = b.dyn.body ? b.dyn.body.position.y : 0;
@@ -7599,9 +7627,19 @@ export function createRigSystem(ctx) {
     b.dyn.transportTilt = b.dyn.transportTilt === undefined
       ? (b.dyn.noMastRaise ? 0 : -1.32) : b.dyn.transportTilt;
     b.root.userData.spec = b.spec;
+    b.root.userData.requestedRigId = id;
     b.root.userData.frameRadius = b.spec.frameRadius || 6;
+    b.sourceKey = key;
+    const wasActive = !!cached && active === cached;
+    if (cached) {
+      if (wasActive) { clearTools(); active = null; }
+      cached.dyn.anim?.stopAll?.();
+      disposeObject(cached.root);
+      cached.root.removeFromParent();
+    }
     group.add(b.root);
     builds.set(id, b);
+    if (wasActive) activateBuild(id, b);
     return b;
   }
 
@@ -7687,7 +7725,18 @@ export function createRigSystem(ctx) {
 
   function show(id) {
     const b = ensureBuild(id);
-    if (!b) return false;
+    if (b) return activateBuild(id, b);
+    if (strictModels() && active) {
+      active.root.visible = false;
+      clearTools();
+      active = null;
+      rigId = null;
+    }
+    return false;
+  }
+
+  function activateBuild(id, b) {
+    if (active === b && rigId === id) return true;
     if (active && active !== b) active.root.visible = false;
     active = b;
     rigId = id;
@@ -8997,11 +9046,12 @@ export function createRigSystem(ctx) {
       sectionGroup.visible = !!(ctx && ctx.geology && typeof ctx.geology.worldYForDepth === 'function');
 
       const startRig = (ctx && ctx.state && ctx.state.garage && ctx.state.garage.rigId) || 'crawler-lite';
-      show(RIG_BUILDERS[startRig] ? startRig : 'crawler-lite');
+      show(startRig);
 
       // follow the shell without owning any of its state
       const bus = ctx && ctx.bus;
       if (bus && bus.on) {
+        bus.on('rig:model-ready', () => { if (!disposed && rigId) show(rigId); });
         const E = (ctx && ctx.EVENTS) || {};
         if (E.RIG_CHANGE) {
           bus.on(E.RIG_CHANGE, (p) => {
@@ -9271,12 +9321,7 @@ export function createRigSystem(ctx) {
 
     /* ── machine selection ───────────────────────────────────────────────── */
     setRig(id) {
-      if (!id || id === rigId) return !!active;
-      if (!RIG_BUILDERS[id]) {
-        if (typeof console !== 'undefined') console.warn('[rig] unknown rig "' + id + '"');
-        return false;
-      }
-      return show(id);
+      return id ? show(id) : false;
     },
 
     setMethod(id) {
@@ -9556,11 +9601,16 @@ export function createRigSystem(ctx) {
 
     /* ── introspection for the shop / garage UI ──────────────────────────── */
     getSpec(id) {
-      const b = id ? builds.get(id) : active;
-      if (b) return b.spec;
-      if (id && RIG_BUILDERS[id]) { const nb = ensureBuild(id); return nb ? nb.spec : null; }
-      return null;
+      const b = id ? ensureBuild(id) : active;
+      return b ? b.spec : null;
     },
+    /** Preferred next source, used only to invalidate caches after a load. */
+    getSourceKey: sourceKey,
+    /** Measured source of the active instance, including a successful fallback. */
+    getActiveSourceKey() {
+      return active ? active.spec.source + ':' + active.spec.id : null;
+    },
+
     /**
      * THE LAMP HOUSINGS THIS MACHINE CARRIES — the handshake with core/env.js.
      *
@@ -9590,18 +9640,28 @@ export function createRigSystem(ctx) {
      */
     getWorkLights() { return (active && active.dyn.workLights) || NO_WORK_LIGHTS; },
 
-    listRigs() { return RIG_IDS.slice(); },
+    listRigs() {
+      const ids = new Set([...RIG_IDS, ...(ctx.gltfRigs?.loaded?.() || []),
+        ...(ctx.data?.RIGS || ctx.game?.RIGS || []).map((r) => r.id)]);
+      return [...ids].filter((id) => !sourceKey(id).startsWith('missing:'));
+    },
     getRigId() { return rigId; },
     getMethodId() { return methodId; },
     getRegionId() { return regionId; },
     /** Build a stand-alone machine for the garage/shop preview. Caller disposes. */
     buildPreview(id) {
-      const fn = RIG_BUILDERS[id];
-      if (!fn) return null;
-      const b = fn(T, ctx);
+      const b = buildMachine(id);
+      if (!b) return null;
       mergeStatic(T, b.root);
       b.root.userData.spec = b.spec;
-      b.root.userData.dispose = () => disposeObject(b.root);
+      b.root.userData.requestedRigId = id;
+      let released = false;
+      b.root.userData.dispose = () => {
+        if (released) return;
+        released = true;
+        b.dyn.anim?.stopAll?.();
+        disposeObject(b.root);
+      };
       return b.root;
     },
     /** Every tool id this rig+method combination uses. */

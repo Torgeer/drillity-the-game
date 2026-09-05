@@ -444,6 +444,7 @@ export function createPreview(ctx) {
   let current = null;          // { itemId, group }
   const thumbCache = new Map(); // itemId -> ImageBitmap | HTMLCanvasElement
   const pending = new Map();
+  const thumbSources = new Map();
   const liveTargets = new Set(); // { canvas, itemId, ctx2d }
   let buildTool = null;
   let buildRigPreview = null;
@@ -455,7 +456,11 @@ export function createPreview(ctx) {
   let lastFrame = null;   // framing telemetry from the last frame() — see below
 
 
-  const isRigId = (id) => !!id && Array.isArray(rigIds) && rigIds.includes(id);
+  // Content identifies a machine; live loader availability chooses its source.
+  // A procedural-only snapshot excluded Blender-only pd55 from this path.
+  const isRigId = (id) => !!id && ((ctx.data?.RIGS || []).some((r) => r.id === id)
+    || (ctx.rig?.listRigs?.() || rigIds || []).includes(id));
+  const sourceFor = (id) => isRigId(id) ? (ctx.rig?.getSourceKey?.(id) || 'rig:' + id) : 'tool';
 
   function makeStudio() {
     scene = new THREE_.Scene();
@@ -623,6 +628,9 @@ export function createPreview(ctx) {
         const g = buildRigPreview(itemId);
         if (g) return g;
       } catch (e) { console.warn('[preview] rig build failed', itemId, e.message); }
+      const missing = new THREE_.Group();
+      missing.name = 'unavailable-rig:' + itemId;
+      return missing;
     }
 
     // build() must always hand back an Object3D. It used to return null when
@@ -721,35 +729,53 @@ export function createPreview(ctx) {
   async function thumbnail(ref, opts = {}) {
     if (!ok) return null;
     const itemId = typeof ref === 'string' ? ref : (ref?.id || '');
-    const key = `${itemId}|${modelIdFor(ref)}|${opts.wear || 0}`;
+    const source = sourceFor(itemId);
+    const key = `${itemId}|${source}|${modelIdFor(ref)}|${opts.wear || 0}`;
+    if (thumbSources.get(itemId) !== source) {
+      // A streamed Blender model replaces an earlier procedural/stand-in card.
+      for (const [oldKey, bitmap] of thumbCache) {
+        if (!oldKey.startsWith(itemId + '|')) continue;
+        bitmap.close?.();
+        thumbCache.delete(oldKey);
+      }
+      thumbSources.set(itemId, source);
+    }
     if (thumbCache.has(key)) return thumbCache.get(key);
     if (pending.has(key)) return pending.get(key);
 
     const p = (async () => {
       const group = build(ref, opts.wear || 0);
-      pivot.clear();
-      pivot.add(group);
-      pivot.rotation.set(0, opts.yaw ?? -0.5, 0);
-      frame(group);
-      renderer.setSize(THUMB, THUMB, false);
-      renderer.render(scene, camera);
+      try {
+        pivot.clear();
+        pivot.add(group);
+        pivot.rotation.set(0, opts.yaw ?? -0.5, 0);
+        frame(group);
+        renderer.setSize(THUMB, THUMB, false);
+        renderer.render(scene, camera);
 
-      let bmp;
-      const src = renderer.domElement;
-      if (typeof createImageBitmap === 'function') {
-        bmp = await createImageBitmap(src);
-      } else {
-        const c = document.createElement('canvas');
-        c.width = c.height = THUMB;
-        c.getContext('2d').drawImage(src, 0, 0);
-        bmp = c;
+        let bmp;
+        const src = renderer.domElement;
+        if (typeof createImageBitmap === 'function') {
+          bmp = await createImageBitmap(src);
+        } else {
+          const c = document.createElement('canvas');
+          c.width = c.height = THUMB;
+          c.getContext('2d').drawImage(src, 0, 0);
+          bmp = c;
+        }
+        if (!ok) { bmp.close?.(); return null; }
+        if (sourceFor(itemId) !== source) {
+          bmp.close?.();
+          return thumbnail(ref, opts);
+        }
+        thumbCache.set(key, bmp);
+        return bmp;
+      } finally {
+        // Another request may already own pivot by the time its bitmap resolves.
+        group.removeFromParent();
+        disposeGroup(group);
       }
-      pivot.clear();
-      disposeGroup(group);
-      thumbCache.set(key, bmp);
-      pending.delete(key);
-      return bmp;
-    })();
+    })().finally(() => pending.delete(key));
 
     pending.set(key, p);
     return p;
@@ -783,7 +809,7 @@ export function createPreview(ctx) {
     pivot.clear();
     pivot.add(group);
     frame(group);
-    current = { itemId, group };
+    current = { itemId, group, ref, opts, source: sourceFor(itemId) };
     liveTargets.add({ canvas: canvasEl, ctx2d: canvasEl.getContext('2d') });
   }
 
@@ -832,6 +858,16 @@ export function createPreview(ctx) {
 
     update(dt) {
       if (!ok || !current || liveTargets.size === 0) return;
+      const source = sourceFor(current.itemId);
+      if (source !== current.source) {
+        const next = build(current.ref, current.opts.wear || 0);
+        current.group.removeFromParent();
+        disposeGroup(current.group);
+        current.group = next;
+        current.source = source;
+        pivot.add(next);
+        frame(next);
+      }
       liveAccum += dt;
       if (liveAccum < 1 / 30) return;          // cap the turntable at 30 fps
       liveAccum = 0;
@@ -858,7 +894,9 @@ export function createPreview(ctx) {
 
     dispose() {
       clearLive();
+      for (const bmp of thumbCache.values()) bmp.close?.();
       thumbCache.clear();
+      thumbSources.clear();
       pending.clear();
       scene?.traverse?.((o) => { o.geometry?.dispose?.(); const m = o.material; Array.isArray(m) ? m.forEach((x) => x?.dispose?.()) : m?.dispose?.(); });
       scene?.environment?.dispose?.();
