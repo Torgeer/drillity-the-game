@@ -130,7 +130,7 @@ p.on('console', (m) => { if (m.type() === 'warning' || m.type() === 'error') war
    that land mid-navigation. */
 for (let attempt = 1; ; attempt++) {
   try {
-    await p.goto(`http://localhost:${PORT}/?quality=low&shot`, { waitUntil: 'commit', timeout: 45000 });
+    await p.goto(`http://127.0.0.1:${PORT}/?quality=low&shot`, { waitUntil: 'commit', timeout: 180000 });
     break;
   } catch (e) {
     if (attempt >= 6) throw e;
@@ -138,7 +138,7 @@ for (let attempt = 1; ; attempt++) {
     await p.waitForTimeout(2000);
   }
 }
-await p.waitForFunction(() => window.__DRILLITY?.ui?.show && window.__DRILLITY?.sim, null, { timeout: 60000 });
+await p.waitForFunction(() => window.__DRILLITY?.ui?.show && window.__DRILLITY?.sim, null, { timeout: 240000 });
 /* WAIT FOR BOOT TO LET GO, do not sleep past it.
    ui/shell.js holds every `show()` while the boot screen is up and replays the
    last one from `releaseBoot()` on a 420 ms timer — and if nothing was

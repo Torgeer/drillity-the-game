@@ -145,8 +145,13 @@ const errs = [];
 const pageErrs = [];
 p.on('console', (m) => { if (m.type() === 'error') errs.push(m.text().slice(0, 180)); });
 p.on('pageerror', (e) => pageErrs.push(String(e).slice(0, 180)));
-await p.goto(`http://localhost:${PORT}/?quality=low&shot`, { waitUntil: 'load' });
-await p.waitForFunction(() => window.__DRILLITY?.ui?.show && window.__DRILLITY?.sim, null, { timeout: 60000 });
+/* `waitUntil: 'load'` waits on every module, font and texture, and this tree's
+   dev server has answered a cold first request in 15.8 s with a dozen agents
+   on the machine. Reachability and readiness are separate questions: fail fast
+   and honestly on the first, then take as long as the app needs on the second.
+   127.0.0.1, not localhost — `localhost` resolves to ::1 first on Windows. */
+await p.goto(`http://127.0.0.1:${PORT}/?quality=low&shot`, { waitUntil: 'domcontentloaded', timeout: 180000 });
+await p.waitForFunction(() => window.__DRILLITY?.ui?.show && window.__DRILLITY?.sim, null, { timeout: 240000 });
 await p.waitForTimeout(2200);
 
 const json = { tag: TAG, cases: {}, nav: null };
