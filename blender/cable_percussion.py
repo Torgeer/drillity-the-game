@@ -832,7 +832,10 @@ def build(out_path):
     # spokes, so the sheave reads as a wheel and not a disc when it turns.  The
     # groove itself is polished to a mirror in a narrow band and nowhere else
     # (reference section 6.1 item 2) - which is why it carries wornSteel while
-    # the rim is castIron.
+    # the rim is castIron.  THAT SPLIT COSTS A DRAW CALL AND IT KEEPS IT: this
+    # is a 400 mm wheel on the crown, the part the whole machine is about, and
+    # the polish band is what says it is turning.  The 224 mm tooling sheave
+    # below it was merged in the same pass; this one is not the same object.
     for k in range(4):
         sh.append(R.box('sheave_spoke%d' % k,
                         (SHEAVE_W * 0.52, SHEAVE_R * 1.5, 0.020), R.MAT_CAST,
@@ -847,7 +850,15 @@ def build(out_path):
                 loc=(s * 0.038, SHEAVE2_Y, SHEAVE2_Z + 0.02), bevel=0.004))
     sheave2 = R.empty(R.NODE_PIVOT, 'sheave-tooling',
                       loc=(0, SHEAVE2_Y, SHEAVE2_Z))
-    weld([disc('sheave2_rim', SHEAVE2_R, 0.046, R.MAT_CAST, (0, 0, 0), 'X',
+    # BOTH R.MAT_WORN, and that is a draw call, not a colour.  `pivot:sheave-
+    # tooling` is its own moving group, so its two materials were two draw calls
+    # for 104 triangles.  Merged into the GROOVE's wornSteel, not into the rim's
+    # castIron, because the groove disc is the WIDER of the two (0.052 against
+    # 0.046): side-on you already see a 204 mm worn face inside an 11 mm cast
+    # band, so wornSteel is what the sheave mostly reads as, and section 6.1
+    # item 2's polished groove survives the merge.  The MAIN sheave keeps both
+    # of its materials - see the note there.
+    weld([disc('sheave2_rim', SHEAVE2_R, 0.046, R.MAT_WORN, (0, 0, 0), 'X',
                sides=14),
           disc('sheave2_gr', SHEAVE2_R - 0.010, 0.052, R.MAT_WORN, (0, 0, 0),
                'X', sides=14)], sheave2, 'sheave-tooling')
@@ -980,9 +991,19 @@ def build(out_path):
         node = R.empty(R.NODE_PIVOT, 'drum-' + tag, loc=(dx, WY, DECK_Z + 0.225))
         g = [disc('drum_%s_barrel' % tag, dr, DRUM_W, R.MAT_WORN, (0, 0, 0),
                   'X', sides=14)]
+        # THE FLANGES ARE R.MAT_WORN, NOT castIron, AND THAT IS WORTH TWO DRAW
+        # CALLS.  This loop runs twice, and each drum is its own `pivot:` group,
+        # so castIron here was the only castIron inside each of two moving
+        # groups: two draw calls for two 16 mm discs, 104 triangles apiece.  The
+        # barrel they bracket and the rope wound against them are already
+        # wornSteel in the same group, so the merge is exact.  Nothing sourced
+        # is lost either: no source calls these cast, and on a 1.7 t towed
+        # tripod the winch drum is a fabrication, not a casting - [BRO] gives
+        # this machine exactly one casting, the "heavy duty worm-drive gearbox",
+        # and that one still carries castIron on the static bed beside it.
         for s in (-1, 1):
             g.append(disc('drum_%s_fl%d' % (tag, s), DRUM_FL_R * (dr / DRUM_R),
-                          0.016, R.MAT_CAST,
+                          0.016, R.MAT_WORN,
                           (s * (DRUM_W / 2 + 0.008), 0, 0), 'X', sides=14))
         # THE ROPE ON THE DRUM, AND IT IS NOT TIDY.  Reference section 4.1: this
         # is a STORAGE reel, not a level-wound working winch - the line is set to
@@ -1014,6 +1035,16 @@ def build(out_path):
     # the grip as a separate piece.
     clutch = R.empty(R.NODE_PIVOT, 'clutch',
                      loc=(-0.56, WY + 0.26, DECK_Z + 0.12))
+    # THIS SPLIT COSTS A DRAW CALL AND IT KEEPS IT.  `pivot:clutch` is a moving
+    # group of two objects and two materials, so it is two calls for 56
+    # triangles - the highest waste ratio on the machine - and it was looked at
+    # in the same pass that merged the drum flanges, the tooling sheave and the
+    # sinker bar's slot.  It stays because the machine has exactly TWO levers
+    # and this is the one section 6.1 item 5 is about: the clutch is "the
+    # most-handled object on the machine", so it is the lever that must show the
+    # bare grip.  Merging it to paint would move the only wear on the pair onto
+    # the brake lever beside it, which is handled less - the read would not just
+    # be lost, it would be inverted.  It is one call if it is ever needed.
     weld([R.tube('clutch_lever', 0.019, 0.50, R.MAT_PAINT, loc=(0, 0, 0),
                  rot=(-0.20, 0, 0), sides=8),
           R.tube('clutch_grip', 0.025, 0.145, R.MAT_WORN,
@@ -1231,10 +1262,19 @@ def build(out_path):
     z0 = -SWIVEL_LEN
     T.append(R.tube('sinker', SINKER_OD / 2, SINKER_LEN, R.MAT_STEEL,
                     loc=(0, 0, z0 - SINKER_LEN), sides=12))
+    # R.MAT_WORN on all three, and paintedDark is now gone from `slide:carriage`
+    # entirely - one draw call back for 52 triangles.  They were the only
+    # paintedDark in the tool string's moving group, so they cost a whole call
+    # to darken two 32 mm cross holes and a 190 mm slot.  wornSteel is the
+    # better material for them anyway: reference section 6 describes the shank
+    # as "dark, scaled and oily" against a bright working face, so a dull hole
+    # and a dull slot in a bright rawSteel bar still read as recesses, and the
+    # bright/dull contrast the reference actually cares about - the cutting edge
+    # against the cutter body - is untouched.
     for k, hz in enumerate((z0 - 0.13, z0 - SINKER_LEN + 0.13)):
-        T.append(disc('sinker_hole%d' % k, 0.016, SINKER_OD + 0.010, R.MAT_DARK,
+        T.append(disc('sinker_hole%d' % k, 0.016, SINKER_OD + 0.010, R.MAT_WORN,
                       (0, 0, hz), 'X', sides=6))
-    T.append(R.box('sinker_slot', (SINKER_OD + 0.008, 0.028, 0.19), R.MAT_DARK,
+    T.append(R.box('sinker_slot', (SINKER_OD + 0.008, 0.028, 0.19), R.MAT_WORN,
                    loc=(0, 0, z0 - SINKER_LEN * 0.52)))
     # THE UPSET BAND AT EVERY JOINT.  Reference warning 9.T: the API pin-and-box
     # joint leaves a collar visibly larger than the bar, and that is "visible and
