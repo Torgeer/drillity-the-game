@@ -122,12 +122,35 @@ for (const m of simSrc.matchAll(/case '([a-z][a-z0-9-]+)':\s*(?:\/\/[^\n]*\n\s*)
 for (const m of simSrc.matchAll(/queueHazard\('([a-z][a-z0-9-]+)'/g)) simKinds.add(m[1]);
 const unmapped = [...simKinds].filter((k) => !EVENT_SHAPE[k]).sort();
 if (simKinds.size < 20) fail(`mapping: only ${simKinds.size} hazard kinds parsed out of drilling.js — the scrape has broken, and a gate over an empty set passes forever`);
+// WHETHER THE SIM FORWARDS ITS KIND IS MEASURED, NOT ASSERTED.
+//
+// This gate used to PRINT `drilling.js does not forward h.kind` as prose, and
+// went on printing it after drilling.js grew a third `kind` parameter and ten
+// `haptic('heavy', true, h.kind)` sites. A hardcoded sentence in a gate is a
+// claim nothing re-derives - the same shape as the eight declared contracts
+// with no consumer in ASTRA section 8 - and it inverted the meaning of the
+// note under it: an unmapped kind that IS forwarded is a live gap reaching a
+// player now, not a mapping held in reserve for later.
+const forwarded = new Set();
+for (const m of simSrc.matchAll(/case '([a-z][a-z0-9-]+)':[^\n]*haptic\([^)]*,[^)]*,[^)]*\)/g)) {
+  forwarded.add(m[1]);
+}
+const kindArgSites =
+  [...simSrc.matchAll(/\bhaptic\([^;)]{0,160}?,[^;)]{0,80}?,[^;)]{0,80}?\)\s*;/g)].length;
 if (unmapped.length) {
+  const live = unmapped.filter((k) => forwarded.has(k));
+  const later = unmapped.filter((k) => !forwarded.has(k));
   note(`${unmapped.length} of ${simKinds.size} sim hazard kinds have no signature of their own and fall to 'ui':`);
   note(`  ${unmapped.join(', ')}`);
-  note(`  Not a failure: they arrive as legacy intensity names today (see LEGACY),`);
-  note(`  and drilling.js does not forward h.kind. Mappings for them already exist`);
-  note(`  in EVENT_SHAPE for the day it does.`);
+  note(`  drilling.js forwards h.kind at ${kindArgSites} haptic() call sites, covering ${forwarded.size} kinds.`);
+  if (live.length) {
+    note(`  REACHING A PLAYER NOW - forwarded, but with no signature of its own:`);
+    note(`    ${live.join(', ')}`);
+  }
+  if (later.length) {
+    note(`  Not yet forwarded, so they still arrive as legacy intensity names (see LEGACY):`);
+    note(`    ${later.join(', ')}`);
+  }
 }
 
 

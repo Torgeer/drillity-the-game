@@ -207,7 +207,14 @@ function collect() {
 
 /* ── one run ──────────────────────────────────────────────────────────────── */
 async function once(origin, profileDir, i) {
-  const url = origin + (QUALITY ? `/?quality=${QUALITY}` : '/');
+  /* `?mute` IS PART OF THE MEASUREMENT, NOT A CHANGE TO IT.
+     `--mute-audio` silences Chrome's output device; audio.js's own mute
+     never engages, so the game builds its full audio graph and plays --
+     the developer just cannot hear it. `?mute` sets busUser.master to 0
+     (audio.js `_silent`) and skips no construction, so the boot this
+     probe times is still the boot the player gets. check:haptics gates
+     both, because seven probes once played the game out loud. */
+  const url = origin + (QUALITY ? `/?quality=${QUALITY}&mute` : '/?mute');
   const t0 = Date.now();
 
   /* A PERSISTENT CONTEXT WITH ITS OWN PROFILE, not launch()+newContext().
@@ -224,7 +231,7 @@ async function once(origin, profileDir, i) {
     headless: false,           // headless cannot bind the GPU here — ASTRA §2
     viewport: { width: 390, height: 844 },
     deviceScaleFactor: 2,
-    args: ['--enable-gpu-rasterization', '--ignore-gpu-blocklist'],
+    args: ['--enable-gpu-rasterization', '--ignore-gpu-blocklist', '--mute-audio'],
   });
 
   const page = await browser.newPage();
