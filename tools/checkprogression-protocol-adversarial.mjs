@@ -212,7 +212,3 @@ try {
   if (storageDescriptor) Object.defineProperty(globalThis, 'localStorage', storageDescriptor);
   else delete globalThis.localStorage;
 }
-
-
-
-

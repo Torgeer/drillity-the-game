@@ -7,9 +7,11 @@ UI motion/reach changes: 19 shipped rigs and 20 external assets, 51,317,348
 asset bytes, one inline game script. The subsequent urban-site integration
 passed its 13 real-loader checks, and the restored numeric HUD passed four
 headed layout/motion cases. Runtime rig metadata is integrated and passed
-72 checks with its matching 19 rebuilt exports. Hero-camera framing and an
-explicit feed-position envelope continue; a fresh full build remains due after
-the current integrations finish.
+72 checks with its matching 19 rebuilt exports. The subsequent feed-position
+envelope and authored-rake adapter commit `1cb148c` passed 80 checks in the
+integration checkout. Hero-camera CPU framing passed 2,904 checks across 342
+actual poses, but headed proof remains queued. A fresh full build remains due
+after the current integrations finish.
 
 ## Interrupted WIP reviewed and finalized
 
@@ -110,9 +112,21 @@ the eight actual endpoint publishers. Runtime commit `7e90ab1` consumes the
 declared parent-local axis, directed endpoints and scenery exclusions. Its
 matching 19 rebuilt exports passed 72 metadata checks in the integration
 checkout; these checks do not establish camera fit or a GPU performance pass.
-The parent team continues hero-camera framing over all 19 rigs and their feed
-endpoints, a separate actual-vertex feed envelope, an actual-fleet tool-attachment
-audit, and primary-source research on CFA capacity.
+The feed envelope and authored-rake adapter are integrated as `1cb148c`.
+Hero-camera rendering still needs headed verification. The parent team continues
+an actual-fleet tool-attachment audit, CFA method-specific capacity integration,
+and rate provenance research. The scoped CFA base-rating correction is integrated
+as `a9c34c1`: 15 m from the verified manufacturer configuration, with remaining
+withdrawal, motion and method-capacity gaps explicitly recorded.
+
+Contract/save reliability is integrated as `dc89553`. The actual simulation
+captures run and attempt identity at start, and progression rejects stale or
+repeated settlements across abort/restart/reload/reset. All 83 dedicated cases
+passed again in the integration checkout (33 acceptance, 28 settlement,
+10 persistence adversarial, 12 protocol adversarial). Data/career checks also
+passed. The corresponding contract-board source is applied but awaits headed
+acceptance/layout verification and a reviewed commit; do not treat the UI
+integration as complete from the CPU protocol results.
 
 The user explicitly requested additional tasks on 2026-09-06 after the original
 task continued to reject extra agent spawns. Six new tasks have private worktrees
@@ -130,10 +144,14 @@ five standalone tasks remain archived; these six are the active assignments:
 
 Each task delegates independent work and adversarial review. GPU sessions are
 serialized across tasks; CPU research, authoring and tests continue in parallel.
-Their work is not yet integrated or claimed complete here.
+Workstream status is tracked individually: progression is integrated; the
+remaining screen/art/optimization work is not yet claimed complete. Its finished
+agents have started the next bounded rock-bolt and pile-hammer mechanics review.
 
 The overnight follow-up `drillity-overnight-build` is active every ten minutes
-in the parent task. The coordination directory contains the current GPU lease,
+in the parent task. It continues assigning concrete backlog work overnight and
+prepares a morning handoff at 08:00 Europe/Stockholm on 2026-09-06. The
+coordination directory contains the current GPU lease,
 individual task checkpoints and a root handoff. Existing workspaces are reused.
 Blocked actions are recorded without escalation requests; permitted work
 continues. Local scheduled work requires the computer on and the app running.
