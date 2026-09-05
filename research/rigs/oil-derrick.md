@@ -29,6 +29,9 @@ the real gaps. Subject: game rig id `oil-derrick`, currently built by
 | `en.wikipedia.org/wiki/Well_bay`; `patents.google.com/patent/US5407302A/en` (skid-off drilling, Santa Fe International, granted 1995-04-18) | fetched 2026-09-05 | Well bay: *"two levels, a lower where the wellheads are accessed and an upper where the Xmas Trees are accessed"*, and on a platform with a drilling package *"located directly below it"*. US5407302A: capping beams *"typically within a range of between 40 and 55 feet transversely apart"*; skid-off feet and cantilever beams at **sixty feet** transverse spacing; *"four to forty drilling positions"*. | **Yes — for platform skidding geometry** |
 | NORSOK M-501 summaries (`worldofcorrosion.com/norsok-m501.html`) | fetched 2026-09-05 | Coating systems 1–7 by exposure zone with generic builds and DFT bands. Secondary (a summary of the standard, not the standard). Used only in §6 and flagged as such. | Partly |
 | Helideck sizing / flare boom searches (CAP 437, NORSOK C-004 context) | 2026-09-05 | D-value rule for helideck sizing, current D-values for offshore types. Flare-boom length appeared only in a patent's general wording — flagged low-confidence. | Partly |
+| **"Wind Loads in Drilling Structures", Stress Engineering Services Inc., report PN1996301, December 2001**, prepared for the US minerals regulator’s Technical Assessment Program (TAP file 374aa). <https://www.bsee.gov/sites/bsee.gov/files/tap-technical-assessment-program//374aa.pdf> | 60 pp.; Ch. 4 pp. 18–21, Ch. 5 pp. 32–36 | **The second primary source this document did not have, and it describes a derrick of EXACTLY the IADC class: "The derrick is 160 feet clear height and a 30-foot square base."** Where the IADC form gives dimensions and stops, this gives CONSTRUCTION: **11 bays, Vee bracing, wide flange legs and girts, angle diagonals**, a gin pole above the crown to 192 ft, both wind-wall elevations, and — decisively — **where the leg batter starts**. Chapter 5 reports a survey of **575 real derrick/mast structures**. A government-published regulator document, not marketing. | **Yes — primary, and it closes two §8 gaps** |
+| `C:\\Users\\henri\\Downloads\\Offshore_Product_Reference_Guide.pdf` | 80 pp.; p.6 "Offshore Top Drives – Sheet 1 of 2", pp.24–25, pp.35–40 | The catalogue §8.2 nominated as "the best remaining hope" for equipment envelopes, and for the **top drive it delivers**: p.6 carries **dimensioned general-arrangement drawings** of four offshore top drives — stack-up height, body height, plan width, setback, and the **108 in guide-dolly rail spacing**. Also crown-block sheave configurations (6 × 72 in, 7 × 72/78 in) for motion-compensated blocks. **The drawworks sheets print a "Dimensions (LxWxH)" row and leave the value BLANK on all six units**, so that envelope is not here either. | **Yes — closes the top drive; not the drawworks** |
+| `C:\\Users\\henri\\Downloads\\Drill_Pipe_Catalogue.pdf` | whole, 12 pp. | **Checked and rejected.** Despite the name it is a small-diameter exploration / water-well drill ROD catalogue — 38–76 mm OD on NC 10 to 2⅜ Reg threads. Nothing oilfield: no 5 in drill pipe, no tool joints, no Range 2/3. | **No — do not re-read** |
 | `research/16-site-archetypes.md` §A.10, §A.11, §A.12 (in-repo) | ll. 1190–1400, refs ll. 3510–3545 | The repo's **own** prior offshore research, and it is good: platform vs jack-up vs vessel, conductors 510–760 mm, conductor guides framed at 12–18 m intervals, spudcans to 20 m, cantilever envelopes, surface vs subsea BOP as the organising rule. This document supplies the **dimensions** that §A.10/§A.11 did not have. | **Yes — secondary, and the right place to cross-read** |
 | `src/rig/rigFactory.js` (`DERRICK` ll. 3318–3327, `buildDerrickSection` 3396, `buildCrownBlock` 3442, `buildTravellingBlock` 3509, `buildTopDrive` 3561, `buildOilDerrick` 3846–4200), `src/game/data.js` ll. 1199–1214, `src/world/terrain.js` ll. 3136–3153 | read-only | The current game model, compared against the sourced material in §9. `terrain.js` `kit === 'offshore'` is where defect #7 physically lives. | Yes (as the subject) |
 
@@ -157,6 +160,58 @@ record-holder.
 Independent corroboration for the class: standard drilling derricks run
 **136–175 ft** tall on a base **30–40 ft** square
 (web survey, 2026-09-05; API Spec 4F is the governing standard).
+
+**And now a second PRIMARY source, which this document previously said did not
+exist.** The regulator’s wind-load study describes its worked “best practice”
+derrick as, verbatim: *“The derrick is **160 feet clear height and a 30-foot
+square base**”* (SES PN1996301, p. 19). That is the IADC triple, independently,
+on a document that has never heard of the IADC form. **§9.A’s caveat that the
+ratio “stands alone” is retired.**
+
+The same paragraph supplies the construction the IADC form has no field for:
+
+| Detail | Value | Source |
+|---|---|---|
+| **Number of bays** | **11, bottom to top** | SES PN1996301 p. 19 |
+| **Bracing pattern** | **Vee bracing**; the report’s own test frame is an *inverted* Vee, so both occur | ibid. |
+| **Framing** | *“fully framed on all four sides”* | ibid. |
+| **Leg and girt section** | **wide flange shapes** | ibid. |
+| **Bracing section** | **angles** | ibid. |
+| Above the crown | **a gin pole frame reaching 192 ft above the base** — 32 ft above the clear height | ibid. |
+| Top drive guidance | **rails on the off-driller’s side** | ibid. |
+| Setback position | racking areas **on the off-drawworks side**, two of **6 × 6.5 ft**, **5 ft apart** | ibid. |
+| **Drill floor wind wall** | shields **the bottom 15 ft** of the derrick, and it is on the SUBSTRUCTURE | ibid. |
+| **Racking board wind wall** | shields **elevation 80 ft to 95 ft**, and it is attached to the DERRICK | ibid. |
+| Class survey behind it | **575 derrick/mast structures**; mode clear height **150–170 ft** | ibid. pp. 32–36 |
+
+Note what the two wind walls confirm: **the floor is screened and the lattice is
+not** — §4.1 item 7’s warning is right, and the one wall that IS on the derrick is
+a local screen at the racking board, not cladding.
+
+### 3.1a Where the taper starts — the finding that changes the shape
+
+SES PN1996301 p. 34, verbatim:
+
+> *“In the case of the derrick, **the leg batter (taper) starts above the
+> racking area (~95’)** to provide for the pipe handling systems preferred by
+> many contractors.”*
+
+**A modern derrick is a PARALLEL BOX for its bottom 95 ft and tapers only over
+the top 65 ft.** The Eiffel-tower taper from the base is the 1930s land derrick,
+not this machine. The report is explicit that the structures it analysed are
+*“recent designs reflecting the deeper depths drilled”*, and the reason is
+functional: a parallel lower section is what lets a pipe-handling system and a
+200-plus-stand setback live inside the derrick at all.
+
+This **supersedes §9.A’s advice** to keep the game’s two-rate taper curve (82 %
+of the taper in the bottom three-quarters), which is the opposite distribution.
+Moving the endpoints alone will not fix the silhouette; the taper has to move up.
+
+The 11 bays then split on a bay boundary at 95 ft without being forced:
+**7 bays of 4.137 m below (28.96 m = 95.0 ft) and 4 of 4.953 m above
+(19.81 m = 65.0 ft)**, totalling 11 bays and 48.77 m = 160 ft. All three sourced
+numbers close simultaneously on 7 + 4, which is the check that it is the right
+reading.
 
 ### 3.2 Substructure and drill floor
 
@@ -972,11 +1027,20 @@ general offshore rules in §6 — it is not traced from a picture.
 
 Honest list. None of these should be invented.
 
-- **Derrick leg cross-section** (tubular? angle? box?), member sizes, and the
-  **number of bays**. The IADC form gives height, base and crown and nothing
-  about the section. This is a real gap — bay count is highly visible.
-- **Which stand length this class racks** — doubles or trebles. The IADC form has
-  no field for it. §3.3 gives the arithmetic for both.
+- ~~**Derrick leg cross-section**, member sizes, and the **number of bays**.~~
+  **CLOSED for type and count; still open for SIZE.** SES PN1996301 p. 19 gives
+  **11 bays**, **Vee bracing**, **wide flange legs and girts** and **angle
+  bracing** (§3.1). What remains unsourced is the member SIZES — that report’s
+  own member schedule sits in a StruCAD appendix that did not survive text
+  extraction.
+- ~~**Which stand length this class racks** — doubles or trebles.~~
+  **RESOLVED BY DERIVATION, not by a direct statement.** The IADC form still has
+  no field for it, but the racking board height does the work: the racking board
+  wind wall runs **80 ft to 95 ft** (SES PN1996301 p. 19), so the board sits at
+  ~80 ft = 24.4 m. A **double** is 18.6 m and would leave the board 5.8 m *above*
+  the pipe, which cannot be. A **treble** is 27.9 m and puts 3.5 m of pipe above
+  the fingers, which is what a fingerboard photograph shows. **Trebles** — and
+  20,000 ft of them is **219 stands**. Flagged as a derivation, not a citation.
 - **Substructure type** (box-on-box, slingshot, parallelogram, swing-up) and its
   member sizes. Only the plan and heights are sourced.
 - **Skid beam section, and the skid stroke.** The **spacing** is now sourced —
@@ -1016,10 +1080,32 @@ Honest list. None of these should be invented.
 - **Flare boom length and angle.** The only figure found (50–100 ft) came from a
   patent's general wording, not a specification, and is **not reliable enough to
   quote as a dimension.**
-- **Drawworks, mud pump and SCR house external dimensions.** Power, drum size and
-  flow are sourced; the boxes around them are not.
-- **Top drive external dimensions and weight.** Ratings are fully sourced;
-  the physical envelope is not.
+- **Drawworks, mud pump and SCR house external dimensions.** Power, drum size
+  and flow are sourced; the boxes around them are not. **Confirmed still open
+  after mining the offshore product guide**: its drawworks sheets print a
+  `Dimensions (LxWxH)` row for every unit and **leave the value blank on all
+  six**. That is not a text-extraction artefact — the field is empty in the
+  document. Build the drawworks from its sourced **30 × 58 in drum** instead.
+- ~~**Top drive external dimensions and weight.**~~ **CLOSED.**
+  `Offshore_Product_Reference_Guide.pdf` p. 6 carries dimensioned GA drawings of
+  four offshore top drives. The closest match to the IADC rig’s 500-ton /
+  1,130 hp / 250 rpm machine is that sheet’s 750-ton unit at **1,150 hp and
+  271 rpm**, described as fitting *“in over 95% of derricks in the world today”*
+  and suited to jack-ups and platforms:
+
+  | | Value |
+  |---|---|
+  | **Stack-up height** | **24 ft = 7.315 m** |
+  | Body height on the elevation | 20 ft 9½ in = **6.338 m** |
+  | To the tool joint | 23 ft 11 in = **7.286 m** |
+  | **Setback (well centre to dolly face)** | 91 in = **2.311 m** |
+  | Plan width | 89.1 in = **2.263 m** |
+  | **Guide-dolly rail spacing** | **108 in = 2.743 m** — printed on all four units on the sheet, so it is a class figure, and it sizes the torque track that runs the full height of the derrick |
+  | Weight | 38,000 lb = 17.2 t |
+
+  The larger units on the same sheet run to 26.5 ft and 29 ft of stack-up at
+  1,250 and 1,500 tons, so **24 ft is the bottom of the modern range** — the
+  right end for a 500-ton rig.
 - **Crown block and travelling block frame dimensions.** Sheave count, sheave
   diameter and rating are sourced; overall height and width are not.
 - **Actual paint colours** for any real unit. §6 gives the coating *systems* and
@@ -1058,7 +1144,17 @@ exhaustively and contains none of the following:**
 
 ### 8.2 Still unmined
 
-`Offshore_Product_Reference_Guide.pdf` (50 MB), `oilfield-products-catalog.pdf`
+**MINED 2026-09-05; the results are folded in above.**
+`Offshore_Product_Reference_Guide.pdf` closed the **top drive** envelope and
+confirmed the **drawworks** one is genuinely absent. `Drill_Pipe_Catalogue.pdf`
+turned out to be a small-diameter exploration ROD catalogue and is rejected.
+`oilfield-products-catalog.pdf` (60 pp.) has top drives on pp. 11–12 and 50–53
+and masts on pp. 43–45, but no derrick structure.
+`HMH-Technical-Training-Catalog…pdf` (54 pp.) is a TRAINING COURSE catalogue —
+it names drawworks and rotary tables as course subjects and carries **no
+equipment dimensions at all**. The original note follows for the record:
+
+> `Offshore_Product_Reference_Guide.pdf` (50 MB), `oilfield-products-catalog.pdf`
 (16 MB), `HMH-Technical-Training-Catalog…pdf` (31 MB) and
 `Drill_Pipe_Catalogue.pdf` were **delegated to a parallel research pass that had
 not reported when this document was closed**. Given what Chakrabarti turned out
