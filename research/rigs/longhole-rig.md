@@ -102,6 +102,16 @@ Retrieved as PDFs and read with a coordinate-aware extractor (PyMuPDF), so every
 printed number could be placed by its (x, y) on the drawing page, and the drawing
 regions were rendered at 8–11× and read as images.
 
+> **ARCHIVED LOCALLY.** A sweep of the owner's catalogue library on 2026-09-05
+> confirmed it holds **no** longhole-rig specification of any kind — 515 PDFs,
+> not one Simba / DL / DU / Solo / Cubex / Normet rig document — so these four
+> were web-only and therefore not re-verifiable at all. **The one that governs
+> the model is now saved in the repo**, the way `research/rigs/source/` already
+> holds the RM20 and core-rig sheets:
+> `research/rigs/source/longhole-rig/compact-longhole-rig-S7-technical-specification.pdf`
+> (894 kB). The other three stay web citations; anything quoted from them rather
+> than from the archived sheet is marked in §3.4.
+
 - **`9869_0087_01e_Simba_S7_technical_specification_english.pdf`** — 5 pp, read
   pp. 3–4 in full. *"Long-hole drilling rig for small to medium sized drifts in
   the 51 to 89 mm hole range."* **THIS IS THE GAME'S MACHINE** — see §3.4 for
@@ -133,6 +143,30 @@ and the RHS carousel design note *"with the gripper arms placed inside the
 carousel, it can easily and quickly move the rods between the carousel and the
 drill centre"*
 (<https://www.epiroc.com/en-us/products/drill-rigs/production-drill-rigs/simba-sm60-s>).
+
+### 1.10 Local catalogue library — re-swept in full 2026-09-05; **it has the TOOLING for this method and no rig**
+515 PDFs and 272 root images searched by filename and then by extracted full
+text. **No Simba, DL, DU, Solo, Cubex, Normet, Joy or Stopemaster rig document
+exists in the library**, and no photograph of the class — confirming §1.8 and
+§8.1 against the whole folder rather than a sample. The only local rig sheet with
+a dimension chain is still the *face jumbo* of §1.1. Two files not previously
+read do carry the drill string this machine's ITH variant runs, and they matter
+because the carousel is sized by the pipe in it:
+
+- **`C:\Users\henri\Downloads\Epiroc DTH product catalog.pdf` p.31**, table headed
+  **"Design group Simba ITH-series"** — the ITH pipe stock for this exact rig
+  family. Pipe **Ø76 mm** (6 mm wall, 1.80 m, 29.2 kg, API 2 3/8" Reg),
+  **Ø89 mm** (1.50 / 1.80 / 1.87 / 2.00 m, 24–38.5 kg), **Ø102 mm** (1.50 /
+  1.80 m, 39.4 / 43.8 kg), **Ø114 mm** (1.50 / 1.87 m, 41 / 47 kg). Circular
+  grip 57 / 70 / 83 mm. p.38 gives the saver sub: *"Simba ITH — short adapter
+  (220 mm) … Long adapter (580 mm) as fixed adapter."*
+- **`C:\Users\henri\Downloads\Mincon_2024-Drill-Pipes_A4_low-res.pdf` p.9**, row
+  **"ATLAS COPCO SIMBA UNDERGROUND — outer diameter 76–114 mm"**. The paired
+  length column is offset in that page's text layer and was not relied on.
+
+**The ITH pipe is 1.50–2.00 m long — the same short band as the top-hammer
+rods.** That is the load-bearing fact for the carousel: whichever way the machine
+is specced, the thing in the drum is a ~1.5–2.0 m stick, never a bench rod.
 
 ### 1.8 Images in `C:\Users\henri\Downloads` — swept; **no photograph of this class exists in the folder**
 274 images in the root plus the `Atpa` and `Atpa/Atpa products` sets. Everything
