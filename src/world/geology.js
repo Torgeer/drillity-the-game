@@ -2535,6 +2535,18 @@ export function createGeology(ctx) {
 
   /** VISUAL borehole radius, in section units. Derived — never a constant. */
   let holeR = CFG.holeRadius;
+  /** Drawn bore diameter / true bore diameter. Derived in applyHoleDiameter()
+   *  from the two diameters, printed by drawRuler(), published as
+   *  ctx.sectionView.boreExaggeration.
+   *
+   *  DECLARED HERE, and that is the whole point of this line. It used to be
+   *  assigned without a declaration. This module is ESM, ESM is strict, and
+   *  the implicit global threw `ReferenceError: boreExag is not defined` out of
+   *  applyHoleDiameter() — which init() calls through computeView() — so
+   *  createGeology().init() aborted and THE ENTIRE SECTION BAND never built.
+   *  No scene, no strata, no string, no ruler, and (HANDOFF §3, rubric axis 9)
+   *  nothing moving in ten method frames, because there was nothing there. */
+  let boreExag = (2 * holeR) / (CFG.holeDiaDefault / 1000);
   /** CSS px per metre of section. Everything expressed in pixels goes via this. */
   let pxPerMetre = 19.4;
 
