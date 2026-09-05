@@ -479,25 +479,66 @@ effortless territory: at the bottom, on the side opposite the thumb."*
 Two-thirds of one-handed grips are the right hand. Gate: `npm run check:reach`
 (needs `npm run dev`). Fix belongs in `ui/screens/site.js` + `styles.css`.
 
-**The two bands do not draw the same hole.** `collarOffsetPx` = **62.44 px** —
-the borehole in the surface band and in the section band are **16.0 % of the
-stage width apart**, which contradicts `GAMEDESIGN.md` §1 in writing.
-`groundAtSeamPx` = **-22.81 px**. Both are renderer-owned and independently
-fixable. **Fix these before the depth ruler**, not after.
+~~**The two bands do not draw the same hole.**~~ **FIXED 2026-09-05**
+(`8a526d9`). `collarOffsetPx` **62.44 → 0.00** and `groundAtSeamPx`
+**−22.81 → 0.00**, warm, identical on dth / cfa / auger. `registerBands()` in
+`core/renderer.js` solves both every frame from the projection itself, with a
+lens shift (`setViewOffset`) on the surface camera — every ray unchanged, so
+the hero solve, the fov and the sun/camera angle are untouched and only the
+framing moves. It also **fixed an 11 px overflow off the right edge** and
+costs **−3 to −4 surface draw calls** (paired interleaved A/B, `.qa-reg-ab.mjs`,
+repeat spread 0–1). Before/after: `shots/base-collar.json` / `shots/reg-collar.json`.
 
 **A rod changes size by 2.81x crossing the seam** — 54.58 px/m above against
-19.42 below. Genuinely contested: `geology.js` is authored against 19.4 px/m
-and rejects a camera more than 35 % off it, so the honest fix may be re-framing
-the surface hero camera, which is an art decision. Quantify before touching.
+19.42 below. **Quantified 2026-09-05 and NOT touched; it needs an art
+decision, not a patch.** Matching at the collar needs the hero eye at
+**38.4 m instead of 13.69** (328 px / 19.42 = 16.89 m of visible height,
+÷ 2 tan 12.41°). That puts crawler-lite's 4.2 m mast at **82 px — 25 % of the
+band against 70 % today, ~7 % of the frame by area against ~53 %** — and lifts
+the eye to ~6.3 m along the ray, re-opening the horizon/exposure solve and
+`terrain.js`'s pit-ring framing. Moving the other side is worse: geology
+authors `logWidth` 5.6, `rulerWidth` 2.6, `holeRBase/Gain/Max` and its contact
+bands in **section units**, so all of them scale 1:1 with px/m — at 54.58 the
+log and ruler alone want 8.2 units of a 7.15-unit band and `uGeoX` inverts —
+and `adoptCameraScale()` clamps the adopted view to `clamp(h, 12, 160)`, a
+**ceiling of 32.35 px/m**, so 54.58 is unreachable from that side regardless.
 
-**The seam's brightness step is content, not the shader.** Of a 95–107 luma
-step the seam lip contributes 0.27–0.36 and the vignette is continuous to
-within 0.5–5.4 %. **Do not reopen that shader.** The cause is in `core/env.js`:
-the bands are lit by different suns (**47–71 degrees apart in azimuth**,
-`#ffe0a6` warm above vs `#e8e5dc` neutral below) and `sectionScene.fog` is
-**null** against exp2 fog above it, so there is no aerial perspective below the
-line at all. A cross-section is a diagram and may legitimately be lit
-differently — but 47–71 degrees is drift, not a decision anybody made.
+**NEW, and it is now the depth ruler's blocker.** With the surface's ground
+line seated on the seam, the remaining break is the CUT's own datum:
+- `sectionGroundAtSeamPx` = **−24.54 px at spud** — the section's depth 0 is
+  **off the top of its own band**, and its first visible row is already 1.26 m
+  deep. `CFG.headroom` asks for 1.6 m of air above the ground line and
+  delivers −1.26.
+- `viewMetres` **claimed 19.988 vs an actual frustum of 14.261** — geology
+  sizes `halfH` as `viewMetres * 0.5` = 10 m against a true 7.13.
+  `adoptCameraScale()` compares **frustum aspect** (not px/m) against the
+  reference band — 1.408 vs 1.005, a 39 % difference against its 35 %
+  tolerance — and returns **silently**, so the cut has never once adopted the
+  renderer's camera on the shipping layout. Everything placed from `halfH` is
+  out by that ratio, a ruler included. Both measured by
+  `node .qa-collar.mjs --depthfrac 0.001`.
+
+**The seam's brightness step is content, not the shader** — and of the three
+causes named, **one was drift and it is fixed** (`a1953d6`); the other two are
+correct on purpose and now say so in `core/env.js`. **Do not reopen the grade
+shader, and do not reopen these two.**
+- **"47–71 degrees apart in azimuth" was the wrong quantity.** The surface
+  figure is a SCREEN azimuth, the section's 150.8 is a WORLD azimuth against a
+  camera pointing elsewhere; subtracting them invented the number. Measured
+  properly the gap is **53.5°, both from the right**. HANDOFF §8C, fourth time.
+- The real fault was invisible to that instrument: the cut's key was a
+  **constant** while the surface sun moves by region, so `.probe-suns.mjs`
+  found **14 of 32 sampled region-hours lighting the two bands from opposite
+  sides of frame** (worst gap 108.7°). The section lights now mirror to follow
+  the sun's side at their authored angle: **0 of 32**, worst gap 63.2°.
+- `sectionScene.fog` **null is correct**: an orthographic projection has no
+  perspective to haze and there is no depth to fog — every visible section
+  mesh lies between z −9 and z +2.2, over which the surface's own density
+  buys **0.33 %**.
+- **Band exposure 1.03–1.61 is correct**: `SECTION_GAIN` states the intent and
+  the amount, the two open-air methods measure 1.03 and 1.20 (the target,
+  met), and the 1.54/1.61 are the SURFACE band moving — rockbolt's is a drive
+  at `envIntensity` 0.15. Chasing them would dim the cut inside a mine.
 
 **`m07-core` is over its draw-call budget** — surface 82 against 80. Only
 visible once the harness started grading WARM numbers; every earlier pass was
