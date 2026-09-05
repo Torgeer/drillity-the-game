@@ -10,11 +10,12 @@
     "check:facts": "node tools/checkfacts.mjs",
     "check:data": "node tools/checkdata.mjs",
     "check:beds": "node tools/checkbeds.mjs",
-    "check": "node tools/checkfacts.mjs && node tools/checkdata.mjs && node tools/checkbeds.mjs",
+    "check": "node tools/checkfacts.mjs && node tools/checkdata.mjs && node tools/checkbeds.mjs && node tools/checkmodels.mjs",
     "blender": "\"C:/Program Files/Blender Foundation/Blender 5.2/blender.exe\" --background --python blender/build.py --",
     "check:reach": "node tools/checkreach.mjs",
     "models:pack": "node tools/glbpack.mjs",
-    "models:check": "node tools/glbpack.mjs --check"
+    "models:check": "node tools/glbpack.mjs --check",
+    "check:models": "node tools/checkmodels.mjs"
   },
   "dependencies": {
     "three": "0.169.0"
