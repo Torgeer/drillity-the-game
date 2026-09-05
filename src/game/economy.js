@@ -39,6 +39,60 @@ function warnOnce(msg, ...rest) {
 /** Test seam — forget what has already been said. */
 export function _resetEconWarnings() { _warned.clear(); }
 
+/* ── A LOOKUP THAT MISSED, ON A LINE THAT IS MONEY ────────────────────────
+   The unknown-region bug fixed in `upkeepFor` below was not one bug. It is a
+   SHAPE, and `research/AUDIT-FALLBACKS.md` names the whole class: every table
+   in this file has a sane-looking default, and on the COST side that default is
+   almost always ZERO. An unknown rig costs nothing to run. An unknown item is
+   free. An unknown destination is free to mobilise to. A method with no
+   materials row consumes no materials — which is exactly how `oil-rotary` and
+   six others once shipped with their largest cost line at zero, and the only
+   evidence was that the numbers looked good.
+
+   The arithmetic still balances, the results screen still prints a total, and
+   there is no symptom whatsoever. That is what makes it expensive.
+
+   ⚠ NO FALLBACK VALUE BELOW CHANGES. You cannot invent a price for a thing that
+   does not exist, and guessing one here would be the worse error. What was
+   wrong was being SILENT about it. Every call site keeps the number it
+   returned and adds a line naming what went missing, so the next person to
+   find a hole in a cost sheet is handed the reason instead of a plausible
+   total. `warnOnce` dedupes by message, so a bad id inside a loop says it once.
+*/
+function unknownRef(kind, id, consequence) {
+  warnOnce(`[economy] unknown ${kind} "${id}" — ${consequence}`, id);
+}
+
+/**
+ * The player's career role, or the bottom of the ladder with a note.
+ *
+ * ⚠ THE FIVE CALL SITES DISAGREED, WHICH IS ITS OWN BUG. `crewCostFor` and
+ * `overheadFor` fell back to `ROLES[0]`; `payoutForContract`,
+ * `reputationForContract` and `upkeepFor` fell back to `null` and then to a
+ * bare `?? 1` / `?? 0`. Four terms of one settlement, resolving the same bad
+ * id four different ways — so a settlement with an unknown role was internally
+ * inconsistent as well as quiet about it.
+ *
+ * They are the SAME NUMBER: `ROLES[0]` is the Helper, whose perks are
+ * `payoutMult 1.00`, `repGain 1.0`, `upkeepDiscount 0` — exactly the values the
+ * `??` defaults were producing. So this unifies the five without moving a
+ * single euro, which is what makes it safe to do in one commit.
+ *
+ * @param {?string} roleId
+ * @param {string} where  the cost line asking, named in the warning
+ */
+function roleOrBase(roleId, where) {
+  if (!roleId) return null;
+  const role = ROLES.find((r) => r.id === roleId);
+  if (!role) {
+    unknownRef('roleId', roleId, 'not in data.js ROLES. Seniority is falling '
+      + `back to the Helper row (${where}): no payout multiplier, no upkeep `
+      + 'discount, no reputation bonus and the cheapest crew in the game');
+    return ROLES[0];
+  }
+  return role;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    Tunables. One place, so balancing is one diff.
    ═══════════════════════════════════════════════════════════════════════════ */
@@ -155,7 +209,15 @@ function lifeKeyForSlot(slot) {
  */
 export function priceWithMarkup(itemOrId, opts = {}) {
   const item = typeof itemOrId === 'string' ? getItem(itemOrId) : itemOrId;
-  if (!item) return 0;
+  /* AN UNKNOWN ITEM IS FREE, AND FREE IS A PRICE. A mistyped id in a loadout
+     costs nothing to buy here and is then skipped by `consumableCostForRun`,
+     so the run is cheaper in two places at once and the shop card shows
+     "EUR 0" rather than an error. */
+  if (!item) {
+    unknownRef('itemId', itemOrId, 'not in data.js ITEMS. It is being priced at '
+      + 'EUR 0 — free to buy, and it will consume nothing on the run either');
+    return 0;
+  }
   const { regionId = null, reputation = 0, skills = {}, urgent = false, quantity = 1 } = opts;
   const sk = resolveSkills(skills);
 
@@ -600,7 +662,15 @@ const FLUSH_VOLUME_RATIO = Object.freeze({
 export function flushingCostForRun(methodId, metres, holeDiaMm, skills = {}, regionId = null) {
   const method = getMethod(methodId);
   if (!method || metres <= 0) return 0;
+  /* `air` and `none` are DELIBERATELY zero and must stay silent. A medium this
+     table has never heard of is a different thing entirely: mud is EUR 34/m3
+     and foam EUR 21/m3, and falling through to 0 makes the wrong one free. */
   const ratePerM3 = FLUSH_RATE_PER_M3[method.flushMedium] ?? 0;
+  if (!(method.flushMedium in FLUSH_RATE_PER_M3)) {
+    unknownRef('flushMedium', method.flushMedium, 'FLUSH_RATE_PER_M3 in '
+      + `economy.js has no rate for it, so flushing on "${methodId}" is free. `
+      + `Known media: ${Object.keys(FLUSH_RATE_PER_M3).join(', ')}`);
+  }
   if (ratePerM3 <= 0) return 0;
   const dia = Math.max(40, holeDiaMm || method.nominalDia) / 1000;   // mm -> m
   const holeVolume = (Math.PI / 4) * dia * dia * metres;             // m3
@@ -856,6 +926,18 @@ const MATERIALS_COVERS_SLOTS = Object.freeze({
 export function materialsCostForRun(methodId, metres, holeDiaMm, skills = {}, regionId = null) {
   const method = getMethod(methodId);
   const spec = MATERIALS[methodId];
+  /* A METHOD WITH NO ROW CONSUMES NOTHING, AND THIS HAS ALREADY SHIPPED.
+     `oil-rotary` and the six METHOD_IDS.md methods each ran with their single
+     largest cost line at zero because this table had no row for them, and the
+     symptom was `rc` topping the mid-game ladder — a balance reading, twenty
+     levels away from the cause. All 21 methods have a row today. Method #22
+     will not, and the day it lands this line must say so instead of quietly
+     making it the most profitable work in the game. */
+  if (method && !spec && metres > 0) {
+    unknownRef('materials row for method', methodId, 'MATERIALS in economy.js '
+      + 'has no row for it, so the run consumes NO materials at all. On every '
+      + 'method that has a row this is between 1 % and 48 % of the cost sheet');
+  }
   if (!method || !spec || metres <= 0) return { total: 0, perMetre: 0, what: '' };
   const ratio = clamp((holeDiaMm || method.nominalDia) / method.nominalDia, 0.4, 3.2);
   const diaExp = MATERIAL_DIA_EXPONENT[methodId] ?? 1;
@@ -903,7 +985,7 @@ export function crewCostFor(hours, opts = {}) {
   const { roleId = 'helper', regionId = null, skills = {}, methodId = null } = opts;
   const h = Math.max(0, hours || 0);
   if (h <= 0) return 0;
-  const role = ROLES.find((r) => r.id === roleId) || ROLES[0];
+  const role = roleOrBase(roleId, 'crew wages') || ROLES[0];
   const method = getMethod(methodId);
 
   // The gang for one rig on one shift, the player included. He is paid out of
@@ -938,6 +1020,15 @@ export function crewCostFor(hours, opts = {}) {
 export function siteSetupCost(rigId, methodId, holes = 1, skills = {}, regionId = null) {
   const rig = getRig(rigId);
   const method = getMethod(methodId);
+  /* Rigging up is free if either id misses, and on the heavy spreads this is
+     the second-largest number on the sheet — `plantMob` alone is EUR 9,000 on
+     a well and EUR 6,500 on a heading. */
+  if ((rigId && !rig) || (methodId && !method)) {
+    unknownRef(rig ? 'methodId' : 'rigId', rig ? methodId : rigId,
+      'siteSetupCost cannot resolve it, so standing the spread up — crane, '
+      + 'slab, water, welfare and the ancillary plant the method needs — is '
+      + 'being charged at EUR 0');
+  }
   if (!rig || !method) return 0;
   const sk = resolveSkills(skills);
   const region = getRegion(regionId);
@@ -1032,7 +1123,7 @@ export function overheadFor(revenue, opts = {}) {
   const { roleId = null, skills = {}, disbursements = 0 } = opts;
   const r = Math.max(0, (revenue || 0) - Math.max(0, disbursements || 0));
   if (r <= 0) return 0;
-  const role = roleId ? (ROLES.find((x) => x.id === roleId) || ROLES[0]) : ROLES[0];
+  const role = roleOrBase(roleId, 'company overhead') || ROLES[0];
   const seniority = clamp((role.level - 1) / (MAX_LEVEL - 1), 0, 1);
   const rate = ECON.overheadRateBase + seniority * ECON.overheadRateGrowth;
   const sk = resolveSkills(skills);
@@ -1073,10 +1164,19 @@ export function standbyHoursFor(hours, regionId) {
 export function upkeepFor(rigId, hours, opts = {}) {
   const rig = getRig(rigId);
   const h = Math.max(0, hours || 0);
+  /* AN UNKNOWN RIG RUNS FOR NOTHING. Upkeep, fuel, insurance AND depreciation
+     all come out of this one row, so a bad `rigId` deletes the entire running
+     line — the largest cost on `oil-rotary` at 30.7 % of the sheet — and the
+     result still balances. `settleRun` defaults `rigId` to 'crawler-lite', so
+     the failure arrives as a wrong machine rather than as a missing one. */
+  if (rigId && !rig) {
+    unknownRef('rigId', rigId, 'not in data.js RIGS. Upkeep, fuel, insurance '
+      + 'and depreciation are all being charged at ZERO for this run');
+  }
   if (!rig || h <= 0) return { upkeep: 0, fuel: 0, insurance: 0, depreciation: 0, total: 0 };
   const { skills = {}, roleId = null, condition = 1, regionId = null } = opts;
   const sk = resolveSkills(skills);
-  const role = roleId ? ROLES.find((r) => r.id === roleId) : null;
+  const role = roleOrBase(roleId, 'the upkeep discount');
   const roleDiscount = 1 - (role?.perks.upkeepDiscount ?? 0);
   // Service, parts and diesel all arrive on the same truck as everything else,
   // so they carry the region's cost of doing business. Insurance and
@@ -1136,6 +1236,13 @@ export function rigWearPerHour(rigId) {
  */
 export function rigServiceCost(rigId, condition = 1, skills = {}) {
   const rig = getRig(rigId);
+  /* A free major service also RESTORES 0.4 of condition in
+     `progression.serviceRig`, so an unknown rig id is not merely uncharged —
+     it is a repair the player is given. */
+  if (rigId && !rig) {
+    unknownRef('rigId', rigId, 'rigServiceCost cannot price a major service '
+      + 'for it, so the service is free and still restores condition');
+  }
   if (!rig) return 0;
   const sk = resolveSkills(skills);
   const neglect = 1 + Math.pow(1 - clamp(condition, 0, 1), 1.5) * 1.2;
@@ -1149,9 +1256,25 @@ export function rigServiceCost(rigId, condition = 1, skills = {}) {
 export function travelCost(fromRegionId, toRegionId, opts = {}) {
   if (fromRegionId === toRegionId) return 0;
   const to = getRegion(toRegionId);
-  if (!to) return 0;
+  /* MOBILISING SOMEWHERE THAT DOES NOT EXIST IS FREE. `progression.acceptContract`
+     and `travelTo` both charge the player this number and both accept 0
+     happily, so a bad destination id moves a 940-tonne derrick across the world
+     for nothing. */
+  if (!to) {
+    unknownRef('destination regionId', toRegionId, 'not in data.js REGIONS. '
+      + 'Mobilisation to it is being charged at EUR 0');
+    return 0;
+  }
   const { rigId = 'crawler-lite', skills = {} } = opts;
   const rig = getRig(rigId);
+  /* …and freight is priced on MASS, so an unknown machine travels as a 5-tonne
+     one: about a fifth of what a piling leader costs to move and a two-hundredth
+     of a derrick. 5 is the right stand-in and it is the quietness that is the
+     defect. */
+  if (rigId && !rig) {
+    unknownRef('rigId', rigId, 'not in data.js RIGS. Freight is being priced as '
+      + 'a 5-tonne machine, which is a fraction of what the real fleet costs to move');
+  }
   const tons = rig ? rig.transportTons : 5;
   const massFactor = clamp(Math.pow(tons / 12, 0.65), 0.35, 3.4);
   const from = getRegion(fromRegionId);
@@ -1164,6 +1287,12 @@ export function travelCost(fromRegionId, toRegionId, opts = {}) {
 /** Certificate course fee after the Site Lead training-budget line. */
 export function certCost(certId, skills = {}) {
   const cert = getCert(certId);
+  /* A certificate gates a REGION, and the regions it gates are the ones with
+     the payout multipliers. Free and instant is the wrong price for that. */
+  if (certId && !cert) {
+    unknownRef('certId', certId, 'not in data.js CERTS. The course is being '
+      + 'priced at EUR 0 and 0 training hours');
+  }
   if (!cert) return { price: 0, hours: 0 };
   const sk = resolveSkills(skills);
   return {
@@ -1205,7 +1334,7 @@ export function payoutForContract(contract, opts = {}) {
   } = opts;
 
   const sk = resolveSkills(skills);
-  const role = roleId ? ROLES.find((r) => r.id === roleId) : null;
+  const role = roleOrBase(roleId, 'the payout multiplier');
 
   // ── the unit of delivery ────────────────────────────────────────────────
   // A per-unit contract is settled in its own units. Everything else is
@@ -1266,7 +1395,7 @@ export function payoutForContract(contract, opts = {}) {
 export function reputationForContract(contract, opts = {}) {
   const { grade = 'C', skills = {}, roleId = null } = opts;
   const sk = resolveSkills(skills);
-  const role = roleId ? ROLES.find((r) => r.id === roleId) : null;
+  const role = roleOrBase(roleId, 'the reputation multiplier');
   const gradeFactor = { S: 1.6, A: 1.3, B: 1.1, C: 1, D: 0.4 }[String(grade).toUpperCase()] ?? 1;
   const base = contract?.reputationReward ?? 20;
   return Math.round(base * gradeFactor * sk.m('reputation.gain') * (role?.perks.repGain ?? 1));
@@ -1481,7 +1610,18 @@ export function settleRun(contract, p = {}) {
  * @param {string} [regionId]
  */
 export function emergencyContract(level = 1, regionId = 'nordic') {
+  /* THIS IS THE SAFETY NET, SO IT IS THE WORST PLACE TO BE QUIET. A broke
+     player sees this card and nothing else; `progression.rescueContract()`
+     builds it from `state.unlocked.regions[0]`, which is a saved value and can
+     be anything a migration left behind. Falling through to REGIONS[0] prices
+     the rescue at Nordic rates and stamps the contract `regionId: 'nordic'`,
+     so the card is at least self-consistent — but the player asked to be
+     rescued somewhere else and was not told they were not. */
   const region = getRegion(regionId) || REGIONS[0];
+  if (regionId && !getRegion(regionId)) {
+    unknownRef('regionId', regionId, 'emergencyContract is falling back to '
+      + `"${REGIONS[0].id}". The rescue job is priced and sited there instead`);
+  }
   const method = getMethod('auger');
   const targetDepth = 8;
   const holes = 3;
