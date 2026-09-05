@@ -8008,6 +8008,11 @@ export function createDrillSim(ctx = {}) {
   }
 
   /* ── state mirror (contract-defined branch only) ───────────────────── */
+  /* The programme fields published on the LAST frame. writeState()'s
+     programme block retires whatever is in here and is not republished.
+     It deliberately SURVIVES startHole(), because the run whose fields
+     have to come off the mirror is the previous one. */
+  let progKeys = [];
   function writeState() {
     // Keep the gauge and its caption in step even on the frame a run ends: the
     // needle and the number under it must never disagree.
@@ -8121,53 +8126,81 @@ export function createDrillSim(ctx = {}) {
       ? clamp((S.stage + clamp(S.stageProgress / Math.max(1e-3, S.target))) / S.stageCount)
       : clamp(S.depth / Math.max(1e-3, S.target));
 
+    /* ══ THE PROGRAMME BLOCK IS PUBLISHED WHOLE AND RETIRED WHOLE ══════
+       `state.drill` is one shared mutable object that lives for the whole
+       session — `core/contract.js` builds it once and nothing ever replaces
+       it. Every branch below used to write straight onto it, and NOTHING
+       took a field off again, so the mirror only ever GREW: measured, a
+       driven-pile → rc → jet-grouting → auger sequence left the auger run
+       publishing `programme: null` on top of 50 live-looking fields from
+       three methods it was not — `founded: true` and `blowsPer250: 59` off a
+       pile finished three holes earlier, `sampleRecovery: 0.641` off an RC
+       run, and `jetBar: 434` / `return01: 0.496` off the jet grouting run.
+
+       That last pair is the SAME DEFECT AS THE PRE-DRILL ONE BELOW, one
+       level up. `sim/vfx.js` tests `d.jetBar != null && d.return01 != null`
+       and nothing else, because those fields are documented as published by
+       no other pass of no other method — so with them left standing the
+       auger's collar drew `spoilWell`/`spoilOverflow` and its section drew a
+       `spoil` return: a jet grouting column over a hole with no grout in it.
+       Nulling them inside `case 'twoStage'` cannot reach this, because on the
+       next hole that case does not run at all.
+
+       So the branch writes into `pd`, and whatever the PREVIOUS frame put on
+       the mirror and this frame did not is deleted. It cannot drift: a field
+       is live exactly as long as the branch that owns it keeps writing it,
+       and a new field needs no bookkeeping anywhere to be retired correctly.
+       The core fields above are unaffected — they are written every frame by
+       construction — and so is anything a consumer parks here itself
+       (`ui/screens/site.js` keeps `runLog` on this object).
+       ═════════════════════════════════════════════════════════════════ */
     const p = S.prog;
-    if (!p) { d.programme = null; return; }
-    switch (p.kind) {
+    const pd = {};
+    switch (p ? p.kind : null) {
       case 'rc':
-        d.programme = 'rc';
-        d.sampleBags = p.index;               // bags cut
-        d.sampleRecovery = p.recovery01;      // the score, not the metres
-        d.sampleContamination = p.contam01;
-        d.sampleQuality = p.quality01;
-        d.sampleHoldUp = p.holdUp;            // the carry-over meter
-        d.sampleWet = p.wet;
-        d.sampleTrainWear = p.trainWear;
+        pd.programme = 'rc';
+        pd.sampleBags = p.index;               // bags cut
+        pd.sampleRecovery = p.recovery01;      // the score, not the metres
+        pd.sampleContamination = p.contam01;
+        pd.sampleQuality = p.quality01;
+        pd.sampleHoldUp = p.holdUp;            // the carry-over meter
+        pd.sampleWet = p.wet;
+        pd.sampleTrainWear = p.trainWear;
         break;
       case 'jumbo':
-        d.programme = 'tunnel-jumbo';
-        d.roundIndex = p.roundIndex + 1;
-        d.roundLength = p.round ? p.round.length : 0;
-        d.roundGroup = jumboGroup() ? jumboGroup().id : null;
-        d.roundHolesDone = p.round ? p.round.holesDone : 0;
-        d.roundHoles = p.holesPerRound;
-        d.roundDrilledM = p.round ? p.round.drilledM : 0;
-        d.roundPull = p.pull01;
-        d.roundOverbreak = p.overbreak;
-        d.roundHalfBarrel = p.halfBarrel;
-        d.roundCutErrM = p.round ? p.round.cutErrM : 0;
-        d.roundLookout = p.round ? p.round.lookout01 : 0;
-        d.roundChargeKgM = p.round ? p.round.chargeKgM : 0;
-        d.advanceM = p.advanceM;
+        pd.programme = 'tunnel-jumbo';
+        pd.roundIndex = p.roundIndex + 1;
+        pd.roundLength = p.round ? p.round.length : 0;
+        pd.roundGroup = jumboGroup() ? jumboGroup().id : null;
+        pd.roundHolesDone = p.round ? p.round.holesDone : 0;
+        pd.roundHoles = p.holesPerRound;
+        pd.roundDrilledM = p.round ? p.round.drilledM : 0;
+        pd.roundPull = p.pull01;
+        pd.roundOverbreak = p.overbreak;
+        pd.roundHalfBarrel = p.halfBarrel;
+        pd.roundCutErrM = p.round ? p.round.cutErrM : 0;
+        pd.roundLookout = p.round ? p.round.lookout01 : 0;
+        pd.roundChargeKgM = p.round ? p.round.chargeKgM : 0;
+        pd.advanceM = p.advanceM;
         // `pulse('shortRound')` was the one action publishing no flag, so a
         // consumer could see the round get shorter but not that it was taken.
-        d.roundShortened = !!(p.round && p.round.shortened);
+        pd.roundShortened = !!(p.round && p.round.shortened);
         /* WHERE THE POWER IS COMING FROM. A jumbo drills the face on mains and
            trams on its diesel, and the changeover is audible — the engine dies
            through its governor, a contactor closes, and an induction bed comes
            up whose pitch never moves. That cue was being inferred from "is
            something percussing", with a debounce to cover the gaps. It is not
            an inference: the sim knows which end of the round it is in. */
-        d.tramming = !(S.phase === 'drilling' || S.phase === 'boom-setup'
+        pd.tramming = !(S.phase === 'drilling' || S.phase === 'boom-setup'
                     || S.phase === 'redrill' || S.phase === 'rod-add');
-        d.powerMode = d.tramming ? 'diesel' : 'mains';
+        pd.powerMode = pd.tramming ? 'diesel' : 'mains';
         break;
       case 'longhole':
-        d.programme = 'longhole';
-        d.ringHole = p.holeIndex + 1;
-        d.ringHoles = p.holesTotal;
-        d.ringIndex = p.ringIndex + 1;
-        d.uphole = p.uphole;
+        pd.programme = 'longhole';
+        pd.ringHole = p.holeIndex + 1;
+        pd.ringHoles = p.holesTotal;
+        pd.ringIndex = p.ringIndex + 1;
+        pd.uphole = p.uphole;
         /* THE FAN'S SHAPE, so nothing has to hardcode it. `holesPerRing` and
            `upholeFrac` were telemetry-only, so the rig carried its own copies —
            eleven fan angles and a 5/6 up-down split — with a note saying that
@@ -8175,28 +8208,28 @@ export function createDrillSim(ctx = {}) {
            the floor while the HUD said uphole. A constant that two files must
            agree on and only one of them can see is a trap; this is the way out
            of it. */
-        d.holesPerRing = S.m.ring.holesPerRing;
-        d.upholeFrac = S.m.ring.upholeFrac;
-        d.holeLengthM = p.holeLengthM;
-        d.deviationCue = p.cue01;             // a CUE. The number is not published.
-        d.dilutionHoles = p.dilutionHoles;
-        d.oreLossHoles = p.oreLossHoles;
+        pd.holesPerRing = S.m.ring.holesPerRing;
+        pd.upholeFrac = S.m.ring.upholeFrac;
+        pd.holeLengthM = p.holeLengthM;
+        pd.deviationCue = p.cue01;             // a CUE. The number is not published.
+        pd.dilutionHoles = p.dilutionHoles;
+        pd.oreLossHoles = p.oreLossHoles;
         break;
       case 'bolt': {
         const b = S.m.bolt;
         const last = p.installs[p.installs.length - 1] || null;
-        d.programme = 'rockbolt';
-        d.boltIndex = p.index;
-        d.boltsTotal = p.total;
-        d.boltType = p.type;
-        d.boltHoleMm = boltHoleMm();
-        d.boltAnchorage = last ? last.anchorage01 : 1;
-        d.boltSlotClosureIn = last && last.inspected ? last.slotClosureIn : null;
-        d.boltTorqueKnm = p.lastTorqueKnm;
-        d.boltTorqueDue = p.torqueWindowT > 0;
-        d.boltTestsTaken = p.testsTaken;
-        d.boltTestsDue = p.testsDue;
-        d.boltMixBand = b.mixBand;
+        pd.programme = 'rockbolt';
+        pd.boltIndex = p.index;
+        pd.boltsTotal = p.total;
+        pd.boltType = p.type;
+        pd.boltHoleMm = boltHoleMm();
+        pd.boltAnchorage = last ? last.anchorage01 : 1;
+        pd.boltSlotClosureIn = last && last.inspected ? last.slotClosureIn : null;
+        pd.boltTorqueKnm = p.lastTorqueKnm;
+        pd.boltTorqueDue = p.torqueWindowT > 0;
+        pd.boltTestsTaken = p.testsTaken;
+        pd.boltTestsDue = p.testsDue;
+        pd.boltMixBand = b.mixBand;
         /* THE RESIN CLOCK. Spin, then gel, then HOLD without turning — and the
            hold is the part defined by something not happening, so anything
            scoring or animating it needs the seconds left, not a guess at them.
@@ -8209,77 +8242,77 @@ export function createDrillSim(ctx = {}) {
            remainder is `boltInstallRemainingSec`, and which third of the install
            is running is `boltInstallStage`; the boundaries are the same ones
            `stepBoltInstall()` scores against, read off the same two constants. */
-        d.boltGelSec = b.gelSec;
-        d.boltHoldSec = b.holdSec;
+        pd.boltGelSec = b.gelSec;
+        pd.boltHoldSec = b.holdSec;
         const resinT = (S.phase === 'bolt-install' && p.type === 'resin') ? S.phaseT : null;
-        d.boltInstallStage = resinT == null ? null
+        pd.boltInstallStage = resinT == null ? null
           : resinT <= b.spinSec ? 'spin' : resinT <= b.gelSec ? 'gel' : 'hold';
-        d.boltInstallRemainingSec = resinT == null ? null : Math.max(0, S.phaseDur - resinT);
-        d.boltHoldRemainingSec = d.boltInstallStage === 'hold'
+        pd.boltInstallRemainingSec = resinT == null ? null : Math.max(0, S.phaseDur - resinT);
+        pd.boltHoldRemainingSec = pd.boltInstallStage === 'hold'
           ? Math.max(0, S.phaseDur - resinT) : null;
         // How much of the required hold has actually been banked — the hold is
         // scored on seconds NOT turning, so the clock alone does not say it.
-        d.boltHoldMetSec = p.heldSec;
+        pd.boltHoldMetSec = p.heldSec;
         break;
       }
       case 'pile': {
         const p0 = S.m.pile;
         const h = hammerSetting(S.m, S.act.wob, S.act.rpm);
-        d.programme = 'driven-pile';
-        d.blows = Math.round(p.blows);
-        d.setMm = p.measuredSetMm;            // the instrument that can lie
-        d.blowsPer250 = Math.round(250 / Math.max(0.05, p.measuredSetMm));
-        d.designSetMm = p.designSetMm;
-        d.toeDepth = p.toeDepthM;             // the instrument that cannot
-        d.headDepth = p.headDepthM;
-        d.bearingTop = p.bearingTopM;
-        d.bearingPen = p.bearingPenM;
-        d.founded = p.founded;
-        d.hammerEnergyKnm = h.kNm;
-        d.hammerDropM = h.dropM;
-        d.hammerBpm = h.bpm;
-        d.hammerPowerLimited = h.capped;
-        d.headDamage = p.headDamage;
-        d.toeDamage = p.toeDamage;
-        d.rakeDeg = p.rake;
-        d.drivingStress = p.stress;
-        d.dollyCondition = clamp(1 - p.dollyWear);
-        d.refused = p.refused;
-        d.blowLog = p.log.slice(-24);
+        pd.programme = 'driven-pile';
+        pd.blows = Math.round(p.blows);
+        pd.setMm = p.measuredSetMm;            // the instrument that can lie
+        pd.blowsPer250 = Math.round(250 / Math.max(0.05, p.measuredSetMm));
+        pd.designSetMm = p.designSetMm;
+        pd.toeDepth = p.toeDepthM;             // the instrument that cannot
+        pd.headDepth = p.headDepthM;
+        pd.bearingTop = p.bearingTopM;
+        pd.bearingPen = p.bearingPenM;
+        pd.founded = p.founded;
+        pd.hammerEnergyKnm = h.kNm;
+        pd.hammerDropM = h.dropM;
+        pd.hammerBpm = h.bpm;
+        pd.hammerPowerLimited = h.capped;
+        pd.headDamage = p.headDamage;
+        pd.toeDamage = p.toeDamage;
+        pd.rakeDeg = p.rake;
+        pd.drivingStress = p.stress;
+        pd.dollyCondition = clamp(1 - p.dollyWear);
+        pd.refused = p.refused;
+        pd.blowLog = p.log.slice(-24);
         // The pile itself: the design driven length, which is what the contract
         // asks for and what a ring or a rebound has to be scaled against.
-        d.pileLengthM = S.target;
+        pd.pileLengthM = S.target;
         break;
       }
       case 'probe':
-        d.programme = p.mode === 'cpt' ? 'cpt' : 'spt';
+        pd.programme = p.mode === 'cpt' ? 'cpt' : 'spt';
         if (p.mode === 'cpt') {
           const t = p.trace[p.trace.length - 1] || null;
-          d.pushRateMmS = S.rop / 3.6;
-          d.qcMpa = t ? t.qcMpa : 0;
-          d.fsKpa = t ? t.fsKpa : 0;
-          d.u2Kpa = t ? t.u2Kpa : null;
-          d.rfPct = t ? t.rfPct : 0;
-          d.sbt = t ? t.sbt : null;
-          d.coneSaturated = p.saturated;
-          d.inclinationDeg = p.incl;
-          d.traceInTolerance = p.fidelity01;
+          pd.pushRateMmS = S.rop / 3.6;
+          pd.qcMpa = t ? t.qcMpa : 0;
+          pd.fsKpa = t ? t.fsKpa : 0;
+          pd.u2Kpa = t ? t.u2Kpa : null;
+          pd.rfPct = t ? t.rfPct : 0;
+          pd.sbt = t ? t.sbt : null;
+          pd.coneSaturated = p.saturated;
+          pd.inclinationDeg = p.incl;
+          pd.traceInTolerance = p.fidelity01;
           /* A SOUNDING STOPPED AT THRUST CAPACITY IS A VALID, REPORTABLE
              RESULT — it is not a failed run, and it must not be inferred from
              "the run ended short". Only the sim knows the difference. */
-          d.soundingTerminated = !!p.terminated;
+          pd.soundingTerminated = !!p.terminated;
         } else {
-          d.sptIncrement = p.inc;
-          d.sptBlows = Math.round(p.blowsTotal);
-          d.sptRelease = p.release;
-          d.sptEnergyRatio = p.er;
+          pd.sptIncrement = p.inc;
+          pd.sptBlows = Math.round(p.blowsTotal);
+          pd.sptRelease = p.release;
+          pd.sptEnergyRatio = p.er;
           const last = p.tests[p.tests.length - 1] || null;
-          d.sptN = last ? last.N : null;
-          d.sptN60 = last ? last.N60 : null;
-          d.sptRefusal = last ? last.refusal : null;
+          pd.sptN = last ? last.N : null;
+          pd.sptN60 = last ? last.N60 : null;
+          pd.sptRefusal = last ? last.refusal : null;
         }
-        d.logQuality = p.quality01;
-        d.logFidelity = p.fidelity01;
+        pd.logQuality = p.quality01;
+        pd.logFidelity = p.fidelity01;
         break;
       /* THE TWO-PASS METHODS WERE PUBLISHING NOTHING HERE. `raise-boring` and
          `hdd` reached `default:` and set `programme = null`, so anything
@@ -8293,18 +8326,18 @@ export function createDrillSim(ctx = {}) {
          crew up to the head, so they belong on the state the HUD reads. */
       case 'twoStage': {
         const st = S.m.stages[Math.min(S.stage, S.m.stages.length - 1)];
-        d.programme = 'two-stage';
-        d.stageName = st.name;
-        d.passM = p.passM;
-        d.pull01 = nz(p.pull);
-        d.pullStallAt = st.stallAt == null ? null : st.stallAt;
-        d.stalls = p.stalls;
-        d.cutterWear01 = p.cutterWear;
-        d.cutterChanges = p.cutterChanges;
+        pd.programme = 'two-stage';
+        pd.stageName = st.name;
+        pd.passM = p.passM;
+        pd.pull01 = nz(p.pull);
+        pd.pullStallAt = st.stallAt == null ? null : st.stallAt;
+        pd.stalls = p.stalls;
+        pd.cutterWear01 = p.cutterWear;
+        pd.cutterChanges = p.cutterChanges;
         // Cutters on a raise borer are changed FROM BELOW and a reamer cannot
         // be tripped at all, so this is not the string-trip number.
-        d.cutterChangeSec = st.cutterChangeSec == null ? null : st.cutterChangeSec;
-        d.mucksByGravity = !!st.flushOff;
+        pd.cutterChangeSec = st.cutterChangeSec == null ? null : st.cutterChangeSec;
+        pd.mucksByGravity = !!st.flushOff;
         /* THE JETTING LIFT'S OWN THREE NUMBERS. Same argument as the block
            above: these are what the pass is actually played on, so they belong
            on the state the HUD reads and not only on telemetry. `jetBar` is
@@ -8329,25 +8362,33 @@ export function createDrillSim(ctx = {}) {
            because during the pre-drill the active stage has no `jet` block. */
         const js = onReversePass() && S.m.stages[1] && S.m.stages[1].jet;
         if (!js || !p.jet) {
-          d.jetBar = null; d.jetFloorBar = null; d.jetBelowFloor = false;
-          d.column01 = null; d.columnWorst01 = null;
-          d.return01 = null; d.returnIdeal01 = null; d.columnDiaKnown = null;
+          pd.jetBar = null; pd.jetFloorBar = null; pd.jetBelowFloor = false;
+          pd.column01 = null; pd.columnWorst01 = null;
+          pd.return01 = null; pd.returnIdeal01 = null; pd.columnDiaKnown = null;
         }
         if (p.jet && js) {
-          d.jetBar = Math.round(p.jet.bar);
-          d.jetFloorBar = js.floorBar;
-          d.jetBelowFloor = !!p.jet.belowFloor;
-          d.column01 = clamp(p.jet.column01);
-          d.columnWorst01 = clamp(p.jet.worst01);
-          d.return01 = clamp(p.jet.return01, 0, 1.25);
-          d.returnIdeal01 = js.retIdeal;
+          pd.jetBar = Math.round(p.jet.bar);
+          pd.jetFloorBar = js.floorBar;
+          pd.jetBelowFloor = !!p.jet.belowFloor;
+          pd.column01 = clamp(p.jet.column01);
+          pd.columnWorst01 = clamp(p.jet.worst01);
+          pd.return01 = clamp(p.jet.return01, 0, 1.25);
+          pd.returnIdeal01 = js.retIdeal;
           // Column DIAMETER is not published, in any unit, at any confidence.
-          d.columnDiaKnown = false;
+          pd.columnDiaKnown = false;
         }
         break;
       }
-      default: d.programme = null; break;
+      default: pd.programme = null; break;
     }
+    /* Retire the previous frame's programme fields that this one did not
+       republish. `delete` rather than `= null` so a consumer's `in` / typeof
+       test reads "absent", which is what it is. */
+    for (let i = 0; i < progKeys.length; i++) {
+      if (!(progKeys[i] in pd)) delete d[progKeys[i]];
+    }
+    progKeys = Object.keys(pd);
+    Object.assign(d, pd);
   }
 
   function emitTick() {
