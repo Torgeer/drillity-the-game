@@ -1514,6 +1514,18 @@ export const TUNING = {
        ═══════════════════════════════════════════════════════════════════ */
     'driven-pile': {
       name: 'Driven piling', kind: 'impact', rodLength: 0, ropMax: 90, timeMul: 0.55,
+      /* NO DRILL STRING — the second of the two, and this table only ever
+         carried the first. game/data.js says `hasDrillString: false` here and
+         DOMAIN.md §1a names both: cable-tool (a wire rope, cleaned by bailing)
+         and driven-pile (a ram, a helmet and a pile). Neither has a rod to add.
+
+         Without it `getTelemetry()` published `hasDrillString: true`, `rods: 1`
+         and `rodLengthMeans: 'rod length'` for a pile, because the flag was
+         read as `!== false` and undefined is not false. The mechanics were
+         already right by a different route — `rodLength: 0` means no cadence
+         and `noJam` covers the fatigue path — which is exactly why nothing
+         looked broken while the published fact was wrong. */
+      hasDrillString: false,
       // At timeMul 0.55 the compressed blow stream lands at about 24 Hz, just
       // under the sim's 30 Hz impact cap — so every single blow can be emitted
       // and the rhythm the player hears IS the blow count being logged.
@@ -8860,13 +8872,18 @@ export function createDrillSim(ctx = {}) {
       greenBandTime: S.greenBandTime, grooveUptime01: clamp(S.grooveAccum / Math.max(1, S.drillSec)),
       sweetSpot: getSweetSpot(),
 
-      /* string & tooling. A spudder has NO DRILL STRING: what its cadence
-         counts is bailing runs, and nothing here may call one a rod. */
+      /* string & tooling. TWO methods have NO DRILL STRING (DOMAIN.md §1a) and
+         they are not the same thing as each other: a spudder's cadence counts
+         BAILING RUNS, and a driven pile has no cadence at all. Nothing here may
+         call a bailing run a rod — and nothing may call a pile either, which is
+         what a two-valued caption on a three-valued fact was doing. `rodLen` is
+         the arbiter: 0 means there is no repeating unit to name. */
       hasDrillString: S.m.hasDrillString !== false,
       rods: S.m.hasDrillString === false ? 0 : S.rods,
       bailingRuns: S.bailingRuns,
       rodLength: rodLen,
-      rodLengthMeans: S.m.hasDrillString === false ? 'bailing-run cadence' : 'rod length',
+      rodLengthMeans: rodLen === 0 ? null
+        : S.m.hasDrillString === false ? 'bailing-run cadence' : 'rod length',
       nextRodDepth: Number.isFinite(S.nextRodDepth) ? S.nextRodDepth : null,
       rodAdd: S.rodAdd ? { ...S.rodAdd, t: S.phaseT } : null,
       rodFatigue: S.rodFatigue,
