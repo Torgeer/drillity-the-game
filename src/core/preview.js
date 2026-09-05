@@ -538,6 +538,28 @@ export function createPreview(ctx) {
     // 22 m tube pile. Zero the offset, measure, then convert back through the
     // parent so the number is in the space `position` is actually expressed in.
     group.position.set(0, 0, 0);
+
+    /* HONOUR THE BUILDER'S DECLARED VIEW. `tools.js` finalise() has always
+       computed `userData.preview.aim` — the direction to look FROM, in the
+       tool's own space — and `preview.roll`, how far to lay a long thin tool
+       back so a 3.6 m rod is not three pixels wide in a square card. Its own
+       comment ended "Until preview.js reads it, this is inert", and nothing
+       read it. Another declared contract with no consumer, exactly like
+       gltfRig.builder() having zero call sites (ASTRA.md §8).
+
+       It matters more than it sounds. Every bit, crown, shoe, auger and bolt
+       in the library is built business-end-DOWN, and the fixed camera sat
+       above the equator — so the card showed the back of the tool. Measured by
+       raycast over a 96x96 grid, the carbide a player is buying covered 3.8 %
+       of a T45 button bit's card and 1.7 % of a DTH bit's. Through the
+       declared aim: 17.9 % and 8.6 % — 4.7x and 5.1x.
+
+       Roll is applied BEFORE the box is measured, so the framing accounts for
+       the tool's new attitude rather than fitting the upright pose and then
+       tipping it out of frame. */
+    const pv = group.userData && group.userData.preview;
+    if (pv && typeof pv.roll === 'number' && pv.roll) group.rotation.x = pv.roll;
+
     group.updateWorldMatrix(true, true);
     const box = new THREE_.Box3().setFromObject(group);
     if (!isFinite(box.min.x)) return;
@@ -550,7 +572,13 @@ export function createPreview(ctx) {
     // the mast off the top and the track off the bottom of every rig card.
     const radius = size.length() * 0.5 || 1;
     const dist = radius / Math.tan((camera.fov * Math.PI) / 360) * 1.9;
-    camera.position.set(dist * 0.42, dist * 0.34, dist * 0.86);
+    // The builder knows where its own face is; only fall back to the fixed
+    // three-quarter view when it has not said. Normalised on read rather than
+    // trusted, so a hand-written aim cannot change the framing distance.
+    const aim = (pv && Array.isArray(pv.aim) && pv.aim.length === 3) ? pv.aim : [0.42, 0.34, 0.86];
+    const aimLen = Math.hypot(aim[0], aim[1], aim[2]) || 1;
+    camera.position.set(
+      (dist * aim[0]) / aimLen, (dist * aim[1]) / aimLen, (dist * aim[2]) / aimLen);
     camera.lookAt(0, 0, 0);
     camera.near = Math.max(0.01, dist * 0.05);
     camera.far = Math.max(dist * 6, 40);

@@ -68,9 +68,34 @@ const note = [];
 
 /* ── 1 & 2. the exported models ──────────────────────────────────────────── */
 const MODELS = join(ROOT, 'public/models');
-const models = existsSync(MODELS)
-  ? readdirSync(MODELS).filter((f) => f.endsWith('.glb'))
-  : [];
+
+/* TOP LEVEL vs SUBDIRECTORY, and why the distinction is the whole point.
+
+   `readdirSync` is not recursive. A .glb dropped in `public/models/tools/`
+   would have been invisible to every check below — the rig-name rule, the
+   duplicate rule and the material rule alike — and this file would have gone
+   on printing OK. That is the "gate over an empty set" pattern (ASTRA.md §8),
+   and it was caught before the first tool landed rather than after.
+
+   The two levels are checked differently on purpose:
+     - a .glb at the TOP LEVEL is a machine, and the loader asks for it by
+       `models/<rigId>.glb`, so its name must BE a rig id;
+     - a .glb in a SUBDIRECTORY is something else — tooling, site furniture —
+       addressed by its own loader under its own naming scheme, so the rig-name
+       rule does not apply to it.
+   The MATERIAL rule applies to both, because assets.js is the only thing that
+   can make a material and it does not care what asked for one. */
+const listGlb = (dir, prefix = '') => (existsSync(dir)
+  ? readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory()
+    ? listGlb(join(dir, e.name), prefix + e.name + '/')
+    : (e.name.endsWith('.glb') ? [prefix + e.name] : [])))
+  : []);
+
+const allGlb = listGlb(MODELS);
+/** Machines: the top level only. These are the ones addressed by rig id. */
+const models = allGlb.filter((f) => !f.includes('/'));
+/** Everything else, checked for materials but not for rig names. */
+const nested = allGlb.filter((f) => f.includes('/'));
 
 /** Which rig, if any, a filename is TRYING to be. */
 const intended = (stem) => (rigIds.has(stem) ? stem
@@ -172,7 +197,7 @@ if (existsSync(BUILD_PY)) {
     ...[...src.matchAll(/^      ([A-Za-z][A-Za-z0-9_]*):\s*\{/gm)].map((m) => m[1]),
     ...[...src.matchAll(/KINDS\.([A-Za-z0-9_]+)\s*=/g)].map((m) => m[1]),
   ]);
-  for (const f of models) {
+  for (const f of [...models, ...nested]) {
     let names = [];
     try {
       const buf = readFileSync(join(MODELS, f));
@@ -207,7 +232,8 @@ const missing = [...rigIds].filter((id) => !haveModule.has(id));
 
 /* ── Report ──────────────────────────────────────────────────────────────── */
 console.log(`rigs ${rigIds.size}   blender modules ${haveModule.size}   `
-  + `exported models ${modelled.size}`);
+  + `exported models ${modelled.size}`
+  + (nested.length ? `   non-machine .glb ${nested.length}` : ''));
 if (missing.length) {
   console.log(`\nno Blender model yet (drawn procedurally): ${missing.join(' ')}`);
 }
