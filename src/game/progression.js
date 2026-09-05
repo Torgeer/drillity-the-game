@@ -18,7 +18,7 @@
  * the frozen GameState shape in core/contract.js is never altered in place.
  */
 
-import { EVENTS, clamp } from '../core/contract.js';
+import { EVENTS, clamp, createGameState } from '../core/contract.js';
 import {
   METHODS, RIGS, REGIONS, CERTS, ROLES, SKILLS, LEVELS, MAX_LEVEL, CORE_SLOTS,
   getMethod, getRig, getItem, getRegion, getCert, getSkill,
@@ -37,7 +37,14 @@ import {
    ═══════════════════════════════════════════════════════════════════════════ */
 export const SAVE_KEY = 'drillity.save.v1';
 export const SAVE_BACKUP_KEY = 'drillity.save.v1.bak';
-export const SAVE_VERSION = 4;
+export const SAVE_VERSION = 6;
+
+// Live delayed handlers can outlast reset/load or a replacement progression
+// instance in this page. Never reuse an identity they may still be carrying.
+// The saved sequence provides the floor on the next page; no wall clock or
+// random value affects physics, prices, rewards or identity allocation.
+let identityHighWater = 0;
+const validIdentity = (id) => Number.isSafeInteger(id) && id > 0;
 
 /**
  * Migrations run in order from the payload's version up to SAVE_VERSION. Each
@@ -83,6 +90,24 @@ export const MIGRATIONS = {
     p.version = 4;
     return p;
   },
+  // v4 -> v5: remember closed jobs and whether this hole has already paid.
+  4: (p) => {
+    p.settledContracts = Array.isArray(p.settledContracts) ? p.settledContracts : [];
+    // Old saves cannot identify an in-flight completion. A completed hole
+    // requires the normal DRILL_START before another one can be paid.
+    if (p.run) p.run.holePending = !(p.run.holesDone > 0);
+    p.version = 5;
+    return p;
+  },
+  5: (p) => {
+    p.identitySequence = p.identitySequence || 0;
+    if (p.run) {
+      if (!('runId' in p.run)) p.run.runId = null;
+      if (!('attemptId' in p.run)) p.run.attemptId = null;
+    }
+    p.version = 6;
+    return p;
+  },
 };
 
 /** Fresh, empty career branch. */
@@ -107,8 +132,6 @@ function makeCareer() {
 function storage() {
   try {
     if (typeof localStorage === 'undefined') return null;
-    localStorage.setItem('__drillity_probe', '1');
-    localStorage.removeItem('__drillity_probe');
     return localStorage;
   } catch { return null; }
 }
@@ -157,6 +180,23 @@ export function createProgression(ctx) {
 
   /** The run currently in progress (one accepted contract). */
   let run = null;
+  let identitySequence = 0;
+  let changingContract = false;
+  let pendingEvents = null;
+
+  // Money/XP/scene observers may save or call back into progression. Publish
+  // only after the whole transaction is recorded, never a half-paid hole.
+  function changeContract(action) {
+    changingContract = true;
+    pendingEvents = [];
+    try { return action(); }
+    finally {
+      const events = pendingEvents;
+      pendingEvents = null;
+      changingContract = false;
+      for (const [event, payload] of events) emit(event, payload);
+    }
+  }
 
   /* ═══════════════════════════════════════════════════════════════════════
      THE SITE, WHICH OUTLIVES THE CONTRACT
@@ -287,7 +327,18 @@ export function createProgression(ctx) {
 
   function markDirty() { savePending = true; saveTimer = 0; }
 
-  function emit(evt, payload) { try { bus.emit(evt, payload); } catch { /* bus is defensive already */ } }
+  function allocateIdentity() {
+    const next = Math.max(identitySequence, identityHighWater) + 1;
+    if (!validIdentity(next)) throw new Error('[progression] attempt identity sequence exhausted');
+    identitySequence = identityHighWater = next;
+    markDirty();
+    return next;
+  }
+
+  function emit(evt, payload) {
+    if (pendingEvents) { pendingEvents.push([evt, payload]); return; }
+    try { bus.emit(evt, payload); } catch { /* bus is defensive already */ }
+  }
 
   /* ── money & XP ──────────────────────────────────────────────────────── */
   /**
@@ -706,23 +757,45 @@ export function createProgression(ctx) {
    * open a run accumulator that the per-hole settlements write into.
    */
   function acceptContract(contract) {
-    if (!contract) return { ok: false, reason: 'No contract' };
-    const missing = (contract.requiredCerts || []).filter((c) => !state.player.certs.includes(c));
+    if (changingContract || run || state.contract) return { ok: false, reason: 'Finish or abandon the active contract first' };
+    if (!contract || typeof contract !== 'object' || Array.isArray(contract)) return { ok: false, reason: 'No contract' };
+    const method = getMethod(contract.methodId);
+    if (!method) return { ok: false, reason: 'Unknown contract method' };
+    if (!getRegion(contract.regionId)) return { ok: false, reason: 'Unknown contract region' };
+    if (typeof contract.id !== 'string' || !contract.id.trim()
+        || !Number.isFinite(contract.targetDepth) || contract.targetDepth <= 0
+        || !Number.isInteger(contract.holes) || contract.holes < 1
+        || !Number.isFinite(contract.payout) || contract.payout < 0
+        || (contract.requiredCerts != null && !Array.isArray(contract.requiredCerts))) {
+      return { ok: false, reason: 'Invalid contract' };
+    }
+    if (state.player.level < method.unlockLevel || !state.unlocked.methods.includes(method.id)) {
+      return { ok: false, reason: `Requires ${method.shortName} at level ${method.unlockLevel}` };
+    }
+    // Read validity without expiring certificates or creating career state:
+    // rejected acceptance has no accounting or selection side effects.
+    const currentCareer = state.player.career;
+    const missing = (contract.requiredCerts || []).filter((id) => {
+      const due = currentCareer?.certExpiry?.[id];
+      return !state.player.certs.includes(id) || (due && (currentCareer?.daysElapsed || 0) >= due);
+    });
     if (missing.length) {
       return { ok: false, reason: `Needs ${missing.map((c) => getCert(c)?.name || c).join(', ')}` };
     }
-    const rig = getRig(state.garage.rigId);
-    if (!rig || !rig.methods.includes(contract.methodId)) {
-      const able = RIGS.filter((r) => state.unlocked.rigs.includes(r.id) && r.methods.includes(contract.methodId));
-      if (!able.length) return { ok: false, reason: `No owned rig runs ${getMethod(contract.methodId)?.shortName ?? contract.methodId}` };
-      selectRig(able[0].id);
-    }
+    const able = RIGS.filter((r) => state.unlocked.rigs.includes(r.id) && r.methods.includes(contract.methodId));
+    const rig = able.find((r) => r.id === state.garage.rigId) || able[0];
+    if (!rig) return { ok: false, reason: `No owned rig runs ${method.shortName}` };
+    const from = currentCareer?.lastRegionId || state.world.regionId;
+    const mobilisation = travelCost(from, contract.regionId, { rigId: rig.id, skills: skills() });
+    if (!canAfford(mobilisation)) return { ok: false, reason: `Mobilisation costs ${mobilisation}` };
 
+    return changeContract(() => openContract(contract, rig, mobilisation));
+  }
+
+  function openContract(contract, rig, mobilisation) {
     const c = career();
-    const from = c.lastRegionId || state.world.regionId;
-    const mobilisation = travelCost(from, contract.regionId, { rigId: state.garage.rigId, skills: skills() });
+    if (state.garage.rigId !== rig.id) selectRig(rig.id);
     if (mobilisation > 0) {
-      if (!canAfford(mobilisation)) return { ok: false, reason: `Mobilisation costs ${mobilisation}` };
       addMoney(-mobilisation, `Mobilisation to ${getRegion(contract.regionId)?.name ?? contract.regionId}`);
       advanceTime(6 + mobilisation / 900);
     }
@@ -731,6 +804,12 @@ export function createProgression(ctx) {
     lastContract = contract;
     settledContracts.delete(contract.id);   // a re-accepted job may settle again
     state.world.regionId = contract.regionId;
+    state.world.contractId = contract.id;
+    if (state.drill) {
+      state.drill.target = contract.targetDepth;
+      state.drill.depth = 0;
+      state.drill.stratumIndex = 0;
+    }
     // The site the world renders. Survives settlement — see THE SITE above.
     publishSite(contract);
     c.lastRegionId = contract.regionId;
@@ -738,6 +817,8 @@ export function createProgression(ctx) {
 
     run = {
       contract,
+      runId: allocateIdentity(),
+      attemptId: null,
       holesDone: 0,
       hours: 0,
       revenue: 0,
@@ -748,24 +829,41 @@ export function createProgression(ctx) {
       incidents: 0,
       grades: [],
       mobilisation,
+      holePending: true,
     };
 
+    // Geology subscribes to this event and creates world.strata synchronously
+    // before the caller navigates to the site. Do not generate it twice.
     emit(EVENTS.CONTRACT_ACCEPT, { contract });
     emit(EVENTS.REGION_CHANGE, { regionId: contract.regionId });
     markDirty();
     return { ok: true, reason: '', mobilisation };
   }
 
+  /** Issue a new physical attempt for this accepted job, before sim starts.
+   * The returned scalars belong to that attempt even after later starts.
+   * DRILL_START is only its notification and cannot issue payment identity.
+   */
+  function beginHole(contract) {
+    if (changingContract || !run || !contract || contract.id !== run.contract.id
+        || state.contract?.id !== run.contract.id) return null;
+    run.attemptId = allocateIdentity();
+    run.holePending = true;
+    return Object.freeze({ runId: run.runId, attemptId: run.attemptId });
+  }
+
   /** Abandon the active contract. The mobilisation is already spent. */
   function abandonContract() {
-    if (!run) return { ok: false, reason: 'No active contract' };
-    const rep = Math.round(-8 - (run.contract.difficulty || 1) * 4);
-    addReputation(run.contract.regionId, rep);
-    if (run.contract.id) settledContracts.add(run.contract.id);   // closed, not payable
-    run = null;
-    releaseContract('abandoned');
-    markDirty();
-    return { ok: true, reason: '', reputation: rep };
+    if (changingContract || !run) return { ok: false, reason: 'No active contract' };
+    return changeContract(() => {
+      const rep = Math.round(-8 - (run.contract.difficulty || 1) * 4);
+      addReputation(run.contract.regionId, rep);
+      if (run.contract.id) settledContracts.add(run.contract.id);   // closed, not payable
+      run = null;
+      releaseContract('abandoned');
+      markDirty();
+      return { ok: true, reason: '', reputation: rep };
+    });
   }
 
   /**
@@ -842,18 +940,16 @@ export function createProgression(ctx) {
    *          safetyIncidents?:number, wob?:number, rpm?:number, flush?:number}} payload
    */
   function completeHole(payload = {}) {
-    /* WHOSE HOLE WAS THAT? The open run is the accounting truth and comes
-       first. After it, `payload.contract` — the sim's own snapshot, taken in
-       `startHole()` and therefore immune to a later clear — is a better answer
-       than `state.contract`, which by this point in the dispatch may already
-       have been taken away. `sim/drilling.js` publishes it on every
-       HOLE_COMPLETE; the QA bridge and the no-sim demo path do not. */
-    const contract = run?.contract || payload.contract || state.contract;
+    if (changingContract) return null;
+    // An event is evidence about an active job, never authority to reopen a
+    // paid/abandoned job. The sim retains its contract on the results screen.
+    const contract = run?.contract;
     if (!contract) {
       warnOnce('[progression] HOLE_COMPLETE with no contract anywhere — the hole '
         + 'is not settled: no money, no XP, no wear, no reputation', payload);
       return null;
     }
+    if (payload.contract && payload.contract.id !== contract.id) return null;
     if (contract.id && settledContracts.has(contract.id)) {
       /* The job is finished and paid. Re-drilling it (the QA harness does this,
          and so does a player who re-enters the site) must not pay again. */
@@ -861,8 +957,18 @@ export function createProgression(ctx) {
         + 'settled — ignored rather than paid twice', contract.id);
       return null;
     }
-    if (!run) run = { contract, holesDone: 0, hours: 0, revenue: 0, costs: 0, xp: 0, reputation: 0, hazards: 0, incidents: 0, grades: [], mobilisation: 0 };
+    // Once a real simulation attempt exists, tokenless compatibility events
+    // cannot downgrade it. Likewise an old token cannot pay a newly accepted
+    // job that has not started yet, even if its posting reused the same ID.
+    if (run.attemptId != null) {
+      if (payload.runId !== run.runId || payload.attemptId !== run.attemptId) return null;
+    } else if ('runId' in payload || 'attemptId' in payload) return null;
+    if (!run.holePending) return null;
 
+    return changeContract(() => settleHole(contract, payload));
+  }
+
+  function settleHole(contract, payload) {
     const depth = Math.max(0.1, Number(payload.depth) || contract.targetDepth || 1);
     const grade = String(payload.grade || 'C').toUpperCase();
     const firstTime = !career().firstTimes[contract.methodId];
@@ -928,6 +1034,10 @@ export function createProgression(ctx) {
       firstTime,
       hoursOverride: hours,
     });
+
+    // Consume before publishing any money, XP or scene event. The next hole
+    // is armed by the sim/no-sim DRILL_START lifecycle and survives reload.
+    run.holePending = false;
 
     // ── apply wear to every consumable actually fitted ────────────────────
     const worn = applyWear(depth, contract, payload);
@@ -1124,7 +1234,6 @@ export function createProgression(ctx) {
       grade: overall,
       lastSettlement,
     };
-    emit(EVENTS.SCENE_CHANGE, { scene: ctx.SCENES?.RESULTS ?? 'results', summary });
     if (contract.id) settledContracts.add(contract.id);
     run = null;
     /* The JOB is over, so `state.contract` goes — menu.js, career.js and the
@@ -1134,6 +1243,7 @@ export function createProgression(ctx) {
        therefore stays, marked dead. See THE SITE, WHICH OUTLIVES THE CONTRACT. */
     releaseContract('settled');
     markDirty();
+    emit(EVENTS.SCENE_CHANGE, { scene: ctx.SCENES?.RESULTS ?? 'results', summary });
     return summary;
   }
 
@@ -1188,6 +1298,7 @@ export function createProgression(ctx) {
   function serialise() {
     return {
       version: SAVE_VERSION,
+      identitySequence,
       savedAtDay: +career().daysElapsed.toFixed(3),
       player: {
         name: state.player.name,
@@ -1227,11 +1338,14 @@ export function createProgression(ctx) {
          above and rehydrated onto the run on load, so the two can never
          disagree about which job is being settled. */
       run: run ? {
+        runId: run.runId, attemptId: run.attemptId,
         holesDone: run.holesDone, hours: run.hours, revenue: run.revenue,
         costs: run.costs, xp: run.xp, reputation: run.reputation,
         hazards: run.hazards, incidents: run.incidents,
         grades: [...run.grades], mobilisation: run.mobilisation,
+        holePending: run.holePending,
       } : null,
+      settledContracts: [...settledContracts],
       settings: { ...state.settings },
     };
   }
@@ -1242,15 +1356,27 @@ export function createProgression(ctx) {
    * @returns {boolean} whether it was persisted
    */
   function save() {
-    savePending = false;
+    savePending = true;
+    if (changingContract) return false;
     const store = storage();
     if (!store) return false;
     let json;
     try { json = JSON.stringify(serialise()); } catch (e) { console.error('[progression] serialise failed', e); return false; }
     try {
       const prev = store.getItem(SAVE_KEY);
-      if (prev) store.setItem(SAVE_BACKUP_KEY, prev);
+      // A recovered career must not replace its good backup with the corrupt
+      // primary. Backup failure also must not prevent a possible primary write.
+      if (prev) {
+        let valid = false;
+        try { valid = validPayload(JSON.parse(prev)); } catch { /* corrupt */ }
+        if (valid) {
+          try { store.setItem(SAVE_BACKUP_KEY, prev); }
+          catch (e) { console.warn('[progression] backup save failed', e && e.message); }
+        }
+      }
       store.setItem(SAVE_KEY, json);
+      savePending = false;
+      saveTimer = 0;
       return true;
     } catch (e) {
       console.warn('[progression] save failed', e && e.message);
@@ -1279,8 +1405,47 @@ export function createProgression(ctx) {
       const raw = store.getItem(key);
       if (!raw) return null;
       const parsed = JSON.parse(raw);
-      return parsed && typeof parsed === 'object' ? parsed : null;
+      return validPayload(parsed) ? parsed : null;
     } catch { return null; }
+  }
+
+  // Check consumed structure before applying anything. A parseable but broken
+  // primary otherwise mutates half the career, then throws before backup load.
+  function validPayload(p) {
+    const object = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
+    if (!object(p) || !object(p.player)) return false;
+    for (const key of ['unlocked', 'garage', 'world', 'settings']) {
+      if (p[key] != null && !object(p[key])) return false;
+    }
+    for (const [branch, keys] of [
+      [p.player, ['certs']], [p.unlocked, ['methods', 'regions', 'rigs', 'tools']],
+      [p.garage, ['owned']], [p.run, ['grades']],
+      [p.player.career, ['ledger']],
+    ]) {
+      for (const key of keys) if (branch?.[key] != null && !Array.isArray(branch[key])) return false;
+    }
+    for (const [branch, keys] of [
+      [p.player, ['skills', 'stats', 'career']], [p.garage, ['loadout', 'condition']],
+      [p.player.career, ['reputation', 'certExpiry', 'firstTimes']],
+    ]) {
+      for (const key of keys) if (branch?.[key] != null && !object(branch[key])) return false;
+    }
+    for (const key of ['ledger', 'reputation', 'certExpiry', 'firstTimes']) {
+      if (p.player.career?.[key] === null) return false;
+    }
+    for (const key of ['daysElapsed', 'hoursWorked', 'contractsDone', 'holesThisContract',
+      'reputationTotal', 'lifetimeEarned', 'lifetimeSpent']) {
+      if (p.player.career?.[key] !== undefined && !Number.isFinite(p.player.career[key])) return false;
+    }
+    if (p.settledContracts != null && !Array.isArray(p.settledContracts)) return false;
+    if (p.contract != null && (!object(p.contract) || !p.contract.id
+        || !getMethod(p.contract.methodId) || !getRegion(p.contract.regionId))) return false;
+    if (p.run != null && (!object(p.run) || !p.contract)) return false;
+    if (p.identitySequence != null && (!Number.isSafeInteger(p.identitySequence) || p.identitySequence < 0)) return false;
+    for (const key of ['runId', 'attemptId']) {
+      if (p.run?.[key] != null && !validIdentity(p.run[key])) return false;
+    }
+    return true;
   }
 
   /**
@@ -1296,7 +1461,9 @@ export function createProgression(ctx) {
     if (!payload) { payload = readPayload(store, SAVE_BACKUP_KEY); usedBackup = !!payload; }
     if (!payload) return false;
     try {
-      applyPayload(migrate(payload));
+      savePending = usedBackup;
+      saveTimer = 0;
+      changeContract(() => applyPayload(migrate(payload)));
       if (usedBackup) console.warn('[progression] primary save was unreadable — restored from backup');
       return true;
     } catch (e) {
@@ -1307,6 +1474,9 @@ export function createProgression(ctx) {
 
   /** Apply a migrated payload onto the live state, field by field. */
   function applyPayload(p) {
+    identitySequence = Math.max(identitySequence, p.identitySequence || 0,
+      p.run?.runId || 0, p.run?.attemptId || 0);
+    identityHighWater = Math.max(identityHighWater, identitySequence);
     const P = p.player || {};
     state.player.name = P.name ?? state.player.name;
     state.player.xp = Number(P.xp) || 0;
@@ -1354,11 +1524,28 @@ export function createProgression(ctx) {
     lastContract = saved;
     adoptedContract = saved;
     settledContracts.clear();
+    for (const id of p.settledContracts || []) settledContracts.add(id);
+    // v4 already kept recent closed jobs in the ledger/site, although it did
+    // not persist the set. Preserve that evidence when migrating.
+    for (const entry of state.player.career.ledger) {
+      if (entry?.complete && entry.contractId) settledContracts.add(entry.contractId);
+    }
+    if (p.world?.site?.live === false && p.world.site.contractId) settledContracts.add(p.world.site.contractId);
     if (saved) {
+      // Explicitly accepted repeats (notably the rescue job) reuse card IDs.
+      settledContracts.delete(saved.id);
       publishSite(saved);
+      state.world.contractId = saved.id;
+      if (state.drill) {
+        state.drill.target = saved.targetDepth;
+        state.drill.depth = 0;
+        state.drill.stratumIndex = 0;
+      }
       const r = p.run && typeof p.run === 'object' ? p.run : null;
       run = {
         contract: saved,
+        runId: validIdentity(r?.runId) ? r.runId : allocateIdentity(),
+        attemptId: r?.attemptId ?? null,
         holesDone: Number(r?.holesDone) || 0,
         hours: Number(r?.hours) || 0,
         revenue: Number(r?.revenue) || 0,
@@ -1372,6 +1559,9 @@ export function createProgression(ctx) {
            subtracts it from the net, so losing it would report a profit the
            player did not make. */
         mobilisation: Number(r?.mobilisation) || 0,
+        // A physical sim is not restored by a career load. Its next start
+        // must issue a new token; queued pre-load results are stale.
+        holePending: r?.attemptId == null && r?.holePending === true,
       };
       if (!r) {
         warnOnce('[progression] restored an active contract with no run '
@@ -1390,6 +1580,10 @@ export function createProgression(ctx) {
     checkCertExpiry();
     emit(EVENTS.MONEY_CHANGE, { delta: 0, balance: state.player.money, reason: 'load' });
     emit(EVENTS.RIG_CHANGE, { rigId: state.garage.rigId, methodId: getRig(state.garage.rigId)?.methods[0] });
+    // Geology initialized before progression and still describes its default
+    // profile. Restore the accepted job through its existing event consumer;
+    // acceptance bookkeeping/charges are deliberately not run a second time.
+    if (saved) emit(EVENTS.CONTRACT_ACCEPT, { contract: saved, restored: true });
     emit(EVENTS.REGION_CHANGE, { regionId: state.world.regionId });
   }
 
@@ -1415,26 +1609,17 @@ export function createProgression(ctx) {
     if (store) {
       try { store.removeItem(SAVE_KEY); store.removeItem(SAVE_BACKUP_KEY); } catch { /* ignore */ }
     }
-    state.player.name = 'Rookie';
-    state.player.level = 1;
-    state.player.xp = 0;
-    state.player.money = 4500;
-    state.player.roleId = 'helper';
-    state.player.certs = [];
-    state.player.skills = {};
-    state.player.skillPoints = 0;
-    state.player.stats = { metresDrilled: 0, holesDone: 0, bitsBurned: 0, perfectRuns: 0, jamsCleared: 0 };
+    // Use the actual starter inventory. A second copy here drifted back to
+    // the R32 percussion rod that the starter auger cannot equip.
+    const fresh = createGameState();
+    Object.assign(state.player, fresh.player);
     state.player.career = makeCareer();
-    state.unlocked.methods = ['auger'];
-    state.unlocked.regions = ['nordic'];
-    state.unlocked.rigs = ['crawler-lite'];
-    state.unlocked.tools = [];
-    state.garage.rigId = 'crawler-lite';
-    state.garage.owned = ['auger-flight-std', 'rod-r32'];
-    state.garage.condition = { 'auger-flight-std': 1, 'rod-r32': 1 };
-    state.garage.loadout = { bit: 'auger-flight-std', rod: 'rod-r32', hammer: null, compressor: null, pump: null };
-    state.world.regionId = 'nordic';
+    Object.assign(state.unlocked, fresh.unlocked);
+    Object.assign(state.garage, fresh.garage);
+    state.world.regionId = fresh.world.regionId;
     state.world.site = null;      // a new career stands on no site at all
+    state.world.contractId = null;
+    boardCache = null;
     state.contract = null;
     lastContract = null;
     adoptedContract = null;
@@ -1568,31 +1753,39 @@ export function createProgression(ctx) {
     reconcileUnlocks();
 
     unsubs.push(bus.on(EVENTS.HOLE_COMPLETE, (payload) => { completeHole(payload || {}); }));
-    unsubs.push(bus.on(EVENTS.CONTRACT_ACCEPT, (p) => {
-      // A contract accepted elsewhere (the QA bridge) still needs a run object.
-      if (p?.contract && (!run || run.contract?.id !== p.contract.id)) {
-        run = { contract: p.contract, holesDone: 0, hours: 0, revenue: 0, costs: 0, xp: 0, reputation: 0, hazards: 0, incidents: 0, grades: [], mobilisation: 0 };
-        state.contract = p.contract;
-        lastContract = p.contract;
-        if (p.contract.id) settledContracts.delete(p.contract.id);
-        // The bridge sets up a site too, and the world has to be told about it.
-        publishSite(p.contract);
-      }
+    // CONTRACT_ACCEPT is a notification emitted by acceptContract, not an
+    // alternate command that bypasses ownership, mobilisation and persistence.
+    unsubs.push(bus.on(EVENTS.DRILL_START, (p) => {
+      if (changingContract || !run) return;
+      // Compatibility for the existing no-sim demo/direct test lifecycle.
+      // Real simulation starts must use beginHole; stale notifications never
+      // rearm an attempt that has paid or been aborted.
+      if (run.attemptId != null || p?.runId != null || p?.attemptId != null) return;
+      if (p?.contract && p.contract.id !== run.contract.id) return;
+      if (p?.methodId && p.methodId !== run.contract.methodId) return;
+      if (!p?.contract && !p?.methodId) return;
+      if (!run.holePending) { run.holePending = true; markDirty(); }
+    }));
+    unsubs.push(bus.on(EVENTS.DRILL_STOP, (p) => {
+      if (changingContract || !run || p?.reason === 'complete') return;
+      if (run.attemptId == null || p?.runId !== run.runId || p?.attemptId !== run.attemptId) return;
+      if (run.holePending) { run.holePending = false; markDirty(); }
     }));
     unsubs.push(bus.on(EVENTS.JAM_CLEARED, () => { state.player.stats.jamsCleared += 1; markDirty(); }));
     if (typeof window !== 'undefined') {
       const flush = () => { if (savePending) save(); };
       window.addEventListener('pagehide', flush);
-      window.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flush(); });
+      const visibility = () => { if (document.visibilityState === 'hidden') flush(); };
+      window.addEventListener('visibilitychange', visibility);
       unsubs.push(() => window.removeEventListener('pagehide', flush));
+      unsubs.push(() => window.removeEventListener('visibilitychange', visibility));
     }
   }
 
   function update(dt) {
     /* ADOPT A CONTRACT SET BEHIND OUR BACK.
-       Two other modules assign `state.contract` directly: `ui/screens/
-       contracts.js` (which does at least emit CONTRACT_ACCEPT, so the handler
-       above catches it) and `main.js`'s QA bridge (which emits nothing). The
+       `main.js`'s QA bridge assigns state.contract directly without emitting
+       anything. The normal board must use acceptContract. The
        harness path is precisely where the auger fallback was first measured,
        so rather than let the world go without a site description there, notice
        the change and publish it. One identity comparison per frame. */
@@ -1636,7 +1829,7 @@ export function createProgression(ctx) {
     unlock, spendSkillPoint, canSpendSkillPoint, skillRank, skillCost, getEffects,
 
     // contracts
-    acceptContract, abandonContract, completeHole, rescueContract, isBroke,
+    acceptContract, beginHole, abandonContract, completeHole, rescueContract, isBroke,
 
     // world
     travelTo, addReputation, reputationFor, reputationTotal,

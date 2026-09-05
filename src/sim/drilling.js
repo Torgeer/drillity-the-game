@@ -2750,6 +2750,9 @@ export function createDrillSim(ctx = {}) {
       stopReason: null,
 
       contract: null,
+      // Captured at start, never resolved from the mutable active job at finish.
+      runId: null,
+      attemptId: null,
       methodId: 'auger',
       /* 'air' | 'water' | 'mud' | 'foam' | 'none', or NULL when the caller did
          not tell us. Null is published as null and warned about once — see
@@ -3423,9 +3426,26 @@ export function createDrillSim(ctx = {}) {
   }
 
   function startHole(contract) {
-    Object.assign(S, newRunState());
     const c = contract || ctx.state?.contract || {};
+    const identity = typeof ctx.progression?.beginHole === 'function'
+      ? ctx.progression.beginHole(c) : null;
+    if (ctx.progression && !identity) {
+      if (ctx.progression.run) {
+        // An unrelated preview must not replace an accepted career attempt.
+        abortHole('contract-not-active');
+        return null;
+      }
+      // main.js's QA bridge starts generated contracts without accepting them.
+      // Keep that visual simulation, explicitly unpaid: progression requires an
+      // accepted run and matching captured IDs before any result can settle.
+      warnOnce('startHole:unaccepted',
+        '[sim] no accepted contract run — starting an unpaid preview; '
+        + 'completion cannot award money, XP or reputation.');
+    }
+    Object.assign(S, newRunState());
     S.contract = c;
+    S.runId = identity?.runId ?? null;
+    S.attemptId = identity?.attemptId ?? null;
     S.methodId = resolveMethodId(c);
     // One method genuinely becomes a different machine depending on what is
     // fitted: with a piezocone in the probe slot, site investigation is not a
@@ -3514,7 +3534,10 @@ export function createDrillSim(ctx = {}) {
 
     S.active = true;
     S.phase = 'drilling';
-    emit(EV.DRILL_START, { methodId: S.methodId, contract: c });
+    emit(EV.DRILL_START, {
+      methodId: S.methodId, contract: c,
+      runId: S.runId, attemptId: S.attemptId,
+    });
     emit(EV.STRATUM_ENTER, { stratum: S.ground, depth: 0, __sim: true });
     writeState();
     return getTelemetry();
@@ -3522,12 +3545,13 @@ export function createDrillSim(ctx = {}) {
 
   function abortHole(reason = 'aborted') {
     if (!S.active) return null;
+    const identity = { runId: S.runId, attemptId: S.attemptId };
     S.active = false;
     S.phase = 'aborted';
     S.stopReason = reason;
     if (S.tripResolve) { S.tripResolve({ ok: false, reason }); S.tripResolve = null; }
     writeState();
-    emit(EV.DRILL_STOP, { reason });
+    emit(EV.DRILL_STOP, { reason, ...identity });
     return { reason, depth: S.depth, timeSec: S.timeSec };
   }
 
@@ -7970,6 +7994,9 @@ export function createDrillSim(ctx = {}) {
 
   function complete() {
     if (!S.active) return;
+    // A synchronous completion listener may start the next hole. Its identity
+    // must not leak into this attempt's later stop notification.
+    const identity = { runId: S.runId, attemptId: S.attemptId };
     S.depth = S.target;
     S.active = false;
     S.phase = 'complete';
@@ -7987,8 +8014,9 @@ export function createDrillSim(ctx = {}) {
       bitWearBook: +S.wearBook.toFixed(3),
       bitBearing: +S.bearing.toFixed(3),
       contract: S.contract,
+      ...identity,
     });
-    emit(EV.DRILL_STOP, { reason: 'complete' });
+    emit(EV.DRILL_STOP, { reason: 'complete', ...identity });
     haptic('success', true);
   }
 
@@ -8909,6 +8937,7 @@ export function createDrillSim(ctx = {}) {
     return {
       /* run */
       active: S.active, phase: S.phase, reason: S.stopReason,
+      runId: S.runId, attemptId: S.attemptId,
       methodId: S.methodId, method: { id: S.methodId, name: S.m.name, kind: S.m.kind },
       // Null when the contract did not carry one — never guessed. See
       // resolveFlushMedium(); the same value is mirrored on state.drill.
