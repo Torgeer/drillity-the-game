@@ -5996,6 +5996,15 @@ export function makeContract(regionId, level = 1, rand = makeRandom(Date.now() &
     metres,
     /** What one of `holes` actually is. A pile, a ring, a drive, a heading. */
     unitNoun: UNIT_NOUN[method.id] || 'hole',
+    /* WHAT COMES BACK UP THE HOLE — copied from the method row, because the
+       contract is what the sim is handed.
+
+       It was never copied, so `state.drill.flushMedium` published NULL for
+       every method, always. `sim/drilling.js` warns once and names this fix;
+       every consumer meanwhile fell back to its own per-method table, which is
+       three tables describing one thing. Measured on a live DRILL_TICK across
+       six methods before this line existed: null, six times out of six. */
+    flushMedium: method.flushMedium || null,
     groundSpec,
     hardness: +hardness.toFixed(3),
     abrasivity: +groundAbrasivity(groundSpec).toFixed(3),

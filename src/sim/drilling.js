@@ -2946,12 +2946,27 @@ export function createDrillSim(ctx = {}) {
   function emit(evt, payload) {
     try { bus.emit(evt, payload); } catch (e) { console.error('[sim] emit', evt, e); }
   }
-  function haptic(pattern, force = false) {
+  /**
+   * `kind` is WHAT HAPPENED, and it is the whole point of the third argument.
+   *
+   * `fireHazard()` knows the hazard's kind and used to discard it here: eleven
+   * unrelated hazards all arrived at the audio layer as `haptic('heavy')`, so
+   * the strongest signal the game can send said only "something bad" and the
+   * player could not learn which. `src/audio/haptics.js` already carries a
+   * six-shape vocabulary keyed on exactly the strings the sim spells — passing
+   * the kind through gives 19 of 31 hazards their correct signature with no
+   * new mapping anywhere.
+   *
+   * A driller working by feel knows a rod change from a jam from a
+   * breakthrough without looking. That is the literacy this channel exists to
+   * build, and it cannot be built from one pattern meaning eleven things.
+   */
+  function haptic(pattern, force = false, kind = null) {
     if (ctx.state?.settings?.haptics === false) return;
     const now = S.timeSec;
     if (!force && now - S.lastHapticT < 1 / T.sim.maxHapticHz) return;
     S.lastHapticT = now;
-    emit(EV.HAPTIC, { pattern });
+    emit(EV.HAPTIC, kind ? { pattern, kind } : { pattern });
   }
 
   /* ── environment snapshot handed to the pure models ─────────────────── */
@@ -4340,11 +4355,11 @@ export function createDrillSim(ctx = {}) {
       case 'boulder':
         h.severity = clamp(nz(d.hardness, h.severity));
         emit(EV.BOULDER, { depth: h.depth, __sim: true, ...d });
-        haptic('heavy', true);
+        haptic('heavy', true, h.kind);
         break;
       case 'cavity':
         emit(EV.CAVITY, { depth: h.depth, height: nz(d.height, 1.2), __sim: true });
-        haptic('heavy', true);
+        haptic('heavy', true, h.kind);
         break;
       case 'water':
         S.waterFlowLpm = Math.round(nz(d.flowLpm, 60 + h.severity * 240));
@@ -4358,14 +4373,14 @@ export function createDrillSim(ctx = {}) {
         // A drilling break: the bit runs away as it enters the pressured bed,
         // which is the first thing a driller notices and the reason to flow-check.
         S.influx = Math.max(S.influx, 0.25);
-        haptic('heavy', true);
+        haptic('heavy', true, h.kind);
         break;
       case 'lost-zone':
         S.returns = Math.min(S.returns, 0.35);
         haptic('medium', true);
         break;
       case 'diff-stick':
-        haptic('heavy', true);
+        haptic('heavy', true, h.kind);
         break;
       case 'twist-off':
         // Survived if the weight and the rotation came off during the warning.
@@ -4381,25 +4396,25 @@ export function createDrillSim(ctx = {}) {
       case 'cyclone-choke': haptic('medium', true); break;
       // The jumbo: the round's fate, decided one hole at a time.
       case 'collar-slip': haptic('light', true); break;
-      case 'cut-choke': haptic('heavy', true); break;
+      case 'cut-choke': haptic('heavy', true, h.kind); break;
       case 'bad-ground': haptic('medium', true); break;
       // Longhole: two of these want opposite things from the flushing control.
       case 'hole-blocked': haptic('medium', true); break;
       case 'uphole-flush': haptic('medium', true); break;
-      case 'rod-whip': haptic('heavy', true); break;
+      case 'rod-whip': haptic('heavy', true, h.kind); break;
       // Ground support.
-      case 'gel-clock': haptic('heavy', true); break;
+      case 'gel-clock': haptic('heavy', true, h.kind); break;
       case 'bolt-hole-collapse': haptic('medium', true); break;
       case 'loose-plate': haptic('light', true); break;
       // Driven piling.
-      case 'obstruction': haptic('heavy', true); break;
+      case 'obstruction': haptic('heavy', true, h.kind); break;
       case 'head-damage': haptic('medium', true); break;
-      case 'premature-refusal': haptic('heavy', true); break;
+      case 'premature-refusal': haptic('heavy', true, h.kind); break;
       // Site investigation.
       case 'rod-bounce': if (S.prog) S.prog.goodTaps = 0; haptic('medium', true); break;
       case 'fall-in': haptic('light', true); break;
-      case 'precarious': haptic('heavy', true); break;
-      case 'thrust-limit': haptic('heavy', true); break;
+      case 'precarious': haptic('heavy', true, h.kind); break;
+      case 'thrust-limit': haptic('heavy', true, h.kind); break;
       case 'cone-desaturation': haptic('medium', true); break;
       default: break;
     }
@@ -8459,6 +8474,20 @@ export function createDrillSim(ctx = {}) {
       greenBandTime: S.greenBandTime, sweetSpot: getSweetSpot(),
       heat: S.heat, load: S.load, stability: S.stability, bind: S.bind,
       jamState: S.jamState, phase: S.phase, warning: currentWarning(),
+      /* THE FOUR FIELDS THE AUDIO LAYER WAS DEAF WITHOUT.
+         These lived only on `getTelemetry()` and the `state.drill` mirror, and
+         audio reads that mirror only after a 500 ms tick drought — so while
+         the player was actually drilling, all six per-method programme voices
+         had nothing to follow. The hammer ran at a rate guessed from the rpm
+         slider while the sim's real blow rate went past on the same frame.
+
+         `flushMedium` may legitimately be NULL; the sim refuses to invent one.
+         A consumer reading null should use its own per-method table rather
+         than treat it as "no flush". */
+      blowHz: S.blowHz,
+      flushMedium: S.flushMedium,
+      programme: S.prog ? (S.prog.kind || S.prog.id || null) : null,
+      beat: S.beat ? { kind: S.beat.kind || null, t: S.beat.t, dur: S.beat.dur } : null,
     });
   }
 
