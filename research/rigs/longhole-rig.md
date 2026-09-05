@@ -2,6 +2,10 @@
 ## Underground longhole / ITH production drill
 
 status: IN PROGRESS (appended as sources are read)
+last update: 2026-09-05 — §1.9, §3.4, §8 revisions and §9 added from four OEM
+             technical specifications with dimensioned general-arrangement
+             drawings for THIS class (previously only a jumbo elevation was in
+             hand). §3.4 is now the modelling basis; §3.2 is superseded.
 date: 2026-09-04
 subject: game rig id `longhole-rig`, built by `buildLonghole()` in `src/rig/rigFactory.js` (line ~5512)
 
@@ -85,6 +89,50 @@ local material still came first, and every carrier figure in §3.1 is local).
   — **top-hammer longhole drill**, same format. Used for the second half of §3.3
   and for the rock-drill and rod-handler numbers. Its text layer is column-shifted
   in places; only unambiguous rows were quoted, and one that was not is flagged in §8.
+
+### 1.9 Web, second pass 2026-09-05 — **four OEM technical specifications from ONE publisher, with fully dimensioned general-arrangement drawings.** This closes the biggest gap in §8
+§1.7's two sheets gave transport H/W/L and envelope diagrams but **no side
+elevation with a dimension chain** (§8.2). These four do. They are from the same
+publisher as `9869_0080_01f_Boomer_M-series…` already read in §1.1 — same
+document family, same drawing conventions, same `9869_xxxx_xxx` numbering — so
+the carrier figures in §3.1 and the longhole figures below are **drawn to the
+same standard and can be compared directly**, which is not true of §1.7.
+
+Retrieved as PDFs and read with a coordinate-aware extractor (PyMuPDF), so every
+printed number could be placed by its (x, y) on the drawing page, and the drawing
+regions were rendered at 8–11× and read as images.
+
+- **`9869_0087_01e_Simba_S7_technical_specification_english.pdf`** — 5 pp, read
+  pp. 3–4 in full. *"Long-hole drilling rig for small to medium sized drifts in
+  the 51 to 89 mm hole range."* **THIS IS THE GAME'S MACHINE** — see §3.4 for
+  why, and it is the source of every number in §3.4. p.4 carries a **fully
+  dimensioned side elevation** and **two coverage-area drawings** (one side, one
+  plan). 13 500 kg.
+  <https://www.epiroc.com/content/dam/epiroc/underground-mining-and-tunneling/tme/drilling-technical-specifications/simba/9869_0087_01e_Simba_S7_technical_specification_english.pdf>
+- **`9869_0081_01e_simba_E7-series_technical_specification_english.pdf`** — 5 pp,
+  read pp. 3–4. The big top-hammer/ITH machine, 51–178 mm, **29 500–31 500 kg**,
+  2 550 mm wide, 12 700–13 700 mm long. Used as the upper bound of the class band
+  and for the **recommended drift-size table**, which the S7 sheet does not carry.
+  <https://www.epiroc.com/content/dam/epiroc/underground-mining-and-tunneling/tme/drilling-technical-specifications/simba/9869_0081_01e_simba_E7-series_technical_specification_english.pdf>
+- **`9869_0070_01f_Simba_M4_technical_specification_english.pdf`** — 5 pp, read
+  pp. 3–4. Mid machine with a **sliding table arm** (*"Turning table ±20°"*),
+  *"2 rear and 2 front stinger"*, RHS 17 / 27 / 35 carousels.
+  <https://www.epiroc.com/content/dam/epiroc/underground-mining-and-tunneling/tme/drilling-technical-specifications/simba/9869_0070_01f_Simba_M4_technical_specification_english.pdf>
+- **`9869_0146_01_Simba_E6-W_WL_technical_specification_english.pdf`** — 5 pp,
+  read pp. 3–4. The 89–254 mm **ITH** machine. Source of the four-stinger feed
+  arrangement (*"Stinger backward on feed: 2 × BSJ 8-200"*, *"Stinger forward on
+  feed: 2 × BSJ 8-115"*), *"Feed extension: 1 200 mm"*, *"Feed dump, drilling:
+  +45° forward and −30° backward"*, RHS 35 (35+1 pipes), water hose reel 3″/120 m.
+  <https://www.epiroc.com/content/dam/epiroc/underground-mining-and-tunneling/tme/drilling-technical-specifications/simba/9869_0146_01_Simba_E6-W_WL_technical_specification_english.pdf>
+
+Two vendor product pages were also read and are cited only where quoted:
+*"front and rear stingers … proper feed stabilization and accuracy in drilling
+through constant feed force"* and *"360° feed roll-over"*
+(<https://www.mining.sandvik/en/products/equipment/underground-drill-rigs/du431-articulated-in-the-hole-production-drill-rig/>),
+and the RHS carousel design note *"with the gripper arms placed inside the
+carousel, it can easily and quickly move the rods between the carousel and the
+drill centre"*
+(<https://www.epiroc.com/en-us/products/drill-rigs/production-drill-rigs/simba-sm60-s>).
 
 ### 1.8 Images in `C:\Users\henri\Downloads` — swept; **no photograph of this class exists in the folder**
 274 images in the root plus the `Atpa` and `Atpa/Atpa products` sets. Everything
@@ -272,6 +320,179 @@ articulation ±35-41°.** (DU411 and DL431 above; DL432i 3 050 / 2 500 / 11 850 
 and 26 500 kg and DL421 3 250-3 700 / 2 290 / 11 250 mm and 22 000 kg per the same
 publisher's product pages.) **Length : width sits at 4.0-4.7 : 1 and
 height : width at 1.1-1.2 : 1.** Those two ratios are the whole machine.
+
+### 3.4 THE MACHINE TO BUILD — a compact small-drift longhole rig, fully dimensioned
+Source: `9869_0087_01e_Simba_S7…pdf` p.4 unless marked. **This section supersedes
+§3.2 as the modelling basis**: §3.2 scaled a *jumbo's* elevation because no
+longhole elevation was in hand. One now is.
+
+**Why this machine and not the 22–31 t ones.** `data.js` gives the game's
+`longhole-rig` **15.2 transport tonnes**, **74 kW** of diesel and **55 kW** of
+mains, rods **915 to 1 830 mm**, and **30 m** of depth capacity. Against the
+class: the E7 is 29.5–31.5 t on 120–180 kW, the DL431 22.1 t, the DU411 25.75 t —
+all roughly double the game's machine. The S7 is **13 500 kg**, its diesel options
+are **55 / 60 / 72 kW**, its total installed drilling power is **80 kW (main motor
+1 × 75 kW)**, its rod lengths are **915 / 1 220 / 1 525 / 1 830 mm** — the exact
+four `data.js` quotes — and its RHS 10 carousel is rated *"mechanized drilling up
+to 20 m"*. **Do not average the class** (the same decision `blender/tunnel_jumbo.py`
+records making): the game's own spec block describes the compact small-drift
+machine, so that is what gets built. Its 216 mm ITH capability is the game's
+stretch and is not modelled as a separate working end.
+
+#### Published dimensions
+
+| Measurement | Value |
+|---|---|
+| Width | **2 100 mm** |
+| Height tramming, roof up / down | **2 800 / 2 100 mm** |
+| Length tramming (feed BMHP 6804 / 6805 / 6806) | **9 300 / 9 600 / 9 900 mm** (+200 mm with extractor) |
+| Ground clearance | **365 mm** |
+| Turning radius outer / inner | **5 000 / 2 850 mm** |
+| Gross weight total / boom side / engine side | **13 500 / 9 000 / 4 500 kg** |
+| Tramming speed | >15 km/h flat, >5 km/h on 1:8 |
+| Articulated steering | **±40°** |
+| Rear axle oscillation | **±8°** (DANA Spicer 123/90; front axle the same, with automatic diff lock and limited slip) |
+| Tyres | **9.00 × R20** |
+| Diesel | Deutz **55 kW** (D914 L04 / TD 3.6 L04), 60 kW (TCD 3.6 L04) or **72 kW** (BF4 L 914) |
+| Total installed electric power | **80 kW** (main motors 1 × 75 kW), 380–1 000 V |
+| Fuel tank | **60 l** |
+| Tramming lights | **6 × 40 W LED + 2 × 80 W**, 24 V DC |
+| Working lights | **4 × 80 W LED**, 24 V DC — plus joystick-controlled spotlights left/right **70 W** |
+| Cab | optional ROPS+FOPS, <80 dB(A), **swingable seat for drilling and tramming**; canopy alternative is FOPS-certified, stainless steel |
+| Noise | **106±6 dB(A)** in canopy drilling, **75±3** in cabin |
+| Boom / drilling unit | BUT 32PD; **1 × rear and 1 × front stinger**; automatic lubrication |
+| Rod handling | **RHS 10 — 10+1 rods**, *"mechanized drilling up to 20 m"*; 3′ rods give **12+1**, T45 speed rods **9+1** |
+| Rods | **R32 / T38 / T45**, 3′ / 4′ / 5′ / 6′ |
+| Holes | **51–89 mm** (R32 51–64, T38 64–76, T45 70–89) |
+| Compressor | Epiroc LE7 or GAR 30, onboard |
+| Water | hydraulic booster pump, **60 l/min at 12 bar**, minimum 2 bar inlet; water hose reel with hose |
+| Fire suppression | ANSUL — manual, checkfire or automatic |
+| Trailing cable | Buflex, **28–37 mm diameter**, **110–200 m** depending on voltage |
+
+**Feed lengths — the table that sizes the working end.** Feed type / intended rock
+drill / rod length / **total length**: BMHP 6803 · 915 · **2 731**; 6804 · 1 220 ·
+**3 035**; 6805 · 1 525 · **3 340**; 6806 · 1 830 · **3 645** mm. The X variants
+(for the MUX drill) add ~200 mm: 2 933 / 3 237 / 3 542 / 3 847 mm.
+**A feed is its rod length + 1 815 mm, exactly, across all four.** That constant is
+the rotation head, the carriage travel over-run and the two end housings, and it
+is the most useful single relationship in this section.
+
+#### The dimensioned side elevation — §8.2 is now closed for this machine
+The chain printed along the bottom of the side elevation, rear to front:
+
+```
+ |<-- 2 100 -->|<---- 2 800 ---->|<-- 960 -->|            <- printed
+ rear end   rear axle        front axle   front frame end
+        |<-637->|                 |<- 700 ->|             <- printed, to the jacks
+                                              230         <- printed, jack pad above ground
+```
+
+- **Rear overhang 2 100 mm**, **wheelbase 2 800 mm**, **front overhang 960 mm** —
+  carrier length **5 860 mm**. Carrier length : width = **2.79 : 1**; overall
+  length : width = **4.57 : 1** at 9 600 mm, which lands inside the class band in
+  §3.3 exactly.
+- **Rear jack 637 mm behind the rear axle; front jack 700 mm ahead of the front
+  axle**; both pads sit **230 mm above ground** retracted.
+- **Departure angle 15°** at the tail — printed on the drawing.
+- **Where the feed sits when tramming, derived and cross-checked.** Tramming
+  length changes by exactly 300 mm between BMHP 6804/6805/6806 while the feeds
+  differ by 305 mm, so the feed's FRONT end sets the tramming length and its rear
+  end is fixed. 9 600 − 3 340 = **6 260 mm forward of the rear end** = **400 mm
+  ahead of the front frame end**. Three feed variants agree; this is arithmetic on
+  printed numbers, not a guess.
+- **Tyre outside diameter ≈ 1 030 mm** — and for once **the two methods agree**,
+  unlike the §3.2 jumbo case. Scaled off the elevation at 25.1 mm/pt (derived from
+  the printed 2 100 / 2 800 / 960 chain, three-way consistent to 1 %) the tyre
+  measures **1 036 mm**; a nominal 9.00R20 is 508 mm rim + 2 × 229 mm section =
+  **966 mm** bare, ~1 015–1 040 mm as published rolling diameter. **Use 1.03 m
+  (radius 0.515 m), section width 0.229 m.** §8.7 is closed for this machine.
+
+#### The coverage drawings — the geometry that makes it a longhole rig
+Side coverage drawing, feed vertical, machine set up and drilling:
+
+| | Value |
+|---|---|
+| **Maximum height, feed vertical, stinger out** | **7 700 mm** |
+| **Feed extension** (the feed slides bodily out of its cradle) | **900 mm** |
+| **Stinger extension, top (against the back)** | **450 mm** |
+| **Stinger extension, bottom (down to the floor)** | **1 000 mm** |
+| **Feed tilt about the boom-end cross axle** | **± 114°** |
+| **Feed roll-over about its own axis** | **360°** |
+| Boom articulation angle shown | **55°**, on a **1 250 mm** boom section |
+| **Drilling axis, ahead of the front axle** | **2 605 mm** |
+| Second feed station, offset from the first | **1 250 mm** |
+
+Plan coverage drawing, boom swinging across the drive:
+
+| | Value |
+|---|---|
+| **Total coverage width from one set-up** | **5 975 mm** |
+| Boom swing angles marked | **20°** and **35°** |
+| Offsets at the two extremes | **397 / 323 mm** |
+
+**±114° of tilt and 360° of roll is the whole machine in two numbers.** 114° each
+way means the feed reaches 24° PAST vertical in both directions — it can drill up
+over its own back and down through the floor from one set-up, which is what a ring
+is. Nothing else in the game's fleet has this. `data.js` says *"the feed swings
+through a full circle on the slew ring"*; the printed **360°** roll-over is that
+claim, verified.
+
+#### The working end, read off the drawings at 8–11× — §8.3, §8.4 and §8.5 partly closed
+- **The boom is a straight two-part telescopic tube**, not a lattice and not a
+  knuckled excavator arm. A lower arm pinned to a bulkhead on the front frame just
+  ahead of the cab, a **big lift cylinder slung underneath it** pinned to a lug on
+  the frame, and an upper section carrying the feed cradle. The visible section
+  marked **1 250 mm** is the upper arm. Round tube, stepped in diameter at the
+  telescope joint, with a machined pin boss at each end.
+- **The feed hangs on a horizontal cross-axle through its middle, not off its
+  end.** The boom terminates in a transverse tube that passes through the feed
+  cradle at roughly the feed's mid-height; the **±114°** tilt is about that axle
+  and the **360°** roll is about the feed's own long axis. Building the feed
+  cantilevered off its lower end — the face-jumbo arrangement — is the single
+  easiest way to get this machine wrong.
+- **Two stingers, on the FEED, not on the carrier**, and they are the load path
+  that makes a 20 m hole straight: one extends **1 000 mm** below the feed foot to
+  the floor, one **450 mm** above the feed head to the back. The feed is jacked
+  floor-to-back like a prop, and only then is the hole drilled. The carrier's own
+  front and rear jacks are separate and smaller. The bigger machines scale this
+  up: *"2 rear and 2 front stinger"* (M4) and four on the feed (E6-W, 2 × BSJ
+  8-200 back and 2 × BSJ 8-115 forward).
+- **The carousel is a drum whose axis is PARALLEL to the feed**, mounted beside
+  the drill centreline at the lower end of the feed, inside a chamfered-corner
+  housing. The plan-view coverage drawing shows it unambiguously as a circle with
+  a centre-mark, with a smaller concentric circle inside it — the gripper-arm hub.
+  The maker's own copy explains that inner circle: *"with the gripper arms placed
+  inside the carousel, it can easily and quickly move the rods between the
+  carousel and the drill centre"* — so the arms reach out from the middle of the
+  drum, they do not swing in from outside it.
+- **Carousel size [GA — scaled, ±5 %].** From the plan coverage drawing at
+  ≈34.5 mm/pt (from the printed 397 / 5 975 / 323 chain; the two half-spans
+  disagree by 5 %, so the scale carries that): drum **OD ≈ 0.56 m**, drum centre
+  **≈ 0.49 m** from the drill centreline. Sanity check against capacity: 10+1 rods
+  at 46–52 mm OD need only ~0.25 m of pitch circle, so a 0.56 m drum is generous —
+  which is exactly what putting the gripper arms *inside* it costs. Both figures
+  are scaled, not printed. **Do not present either as published.**
+- **The drill centreline runs in a V-jawed rod guide** at the feed foot, drawn as
+  a V-clamp closing on the string. There is a second guide bushing above it.
+- **The cable reel is a large spoked drum with a transverse axis at the rear**,
+  its side flange seen as a full circle in the side elevation with radial spokes.
+  Three-point circle fit on the drawn arc gives **Ø ≈ 1 570 mm, centre ≈ 1.19 m
+  above ground** [GA] — which is the **1 600 mm** the M-series carrier publishes
+  in §3.1, from a completely independent drawing. Its top stands proud of the
+  engine hood. It is the biggest single object on the machine and the clearest
+  "this drills on mains" signal there is.
+- **The operator station is an enclosed glazed cab on the LEFT of the machine,
+  set between the wheels**, with a door, a tall narrow side light, and a
+  **swingable seat for drilling and tramming** — the seat turns to face the boom
+  when drilling and forward when tramming. Ahead of it is a console/hood box
+  carrying the badge panel, and the boom bulkhead is on the front face of that box.
+  The canopy alternative is a FOPS plate on posts. **The roof drops 700 mm**
+  (2 800 → 2 100 tramming) which is how the machine gets under a low back.
+- **The rear body is a long low hood** with a rounded top edge, vertical panel
+  breaks, a lifting eye on top, an exhaust/cooling stack toward its front, and a
+  **sloping tail at 15°**. It is the biggest painted surface on the machine.
+- **Wheels** carry deep chevron lugs, a visible rim ring and a hub with a **10-stud
+  bolt circle** and a cap.
 
 ---
 
@@ -550,35 +771,54 @@ more than everything in the table above.
 This list is as valuable as the findings. **Nothing here should be filled in with
 a plausible-looking number.**
 
+> **Updated 2026-09-05 after §1.9 / §3.4.** Items **2, 7** are **CLOSED** for the
+> machine in §3.4, and **3, 5, 11** are **partly closed**. The strikethrough is
+> kept rather than deleted so the shape of what was missing stays visible.
+> **Item 1 — no photograph of the class — is still completely open and is still
+> the biggest gap.** Everything about *finish* rather than *dimension* rests on
+> vector line drawings, which show where things are and never show what they
+> look like.
+
 1. **No photograph of an underground longhole rig anywhere in `C:\Users\henri\Downloads`.**
    Not one. Every rig image in the folder is a surface crawler or a rail rig
    (§7). The machine's actual *appearance* — panel breaks, weld lines, where the
    ladder is, what the operator's station looks like from outside — is unsourced.
-2. **No dimensioned side elevation or general-arrangement drawing of a longhole
-   rig.** The Boomer M-series spec gives a *jumbo's* elevations, which is a
-   different working end on a similar carrier. The two Sandvik sheets give
-   transport H/W/L and envelope diagrams but **no side elevation with a dimension
-   chain**, so wheelbase, axle positions, the front/rear frame split and the
-   position of the articulation joint along the machine are all unsourced for
-   this class. §3.2's wheelbase figures are the *jumbo's*.
-3. **Boom geometry.** The SB120P / longhole boom is named and its swing (±45°),
-   extension (1 500 mm) and module travel (5 000 mm) are given, but there is **no
-   drawing and no section**. How many joints, where the cylinders sit, whether the
-   boom is a box weld or a casting — unsourced.
-4. **Feed cross-section.** Feed total lengths and travels are sourced. The
-   **profile** — beam depth, width, rail form, whether the carriage runs on slides
-   or rollers, chain vs screw drive — is not.
-5. **Rod-handling arm and carousel geometry.** Carousel *capacities* are sourced
-   (16+1 / 20+1 / 31+1 / 32+1) and pipe diameters are sourced. The carousel's
-   **drum diameter, its axis orientation and the pipe-arm linkage** are not.
+2. ~~**No dimensioned side elevation or general-arrangement drawing of a longhole
+   rig.**~~ **CLOSED 2026-09-05 for the §3.4 machine.** `9869_0087_01e_Simba_S7…`
+   p.4 carries a fully dimensioned side elevation with the chain **2 100 / 2 800 /
+   960** plus jack positions, departure angle and two coverage drawings. Wheelbase
+   and axle positions are now printed, not scaled. **Still open:** where the
+   ARTICULATION JOINT sits along the wheelbase is printed on no sheet in hand;
+   §3.2's 48/52 split is the *jumbo's* and is what the model uses, flagged.
+3. **Boom geometry — partly closed.** The *form* is now sourced from the S7
+   coverage drawings: a **straight two-part telescopic round tube**, pinned to a
+   bulkhead on the front frame, with a **lift cylinder slung underneath**, and a
+   **transverse cross-axle at the far end that passes through the middle of the
+   feed** (§3.4). Angles are printed: 55° arm, ±114° feed tilt, 20°/35° swing,
+   5 975 mm coverage. **Still open:** tube diameters, wall sections, cylinder
+   bores, whether the boom is a weldment or a casting.
+4. **Feed cross-section — still open.** Feed total lengths and travels are now
+   sourced to four decimal-exact rows (§3.4) and the rod-length + 1 815 mm
+   relationship is derived. The **profile** — beam depth, width, rail form,
+   carriage on slides or rollers, chain vs screw drive — is still not printed
+   anywhere in hand.
+5. **Rod-handling arm and carousel geometry — partly closed.** Now sourced: the
+   drum's **axis is parallel to the feed**, it sits **beside the drill centreline
+   at the lower end of the feed**, and the **gripper arms are inside the drum**
+   (maker's own copy, §1.9). Capacities are sourced (10+1 on this machine; 12+1 on
+   3′ rods, 9+1 on T45 speed rods; 17+1 / 27+1 / 35+1 on the bigger ones).
+   **Drum diameter and centre offset are SCALED, not printed** — 0.56 m and
+   0.49 m, ±5 %, tagged `[GA]` in §3.4 and in the model. **Still open:** the arm
+   linkage itself, the pocket form, and how the drum is indexed.
 6. **Carrier articulation angle for the DL431** — the row exists in the spec sheet
    but the value is lost to a column shift in the text layer. Use the DU411's
    ±35° or the Boomer's ±41° and say which.
-7. **Tyre outside diameter.** Only the *designations* are sourced: **10.00-20**
-   (DU411 ITH longhole), **12.00 × R24** (Boomer jumbo carrier). No OEM sheet in
-   hand states the rolling diameter. §3.2 records a **scaled** value from the
-   Boomer drawing (≈1 050-1 100 mm) that **disagrees with a nominal 12.00R24 by
-   about 12 %**; both are on the page and neither is picked.
+7. ~~**Tyre outside diameter.**~~ **CLOSED for the §3.4 machine.** Its tyre is
+   **9.00 × R20**; scaling the S7 side elevation gives **1 036 mm** and the
+   nominal calculation gives 966 mm bare / ~1 015–1 040 mm rolling. **The two
+   methods agree to within 2 %**, which is what the §3.2 jumbo case failed to do.
+   Use **1.03 m OD**. Still unsourced for the 12.00 × R24 and 10.00-20 machines,
+   where the 12 % disagreement in §3.2 stands unresolved.
 8. **Weight distribution front/rear** for a longhole rig. The Boomer sheet splits
    its jumbo's weight (boom side vs engine side); neither Sandvik sheet does.
 9. **Paint colours.** No RAL number, no colour callout anywhere in the local
@@ -588,9 +828,14 @@ a plausible-looking number.**
     sheets confirm the *existence* of ground-level service access ("All service
     points are accessible from ground level", "Stair and service lights") but
     nothing dimensions or locates them.
-11. **The exact form of the stingers.** Front and rear stinger extensions are
-    given as numbers (803 mm front, 1 664 mm rear on the CF706). What they look
-    like — pad shape, ram diameter, how they fold for tramming — is not.
+11. **The exact form of the stingers — partly closed.** Now sourced: they are on
+    the FEED, not the carrier, one at each end, and on the §3.4 machine they
+    extend **1 000 mm** at the foot and **450 mm** at the head; the carrier's own
+    front and rear jacks are separate, sit **637 mm behind the rear axle and
+    700 mm ahead of the front axle**, and their pads rest **230 mm above ground**.
+    (Older figures for a different maker: 803 mm front, 1 664 mm rear on the
+    CF706.) **Still open:** pad shape, ram diameter, and how they fold for
+    tramming.
 12. **Hose routing.** `research/` has a Bauer hydraulic-hose catalogue in the
     folder set, but **no hose-routing drawing for this machine**. The routing in
     §4 and §7 is inferred from surface-rig photographs and is marked as such.
@@ -600,4 +845,53 @@ a plausible-looking number.**
 ---
 
 ## 9. Domain-truth warnings
-_pending_
+Written 2026-09-05 against §3.4. Each of these is a way the model or the game can
+be wrong in a manner a driller would spot in one glance.
+
+1. **A ring is not a hole, and `targetDepth` is not a depth.** `data.js` sets
+   `depthRange: [120, 400]` for `longhole` and its own comment says those are
+   **ring metres — the sum of every hole in the fan**, while an individual hole
+   *"runs to about 30 m"* and the rig's `depthCapacity` is 30. So a 400 m contract
+   is roughly **13–20 holes**, not one 400 m hole. **Any model, render or HUD that
+   implies a single deep hole contradicts the game's own content.** The model
+   answers this by being built in the fan-drilling pose with the feed off vertical
+   and the full ±114° / 360° chain present and drivable.
+2. **The feed must not be built cantilevered off its lower end.** That is the
+   face-jumbo arrangement. On this machine the boom ends in a **transverse axle
+   through the middle of the feed** (§3.4). Get this wrong and every pose past
+   about 40° reads as a jumbo pointed at the ceiling.
+3. **The stingers are on the feed and they are the point.** A longhole rig braced
+   only on its carrier jacks is drilling a crooked hole. The **1 000 mm foot
+   stinger to the floor and 450 mm head stinger to the back** are what hold the
+   collar; the vendor copy is explicit that they exist for *"proper feed
+   stabilization and accuracy in drilling through constant feed force"*. If the
+   render shows the machine drilling with nothing touching the back, it is showing
+   the thing the whole method is about not happening.
+4. **Rods are short — 0.915 to 1.83 m — and that is the tell.** `data.js` already
+   has 1.525 m. A 3–6 m bench rod on this machine is a domain error, and the
+   carousel that holds them is small and close to the feed foot, not a tall rack.
+5. **10+1 rods is 20 m of hole, not 400.** The RHS 10 carousel is *"mechanized
+   drilling up to 20 m"*. The crew reloads it inside a single deep hole. A
+   carousel drawn with enough rods for a whole ring would be an invention.
+6. **It is plugged in while it drills.** 80 kW of installed drilling power against
+   55–72 kW of diesel: the diesel trams, the mains drills. **The trailing cable
+   must be present and must run away down the drive** — 28–37 mm diameter, 110–200
+   m of it on a Ø1.57 m reel. A longhole rig rendered without its cable is
+   rendered mid-impossibility.
+7. **`transportTons: 15.2` vs a real 13.5 t is fine; `stats.power: 74` vs 55–72 kW
+   is fine.** Both sit inside the class. **What is NOT sourced is the 216 mm ITH
+   figure on a machine of this size** — the real machines that reach 216–254 mm
+   are the 25–31 t ITH rigs (DU411, E6-W). The number is not wrong for the
+   *method*; it is unsupported for a 15 t *rig*. Flagged here rather than
+   changed, because content is `data.js`'s to own.
+8. **`research/03-mining.md` §A.2's ITH envelope is still flagged.** It records
+   *"Ø89-216 mm to 100 m using 3″-8″ hammers"* with `[verify the exact figures
+   before shipping any number]`, and the game ships the number. §1.9's E6-W sheet
+   gives **89–254 mm** for that class and the Mincon catalogue gives 85–610 mm for
+   DTH overall. **The flag should be resolved against a primary sheet, not against
+   this file** (HANDOFF §8D: the pack's own voice is not evidence).
+9. **No badge, anywhere.** Every drawing read for this machine carries a wordmark
+   on the hood and a model designation on the tail. `DOMAIN.md` §10 binds:
+   **model the raised panel, leave it blank.** The in-game marque is
+   *"Fennholm LH-60 Fanline"* (`data.js`), and even that goes nowhere near an
+   exported object name.
