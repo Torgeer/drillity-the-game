@@ -64,7 +64,17 @@ const TAG = flag('tag', '');
 const HEADED = has('headed');
 const LIST_ONLY = has('list');
 const GROUP = (flag('only', '') || '').toLowerCase();   // ui | methods | rigs
-const only = argv.filter((a, i) => !a.startsWith('--') && !(i > 0 && argv[i - 1].startsWith('--')));
+
+/* Positional filters — substrings matched against shot ids.
+ *
+ * This used to drop any positional that followed ANY `--flag`, on the
+ * assumption that every flag takes a value. Half of them do not, so
+ * `node tools/shoot.mjs --headed m01-auger` silently shot all fifty states
+ * instead of the one asked for — the usage line above promises otherwise.
+ * Only the flags that actually consume the next argv entry are listed. */
+const VALUE_FLAGS = new Set(['quality', 'url', 'tag', 'only', 'manifest', 'warmmax']);
+const only = argv.filter((a, i) =>
+  !a.startsWith('--') && !(i > 0 && argv[i - 1].startsWith('--') && VALUE_FLAGS.has(argv[i - 1].slice(2))));
 
 const PHONE = {
   ...devices['iPhone 13 Pro'],
@@ -1357,7 +1367,7 @@ const run = async () => {
     errorLines: [],
   });
 
-  writeReport({ results, logs, content, methods, rigs, skipped, unlisted, bootSec, hashes, loads, render });
+  writeReport({ results, logs, content, methods, rigs, skipped, unlisted, bootSec, hashes, loads, render, warm });
   await browser.close();
 };
 
@@ -1365,7 +1375,7 @@ const run = async () => {
    REPORT — the thing a reviewer reads before looking at a single PNG. It has
    to make a regression ATTRIBUTABLE: which state, which band, which number.
    ═══════════════════════════════════════════════════════════════════════════ */
-function writeReport({ results, logs, content, methods, rigs, skipped, unlisted, bootSec, hashes, loads, render }) {
+function writeReport({ results, logs, content, methods, rigs, skipped, unlisted, bootSec, hashes, loads, render, warm }) {
   const L = [];
   const shot = results.filter((r) => !r.skipped);
   const num = (v, w) => String(v == null ? '-' : v).padStart(w);
@@ -1379,6 +1389,50 @@ function writeReport({ results, logs, content, methods, rigs, skipped, unlisted,
   L.push(`filter    ${GROUP || only.length ? [GROUP && '--only ' + GROUP, ...only].filter(Boolean).join(' ') : 'none — full coverage run'}`);
   L.push(`boot      ${bootSec}s`);
   L.push(`page loads ${loads}${loads > 1 ? '  ← THE PAGE RELOADED MID-RUN (a src/ save reached the browser). Frames after a reload may be from a second, weaker boot.' : '  (no mid-run reload — HMR muted)'}`);
+  L.push('');
+
+  /* ── WARM OR COLD ───────────────────────────────────────────────────────
+     Printed before anything else that carries an fps, because it decides
+     whether any of those numbers mean anything. */
+  const coldShots = shot.filter((r) => r.metrics && r.metrics.fps != null && !r.warm);
+  L.push('── FPS PROVENANCE — WARM OR COLD ───────────────────────────────────────');
+  if (!HEADED) {
+    L.push('  HEADLESS. Every fps below is SwiftShader and says nothing about this game on a');
+    L.push('  real GPU. Warm-up is beside the point here; run with --headed.');
+  } else if (warm && warm.warm) {
+    L.push(`  WARM. The session was driven for ${warm.sec}s before the first capture, until the`);
+    L.push(`  program count held still at ${warm.programs} and the frame pace stopped improving`);
+    L.push(`  (${warm.rafMs} ms/frame = ${warm.fps} fps at the gate).`);
+    L.push(`  ${warm.why}`);
+    L.push('');
+    L.push('  WHY THIS SECTION EXISTS. This harness used to wait 1.5s after boot and then time');
+    L.push('  fifty states in a row, while shader warm-up on this machine runs 60-100s. The');
+    L.push('  same auger state measured 26.5 fps at t+29s and 102.5 fps at t+99s — with a MORE');
+    L.push('  expensive GPU frame (4.10 -> 5.88 ms) and MORE draw calls (221 -> 235). The report');
+    L.push('  was ranking states by capture order. Every fps in a shots/*-report.json written');
+    L.push('  before this section existed is unreliable and is not comparable to the numbers');
+    L.push('  below.');
+  } else {
+    L.push('  ***** COLD — DO NOT TRUST THE FPS COLUMN *****');
+    L.push(`  ${(warm && warm.why) || 'no warm-up ran'}`);
+    L.push('  Program linking stalls the MAIN THREAD, so a cold state reads slow while its GPU');
+    L.push('  frame is cheap. The numbers below rank capture order, not performance.');
+  }
+  if (coldShots.length) {
+    L.push('');
+    L.push(`  ${coldShots.length} of ${shot.length} shots carry a COLD fps — marked in the table below:`);
+    for (const r of coldShots.slice(0, 12)) {
+      const d = r.warmDetail || {};
+      L.push(`    ${r.id.padEnd(26)} ${d.session === false ? 'session never warmed'
+        : d.stop === false ? `stop gate: ${d.stopWhy}`
+        : `${d.programsDelta} programs linked DURING the fps window`}`);
+    }
+    if (coldShots.length > 12) L.push(`    ... and ${coldShots.length - 12} more`);
+  } else if (HEADED && warm && warm.warm) {
+    L.push('');
+    L.push(`  All ${shot.length} shots measured warm — the program count did not move during any`);
+    L.push('  of their fps windows.');
+  }
   L.push('');
 
   /* ── render health ──────────────────────────────────────────────────── */
@@ -1490,12 +1544,14 @@ function writeReport({ results, logs, content, methods, rigs, skipped, unlisted,
 
   /* ── per-shot table ─────────────────────────────────────────────────── */
   L.push('── PER-SHOT ────────────────────────────────────────────────────────────');
-  L.push('  id                          fps   frame  surf  sect   rig     tris  part   err   sec  verify');
+  L.push('  id                          fps  w?  frame  surf  sect   rig     tris  part   err   sec  verify');
+  L.push('  ("w?" = was that fps taken warm. A COLD row is capture order, not performance.)');
   for (const r of results) {
     if (r.skipped) { L.push(`  ${r.id.padEnd(26)} SKIPPED — ${r.skipped}`); continue; }
     const m = r.metrics || {};
     L.push('  ' + r.id.padEnd(26) +
-      num(m.fps, 6) + ' ' + num(m.frame && m.frame.calls, 6) + ' ' +
+      num(m.fps, 6) + ' ' + (m.fps == null ? '  -' : r.warm ? '  W' : 'COLD') + ' ' +
+      num(m.frame && m.frame.calls, 6) + ' ' +
       num(m.surface && m.surface.calls, 5) + ' ' + num(m.section && m.section.calls, 5) + ' ' +
       num(m.rig && m.rig.calls, 5) + ' ' +
       num(m.frame ? Math.round(m.frame.tris / 1000) + 'k' : null, 8) + ' ' +
@@ -1566,13 +1622,21 @@ function writeReport({ results, logs, content, methods, rigs, skipped, unlisted,
     JSON.stringify({
       when: new Date().toISOString(), url: URL_, headed: HEADED, quality: QUALITY,
       budget: BUDGET, renderHealth: render || null,
+      /* THE PROVENANCE OF EVERY fps IN THIS FILE. A consumer that compares
+         `shots[].metrics.fps` across runs must check `warmUp.warm` and the
+         per-shot `warm` first; a cold number is capture order, not cost. */
+      warmUp: warm || null,
       coverage: { methods: methods.length, rigs: rigs.length, shots: shot.length },
       skipped, unlisted,
       shots: results.map((r) => ({
         id: r.id, group: r.group, file: r.file, md5: r.md5, skipped: r.skipped || null, tookSec: r.tookSec || null,
         failed: r.failed || [], errors: r.errors || 0,
+        warm: r.warm ?? null, warmDetail: r.warmDetail || null,
         metrics: r.metrics ? {
-          fps: r.metrics.fps, ctxLost: r.metrics.ctxLost, frame: r.metrics.frame, surface: r.metrics.surface,
+          fps: r.metrics.fps, fpsClock: r.metrics.fpsClock,
+          programs: r.metrics.programs, programsDelta: r.metrics.programsDelta,
+          sessionSec: r.metrics.sessionSec,
+          ctxLost: r.metrics.ctxLost, frame: r.metrics.frame, surface: r.metrics.surface,
           section: r.metrics.section, rig: r.metrics.rig, texEstMB: r.metrics.texEstMB,
           particles: r.metrics.particles, canvas: r.metrics.canvas,
         } : null,
