@@ -12,16 +12,34 @@ forest. You finish running raise-bore and HDD crews across the world.
 
 ```bash
 npm install
+npm run blender      # first clone: export 19 rigs and both sites (Blender 5.2)
 npm run dev          # http://localhost:5178
 ```
 
 ```bash
-npm run build        # → dist/index.html, a single self-contained file
+npm run build        # validate, build dist/index.html and external models, inspect artifact
+npm run preview      # serve the complete build on http://localhost:5179
 ```
 
-The build inlines **everything** — three.js, all game code, the CSS and the logo
-artwork — into one HTML file with no runtime dependencies except the two font
-hosts (see *Fonts* below).
+The build inlines three.js, game code, CSS and logo artwork into one HTML file.
+Blender models stream from `dist/models/`; serve the complete `dist` directory.
+The pipeline proof `teststub.glb` is excluded from the shipping artifact. The
+two external font hosts are documented under *Fonts* below.
+
+Models are generated files and are gitignored. A clean clone needs Blender
+before its shipping checks can pass. The Windows npm command uses the installed
+Blender 5.2 executable; adjust that executable path for another platform.
+`blender:rigs` and `blender:sites` rebuild those asset groups separately.
+
+`npm run motion:export` exports the authored Blender curves to runtime JS and
+CSS. `npm run motion:verify` compares the checked-in exports with Blender's
+F-Curves without rewriting them. `npm run check` includes data, geometry,
+material, motion and QA regression checks, then the headed Chrome reach gate.
+`npm run qa:visual` performs the separate rendered-state and performance audit;
+a source/build check alone does not establish a GPU performance pass.
+`npm run qa:entrance` verifies title readiness and handoff. `npm run qa:ui`
+checks portrait HUD layout, touch targets, authored curves and reduced motion.
+These headed browser checks share the GPU; run them sequentially.
 
 ### URL overrides (QA / support only)
 

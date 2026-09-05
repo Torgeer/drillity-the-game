@@ -8,6 +8,7 @@ shots/**/*.jpg
 
 __pycache__/
 public/models/*.glb
+public/models/sites/*.glb
 
 # QA scratch output — reports and logs regenerate on every run
 shots/*.json

@@ -1,5 +1,11 @@
 # ASTRA — handover
 
+**Current implementation checkpoint (2026-09-06):** read
+[`research/ASTRA-progress-2026-09-06.md`](research/ASTRA-progress-2026-09-06.md)
+for reviewed fixes, fresh measurements and active workstreams. The owner rules
+below remain in force. Historical gate results and open findings below must be
+reproduced against the current code before being treated as current failures.
+
 **For whoever picks this up next, in any tool, with no access to the
 conversation that produced it.** Written 2026-09-05, at the end of a long
 multi-agent day, at the moment every agent was stopped so the project could be
