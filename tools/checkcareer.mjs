@@ -758,7 +758,7 @@ function probeDepth() {
     const deepest = Math.max(...ctCards.map((x) => x.d));
     console.log(`  ${total} cards sampled, deepest ${deepest.toFixed(1)} m, `
       + `mean payout ${eur(meanAll.payout)}, mean net ${eur(meanAll.net)}\n`);
-    console.log(`  ${pad('new ceiling', 13)}${rpad('cards lost', 11)}${rpad('board value', 12)}${rpad('mean payout', 12)}${rpad('mean net', 10)}  what it matches`);
+    console.log(`  ${pad('new ceiling', 13)}${rpad('cards lost', 11)}${rpad('board value', 12)}${rpad('mean payout', 12)}${rpad('mean net', 10)}${rpad('€/h', 8)}${rpad('payback', 9)}  what it matches`);
     const label = {
       250: 'the rig row today (inert — 120 binds first)',
       120: 'the method row today — NO CHANGE',
@@ -772,10 +772,16 @@ function probeDepth() {
       const lost = total - kept.length;
       const keptValue = sum(kept, (x) => x.payout);
       const allValue = sum(ctCards, (x) => x.payout);
+      const meanNet = kept.length ? sum(kept, (x) => x.net) / kept.length : 0;
+      const perHour = kept.length ? sum(kept, (x) => x.net) / sum(kept, (x) => x.hours) : 0;
+      // Payback on the EUR 68,000 machine, in jobs, at this ceiling.
+      const back = meanNet > 0 ? Math.ceil(D.getRig('cable-percussion').price / meanNet) : Infinity;
       console.log(`  ${pad(ceiling + ' m', 13)}${rpad(`${lost} (${pct(lost / total)})`, 11)}`
         + `${rpad(pct(keptValue / allValue), 12)}`
         + `${rpad(kept.length ? eur(keptValue / kept.length) : '—', 12)}`
-        + `${rpad(kept.length ? eur(sum(kept, (x) => x.net) / kept.length) : '—', 10)}  ${label[ceiling] || ''}`);
+        + `${rpad(kept.length ? eur(meanNet) : '—', 10)}`
+        + `${rpad(kept.length ? eur(perHour) : '—', 8)}`
+        + `${rpad(Number.isFinite(back) ? back + ' jobs' : '∞', 9)}  ${label[ceiling] || ''}`);
     }
     console.log(`\n  ⚠ THIS IS A TRUNCATION, NOT A RE-GENERATION, and the difference matters.`);
     console.log(`  A real ceiling change makes the generator re-roll depth inside the SMALLER`);
@@ -783,6 +789,31 @@ function probeDepth() {
     console.log(`  simply kept. The "cards lost" and "board value" columns are therefore an`);
     console.log(`  UPPER bound on the loss; the true loss is smaller. Proving the exact figure`);
     console.log(`  needs data.js's depthRange changed, which is not this tool's to change.`);
+
+    /* ── WHAT THE TABLE SAYS, AND IT IS NOT WHAT THE FRAMING ASSUMES ──────
+       "Matching the data to the model would shrink every cable-tool contract
+       in the game" is true about METRES and false about ECONOMICS, and the
+       euro-per-hour column is why. It barely moves: 475 at the 120 m ceiling,
+       521 at 60 m, 523 at 50 m. It goes UP on the way down, because a shallow
+       cable-tool hole is proportionally more of the EUR 420 fixed item per
+       hole and proportionally less of the 1.6 m/h drilling that makes the
+       method slow. The board loses card SIZE, not card QUALITY.
+
+       Payback on the EUR 68,000 machine goes 4 -> 5 -> 6 jobs across the same
+       range. At every candidate it stays the fastest-paying machine in the
+       fleet bar the raise borer, and it is still comfortably inside a career.
+
+       So the cost of matching the data to the model, on the axis the player
+       actually experiences, is close to zero. That is the whole decision. */
+    console.log(`\n  ── what the numbers say ──`);
+    console.log(`  The premise "shrinking the window shrinks every cable-tool contract" is`);
+    console.log(`  true about METRES and false about ECONOMICS. Euro-per-hour barely moves`);
+    console.log(`  (475 at 120 m, 521 at 60 m, 523 at 50 m) and rises slightly on the way`);
+    console.log(`  down, because a shallow hole is proportionally more of the EUR 420 fixed`);
+    console.log(`  item per hole and less of the 1.6 m/h drilling that makes the method slow.`);
+    console.log(`  Payback on the EUR 68,000 machine goes 4 -> 5 -> 6 jobs. The board loses`);
+    console.log(`  card SIZE, not card QUALITY, and the player's rate of earning is intact.`);
+    console.log(`  The economic argument for keeping the American spudder does not exist.`);
   }
 
   console.log();
