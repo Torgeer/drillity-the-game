@@ -147,6 +147,19 @@ export function createUI(ctx) {
    * shapes a contract and the field names every screen reads. It is a superset:
    * originals are preserved, so ctx.sim.startHole() and world/geology.js still
    * see the keys they expect.
+   *
+   * ── THE TWO FALLBACKS ON THE NEXT LINES ────────────────────────────────
+   * A contract that carried none of the method or region spellings used to
+   * come out of here as a perfectly well-formed auger job in Nordic, in
+   * silence, and every screen downstream then displayed that invention as
+   * fact. HANDOFF §8A: a plausible wrong answer is worse than a crash,
+   * because it survives review.
+   *
+   * `state.world.site` is consulted first and is the RIGHT answer, not a
+   * consolation: progression.js publishes it when a job is accepted and never
+   * clears it — only marks `live: false` at settlement — so it still knows the
+   * method and region while `state.contract` is already null (HANDOFF §12).
+   * Only when even that is empty do we fall through, and then loudly.
    */
   const normCache = new Map();
   function normalizeContract(c) {
@@ -154,8 +167,13 @@ export function createUI(ctx) {
     if (c.__uiNorm) return c;
     if (c.id && normCache.has(c.id)) return normCache.get(c.id);
 
-    const region = c.region ?? c.regionId ?? 'nordic';
-    const method = c.method ?? c.methodId ?? c.requiredMethod ?? 'auger';
+    const site = state.world?.site || null;
+    const region = C.mustResolve(
+      c.region ?? c.regionId ?? site?.regionId, 'contract region', 'nordic',
+      'Every screen will name the wrong region, and the section will be built from the wrong ground.');
+    const method = C.mustResolve(
+      c.method ?? c.methodId ?? c.requiredMethod ?? site?.methodId, 'contract method', 'auger',
+      'The rig, the section, the particles and the audio all follow this — the whole session plays as a surface auger.');
     const target = targetOf(c);
     const certs = c.certs ?? c.requiredCerts ?? [];
     const apps = ctx.game?.APPLICATIONS;
@@ -642,8 +660,25 @@ export function createUI(ctx) {
     on(EVENTS.BIT_BROKEN,    (p) => current?.inst.onBitBroken?.(p));
 
     on(EVENTS.HOLE_COMPLETE, (p) => {
-      // The payoff screen owns the summary; hand it everything we know.
-      show(SCENES.RESULTS, { result: p });
+      /* The payoff screen owns the summary; hand it everything we know — but
+         NOT until every other listener on this event has finished.
+
+         main.js awaits `ui.init()` (which is what calls wire(), so this
+         subscription is made here) BEFORE it initialises the rest, and
+         progression.js subscribes inside its own init(). This handler
+         therefore runs FIRST, ahead of `progression.completeHole()`. Calling
+         show() synchronously mounted the results screen before the settlement
+         was booked, so `lastSettlement()` in screens/results.js read a ledger
+         whose head was still the PREVIOUS hole — and its contract-id and ±5%
+         depth guard cannot tell two runs of the same contract apart, so a
+         repeat of the same job showed the earlier run's money and XP.
+
+         A microtask is the whole fix: bus.emit is synchronous, so by the time
+         this drains, every listener — progression included — has run to
+         completion and the ledger head is this hole. Deliberately a
+         microtask and not a frame: the screen must still change in the same
+         turn, so nothing paints in between. */
+      queueMicrotask(() => show(SCENES.RESULTS, { result: p }));
     });
 
     on(EVENTS.QUALITY_CHANGE, (p) => current?.inst.onQuality?.(p));

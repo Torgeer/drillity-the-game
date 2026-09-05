@@ -568,6 +568,188 @@ def build_access(root):
     return o
 
 
+def aim_tube(name, r, a, b, mat, parent=None, sides=10, shrink=0.0):
+    """A cylinder spanning two points. Cylinders that actually connect the lugs
+    they are pinned to is most of what makes a linkage read as a mechanism
+    instead of a pile of tubes."""
+    a = Vector(a)
+    b = Vector(b)
+    d = b - a
+    L = d.length - shrink
+    rot = d.to_track_quat('Z', 'Y').to_euler()
+    return R.tube(name, r, L, mat, parent, a, rot, sides)
+
+
+def aim_box(name, w, d, a, b, mat, parent=None, bev=0.012):
+    """A box section spanning two points, the box's local +Z along the span."""
+    a = Vector(a)
+    b = Vector(b)
+    v = b - a
+    L = v.length
+    rot = v.to_track_quat('Z', 'Y').to_euler()
+    o = R.box(name, (w, d, L), mat, parent, (0, 0, 0), rot, bevel=bev)
+    o.location = a + v * 0.5
+    return o
+
+
+# =============================================================================
+# 3. BOOM  -  the component the game is missing entirely ([R]S9.2)
+#
+#    "A heavy fabricated steel box-section boom, dark grey, pinned to the front
+#    of the carrier body. It carries the feed cradle at its outer end through a
+#    swing/dump joint... Underneath it sits a large boom lift cylinder."
+#    [R]S4.2. The gap of daylight between the beam and the carrier, spanned by
+#    the boom, is the single most identifying feature of the class [R]S5 #1.
+#
+#    Sourced envelope: horizontal reach 2,700-3,190 mm, vertical reach
+#    1,040 mm up / 2,659 mm down [R]S3.1. Boom cross-section, pin diameters and
+#    cylinder bores are NOT SOURCED ([R]S8 #7) - derived from [P1]/[P2].
+#
+#    REST POSE CONVENTION: every game-driven pivot: node on the boom sits at
+#    IDENTITY rotation and the rest attitude is carried by the GEOMETRY inside
+#    it. So a game that writes absolute rotations onto pivot:boomLift or
+#    pivot:mast cannot accidentally fold the machine. The two ram nodes are the
+#    documented exception - an aim node has to carry its aim.
+# =============================================================================
+
+BOOM_END = (0.0, BOOM_LEN * math.cos(BOOM_RISE), BOOM_LEN * math.sin(BOOM_RISE))
+UY = math.cos(BOOM_RISE)               # unit step along the boom, Y component
+UZ = math.sin(BOOM_RISE)               # ... and Z
+FEED_X = BOOM_X                        # beam axis, in line with the boom
+FEED_Y = BOOM_FOOT[1] + BOOM_END[1] + 0.140
+# 3.24 m ahead of the boom foot pin - inside the sourced 2.86-3.39 m envelope,
+# and 2.67 m of daylight ahead of the track front, which is the silhouette.
+FEED_GRIP = 2.060                      # height up the beam at which the cradle
+                                       # grips it, so the foot lands at grade
+BW, BD = 0.430, 0.470                  # boom box section across / deep
+
+
+def build_boom(root):
+    """Build the boom. Returns pivot:mast - what the feed assembly hangs on."""
+    fx, fy, fz = BOOM_FOOT
+    ex, ey, ez = BOOM_END
+
+    # ---- foot: two cheek plates and a pin boss on the front bulkhead -------
+    for s in (-1, 1):
+        R.box('boomcheek%d' % s, (0.040, 0.560, 0.640), R.MAT_DARK, root,
+              (fx + s * (BW / 2 + 0.055), fy - 0.14, fz), bevel=0.012)
+    cyl('boompin_boss', 0.110, BW + 0.19, R.MAT_CAST, root,
+        (fx - (BW + 0.19) / 2, fy, fz), (0, math.radians(90), 0), sides=14)
+    for s in (-1, 1):                                  # ram foot bracket
+        R.box('rambkt%d' % s, (0.035, 0.320, 0.300), R.MAT_DARK, root,
+              (fx + s * 0.145, fy - 0.62, fz - 0.300), bevel=0.010)
+
+    swing = R.empty(R.NODE_PIVOT, 'boomSwing', root, (fx, fy, fz))
+    swing['range_deg'] = 30.0          # boom slew about the foot pin
+    lift = R.empty(R.NODE_PIVOT, 'boomLift', swing, (0, 0, 0))
+    lift['up_m'] = 1.040 * K           # vertical reach above track level
+    lift['down_m'] = 2.659 * K         # ... and below [R]S3.1
+
+    # ---- box section: heavy root, slimmer outer, with flange plates --------
+    aim_box('boomroot', BW, BD, (0, 0.06, 0.02), (0, UY * 1.95, UZ * 1.95),
+            R.MAT_DARK, lift, bev=0.026)
+    aim_box('boomouter', BW - 0.085, BD - 0.095, (0, UY * 1.90, UZ * 1.90),
+            (ex, ey, ez), R.MAT_DARK, lift, bev=0.022)
+    for s in (-1, 1):                  # top / bottom flange strips
+        aim_box('boomflange%d' % s, BW + 0.030, 0.028,
+                (0, 0.10, 0.02 + s * BD / 2),
+                (ex, ey - 0.05, ez + s * (BD - 0.10) / 2), R.MAT_DARK, lift,
+                bev=0.006)
+    for s in (-1, 1):                  # web gussets at the section step
+        R.box('boomgus%d' % s, (0.028, 0.420, 0.230), R.MAT_DARK, lift,
+              (s * BW / 2, UY * 1.92, UZ * 1.92 + 0.10), (BOOM_RISE, 0, 0),
+              bevel=0.008)
+    lugp = (0.0, UY * 1.85, UZ * 1.85 - BD / 2 - 0.05)
+    for s in (-1, 1):                  # lug the lift ram pulls on
+        R.box('boomlug%d' % s, (0.032, 0.240, 0.190), R.MAT_DARK, lift,
+              (s * 0.115, lugp[1], lugp[2]), (BOOM_RISE, 0, 0), bevel=0.008)
+    cyl('boomlugpin', 0.052, 0.330, R.MAT_STEEL, lift, (-0.165, lugp[1], lugp[2]),
+        (0, math.radians(90), 0), sides=10)
+
+    # ---- hose deflection shoe and tray on the boom top ---------------------
+    # [H] calls it a Schlauchumlenkung: a roller that sets the bend radius
+    # where the hose package leaves the carrier.
+    cyl('hosedeflect', 0.085, 0.400, R.MAT_WORN, lift,
+        (-0.20, UY * 0.70, UZ * 0.70 + BD / 2 + 0.06),
+        (0, math.radians(90), 0), sides=12)
+    R.box('hosetray', (0.360, 1.60, 0.030), R.MAT_DARK, lift,
+          (0, UY * 1.35, UZ * 1.35 + BD / 2 + 0.02), (BOOM_RISE, 0, 0),
+          bevel=0.006)
+
+    # ---- central lubrication manifold and its fan of nylon lines [R]S4.7 ---
+    R.box('lubeblock', (0.150, 0.190, 0.110), R.MAT_CAST, lift,
+          (0.22, UY * 0.55, UZ * 0.55 + 0.10), (BOOM_RISE, 0, 0), bevel=0.008)
+    for i in range(6):
+        R.hose('lubeline%d' % i,
+               [(0.22 + 0.018 * i, UY * 0.55, UZ * 0.55 + 0.16),
+                (0.26 + 0.026 * i, UY * 1.30, UZ * 1.30 + 0.20 + 0.018 * i),
+                (0.20, UY * 2.25 + 0.04 * i, UZ * 2.25 + 0.02)],
+               radius=0.007, mat=R.MAT_RUBBER, parent=lift, sides=4)
+
+    # ---- main hose package along the boom, bundled, not loose [H] ----------
+    # A few fat lines (NS 32-50, 420 bar) and several thin ones - never a
+    # uniform bundle of same-diameter tubes.
+    for i, (r, dx) in enumerate(((0.036, -0.105), (0.036, -0.032),
+                                 (0.028, 0.038), (0.020, 0.090),
+                                 (0.020, 0.126))):
+        R.hose('boomhose%d' % i,
+               [(dx, -0.05, BD / 2 - 0.02),
+                (dx, UY * 0.75, UZ * 0.75 + BD / 2 + 0.16),
+                (dx, UY * 1.85, UZ * 1.85 + BD / 2 + 0.10),
+                (dx, ey - 0.10, ez + 0.16)],
+               radius=r, mat=R.MAT_RUBBER, parent=lift, sides=6)
+    # the fat air line to the rotary head - 470 l/s at 30 bar [R]S3.1, and
+    # visibly the thickest flexible on the machine after the dust hose.
+    R.hose('airline',
+           [(0.20, -0.10, BD / 2),
+            (0.20, UY * 0.90, UZ * 0.90 + BD / 2 + 0.22),
+            (0.20, UY * 2.00, UZ * 2.00 + BD / 2 + 0.12),
+            (0.16, ey - 0.08, ez + 0.22)],
+           radius=0.058, mat=R.MAT_RUBBER, parent=lift, sides=8)
+
+    join_by_mat(lift, 'boom')
+
+    # ---- boom lift cylinder ------------------------------------------------
+    # Its own aim node so the barrel tracks the boom instead of shearing.
+    ram_a = Vector((fx, fy - 0.62, fz - 0.300))
+    ram_b = Vector((fx + lugp[0], fy + lugp[1], fz + lugp[2]))
+    ram_v = ram_b - ram_a
+    ramp = R.empty(R.NODE_PIVOT, 'boomRam', root, ram_a,
+                   ram_v.to_track_quat('Z', 'Y').to_euler())
+    L = ram_v.length
+    cyl('ram_barrel', 0.105, L * 0.58, R.MAT_DARK, ramp, (0, 0, 0), sides=14)
+    cyl('ram_gland', 0.088, 0.085, R.MAT_CAST, ramp, (0, 0, L * 0.58), sides=14)
+    cyl('ram_eye', 0.075, 0.230, R.MAT_CAST, ramp, (-0.115, 0, 0.03),
+        (0, math.radians(90), 0), sides=12)
+    for i, z in enumerate((0.12, L * 0.46)):
+        R.hose('ramhose%d' % i, [(0.10, 0.0, z), (0.17, 0.05, z + 0.20),
+                                 (0.12, 0.0, z + 0.42)],
+               radius=0.016, mat=R.MAT_RUBBER, parent=ramp, sides=4)
+    join_by_mat(ramp, 'boomram')
+
+    rod = R.empty(R.NODE_SLIDE, 'boomRamRod', ramp, (0, 0, L * 0.58))
+    rod['stroke_m'] = L * 0.40
+    cyl('ram_rod', 0.062, L * 0.44, R.MAT_CHROME, rod, (0, 0, 0), sides=12)
+    cyl('ram_rodeye', 0.070, 0.210, R.MAT_CAST, rod, (-0.105, 0, L * 0.44),
+        (0, math.radians(90), 0), sides=12)
+    join_by_mat(rod, 'boomrod')
+
+    # ---- knuckle: the swing / dump joint at the boom's outer end [R]S4.2 ---
+    fswing = R.empty(R.NODE_PIVOT, 'feedSwing', lift, (ex, ey, ez))
+    cyl('knuckle', 0.155, 0.480, R.MAT_CAST, fswing, (0, 0, -0.17), sides=16)
+    R.box('knuckleyoke', (0.360, 0.320, 0.280), R.MAT_DARK, fswing,
+          (0, 0.07, 0.20), bevel=0.014)
+    bolt_ring(fswing, 'knucklebolt', 0.120, 8, 0.020, 0.026, R.MAT_WORN,
+              (0, 0, 0.315))
+    join_by_mat(fswing, 'knuckle')
+
+    # pivot:mast - the hole-angle node. Identity here = a vertical hole.
+    mast = R.empty(R.NODE_PIVOT, 'mast', fswing, (0, 0.140, 0.200))
+    mast['tilt_min_deg'] = -25.0   # brochure quotes feed angles at 17 and 25
+    mast['tilt_max_deg'] = 50.0    # deg; the class drills "well past 45" [R]S2
+    return mast
+
+
 # ═════════════════════════════════════════════════════════════════════════════
 # 9. ASSEMBLY
 # ═════════════════════════════════════════════════════════════════════════════
@@ -581,6 +763,7 @@ def build(out_path):
     build_canopy(None)
     build_cab(None)
     build_access(None)
+    build_boom(root)
 
     bake_all()
     return R.finish(out_path)

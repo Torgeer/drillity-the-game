@@ -1,0 +1,118 @@
+{
+  "port": "5186",
+  "started": {
+    "ok": true,
+    "scene": "site",
+    "drill": {
+      "active": true,
+      "depth": 0.0007843292176532552,
+      "target": 30,
+      "rop": 0.03194100886370616,
+      "wob": 0.5743913198821048,
+      "rpm": 0.6756086801178953,
+      "flush": 0.357,
+      "torque": 0.7754791739244555,
+      "wear": 0.0000029042493502713772,
+      "heat": 0.15740300423895726,
+      "stability": 1,
+      "load": 0,
+      "returns": 1,
+      "timeSec": 1.8083333333333294,
+      "jam": 0,
+      "rods": 1,
+      "stratumIndex": 0,
+      "inGreenBand": false,
+      "greenBandTime": 0,
+      "score": 0,
+      "holeDepth": 0.0007843292176532552,
+      "stringDepth": 0.0007843292176532552,
+      "gauge": 0.7754791739244555,
+      "gaugeAxis": "torque",
+      "gaugeLabel": "TORQUE",
+      "gaugeUnit": "",
+      "gaugeMax": 1.25,
+      "gaugeReal": 0.775,
+      "bandCentre": 0.9723015936937393,
+      "bandHalf": 0.08107489404209275,
+      "phase": "drilling",
+      "phaseT": 0,
+      "phaseDur": 0,
+      "stage": 0,
+      "stageProgress": 0,
+      "stageCount": 1,
+      "stageId": "bore",
+      "stageReverse": false,
+      "actionDepth": 0.0007843292176532552,
+      "progress01": 0.000026144307255108504,
+      "programme": null,
+      "runLog": [
+        {
+          "depth": 0,
+          "text": "Spud in",
+          "kind": null
+        },
+        {
+          "depth": 1.4,
+          "text": "Clay ahead · ~32.8 m/h",
+          "kind": null
+        },
+        {
+          "depth": 0,
+          "text": "Topsoil ahead · ~88.1 m/h",
+          "kind": null
+        }
+      ]
+    }
+  },
+  "errors": [
+    "[init] geology ReferenceError: boreExag is not defined\n    at applyHoleDiameter (http://localhost:5186/src/world/geology.js:2682:14)\n    at computeView (http://localhost:5186/src/world/geology.js:4236:5)\n    at Object.init (http://localhost:5186/src/world/geology.js:6191:5)\n    at boot (http://local",
+    "ReferenceError: boreExag is not defined\n    at applyHoleDiameter (http://localhost:5186/src/world/geology.js:2682:14)\n    at computeView (http://localhost:5186/src/world/geology.js:4236:5)\n    at Object.resize (http://localhost:5186/src/world/geology.js:6680:5)\n    at resize (http://localhost:5186/s"
+  ],
+  "runs": [
+    {
+      "label": "idle (no rotation)",
+      "error": "no drill-string mesh"
+    },
+    {
+      "label": "drilling rpm 0.30",
+      "error": "no drill-string mesh"
+    },
+    {
+      "label": "drilling rpm 0.90",
+      "error": "no drill-string mesh"
+    },
+    {
+      "label": "jammed",
+      "error": "no drill-string mesh"
+    }
+  ],
+  "pixels": {
+    "frames": 24,
+    "bytes": [
+      1196983,
+      1228349,
+      1252584,
+      1246540,
+      1258496,
+      1242038,
+      1259490,
+      1246673,
+      1245112,
+      1243548,
+      1259370,
+      1253035,
+      1245816,
+      1255787,
+      1260643,
+      1247513,
+      1243123,
+      1256762,
+      1250899,
+      1257194,
+      1242576,
+      1260434,
+      1256630,
+      1259959
+    ]
+  }
+}

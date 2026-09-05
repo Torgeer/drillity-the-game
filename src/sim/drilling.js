@@ -1886,6 +1886,27 @@ function bellStall(x, centre, sigma, stallK, floor) {
 }
 const nz = (v, d = 0) => (typeof v === 'number' && Number.isFinite(v) ? v : d);
 
+/* ── THE SILENT FALLBACK, AND THE ONE LINE THAT ENDS IT ─────────────────────
+   Not one `console.warn` existed on any missing-contract path in this file, and
+   the bill for that is on record: `sim.methodId` read `auger` for 513 of 519
+   samples in a longhole run, because a caller reached `startHole(undefined)`
+   and the resolution chain ended in a bare `|| 'auger'`. A plausible wrong
+   answer is worse than a crash — it survives review, it survives a screenshot,
+   and it survives four rounds of someone else's bug hunt.
+
+   So every terminal default in this file says so, once per distinct message, on
+   the console. Once, because these sit inside a 120 Hz loop and a warning that
+   floods is a warning nobody reads. HANDOFF §9.2 asks for this as a shared
+   `mustResolve()` helper; the sim deliberately imports only contract.js (that
+   isolation is what makes `debug.simulate()` runnable in node), so it keeps its
+   own copy rather than reaching for one. */
+const _warned = new Set();
+function warnOnce(key, ...msg) {
+  if (_warned.has(key)) return;
+  _warned.add(key);
+  try { console.warn(...msg); } catch { /* no console in some harnesses */ }
+}
+
 /** Normalised rock hardness — compresses 0..300 MPa into roughly 0.18..2.4. */
 function hardnessOf(ucs) {
   const r = T.rock;
@@ -2471,6 +2492,10 @@ export function createDrillSim(ctx = {}) {
 
       contract: null,
       methodId: 'auger',
+      /* 'air' | 'water' | 'mud' | 'foam' | 'none', or NULL when the caller did
+         not tell us. Null is published as null and warned about once — see
+         resolveFlushMedium(). A guessed medium draws the wrong plume. */
+      flushMedium: null,
       m: methodOf('auger'),
       bit: bitOf('auger-flight-std', methodOf('auger')),
       difficulty: 1,
@@ -2973,13 +2998,95 @@ export function createDrillSim(ctx = {}) {
   /* ═════════════════════════════════════════════════════════════════════
      RUN LIFECYCLE
      ═════════════════════════════════════════════════════════════════════ */
+  /**
+   * WHICH METHOD THIS RUN IS.
+   *
+   * ── THIS FUNCTION HAS ALREADY SHIPPED A WRONG ANSWER 513 TIMES ──
+   * `ui/screens/site.js` reaches `startHole(undefined)` whenever no contract is
+   * in hand, and this chain ended in a bare `|| 'auger'`. A longhole run
+   * measured `sim.methodId === 'auger'` on 513 of 519 samples: an underground
+   * production rig playing as a surface auger, in silence, through four rounds
+   * of review. Nothing crashed. Nothing logged. Everything downstream — vfx,
+   * audio, terrain, env — followed it, because they all ask the sim.
+   *
+   * Two changes stop that repeating.
+   *
+   * 1. `state.world.site.methodId` joins the chain. `progression.js` publishes
+   *    that descriptor when the job is ACCEPTED and — unlike `state.contract`,
+   *    which is nulled at settlement from inside `HOLE_COMPLETE` dispatch — it
+   *    is never cleared, only marked `live: false`. It is the durable answer to
+   *    "what is on screen", which is exactly the question this is.
+   * 2. The last two links WARN. The unlocked-methods guess and the terminal
+   *    `'auger'` are not resolutions, they are inventions, and an invented
+   *    method is worse than no run at all: it is plausible, so it survives.
+   */
   function resolveMethodId(contract) {
     const c = contract || {};
-    return c.methodId || c.method
+    // `c.method` is an id on most callers and the METHOD ROW on a few, so it
+    // is only an id when it is a string — otherwise the row itself would be
+    // returned as the method id and every table lookup would miss silently.
+    const id = c.methodId
+        || (typeof c.method === 'string' ? c.method : c.method?.id)
         || ctx.rig?.methodId
         || ctx.state?.contract?.methodId
-        || (ctx.state?.unlocked?.methods || ['auger']).slice(-1)[0]
-        || 'auger';
+        /* The SITE, not the contract. Published on accept, still standing at
+           settlement — the one place that still knows the method while the
+           results screen is up. See HANDOFF §12. */
+        || ctx.state?.world?.site?.methodId;
+    if (id) return id;
+
+    const guess = (ctx.state?.unlocked?.methods || []).slice(-1)[0];
+    if (guess) {
+      warnOnce('resolveMethodId:unlocked',
+        `[sim] startHole() got no method — no contract, no rig, no state.world.site. `
+        + `GUESSING "${guess}" from the last unlocked method. The run, the section, `
+        + `the particles and the audio will all play as that method. Pass a contract `
+        + `to startHole(), or publish state.world.site before mounting the site screen.`);
+      return guess;
+    }
+    warnOnce('resolveMethodId:auger',
+      '[sim] startHole() got no method AND nothing is unlocked — falling back to '
+      + '"auger". This is a WRONG ANSWER, not a default: every consumer that asks '
+      + 'sim.methodId will now be told it is watching a surface auger.');
+    return 'auger';
+  }
+
+  /**
+   * WHAT THIS RUN CIRCULATES — and why the sim does not keep its own table.
+   *
+   * `flushMedium` is a `game/data.js` METHODS fact ('air' | 'water' | 'mud' |
+   * 'foam' | 'none'). `sim/vfx.js` draws the collar plume from it, `audio.js`
+   * voices the pump from it and `economy.js` bills the consumable from it —
+   * three consumers, one fact, and the sim publishes about fifty fields beside
+   * it without ever publishing this one.
+   *
+   * It is NOT copied into a table here. This file already carries a private
+   * per-method tuning table and HANDOFF §8B is the record of what a second
+   * table of one fact costs (`catalog.js`'s parallel universe, the `rodLength`
+   * divergence `tools/checkdata.mjs` exists to catch). The fact belongs to the
+   * method row, so the sim takes it from the row it was handed — which is also
+   * the direction HANDOFF §9.1 wants everything else to move.
+   *
+   * TODAY THE ROW IS NOT HANDED IN. `makeContract()` (game/data.js) copies
+   * `methodId` off the method and stops; there is no `flushMedium` on a
+   * contract. So this resolves to null and says so, once, naming the fix.
+   * Null published honestly is a consumer falling back to its own table, which
+   * is recoverable. A guessed 'air' published as fact is the collar of a jet
+   * grouting column drawn as a dust plume, and nobody finds that for four
+   * rounds.
+   */
+  function resolveFlushMedium(c) {
+    // `c.method` is an id string on some callers and the METHOD ROW on others.
+    const row = c && typeof c.method === 'object' ? c.method : null;
+    const fm = (c && c.flushMedium) || (row && row.flushMedium) || null;
+    if (fm) return fm;
+    warnOnce('flushMedium:missing',
+      `[sim] no flushMedium for "${S.methodId}" — the contract does not carry one `
+      + 'and the sim will not invent one. state.drill.flushMedium publishes null; '
+      + 'consumers fall back to their own per-method tables. FIX: have '
+      + 'game/data.js makeContract() copy flushMedium off the method row (or pass '
+      + 'the row itself as contract.method).');
+    return null;
   }
 
   /** The fitted loadout, whatever shape the state is in. */
@@ -3036,6 +3143,7 @@ export function createDrillSim(ctx = {}) {
     // boring rig at all — the cone is pushed, nothing turns and nothing is
     // circulated. Resolve that once, here, and everything downstream is honest.
     S.m = resolveMethod(S.methodId, { probeMode: resolveProbeMode() });
+    S.flushMedium = resolveFlushMedium(c);
     S.bit = resolveBit();
     S.wear = S.bitStartWear;
     S.difficulty = clamp(nz(c.difficulty, 1), 0, 5);
@@ -7308,6 +7416,20 @@ export function createDrillSim(ctx = {}) {
     pushStage();
     const d = ctx.state?.drill;
     if (!d) return;
+    /* ── WHICH METHOD, AND WHAT IT CIRCULATES ────────────────────────────
+       Fifty fields were mirrored here and these two were not, so every
+       consumer that reads `state.drill` had to go and guess. `sim/vfx.js`
+       carried a fallback chain three links long looking for exactly these two
+       names; `ui/screens/site.js` re-derives the method from the contract,
+       which `progression.js` nulls at settlement; `results.js` reads a
+       normalised copy. One publisher, one answer, and it is the running
+       method by construction — `startHole()` sets it before it emits anything.
+
+       `flushMedium` may legitimately be NULL: the sim refuses to invent one
+       (see resolveFlushMedium). A consumer reading null should use its own
+       per-method table, not treat null as 'none'. */
+    d.methodId = S.methodId;
+    d.flushMedium = S.flushMedium;
     d.active = S.active;
     d.depth = S.depth;
     d.target = S.target;
@@ -7991,6 +8113,9 @@ export function createDrillSim(ctx = {}) {
       /* run */
       active: S.active, phase: S.phase, reason: S.stopReason,
       methodId: S.methodId, method: { id: S.methodId, name: S.m.name, kind: S.m.kind },
+      // Null when the contract did not carry one — never guessed. See
+      // resolveFlushMedium(); the same value is mirrored on state.drill.
+      flushMedium: S.flushMedium,
       contractId: S.contract?.id ?? null, difficulty: S.difficulty,
       timeSec: S.timeSec, drillSec: S.drillSec, parSec: S.parSec,
       jobHours: S.downholeSec / 3600,

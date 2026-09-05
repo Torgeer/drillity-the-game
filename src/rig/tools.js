@@ -668,9 +668,38 @@ export function flightGeometry(T, o) {
    CARBIDE — the single most important detail on any Drillity product.
    ═══════════════════════════════════════════════════════════════════════════ */
 /**
+ * How far a button of each shape stands out of the steel, as a multiple of its
+ * own RADIUS. A driller reads a bit face by the button silhouette before
+ * anything else, so these are the numbers that decide whether the render is a
+ * bit or a colander.
+ *
+ * A spherical button is set so that a full hemisphere is exposed — protrusion
+ * ≈ its own radius, i.e. 0.5 × diameter. A ballistic is a long ogive standing
+ * roughly a diameter clear. The previous values (0.62 r spherical, 1.35 r
+ * ballistic) were both about half of that, and at shop-card size the buttons
+ * disappeared into the face steel entirely.
+ */
+export const BUTTON_STICKOUT = {
+  spherical: 0.95,
+  semiballistic: 1.45,
+  ballistic: 2.15,
+  conical: 2.0,
+  chisel: 1.25,
+  flat: 0.34,
+};
+
+/**
  * One carbide button/insert as a lathe solid.
- * kind: 'spherical' | 'ballistic' | 'conical' | 'flat' | 'chisel'
+ * kind: 'spherical' | 'semiballistic' | 'ballistic' | 'conical' | 'flat' | 'chisel'
  * wear: 0..1 — the crown collapses into a polished wear flat.
+ *
+ * WEAR. A button does not shrink evenly. It loses its crown to a FLAT, and the
+ * flat has a hard rim where it meets what is left of the dome — that rim is the
+ * whole read, because a flat catches the key light as a hard-edged highlight
+ * while a fresh dome catches it as a soft one. So the flat is built as a real
+ * disc with its own edge ring rather than as a truncation, and it is given a
+ * shallow negative crown (a worn button dishes very slightly) so the rim stays
+ * a rim from every angle.
  */
 export function buttonGeometry(T, o) {
   o = o || {};
@@ -678,45 +707,83 @@ export function buttonGeometry(T, o) {
   const r = d * 0.5;
   const kind = o.kind || 'spherical';
   const wear = clamp01(o.wear || 0);
-  const stick = (o.protrusion !== undefined ? o.protrusion : (kind === 'ballistic' ? 1.35 : 0.62)) * r;
+  const stick = (o.protrusion !== undefined ? o.protrusion
+    : (BUTTON_STICKOUT[kind] !== undefined ? BUTTON_STICKOUT[kind] : BUTTON_STICKOUT.spherical)) * r;
   const seg = o.seg || 10;
   const bury = o.bury !== undefined ? o.bury : r * 0.9;
   const pts = [[0, -bury], [r, -bury], [r, 0]];
-  if (kind === 'ballistic') {
-    const h = stick * (1 - wear * 0.42);
-    const tipR = lerp(r * 0.13, r * 0.62, wear);
-    pts.push([r * 0.98, h * 0.20]);
-    pts.push([r * 0.86, h * 0.48]);
+  if (kind === 'ballistic' || kind === 'semiballistic') {
+    // A ballistic wears from the point back: the ogive is truncated and the
+    // truncation opens into a flat, so the tip radius grows fast while the
+    // height falls slowly. That is why a half-worn ballistic reads as a
+    // *stubbier* ballistic rather than as a sphere.
+    const h = stick * (1 - wear * 0.34);
+    const tipR = lerp(r * 0.13, r * 0.66, Math.pow(wear, 0.8));
+    pts.push([r * 0.99, h * 0.16]);
+    pts.push([r * 0.93, h * 0.36]);
+    pts.push([r * 0.80, h * 0.56]);
     pts.push([r * 0.62, h * 0.74]);
-    pts.push([tipR, h * 0.94]);
-    pts.push([tipR * 0.5, h]);
-    pts.push([0, h]);
+    pts.push([lerp(r * 0.38, r * 0.72, wear), h * 0.88]);
+    if (wear > 0.14) {
+      pts.push([tipR * 1.04, h * 0.985]);   // the rim of the wear flat
+      pts.push([tipR, h]);
+      pts.push([tipR * 0.45, h - r * 0.035 * wear]);  // dished centre
+      pts.push([0, h - r * 0.04 * wear]);
+    } else {
+      pts.push([tipR, h * 0.96]);
+      pts.push([tipR * 0.5, h]);
+      pts.push([0, h]);
+    }
   } else if (kind === 'conical') {
-    const h = stick * (1 - wear * 0.5);
-    const tipR = lerp(r * 0.10, r * 0.55, wear);
-    pts.push([r * 0.92, h * 0.30]);
-    pts.push([tipR, h * 0.94]);
-    pts.push([0, h]);
+    const h = stick * (1 - wear * 0.44);
+    const tipR = lerp(r * 0.10, r * 0.58, Math.pow(wear, 0.8));
+    pts.push([r * 0.94, h * 0.26]);
+    pts.push([r * 0.66, h * 0.66]);
+    if (wear > 0.14) { pts.push([tipR * 1.05, h * 0.98]); pts.push([tipR, h]); pts.push([0, h - r * 0.03 * wear]); }
+    else { pts.push([tipR, h * 0.94]); pts.push([0, h]); }
   } else if (kind === 'flat') {
-    const h = stick * 0.5;
-    pts.push([r, h]); pts.push([r * 0.86, h * 1.06]); pts.push([0, h * 1.06]);
+    // A flat-top insert (and a PDC cutter, which borrows this) is a right
+    // cylinder with a chamfered rim, not a dome. It wears by losing that rim
+    // to a scallop, so the chamfer opens up rather than the height falling.
+    const h = stick;
+    const ch = lerp(r * 0.10, r * 0.30, wear);
+    pts.push([r, h - ch]); pts.push([r - ch * 0.8, h]); pts.push([0, h]);
   } else if (kind === 'chisel') {
-    const h = stick * (1 - wear * 0.45);
-    pts.push([r * 0.9, h * 0.55]); pts.push([lerp(r * 0.16, r * 0.6, wear), h]); pts.push([0, h]);
+    const h = stick * (1 - wear * 0.4);
+    pts.push([r * 0.94, h * 0.34]);
+    pts.push([r * 0.72, h * 0.68]);
+    pts.push([lerp(r * 0.10, r * 0.58, wear), h]);
+    pts.push([0, h]);
   } else {
-    const h = stick * (1 - wear * 0.55);
-    const flat = lerp(0.0, 0.78, Math.pow(wear, 0.85));
-    const steps = 5;
+    // Spherical. A fresh one is a hemisphere; a worn one is a hemisphere with
+    // its crown taken off square. The rim between dome and flat is built
+    // explicitly — that hard edge is what makes a worn button read as worn
+    // instead of as a smaller button.
+    const h = stick * (1 - wear * 0.42);
+    const flat = lerp(0.0, 0.72, Math.pow(wear, 0.75));
+    const steps = 6;
     for (let i = 1; i <= steps; i++) {
       const a = (i / steps) * (Math.PI * 0.5);
       const rr = r * Math.cos(a);
-      if (rr < r * flat) break;
+      if (rr < r * flat * 1.02) break;
       pts.push([rr, h * Math.sin(a)]);
     }
-    pts.push([Math.max(1e-4, r * flat), h]);
-    pts.push([0, h]);
+    if (flat > 0.02) {
+      const fr = r * flat;
+      pts.push([fr * 1.03, h * 0.992]);
+      pts.push([fr, h]);
+      pts.push([fr * 0.45, h - r * 0.03 * wear]);
+      pts.push([0, h - r * 0.035 * wear]);
+    } else {
+      pts.push([Math.max(1e-4, r * 0.12), h * 0.995]);
+      pts.push([0, h]);
+    }
   }
-  return G.lathe(T, pts, seg, false);
+  const g = G.lathe(T, pts, seg, false);
+  // A chisel insert is a wedge, not a solid of revolution. Squashing the lathe
+  // on one axis is the honest cross-section and costs nothing.
+  if (kind === 'chisel') g.scale(1, 1, 0.44);
+  return g;
 }
 
 /** A snapped-out button: the empty socket with a chipped crater lip. */
@@ -740,6 +807,15 @@ export function socketGeometry(T, o) {
  * an open socket; a milled steel tooth leaves a snapped stub; a PDC cutter
  * leaves a brazed pocket. Those must not look the same, so the caller decides.
  * o.lossStart moves the threshold and o.lossRate scales how many go.
+ *
+ * WASHOUT. Carbide outlasts the steel it is set in, so the second half of a
+ * bit's life is the FACE receding, not the buttons shrinking: the flushing
+ * scours the body away around each insert until the button stands on a little
+ * pedestal, and once enough of the socket wall has gone the button falls out.
+ * That is why a scrapped bit has short buttons AND empty holes, and why the
+ * survivors look TALLER than they did new. Pass `o.bodyMat` — the bit's own
+ * body material — and studFace models it. The pedestals land in the body's
+ * existing material bucket, so they merge into the head and cost no draw call.
  */
 export function studFace(T, ctx, parent, layout, o) {
   o = o || {};
@@ -750,24 +826,42 @@ export function studFace(T, ctx, parent, layout, o) {
   const out = [];
   const lossStart = o.lossStart === undefined ? 0.82 : clamp01(o.lossStart);
   const lossRate = o.lossRate === undefined ? 0.6 : o.lossRate;
+  // Steel starts to scour once the bit is over half worn, and the gauge — where
+  // the flushing velocity is highest — goes first.
+  const washStart = o.washStart === undefined ? 0.42 : o.washStart;
+  const wash = clamp01((wear - washStart) / Math.max(1e-3, 1 - washStart));
   const up = new T.Vector3(0, 1, 0);
   for (let i = 0; i < layout.length; i++) {
     const b = layout[i];
     const h = ((i * 2654435761) % 1013) / 1013;
+    const h2 = ((i * 40503 + 17) % 251) / 251;
     const lost = wear > lossStart
       && h < ((wear - lossStart) / Math.max(1e-3, 1 - lossStart)) * lossRate;
     const dir = new T.Vector3(b.nx || 0, b.ny === undefined ? 1 : b.ny, b.nz || 0);
     if (dir.lengthSq() < 1e-8) dir.set(0, 1, 0);
     dir.normalize();
     const quat = new T.Quaternion().setFromUnitVectors(up, dir);
+    // Every slot wears at its own rate. A face where all thirty buttons are
+    // identically blunt is a render; a real one has a couple that took the
+    // punishment and a couple that were shielded.
+    const bw = clamp01(wear * (b.gauge ? 1.25 : 1) * lerp(0.72, 1.22, h2));
     const geo = lost
       ? (o.lostGeo ? o.lostGeo(b, i) : socketGeometry(T, { dia: b.dia, seg: Math.max(7, seg - 2) }))
       : buttonGeometry(T, {
         dia: b.dia, kind: b.kind || o.kind || 'spherical', seg: seg,
-        wear: clamp01(wear * (b.gauge ? 1.25 : 1)),
-        protrusion: b.protrusion,
+        wear: bw, protrusion: b.protrusion,
       });
-    out.push(part(T, parent, geo, lost ? matS : matC, { p: [b.x, b.y, b.z], q: quat, recv: false }));
+    // Recess a lost socket into the eroded face, and stand a survivor on the
+    // pedestal the scour has left it.
+    const lift = wash > 0.02 ? b.dia * (b.gauge ? 0.30 : 0.20) * wash * lerp(0.6, 1.3, h2) : 0;
+    const p = [b.x + dir.x * lift, b.y + dir.y * lift, b.z + dir.z * lift];
+    out.push(part(T, parent, geo, lost ? matS : matC, { p: p, q: quat, recv: false }));
+    if (lift > 1e-5 && !lost && o.bodyMat) {
+      const pr = b.dia * 0.5;
+      out.push(part(T, parent, G.lathe(T, [
+        [pr * 1.34, -lift * 1.25], [pr * 1.24, -lift * 0.35], [pr * 1.02, lift * 0.06], [0, lift * 0.06],
+      ], Math.max(6, seg - 3), false), o.bodyMat, { p: p, q: quat, recv: false, cast: false }));
+    }
   }
   return out;
 }
@@ -789,9 +883,53 @@ export function ringLayout(o) {
       x: ca * r, y: y, z: sa * r,
       nx: ca * st, ny: Math.cos(tilt), nz: sa * st,
       dia: o.dia, kind: o.kind, gauge: !!o.gauge, protrusion: o.protrusion,
+      a: a, r: r,
     });
   }
   return out;
+}
+
+/**
+ * FLUSHING GROOVES — the waterways.
+ *
+ * After the buttons, the channels are what identify a percussive bit. Air or
+ * water leaves the blow holes at the centre of the face and has to get the
+ * cuttings out past the gauge; the route it takes is milled into the bit as a
+ * set of grooves that cross the face radially and then run up the outside of
+ * the gauge as flats. A bit without them is a mushroom.
+ *
+ * Returns { depthAt(theta), n, phase, half } where depthAt is 0 on the land
+ * and 1 in the middle of a groove, with a cosine shoulder so the groove wall
+ * is a real fillet rather than a step. Feed it to profiledLathe's `yFn` for
+ * the face and `radiusFn` for the gauge, and to `clearOf()` so no button is
+ * ever planted in the middle of a channel.
+ */
+export function grooveField(o) {
+  o = o || {};
+  const n = Math.max(1, o.count || 4);
+  const phase = o.phase || 0;
+  // Angular half-width of one groove. Real face waterways are wide — roughly a
+  // fifth of the pitch circle each on a 4-groove bit — because they have to
+  // pass the whole cuttings load of that quadrant.
+  const half = (o.widthFrac === undefined ? 0.34 : o.widthFrac) * (Math.PI / n);
+  const depthAt = (th) => {
+    const a = ((th - phase) % (TAU / n) + (TAU / n)) % (TAU / n);
+    const d = Math.min(a, (TAU / n) - a);
+    if (d >= half) return 0;
+    return 0.5 + 0.5 * Math.cos((d / half) * Math.PI);
+  };
+  return {
+    n: n, phase: phase, half: half, depthAt: depthAt,
+    /** Nudge a button off the centreline of the nearest groove. */
+    clearOf: (th) => {
+      const step = TAU / n;
+      const a = ((th - phase) % step + step) % step;
+      const d = Math.min(a, step - a);
+      if (d >= half * 1.35) return th;
+      const push = (half * 1.35 - d) * (a < step - a ? 1 : -1);
+      return th + push;
+    },
+  };
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -929,11 +1067,20 @@ function finalise(T, g, spec, opts) {
    PROFILED LATHE — a solid of revolution whose radius is also a function of
    angle. This is what gives bits their real flushing flutes and DTH bits their
    blow-hole channels without CSG.
+
+   `radiusFn` alone can only push the surface in and out radially, which is
+   enough for a gauge flute but cannot cut the FACE. A real percussive bit is
+   recognised by its face waterways — the channels running from the blow holes
+   out to the periphery that the cuttings actually leave by — and those are an
+   AXIAL cut, not a radial one. `yFn` supplies that second degree of freedom:
+   it returns a y offset in metres, so a face row can be lifted up into the
+   body wherever a groove passes. Same mesh, same material, no extra draw call.
    ═══════════════════════════════════════════════════════════════════════════ */
 export function profiledLathe(T, pairs, o) {
   o = o || {};
   const cols = Math.max(6, o.segments || 24);
   const fn = o.radiusFn;
+  const yfn = o.yFn;
   const pts = pairs.map((p) => [Math.max(1e-5, p[0]), p[1]]);
   if (o.closedProfile !== false) {
     const a = pts[0], b = pts[pts.length - 1];
@@ -949,7 +1096,7 @@ export function profiledLathe(T, pairs, o) {
     for (let j = 0; j <= cols; j++) {
       const th = (j / cols) * TAU;
       const r = fn ? r0 * fn(th, r0, y, i) : r0;
-      pos.push(Math.cos(th) * r, y, Math.sin(th) * r);
+      pos.push(Math.cos(th) * r, y + (yfn ? yfn(th, r, y, i) : 0), Math.sin(th) * r);
       uv.push(j / cols, i / (rows - 1));
     }
   }
@@ -1162,7 +1309,8 @@ export function buildScreenPanel(T, ctx, parent, o) {
 export const TOOL_UTILS = {
   mm, part, group, G, material, wearMaterial, threadGeometry, addPinThread,
   addBoxThread, flightGeometry, buttonGeometry, socketGeometry, studFace,
-  ringLayout, mergeStatic, disposeObject, THREAD_SPECS, TEXTURES,
+  ringLayout, grooveField, BUTTON_STICKOUT, mergeStatic, disposeObject,
+  THREAD_SPECS, TEXTURES,
   clamp01, lerp, DEG, TAU, finalise, profiledLathe, flushHole, weldBead,
   boltRing, buildScreenPanel, screenMaterial, glowIntensity, linearLuminance,
   GLOW, BLOOM_THRESHOLD, bitBodyMaterial,

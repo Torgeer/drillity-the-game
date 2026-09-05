@@ -1606,11 +1606,25 @@ export function createSiteScreen(app) {
    * fractions for a consumer that has no live screen to ask.
    *
    * Called twice per run, never per frame.
+   *
+   * ── offsetHeight, NOT getBoundingClientRect ─────────────────────────────
+   * `.screen.is-entering` runs `@keyframes screen-in`, which starts at
+   * `scale(.985)` (styles.css). getBoundingClientRect() returns the RENDERED
+   * box, so measuring one rAF after mount — which is exactly when this is
+   * called — read the dock through that scale and published 186 px for a dock
+   * that is 189, and 51 for a 52 px strip. The renderer would then inset 3 px
+   * less than the chrome actually covers, and 3 px of section would be drawn
+   * under the opaque dock and thrown away on every entry, for ever.
+   *
+   * offsetHeight is the LAID-OUT border box and is immune to transforms, which
+   * is the quantity the renderer actually needs: how much of the stage the
+   * chrome will occupy once it has settled, not how big it looks mid-animation.
+   * Do not "simplify" this back to a rect.
    */
   function publishChrome() {
     if (!el.isConnected) return;
-    const top = Math.round(sstrip.getBoundingClientRect().height);
-    const bottom = Math.round(dock.getBoundingClientRect().height);
+    const top = sstrip.offsetHeight;
+    const bottom = dock.offsetHeight;
     const prev = ctx.hud;
     if (prev && prev.top === top && prev.bottom === bottom) return;
     ctx.hud = { top, bottom };

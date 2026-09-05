@@ -4812,13 +4812,59 @@ const DEPTH_BY_METHOD_APPLICATION = Object.freeze({
  *        everywhere.
  * @returns {[number, number]}
  */
+/**
+ * THE DEEPEST HOLE THE FLEET CAN MAKE with a given method, in metres, cached.
+ *
+ * A contract that asks for more depth than any rig in the game can reach is
+ * the same defect as one that bottoms in undrillable ground — the player takes
+ * the job, buys the only machine that runs the method, and it still cannot
+ * finish. Measured over 24,000 cards, three methods were dealing them:
+ *
+ *   rotary-kelly   worst card 90 m   deepest rig  78 m   (Torvald KR-46)
+ *   jet-grouting   worst card 46 m   deepest rig  45 m   (Steinbach TH-320)
+ *   driven-pile    worst card 30 m   deepest rig  25 m   (Bergholt PM-78)
+ *
+ * The last one is the clearest: `research/rigs/piling-leader.md` sources the
+ * 25 m pile off the manufacturer's own table ("max pile length 25 m with the
+ * smallest recommended hammer"), so 25 is the true number and the method's 30 m
+ * ceiling was the invention.
+ *
+ * DERIVED, NOT DECIDED. The cap is read off RIGS rather than written down a
+ * second time, so it cannot drift: add a deeper machine and the work widens by
+ * itself, retire one and it narrows. Writing "25" into DEPTH_BY_METHOD_APPLICATION
+ * would be a third place for the same fact to be wrong in.
+ *
+ * Only for methods in DEPTH_IS_VERTICAL. For the other four, `targetDepth` is a
+ * length along something else — an HDD bore, a jumbo's chainage, metres of
+ * drive, a ring's total — and comparing any of those to a rig's depth rating is
+ * the same category error the list exists to prevent. A 400 m HDD bore is
+ * drilled by a rig rated for nothing like 400 m of hole.
+ */
+const _fleetDepth = new Map();
+function fleetDepthFor(methodId) {
+  if (_fleetDepth.has(methodId)) return _fleetDepth.get(methodId);
+  let deepest = Infinity;
+  if (DEPTH_IS_VERTICAL.includes(methodId)) {
+    const able = RIGS.filter((r) => r.methods.includes(methodId));
+    // No rig runs it at all is checkdata.mjs's problem, not this function's —
+    // it must not silently narrow a window to nothing on the way past.
+    deepest = able.length
+      ? able.reduce((a, r) => Math.max(a, r.stats.depthCapacity || 0), 0)
+      : Infinity;
+  }
+  _fleetDepth.set(methodId, deepest);
+  return deepest;
+}
+
 export function depthWindow(method, applicationId, archetypeId = null) {
+  const fleet = fleetDepthFor(method.id);
   const row = (DEPTH_BY_METHOD_APPLICATION[method.id] || {})[applicationId];
   const w = Array.isArray(row)
     ? row
     : (row && archetypeId ? row[archetypeId] : null);
-  if (!w) return method.depthRange;
-  const hi = Math.min(w[1], method.depthRange[1]);
+  if (!w) return [Math.min(method.depthRange[0], Math.min(method.depthRange[1], fleet)),
+                   Math.min(method.depthRange[1], fleet)];
+  const hi = Math.min(w[1], method.depthRange[1], fleet);
   return [Math.min(w[0], hi), hi];
 }
 

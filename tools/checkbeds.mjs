@@ -44,6 +44,24 @@ const ONLY = process.argv[3] || null;
 
 const methodById = new Map(D.METHODS.map((m) => [m.id, m]));
 
+/**
+ * Methods whose `targetDepth` is the vertical depth of a hole. data.js keeps
+ * the authoritative list as `DEPTH_IS_VERTICAL`; it is module-private, so this
+ * derives the same set from the one thing that defines it — a method whose
+ * depth is a depth is one `depthWindow()` lets the fleet cap. Anything the
+ * fleet cap leaves untouched is measured along something else.
+ */
+const VERTICAL = new Set(D.METHODS.filter((m) => {
+  const app = m.applications[0];
+  const uncapped = m.depthRange[1];
+  const fleet = D.RIGS.filter((r) => r.methods.includes(m.id))
+    .reduce((a, r) => Math.max(a, r.stats.depthCapacity || 0), 0);
+  if (!fleet) return false;
+  // A vertical method's window can never exceed the fleet; a non-vertical
+  // one's routinely does, because the two numbers measure different things.
+  return D.depthWindow(m, app, m.archetypes[0])[1] <= Math.min(uncapped, fleet);
+}).map((m) => m.id));
+
 /** Every failure this card commits, in words. Empty means the card is legal. */
 function faults(c) {
   const out = [];
@@ -76,6 +94,23 @@ function faults(c) {
     out.push(`targetDepth ${c.targetDepth} m is outside the window `
       + `${lo}-${hi} m for ${method.id}/${c.applicationId}/${c.archetype}`);
   }
+  // 4. SOMEBODY IN THE FLEET MUST BE ABLE TO REACH IT. A card the player can
+  //    accept, buy the only machine that runs the method for, and still not
+  //    finish is the same defect as one that bottoms in undrillable ground.
+  //    Only for methods whose targetDepth IS a vertical depth — for an HDD
+  //    bore length or a jumbo's chainage, comparing it to a rig's depth rating
+  //    is a category error.
+  if (VERTICAL.has(c.methodId)) {
+    const able = D.RIGS.filter((r) => r.methods.includes(c.methodId));
+    if (!able.length) {
+      out.push('no rig in the game runs this method at all');
+    } else if (!able.some((r) => (r.stats.depthCapacity || 0) >= c.targetDepth)) {
+      const deepest = Math.max(...able.map((r) => r.stats.depthCapacity || 0));
+      out.push(`asks for ${c.targetDepth} m; the deepest rig that runs `
+        + `${c.methodId} reaches ${deepest} m`);
+    }
+  }
+
   return out;
 }
 

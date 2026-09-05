@@ -1,0 +1,273 @@
+{
+  "tag": "valid-base",
+  "cases": {
+    "rockbolt": {
+      "painted": {
+        "max": 41,
+        "med": 41
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "smallTargets": [],
+      "clipped": [],
+      "split": {
+        "surfPct": 54,
+        "sectPct": 46,
+        "stagePct": 66.9
+      },
+      "bands": {
+        "surface": {
+          "y": 52,
+          "h": 305
+        },
+        "section": {
+          "y": 357,
+          "h": 260
+        }
+      },
+      "dom": {
+        "screens": 2,
+        "liveNodes": 120,
+        "docNodes": 163,
+        "dockH": 227,
+        "stripH": 52,
+        "dockCount": 1,
+        "hud": {
+          "top": 51,
+          "bottom": 224
+        }
+      }
+    },
+    "driven-pile": {
+      "painted": {
+        "max": 36,
+        "med": 29
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "smallTargets": [],
+      "clipped": [],
+      "split": {
+        "surfPct": 54,
+        "sectPct": 46,
+        "stagePct": 66.9
+      },
+      "bands": {
+        "surface": {
+          "y": 52,
+          "h": 305
+        },
+        "section": {
+          "y": 357,
+          "h": 260
+        }
+      },
+      "dom": {
+        "screens": 2,
+        "liveNodes": 120,
+        "docNodes": 163,
+        "dockH": 227,
+        "stripH": 52,
+        "dockCount": 1,
+        "hud": {
+          "top": 52,
+          "bottom": 227
+        }
+      }
+    },
+    "rc": {
+      "painted": {
+        "max": 39,
+        "med": 39
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "smallTargets": [],
+      "clipped": [],
+      "split": {
+        "surfPct": 54,
+        "sectPct": 46,
+        "stagePct": 66.9
+      },
+      "bands": {
+        "surface": {
+          "y": 52,
+          "h": 305
+        },
+        "section": {
+          "y": 357,
+          "h": 260
+        }
+      },
+      "dom": {
+        "screens": 2,
+        "liveNodes": 120,
+        "docNodes": 163,
+        "dockH": 227,
+        "stripH": 52,
+        "dockCount": 1,
+        "hud": {
+          "top": 52,
+          "bottom": 227
+        }
+      }
+    },
+    "dth": {
+      "painted": {
+        "max": 38,
+        "med": 38
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "smallTargets": [],
+      "clipped": [],
+      "split": {
+        "surfPct": 54.1,
+        "sectPct": 45.9,
+        "stagePct": 71.4
+      },
+      "bands": {
+        "surface": {
+          "y": 52,
+          "h": 326
+        },
+        "section": {
+          "y": 378,
+          "h": 277
+        }
+      },
+      "dom": {
+        "screens": 2,
+        "liveNodes": 120,
+        "docNodes": 163,
+        "dockH": 189,
+        "stripH": 52,
+        "dockCount": 1,
+        "hud": {
+          "top": 52,
+          "bottom": 189
+        }
+      }
+    },
+    "oil-rotary": {
+      "painted": {
+        "max": 42,
+        "med": 42
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "smallTargets": [],
+      "clipped": [],
+      "split": {
+        "surfPct": 54,
+        "sectPct": 46,
+        "stagePct": 66.9
+      },
+      "bands": {
+        "surface": {
+          "y": 52,
+          "h": 305
+        },
+        "section": {
+          "y": 357,
+          "h": 260
+        }
+      },
+      "dom": {
+        "screens": 2,
+        "liveNodes": 120,
+        "docNodes": 163,
+        "dockH": 227,
+        "stripH": 52,
+        "dockCount": 1,
+        "hud": {
+          "top": 52,
+          "bottom": 227
+        }
+      }
+    }
+  },
+  "nav": [
+    {
+      "visit": 1,
+      "screens": 4,
+      "liveNodes": 120,
+      "docNodes": 811,
+      "dockH": 189,
+      "stripH": 52,
+      "dockCount": 1,
+      "hud": {
+        "top": 51,
+        "bottom": 186
+      },
+      "overlaps": 0,
+      "painted": 30
+    },
+    {
+      "visit": 2,
+      "screens": 4,
+      "liveNodes": 120,
+      "docNodes": 811,
+      "dockH": 189,
+      "stripH": 52,
+      "dockCount": 1,
+      "hud": {
+        "top": 51,
+        "bottom": 186
+      },
+      "overlaps": 0,
+      "painted": 30
+    },
+    {
+      "visit": 3,
+      "screens": 4,
+      "liveNodes": 120,
+      "docNodes": 811,
+      "dockH": 189,
+      "stripH": 52,
+      "dockCount": 1,
+      "hud": {
+        "top": 51,
+        "bottom": 186
+      },
+      "overlaps": 0,
+      "painted": 30
+    },
+    {
+      "visit": 4,
+      "screens": 4,
+      "liveNodes": 120,
+      "docNodes": 811,
+      "dockH": 189,
+      "stripH": 52,
+      "dockCount": 1,
+      "hud": {
+        "top": 51,
+        "bottom": 186
+      },
+      "overlaps": 0,
+      "painted": 30
+    },
+    {
+      "visit": 5,
+      "screens": 4,
+      "liveNodes": 120,
+      "docNodes": 811,
+      "dockH": 189,
+      "stripH": 52,
+      "dockCount": 1,
+      "hud": {
+        "top": 51,
+        "bottom": 186
+      },
+      "overlaps": 0,
+      "painted": 30
+    }
+  ],
+  "errors": []
+}

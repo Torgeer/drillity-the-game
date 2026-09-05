@@ -2704,47 +2704,160 @@ export function createTerrain(ctx) {
        mining engineer would look for first: production holes are not scattered,
        they are on a designed pattern with flagged collars. */
     if (kit === 'pit') {
-      // benches stepping away, each one wider than a quarry's
-      for (let b = 1; b <= 4; b++) {
-        const r = 26 + b * 15;
-        for (let i = 0; i < 11; i++) {
-          const a = -2.35 + i * 0.155;
+      /* ROUND 4 — WHAT SHOTS/B0-OPEN-PIT-BENCH.PNG ACTUALLY SHOWED.
+
+         Sky across the top half of the band, a dune horizon, and one cobbly
+         wall off to the left. Every word of the archetype's own note was
+         missing from its own frame: "no edge of the property in sight", the
+         benches "receding to the far wall", the haul road. The cause is
+         arithmetic, not art. The old loop drew four rings at r = 41, 56, 71,
+         86 with crest heights of 4.1, 5.1, 6.2, 7.3 m over an 11-box, 155-deg
+         arc that did not close, and it sat them at MINUS 1.2 m so a 4 m bench
+         stood 2.9 m proud.
+
+         The hero camera is at y 2.60 looking at y 3.40 with a 34-deg VERTICAL
+         field. At r = 41 the top of the band is 41·tan(17 deg) = 12.5 m above
+         that sight line, i.e. 15.9 m of world height. A 2.9 m bench occupies
+         18 % of it and the other 82 % is sky. Nothing about the shading could
+         have saved that; the geometry was an order of magnitude short.
+
+         So the pit is now solved against the frame it has to fill. The wall
+         closes a full 360 deg, the innermost crest clears the top of the band,
+         and each ring steps UP and OUT — which is what "benches receding to
+         the far wall" is when you are standing on the floor of the hole. §A.5
+         gives 12-15 m benches 20-40 m wide for a large pit; 12 m and 22 m are
+         used, and four rings then put the crest 48 m up at r = 130, well over
+         the frame. The archetype's farAmp of 0.35 stops the region's ridge
+         competing with it, which was always the intent.
+
+         The second thing §A.5 asks for, and the old kit had none of, is TWO
+         drill classes on one bench: "the game draws one machine for both". The
+         grade-control RC rig is here, on the pattern, behind the hero. */
+      const BENCH_H = 12.0, BENCH_W = 22.0;
+      for (let b = 0; b < 4; b++) {
+        const r = 30 + b * BENCH_W;
+        const n = Math.max(16, Math.round((TAU * r) / 15));
+        for (let i = 0; i < n; i++) {
+          const a = (i / n) * TAU;
           const px = Math.cos(a) * r, pz = Math.sin(a) * r;
           const y = terrainHeight(px, pz);
-          put(box(T, 17, 4.2 + b * 1.1, 13, px, y + (4.2 + b * 1.1) * 0.5 - 1.2, pz, 0, a + 1.57, 0),
+          const seg = (TAU * r) / n + 1.6;              // overlap so no gap opens
+          /* THE BATTER AND THE BERM, which is the shape §A.5 names: a steep
+             face, a flat catch bench, then the next face. Two boxes per ring
+             — the face standing on the level below, and the berm slab on top
+             of it — is the cheapest honest read of it, and both merge into the
+             same `earth` mesh as the ground. */
+          const h = BENCH_H * (b + 1);
+          put(box(T, seg, h, 8.0, px, y + h * 0.5 - 0.8, pz, 0, -a, 0),
             b % 2 ? region.rock : region.colA, 'earth');
+          put(box(T, seg, 0.9, BENCH_W - 8.0,
+            px + Math.cos(a) * (BENCH_W * 0.5), y + h - 0.35, pz + Math.sin(a) * (BENCH_W * 0.5), 0, -a, 0),
+            region.spoil, 'earth');
+          /* the safety berm along the crest of every bench — a real rule, and
+             the line that makes a bench read as a bench at 60-130 m */
+          if (i % 2 === 0) {
+            put(box(T, seg * 0.9, 1.5, 1.9,
+              px + Math.cos(a) * (BENCH_W - 9.0), y + h + 0.6, pz + Math.sin(a) * (BENCH_W - 9.0), 0, -a, 0),
+              region.rock, 'earth');
+          }
         }
       }
-      // the surveyed pattern: flagged collars on a grid, stemming beside each
+      /* THE HAUL RAMP, climbing the wall on the far side. §A.5: "the haul road
+         situated at the side of the pit, forming a ramp." It cuts across the
+         benches at a constant grade, which is the one diagonal in an image
+         otherwise made entirely of horizontals. */
+      for (let i = 0; i < 26; i++) {
+        const a = 1.15 + i * 0.075;
+        const r = 30 + i * 3.4;
+        const px = Math.cos(a) * r, pz = Math.sin(a) * r;
+        const y = terrainHeight(px, pz) + i * 1.85;
+        put(box(T, 13.0, 1.1, 16.0, px, y, pz, 0, -a, 0), region.spoil, 'earth');
+        put(box(T, 1.6, 1.4, 15.0, px + Math.cos(a) * 6.2, y + 1.1, pz + Math.sin(a) * 6.2, 0, -a, 0),
+          region.rock, 'earth');                        // the windrow down the outer edge
+      }
+
+      /* THE SURVEYED PATTERN. §A.5 gives burden 3-3.5 m and spacing 3.5-6 m,
+         so 5.2 m is inside the range and stays. What was missing is the half
+         of it BEHIND the rig: "a grid of finished collars, each a black circle
+         with a cone of grey cuttings round it." A grid of flags with no drilled
+         holes in it is a set-out, not a bench being drilled. */
       for (let ix = -3; ix <= 3; ix++) {
         for (let iz = -2; iz <= 3; iz++) {
           if (ix === 0 && iz === 0) continue;                    // the live hole
           const px = ix * 5.2 - 1.0, pz = iz * 5.2 - 2.0;
           if (Math.hypot(px, pz) < 7) continue;
           const y = terrainHeight(px, pz);
-          put(cyl(T, 0.13, 0.13, 0.30, 8, px, y + 0.13, pz), 0x2A2E33, 'matte');
-          put(cyl(T, 0.012, 0.012, 1.1, 4, px, y + 0.60, pz), 0xE8E6DF, 'matte');
-          put(box(T, 0.26, 0.18, 0.02, px + 0.12, y + 1.05, pz), 0xE0562A, 'matte');
+          const drilled = iz >= 1;                               // the rig works toward -z
+          if (drilled) {
+            // a collar, the ring of cuttings the hammer threw out, and stemming
+            const cone = new T.ConeGeometry(0.95, 0.34, 9);
+            cone.translate(px, y + 0.10, pz);
+            put(cone, region.spoil, 'earth');
+            put(cyl(T, 0.16, 0.16, 0.34, 10, px, y + 0.19, pz), 0x17191C, 'matte');
+            put(box(T, 0.24, 0.20, 0.02, px + 0.34, y + 0.95, pz), 0xE0562A, 'matte');
+            put(cyl(T, 0.010, 0.010, 0.95, 4, px + 0.34, y + 0.52, pz), 0xE8E6DF, 'matte');
+          } else {
+            put(cyl(T, 0.13, 0.13, 0.30, 8, px, y + 0.13, pz), 0x2A2E33, 'matte');
+            put(cyl(T, 0.012, 0.012, 1.1, 4, px, y + 0.60, pz), 0xE8E6DF, 'matte');
+            put(box(T, 0.26, 0.18, 0.02, px + 0.12, y + 1.05, pz), 0xE0562A, 'matte');
+          }
         }
       }
-      // a haul truck on the bench below, and the haul road it came up
+      /* STEMMING AGGREGATE, stockpiled beside the pattern. §A.5: inert crushed
+         stone against the "rifle" or "gun-barrel" effect, and larger holes take
+         larger stone. It is the only pale heap on a bench and it reads. */
+      for (let i = 0; i < 3; i++) {
+        const px = 14.5 + i * 3.2, pz = 5.0 + (i % 2) * 2.4;
+        const s = 2.2 - i * 0.25;
+        const cone = new T.ConeGeometry(s, s * 0.78, 9);
+        cone.translate(px, terrainHeight(px, pz) + s * 0.30, pz);
+        put(cone, region.rock, 'earth');
+      }
+
+      /* THE EXPLOSIVES TRUCK. §A.5 names it: "a bulk emulsion truck with a
+         boom hose over a hole", behind the rig on the drilled half of the
+         pattern. This is the machine that tells a mining engineer the frame is
+         a production bench and not an exploration pad. */
       {
-        const c = at(-30, 20, 0.9);
-        put(c(box(T, 9.5, 1.5, 5.4, 0, 2.35, 0)), 0xB8791C, 'paint');       // body
-        put(c(box(T, 8.2, 2.6, 5.0, -0.6, 3.9, 0)), 0xA96E18, 'paint');     // tray
-        put(c(box(T, 2.6, 1.7, 3.0, 4.3, 3.3, 0)), 0xC7761F, 'paint');      // cab
-        put(c(box(T, 2.3, 0.8, 2.6, 4.3, 4.0, 0)), 0x1B2129, 'glass');
-        for (const [wx, wz] of [[3.2, 2.6], [3.2, -2.6], [-2.6, 2.8], [-2.6, -2.8]]) {
-          put(c(cyl(T, 1.5, 1.5, 1.0, 14, wx, 1.5, wz, 0, 0, Math.PI / 2)), 0x141518, 'rubber');
+        const c = at(13.0, 13.5, -0.66);
+        put(c(box(T, 8.4, 1.05, 2.7, 0, 1.35, 0)), 0x2E3238, 'metal');             // chassis
+        put(c(cyl(T, 1.35, 1.35, 5.2, 14, -1.0, 2.75, 0, 0, 0, Math.PI / 2)), 0xD8DAD5, 'paint'); // emulsion tank
+        put(c(box(T, 5.3, 0.5, 0.34, -1.0, 4.15, 0)), 0xC0392B, 'paint');          // hazard band on the crown
+        put(c(box(T, 2.4, 1.6, 2.5, 3.5, 2.15, 0)), 0xC7761F, 'paint');            // cab
+        put(c(box(T, 2.2, 0.75, 2.2, 3.5, 2.85, 0)), 0x1B2129, 'glass');
+        // the boom and the delivery hose reaching down to a collar
+        put(c(box(T, 0.30, 0.30, 3.6, -3.4, 4.0, 0, 0, 0, 0)), 0x7E858C, 'metal');
+        put(c(cyl(T, 0.09, 0.09, 3.4, 6, -3.4, 2.4, 1.9, 0.42, 0, 0)), 0x24282C, 'rubber');
+        for (const [wx, wz] of [[2.7, 1.4], [-1.4, 1.45], [-2.5, 1.45], [2.7, -1.4], [-1.4, -1.45], [-2.5, -1.45]]) {
+          put(c(cyl(T, 0.72, 0.72, 0.52, 12, wx, 0.72, wz, 0, 0, Math.PI / 2)), 0x141518, 'rubber');
         }
       }
-      put(box(T, 46, 0.9, 12, -26, terrainHeight(-26, 30) + 0.4, 30, 0, 0.5, 0), region.spoil, 'earth');
-      // a lit windsock/berm marker on the crest — the stand-off is a real rule
-      for (let i = -4; i <= 4; i++) {
-        const px = i * 4.4 + 6, pz = -18;
-        const y = terrainHeight(px, pz);
-        put(box(T, 1.8, 0.9, 1.6, px, y + 0.45, pz), region.rock, 'earth');   // berm
+
+      /* THE SECOND DRILL CLASS. §A.5's central complaint is that the game
+         "draws one machine for both" — a 250 mm rotary on jacks with a tower
+         and a dust hood is not a 100 mm tracked crawler. The hero is whichever
+         the contract fitted; this is the OTHER one, working the far end of the
+         same pattern: a tracked crawler with a short feed at a rake, which is
+         also §A.5's inclined grade-control RC drilling. */
+      {
+        const c = at(-16.0, -9.0, 1.15);
+        for (const s of [-1, 1]) {
+          put(c(box(T, 3.6, 0.75, 0.62, 0, 0.42, s * 1.05)), 0x2E3238, 'rubber');   // tracks
+          put(c(cyl(T, 0.38, 0.38, 0.64, 10, 1.55, 0.42, s * 1.05, 0, 0, Math.PI / 2)), 0x4A4F55, 'metal');
+        }
+        put(c(box(T, 3.0, 1.15, 1.9, -0.2, 1.32, 0)), PLANT_AMBER, 'paint');        // carrier
+        put(c(box(T, 1.25, 1.35, 1.5, -1.5, 2.5, 0)), 0x2A2E33, 'metal');           // canopy
+        put(c(box(T, 0.55, 0.55, 0.55, 1.2, 2.1, 0)), 0x5A6169, 'metal');           // boom knuckle
+        put(c(box(T, 0.34, 0.34, 3.2, 2.4, 3.0, 0, 0, 0, -0.5)), 0x8A6F22, 'paint');// boom
+        // the feed, raked over — an inclined grade-control hole, not a vertical one
+        put(c(box(T, 0.42, 5.4, 0.42, 4.3, 3.1, 0, 0, 0, 0.34)), 0x9AA0A6, 'metal');
+        put(c(cyl(T, 0.055, 0.055, 4.2, 6, 4.9, 2.5, 0, 0, 0, 0.34)), 0xB6BCC2, 'metal');
+        put(c(cyl(T, 0.34, 0.34, 0.5, 10, 5.6, 0.35, 0)), 0x3A3F44, 'rubber');      // dust skirt at the collar
       }
+
+      /* THE MUCK PILE the shovel is loading from, on the bench below and
+         behind — the reason the haul truck is on the ramp at all. */
+      put(box(T, 46, 0.9, 12, -26, terrainHeight(-26, 30) + 0.4, 30, 0, 0.5, 0), region.spoil, 'earth');
     }
 
     /* ── TUNNEL PORTAL ──────────────────────────────────────────────────────
@@ -2753,33 +2866,189 @@ export function createTerrain(ctx) {
        flat apron in front; spoil and segment stacks to one side." It is the one
        surface archetype with cover: `rock-back`. The face is what makes it. */
     if (kit === 'portal') {
-      const FX = -0.633 * 26, FZ = -0.775 * 26;      // the face, on the camera bearing
+      /* ROUND 4 — THIS BRANCH WAS REBUILT, AND THE REASON IS ONE BUG.
+
+         The old version put the black opening box at exactly (FX, FZ) — the
+         same centre as the `l = 0` rock slab, which is 9.4 x 7 x 6 against the
+         opening's 9 x 7 x 4. The opening was therefore INSIDE the rock, and no
+         portal frame this project ever shot contained an arch: what rendered
+         was seven cobble-textured slabs filling the whole band, which is what
+         shots/b0-tunnel-portal.png is a picture of. The archetype whose entire
+         identity is "a dark arch in a rock face" (research/16 §A.9) had drawn
+         a rock face and no arch for every round.
+
+         So the face is now built AROUND a hole rather than across one: a
+         headwall of jambs and a voussoir arch, with the rock cut back either
+         side of it, and a real tube of darkness behind. The tube is 26 m deep
+         with an unlit interior — depth is what makes an opening read as an
+         opening rather than as a black rectangle painted on a wall, and it is
+         the one place in this file where geometry the player can never reach
+         is worth its triangles.
+
+         Everything else here is §A.9's own inventory, and the two items it
+         says nobody draws are both in: the relocatable BATCHING PLANT (silos,
+         aggregate bins, mixer) and the SETTLEMENT / water-treatment package. */
+      const FX = -0.633 * 26, FZ = -0.775 * 26;      // the arch, on the camera bearing
       const fy = Math.atan2(0.633, 0.775);
-      // the cut face itself: a stepped rock wall across the back of the apron
-      for (let i = -3; i <= 3; i++) {
-        for (let l = 0; l < 3; l++) {
-          const ox = -0.775 * i * 9, oz = 0.633 * i * 9;
-          const px = FX + ox - 0.633 * l * 3.0, pz = FZ + oz - 0.775 * l * 3.0;
-          const h = 7 + l * 5.5;
-          put(box(T, 9.4, h, 6.0, px, terrainHeight(px, pz) + h * 0.5 - 1.0, pz, 0, fy, 0),
-            l ? region.rock : region.colB, 'earth');
+      const FY = terrainHeight(FX, FZ);
+      // unit vectors: `n` runs into the hill, `t` runs across the face
+      const nx = -0.633, nz = -0.775, tx = -0.775, tz = 0.633;
+      /* §A.9 gives one section for the drive behind it: "2 220 m long, 6 m
+         high x 5.5 m wide". The portal opening is that section plus the
+         lining, so 6.4 wide and 7.0 to the crown. */
+      const OW = 6.4, OH = 7.0;
+
+      /* THE TUBE. Four slabs making a box with no near end, running 26 m into
+         the hill, unlit and matte black. Backface culling means the player
+         only ever sees the inside. */
+      for (let s = -1; s <= 1; s += 2) {
+        put(box(T, 0.9, OH + 1.2, 26, FX + tx * s * (OW * 0.5 + 0.45) + nx * 13,
+          FY + OH * 0.5, FZ + tz * s * (OW * 0.5 + 0.45) + nz * 13, 0, fy, 0), 0x0B0D10, 'matte');
+      }
+      put(box(T, OW + 1.8, 0.9, 26, FX + nx * 13, FY + OH + 0.45, FZ + nz * 13, 0, fy, 0), 0x0B0D10, 'matte');
+      put(box(T, OW + 1.8, 0.6, 26, FX + nx * 13, FY - 0.28, FZ + nz * 13, 0, fy, 0), 0x14161A, 'matte');
+      // the back of the tube, so no sky can ever show through the hill
+      put(box(T, OW + 2.0, OH + 1.6, 0.8, FX + nx * 25.6, FY + OH * 0.5, FZ + nz * 25.6, 0, fy, 0), 0x07080A, 'matte');
+
+      /* THE HEADWALL. §A.9: "massive reinforced concrete or reinforced
+         shotcrete with wing walls and movement joints". Two jambs, a
+         voussoir arch of nine segments over the opening, a string course, and
+         wing walls raking away either side. Concrete, NOT the region's rock —
+         the value contrast between a pale cast collar and the dark hole is
+         what carries the image. */
+      const wallCol = 0xA8A49B;
+      for (let s = -1; s <= 1; s += 2) {
+        const off = OW * 0.5 + 1.5;
+        put(box(T, 3.0, OH + 0.4, 2.2, FX + tx * s * off, FY + (OH + 0.4) * 0.5, FZ + tz * s * off, 0, fy, 0),
+          wallCol, 'slab');
+        // the wing wall, raking down and out from the jamb
+        for (let w = 1; w <= 3; w++) {
+          const o2 = off + 1.5 + w * 2.6, h = (OH + 0.4) * (1 - w * 0.22);
+          const px = FX + tx * s * o2 + nx * -1.4, pz = FZ + tz * s * o2 + nz * -1.4;
+          put(box(T, 2.7, h, 1.6, px, terrainHeight(px, pz) + h * 0.5, pz, 0, fy, 0), wallCol, 'slab');
         }
       }
-      // the portal opening, and the canopy over it
-      put(box(T, 9.0, 7.0, 4.0, FX, terrainHeight(FX, FZ) + 3.4, FZ, 0, fy, 0), 0x0A0B0D, 'matte');
-      put(box(T, 11.0, 0.5, 6.5, FX - 0.633 * 2.2, terrainHeight(FX, FZ) + 7.2, FZ - 0.775 * 2.2, 0, fy, 0),
-        0x7E858C, 'metal');
+      // the arch ring: nine voussoirs on a half-circle of radius OW/2 + 0.75
+      {
+        const R = OW * 0.5 + 0.75;
+        for (let i = 0; i <= 8; i++) {
+          const a = (i / 8) * Math.PI;
+          const ax = -Math.cos(a) * R, ay = Math.sin(a) * R;
+          put(box(T, 1.5, 1.5, 2.2, FX + tx * ax, FY + OH - R + ay, FZ + tz * ax, 0, fy, a - Math.PI / 2),
+            wallCol, 'slab');
+        }
+        // the string course over the crown, and the datum plate on it
+        put(box(T, OW + 6.4, 0.65, 2.6, FX, FY + OH + 1.5, FZ, 0, fy, 0), 0x9A968D, 'slab');
+        put(box(T, 1.1, 0.7, 0.06, FX + tx * 3.4 + nx * -1.35, FY + OH + 1.5, FZ + tz * 3.4 + nz * -1.35, 0, fy, 0),
+          BRAND.amber, 'paint');
+      }
+
+      /* THE ROCK, CUT BACK EITHER SIDE OF THE HEADWALL AND STEPPED UP OVER IT.
+         The old loop ran i = -3..3 straight across the opening. It now starts
+         outside the wing walls, so nothing is ever drawn in front of the hole,
+         and the tiers step BACK as they rise — a cut slope, not a cliff. */
       for (const s of [-1, 1]) {
-        put(cyl(T, 0.16, 0.16, 7.4, 8, FX - 0.775 * s * 5.0 - 0.633 * 4.6, terrainHeight(FX, FZ) + 3.6,
-          FZ + 0.633 * s * 5.0 - 0.775 * 4.6), 0x8B9199, 'metal');
-      }
-      // rock netting and the anchors holding it, on the cut above the portal
-      for (let i = -4; i <= 4; i++) {
-        for (let j = 0; j < 3; j++) {
-          const px = FX - 0.775 * i * 2.6, pz = FZ + 0.633 * i * 2.6;
-          put(box(T, 0.22, 0.22, 0.05, px, terrainHeight(px, pz) + 8.5 + j * 2.6, pz, 0, fy, 0), 0x9AA0A6, 'metal');
+        for (let i = 0; i < 3; i++) {
+          for (let l = 0; l < 3; l++) {
+            const off = s * (OW * 0.5 + 7.5 + i * 9.0);
+            const back = l * 3.4;
+            const px = FX + tx * off + nx * back, pz = FZ + tz * off + nz * back;
+            const h = 8 + l * 5.0;
+            put(box(T, 9.4, h, 6.0, px, terrainHeight(px, pz) + h * 0.5 - 1.0, pz, 0, fy, 0),
+              l ? region.rock : region.colB, 'earth');
+          }
         }
       }
+      // and the hillside ABOVE the crown, stepped back so the arch has a brow
+      for (let l = 0; l < 3; l++) {
+        const back = 3.0 + l * 3.4, h = 9 + l * 5.0;
+        const px = FX + nx * back, pz = FZ + nz * back;
+        put(box(T, OW + 8.0, h, 6.0, px, FY + OH + 1.9 + h * 0.5 - 1.0, pz, 0, fy, 0),
+          l ? region.rock : region.colB, 'earth');
+      }
+
+      /* ROCKFALL NETTING on the cut above the arch — §A.9 "netted, bolted
+         slopes above". The net itself is a draped mesh panel; the bolt plates
+         are the grid of small squares pinning it. */
+      for (let i = -3; i <= 3; i++) {
+        const off = i * 3.2, back = 2.2;
+        const px = FX + tx * off + nx * back, pz = FZ + tz * off + nz * back;
+        put(box(T, 3.1, 9.0, 0.06, px, FY + OH + 6.6, pz, 0, fy, 0), 0x8A9097, 'metal');
+        for (let j = 0; j < 3; j++) {
+          put(box(T, 0.30, 0.30, 0.10, px, FY + OH + 3.4 + j * 3.0, pz, 0, fy, 0), 0xB6BCC2, 'metal');
+        }
+      }
+
+      /* THE VENTILATION DUCT — out of the arch, not standing in a field. It
+         runs along the crown inside the tube and turns down to the fan on the
+         apron. The fan sits "about 10 m inside the entrance" for a real drive;
+         at a portal it is the surface half of that pair. */
+      for (let i = 0; i < 7; i++) {
+        const b = 8.0 - i * 2.6;                        // from inside the arch out onto the apron
+        const px = FX + nx * b + tx * 1.9, pz = FZ + nz * b + tz * 1.9;
+        put(cyl(T, 0.62, 0.62, 2.7, 12, px, FY + OH - 1.1, pz, Math.PI / 2, fy, 0), 0xD8DAD5, 'matte');
+        put(cyl(T, 0.66, 0.66, 0.16, 12, px, FY + OH - 1.1, pz, Math.PI / 2, fy, 0), 0x8B9199, 'metal');
+      }
+      {
+        const c = at(-9.0, -11.0, fy);
+        put(c(box(T, 3.0, 0.5, 2.6, 0, 0.30, 0)), 0x4B525A, 'metal');
+        put(c(cyl(T, 1.15, 1.15, 3.2, 14, 0, 1.7, 0, 0, 0, Math.PI / 2)), 0xD8DAD5, 'matte');
+        put(c(cyl(T, 1.20, 1.20, 0.25, 14, 0, 1.7, 1.7, 0, 0, Math.PI / 2)), 0x8B9199, 'metal');
+      }
+
+      /* THE CONVEYOR out of the arch to the stockpile — §A.9's muck handling.
+         It leaves the tube at low level on the other side from the duct and
+         runs out onto the apron on trestles, discharging onto the spoil. */
+      for (let i = 0; i < 9; i++) {
+        const b = 6.0 - i * 3.1;
+        const px = FX + nx * b + tx * -1.8, pz = FZ + nz * b + tz * -1.8;
+        const y = FY + 1.5 + i * 0.16;
+        put(box(T, 1.10, 0.22, 3.2, px, y, pz, 0, fy, 0), 0x2A2E33, 'rubber');
+        put(box(T, 1.30, 0.14, 0.16, px, y - 0.20, pz, 0, fy, 0), 0x6E757C, 'metal');
+        if (i % 2 === 0 && i > 1) {
+          put(cyl(T, 0.09, 0.09, y - terrainHeight(px, pz), 6, px, (y + terrainHeight(px, pz)) * 0.5, pz),
+            0x7E858C, 'metal');
+        }
+      }
+
+      /* THE RELOCATABLE BATCHING PLANT — §A.9 names it explicitly, and it is
+         the largest object on a real portal apron: two cement silos, a bank of
+         aggregate bins on a ramp, and the mixer between them. */
+      {
+        const c = at(17.0, -13.0, -0.5);
+        for (const s of [-1, 1]) {
+          put(c(cyl(T, 1.35, 1.35, 8.4, 14, s * 2.4, 5.4, 0)), 0xD6D3CB, 'matte');   // silo barrel
+          put(c(new T.ConeGeometry(1.38, 1.7, 14).translate(s * 2.4, 0.85, 0)), 0x9A968D, 'metal'); // hopper
+          for (let l = 0; l < 3; l++) {
+            put(c(box(T, 0.16, 0.16, 3.0, s * 2.4, 1.9 + l * 3.0, 0, 0.55, 0, 0)), 0x7E858C, 'metal');
+          }
+          put(c(box(T, 3.0, 0.12, 0.12, s * 2.4, 9.7, 0)), 0x6E757C, 'metal');       // filter deck rail
+        }
+        // the aggregate bins, on their charging ramp
+        for (let i = 0; i < 3; i++) {
+          put(c(box(T, 2.3, 2.6, 3.4, -1.2 + i * 2.4, 2.6, -5.6)), 0x8A8F95, 'metal');
+          put(c(new T.ConeGeometry(1.5, 1.5, 4).translate(-1.2 + i * 2.4, 0.9, -5.6)), 0x767C82, 'metal');
+        }
+        put(c(box(T, 8.6, 0.9, 4.0, 1.2, 0.5, -9.4, 0.16, 0, 0)), region.spoil, 'earth');   // the ramp
+        // the mixer and its skirt
+        put(c(box(T, 3.4, 2.8, 3.0, 0, 2.0, -1.6)), 0x5B6169, 'metal');
+        put(c(box(T, 3.6, 0.5, 3.2, 0, 3.6, -1.6)), 0x8B9199, 'metal');
+      }
+
+      /* THE PORTAL WATER TREATMENT PACKAGE — §A.9: "a piece of plant almost
+         nobody draws". Compact lamella settlement: a tank with an inclined
+         plate stack in it, a launder over the top, and a pH dosing kiosk. */
+      {
+        const c = at(-17.5, 4.5, 0.28);
+        put(c(cyl(T, 1.9, 1.9, 2.4, 14, 0, 1.2, 0)), 0x35708C, 'paint');
+        for (let i = 0; i < 6; i++) {
+          put(c(box(T, 3.2, 0.06, 0.42, 0, 1.5 + i * 0.16, -1.3 + i * 0.5, 0.72, 0, 0)), 0xB6BCC2, 'metal');
+        }
+        put(c(cyl(T, 2.0, 2.0, 0.14, 14, 0, 2.48, 0)), 0x8B9199, 'metal');
+        put(c(box(T, 1.3, 1.8, 1.1, 3.2, 0.9, 0.4)), 0xD8DAD5, 'paint');
+        put(c(cyl(T, 0.10, 0.10, 3.0, 8, 1.9, 1.9, 0, 0, 0, Math.PI / 2)), 0x8E969E, 'metal');
+      }
+
       // segment / lining stacks and the spoil the drive is making
       for (let k = 0; k < 4; k++) {
         const px = 13 + (k % 2) * 3.6, pz = -6 - Math.floor(k / 2) * 4.2;
@@ -2796,13 +3065,25 @@ export function createTerrain(ctx) {
         cone.translate(px, terrainHeight(px, pz) + sc * 0.26, pz);
         put(cone, region.spoil, 'earth');
       }
-      // the ventilation fan and its duct running into the portal — the portal
-      // is the one surface site that has to breathe for the work inside it
+
+      /* MID-GROUND: the second machine. research/18 point 4 — "a lone rig
+         reads as a product shot" — and §A.9's apron is "a working platform AND
+         a haulage yard", so the machine that belongs on it is the one that
+         empties it: a tracked loader with its bucket down, parked square to
+         the arch where the muck comes out. */
       {
-        const c = at(-9.0, -11.0, fy);
-        put(c(box(T, 3.0, 0.5, 2.6, 0, 0.30, 0)), 0x4B525A, 'metal');
-        put(c(cyl(T, 1.15, 1.15, 3.2, 14, 0, 1.7, 0, 0, 0, Math.PI / 2)), 0xD8DAD5, 'matte');
-        put(c(cyl(T, 1.20, 1.20, 0.25, 14, 0, 1.7, 1.7, 0, 0, Math.PI / 2)), 0x8B9199, 'metal');
+        const c = at(9.5, 7.5, 2.35);
+        put(c(box(T, 4.6, 1.3, 2.6, 0, 1.55, 0)), PLANT_AMBER, 'paint');          // body
+        put(c(box(T, 1.9, 1.5, 2.0, -0.6, 2.9, 0)), 0x2A2E33, 'metal');           // cab frame
+        put(c(box(T, 1.7, 1.0, 1.8, -0.6, 2.9, 0)), 0x1B2129, 'glass');
+        for (const s of [-1, 1]) {                                                 // tracks
+          put(c(box(T, 4.9, 0.95, 0.85, 0, 0.60, s * 1.45)), 0x2E3238, 'rubber');
+          put(c(cyl(T, 0.48, 0.48, 0.88, 10, 2.1, 0.60, s * 1.45, 0, 0, Math.PI / 2)), 0x4A4F55, 'metal');
+          put(c(cyl(T, 0.48, 0.48, 0.88, 10, -2.1, 0.60, s * 1.45, 0, 0, Math.PI / 2)), 0x4A4F55, 'metal');
+          put(c(box(T, 0.34, 0.30, 3.0, 2.6, 1.55, s * 0.9, 0, 0, -0.34)), 0x8A6F22, 'paint');  // lift arm
+        }
+        put(c(box(T, 0.5, 1.5, 3.1, 4.3, 0.85, 0, 0, 0, 0.22)), 0x6E757C, 'metal'); // bucket back
+        put(c(box(T, 1.5, 0.22, 3.1, 4.7, 0.24, 0)), 0x9AA0A6, 'metal');            // bucket floor
       }
     }
 
@@ -4068,8 +4349,31 @@ export function createTerrain(ctx) {
            = F.amp·1.54 for the near range, a little more where the second
            range's plinth stacks on. Getting this normalisation right matters
            because `rel` now drives the crest fade below, and under the old
-           F.amp normalisation the actual crest only ever reached rel ≈ 0.5. */
-        const rel = clamp(y / Math.max(5, F.amp * 1.54 * (1 + back * 0.25)));
+           F.amp normalisation the actual crest only ever reached rel ≈ 0.5.
+
+           ── AND IT NORMALISES AGAINST THE REGION, NOT THE ARCHETYPE ────────
+           `rel` is "how far above the haze layer this vertex is", and it feeds
+           BOTH the value ramp and the aerial lerp. Normalising it against the
+           ARCHETYPE-scaled amp made it self-cancelling: an open-pit bench sets
+           farAmp 0.35 and a corridor 0.55, which drops the relief to 7-10 m,
+           but `rel` still ran the full 0..1 — so a 0.74→1.26 value ramp and a
+           0→0.97 haze lerp were compressed into the ~20 px of screen that
+           10 m of relief occupies at 200-400 m. Each of the 35 rings then
+           landed as one horizontal stripe of a distinctly different value and
+           the horizon rendered as a contour-banded ramp — plainly visible in
+           shots/b0-infrastructure-corridor.png and shots/b0-open-pit-bench.png,
+           where the "dune" behind the site is two dozen ruled lines.
+
+           `region.far.amp` is the UNSCALED denominator, so a flattened range
+           now reads as genuinely low: at farAmp 0.35 `rel` tops out at 0.35,
+           the value ramp spans 0.74-0.92 instead of 0.74-1.26, and the aerial
+           term's rel contribution falls 0.62 → 0.27. The variation shrinks
+           with the landform that is supposed to be carrying it, which is the
+           whole reason a flat horizon looks flat rather than striped. The
+           archetypes that keep their relief (portal 0.9, exploration 1.0,
+           quarry 0.8) stay within a percent of where they were solved. */
+        const relDenom = (region.far && region.far.amp) || F.amp;
+        const rel = clamp(y / Math.max(5, relDenom * 1.54 * (1 + back * 0.25)));
         // Widened 0.82+0.42 -> 0.74+0.52: more internal value range is what
         // makes a flank read as a lit flank rather than as a flat fill.
         tmp.multiplyScalar(0.74 + 0.52 * rel);
@@ -4169,21 +4473,55 @@ export function createTerrain(ctx) {
       sg.rotateX(-Math.PI / 2);
       // Open water matches no authored kind and is entirely shader-driven.
       seaMat = mat(null, { color: 0x16303d, roughness: 0.14, metalness: 0.35 });
+      /* THE HORIZON, AND WHY THE SEA WAS A STACK OF STRIPES.
+
+         A 900 m plane 14 m below a camera 2.6 m up is seen at grazing
+         incidence for all but its nearest 100 m: past ~250 m ONE SCREEN PIXEL
+         SPANS TENS OF METRES of water, and the two value-noise octaves below
+         run at 0.06 and 0.19 cycles/m — periods of 16 m and 5 m. Sampling a
+         5 m period at a 40 m rate is pure aliasing, and because the sampling
+         rate varies smoothly with screen row the beat lands as horizontal
+         bands: the "dune horizon" behind the marine deck in
+         shots/b0-marine-spread.png is that, not landform.
+
+         There is no mip chain to lean on — the noise is analytic — so the
+         fix is the analytic equivalent: fade each octave out at the distance
+         where its own period stops being resolvable, and lerp what is left
+         into the haze. `fade` is one smoothstep per octave against the view
+         distance, and the FINE octave (5 m period) dies first at 90-200 m
+         while the coarse one (16 m) survives to 420 m. Beyond that the water
+         is a flat value, which is what open water past half a kilometre
+         actually looks like through this much air.
+
+         The haze lerp uses the scene's own fog colour, so the sea meets the
+         sky in the same value the sky arrives at rather than in a hard line —
+         the horizon is the one edge in an offshore frame and it has to be an
+         edge because the VALUES differ, not because the geometry stops. */
       seaMat.onBeforeCompile = (sh) => {
         sh.uniforms.uST = groundUniforms.uTime;
-        sh.vertexShader = 'varying vec2 vSP;\n' + sh.vertexShader.replace(
-          '#include <begin_vertex>', '#include <begin_vertex>\n vSP = position.xz;');
-        sh.fragmentShader = `varying vec2 vSP; uniform float uST;
+        sh.uniforms.uSeaHaze = { value: new T.Color(region.haze) };
+        sh.vertexShader = 'varying vec2 vSP;\nvarying float vSD;\n' + sh.vertexShader.replace(
+          '#include <begin_vertex>',
+          '#include <begin_vertex>\n vSP = position.xz;\n'
+          + ' vSD = length( ( modelMatrix * vec4( transformed, 1.0 ) ).xyz - cameraPosition );');
+        sh.fragmentShader = `varying vec2 vSP; varying float vSD; uniform float uST; uniform vec3 uSeaHaze;
           float sh21(vec2 p){ vec3 q=fract(vec3(p.xyx)*0.1031); q+=dot(q,q.yzx+33.33); return fract((q.x+q.y)*q.z); }
           float svn(vec2 p){ vec2 i=floor(p),f=fract(p); f=f*f*(3.0-2.0*f);
             return mix(mix(sh21(i),sh21(i+vec2(1,0)),f.x),mix(sh21(i+vec2(0,1)),sh21(i+vec2(1,1)),f.x),f.y);}
         ` + sh.fragmentShader.replace(
           '#include <color_fragment>',
           `#include <color_fragment>
-           float w = svn(vSP * 0.06 + vec2(uST * 0.08, uST * 0.05))
-                   + svn(vSP * 0.19 - vec2(uST * 0.13, 0.0)) * 0.5;
+           float fFine   = 1.0 - smoothstep( 90.0, 200.0, vSD );
+           float fCoarse = 1.0 - smoothstep( 180.0, 420.0, vSD );
+           /* each octave's mean is 0.5, so fading TOWARD the mean rather than
+              toward zero keeps the average brightness of the water constant
+              as the detail goes — otherwise the horizon darkens as it calms. */
+           float w = mix( 0.5, svn(vSP * 0.06 + vec2(uST * 0.08, uST * 0.05)), fCoarse )
+                   + mix( 0.5, svn(vSP * 0.19 - vec2(uST * 0.13, 0.0)), fFine ) * 0.5;
            diffuseColor.rgb *= 0.72 + 0.55 * w;
-           diffuseColor.rgb += vec3(0.06,0.09,0.10) * smoothstep(1.05, 1.4, w);`);
+           diffuseColor.rgb += vec3(0.06,0.09,0.10) * smoothstep(1.05, 1.4, w) * fFine;
+           diffuseColor.rgb = mix( diffuseColor.rgb, uSeaHaze * 0.62,
+                                   smoothstep( 150.0, 640.0, vSD ) * 0.88 );`);
       };
       seaMat.customProgramCacheKey = () => 'drillity-sea';
       sea = new T.Mesh(sg, seaMat);

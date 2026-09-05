@@ -107,6 +107,37 @@ export const lerp = (a, b, t) => a + (b - a) * t;
 export const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
 export const easeOutBack = (t) => 1 + 2.7 * Math.pow(t - 1, 3) + 1.7 * Math.pow(t - 1, 2);
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   mustResolve — the bare `||` default, made audible
+   ═══════════════════════════════════════════════════════════════════════════
+   HANDOFF §8A is the most expensive bug class in this project: a value that
+   could not be resolved was quietly replaced with a plausible one, and the
+   plausible one SURVIVED REVIEW. `sim.methodId` read `auger` for 513 of 519
+   samples in a longhole run. Nothing crashed. Nothing logged. Four rounds.
+
+   A fallback is not the problem — the UI genuinely cannot crash because a
+   contract is thin. The problem is a fallback nobody can hear. So: pass the
+   value, say what it is, say what happens if it is wrong, and this warns ONCE
+   per site and then gets out of the way. It never throws and never changes
+   what the caller would have done.
+
+   The rule §9.2 asks for: no bare `||` / `??` default on a value that
+   describes the job, the method, the region or the site. Route it here.
+*/
+const resolveWarned = new Set();
+export function mustResolve(value, what, fallback, consequence = '') {
+  if (value !== null && value !== undefined && value !== '') return value;
+  if (!resolveWarned.has(what)) {
+    resolveWarned.add(what);
+    console.warn(`[ui] ${what} could not be resolved — using "${fallback}". `
+      + 'This is a WRONG ANSWER, not a default.'
+      + (consequence ? ' ' + consequence : ''));
+  }
+  return fallback;
+}
+/** Test hook: forget which sites have already warned. */
+export function _resetResolveWarnings() { resolveWarned.clear(); }
+
 /** Staggered entrance. Sets --stagger-i; CSS does the rest. */
 export function stagger(nodes, step = 1) {
   let i = 0;

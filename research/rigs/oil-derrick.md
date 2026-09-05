@@ -1,7 +1,8 @@
 # Rig reference — `oil-derrick` (Offshore platform / jack-up drilling package)
 
-status: in progress — written incrementally, may be truncated at any moment.
-Subject: game rig id `oil-derrick`, currently built by `src/rig/rigFactory.js` (`buildOilDerrick`, ~line 3846).
+status: in progress — skeleton written, sections appended as sources are read.
+Subject: game rig id `oil-derrick`, currently built by `src/rig/rigFactory.js`
+(`buildOilDerrick`, ~line 3846).
 
 > **NAMING RULE (DOMAIN.md §10).** Everything below is for GEOMETRY and MATERIALS only.
 > Do NOT copy manufacturer names, model designations, badges, logos or IADC rig names
@@ -9,7 +10,6 @@ Subject: game rig id `oil-derrick`, currently built by `src/rig/rigFactory.js` (
 > source. The in-game name stays fictional.
 
 ## 1. Sources read
-_(filled in as I go)_
 
 ## 2. What the machine IS
 
@@ -19,7 +19,7 @@ _(filled in as I go)_
 
 ## 5. Distinctive features (thumbnail silhouette)
 
-## 6. Materials and paint
+## 6. Materials, paint, and where wear and dirt accumulate
 
 ## 7. Photo references
 

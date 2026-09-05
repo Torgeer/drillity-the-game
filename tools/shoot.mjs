@@ -206,24 +206,51 @@ async function pageMetrics() {
   if (!gl || !THREE) return null;
   const info = gl.info;
 
-  /* ── frame totals: sample real frames ─────────────────────────────────── */
+  /* ── frame totals: sample real frames ─────────────────────────────────────
+     THE FPS NUMBER IS MEASURED HERE, NOT READ OFF THE GAME'S OWN CLOCK.
+
+     This used to sample 8 frames for draw calls and then take fps from a
+     single instantaneous `c.clock.fps`. That is the instrument that produced
+     the "some states run at 24-27 fps" mystery (HANDOFF §9.4): one unaveraged
+     reading, taken 1.5 s into a session whose shader warm-up runs 60-100 s.
+
+     Now: a 40-frame rAF window, median interval. The median is deliberate —
+     a mean is dragged by the single 200 ms stall a program link costs, and
+     one such stall in 40 frames is the difference between 100 and 60 fps.
+     The old number is kept as `fpsClock` so the two can be compared, and
+     `programsDelta` records whether the GPU compiled anything WHILE this
+     sample was being taken. A non-zero delta means the sample is cold by
+     definition, whatever the warm gate concluded a moment earlier. */
+  const FRAMES = 40;
+  const programs0 = info.programs ? info.programs.length : null;
   const frames = [];
   await new Promise((res) => {
     let n = 0;
+    let prev = performance.now();
     const tick = () => {
       // Our rAF is registered after main.js re-registered its own, so by the
       // time this runs the frame has already been rendered.
-      frames.push({ calls: info.render.calls, tris: info.render.triangles });
-      if (++n >= 8) return res();
+      const now = performance.now();
+      frames.push({ calls: info.render.calls, tris: info.render.triangles, dt: now - prev });
+      prev = now;
+      if (++n >= FRAMES) return res();
       requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
   });
+  const programs1 = info.programs ? info.programs.length : null;
   const med = (a) => { const s = a.slice().sort((x, y) => x - y); return s[s.length >> 1] || 0; };
+  // frames[0].dt is the gap from "evaluate started" to the first tick, not a
+  // frame interval. Drop it.
+  const dts = frames.slice(1).map((f) => f.dt).filter((d) => d > 0 && d < 2000);
+  const rafMs = dts.length ? med(dts) : null;
   const frame = {
     calls: med(frames.map((f) => f.calls)),
     tris: med(frames.map((f) => f.tris)),
     callsMax: Math.max(...frames.map((f) => f.calls)),
+    rafMs: rafMs != null ? +rafMs.toFixed(2) : null,
+    rafMsWorst: dts.length ? +Math.max(...dts).toFixed(2) : null,
+    samples: dts.length,
   };
 
   /* ── per-band attribution ──────────────────────────────────────────────
@@ -328,16 +355,67 @@ async function pageMetrics() {
   try { ctxLost = gl.getContext().isContextLost(); } catch (e) { void e; }
 
   return {
-    fps: c.clock ? +(c.clock.fps || 0).toFixed(1) : null,
+    /* MEASURED over `frame.samples` real frames, not read off c.clock. */
+    fps: rafMs ? +(1000 / rafMs).toFixed(1) : null,
+    fpsClock: c.clock ? +(c.clock.fps || 0).toFixed(1) : null,
     quality: c.quality && c.quality.id,
     ctxLost,
     frame, surface, section, rig,
     texEstMB: +(bytes / 1048576).toFixed(1),
     textures: info.memory.textures, geometries: info.memory.geometries,
-    programs: info.programs ? info.programs.length : null,
+    programs: programs1,
+    /* > 0 means shaders were still compiling DURING the fps window above.
+       Any fps taken with a non-zero delta is cold, full stop. */
+    programsDelta: (programs0 != null && programs1 != null) ? programs1 - programs0 : null,
+    sessionSec: +(performance.now() / 1000).toFixed(1),
     particles,
     jsHeapMB: performance.memory ? +(performance.memory.usedJSHeapSize / 1048576).toFixed(1) : null,
     canvas,
+  };
+}
+
+/**
+ * ═══ THE WARM GATE ═══════════════════════════════════════════════════════
+ *
+ * Sample the program count and a short frame window, and say whether the
+ * session has stopped compiling. Called in a poll loop by `warmUp()`.
+ *
+ * Two independent signals, because either alone lies:
+ *   • `gl.info.programs.length` — climbs 65 -> 77 over the first ~100 s as
+ *     three.js links a program per material/lights/shadow permutation. Stable
+ *     is necessary but NOT sufficient: the last link can still be in flight
+ *     and the parallel-shader-compile extension defers the stall to first use.
+ *   • the median rAF interval — the thing we actually care about. A session
+ *     that is still linking spends 30+ ms per frame on the MAIN THREAD while
+ *     its GPU frame is 4 ms, which is exactly the shape of the 26.5 fps
+ *     reading in HANDOFF §9.4.
+ */
+async function pageWarmSample() {
+  const c = window.__DRILLITY;
+  const gl = c && c.renderer && c.renderer.gl;
+  if (!gl) return null;
+  const info = gl.info;
+  const N = 20;
+  const dts = [];
+  await new Promise((res) => {
+    let n = 0;
+    let prev = performance.now();
+    const tick = () => {
+      const now = performance.now();
+      if (n > 0) dts.push(now - prev);
+      prev = now;
+      if (++n >= N) return res();
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+  const s = dts.slice().sort((a, b) => a - b);
+  const rafMs = s.length ? s[s.length >> 1] : null;
+  return {
+    programs: info.programs ? info.programs.length : null,
+    rafMs: rafMs != null ? +rafMs.toFixed(2) : null,
+    worstMs: s.length ? +s[s.length - 1].toFixed(2) : null,
+    sessionSec: +(performance.now() / 1000).toFixed(1),
   };
 }
 
@@ -625,6 +703,105 @@ async function drive(page, ticks = 18, ms = 130) {
     await sleep(ms);
   }
   return last;
+}
+
+/**
+ * ═══ WARM THE SESSION, THEN MEASURE ══════════════════════════════════════
+ *
+ * THE BUG THIS REPLACES. The harness waited `sleep(1500)` after boot and then
+ * photographed and timed ~50 states back to back. Shader warm-up on this
+ * machine takes 60-100 s, so the first dozen states were all measured on a
+ * main thread that was still linking programs. Commit 90defe7 caught it with
+ * the same state twice in one session (HANDOFF §9.4):
+ *
+ *     stop  state   t+       fps      rAF       GPU      calls  programs
+ *     #0    auger    29.2 s   26.5    36.9 ms   4.10 ms   221     65
+ *     #5    auger    99.3 s  102.5     8.3 ms   5.88 ms   235     77
+ *
+ * 26.5 -> 102.5 fps while the GPU frame got MORE expensive and the draw calls
+ * went UP. The 32 ms that vanished was never on the GPU; it was program
+ * linking on the main thread. A cost that evaporates as a session warms, on a
+ * frame doing more work, is not a cost of that state.
+ *
+ * Poll until BOTH signals settle:
+ *   • the program count has not moved for `quietMs`
+ *   • the median rAF interval has stopped improving (within `tolerance` of
+ *     the best window seen so far)
+ * with a floor so a session that looks instantly quiet is still exercised,
+ * and a ceiling so a genuinely slow state cannot hang the run.
+ *
+ * Returns `{ warm, why, sec, programs, rafMs, fps, samples }`. **`warm` is
+ * carried into the report against every number taken after it.** A run that
+ * times out still captures — it just says so, loudly, instead of filing a
+ * cold number as a fact.
+ */
+async function warmUp(page, opts = {}) {
+  const {
+    label = 'session',
+    minMs = 6_000,        // never declare warm before this much has elapsed
+    maxMs = 150_000,      // hard ceiling — report cold rather than hang
+    quietMs = 6_000,      // programs must hold still this long
+    tolerance = 0.08,     // rAF within 8 % of the best window = stopped improving
+    verbose = false,
+  } = opts;
+
+  const t0 = Date.now();
+  let lastPrograms = null;
+  let programsStableAt = t0;
+  let bestRaf = Infinity;
+  let bestRafAt = t0;
+  let last = null;
+  let samples = 0;
+
+  for (;;) {
+    const s = await page.evaluate(pageWarmSample).catch(() => null);
+    const elapsed = Date.now() - t0;
+    if (!s) {
+      return { warm: false, why: 'no renderer to sample', sec: +(elapsed / 1000).toFixed(1),
+               programs: null, rafMs: null, fps: null, samples };
+    }
+    last = s; samples++;
+
+    if (s.programs !== lastPrograms) { lastPrograms = s.programs; programsStableAt = Date.now(); }
+    if (s.rafMs != null && s.rafMs < bestRaf * (1 - tolerance)) { bestRaf = s.rafMs; bestRafAt = Date.now(); }
+    else if (s.rafMs != null && s.rafMs < bestRaf) bestRaf = s.rafMs;
+
+    if (verbose) {
+      process.stdout.write(
+        `  warm[${label}] t+${(elapsed / 1000).toFixed(1)}s  programs ${s.programs}  ` +
+        `rAF ${s.rafMs} ms (best ${bestRaf === Infinity ? '-' : bestRaf.toFixed(2)})  ` +
+        `worst ${s.worstMs} ms\n`);
+    }
+
+    const now = Date.now();
+    const programsQuiet = now - programsStableAt >= quietMs;
+    const paceQuiet = now - bestRafAt >= quietMs;
+    if (elapsed >= minMs && programsQuiet && paceQuiet) {
+      return {
+        warm: true,
+        why: `programs stable at ${s.programs} for ${((now - programsStableAt) / 1000).toFixed(1)}s; ` +
+             `rAF stopped improving at ${bestRaf.toFixed(2)} ms`,
+        sec: +(elapsed / 1000).toFixed(1),
+        programs: s.programs, rafMs: s.rafMs,
+        fps: s.rafMs ? +(1000 / s.rafMs).toFixed(1) : null,
+        samples,
+      };
+    }
+    if (elapsed >= maxMs) {
+      return {
+        warm: false,
+        why: `TIMED OUT after ${(elapsed / 1000).toFixed(0)}s — programs ${s.programs} ` +
+             `(last moved ${((now - programsStableAt) / 1000).toFixed(1)}s ago), ` +
+             `rAF ${s.rafMs} ms vs best ${bestRaf.toFixed(2)} ms. ` +
+             `EVERY fps NUMBER IN THIS RUN IS COLD.`,
+        sec: +(elapsed / 1000).toFixed(1),
+        programs: s.programs, rafMs: s.rafMs,
+        fps: s.rafMs ? +(1000 / s.rafMs).toFixed(1) : null,
+        samples,
+      };
+    }
+    await sleep(250);
+  }
 }
 
 /**
@@ -980,6 +1157,37 @@ const run = async () => {
   if (!render.ok) logs.push(`[harness] FORCED past a dead renderer — ${render.why}`);
   process.stdout.write(`render health: ${render.ok ? 'ok' : 'DEAD'} (luma ${render.meanLuma}, ctxLost ${render.lost}, shader errors ${shaderErrs})\n`);
 
+  /* ── WARM THE SESSION ────────────────────────────────────────────────────
+     This is the fix for HANDOFF §9.4 and it belongs HERE, not in the settle:
+     shader linking is a property of the SESSION, not of a state. The old
+     `sleep(1500)` above meant the first dozen states were timed on a main
+     thread still linking programs, and the last dozen on one that had
+     finished — so the report ranked states by capture order and called it
+     performance.
+
+     The demo contract from the render-health check is already live, so the
+     surface world, the section world, the rig, the particles and the whole
+     post chain are all on screen and compiling. Drive it so nothing is
+     skipped for being static, then poll until it stops compiling.
+
+     Costs 30-100 s once. It used to cost the entire meaning of the fps
+     column. `--nowarm` skips it and stamps every number cold. */
+  let warm = { warm: false, why: 'skipped (--nowarm)', sec: 0, programs: null, rafMs: null, fps: null, samples: 0 };
+  if (!has('nowarm')) {
+    process.stdout.write('warming up (shader/program compile) ...\n');
+    // real ticks first: a parked frame never touches the impact, dust or
+    // cuttings materials, and those are programs too.
+    await drive(page, 12, 130);
+    warm = await warmUp(page, { label: 'session', verbose: true, maxMs: +flag('warmmax', 150_000) });
+    process.stdout.write(
+      `warm-up ${warm.warm ? 'COMPLETE' : 'INCOMPLETE'} after ${warm.sec}s — ` +
+      `${warm.programs} programs, ${warm.rafMs} ms/frame (${warm.fps} fps)\n  ${warm.why}\n`);
+    if (!warm.warm) logs.push(`[harness] WARM-UP INCOMPLETE — ${warm.why}`);
+  } else {
+    logs.push('[harness] --nowarm: every fps number in this run is COLD and comparable only to other cold runs');
+    process.stdout.write('--nowarm: fps numbers will be marked COLD\n');
+  }
+
   /* ── build the plan from the live content tables ─────────────────────── */
   const content = await page.evaluate(pageContent).catch(() => null);
   if (!content) { logs.push('[harness] FATAL: could not read window.__DRILLITY.data'); }
@@ -1061,6 +1269,21 @@ const run = async () => {
     }
     await sleep(shot.settle);
 
+    /* ── PER-STOP WARM GATE ──────────────────────────────────────────────
+       The session warm-up above handles the bulk, but a state can still be
+       the FIRST to show a material: a new rig, a method's own tooling, a
+       hazard effect. Those link on their first drawn frame, on the main
+       thread, and the fps window is about to start.
+
+       So: a short, cheap re-check that the program count is holding still.
+       Warm session, no new material -> two polls, ~1 s. New material ->
+       waits for it. Never longer than `stopWarmMax`, and the result is
+       recorded per stop rather than assumed. */
+    const stopWarm = has('nowarm')
+      ? { warm: false, why: 'skipped (--nowarm)', sec: 0, programs: null, rafMs: null, fps: null, samples: 0 }
+      : await warmUp(page, { label: shot.id, minMs: 0, quietMs: 1_500, maxMs: 15_000, tolerance: 0.12 });
+    if (!stopWarm.warm) logs.push(`[warm:${shot.id}] ${stopWarm.why}`);
+
     const metrics = await page.evaluate(pageMetrics).catch((e) => ({ error: e.message }));
     const ident = await page.evaluate(pageIdentity).catch(() => ({ counts: {} }));
 
@@ -1085,10 +1308,24 @@ const run = async () => {
       metrics, ident, checks, failed, errors: errs.length, errorLines: errs.slice(0, 6),
       extra: shot.extra ? shot.extra.call(shot) : null,
       tookSec: +((Date.now() - t0) / 1000).toFixed(1),
+      /* WAS THIS NUMBER TAKEN WARM? Both gates have to agree, and the metrics
+         sampler gets a veto: if `programsDelta` is non-zero the GPU was
+         compiling during the fps window itself. Nothing downstream may print
+         an fps without printing this beside it. */
+      warm: !!(warm.warm && stopWarm.warm && metrics && metrics.programsDelta === 0),
+      warmDetail: {
+        session: warm.warm, stop: stopWarm.warm,
+        stopSec: stopWarm.sec, stopWhy: stopWarm.warm ? null : stopWarm.why,
+        programsDelta: metrics ? (metrics.programsDelta ?? null) : null,
+      },
     });
     const mk = failed.length ? `VERIFY FAIL (${failed.join('; ')})` : 'ok';
-    const fm = metrics && metrics.frame ? `${metrics.frame.calls} calls / ${(metrics.frame.tris / 1000).toFixed(0)}k tris / ${metrics.fps} fps` : 'no metrics';
-    process.stdout.write(`shot ${shot.id.padEnd(26)} ${fm.padEnd(34)} ${mk}\n`);
+    const isWarm = !!(warm.warm && stopWarm.warm && metrics && metrics.programsDelta === 0);
+    const fm = metrics && metrics.frame
+      ? `${metrics.frame.calls} calls / ${(metrics.frame.tris / 1000).toFixed(0)}k tris / ` +
+        `${metrics.fps} fps ${isWarm ? 'warm' : 'COLD'}`
+      : 'no metrics';
+    process.stdout.write(`shot ${shot.id.padEnd(26)} ${fm.padEnd(40)} ${mk}\n`);
   }
 
   /* ── burn-in: a short interaction sweep to surface runtime errors the

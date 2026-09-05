@@ -49,11 +49,58 @@ await page.routeWebSocket(/.*/, () => { /* mute HMR */ })
 
 await page.goto(`http://localhost:5178/?quality=${QUALITY}&shot`, { waitUntil: 'load' });
 await page.waitForFunction(() => window.__DRILLITY && window.__DRILLITY.__qa, { timeout: 30000 });
+await page.waitForFunction(() => document.body.classList.contains('booted'), { timeout: 60000 }).catch(() => {});
 await sleep(2500);
 
 const report = { when: new Date().toISOString(), quality: QUALITY, methods: {}, errors };
 
+/* Crash-safe: this rig lost a whole run to a GPU-process death on method 2.
+   Write after every method so a crash costs one method, not the session. */
+const flush = () => writeFileSync(`shots/${TAG}-seam.json`, JSON.stringify(report, null, 2));
+
+/* Warm-up gate — the same fault tools/shoot.mjs had (HANDOFF §9.4). Luma
+   measurements are not immune to it: a session that is still linking programs
+   has not necessarily DRAWN everything yet, and a band mean taken while three
+   materials are missing is not a measurement of the band. Poll until the
+   program count holds still. */
+async function warmUp(page, { minMs = 4000, maxMs = 120000, quietMs = 5000, label = '' } = {}) {
+  const t0 = Date.now();
+  let lastP = null, stableAt = t0, last = null;
+  for (;;) {
+    const s = await page.evaluate(() => {
+      const c = window.__DRILLITY;
+      const gl = c && c.renderer && c.renderer.gl;
+      if (!gl) return null;
+      return { programs: gl.info.programs ? gl.info.programs.length : null,
+               sec: +(performance.now() / 1000).toFixed(1) };
+    }).catch(() => null);
+    if (!s) return { warm: false, why: 'no renderer', programs: null, sec: (Date.now() - t0) / 1000 };
+    last = s;
+    if (s.programs !== lastP) { lastP = s.programs; stableAt = Date.now(); }
+    const el = Date.now() - t0;
+    if (el >= minMs && Date.now() - stableAt >= quietMs) {
+      console.log(`  warm${label ? ' ' + label : ''}: ${s.programs} programs, stable, t+${s.sec}s`);
+      return { warm: true, why: `programs stable at ${s.programs}`, programs: s.programs, sec: +(el / 1000).toFixed(1) };
+    }
+    if (el >= maxMs) {
+      console.log(`  ! NOT WARM${label ? ' ' + label : ''}: programs still moving at t+${s.sec}s (${s.programs})`);
+      return { warm: false, why: `timed out with programs still moving (${s.programs})`, programs: s.programs, sec: +(el / 1000).toFixed(1) };
+    }
+    await sleep(400);
+  }
+}
+
+/* the section band draws nothing until a hole is live, so the session warm-up
+   has to happen INSIDE a drilling state, not on the menu */
+await page.evaluate(async () => {
+  const c = window.__DRILLITY;
+  try { await c.__qa.startDemoContract({ depth: 12 }); } catch (e) { void e; }
+}).catch(() => {});
+await sleep(1500);
+report.sessionWarm = await warmUp(page, { label: 'session' });
+
 for (const mid of METHODS) {
+ try {
   /* ── drive the game into a live drilling run of this method ─────────── */
   const setup = await page.evaluate(async (M) => {
     const c = window.__DRILLITY;
@@ -70,12 +117,35 @@ for (const mid of METHODS) {
 
   /* the shell holds every scene while the boot screen is up, and re-showing a
      scene that is already current returns without emitting — so wait for the
-     site screen to be genuinely live and its chrome measured */
-  await page.waitForFunction(() => {
+     site screen to be genuinely live and its chrome measured.
+
+     This used to fail SILENTLY into a console line and then measure anyway,
+     which is how a run reported "visible 54/46" off a frame whose chrome was
+     zero: the visible split is 54/46 BY CONSTRUCTION whatever the chrome does,
+     so it can never detect this. Say what actually failed, and record it. */
+  const live = await page.waitForFunction(() => {
     const c = window.__DRILLITY;
-    return c && c.state && c.state.scene === 'site' && c.hud;
-  }, { timeout: 20000 }).catch(() => console.log('  ! site screen never came up'));
+    return !!(c && c.state && c.state.scene === 'site' && c.hud
+      && c.renderer && c.renderer.chrome && c.renderer.chrome.bottom > 0);
+  }, { timeout: 20000 }).then(() => true).catch(() => false);
+  let liveWhy = null;
+  if (!live) {
+    liveWhy = await page.evaluate(() => {
+      const c = window.__DRILLITY;
+      return {
+        scene: c && c.state ? c.state.scene : null,
+        hud: (c && c.hud) || null,
+        chrome: c && c.renderer ? c.renderer.chrome : null,
+        usesHudChrome: !!(c && c.renderer && c.renderer.usesHudChrome),
+        siteInDom: !!document.querySelector('.site'),
+        sstrip: (() => { const e = document.querySelector('.sstrip'); return e ? +e.getBoundingClientRect().height.toFixed(2) : null; })(),
+        sitedock: (() => { const e = document.querySelector('.sitedock'); return e ? +e.getBoundingClientRect().height.toFixed(2) : null; })(),
+      };
+    }).catch(() => null);
+    console.log(`  ! chrome never reached the renderer — ${JSON.stringify(liveWhy)}`);
+  }
   await sleep(2600);
+  const methodWarm = await warmUp(page, { label: mid, minMs: 1500, quietMs: 2500, maxMs: 40000 });
 
   /* ── layout + light + air, straight off the live ctx ─────────────────── */
   const scene = await page.evaluate(() => {
@@ -313,6 +383,13 @@ for (const mid of METHODS) {
   const vis = scene.bands.surface.h + scene.bands.section.h;
   report.methods[mid] = {
     setup,
+    /* EVERY NUMBER BELOW IS STAMPED WITH THE CONDITIONS IT WAS TAKEN UNDER.
+       `chromeLive` false means the bands were never inset and the layout
+       numbers describe a frame the player never sees; `warm` false means the
+       session was still compiling and the pixels may be missing content. */
+    warm: methodWarm.warm && report.sessionWarm.warm,
+    warmDetail: { session: report.sessionWarm, method: methodWarm },
+    chromeLive: live, chromeWhy: liveWhy,
     layout: {
       hud: scene.hud, chrome: scene.chrome, usesHudChrome: scene.usesHudChrome,
       stage: scene.stage, bands: scene.bands, seamCssY: scene.seamCssY,
@@ -367,11 +444,26 @@ for (const mid of METHODS) {
     await page.evaluate(() => { const u = document.getElementById('ui'); if (u) u.style.visibility = ''; });
   }
 
-  console.log(`— ${mid}: seam css y=${scene.seamCssY}  visible ${report.methods[mid].layout.visibleSplitPct.surface}/${report.methods[mid].layout.visibleSplitPct.section}  stepL=${stepL}  lip+L=${report.methods[mid].seam.lipPeakOverBaselineL}  lip+RB=${report.methods[mid].seam.lipPeakOverBaselineRb}`);
+  const Ly = report.methods[mid].layout;
+  console.log(
+    `— ${mid}: seam y=${scene.seamCssY}  chrome ${scene.chrome ? scene.chrome.top + '/' + scene.chrome.bottom : 'null'}` +
+    `  stage ${Ly.stagePct.surface}/${Ly.stagePct.section}  visible ${Ly.visibleSplitPct.surface}/${Ly.visibleSplitPct.section}` +
+    `  stepL=${stepL}  lip+L=${report.methods[mid].seam.lipPeakOverBaselineL}  lip+RB=${report.methods[mid].seam.lipPeakOverBaselineRb}` +
+    `  [${report.methods[mid].warm ? 'warm' : 'COLD'}${live ? '' : ', CHROME NOT LIVE'}]`);
+  flush();
+ } catch (e) {
+   /* a GPU-process death used to lose the whole run here. Record it against
+      the method it happened to and stop, with everything before it saved. */
+   const why = String((e && e.message) || e).slice(0, 220);
+   report.methods[mid] = { aborted: why };
+   console.log(`— ${mid}: ABORTED — ${why}`);
+   flush();
+   break;
+ }
 }
 
 await browser.close();
 const out = `shots/${TAG}-seam.json`;
-writeFileSync(out, JSON.stringify(report, null, 2));
+flush();
 console.log('\nwrote', out);
 if (errors.length) console.log('console errors:', errors.slice(0, 8));

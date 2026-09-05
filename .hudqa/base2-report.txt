@@ -1,0 +1,70 @@
+
+rockbolt
+  painted     max 41 / med 41   (enumerated from *, no allowlist)
+  OVERLAPS    0  ok
+  ON THE 3D   0  ok
+  targets<44  0  ok  
+  clipped     0  
+  split       surface 54 / section 46   (3D = 66.9% of stage)
+  chrome      .sstrip 52px  .sitedock 227px  ctx.hud {"top":51,"bottom":224}
+
+driven-pile
+  painted     max 36 / med 30   (enumerated from *, no allowlist)
+  OVERLAPS    0  ok
+  ON THE 3D   0  ok
+  targets<44  0  ok  
+  clipped     0  
+  split       surface 54 / section 46   (3D = 66.9% of stage)
+  chrome      .sstrip 52px  .sitedock 227px  ctx.hud {"top":52,"bottom":227}
+
+rc
+  painted     max 39 / med 39   (enumerated from *, no allowlist)
+  OVERLAPS    0  ok
+  ON THE 3D   0  ok
+  targets<44  0  ok  
+  clipped     0  
+  split       surface 54 / section 46   (3D = 66.9% of stage)
+  chrome      .sstrip 52px  .sitedock 227px  ctx.hud {"top":52,"bottom":227}
+
+dth
+  painted     max 38 / med 38   (enumerated from *, no allowlist)
+  OVERLAPS    0  ok
+  ON THE 3D   0  ok
+  targets<44  0  ok  
+  clipped     0  
+  split       surface 54.1 / section 45.9   (3D = 71.4% of stage)
+  chrome      .sstrip 52px  .sitedock 189px  ctx.hud {"top":52,"bottom":189}
+
+oil-rotary
+  painted     max 49 / med 49   (enumerated from *, no allowlist)
+  OVERLAPS    0  ok
+  ON THE 3D   0  ok
+  targets<44  0  ok  
+  clipped     0  
+  split       surface 54 / section 46   (3D = 66.9% of stage)
+  chrome      .sstrip 52px  .sitedock 227px  ctx.hud {"top":52,"bottom":227}
+
+
+=== REPEAT NAVIGATION: five ordinary visits to the site screen ===
+visit |  .sitedock |  .sstrip |  .screen nodes |  live nodes |  doc nodes |  .sitedock count |  ctx.hud
+  1   |     189 px |    52 px |         2      |      120   |     163   |         1        | {"top":52,"bottom":189}
+  2   |     189 px |    52 px |         4      |      120   |     811   |         1        | {"top":51,"bottom":186}
+  3   |     189 px |    52 px |         4      |      120   |     811   |         1        | {"top":51,"bottom":186}
+  4   |     189 px |    52 px |         4      |      120   |     811   |         1        | {"top":51,"bottom":186}
+  5   |     189 px |    52 px |         4      |      120   |     811   |         1        | {"top":51,"bottom":186}
+
+  GROWTH      document nodes 163 -> 811 (+648)   <-- GATE FAIL
+
+=== GATES ===
+  overlaps (enumerated) .... PASS
+  nothing over the 3D ...... PASS
+  touch targets >= 44px .... PASS
+  no navigation growth ..... FAIL
+
+console errors:
+[init] geology ReferenceError: boreExag is not defined
+    at applyHoleDiameter (http://localhost:5184/src/world/geology.js:2682:14)
+    at computeView (http://localhost:5184/src/w
+ReferenceError: boreExag is not defined
+    at applyHoleDiameter (http://localhost:5184/src/world/geology.js:2682:14)
+    at computeView (http://localhost:5184/src/world/geology.js
