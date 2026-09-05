@@ -178,7 +178,26 @@ p.on('pageerror', (e) => pageErrs.push(String(e).slice(0, 180)));
    127.0.0.1, not localhost — `localhost` resolves to ::1 first on Windows. */
 await p.goto(`${SERVER.origin}/?quality=low&shot`, { waitUntil: 'domcontentloaded', timeout: 180000 });
 await p.waitForFunction(() => window.__DRILLITY?.ui?.show && window.__DRILLITY?.sim, null, { timeout: 240000 });
-await p.waitForTimeout(2200);
+
+/* THE BOOT SCREEN IS NOT A SPLASH, IT IS A SHADER COMPILE — AND `waitForTimeout`
+   HERE WAS MEASURING IT. This was `await p.waitForTimeout(2200)`, a fixed wait
+   against a boot that has been measured at 10.4 s, 27.5 s and, on a loaded
+   machine, 60-100 s. tools/checkreach.mjs was fixed for exactly this and this
+   file kept the fault: it is the same lie in the other harness.
+
+   It is not theoretical. `shell.js show()` stashes any scene requested while
+   `bootHeld` is true into a SINGLE pendingScene slot, so a GOTO_SITE fired at
+   2.2 s races the MENU that main.js asked for, and a run has already been
+   caught scoring the menu screen as `rockbolt` — `wordmark` and `menu__tag`
+   reported as overlaps on the site screen. The empty-set guard caught that
+   one; a guard is not a reason to keep making the mistake.
+
+   Wait for boot to actually leave, then let the first screen settle. */
+const bootT0 = Date.now();
+await p.waitForFunction(() => !!document.querySelector('.screens > *:not(.boot)'),
+  null, { timeout: 240000 });
+say(`  boot cleared after ${((Date.now() - bootT0) / 1000).toFixed(1)} s`);
+await p.waitForTimeout(1200);
 
 const json = { tag: TAG, cases: {}, nav: null };
 let grew = [];
@@ -187,6 +206,31 @@ let grew = [];
 if (ONLY !== 'nav') {
   for (const m of CASES) {
     await p.evaluate(GOTO_SITE, m);
+    /* AND THE SCREEN IS CONFIRMED BEFORE IT IS MEASURED. `ui.show('site')` is
+       a request, not an arrival: it is stashed while boot holds, and the
+       enter transition takes another 440 ms after that. Every number below is
+       attributed to `m` in the report, so measuring any other screen does not
+       produce a gap — it produces a WRONG ROW, which is worse. Confirm, and
+       say so if it never arrives rather than sampling whatever is there. */
+    const arrived = await p.waitForFunction(() => {
+      const live = [...document.querySelectorAll('.screens > .screen')]
+        .find((n) => !n.hidden && !n.classList.contains('is-leaving')
+          && !n.classList.contains('is-leaving--back'));
+      return !!live && live.classList.contains('screen--site');
+    }, null, { timeout: 30000 }).then(() => true, () => false);
+    if (!arrived) {
+      say(`
+${m}`);
+      say('  WRONG SCREEN  the site screen never became live  <-- GATE FAIL');
+      json.cases[m] = {
+        saidTwice: [], hudDrift: [], splitBad: [], clipped: [],
+        nothing: [`${m}: ui.show('site') never put the site screen on screen — nothing measured`],
+        painted: { max: 0, med: 0 }, overlaps: 0, overlapList: [],
+        onBand3D: [], smallTargets: [], targetsSeen: [],
+        split: null, bands: null, dom: {},
+      };
+      continue;
+    }
     const S = [];
     for (let t = 0; t < 12000; t += 400) { await p.waitForTimeout(400); S.push(await measure(p)); }
 

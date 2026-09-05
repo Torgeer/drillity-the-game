@@ -93,7 +93,20 @@ const CONTROL_SETS = {
                 protect: ['Concrete pressure', 'CONCRETE'] },
   jet:        { advance: ['Withdrawal rate', 'WITHDRAW'],    work: ['Jet pressure', 'JET'],
                 protect: ['Rotation speed', 'ROTATION'] },
-  piling:     { advance: ['Hammer energy', 'ENERGY'],        work: ['Blow rate', 'BLOWS'],
+  /* `work` was ['Blow rate', 'BLOWS'], and on the one method where blows are
+     the whole point that word was already taken: `STATUS_UNIT.pile` puts
+     "Blows 47" in the status strip, which is the COUNT driven into this pile,
+     while the slider is the RATE the player holds. Two different quantities
+     under one word, on screen together, on the method whose entire record is
+     a blow count — and the driving record beside them is captioned
+     "Blows / 250 mm", a third sense of it.
+
+     `.hudqa/measure.mjs` has measured that collision for as long as it has
+     had a say-it-once check. The check was printed and never gated, so nobody
+     ever acted on it; it fails the build now, and this was the first thing it
+     caught. BPM is what the quantity is called on a hammer and can only mean
+     the rate. */
+  piling:     { advance: ['Hammer energy', 'ENERGY'],        work: ['Blow rate', 'BPM'],
                 protect: ['Alignment', 'ALIGN', 'the pile wanders off line unattended — trim the rake'] },
 
   /* ── the six from METHOD_IDS.md, keyed on the sim's programme ─────────── */
@@ -579,7 +592,12 @@ export function createSiteScreen(app) {
      through am I" in 2px of height, which is the one question a status line
      exists to answer. */
   const moneyEl = C.h('span.sstrip__v', { text: '€0' });
-  const lvlEl = C.h('span.sstrip__lvl', { text: '1' });
+  /* 'LVL 7', not a bare '7' in an amber plate. The plate was doing the
+     labelling work — see .sstrip__lvl in styles.css for why it is gone — and
+     without it a lone numeral sits directly against "Balance EUR48,210" and
+     reads as part of it. Three characters of quiet label cost less width than
+     the border and the padding they replace. */
+  const lvlEl = C.h('span.sstrip__lvl', { text: 'LVL 1' });
   const depthEl = C.h('span.sstrip__v', { text: '0.00', 'aria-live': 'off' });
   const targetEl = C.h('em', { text: ' / 0 m' });
   /* Not always "Depth": a jumbo and a bolter ADVANCE a drive, a pile is
@@ -2269,7 +2287,7 @@ export function createSiteScreen(app) {
        honest word — and it is the ONLY place the programme appears while the
        player is drilling. `--p` is the job-progress rule along its foot. */
     moneyRoll.step(dt);
-    lvlEl.textContent = String(p.level || 1);
+    lvlEl.textContent = 'LVL ' + (p.level || 1);
     const dep = d.depth || 0;
     const unitFmt = prog ? STATUS_UNIT[pkey] : null;
     let dKey = DEPTH_KEY[pkey] || 'Depth';
