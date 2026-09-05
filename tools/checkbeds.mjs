@@ -45,22 +45,14 @@ const ONLY = process.argv[3] || null;
 const methodById = new Map(D.METHODS.map((m) => [m.id, m]));
 
 /**
- * Methods whose `targetDepth` is the vertical depth of a hole. data.js keeps
- * the authoritative list as `DEPTH_IS_VERTICAL`; it is module-private, so this
- * derives the same set from the one thing that defines it — a method whose
- * depth is a depth is one `depthWindow()` lets the fleet cap. Anything the
- * fleet cap leaves untouched is measured along something else.
+ * Methods whose `targetDepth` is the vertical depth of a hole, straight from
+ * data.js. An earlier version of this file DERIVED the set by asking which
+ * windows sat under the fleet cap; it was accidentally right, sweeping in
+ * `tunnel-jumbo` and `hdd`, whose numbers are chainage and bore length and are
+ * not depths at all. A guard that reasons its way to the right answer for the
+ * wrong reason is a guard that will be wrong later.
  */
-const VERTICAL = new Set(D.METHODS.filter((m) => {
-  const app = m.applications[0];
-  const uncapped = m.depthRange[1];
-  const fleet = D.RIGS.filter((r) => r.methods.includes(m.id))
-    .reduce((a, r) => Math.max(a, r.stats.depthCapacity || 0), 0);
-  if (!fleet) return false;
-  // A vertical method's window can never exceed the fleet; a non-vertical
-  // one's routinely does, because the two numbers measure different things.
-  return D.depthWindow(m, app, m.archetypes[0])[1] <= Math.min(uncapped, fleet);
-}).map((m) => m.id));
+const VERTICAL = new Set(D.DEPTH_IS_VERTICAL);
 
 /** Every failure this card commits, in words. Empty means the card is legal. */
 function faults(c) {

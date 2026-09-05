@@ -4652,7 +4652,7 @@ export function preCollarFor(method, archetypeId) {
  * ring's total — and comparing any of those to a depth is a category error. A
  * 400 m HDD bore may never be more than six metres below the surface.
  */
-const DEPTH_IS_VERTICAL = deepFreeze([
+export const DEPTH_IS_VERTICAL = deepFreeze([
   'auger', 'cable-tool', 'top-hammer', 'site-investigation', 'dth', 'overburden',
   'core', 'rc', 'rotary-kelly', 'cfa', 'oil-rotary', 'anchor', 'driven-pile',
   'cased-cfa', 'sonic', 'jet-grouting', 'raise-boring',
