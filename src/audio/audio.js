@@ -147,6 +147,7 @@
  */
 
 import { EVENTS, clamp, damp, TAU, GROUND } from '../core/contract.js';
+import { createHaptics } from './haptics.js';
 
 /* ═══════════════════════════════════════════════════════════════════════════
    0. CONSTANTS & SMALL MATH
@@ -190,13 +191,56 @@ function prng(seed) {
 
    percussion : 'none' | 'top' | 'dth' | 'drop' | 'sonic'
    blowHz     : [min,max] blows per second at rpm control 0 → 1.
-                Real top hammer runs 2400–4200 bpm = 40–70 Hz; we use 34–62 Hz
-                because above ~62 Hz on a small speaker the individual blows
-                smear into a buzz and you lose the "machine" read.
-                Real DTH runs 1600–2200 bpm = 27–37 Hz → we use 20–34 Hz, which
-                keeps the blows individually audible and reads as heavier.
-                Cable-tool is a literal falling weight: 0.6–1.1 Hz.
-                Sonic is resonance, not blows: 55–165 Hz continuous.
+
+                ── THE REAL NUMBERS, AND WHERE THEY COME FROM ──────────────
+                `research/rigs/tools-drifters.md` §2 and §3, from manufacturer
+                datasheets, per drifter:
+
+                  Epiroc COP 1022   70 Hz   | Montabert HC 25  3 900 bpm
+                        COP 1028    50 Hz   |             55–65 Hz
+                        COP 628    100 Hz   |           HC 28  3 200 bpm
+                        COP SC14    80 Hz   |             47–55 Hz
+                        COP 1238K  40–60 Hz |           HC 50  3 300–4 200 bpm
+                                            |             40–62.5 Hz
+
+                Epiroc sources: product pages for COP 1022/1025/1028; brochures
+                COP 628 `9865 0122 01`, COP SC14 `9865 0009 01`, COP 1238K
+                `9865 0024 01`; rig brochure FlexiROC T15 R `9868 0026 01c`,
+                which is the ONLY source for the COP 1022/1028 figures.
+                Montabert sources: Komatsu spec sheets for HC25/HC28/HC50,
+                montabert.com product pages, 2010 HC brochure `86715521-EN`.
+
+                So the sourced top-hammer envelope across the whole class is
+                40–100 Hz, not the 40–70 this comment used to claim without a
+                citation. We ship 34–62 Hz, which is the COP 1028 / HC 28 end of
+                the real range and DELIBERATELY below the fast end: above ~62 Hz
+                on a phone speaker the individual blows smear into a buzz and
+                the "machine" read is lost. The offset is a choice, and it is
+                now a choice against a known number rather than against a
+                remembered one.
+
+                DTH: the previous comment claimed 1600–2200 bpm = 27–37 Hz.
+                **NOT SOURCED** — no DTH hammer datasheet in `research/`
+                supports it and none was found. We ship 20–34 Hz. What IS
+                defensible is the RATIO: a DTH hammer runs far slower than a
+                top-hammer drifter, roughly half, and that ratio is what a
+                driller actually hears across a site. Our 34–62 against 20–34
+                is 1.7–1.8x, against a sourced COP 1028 at 50 Hz. If a DTH
+                datasheet is ever found, fix the absolute numbers here and
+                leave the ratio alone.
+
+                Driven pile: 40–100 blows/min (0.667–1.667 Hz), sourced —
+                `research/rigs/tools-piling-hammers.md` §3a, Junttan hammer
+                brochure `Junttan_Hammers_brochure_EN_2025_web.pdf` p.9, for
+                the whole 3 000–9 000 kg box-framed line; a parallel line runs
+                50–140+/min and the round-cased line 40–180/min. We ship
+                0.50–1.667 Hz — **the bottom of our range, 30 blows/min, is
+                below every sourced figure.** Left alone rather than quietly
+                corrected, because blowHz here also drives the pile scheduler
+                and the music tempo; it is a balance decision, not a typo.
+
+                Cable-tool is a literal falling weight: 0.6–1.1 Hz. NOT SOURCED.
+                Sonic is resonance, not blows: 55–165 Hz continuous. NOT SOURCED.
    ringHz     : base pitch of the drill-string resonator at 1 rod.
                 Short steel string rings high and briefly; each added rod drops
                 pitch and lengthens decay (see blowPlaybackRate()).
@@ -559,6 +603,17 @@ const TEL_ALIASES = [
   ['deviationCue01', 'devCue'], ['devCue01', 'devCue'],
   ['driving01', 'driving'], ['isDriving', 'driving'],
   ['power', 'powerMode'], ['supply', 'powerMode'],
+  // DRILL_TICK spells the green band 'inGroove' and audio spells it
+  // 'inGreenBand', so the groove state has been dropped on the tick path —
+  // which is the ONLY path that runs while drilling (state.drill is read back
+  // only after a 500 ms tick drought). Two words, and the sweet-spot voice
+  // starts hearing the sweet spot.
+  ['inGroove', 'inGreenBand'],
+  // NOT aliased on purpose: DRILL_TICK.bind. It is RAW (0..T.jam.bindMax) while
+  // tel.jam is 0..1, and T.jam.bindMax lives in the sim where this file cannot
+  // see it. Aliasing it would put a silently wrong scale into a gate that mutes
+  // the whole percussion train at 0.85. jamState is a string and is handled in
+  // ingest() instead, where the mapping can be stated rather than assumed.
 ];
 /** Telemetry fields that carry a string, not a number. */
 const TEL_STRINGS = { pushMode: 1, pileType: 1, powerMode: 1, phase: 1 };
@@ -652,21 +707,137 @@ const LEAD_MOTIF = [
 ];
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   5. HAPTIC PATTERNS  (ms on/off pairs for navigator.vibrate)
-   Kept deliberately short — a phone motor takes ~15 ms to spin up, so anything
-   under 10 ms is felt as nothing. These are tuned to land ON the audio
-   transient, not after it.
+   5. HAPTIC PATTERNS  →  src/audio/haptics.js
+   ───────────────────────────────────────────────────────────────────────────
+   The table that used to live here held nine names, and FIVE OF THEM WERE A
+   SINGLE PULSE — 6, 8, 10, 22 or 30 ms. On a phone motor that is not five
+   signals; it is "a tick" and "a bump". Nine names that can say how MUCH
+   happened and never WHAT happened is most of the channel thrown away, on a
+   game played one-handed with the screen glanced at rather than watched.
+
+   It is now a VOCABULARY OF SIX SHAPES — stutter, grind, void, twin, ramp and
+   step — in ./haptics.js, which also owns the novelty decay that keeps a
+   hundred rod additions in a 300 m hole from becoming a hundred identical
+   buzzes. Read that file's header for the design, and for what the Vibration
+   API actually gives us: a list of durations, with NO AMPLITUDE ANYWHERE. A
+   signature here is rhythm and length; it can never be force.
+
+   Every legacy name still resolves (LEGACY there), so src/sim/drilling.js and
+   the EVENTS.HAPTIC contract in core/contract.js keep working unchanged.
+
+   It is a separate, PURE module for one reason: a vibration cannot be
+   photographed and --headed Chrome has no motor, so the only way to verify
+   this channel at all is to assert it in plain node. tools/checkhaptics.mjs
+   does that, and can only do it because haptics.js imports nothing.
    ═══════════════════════════════════════════════════════════════════════════ */
-const HAPTICS = {
-  light:   [10],
-  medium:  [22],
-  heavy:   [38, 26, 62],
-  success: [16, 42, 16, 42, 46],
-  fail:    [64, 46, 64],
-  blow:    [8],
-  detent:  [6],
-  impact:  [30],
-  snap:    [12, 24, 46],
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   5b. SHOT → HAPTIC SIGNATURE
+   ───────────────────────────────────────────────────────────────────────────
+   Every one-shot that carries a haptic, in one table, because a vocabulary
+   scattered across thirty-eight call sites is not a vocabulary — it is thirty-
+   eight decisions nobody can review together. `tools/checkhaptics.mjs` reads
+   this table and asserts that every entry names a real shot and that the six
+   shapes are all actually reachable from one.
+
+   It is consulted in playShot() BEFORE the `!built` early return, and that is
+   the point of moving it here:
+
+     ►  HAPTICS USED TO BE GATED BEHIND THE AUDIO GRAPH.
+
+   Every haptic in this file used to live inside a SHOTS body, and a SHOTS body
+   only runs once unlock() has built the graph. So if the AudioContext ever
+   failed to construct — no AudioContext at all, a policy block, a constructor
+   throw — `failed` latched true, audio degraded to a silent no-op exactly as
+   designed, and it took the ENTIRE HAPTIC CHANNEL WITH IT, silently, even
+   though navigator.vibrate has nothing to do with Web Audio and its own
+   capability check had already passed. Two independent channels, one point of
+   failure, no log line. Haptics now fire whether or not there is a graph.
+
+   Each entry is `(p) => [name, opt]`, or null for no haptic. `p` is the shot's
+   own params object, which is never null (playShot substitutes EMPTY), so
+   these may read it directly.
+   ═══════════════════════════════════════════════════════════════════════════ */
+// Exported so tools/checkhaptics.mjs can assert the mapping instead of
+// scraping it out of the source, which is the difference between a gate and
+// a guess about a gate.
+export const SHOT_HAPTIC = {
+  /* ── the string changed length ─────────────────────────────────────────── */
+  // A hundred of these in a 300 m hole, so the qualifier is the ROD KIND: the
+  // signature decays through repeats of the same rod and comes back in full the
+  // moment the string changes to something else.
+  rod_add:        (p) => ['rod-added', { qualifier: p.kind || 'rod' }],
+  casing_set:     () => ['casing-set'],
+  trip_out:       () => ['trip'],
+  trip_in:        () => ['trip'],
+  bailer_run:     (p) => ['bailer-run', { qualifier: p.perfect ? 1 : 0 }],
+
+  /* ── it is stuck ───────────────────────────────────────────────────────── */
+  // Severity in four bands rather than raw: a bind that is merely continuing
+  // must not re-fire the full signature, but a bind that is getting WORSE is
+  // news and should.
+  jam_bind:       (p) => ['jam', { qualifier: Math.round(clamp(p.severity !== undefined ? p.severity : 0.7, 0, 1) * 3) }],
+
+  /* ── the ground went away ──────────────────────────────────────────────── */
+  // The gap scales with the void's own height. EVENTS.CAVITY has published
+  // `height` since the contract was written and nothing had ever read it.
+  cavity:         (p) => ['cavity', { height: p.height }],
+
+  /* ── you changed the tool ──────────────────────────────────────────────── */
+  equip:          () => ['equip'],
+  power_transfer: () => ['power-transfer'],
+  // A boulder is an obstacle you drill THROUGH, not a hole that ended — so it
+  // is a TWIN, not a RAMP-DOWN. Hardness bands are the qualifier: a harder
+  // boulder after a run of soft ones is news.
+  boulder:        (p) => ['boulder', { qualifier: Math.round(clamp(p.hardness || 0, 0, 1) * 3) }],
+
+  /* ── it stopped before you were done ───────────────────────────────────── */
+  // THE premature refusal, and the reason the ramp pair exists at all.
+  pile_refusal:   () => ['premature-refusal'],
+  bit_break:      () => ['bit-broken'],
+  collapse:       () => ['collapse'],
+  misfire:        () => ['misfire'],
+
+  /* ── it finished ───────────────────────────────────────────────────────── */
+  hole_complete:  () => ['hole-complete'],
+  jam_release:    () => ['jam-cleared'],
+  resin_set:      () => ['resin-set'],
+  level_up:       () => ['level-up'],
+  cert:           () => ['cert'],
+  // The grade stamp lands 1.25 s after hole_complete and is the verdict. Only a
+  // good one gets the arrival signature; a poor one gets nothing, because the
+  // hole ending has already been felt and a second buzz would say the run went
+  // well when it did not.
+  grade_stamp:    (p) => (p.grade === 'S' || p.grade === 'A' ? ['hole-complete', { force: true }] : null),
+
+  /* ── the ground changed under you ──────────────────────────────────────── */
+  // `harder` undefined means the caller does not know which way the ground
+  // went, and shapeFor() degrades that to a plain tick rather than guessing.
+  stratum:        (p) => ['stratum', { harder: p.harder, qualifier: p.harder }],
+
+  /* ── everything else is a confirmation, not a signature ────────────────── */
+  // These get the tick. It is not laziness: a signature that means "something
+  // happened" is worth less than nothing, because it dilutes the six that mean
+  // something specific. Six is the budget; these are not in it.
+  bit_worn:       () => ['ui'],
+  water_strike:   () => ['ui'],
+  drill_start:    () => ['ui'],
+  drill_stop:     () => ['ui'],
+  contract_accept:() => ['ui'],
+  purchase:       () => ['ui'],
+  unlock:         () => ['ui'],
+  money:          () => ['ui'],
+  ui_tap:         () => ['ui'],
+  ui_detent:      () => ['ui'],
+  ui_back:        () => ['ui'],
+  ui_error:       () => ['ui'],
+  blast:          () => ['ui', { force: true }],
+  resin_puncture: () => ['ui'],
+  torque_wrench:  () => ['ui'],
+  cpt_push_start: () => ['ui'],
+  sample_bag:     () => ['ui'],
+  boom_reposition:() => ['ui'],
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -1209,6 +1380,10 @@ export function createAudio(ctx) {
     powerMode: '', phase: '', beatT: 0, beatDur: 0,
   };
   let lastExternalTel = -1e9;
+  /** The sim's own percussion rate, Hz, and when it last arrived. Written by
+   *  setDrillTone() and by EV.BIT_IMPACT; read by stepPercussion(). */
+  let simBlowHz = 0;
+  let simToneAt = -10;
 
   /* ── derived / smoothed audio-side model state (no allocation per frame) ─ */
   const m = {
@@ -2187,7 +2362,26 @@ export function createAudio(ctx) {
     // Blow rate. Percussion rate is set by the rpm/percussion control, but a
     // hammer also slows slightly when it is loaded hard into rock (the piston
     // has to push more) — 8 % droop at full torque. Small, but you feel it.
-    const base = mixf(lo, hi, tel.rpm);
+    // THE SIM'S OWN RATE WINS WHEN THE SIM PUBLISHES ONE.
+    //
+    // stepBeats() in sim/drilling.js computes S.blowHz per method and ships it
+    // on BIT_IMPACT.hz and through setDrillTone(). Deriving our own rate from
+    // the rpm control instead means the hammer you HEAR and the hammer that is
+    // breaking rock can disagree — and the difference between a DTH hammer and
+    // a top-hammer drifter is a diagnostic a real driller reads by ear, so a
+    // rate that is merely plausible is worse here than in most places.
+    //
+    // Guarded three ways, because a live sim number reaching an oscillator is
+    // exactly the shape of the gustDepth bug: it must be finite, it must be
+    // recent (the sim goes quiet between holes and the derived rate has to take
+    // over cleanly), and it is CLAMPED INTO THIS METHOD'S OWN ENVELOPE so a sim
+    // fault cannot put 5 kHz into P.osc. The clamp is deliberately generous —
+    // 0.5x to 1.6x the authored range — because the sim is allowed to disagree
+    // with us, just not by orders of magnitude.
+    const simHz = (now() - simToneAt < 0.5) ? simBlowHz : 0;
+    const base = (simHz > 0 && hi > 0)
+      ? clamp(simHz, lo * 0.5, hi * 1.6)
+      : mixf(lo, hi, tel.rpm);
     m.blowTarget = base * (1 - 0.08 * tel.torque) * (1 - 0.5 * tel.jam);
     m.blowHz = damp(m.blowHz, m.blowTarget, 5.5, dt);
 
@@ -4506,7 +4700,7 @@ export function createAudio(ctx) {
       r1.g.connect(g); perc(r1.g.gain, t, 0.45, 0.001, 0.5);
       const r2 = bd(d, t + 0.04, B.ring, m.ringRate * 1.06);
       r2.g.connect(g); perc(r2.g.gain, t + 0.04, 0.22, 0.001, 0.35);
-      duckMusic(t, 0.55); haptic('impact');
+      duckMusic(t, 0.55);
     },
 
     /* ── BIT BREAK ─────────────────────────────────────────────────────────
@@ -4544,7 +4738,7 @@ export function createAudio(ctx) {
       mass.osc.frequency.setValueAtTime(210, t);
       expoTo(mass.osc.frequency, 96, t + 0.35);
 
-      duckFor(900); haptic('fail');
+      duckFor(900);
     },
 
     /* ── BIT WORN ──────────────────────────────────────────────────────────
@@ -4563,7 +4757,6 @@ export function createAudio(ctx) {
       sc.g.connect(g); perc(sc.g.gain, t, 0.24, 0.02, 0.5);
       sc.bp.frequency.setValueAtTime(2600, t);
       expoTo(sc.bp.frequency, 900, t + 0.5);
-      haptic('medium');
     },
 
     /* ── JAM / BIND ────────────────────────────────────────────────────────
@@ -4599,7 +4792,7 @@ export function createAudio(ctx) {
       lfoGate(d, t, 1.6, 7, 0.45, gate.gain);
       perc(ss.g.gain, t, 0.5 * sev, 0.03, 1.3);
 
-      duckFor(600); haptic('heavy');
+      duckFor(600);
     },
 
     /* ── JAM RELEASE ───────────────────────────────────────────────────────
@@ -4624,7 +4817,6 @@ export function createAudio(ctx) {
       expoTo(spin.osc.frequency, 220, t + 0.45);
       lp.frequency.setValueAtTime(700, t + 0.05);
       expoTo(lp.frequency, 2200, t + 0.45);
-      haptic('success');
     },
 
     /* ── ROD ADD ───────────────────────────────────────────────────────────
@@ -4691,7 +4883,6 @@ export function createAudio(ctx) {
       const clack = bd(d, t3 + 0.186, B.metalThread, 0.9);
       clack.g.connect(g); perc(clack.g.gain, t3 + 0.186, 0.42, 0.001, 0.16);
 
-      haptic('snap');
     },
 
     /* ── CASING SET ────────────────────────────────────────────────────────
@@ -4708,7 +4899,6 @@ export function createAudio(ctx) {
       body.g.connect(lp); perc(body.g.gain, t, 0.75, 0.002, 1.6);
       const grav = nz(d, t + 0.05, { buf: B.brown, bp: 620, bpQ: 1.2, rate: 1.4, dur: 0.8 });
       grav.g.connect(g); perc(grav.g.gain, t + 0.05, 0.30, 0.04, 0.7);
-      haptic('heavy');
     },
 
     /* ── WATER STRIKE ──────────────────────────────────────────────────────
@@ -4741,7 +4931,6 @@ export function createAudio(ctx) {
         const dp = nz(d, tt, { buf: B.white, bp: 2600 + Math.random() * 1600, bpQ: 7, dur: 0.09 });
         dp.g.connect(g); perc(dp.g.gain, tt, 0.10, 0.001, 0.05);
       }
-      haptic('medium');
     },
 
     /* ── CAVITY / KARST VOID ───────────────────────────────────────────────
@@ -4755,7 +4944,7 @@ export function createAudio(ctx) {
             routed almost entirely to reverb — dry 0.06, wet 0.85
        Nothing else in the game is allowed to be this quiet, which is exactly
        why it lands.                                                           */
-    cavity(t) {
+    cavity(t, p) {
       const d = alloc(PRIO.critical, 3.6, t); if (!d) return;
       const g = out(d, 0.5, 0.0, 0.70);
       const fall = tn(d, t, { type: 'triangle', f: 520, dur: 1.1 });
@@ -4775,7 +4964,12 @@ export function createAudio(ctx) {
       far.g.connect(echoDry); far.g.connect(echoWet);
       perc(far.g.gain, t + 1.30, 0.55, 0.004, 1.4);
       duckFor(1100);
-      haptic('light');
+      // The haptic's gap and this shot's 350 ms of silence are the same
+      // design argument in two channels: this is the one event whose content
+      // is an ABSENCE, so both render it as one. The hand gets its gap
+      // immediately — a fall you feel a second late is a lie — and the ear
+      // gets the bigger one as the echo returns, so you feel THAT it happened
+      // and then hear HOW DEEP it was.
     },
 
     /* ── COLLAPSE RUMBLE ───────────────────────────────────────────────────
@@ -4807,7 +5001,7 @@ export function createAudio(ctx) {
         const hit = nz(d, tt, { buf: B.white, bp: 700 + Math.random() * 1400, bpQ: 3, dur: 0.13 });
         hit.g.connect(g); perc(hit.g.gain, tt, 0.14 + Math.random() * 0.14, 0.002, 0.09);
       }
-      duckFor(700); haptic('heavy');
+      duckFor(700);
     },
 
     /* ── TRIP IN / TRIP OUT ────────────────────────────────────────────────
@@ -4829,7 +5023,6 @@ export function createAudio(ctx) {
       SHOTS.__winch(d, g, t, dir, 0, 1.4);
       const clunk = bd(d, t + 1.45, B.metalThread, 0.6);
       clunk.g.connect(g); perc(clunk.g.gain, t + 1.45, 0.40, 0.001, 0.2);
-      haptic('medium');
     },
 
     /**
@@ -4955,7 +5148,6 @@ export function createAudio(ctx) {
       const tube = bd(d, t2 + 0.38, B.metalClang, 1.35);
       tube.g.connect(g); perc(tube.g.gain, t2 + 0.38, 0.18, 0.002, 0.30);
 
-      haptic(perfect ? 'medium' : 'light');
     },
 
     /* ── POWER TRANSFER ────────────────────────────────────────────────────
@@ -4994,7 +5186,6 @@ export function createAudio(ctx) {
         const arc = nz(d, t + 0.004, { buf: B.white, bp: 4200, bpQ: 3.2, hp: 2000, dur: 0.05 });
         arc.g.connect(g); perc(arc.g.gain, t + 0.004, 0.30, 0.001, 0.018);
       }
-      haptic('detent');
     },
 
     /* ── RESIN SET ─────────────────────────────────────────────────────────
@@ -5012,7 +5203,6 @@ export function createAudio(ctx) {
       expoTo(sigh.bp.frequency, 240, t + 0.32);
       const th = bd(d, t + 0.16, B.metalThread, 0.55);
       th.g.connect(g); perc(th.g.gain, t + 0.16, 0.16, 0.004, 0.22);
-      haptic('success');
     },
 
     /* ── FLUSH SPIT ────────────────────────────────────────────────────────
@@ -5062,7 +5252,9 @@ export function createAudio(ctx) {
       a.g.connect(g); perc(a.g.gain, t, 0.24, 0.006, 0.13);
       const b = tn(d, t + 0.085, { type: 'triangle', f: f1, dur: 0.28 });
       b.g.connect(g); perc(b.g.gain, t + 0.085, 0.26, 0.006, 0.2);
-      haptic('detent');
+      // p.harder undefined means the caller does not know which way the ground
+      // went, and shapeFor() degrades that to a plain tick rather than guessing
+      // "softer" — which is what !!undefined would have silently done.
     },
 
     /* ── DRILL START / STOP ────────────────────────────────────────────────
@@ -5079,7 +5271,6 @@ export function createAudio(ctx) {
       setAt(sw.g.gain, EPS, t);
       expoTo(sw.g.gain, 0.22, t + 0.30);
       expoTo(sw.g.gain, EPS, t + 0.75);
-      haptic('medium');
     },
     drill_stop(t) {
       const d = alloc(PRIO.event, 1.4, t); if (!d) return;
@@ -5088,7 +5279,6 @@ export function createAudio(ctx) {
       ring.g.connect(g); perc(ring.g.gain, t, 0.35, 0.002, 0.6);
       const th = bd(d, t + 0.02, B.metalThread, 0.5);
       th.g.connect(g); perc(th.g.gain, t + 0.02, 0.30, 0.002, 0.2);
-      haptic('light');
     },
   };
 
@@ -5175,7 +5365,7 @@ export function createAudio(ctx) {
       const st = bd(d, t + 0.40, B.metalStamp, 0.75);
       st.g.connect(g); perc(st.g.gain, t + 0.40, 0.26, 0.003, 1.3);
 
-      duckFor(1200); haptic('success');
+      duckFor(1200);
     },
 
     /* ── GRADE STAMP ───────────────────────────────────────────────────────
@@ -5245,7 +5435,6 @@ export function createAudio(ctx) {
         }
       }
       duckFor(grade === 'S' ? 1400 : 700);
-      haptic(grade === 'S' || grade === 'A' ? 'success' : 'heavy');
     },
 
     /* ── HOLE COMPLETE ─────────────────────────────────────────────────────
@@ -5268,7 +5457,6 @@ export function createAudio(ctx) {
       ring.g.connect(g); perc(ring.g.gain, t, 0.30, 0.002, 0.7);
       const hs = nz(d, t + 0.9, { buf: B.pink, bp: 1200, bpQ: 0.9, dur: 0.7 });
       hs.g.connect(g); perc(hs.g.gain, t + 0.9, 0.14, 0.04, 0.55);
-      haptic('medium');
     },
 
     /* ── CONTRACT ACCEPTED ─────────────────────────────────────────────────
@@ -5285,7 +5473,6 @@ export function createAudio(ctx) {
       a.g.connect(g); perc(a.g.gain, t + 0.06, 0.24, 0.004, 0.20);
       const b = tn(d, t + 0.17, { type: 'triangle', f: root * 1.5, dur: 0.40 });
       b.g.connect(g); perc(b.g.gain, t + 0.17, 0.26, 0.004, 0.30);
-      haptic('medium');
     },
 
     /* ── PURCHASE ──────────────────────────────────────────────────────────
@@ -5304,7 +5491,6 @@ export function createAudio(ctx) {
       a.g.connect(g); perc(a.g.gain, t + 0.09, 0.18, 0.004, 0.15);
       const b = tn(d, t + 0.17, { type: 'triangle', f: root, dur: 0.30 });
       b.g.connect(g); perc(b.g.gain, t + 0.17, 0.20, 0.004, 0.22);
-      haptic('light');
     },
 
     /* ── EQUIP ─────────────────────────────────────────────────────────────
@@ -5318,7 +5504,6 @@ export function createAudio(ctx) {
       a.g.connect(g); perc(a.g.gain, t, 0.24, 0.001, 0.06);
       const b = bd(d, t + 0.055, B.metalThread, 0.85);
       b.g.connect(g); perc(b.g.gain, t + 0.055, 0.40, 0.001, 0.16);
-      haptic('detent');
     },
 
     /* ── UNLOCK ────────────────────────────────────────────────────────────
@@ -5347,7 +5532,6 @@ export function createAudio(ctx) {
         expoTo(idx.gain, root * muls[i] * 0.1, tt + 0.30);
         car.start(tt); mod.start(tt); car.stop(tt + 0.75); mod.stop(tt + 0.75);
       }
-      haptic('medium');
     },
 
     /* ── CERT EARNED ───────────────────────────────────────────────────────
@@ -5361,7 +5545,6 @@ export function createAudio(ctx) {
       hit.g.connect(g); perc(hit.g.gain, t, 0.45, 0.001, 0.025);
       const st = bd(d, t, B.metalStamp, 0.90);
       st.g.connect(g); perc(st.g.gain, t, 0.34, 0.002, 0.85);
-      haptic('heavy');
     },
 
     /* ── XP TICK ───────────────────────────────────────────────────────────
@@ -5392,7 +5575,6 @@ export function createAudio(ctx) {
       }
       const o = tn(d, t + 0.05, { type: 'triangle', f: chordRootHz(4) * 2, dur: 0.35 });
       o.g.connect(g); perc(o.g.gain, t + 0.05, 0.16, 0.004, 0.26);
-      haptic('light');
     },
 
     /* ── UI: TAP / DETENT / ERROR / BACK ───────────────────────────────────
@@ -5412,14 +5594,12 @@ export function createAudio(ctx) {
       k.g.connect(g); perc(k.g.gain, t, 0.5, 0.0008, 0.022);
       const b = tn(d, t, { type: 'triangle', f: 1400, dur: 0.05 });
       b.g.connect(g); perc(b.g.gain, t, 0.16, 0.001, 0.020);
-      haptic('detent');
     },
     ui_detent(t, p) {
       const d = alloc(PRIO.ui, 0.10, t); if (!d) return;
       const g = out(d, 0.30 * (p.gain !== undefined ? p.gain : 1), p.pan || 0, 0.04);
       const k = nz(d, t, { buf: B.white, bp: 4400, bpQ: 12, dur: 0.03 });
       k.g.connect(g); perc(k.g.gain, t, 0.5, 0.0006, 0.016);
-      haptic('detent');
     },
     ui_back(t) {
       const d = alloc(PRIO.ui, 0.16, t); if (!d) return;
@@ -5428,7 +5608,6 @@ export function createAudio(ctx) {
       k.g.connect(g); perc(k.g.gain, t, 0.42, 0.001, 0.028);
       k.bp.frequency.setValueAtTime(1900, t);
       expoTo(k.bp.frequency, 900, t + 0.03);
-      haptic('detent');
     },
     ui_error(t) {
       const d = alloc(PRIO.ui, 0.35, t); if (!d) return;
@@ -5440,7 +5619,6 @@ export function createAudio(ctx) {
         o.g.connect(bp); bp.connect(g);
         perc(o.g.gain, tt, 0.22, 0.002, 0.038);
       }
-      haptic('fail');
     },
   });
 
@@ -5777,7 +5955,7 @@ export function createAudio(ctx) {
       expoTo(fan.hp.frequency, 900, t + 2.9);
 
       m.ventBoost = 1;
-      duckFor(1400); haptic('heavy');
+      duckFor(1400);
     },
 
     /* ── MISFIRE ───────────────────────────────────────────────────────────
@@ -5798,7 +5976,6 @@ export function createAudio(ctx) {
         const c = nz(d, tt, { buf: B.white, bp: 2800, bpQ: 3.2, hp: 1200, dur: 0.03 });
         c.g.connect(g); perc(c.g.gain, tt, 0.55 - i * 0.12, 0.0006, 0.006);
       }
-      haptic('light');
     },
 
     /* ── RESIN PUNCTURE ────────────────────────────────────────────────────
@@ -5829,7 +6006,6 @@ export function createAudio(ctx) {
 
       const wet = nz(d, t + 0.03, { buf: B.brown, bp: 480, bpQ: 1.6, dur: 0.34 });
       wet.g.connect(g); perc(wet.g.gain, t + 0.03, 0.34, 0.02, 0.26);
-      haptic('light');
     },
 
     /* ── TORQUE WRENCH ─────────────────────────────────────────────────────
@@ -5859,7 +6035,6 @@ export function createAudio(ctx) {
       const grn = tn(d, tb, { type: 'sawtooth', f: 168, dur: 0.50 });
       const lp = track(d, filt('lowpass', 900, 1.4));
       grn.g.connect(lp); lp.connect(g); perc(grn.g.gain, tb, 0.20, 0.03, 0.34);
-      haptic('success');
     },
 
     /* ── PILE BLOW ─────────────────────────────────────────────────────────
@@ -6052,7 +6227,7 @@ export function createAudio(ctx) {
         const rg = bd(d, tt + 0.001, B.pileSteel || B.metalClang, rate);
         rg.g.connect(g); perc(rg.g.gain, tt + 0.001, 0.62 * a, 0.0015, 1.05 * a + 0.20);
       }
-      duckFor(500); haptic('fail');
+      duckFor(500);
     },
 
     /* ── SPT HAMMER DROP ───────────────────────────────────────────────────
@@ -6149,7 +6324,6 @@ export function createAudio(ctx) {
       expoTo(ram.g.gain, EPS, t + 1.10);
       ram.osc.frequency.setValueAtTime(34, t + 0.02);
       linTo(ram.osc.frequency, 44, t + 0.90);
-      haptic('light');
     },
 
     /* ── CPT PUSH STOP ─────────────────────────────────────────────────────
@@ -6216,7 +6390,6 @@ export function createAudio(ctx) {
       perc(r.g.gain, t, 0.34, 0.02, 0.22);
       const th = nz(d, t + 0.24, { buf: B.brown, bp: 92, bpQ: 1.0, lp: 260, dur: 0.30, rate: 0.8 });
       th.g.connect(g); perc(th.g.gain, t + 0.24, 0.42, 0.008, 0.10);
-      haptic('light');
     },
 
     /* ── BOOM REPOSITION ───────────────────────────────────────────────────
@@ -6254,7 +6427,6 @@ export function createAudio(ctx) {
 
       const seat = bd(d, t + 0.86, B.metalThread, 0.90);
       seat.g.connect(g); perc(seat.g.gain, t + 0.86, 0.42, 0.001, 0.16);
-      haptic('detent');
     },
 
     /* ── UNDERGROUND: DRIP ─────────────────────────────────────────────────
@@ -6389,8 +6561,31 @@ export function createAudio(ctx) {
   const shotErr = Object.create(null);
 
   function playShot(id, params) {
-    if (!built || disposed || !ac) return;
+    if (disposed) return;
     const key = SHOTS[id] ? id : SHOT_ALIAS[id];
+    // An id nothing answers to is counted HERE, before the graph check, so a
+    // typo is countable whether or not the AudioContext ever came up. It used
+    // to be counted after, which made the one diagnostic for a dead shot id
+    // depend on the very thing whose absence makes shots silent.
+    if (!key) { shotErr['?' + id] = (shotErr['?' + id] || 0) + 1; return; }
+
+    // THE HAPTIC FIRES FIRST, AND WITHOUT THE GRAPH.
+    //
+    // navigator.vibrate has nothing to do with Web Audio and has its own
+    // capability check, so a failed AudioContext must not take the haptic
+    // channel down with it — which is exactly what happened while every
+    // haptic() lived inside a SHOTS body, because a SHOTS body only runs
+    // after unlock() has built the graph. Silent, and two channels wide.
+    //
+    // It also lands the pattern on the same frame the shot is scheduled,
+    // which is what the old in-shot calls were for.
+    const hf = key && SHOT_HAPTIC[key];
+    if (hf) {
+      const spec = hf(params || EMPTY);
+      if (spec) haptic(spec[0], spec[1]);
+    }
+
+    if (!built || !ac) return;
     const fn = key && SHOTS[key];
     if (typeof fn !== 'function') { shotErr['?' + id] = (shotErr['?' + id] || 0) + 1; return; }
     const p = params || EMPTY;
@@ -6406,18 +6601,23 @@ export function createAudio(ctx) {
   /* ═══════════════════════════════════════════════════════════════════════
      19. HAPTICS
      ───────────────────────────────────────────────────────────────────────
-     navigator.vibrate is unsupported on iOS Safari and can be disabled by
-     policy anywhere, so every call is guarded and failure is silent. Patterns
-     are short by design: a phone's eccentric-rotating-mass motor needs ~15 ms
-     to spin up, so anything under 10 ms is felt as nothing at all, and
-     anything over ~60 ms feels like a notification rather than an impact.
+     The vocabulary, the novelty decay and the budget all live in
+     ./haptics.js — pure, importable by node, and therefore the only part of
+     this file that can actually be ASSERTED rather than listened to. This
+     section is just the plumbing: capability, the player's setting, the
+     capture-harness mute, and the two entry points the rest of the file uses.
 
-     Continuous drilling haptics are separately rate-limited to 4/s: at 15
-     accents/s the motor never stops, which both destroys the battery and
-     turns every distinct blow into one undifferentiated mush.
+     navigator.vibrate does not exist on iOS Safari in any version and can be
+     disabled by policy anywhere, so every call is guarded and failure is
+     silent. It also means roughly half the likely audience feels NOTHING:
+     haptics must never be the only channel carrying a fact, which is why
+     every signature below has a one-shot and a section-band change beside it.
+
+     Continuous drilling haptics stay rate-limited to 4/s: at 15 accents/s the
+     motor never stops, which both destroys the battery and turns every
+     distinct blow into one undifferentiated mush.
      ═══════════════════════════════════════════════════════════════════════ */
   const canVibrate = typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function';
-  let lastHapticAt = -10;
   let lastBlowHapticAt = -10;
 
   function hapticsEnabled() {
@@ -6425,21 +6625,52 @@ export function createAudio(ctx) {
     return canVibrate && (!s || s.haptics !== false);
   }
 
-  function haptic(name) {
-    if (!hapticsEnabled()) return;
-    const t = (typeof performance !== 'undefined' ? performance.now() : Date.now()) / 1000;
-    if (t - lastHapticAt < 0.045) return;         // never stack patterns
-    lastHapticAt = t;
-    const pat = HAPTICS[name] || HAPTICS.light;
-    try { navigator.vibrate(pat); } catch (e) { /* policy-blocked */ }
-  }
+  /**
+   * THE HAPTIC CHANNEL.
+   *
+   * `silent` is the same `_silent` that mutes the audio buses under `?shot`
+   * (§7). A capture run must not buzz a handset any more than it may play
+   * through the owner's speakers — `npm run preview` binds to the LAN
+   * specifically so the game can be driven on a real phone, and that is
+   * exactly the case where a forgotten mute is felt rather than heard.
+   *
+   * It suppresses the ACTUATOR ONLY. Resolution, decay and bookkeeping still
+   * run, so `api.debug.haptics.last` is readable under the harness and the
+   * mapping can be asserted in-browser as well as in node.
+   */
+  const haptics = createHaptics({
+    vibrate: (pat) => navigator.vibrate(pat),
+    now: () => (typeof performance !== 'undefined' ? performance.now() : Date.now()) / 1000,
+    enabled: hapticsEnabled,
+    silent: () => _silent,
+  });
 
+  /**
+   * Fire a signature.
+   *
+   * @param {string} name  an event class from haptics.js EVENT_SHAPE
+   *                       ('rod-added', 'cavity', 'premature-refusal', …),
+   *                       or one of the legacy intensity names, which still
+   *                       resolve so nothing outside this file has to change.
+   * @param {object} [opt] { harder, height, qualifier, force } — see
+   *                       haptics.js. `qualifier` is what brings a decayed
+   *                       signature back: change it and the event is news
+   *                       again.
+   */
+  function haptic(name, opt) { haptics.fire(name, opt); }
+
+  /**
+   * The drilling beat. TEXTURE, not a signature — it says the machine is
+   * working, and nothing else. It is deliberately the one thing here that is
+   * still an intensity rather than a shape, because a shape repeated fifteen
+   * times a second stops being a shape.
+   */
   function hapticBlow(intensity) {
     if (!hapticsEnabled()) return;
     const t = (typeof performance !== 'undefined' ? performance.now() : Date.now()) / 1000;
     if (t - lastBlowHapticAt < 0.25) return;      // ≤4/s while drilling
     lastBlowHapticAt = t;
-    lastHapticAt = t;
+    if (_silent) return;
     try { navigator.vibrate(intensity > 0.8 ? 12 : 8); } catch (e) { /* ignore */ }
   }
 
@@ -6537,6 +6768,16 @@ export function createAudio(ctx) {
     }
     // The beat, if one is running. bolt-install and take-the-set are CLOCKS the
     // player is waiting out, and the only place their length is published.
+    // DRILL_TICK publishes jam severity as a RAW `bind` plus a `jamState`
+    // string, and tel.jam is 0..1. The raw number cannot be normalised here
+    // (its ceiling is a sim constant this file cannot read), so the string is
+    // used and the three-way mapping is stated rather than inferred. Without
+    // this, jam severity only ever arrived on the EV.JAM one-shot and the
+    // continuous voices never heard a bind at all while drilling.
+    if (typeof srcObj.jamState === 'string' && srcObj.jam === undefined) {
+      const js = srcObj.jamState;
+      tel.jam = js === 'stuck' ? 1 : js === 'binding' ? 0.6 : 0;
+    }
     const b = srcObj.beat;
     if (b) { telWrite('beatT', b.t); telWrite('beatDur', b.dur); }
     else { tel.beatT = 0; tel.beatDur = 0; }
@@ -6706,6 +6947,10 @@ export function createAudio(ctx) {
         if (p.contract.regionId) setRegion(p.contract.regionId);
       }
       startEngine(engineRigId);
+      // The novelty budget is per HOLE — see haptics.js. Without this reset a
+      // player's second hole would open with every signature already decayed
+      // to a tick, which is the exact opposite of what the decay is for.
+      haptics.newHole();
       playShot('drill_start');
     });
 
@@ -6733,6 +6978,12 @@ export function createAudio(ctx) {
     on(E2.BIT_IMPACT, (p) => {
       m.lastImpactAt = now();
       const I = p && typeof p.intensity === 'number' ? clamp(p.intensity, 0, 1) : 0.6;
+      // BIT_IMPACT.hz is the same S.blowHz that setDrillTone() carries, and
+      // both have been discarded here until now. Reading both means the rate
+      // survives whichever path a future integrator keeps.
+      if (p && typeof p.hz === 'number' && Number.isFinite(p.hz) && p.hz > 0) {
+        simBlowHz = p.hz; simToneAt = now();
+      }
       // Honour the sim's rate but never exceed our own accent budget.
       if (now() - lastAccentAt >= 1 / 17) fireAccent(I, now());
     });
@@ -6755,8 +7006,8 @@ export function createAudio(ctx) {
     on(E2.JAM, (p) => playShot('jam_bind', { severity: p && p.severity }));
     on(E2.JAM_CLEARED, () => playShot('jam_release'));
     on(E2.WATER_STRIKE, () => playShot('water_strike'));
-    on(E2.CAVITY, () => playShot('cavity'));
-    on(E2.BOULDER, () => playShot('boulder'));
+    // Both of these have always carried a payload and both wirings have    // always discarded it. CAVITY.height sizes the void haptic's gap;    // BOULDER.hardness is the qualifier that lets a HARDER boulder feel like    // news after a run of soft ones. Neither shot's sound changes by a sample.    on(E2.CAVITY, (p) => playShot('cavity', p || undefined));
+    on(E2.BOULDER, (p) => playShot('boulder', p || undefined));
     on(E2.HOLE_COMPLETE, (p) => {
       tel.active = false;
       playShot('hole_complete');
@@ -7035,6 +7286,40 @@ export function createAudio(ctx) {
     startEngine,
     stopEngine,
 
+    /**
+     * THE PERCUSSION RATE, STRAIGHT FROM THE SIM.
+     *
+     * `src/sim/drilling.js` flushImpacts() has called
+     * `ctx.audio?.setDrillTone?.({ hz, intensity, torque, groove })` on every
+     * impact since it was written. NOTHING HAS EVER ANSWERED TO IT — the
+     * optional-call operators meant the miss was silent, so the hammer has been
+     * running at a rate this file GUESSED from the rpm slider while the sim's
+     * real rate went into the void on the same frame. That is ASTRA.md §8's
+     * most expensive failure pattern exactly: a silent fallback that works
+     * removes the symptom and keeps the cause.
+     *
+     * The rate matters more than most numbers here because it is DIAGNOSTIC. A
+     * DTH hammer and a top-hammer drifter differ by roughly 2x in blow rate and
+     * a driller tells them apart by ear across a site; a hammer losing its beat
+     * as the air goes wrong is heard before it is seen on any gauge. Sound that
+     * tracks the sim is worth more than sound that plays on a trigger, and this
+     * is the single cheapest place in the file to buy that.
+     *
+     * Everything is optional and everything is guarded. stepPercussion() clamps
+     * `hz` into the method's own envelope and falls back to the derived rate if
+     * this goes quiet for 500 ms, so a sim that never calls this — or one that
+     * calls it with rubbish — sounds exactly as it did before.
+     */
+    setDrillTone(t) {
+      if (!t) return;
+      if (typeof t.hz === 'number' && Number.isFinite(t.hz) && t.hz > 0) {
+        simBlowHz = t.hz;
+        simToneAt = now();
+      }
+      if (typeof t.torque === 'number' && Number.isFinite(t.torque)) tel.torque = clamp(t.torque, 0, 1);
+      if (t.groove !== undefined) tel.inGreenBand = !!t.groove;
+    },
+
     /** Push live telemetry. Called every frame by the integrator. */
     setDrillState(t) {
       if (!t) return;
@@ -7106,6 +7391,15 @@ export function createAudio(ctx) {
         driving: tel.driving !== false,
         mainsBuilt,
         shots: shotCount,
+
+        /** The haptic channel. `last` is the signature most recently issued —
+         *  { name, id, pattern, n } — and it is populated even under `?shot`,
+         *  where the actuator is suppressed but the resolution still runs. That
+         *  is what lets a probe assert the event -> pattern mapping in-browser
+         *  without anything vibrating. `load` is 0..1 of the rolling motor
+         *  budget; if it is ever near 1 in normal play, something is firing far
+         *  too often and the novelty decay is not doing its job. */
+        haptics: { stats: haptics.stats, load: +haptics.load.toFixed(3), enabled: hapticsEnabled() },
         /** Any entry here is a one-shot that threw inside playShot's catch, or
          *  (with a leading '?') an id nothing in SHOTS answers to. Both are
          *  bugs and neither is audible. Empty is the only acceptable state. */
