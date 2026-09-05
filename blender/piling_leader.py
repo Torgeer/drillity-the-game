@@ -112,13 +112,54 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lib'))
 
 from rig import (  # noqa: E402
-    reset, part, box, tube, hose, empty, worklight, finish,
+    reset, part, tube, hose, empty, worklight, finish,
     NODE_MOUNT, NODE_PIVOT, NODE_SLIDE,
     MAT_PAINT, MAT_DARK, MAT_STEEL, MAT_WORN, MAT_CAST, MAT_RUBBER,
     MAT_GLASS, MAT_CHROME, MAT_HAZARD,
 )
 
 DEG = math.pi / 180.0
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# BUG IN THE SHARED HELPER — rig.py box() BUILDS EVERY BOX AT HALF SIZE
+# ═══════════════════════════════════════════════════════════════════════════
+# rig.py:
+#     bpy.ops.mesh.primitive_cube_add(size=1)
+#     o.scale = (size[0] / 2, size[1] / 2, size[2] / 2)
+#     bpy.ops.object.transform_apply(scale=True)
+#
+# In Blender `size` on primitive_cube_add is the EDGE LENGTH, not a radius.
+# size=1 already gives a 1 m cube spanning -0.5..+0.5. Scaling that by size/2
+# therefore yields an edge of size/2. Verified in Blender 5.2.1: asking for
+# box(..., (0.80, 0.88, 17.80)) returns dimensions (0.40, 0.44, 8.90).
+#
+# Every box in every machine built on this library is half its stated
+# dimension, while tube() (which takes a real radius and a real depth) and any
+# hand-authored mesh are full size — so a rig mixes the two scales and the
+# dimensional provenance that the whole script-not-.blend argument rests on is
+# silently void. This needs fixing centrally in rig.py, ONE line:
+#     o.scale = size            # a size=1 cube is already 1 m on each edge
+#
+# It is NOT fixed here. blender/lib/rig.py is shared with the machines other
+# builders are exporting right now; some of them may already have compensated
+# by doubling their constants, and changing the helper underneath them mid-run
+# would break their models with no warning. So this file shadows box() locally
+# and reports the bug instead. Remove this override once rig.py is corrected —
+# the two are then identical.
+def box(name, size, mat=MAT_PAINT, parent=None, loc=(0, 0, 0), rot=(0, 0, 0),
+        bevel=0.0):
+    """A box of the size you actually asked for. See the note above."""
+    bpy.ops.mesh.primitive_cube_add(size=1)
+    o = bpy.context.active_object
+    o.scale = (size[0], size[1], size[2])
+    bpy.ops.object.transform_apply(scale=True)
+    if bevel > 0:
+        m = o.modifiers.new('bev', 'BEVEL')
+        m.width = bevel
+        m.segments = 2
+        m.limit_method = 'ANGLE'
+    return part(name, o, mat, parent, loc, rot)
 
 # ═══════════════════════════════════════════════════════════════════════════
 # DIMENSIONS.  Metres.  Every line carries its source.
@@ -216,7 +257,7 @@ PILE_SIDE    = 0.35    # [GA] 388 mm measured; 350 mm square is the routine size
 PILE_LEN     = 14.00   # [DS11][DS25] max 25 m; 14 m is a routine housing pile
 PILE_TOP     = 13.60   # pose: driving, tip 400 mm into the ground
 CAP_Z        = 13.60   # drive cap sits on the pile head
-HAMMER_BOT   = 14.05   # hammer down on the cap — 53-81 % of the leader height,
+HAMMER_BOT   = 14.60   # hammer down on the cap, sleeve between — 53-81 % of the leader height,
                        # which is where [PB13] and [GA] both show it working
 
 # leader-local frame: y_local = y_world - PILE_AXIS_Y
@@ -304,20 +345,18 @@ def punch_round(obj, centres, radius, depth=3.0, sides=18):
 
 
 def punch_obround(obj, centres, w, h, depth=3.0):
-    """The three TALL OBROUND holes in the leader's top section [GA]. A
-    stadium slot, not a circle — two half-cylinders and a slab between."""
+    """The three TALL holes in the leader's TOP section, which [GA] draws as
+    obrounds ~300 wide x 350 tall rather than as the circles used everywhere
+    below. Cut as a Z-stretched cylinder: a true ellipse, not a stadium, but
+    at 300 x 350 the difference is under the pixel and one solid cutter
+    survives the EXACT solver where a three-part union did not."""
     cs = []
-    r = w / 2.0
-    dz = max(0.0, (h - w) / 2.0)
     for (x, y, z) in centres:
-        for s in (-1, 1):
-            bpy.ops.mesh.primitive_cylinder_add(
-                radius=r, depth=depth, vertices=18,
-                location=(x, y, z + s * dz), rotation=(0.0, 90 * DEG, 0.0))
-            cs.append(bpy.context.active_object)
-        bpy.ops.mesh.primitive_cube_add(size=1, location=(x, y, z))
+        bpy.ops.mesh.primitive_cylinder_add(
+            radius=w / 2.0, depth=depth, vertices=24,
+            location=(x, y, z), rotation=(0.0, 90 * DEG, 0.0))
         o = bpy.context.active_object
-        o.scale = (depth / 2, r, dz if dz > 0 else 0.001)
+        o.scale = (1.0, 1.0, h / w)
         bpy.ops.object.transform_apply(scale=True)
         cs.append(o)
     return _boolean(obj, cs)
@@ -436,20 +475,24 @@ def build_track(side, parent):
                          (-SHOE_W / 2, sgn * half, WHEEL_R), (0, 90 * DEG, 0),
                          sides=22))
 
-    def shoe(nm, loc, rot=(0, 0, 0)):
+    def shoe(nm, loc, rot=(0, 0, 0), down=False):
         # triple-grouser shoe: [DS25] offers 3-edge / flat-edges / flat, and
-        # 3-edge is the default read on a piling rig standing on soft ground
+        # 3-edge is the default read on a piling rig standing on soft ground.
+        # `down` builds the grousers on the underside rather than rotating the
+        # shoe: a pi rotation about X also flips an ARRAY modifier's LOCAL
+        # offset, and the bottom run then marches backwards out of the machine.
+        d = -1.0 if down else 1.0
         g = [box(nm, (SHOE_W, SHOE_PITCH * 0.93, 0.032), MAT_WORN, None, (0, 0, 0))]
         for k in (-1, 0, 1):
             g.append(box(nm + 'g', (SHOE_W * 0.95, 0.032, 0.058), MAT_WORN, None,
-                         (0, k * 0.062, 0.045)))
+                         (0, k * 0.062, d * 0.045)))
         m = merge(nm, g)
         m.location = loc
         m.rotation_euler = rot
         return m
 
     n_run = int(SPR_IDLER / SHOE_PITCH)
-    s = shoe('shoe_b', (0, -half + SHOE_PITCH / 2, -0.014), (math.pi, 0, 0))
+    s = shoe('shoe_b', (0, -half + SHOE_PITCH / 2, -0.014), down=True)
     array_along(s, n_run, (0, SHOE_PITCH, 0))
     worn.append(s)
     s = shoe('shoe_t', (0, -half + SHOE_PITCH / 2, TRACK_H + 0.014))
@@ -462,7 +505,8 @@ def build_track(side, parent):
             worn.append(shoe('shoe_e',
                              (0, sgn * (half + rr * math.cos(a)),
                               WHEEL_R - rr * math.sin(a) * sgn),
-                             (a * sgn + (0 if sgn > 0 else math.pi), 0, 0)))
+                             (a * sgn + (0 if sgn > 0 else math.pi), 0, 0),
+                             down=(sgn < 0)))
 
     steel.append(tube('spr', WHEEL_R * 0.86, 0.30, MAT_STEEL, None,
                       (-0.15, half, WHEEL_R), (0, 90 * DEG, 0), sides=20))
@@ -952,18 +996,17 @@ def build(out_path):
     HB = LEADER_TOP - 0.90
     tuc.append(box('cathead', (LEADER_W + 0.30, LEADER_D + 0.46, 0.90), MAT_CAST,
                    None, (0, YC - 0.16, HB + 0.45), bevel=0.04))
-    tuc.append(plate('catnose', [(Y0 - 0.10, HB + 0.10), (Y0 - 0.10, HB + 0.72),
-                                 (Y0 - 1.32, HB + 0.62), (Y0 - 1.32, HB + 0.22)],
+    tuc.append(plate('catnose', [(Y0 - 0.05, HB + 0.10), (Y0 - 0.05, HB + 0.78),
+                                 (-0.44, HB + 0.66), (-0.44, HB + 0.26)],
                      LEADER_W + 0.24, MAT_CAST, None, (0, 0, 0), bevel=0.03))
     for sx in (-1, 1):
-        tuc.append(box('catgus', (0.09, 1.30, 0.62), MAT_CAST, None,
-                       (sx * (LEADER_W / 2 + 0.16), Y0 - 0.70, HB + 0.52),
-                       bevel=0.02))
+        tuc.append(box('catgus', (0.09, 0.94, 0.66), MAT_CAST, None,
+                       (sx * (LEADER_W / 2 + 0.16), 0.02, HB + 0.50), bevel=0.02))
     merge('leader_upper', tu, tele)
     merge('leader_upper_rails', tus, tele)
     merge('cathead', tuc, tele)
     # sheaves: the forward one over the pile axis is the big one
-    for nm, sx, sy, sr in (('sheave-pile', 0.0, -0.62, 0.30),
+    for nm, sx, sy, sr in (('sheave-pile', 0.0, 0.0, 0.32),
                            ('sheave-hammer', -0.26, YC - 0.20, 0.24),
                            ('sheave-aux', 0.26, YC - 0.20, 0.24)):
         pn = empty(NODE_PIVOT, nm, tele, (sx, sy, HB + 0.45))
@@ -1121,8 +1164,8 @@ def build(out_path):
                        (-0.24, 0.02, HAMMER_BOT + HAMMER_L + 0.34)],
                       radius=0.022, mat=MAT_WORN, parent=root, sides=6))
     ropes.append(hose('rope_pile',
-                      [(0.0, -0.62, HB + 0.76),
-                       (0.05, -0.74, HB - 5.0),
+                      [(0.0, -0.30, HB + 0.50),
+                       (0.05, -0.34, HB - 5.0),
                        (0.04, -0.30, PILE_TOP + 1.30)],
                       radius=0.019, mat=MAT_WORN, parent=root, sides=6))
     # the auxiliary line hanging free with its hook: this is how the NEXT pile

@@ -211,9 +211,12 @@ def rail(name, pts, r, mat, parent=None):
         L = math.sqrt(d[0] ** 2 + d[1] ** 2 + d[2] ** 2)
         if L < 1e-4:
             continue
-        # rotate +Z onto d
+        # rotate +Z onto d.  Euler XYZ (0, ry, rz) sends +Z to
+        # (sin ry cos rz, sin ry sin rz, cos ry) - no extra quarter turn, which
+        # is what the first version had, and it fired every handrail off at 90
+        # degrees to the deck edge it was supposed to follow.
         ry = math.acos(max(-1.0, min(1.0, d[2] / L)))
-        rz = math.atan2(d[1], d[0]) - math.pi / 2
+        rz = math.atan2(d[1], d[0])
         out.append(R.tube('%s_%d' % (name, i), r, L, mat, parent=parent, loc=a,
                           rot=(0, ry, rz), sides=8))
     return out
@@ -408,9 +411,11 @@ def build(out_path):
                 loc=(jx, jy, DECK_Z - 0.20), bevel=0.015))
         A(R.tube('jack_case_' + tag, 0.085, 0.42, R.MAT_DARK, loc=(jx, jy, 0.42), sides=10))
         node = R.empty(R.NODE_SLIDE, 'jack-' + tag, loc=(jx, jy, 0.42))
-        parts = [R.tube('jrod', 0.062, 0.44, R.MAT_CHROME, loc=(0, 0, -0.44), sides=10),
-                 disc('jpad', JACK_PAD_R, 0.05, R.MAT_WORN, (0, 0, -0.46), 'Z', sides=12),
-                 R.box('jpin', (0.20, 0.05, 0.05), R.MAT_STEEL, loc=(0, 0, -0.40))]
+        # parked with the pad exactly on the ground: the node's own travel is
+        # the published 550 mm, so the game can lift the machine off its tracks.
+        parts = [R.tube('jrod', 0.062, 0.42, R.MAT_CHROME, loc=(0, 0, -0.37), sides=10),
+                 disc('jpad', JACK_PAD_R, 0.05, R.MAT_WORN, (0, 0, -0.395), 'Z', sides=12),
+                 R.box('jpin', (0.20, 0.05, 0.05), R.MAT_STEEL, loc=(0, 0, -0.33))]
         weld(parts, node, 'jack-' + tag)
 
     # ── 8. WINCHES - two, and they are different [C140] p.6 ─────────────────
@@ -648,8 +653,11 @@ def build(out_path):
                         loc=(s * RK_W / 2, RK_D - 0.05, RK_L / 2)))
         rp.append(R.box('rack_bot%d' % s, (0.06, 0.06, RK_L), R.MAT_PAINT,
                         loc=(s * RK_W / 2, 0.02, RK_L / 2)))
+    # floor: authored straight in the panel's own XZ plane - width across the
+    # rack, length up it.  Rotating it into place was the bug that laid a 3 m
+    # fan of loose bars out across the ground beside the machine.
     rp += mesh_panel('rack_floor', RK_W, RK_L, R.MAT_PAINT, (0, 0.02, RK_L / 2),
-                     rot=(math.pi / 2, 0, 0), pitch=0.20)
+                     pitch=0.20)
     for e in (0.05, RK_L - 0.05):
         rp.append(R.box('rack_end%d' % int(e * 10), (RK_W + 0.10, RK_D, 0.06),
                         R.MAT_PAINT, loc=(0, RK_D / 2 - 0.02, e), bevel=0.012))

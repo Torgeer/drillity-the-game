@@ -110,8 +110,12 @@ MAST_W      = 0.92    # DERIVED. [M4] gives 0.48 m in side elevation; the
 MAST_D      = 0.52    # plan view [P10] shows the mast noticeably wider than
                       # deep. Section is NOT SOURCED (rm20-leader.md sec.10).
 MAST_Z0     = 3.90    # [M4] mast foot in the fully-raised pose
-MAST_HEAD_H = 1.90    # DERIVED: RIG_H - MAST_Z0 - mast length, see below
-MAST_LEN    = 19.90   # DERIVED: RIG_H - MAST_Z0 - MAST_HEAD_H
+MAST_HEAD_H = 2.24    # DERIVED. The head is a fabricated frame, not a box:
+                      # its height is whatever the sheaves, the damper units
+                      # and the fold cylinder need. Measured off the built
+                      # geometry rather than assumed, then MAST_LEN set so the
+                      # total lands on the stated A = 25.70 m.
+MAST_LEN    = RIG_H - 3.90 - MAST_HEAD_H   # = 19.48 m of mast
 MAX_PILE    = 18.00   # max pile length, hammer dependent, dim E         [P4]
 
 # ── kinematics: four-bar, high pivot, mast stays plumb ───────────────────
@@ -363,7 +367,7 @@ def build_undercarriage(root):
     for yy in (TRACK_Y + 1.28, TRACK_Y - 1.28):
         bx('spread-beam', (GAUGE_WIDE - 0.30, 0.42, 0.30), MAT_DARK, root,
            (0, yy, 0.62), bevel=0.02)
-        bx('spread-slide', (GAUGE_WIDE + 0.10, 0.22, 0.17), MAT_CHROME, root,
+        bx('spread-slide', (GAUGE_WIDE - 0.16, 0.22, 0.17), MAT_CHROME, root,
            (0, yy, 0.62), bevel=0.01)
     # slew ring
     tb('slew-ring', 0.98, 0.17, MAT_WORN, root, (0, 0, 1.03), sides=32)
@@ -441,14 +445,37 @@ def build_cab(slew):
        (cx, y1 - 0.04, z0 + 0.72), bevel=0.012)
     bx('cab-rear', (w - 0.08, 0.07, h - 0.20), MAT_PAINT, slew,
        (cx, y0 + 0.04, (z0 + z1) / 2), bevel=0.012)
+    # kick plate under the door and the sill the glazing sits on
+    bx('cab-kick', (0.05, d - 0.16, 0.30), MAT_PAINT, slew,
+       (x0 + 0.03, cy, z0 + 0.15), bevel=0.01)
+    bx('cab-sill', (w, 0.08, 0.09), MAT_PAINT, slew,
+       (cx, y1 - 0.04, z0 + 0.26), bevel=0.01)
     bx('cab-inboard', (0.07, d - 0.14, h - 0.16), MAT_PAINT, slew,
        (x0 + w - 0.035, cy, (z0 + z1) / 2), bevel=0.012)
     # glazing — MAT_GLASS is a NAME. Never transmission > 0: measured at
     # +65..81 draw calls because it re-renders the whole opaque list.
     bx('glass-front-upper', (w - 0.14, 0.03, h - 0.90), MAT_GLASS, slew,
        (cx, y1 - 0.045, z0 + 0.78 + (h - 0.90) / 2), bevel=0.0)
-    bx('glass-front-lower', (w - 0.14, 0.03, 0.62), MAT_GLASS, slew,
-       (cx, y1 - 0.045, z0 + 0.36), bevel=0.0)
+    # The footwell pane: on a leader rig the driver looks DOWN at the pile
+    # butt as often as up the mast, so the front glazing runs to the floor.
+    bx('glass-front-lower', (w - 0.14, 0.03, 0.36), MAT_GLASS, slew,
+       (cx, y1 - 0.045, z0 + 0.50), bevel=0.0)
+    bx('glass-front-foot', (w - 0.20, 0.03, 0.30), MAT_GLASS, slew,
+       (cx, y1 - 0.18, z0 + 0.18), (0.55, 0, 0), bevel=0.0)
+    # cab interior — a hollow glasshouse reads as a hollow glasshouse
+    bx('seat-base', (0.46, 0.44, 0.14), MAT_DARK, slew,
+       (cx - 0.06, cy - 0.10, z0 + 0.52), bevel=0.02)
+    bx('seat-back', (0.44, 0.13, 0.62), MAT_DARK, slew,
+       (cx - 0.06, cy - 0.32, z0 + 0.88), (-0.16, 0, 0), bevel=0.02)
+    bx('seat-pillar', (0.14, 0.14, 0.42), MAT_STEEL, slew,
+       (cx - 0.06, cy - 0.10, z0 + 0.24), bevel=0.01)
+    for sx2 in (-0.30, 0.30):
+        bx('console', (0.20, 0.40, 0.26), MAT_DARK, slew,
+           (cx + sx2, cy + 0.08, z0 + 0.62), bevel=0.02)
+        tb('joystick', 0.028, 0.20, MAT_DARK, slew,
+           (cx + sx2, cy + 0.14, z0 + 0.74), sides=6)
+    bx('screen', (0.05, 0.26, 0.20), MAT_GLASS, slew,
+       (cx + 0.34, cy + 0.44, z0 + 1.06), (0, 0, 0.35), bevel=0.0)
     bx('glass-door', (0.03, 0.62, h - 0.42), MAT_GLASS, slew,
        (x0 + 0.04, cy + 0.02, z0 + 0.28 + (h - 0.42) / 2), bevel=0.0)
     bx('glass-quarter', (0.03, 0.52, h - 0.55), MAT_GLASS, slew,
@@ -483,6 +510,11 @@ def build_cab(slew):
        (x0 - 0.16, y1 - 0.16, z1 - 0.14), bevel=0.006)
     bx('mirror', (0.05, 0.14, 0.22), MAT_GLASS, slew,
        (x0 - 0.30, y1 - 0.16, z1 - 0.22), bevel=0.0)
+    # amber beacon and the reversing camera [P8] — both standard kit
+    tb('beacon-base', 0.055, 0.09, MAT_DARK, slew,
+       (cx + 0.30, y0 + 0.30, z1 + 0.10), sides=10)
+    tb('beacon', 0.055, 0.13, MAT_HAZARD, slew,
+       (cx + 0.30, y0 + 0.30, z1 + 0.18), sides=10)
     # step and grab handle beside the door
     bx('cab-step', (0.34, 0.26, 0.05), MAT_STEEL, slew,
        (x0 + 0.10, y1 - 0.42, DECK_Z - 0.30), bevel=0.01)
@@ -509,6 +541,18 @@ def build_house(slew):
        (0, (FRONT_Y + HOUSE_Y0) / 2 - 0.10, DECK_Z - 0.08), bevel=0.02)
     bx('deck-front-beam', (UPPER_W, 0.40, 0.55), MAT_DARK, slew,
        (0, FRONT_Y - 0.20, DECK_Z + 0.10), bevel=0.03)
+    bx('deck-front-hazard', (UPPER_W, 0.05, 0.16), MAT_HAZARD, slew,
+       (0, FRONT_Y + 0.01, DECK_Z + 0.26), bevel=0.006)
+    # frame ribs under the deck, where the slew ring loads spread out
+    for yy in (-2.60, -1.60, -0.60, 0.40, 1.40):
+        bx('deck-rib', (UPPER_W - 0.20, 0.14, 0.22), MAT_DARK, slew,
+           (0, yy, DECK_Z - 0.24), bevel=0.014)
+    # bolted flange rows down both frame edges
+    for sx2 in (-1, 1):
+        for i in range(14):
+            tb('deck-bolt', 0.020, 0.04, MAT_WORN, slew,
+               (sx2 * (UPPER_W / 2 - 0.03), FRONT_Y - 0.35 - i * 0.38,
+                DECK_Z - 0.06), (0, math.pi / 2 * sx2, 0), sides=6)
 
     # house shell
     bx('house', (UPPER_W, d, z1 - z0), MAT_PAINT, slew, (0, cy, (z0 + z1) / 2),
@@ -609,8 +653,18 @@ def build_house(slew):
         for sx in (-0.85, 0.85):
             bx('cw-lug', (0.11, 0.20, 0.16), MAT_WORN, slew,
                (sx, CW_Y0 + 0.16, zc + th / 2 + 0.05), bevel=0.012)
-    bx('cw-hazard', (2.66, 0.04, 0.18), MAT_HAZARD, slew,
-       (0, CW_Y0 - 0.02, CW_Z0 + 0.10), bevel=0.006)
+    for zz in (CW_Z0 + 0.08, CW_Z1 - 0.06):
+        bx('cw-hazard', (2.66, 0.05, 0.16), MAT_HAZARD, slew,
+           (0, CW_Y0 - 0.02, zz), bevel=0.006)
+    # reversing camera [P8], where it can see behind the counterweight
+    bx('rev-camera', (0.14, 0.12, 0.12), MAT_DARK, slew,
+       (0, CW_Y0 - 0.10, CW_Z1 + 0.16), bevel=0.012)
+    bx('rev-camera-lens', (0.07, 0.03, 0.07), MAT_GLASS, slew,
+       (0, CW_Y0 - 0.17, CW_Z1 + 0.16), bevel=0.0)
+    # tie-down and lifting points on the console
+    for sx2 in (-1.10, 1.10):
+        bx('lash-eye', (0.09, 0.20, 0.24), MAT_WORN, slew,
+           (sx2, HOUSE_Y0 - 0.20, DECK_Z + 0.32), bevel=0.012)
 
     # ── rear support unit [P2 item 3] ───────────────────────────────────
     # Both jacks on ONE slide node: they are a single hydraulic function and
@@ -839,6 +893,31 @@ def build_guide(slew):
        (0, 2.68, 2.86), (0.36, 0, 0), bevel=0.012)
     bx('sensor-box', (0.22, 0.18, 0.26), MAT_DARK, g,
        (-0.58, 2.62, 5.55), bevel=0.012)
+    # Mast slide drive: the 7 m of vertical travel [P3][P4] has to come from
+    # somewhere, and on the real machine it is a drive on the guide working a
+    # rack up the mast. Modelled where the rack runs, at the guide.
+    bx('slide-drive', (0.34, 0.44, 0.58), MAT_PAINT, g,
+       (MAST_W / 2 + 0.30, MAST_Y - 0.10, GUIDE_Z1 - 0.75), bevel=0.025)
+    tb('slide-pinion', 0.16, 0.20, MAT_WORN, g,
+       (MAST_W / 2 + 0.22, MAST_Y - 0.10, GUIDE_Z1 - 0.75),
+       (0, -math.pi / 2, 0), sides=14)
+    tb('slide-motor', 0.12, 0.26, MAT_PAINT, g,
+       (MAST_W / 2 + 0.46, MAST_Y - 0.10, GUIDE_Z1 - 0.75),
+       (0, math.pi / 2, 0), sides=12)
+    # bolt rows on the carrier ties — free triangles, and a bolted flange is
+    # most of what says 'fabricated' rather than 'extruded'
+    for sx in (-0.62, 0.62):
+        for i in range(5):
+            tb('carrier-bolt', 0.022, 0.05, MAT_WORN, g,
+               (sx + 0.075, 2.40 + i * 0.10, GUIDE_Z0 + 0.20),
+               (0, math.pi / 2, 0), sides=6)
+    # a step and grab rail at the guide, for hands-on work at the pile head
+    # MAT_WORN, not MAT_STEEL: rawSteel is not otherwise present in this
+    # group, and one more material here is one more draw call for a step.
+    bx('guide-step', (0.80, 0.34, 0.05), MAT_WORN, g,
+       (0, MAST_Y + 0.55, GUIDE_Z0 - 1.15), bevel=0.008)
+    handrail(g, [(-0.42, MAST_Y + 0.55), (0.42, MAST_Y + 0.55)],
+             GUIDE_Z0 - 1.13, 0.95, mat=MAT_WORN)
 
     # ── lower mast extension with hydraulic support [P2 item 13] ────────
     # It reaches from the mast foot down to a bearing plate on the ground and
@@ -860,12 +939,21 @@ def build_guide(slew):
     for side, sx in (('l', -1), ('r', 1)):
         a = node(NODE_PIVOT, 'pile-guide-' + side, g,
                  (0, MAST_Y + MAST_D / 2 + 0.10, GUIDE_Z0 - 0.55))
-        bx('guide-arm', (0.16, 0.86, 0.30), MAT_DARK, a,
-           (sx * 0.30, 0.48, 0), (0, 0, sx * 0.22), bevel=0.02)
-        bx('guide-jaw', (0.22, 0.26, 0.40), MAT_WORN, a,
-           (sx * 0.46, 0.92, 0), bevel=0.02)
-        bx('guide-cyl', (0.11, 0.52, 0.11), MAT_CHROME, a,
-           (sx * 0.18, 0.30, -0.16), bevel=0.01)
+        bx('guide-arm', (0.18, 0.92, 0.34), MAT_DARK, a,
+           (sx * 0.30, 0.50, 0), (0, 0, sx * 0.22), bevel=0.025)
+        bx('guide-arm-web', (0.07, 0.66, 0.22), MAT_DARK, a,
+           (sx * 0.44, 0.44, 0.16), (0, 0, sx * 0.22), bevel=0.012)
+        # prismatic V-block: two faces at 45 deg, which is how one jaw holds
+        # 508-1016 mm casing and a 350 mm pile without changing parts [P6]
+        for f in (-1, 1):
+            bx('guide-vee', (0.22, 0.30, 0.16), MAT_WORN, a,
+               (sx * 0.50, 0.96, f * 0.11), (0, f * 0.62, 0), bevel=0.014)
+        bx('guide-jaw-back', (0.24, 0.14, 0.42), MAT_WORN, a,
+           (sx * 0.58, 1.02, 0), bevel=0.02)
+        bx('guide-cyl', (0.12, 0.56, 0.12), MAT_CHROME, a,
+           (sx * 0.18, 0.32, -0.18), bevel=0.01)
+        bx('guide-cyl-eye', (0.16, 0.14, 0.16), MAT_DARK, a,
+           (sx * 0.30, 0.60, -0.18), bevel=0.014)
         weld(a, 'pile-guide-' + side)
     bx('guide-yoke', (MAST_W + 0.50, 0.34, 0.42), MAT_DARK, g,
        (0, MAST_Y + MAST_D / 2 + 0.12, GUIDE_Z0 - 0.55), bevel=0.025)
@@ -913,8 +1001,20 @@ def build_mast(carrier):
            (sx * (hw - 0.10), -hd + 0.025, (z0 + z1) / 2), bevel=0.01)
     bays = 13
     for i in range(bays + 1):
+        zz = z0 + 0.30 + i * (MAST_LEN - 0.60) / bays
         bx('mast-strip', (MAST_W - 0.14, 0.05, 0.24), MAT_DARK, m,
-           (0, -hd + 0.025, z0 + 0.30 + i * (MAST_LEN - 0.60) / bays), bevel=0.01)
+           (0, -hd + 0.025, zz), bevel=0.01)
+        # ring the cut-out so the hole has a rolled edge, not a razor lip
+        bx('mast-ring-top', (MAST_W - 0.30, 0.09, 0.05), MAT_DARK, m,
+           (0, -hd + 0.05, zz + 0.20), bevel=0.008)
+        # a diaphragm every second bay: this is a box mast, and box masts are
+        # stiffened internally where the guide loads come in
+        if i % 2 == 0:
+            bx('mast-diaphragm', (MAST_W - 0.16, MAST_D - 0.16, 0.05), MAT_DARK,
+               m, (0, 0, zz), bevel=0.008)
+        for sx in (-1, 1):
+            bx('mast-web-rib', (0.06, MAST_D - 0.18, 0.10), MAT_DARK, m,
+               (sx * (hw - 0.06), 0, zz + 0.36), bevel=0.006)
     # bolted splices: this mast ships in sections
     for f in (0.33, 0.66):
         zz = z0 + MAST_LEN * f
