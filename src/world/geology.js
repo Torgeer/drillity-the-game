@@ -3937,8 +3937,11 @@ export function createGeology(ctx) {
       confidence: ore.confidence,
       /* The player only KNOWS what has been drilled. A UI that wants to show
          the truth regardless can ignore this; a UI that wants to be honest
-         should not. */
-      revealed: dpt <= depthForStation(depth) + 0.05,
+         should not. "Has been drilled" is the log's own frontier and not the
+         bit's live depth — an intercept does not un-reveal itself because the
+         string was tripped out, or because an HDD bore has started climbing
+         back towards its exit. */
+      revealed: dpt <= logFrontier() + 0.05,
       widthM: ore.halfThick * 2,
     };
   }
@@ -4087,8 +4090,10 @@ export function createGeology(ctx) {
     };
     /* Knowledge bought for the LAST hole is not knowledge about this one. A
        new profile is new ground, so anything setSurveyConfidence() was told
-       dies with the profile that earned it. */
+       dies with the profile that earned it. Same for the ground the last hole
+       logged — see loggedMax. */
     surveyBought = 0;
+    loggedMax = -Infinity;
     applyHoleDiameter();
 
     const recipe = REGIONS[spec.regionId] || REGIONS.nordic;
@@ -6838,8 +6843,21 @@ export function createGeology(ctx) {
        ahead of the bit and says why. This is the same rule applied to the
        lithology, and both take their uncertainty from lookUncAt(), which is
        the same curve the shader uses — so the strip and the cut can never
-       disagree about which ground is known. */
-    const loggedTo = depthForStation(depth);
+       disagree about which ground is known.
+
+       TWO THINGS ABOUT WHICH BIT POSITION THIS IS.
+
+       It is the deepest TVD the hole has REACHED, not the bit's current one:
+       see loggedMax. A tripped-out string, and every HDD shot's second half,
+       walked this line back up and deleted strengths the log had already
+       printed.
+
+       And it is derived from `smoothDepth`, the same damped bit the shader's
+       ahead-plane is built from (applySurvey()), not from the raw `depth`.
+       They separate during a jump — and the raw one is the OPTIMISTIC one, so
+       the strip would print a UCS for a bed the cut beside it was still
+       drawing as projected. Two instruments, one bit. */
+    const loggedTo = logFrontier();
 
     for (const s of strata) {
       const y0 = (s.top - topDepth) * pxPerM;
@@ -6983,7 +7001,9 @@ export function createGeology(ctx) {
        ladder above is tuned to 63 CSS px of text room and would fall through
        to three-letter codes if the column were narrowed. */
     if (ore) {
-      const drilledTvd = depthForStation(depth);
+      // the same frontier the lithology above uses, so the two halves of one
+      // strip cannot disagree about which ground has been drilled
+      const drilledTvd = logFrontier();
       const gw = colW * 0.86;
       const cutX = colX + (ore.cutoff / Math.max(ore.grade[3], 1e-6)) * gw;
       const stepM = Math.max((1.2 / pxPerM), profileDepth / 900);
@@ -7490,6 +7510,36 @@ export function createGeology(ctx) {
    * first consumer.
    */
   let surveyBought = 0;
+  /* ── HOW DEEP THIS HOLE HAS EVER BEEN, WHICH IS NOT HOW DEEP IT IS ─────────
+     The drill log took its "logged to here" line straight from the bit's
+     current TVD, and the bit's current TVD goes DOWN as well as up:
+
+       · trip out. This file already knows depth can fall — `resetCrossings()`
+         exists for exactly that — and every rod pulled walked the PROJECTED
+         divider back up the strip, un-logged the beds above it and deleted the
+         strengths it had already printed for them.
+       · an HDD profile, where it is not even an edge case. The bore goes down
+         and then back UP to its exit, so `depthForStation()` rises to the
+         cover depth and falls again over the second half of every single shot.
+         Beds the bit had drilled through un-logged themselves on the way out.
+
+     §7.4's one hard rule is that the look-ahead must never lie: once drilled,
+     the section must match what the sim resolved. Coring a bed and then
+     pulling the string does not unlog it — the core is in the box. So the log
+     is driven by the deepest TVD the hole has REACHED, monotone within a hole
+     and reset with the profile.
+
+     SCOPE, DELIBERATELY. This changes the LOG and nothing else. The CUT has
+     the same exposure in the vertical modes — applySurvey()'s else branch is
+     `L.set(1, 0, -Math.max(smoothDepth, 0), L.w)`, so a tripped-out string
+     re-softens ground it has already drilled — but the cut's other two
+     branches are already monotone (uBore.x is horizontal metres and an HDD
+     bore advances monotonically in x; uTun.z is chainage), and making the
+     vertical one monotone means deciding whether the DRAWN hole should follow
+     the max too, which is uBore's business and a different question. Reported
+     rather than half-changed. The log is the record of what has been observed
+     and it is the one §7.4 names outright, so it is the one fixed here. */
+  let loggedMax = -Infinity;
   function surveyConfidence() {
     /* > 0 is the discriminator, not != null: data.js writes a hard 0 for the
        non-ore applications and 0.25-0.90 for the rest, so zero can only ever
@@ -7518,6 +7568,15 @@ export function createGeology(ctx) {
    *  two numbers through uSurvey / uLook below. */
   function lookUncAt(aheadMetres) {
     return surveyCeiling() * (1 - Math.exp(-Math.max(aheadMetres, 0) * surveyInvLead()));
+  }
+
+  /** The depth the LOG has logged to: the deepest TVD this hole has reached,
+   *  off the same damped bit the shader's ahead-plane uses. Monotone within a
+   *  hole, reset by generateProfile(). See loggedMax. */
+  function logFrontier() {
+    const d = depthForStation(Math.max(smoothDepth, 0));
+    if (d > loggedMax) loggedMax = d;
+    return loggedMax;
   }
 
   function applySurvey() {
@@ -7895,7 +7954,10 @@ export function createGeology(ctx) {
        is repainted every 0.15 m of bit travel — 2.9 CSS px at the reference
        scale, so the divider never visibly steps — and the guard is a scalar
        compare, so a still bit costs exactly what it did before. */
-    const loggedNow = depthForStation(depth);
+    // the same frontier drawLog() draws, or the strip repaints on a number it
+    // no longer prints — and stops repainting at all once the bit trips out,
+    // which is correct: nothing about the log has changed.
+    const loggedNow = logFrontier();
     const logStale = logStrip
       && Math.abs(loggedNow - (logStrip.loggedAt ?? -1e9)) > 0.15
       && loggedNow < botDepth + 1.0;
@@ -7972,6 +8034,12 @@ export function createGeology(ctx) {
        long-section that axis travels. It stays 0 in every vertical mode. */
     if (ctx?.sectionView) {
       ctx.sectionView.holeX = root.position.x + actX;
+      /* The log's own datum: the deepest TVD this hole has reached, which is
+         where LOGGED stops and PROJECTED starts. Published because it is the
+         only honest answer to "does the player know this yet", and because a
+         claim this load-bearing should be measurable from outside the file
+         rather than inferred from pixels. */
+      ctx.sectionView.loggedDepth = loggedMax > -Infinity ? loggedMax : 0;
       ctx.sectionView.profileMode = layout.id;
       ctx.sectionView.metresPerUnitX = layout.metresPerUnitX;
       ctx.sectionView.verticalExaggeration = layout.ve;
