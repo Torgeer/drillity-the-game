@@ -583,6 +583,23 @@ def build_wheel(name, parent, x, y):
               (x, y, cz))
     lug.data.transform(Matrix.Translation((0, 0, WHEEL_R - 0.012)))
     out.append(radial(lug, 22, 'X'))
+
+    # Mudguard.  Every one of these machines has them and the first render
+    # looked bare without: a drill drive floor is broken rock under standing
+    # water and the wheels throw it at the cab and at anybody walking past.
+    # Built as five flat facets on an arc rather than a curved surface,
+    # sharing MAT_DARK with the frame - so it merges into the same draw call
+    # and costs only triangles, which is the lane rig.py says to spend in.
+    # It is exactly TYRE WIDTH, not wider: a published width is the machine's
+    # maximum, and a guard 45 mm proud of it took the measured model to 2.190
+    # against a printed 2.100.
+    for i in range(5):
+        a = D(28) + i * D(31)
+        out.append(box('%s_guard%d' % (name, i),
+                       (WHEEL_W, 0.30, 0.028), MAT_DARK, parent,
+                       (x, y + math.cos(a) * (WHEEL_R + 0.075),
+                        cz + math.sin(a) * (WHEEL_R + 0.075)),
+                       rot=(-(math.pi / 2 - a), 0, 0), bevel=0.006))
     return out
 
 
@@ -602,48 +619,93 @@ def build_rear(root):
     ylen = y1 - y0
     ymid = (y0 + y1) / 2
 
-    # main frame box (chassis)
-    out.append(box('rear-frame', (FRAME_W, ylen, FRAME_TOP - FRAME_BOT),
-                   MAT_DARK, root, (0, ymid, (FRAME_BOT + FRAME_TOP) / 2),
-                   bevel=0.012))
+    # THE REEL WELL.  The scaled reel is 1.57 m across with its axis 1.19 m up,
+    # so its bottom sits at 0.405 - barely above the 0.365 belly.  A drum that
+    # size does not sit ON the chassis, it sits IN it, and the rear frame is
+    # therefore TWO SIDE RAILS over the reel's length rather than one closed
+    # box.  It is also the only arrangement that can pay cable out, and this
+    # machine drills on a trailing cable.  The first build buried the drum in a
+    # solid hood and the biggest and most characteristic object on the whole
+    # machine rendered as two dark crescents.
+    bay0, bay1 = y0 + 0.16, REEL_Y + 0.62
+    rail_w = 0.30
+    out.append(box('rear-frame', (FRAME_W, y1 - bay1, FRAME_TOP - FRAME_BOT),
+                   MAT_DARK, root, (0, (bay1 + y1) / 2,
+                                    (FRAME_BOT + FRAME_TOP) / 2), bevel=0.012))
+    for sgn in (-1, +1):
+        out.append(box('rear-rail%d' % (sgn > 0),
+                       (rail_w, bay1 - bay0, FRAME_TOP - FRAME_BOT), MAT_DARK,
+                       root, (sgn * (FRAME_W / 2 - rail_w / 2),
+                              (bay0 + bay1) / 2,
+                              (FRAME_BOT + FRAME_TOP) / 2), bevel=0.012))
+    out.append(box('rear-crossmember', (FRAME_W, 0.16, FRAME_TOP - FRAME_BOT),
+                   MAT_DARK, root, (0, bay0 + 0.08,
+                                    (FRAME_BOT + FRAME_TOP) / 2), bevel=0.012))
     # belly plate - scraped bare on broken floor, never painted-looking
     out.append(box('rear-belly', (FRAME_W * 0.98, ylen * 0.92, 0.022),
                    MAT_WORN, root, (0, ymid, FRAME_BOT + 0.011)))
+    # A guard GRID over the open well - nothing should walk into a turning
+    # drum.  Two lone transverse bars (the first attempt) read as antennae in
+    # three-quarter view; a grid of three cross bars and two longitudinals
+    # reads as what it is.  It hugs the drum rather than standing off it, so
+    # it stays under the roof-down height.
+    gz = REEL_CZ + REEL_R + 0.045
+    for i, yy in enumerate((REEL_Y - 0.50, REEL_Y, REEL_Y + 0.50)):
+        out.append(box('reel-guard-x%d' % i, (FRAME_W - 0.06, 0.045, 0.035),
+                       MAT_DARK, root, (0, yy, gz), bevel=0.006))
+    for sgn in (-1, +1):
+        out.append(box('reel-guard-y%d' % (sgn > 0),
+                       (0.045, 1.10, 0.035), MAT_DARK, root,
+                       (sgn * (FRAME_W / 2 - 0.20), REEL_Y, gz), bevel=0.006))
+        out.append(strut('reel-guard-leg%d' % (sgn > 0),
+                         (sgn * (FRAME_W / 2 - 0.05), REEL_Y, FRAME_TOP - 0.10),
+                         (sgn * (FRAME_W / 2 - 0.05), REEL_Y, gz),
+                         0.024, MAT_DARK, root))
 
-    # the power module over it.  Its top face is the hood line.
-    hy0, hy1 = y0 + 0.10, y1
+    # the power module FORWARD of the well.  Its top face is the hood line -
+    # one of the three horizontal bands the silhouette reads by [R] 3.2.
+    hy0, hy1 = bay1, y1
     out.append(box('hood', (WIDTH - 0.10, hy1 - hy0, HOOD_TOP - FRAME_TOP),
                    MAT_PAINT, root,
                    (0, (hy0 + hy1) / 2, (FRAME_TOP + HOOD_TOP) / 2),
                    bevel=0.030))
+    # the bulkhead the hood closes against, and a panel break down each side
+    out.append(box('hood-bulkhead', (WIDTH - 0.10, 0.05, HOOD_TOP - FRAME_TOP),
+                   MAT_DARK, root, (0, hy0 - 0.02,
+                                    (FRAME_TOP + HOOD_TOP) / 2), bevel=0.010))
+    for sgn in (-1, +1):
+        out.append(box('hood-break%d' % (sgn > 0),
+                       (0.016, 0.03, HOOD_TOP - FRAME_TOP - 0.10), MAT_DARK,
+                       root, (sgn * ((WIDTH - 0.10) / 2 + 0.004), hy0 + 0.78,
+                              (FRAME_TOP + HOOD_TOP) / 2)))
     # the tail: a sloping panel at the printed 15 degree departure angle
     tl = 0.55
-    out.append(box('tail-ramp', (WIDTH - 0.16, tl, 0.035), MAT_PAINT, root,
+    out.append(box('tail-ramp', (WIDTH - 0.30, tl, 0.035), MAT_DARK, root,
                    (0, y0 + tl / 2 * math.cos(DEPART),
                     FRAME_BOT + tl / 2 * math.sin(DEPART) - 0.01),
                    rot=(-DEPART, 0, 0), bevel=0.008))
     # tail panel - where the drawing carries the model designation.  Blank.
     out.append(badge_panel('tail-plate', (0.52, 0.02, 0.20), root,
-                           (-0.42, y0 - 0.012, FRAME_TOP + 0.16)))
+                           (-0.42, y0 - 0.012, FRAME_TOP - 0.22)))
     # hood side wordmark plate - also blank, also deliberate
     out.append(badge_panel('hood-plate', (0.02, 0.60, 0.16), root,
-                           (-(WIDTH - 0.10) / 2 - 0.012, ymid + 0.30,
+                           (-(WIDTH - 0.10) / 2 - 0.012, hy0 + 1.10,
                             (FRAME_TOP + HOOD_TOP) / 2)))
 
     # cooling louvres, both sides.  [R] 4.0(2) "side louvre banks".
     for sgn in (-1, +1):
         out += grille('hood-louvre-%d' % (sgn > 0), 0.02, 0.44, MAT_PAINT,
-                      root, (sgn * ((WIDTH - 0.10) / 2 + 0.008), ymid - 0.42,
-                             FRAME_TOP + 0.42), n=8, depth=0.62)
+                      root, (sgn * ((WIDTH - 0.10) / 2 + 0.008), hy0 + 0.34,
+                             FRAME_TOP + 0.42), n=8, depth=0.56)
 
     # exhaust / cooling stack on the hood top, forward end [GA]
     out.append(box('stack', (0.30, 0.34, 0.20), MAT_WORN, root,
-                   (0.34, y1 - 0.50, HOOD_TOP + 0.10), bevel=0.014))
+                   (0.34, y1 - 0.44, HOOD_TOP + 0.10), bevel=0.014))
     out.append(box('stack-cap', (0.38, 0.42, 0.03), MAT_WORN, root,
-                   (0.34, y1 - 0.50, HOOD_TOP + 0.215)))
+                   (0.34, y1 - 0.44, HOOD_TOP + 0.215)))
     # lifting eye - drawn on the elevation
     out.append(box('lift-eye', (0.03, 0.16, 0.13), MAT_STEEL, root,
-                   (-0.30, y1 - 0.30, HOOD_TOP + 0.065), bevel=0.01))
+                   (-0.30, y1 - 0.26, HOOD_TOP + 0.065), bevel=0.01))
 
     # ---- the cable reel -------------------------------------------------
     # The single clearest "this is underground" signal there is: the machine
@@ -869,6 +931,23 @@ def build_front(art):
     out.append(tube('stair-rail', 0.016, 0.90, MAT_STEEL, parent=art,
                     loc=(CAB_X0 - 0.19, CAB_Y0 - 0.14, 0.32), sides=6))
 
+    # A grab rail beside the door, and NOT a run of handrail along the deck.
+    # The first attempt put a two-rail run at deck + 0.98 down the left side,
+    # which lands ABOVE the 1.69 m hood line: from three-quarter view it read
+    # as two bars floating over the cable reel.  [R] section 8.10 says both
+    # spec sheets confirm ground-level service access EXISTS and neither
+    # dimensions or locates it - so the honest move is the small piece that is
+    # certainly there (a handhold at the step) rather than the big piece that
+    # is guessed.
+    out.append(tube('door-grab', 0.017, 0.72, MAT_STEEL, parent=art,
+                    loc=(CAB_X0 - 0.055, CAB_Y0 - 0.02, DECK + 0.16),
+                    sides=6))
+    for zz in (DECK + 0.16, DECK + 0.88):
+        out.append(strut('door-grab-arm%d' % int(zz * 100),
+                         (CAB_X0 + 0.01, CAB_Y0 - 0.02, zz),
+                         (CAB_X0 - 0.055, CAB_Y0 - 0.02, zz), 0.015,
+                         MAT_STEEL, art, sides=6))
+
     # ---- the right-hand side: electric cabinet, oil tank, compressor ------
     # [S] p.3: switch gear, PC4/PC5 plug socket, stainless electrical
     # enclosure, hydraulic oil tank with a level indicator and temperature
@@ -1048,6 +1127,21 @@ def build_feed(tele, b1):
                          rot=(0, 0, sgn * D(28)), bevel=0.006))
     parts.append(disc('guide-bush', 0.075, 0.06, MAT_WORN,
                       (0, 0.20, z1 - 0.42), 'Z', sides=12, parent=fx))
+
+    # The bracket that actually carries the carousel off the beam.  Without it
+    # the drum floats beside the feed with no visible connection, which is the
+    # kind of thing a driller spots instantly.
+    parts.append(box('caro-bracket', (CARO_OFF, 0.13, 0.16), MAT_PAINT, fx,
+                     (CARO_OFF / 2, 0.02, z0 + 0.34), bevel=0.010))
+    parts.append(box('caro-bracket-2', (CARO_OFF, 0.13, 0.16), MAT_PAINT, fx,
+                     (CARO_OFF / 2, 0.02, z0 + 0.34 + ROD_LEN * 0.84),
+                     bevel=0.010))
+    # the feed's chain/cylinder cover down one side of the beam, and the two
+    # slide pads the carriage runs on.  [R] section 8.4 is explicit that no
+    # feed cross-section is published, so this is form, not dimension.
+    parts.append(box('feed-chain-cover', (0.085, 0.10, FEED_LEN - 0.30),
+                     MAT_DARK, fx, (-(FEED_W / 2 + 0.03), -0.09, 0),
+                     bevel=0.008))
 
     # feed lamps.  These are the ones that matter: they light the collar and
     # the rod being added, and they move with the feed through 114 degrees of
