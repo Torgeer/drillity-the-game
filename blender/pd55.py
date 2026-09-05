@@ -960,6 +960,14 @@ def build_mast(carrier):
     costs a fraction of the geometry.
     """
     m = node(NODE_SLIDE, 'mast', carrier, (0, MAST_Y, 0))
+    # THE HEADLINE FEATURE, and it declared no stroke.  [P4] dim B: "Max
+    # cylinder stroke 7.0 m" — the mast is vertically displaceable by 7 m
+    # through its guide collar, which is why dim A (max rig height 25.7 m) and
+    # dim A1 (min 19.5 m) differ by 6.2 m and why the machine can work under
+    # low headroom.  It is the reason this class exists and the source document
+    # leads with it.
+    m['travel_m'] = MAST_SLIDE                # 7.00 m  [P4] dim B
+    m['axis'] = 'z'
     z0, z1 = MAST_Z0, MAST_Z0 + MAST_LEN
     hw, hd = MAST_W / 2, MAST_D / 2
 
@@ -1108,7 +1116,29 @@ def build_carriage(mast):
     out of the working line to handle a rod.
     """
     hd = MAST_D / 2
-    c = node(NODE_SLIDE, 'carriage', mast, (0, 0, MAST_Z0 + MAST_LEN - 5.60))
+    # THE CARRIAGE CONTRACT.  All 22 named nodes on this machine shipped with
+    # zero extras, this one included, so src/core/gltfRig.js makeDyn() set
+    # carriageRange = [y, y] and carriageNoFlex = true: the hammer could not
+    # travel the mast.  Worse, a carriage published without `travel_m` does not
+    # throw — setCarriage() evaluates `-0 * undefined` and writes NaN into a
+    # world matrix, and the machine silently vanishes.
+    #
+    # The stroke is SOLVED from this file's own geometry, not picked:
+    #   top    = MAST_Z0 + MAST_LEN - 5.60 = 17.78, where the sledge is exported
+    #   bottom = 4.00, the point at which the drive cap sits on grade.  The tool
+    #            mount hangs (0.30 - 4.30) = 4.00 m below the carriage origin,
+    #            through pivot:sledge-tilt and slide:hammer.
+    # 13.78 m of hammer travel on a 19.48 m leader, and the 7 m sliding mast
+    # (dim B) makes up the rest of the published dim E, "max pile length
+    # 18.0 m" [P4] — 13.78 + 7.00 = 20.78 of combined reach against an 18.0 m
+    # pile, which is the clearance a leader rig needs and not slack.
+    CARR_TOP = MAST_Z0 + MAST_LEN - 5.60      # 17.78, the exported pose
+    CARR_BOT = 4.00                           # drive cap on grade
+    c = node(NODE_SLIDE, 'carriage', mast, (0, 0, CARR_TOP))
+    c['travel_m'] = CARR_TOP - CARR_BOT       # 13.78 m
+    c['axis'] = 'z'
+    c['travel_min_m'] = CARR_BOT
+    c['travel_max_m'] = CARR_TOP
     # guide shoes gripping the mast rails — this is what makes it a
     # mast-guided hammer and not one hanging on a rope
     for sz in (-1, 1):
