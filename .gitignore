@@ -1,7 +1,7 @@
 node_modules/
 dist/
-shots/*.png
-shots/*.jpg
+shots/**/*.png
+shots/**/*.jpg
 .hudqa/out/
 .hudqa/*.png
 .bak/
