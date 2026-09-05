@@ -1112,11 +1112,27 @@ def build_mast():
 def build_carriage(piv):
     fw = -MAST_D / 2
     car = R.empty(R.NODE_SLIDE, 'carriage', piv, (0, 0, CARR_Z0))
-    # THE CARRIAGE INVARIANT (gltfRig.js): `travel_m` and the node's own y are
+    # THE CARRIAGE INVARIANT (`gltfRig.js`): `travel_m` and the node's own y are
     # read together, and a carriage missing either writes NaN into a world
-    # matrix and the machine silently disappears.  Both are set, and the node is
-    # authored at the BOTTOM of the stroke so that the published interval
-    # [y, y + travel] keeps the head inside the mast at BOTH ends.
+    # matrix and the machine silently disappears.  Both are set.
+    #
+    # AND A FINDING FOR WHOEVER OWNS `gltfRig.js` — measured, not guessed.
+    # It publishes `carriageRange = [y, y + travel]`, i.e. LOW first.  But
+    # `rigFactory.setCarriage(u)` does `position.y = lerp(r[0], r[1], u)`, and
+    # every procedural rig in that same file publishes the range the other way
+    # round — `[mastH - 1.45, 0.55]`, HIGH first — so that u = 1 is DOWN.  The
+    # drilling beat confirms the intent: it SUBTRACTS from u to lift the bit off
+    # bottom.  So a Blender machine's carriage currently travels the right
+    # distance in the wrong direction: it rises as the hole deepens.  Measured
+    # on this model: `carriageRange` comes back [1.53, 3.73].
+    #
+    # It is not fixable from here.  `travel_m` cannot be negative — the loader
+    # guards on `travel > 0` and a negative one falls to `[y, y]`, freezing the
+    # carriage instead of inverting it.  The fix belongs in `gltfRig.js`
+    # (`[y + travel, y]`), and until it lands the node is authored at the BOTTOM
+    # of the stroke, which is the least-bad state available: the published
+    # interval is the correct interval, so the head stays inside the mast at
+    # both ends and only the sign of the motion is wrong.
     car['travel_m'] = FEED_STROKE
     g = []
     # carriage plate and its slippers on the mast rails
