@@ -824,14 +824,14 @@ def build_frame_and_body():
     # honest label is: shape sourced, function guessed.
     g.append(bx('tailbracket', (0.26, 0.22, 0.30), R.MAT_DARK, root,
                 (0, TAIL_Y - 0.20, 0.980), bevel=0.010))
-    g.append(tb('reel_drum', 0.185, 0.24, R.MAT_DARK, root,
-                (-0.12, TAIL_Y, 0.980), (0, math.pi / 2, 0), 16))
+    g.append(tb('reel_drum', 0.130, 0.21, R.MAT_DARK, root,
+                (-0.105, TAIL_Y - 0.055, 1.030), (0, math.pi / 2, 0), 14))
     for s in (-1, 1):
-        g.append(tb('reel_flange%d' % s, 0.235, 0.018, R.MAT_WORN, root,
-                    (s * 0.12, TAIL_Y, 0.980), (0, math.pi / 2, 0), 16))
+        g.append(tb('reel_flange%d' % s, 0.178, 0.016, R.MAT_WORN, root,
+                    (s * 0.105, TAIL_Y - 0.055, 1.030), (0, math.pi / 2, 0), 16))
     # the coiled air line on the drum
-    g.append(tb('reel_coil', 0.222, 0.20, R.MAT_RUBBER, root,
-                (-0.10, TAIL_Y, 0.980), (0, math.pi / 2, 0), 16))
+    g.append(tb('reel_coil', 0.166, 0.175, R.MAT_RUBBER, root,
+                (-0.088, TAIL_Y - 0.055, 1.030), (0, math.pi / 2, 0), 14))
 
     # -- the towing eye.  [D1]: the compressor is TOWED, so there is a hitch.
     g.append(bx('towplate', (0.24, 0.06, 0.16), R.MAT_CAST, root,
@@ -1076,6 +1076,11 @@ def build_mast():
                     (0, AX_Y, z), (0, 0, 0), 16))
         g.append(tb('rodguard_ring%d_i' % i, 0.107, 0.016, R.MAT_HAZARD, piv,
                     (0, AX_Y, z - 0.001), (0, 0, 0), 16))
+    # ...and the arm that holds it on.  A guard cage hanging in mid-air beside
+    # the mast is worse than no guard: it reads as a modelling accident.
+    for i, z in enumerate((gz0 + 0.05, gz1 - 0.05)):
+        g.append(bx('rodguard_arm%d' % i, (0.045, MAST_D / 2 + 0.24, 0.038),
+                    R.MAT_DARK, piv, (0, (AX_Y + fw) / 2 - 0.02, z), bevel=0.005))
 
     # ── hazard striping where a rod hits paint [R1] section 6
     g.append(hz('mast_mouth_hz', (MAST_W + 0.02, 0.010, 0.070), piv,
@@ -1153,13 +1158,27 @@ def build_carriage(piv):
                 (0, AX_Y, CHUCK_DZ + 0.10), (0, 0, 0), 14))
     g.append(tb('head_chucknut', 0.104, 0.048, R.MAT_STEEL, car,
                 (0, AX_Y, CHUCK_DZ + 0.10), (0, 0, 0), 6))
-    # a rod stub in the chuck: enough that the machine reads as collared, and
-    # short enough that it is obviously not the string -- `updateString()` draws
-    # the string itself from `mount:tool`.
-    g.append(tb('rod_stub', ROD_DIA / 2, 0.34, R.MAT_STEEL, car,
-                (0, AX_Y, CHUCK_DZ - 0.24), (0, 0, 0), 10))
-    g.append(tb('rod_coupling', ROD_DIA * 0.74, 0.085, R.MAT_WORN, car,
-                (0, AX_Y, CHUCK_DZ - 0.06), (0, 0, 0), 10))
+    # ── the rod in the chuck.  It has to REACH THE CLAMP.  The first render
+    # stopped it 290 mm short and the machine read as parked over a hole rather
+    # than collared in one — the single most expensive 290 mm on the model,
+    # because the clamp, the rod guard and the mud tray all only make sense
+    # with a rod actually running through them.  From the chuck at z 1.19 down
+    # into the upper clamp jaw at 0.50: [E1] Rnd 32, 32 mm section.
+    g.append(tb('rod_stub', ROD_DIA / 2, 0.79, R.MAT_STEEL, car,
+                (0, AX_Y, CHUCK_DZ - 0.70), (0, 0, 0), 10))
+    # the coupling sleeve at the joint just below the chuck: [E1] again — an
+    # extension-rod string HAS a sleeve at every joint, and this is the one the
+    # camera sees during a rod change.
+    g.append(tb('rod_coupling', ROD_DIA * 0.80, ROD_COUPLING_L, R.MAT_WORN, car,
+                (0, AX_Y, CHUCK_DZ - 0.14), (0, 0, 0), 10))
+    # a bolt flange round the gearbox split line, and the two hose stubs on its
+    # back face: without them the head is a box with a cylinder on it
+    g.append(tb('head_flange', 0.145, 0.020, R.MAT_WORN, car,
+                (-0.055, AX_Y, CHUCK_DZ + 0.19), (0, 0, 0), 14))
+    for i in range(2):
+        g.append(tb('head_stub%d' % i, 0.026, 0.075, R.MAT_CAST, car,
+                    (-0.055 + i * 0.09, AX_Y + HEAD_D / 2, -0.06),
+                    (-math.pi / 2, 0, 0), 8))
 
     # where the game hangs the live bit and the rest of the string
     R.empty(R.NODE_MOUNT, 'tool', car, (0, AX_Y, CHUCK_DZ))
@@ -1533,6 +1552,15 @@ def build_guards(root):
     for pz in (z0 + 0.02, z1 - 0.02):
         g.append(bx('cage_rail%.0f' % (pz * 100), (0.040, y1 - y0, 0.040),
                     R.MAT_PAINT, root, (gx, (y0 + y1) / 2, pz), bevel=0.006))
+    # the feet that bolt it to the frame nose.  [G4]'s cage is a BOLTED tube
+    # frame, and a mesh panel floating at chest height reads as a signboard.
+    for py in (y0, y1):
+        g.append(bx('cage_foot%.0f' % (py * 100), (0.085, 0.085, 0.022),
+                    R.MAT_DARK, root, (gx, py, z0 - 0.010), bevel=0.004))
+        g.append(bx('cage_leg%.0f' % (py * 100), (0.045, 0.045, z0 - 0.60),
+                    R.MAT_PAINT, root, (gx, py, z0 - (z0 - 0.60) / 2), bevel=0.005))
+        g.append(bx('cage_tie%.0f' % (py * 100), (0.34, 0.045, 0.045), R.MAT_DARK,
+                    root, (gx + 0.17, py, 0.640), bevel=0.005))
     for i in range(8):
         g.append(bx('cagemesh_v%d' % i, (0.007, 0.007, z1 - z0 - 0.06),
                     R.MAT_WORN, root,
