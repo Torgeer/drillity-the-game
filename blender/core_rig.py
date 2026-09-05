@@ -108,6 +108,32 @@ MASTL_Y = lambda y: y - BEAM_Y           # world Y -> mast-local Y
 
 
 # ── local helpers on top of rig.py ───────────────────────────────────────────
+def box(name, size, mat=R.MAT_PAINT, parent=None, loc=(0, 0, 0), rot=(0, 0, 0),
+        bevel=0.0):
+    """A box of the size you asked for.
+
+    `rig.py`'s box() halves it: `primitive_cube_add(size=1)` is a 1 m cube
+    spanning -0.5..+0.5, and it then applies `scale = size/2`, so a box asked
+    for at 1.90 m comes out 0.95 m.  Every dimension in this file traces to a
+    datasheet, so a silent factor of two makes the whole exercise pointless -
+    it is what made the first renders read as a spindly toy.  Fixed HERE and
+    not in the shared library, the same call `blender/pd55.py` made, because
+    rig.py is shared with other machines being built in parallel and half of
+    them may already be compensating for it.  The library should be fixed once,
+    in one commit, by whoever owns the fleet: `o.scale = size`.
+    """
+    bpy.ops.mesh.primitive_cube_add(size=1)
+    o = bpy.context.active_object
+    o.scale = size
+    bpy.ops.object.transform_apply(scale=True)
+    if bevel > 0:
+        m = o.modifiers.new('bev', 'BEVEL')
+        m.width = bevel
+        m.segments = 2
+        m.limit_method = 'ANGLE'
+    return R.part(name, o, mat, parent, loc, rot)
+
+
 def bake(o):
     """Apply every modifier (and convert curves to meshes) so the object can be
     joined.  join() keeps only the active object's modifier stack, so anything
@@ -193,10 +219,10 @@ def mesh_panel(name, w, h, mat, loc, rot=(0, 0, 0), pitch=0.17, bar=0.013):
     from mathutils import Matrix
     nx = max(2, int(round(w / pitch)) + 1)
     nz = max(2, int(round(h / pitch)) + 1)
-    v = R.box(name + '_v', (bar, bar, h), mat, loc=loc, rot=rot)
+    v = box(name + '_v', (bar, bar, h), mat, loc=loc, rot=rot)
     v.data.transform(Matrix.Translation((-w / 2, 0, 0)))
     arr(v, (w / (nx - 1), 0, 0), nx)
-    z = R.box(name + '_h', (w, bar, bar), mat, loc=loc, rot=rot)
+    z = box(name + '_h', (w, bar, bar), mat, loc=loc, rot=rot)
     z.data.transform(Matrix.Translation((0, 0, -h / 2)))
     arr(z, (0, 0, h / (nz - 1)), nz)
     return [v, z]
@@ -237,50 +263,50 @@ def build(out_path):
     for s in (-1, 1):
         x = s * GAUGE / 2
         # belt: flat top and bottom runs closed by the idler/sprocket ends
-        A(R.box('track_belt%d' % s, (SHOE, TRACK_LEN - 2 * TRACK_R, 2 * TRACK_R + 0.06),
-                R.MAT_WORN, loc=(x, tyc, TRACK_R), bevel=0.01))
+        A(box('track_belt%d' % s, (SHOE, TRACK_LEN - 2 * TRACK_R, 2 * TRACK_R),
+                R.MAT_WORN, loc=(x, tyc, TRACK_R + 0.02), bevel=0.01))
         for e, ey in (('f', ty0 + TRACK_R), ('r', ty1 - TRACK_R)):
-            A(disc('track_end%d%s' % (s, e), TRACK_R + 0.03, SHOE, R.MAT_WORN,
-                   (x, ey, TRACK_R), 'X', sides=18))
-            A(disc('track_hub%d%s' % (s, e), TRACK_R - 0.09, SHOE + 0.06, R.MAT_DARK,
-                   (x, ey, TRACK_R), 'X', sides=12))
+            A(disc('track_end%d%s' % (s, e), TRACK_R, SHOE, R.MAT_WORN,
+                   (x, ey, TRACK_R + 0.02), 'X', sides=18))
+            A(disc('track_hub%d%s' % (s, e), TRACK_R - 0.10, SHOE + 0.06, R.MAT_DARK,
+                   (x, ey, TRACK_R + 0.02), 'X', sides=12))
         # grousered shoes, top and bottom run - an ARRAY, so one object
-        for run, z, in (('b', -0.005), ('t', 2 * TRACK_R + 0.045)):
-            sh = R.box('shoe%d%s' % (s, run), (SHOE, 0.16, 0.045), R.MAT_WORN,
+        for run, z, in (('b', 0.021), ('t', 2 * TRACK_R + 0.019)):
+            sh = box('shoe%d%s' % (s, run), (SHOE, 0.16, 0.045), R.MAT_WORN,
                        loc=(x, ty0 + 0.12, z))
             arr(sh, (0, 0.20, 0), int((TRACK_LEN - 0.24) / 0.20))
             A(sh)
         # track rollers under the frame
         rl = disc('roller%d' % s, 0.095, SHOE - 0.06, R.MAT_DARK,
-                  (x, ty0 + 0.52, 0.135), 'X', sides=10)
+                  (x, ty0 + 0.52, 0.155), 'X', sides=10)
         arr(rl, (0, 0.32, 0), 7)
         A(rl)
         # track frame
-        A(R.box('track_frame%d' % s, (0.26, TRACK_LEN - 0.5, 0.30), R.MAT_DARK,
+        A(box('track_frame%d' % s, (0.26, TRACK_LEN - 0.5, 0.30), R.MAT_DARK,
                 loc=(x, tyc, 0.44), bevel=0.02))
     # crossmembers - underside sets the published 536 mm ground clearance
     for cy in (FRAME_Y0 + 0.45, FRAME_Y1 - 0.55):
-        A(R.box('xmember_%d' % int(cy * 100), (GAUGE - 0.1, 0.34, 0.20), R.MAT_DARK,
+        A(box('xmember_%d' % int(cy * 100), (GAUGE - 0.1, 0.34, 0.20), R.MAT_DARK,
                 loc=(0, cy, CLEARANCE + 0.10), bevel=0.02))
 
     # ── 2. MAIN FRAME AND DECK ──────────────────────────────────────────────
     for s in (-1, 1):
-        A(R.box('frame_beam%d' % s, (0.26, FRAME_Y1 - FRAME_Y0, 0.36), R.MAT_DARK,
+        A(box('frame_beam%d' % s, (0.26, FRAME_Y1 - FRAME_Y0, 0.36), R.MAT_DARK,
                 loc=(s * 0.95, (FRAME_Y0 + FRAME_Y1) / 2, DECK_Z - 0.23), bevel=0.02))
-    A(R.box('frame_front', (2.16, 0.28, 0.34), R.MAT_DARK,
+    A(box('frame_front', (2.16, 0.28, 0.34), R.MAT_DARK,
             loc=(0, FRAME_Y0 + 0.14, DECK_Z - 0.24), bevel=0.02))
-    A(R.box('frame_rear', (2.16, 0.28, 0.34), R.MAT_DARK,
+    A(box('frame_rear', (2.16, 0.28, 0.34), R.MAT_DARK,
             loc=(0, FRAME_Y1 - 0.14, DECK_Z - 0.24), bevel=0.02))
-    A(R.box('deck_plate', (2.30, FRAME_Y1 - FRAME_Y0, 0.05), R.MAT_DARK,
+    A(box('deck_plate', (2.30, FRAME_Y1 - FRAME_Y0, 0.05), R.MAT_DARK,
             loc=(0, (FRAME_Y0 + FRAME_Y1) / 2, DECK_Z - 0.025), bevel=0.008))
     # grating: bars across the open walkway strip down the left side [XP] p.18
-    gr = R.box('grate_bar', (0.86, 0.03, 0.012), R.MAT_STEEL,
+    gr = box('grate_bar', (0.86, 0.03, 0.012), R.MAT_STEEL,
                loc=(-0.72, FRAME_Y0 + 0.20, DECK_Z + 0.008))
     arr(gr, (0, 0.085, 0), 24)
     A(gr)
     # toe boards / hazard edging on the open sides
-    A(R.box('toe_l', (0.04, 2.1, 0.11), R.MAT_HAZARD, loc=(-1.13, 1.7, DECK_Z + 0.055)))
-    A(R.box('toe_r', (0.04, 2.1, 0.11), R.MAT_HAZARD, loc=(1.13, 1.7, DECK_Z + 0.055)))
+    A(box('toe_l', (0.04, 2.1, 0.11), R.MAT_HAZARD, loc=(-1.13, 1.7, DECK_Z + 0.055)))
+    A(box('toe_r', (0.04, 2.1, 0.11), R.MAT_HAZARD, loc=(1.13, 1.7, DECK_Z + 0.055)))
 
     # ── 3. POWER PACK ───────────────────────────────────────────────────────
     # 142 kW Tier 4 [XP] p.19 / 153-160 kW in this family [CS14] p.2, in a
@@ -288,30 +314,34 @@ def build(out_path):
     # a radiator pack that overhangs the right-hand track - which is exactly
     # what makes overall width 2 895 wider than width-over-tracks 2 600 [GA].
     eyc = (ENG_Y0 + ENG_Y1) / 2
-    A(R.box('engine_case', (1.90, ENG_Y1 - ENG_Y0, ENG_TOP - DECK_Z), R.MAT_PAINT,
+    A(box('engine_case', (1.90, ENG_Y1 - ENG_Y0, ENG_TOP - DECK_Z), R.MAT_PAINT,
             loc=(0, eyc, (DECK_Z + ENG_TOP) / 2), bevel=0.025))
     for s in (-1, 1):
         # a recessed dark panel behind the slats, so the louvres read as an
         # opening in the sheet metal rather than as bars stuck on the side
-        A(R.box('louvre_recess%d' % s, (0.03, ENG_Y1 - ENG_Y0 - 0.26, 0.34), R.MAT_DARK,
+        A(box('louvre_recess%d' % s, (0.03, ENG_Y1 - ENG_Y0 - 0.26, 0.34), R.MAT_DARK,
                 loc=(s * 0.935, eyc, ENG_TOP - 0.19)))
-        lv = R.box('louvre%d' % s, (0.02, ENG_Y1 - ENG_Y0 - 0.30, 0.030), R.MAT_PAINT,
+        lv = box('louvre%d' % s, (0.02, ENG_Y1 - ENG_Y0 - 0.30, 0.030), R.MAT_PAINT,
                    loc=(s * 0.955, eyc, ENG_TOP - 0.08))
         arr(lv, (0, 0, -0.055), 6)
         A(lv)
-        A(R.box('door%d' % s, (0.015, 0.78, 0.60), R.MAT_DARK,
+        A(box('door%d' % s, (0.015, 0.78, 0.60), R.MAT_DARK,
                 loc=(s * 0.953, eyc - 0.42, 1.52), bevel=0.01))
-        A(R.box('door%db' % s, (0.015, 0.78, 0.60), R.MAT_DARK,
+        A(box('door%db' % s, (0.015, 0.78, 0.60), R.MAT_DARK,
                 loc=(s * 0.953, eyc + 0.42, 1.52), bevel=0.01))
         for dy in (-0.42, 0.42):
-            A(R.box('handle%d%d' % (s, int(dy * 10)), (0.03, 0.14, 0.035), R.MAT_STEEL,
+            A(box('handle%d%d' % (s, int(dy * 10)), (0.03, 0.14, 0.035), R.MAT_STEEL,
                     loc=(s * 0.975, eyc + dy + 0.30, 1.52)))
-    A(R.box('radiator', (0.28, 1.10, 1.10), R.MAT_DARK,
-            loc=(1.29, eyc + 0.14, 1.65), bevel=0.015))
-    fin = R.box('rad_fin', (0.02, 0.03, 1.00), R.MAT_STEEL, loc=(1.44, eyc - 0.38, 1.65))
+    # the radiator is what makes the machine 2 895 mm wide over a 2 600 mm
+    # track: its outer face lands on W_OVERALL/2 [GA] end elevation, where the
+    # D and E dimension lines start together on the left and D runs 295 mm
+    # further right.
+    A(box('radiator', (0.28, 1.10, 1.10), R.MAT_DARK,
+            loc=(W_OVERALL / 2 - 0.155, eyc + 0.14, 1.65), bevel=0.015))
+    fin = box('rad_fin', (0.02, 0.03, 1.00), R.MAT_STEEL, loc=(1.44, eyc - 0.38, 1.65))
     arr(fin, (0, 0.045, 0), 24)
     A(fin)
-    A(R.box('rad_guard', (0.05, 1.14, 0.06), R.MAT_PAINT, loc=(1.42, eyc + 0.14, 2.22)))
+    A(box('rad_guard', (0.05, 1.14, 0.06), R.MAT_PAINT, loc=(1.42, eyc + 0.14, 2.22)))
     # exhaust stack, curving up out of the enclosure roof [MET] p.17
     A(R.hose('exhaust', [(-0.55, 2.48, 2.22), (-0.55, 2.43, 2.52), (-0.47, 2.35, 2.66)],
              radius=0.055, mat=R.MAT_WORN, sides=9))
@@ -322,42 +352,42 @@ def build(out_path):
     # lifting eyes - every module on this class carries them [MET] p.18
     for ex, ey in ((-0.80, ENG_Y0 + 0.15), (0.80, ENG_Y0 + 0.15),
                    (-0.80, ENG_Y1 - 0.15), (0.80, ENG_Y1 - 0.15)):
-        A(R.box('lift_eye%d%d' % (int(ex * 10), int(ey * 10)), (0.03, 0.11, 0.13),
+        A(box('lift_eye%d%d' % (int(ex * 10), int(ey * 10)), (0.03, 0.11, 0.13),
                 R.MAT_STEEL, loc=(ex, ey, ENG_TOP + 0.05)))
 
     # ── 4. WATER / MUD SYSTEM - a core rig is a WET machine ──────────────────
     # Trido 140H triplex, 140 l/min at 68.95 bar [C140] p.6 / 64 bar [CS14] p.3:
     # crankcase, three fluid-end cylinders in a row, suction manifold.
-    A(R.box('tank', (1.86, 0.74, 0.58), R.MAT_PAINT, loc=(0, 1.82, 1.26), bevel=0.03))
+    A(box('tank', (1.86, 0.74, 0.58), R.MAT_DARK, loc=(0, 1.82, 1.26), bevel=0.03))
     A(disc('tank_fill', 0.10, 0.07, R.MAT_STEEL, (0.45, 1.62, 1.57), 'Z', sides=10))
-    A(R.box('tank_sight', (0.05, 0.05, 0.42), R.MAT_STEEL, loc=(0.95, 1.72, 1.26)))
+    A(box('tank_sight', (0.05, 0.05, 0.42), R.MAT_STEEL, loc=(0.95, 1.72, 1.26)))
     # hydraulic mud mixer hopper (standard equipment [C140] p.6)
-    A(R.box('mixer_hopper', (0.46, 0.46, 0.34), R.MAT_PAINT, loc=(-0.58, 1.82, 1.72),
+    A(box('mixer_hopper', (0.46, 0.46, 0.34), R.MAT_DARK, loc=(-0.58, 1.82, 1.72),
             bevel=0.02))
     A(disc('mixer_drive', 0.09, 0.16, R.MAT_DARK, (-0.58, 1.82, 1.97), 'Z', sides=10))
     # Trido 140H triplex on the rear shelf, behind the power pack: crankcase,
     # three fluid ends in a row, suction manifold, pulsation bottle.
-    A(R.box('pump_crank', (0.46, 0.34, 0.34), R.MAT_DARK, loc=(0.42, 4.00, 1.17),
+    A(box('pump_crank', (0.46, 0.34, 0.34), R.MAT_DARK, loc=(0.42, 4.00, 1.17),
             bevel=0.02))
     for i in range(3):
         A(disc('pump_cyl%d' % i, 0.072, 0.28, R.MAT_STEEL,
                (0.42 + (i - 1) * 0.17, 3.82, 1.22), 'Y', sides=10))
         A(disc('pump_cap%d' % i, 0.055, 0.09, R.MAT_CAST,
                (0.42 + (i - 1) * 0.17, 3.70, 1.22), 'Y', sides=8))
-    A(R.box('pump_manifold', (0.62, 0.13, 0.13), R.MAT_STEEL, loc=(0.42, 3.76, 1.00)))
+    A(box('pump_manifold', (0.62, 0.13, 0.13), R.MAT_STEEL, loc=(0.42, 3.76, 1.00)))
     A(disc('pump_bottle', 0.085, 0.30, R.MAT_STEEL, (0.42, 3.86, 1.52), 'Z', sides=10))
     A(disc('pump_motor', 0.11, 0.24, R.MAT_CAST, (0.42, 4.20, 1.17), 'Y', sides=12))
     # hydraulic oil cooler - the system is AIR cooled [C140] p.6
-    A(R.box('oil_cooler', (0.52, 0.16, 0.46), R.MAT_DARK, loc=(-0.60, 3.90, 1.30),
+    A(box('oil_cooler', (0.52, 0.16, 0.46), R.MAT_DARK, loc=(-0.60, 3.90, 1.30),
             bevel=0.015))
-    cf = R.box('cooler_fin', (0.48, 0.02, 0.03), R.MAT_STEEL, loc=(-0.60, 3.81, 1.10))
+    cf = box('cooler_fin', (0.48, 0.02, 0.03), R.MAT_STEEL, loc=(-0.60, 3.81, 1.10))
     arr(cf, (0, 0, 0.055), 8)
     A(cf)
     # 200 l diesel and 100 l hydraulic tanks live inside the frame [C140] p.6;
     # what shows outside is the filler and the sight gauge.
     A(disc('fuel_fill', 0.075, 0.06, R.MAT_STEEL, (-1.02, 3.30, DECK_Z + 0.03), 'Z',
            sides=10))
-    A(R.box('valve_bank', (0.40, 0.26, 0.30), R.MAT_DARK, loc=(0.62, 1.34, 1.12),
+    A(box('valve_bank', (0.40, 0.26, 0.30), R.MAT_DARK, loc=(0.62, 1.34, 1.12),
             bevel=0.012))
     for i in range(4):
         A(R.tube('valve_lever%d' % i, 0.012, 0.20, R.MAT_STEEL,
@@ -368,11 +398,11 @@ def build(out_path):
     # knob, a gear indicator and an LED screen [C140] p.6; a light canopy roof
     # on posts over the standing position [MET] p.17.  The canopy top is the
     # published transport height, 2 558 mm [C140] p.6 dim F.
-    A(R.box('console_body', (0.92, 0.40, 0.90), R.MAT_PAINT, loc=(-0.86, 0.72, 1.40),
+    A(box('console_body', (0.92, 0.40, 0.90), R.MAT_PAINT, loc=(-0.86, 0.72, 1.40),
             bevel=0.03))
-    A(R.box('console_face', (0.86, 0.30, 0.10), R.MAT_DARK, loc=(-0.86, 0.50, 1.90),
+    A(box('console_face', (0.86, 0.30, 0.10), R.MAT_DARK, loc=(-0.86, 0.50, 1.90),
             rot=(-0.55, 0, 0), bevel=0.01))
-    A(R.box('console_screen', (0.30, 0.19, 0.02), R.MAT_GLASS, loc=(-1.02, 0.425, 1.945),
+    A(box('console_screen', (0.30, 0.19, 0.02), R.MAT_GLASS, loc=(-1.02, 0.425, 1.945),
             rot=(-0.55, 0, 0)))
     for i in range(5):
         A(disc('gauge%d' % i, 0.037, 0.03, R.MAT_STEEL,
@@ -382,12 +412,12 @@ def build(out_path):
                  loc=(-1.05 + i * 0.38, 0.60, 1.86), rot=(-0.35, 0, 0), sides=6))
         A(disc('joyknob%d' % i, 0.032, 0.05, R.MAT_RUBBER,
                (-1.05 + i * 0.38, 0.54, 2.02), 'Z', sides=8))
-    A(R.box('estop', (0.08, 0.08, 0.05), R.MAT_HAZARD, loc=(-0.50, 0.48, 1.92)))
-    for px, py in ((-1.44, -0.24), (-0.22, -0.24), (-1.44, 1.00), (-0.22, 1.00)):
+    A(box('estop', (0.08, 0.08, 0.05), R.MAT_HAZARD, loc=(-0.50, 0.48, 1.92)))
+    for px, py in ((-1.36, -0.10), (-0.30, -0.10), (-1.36, 0.98), (-0.30, 0.98)):
         A(R.tube('canopy_post%d%d' % (int(px * 10), int(py * 10)), 0.038,
                  H_TRANSPORT - DECK_Z - 0.06, R.MAT_PAINT, loc=(px, py, DECK_Z), sides=8))
-    A(R.box('canopy', (1.40, 1.44, 0.06), R.MAT_PAINT,
-            loc=(-0.83, 0.38, H_TRANSPORT - 0.03), bevel=0.02))
+    A(box('canopy', (1.22, 1.24, 0.06), R.MAT_PAINT,
+            loc=(-0.83, 0.44, H_TRANSPORT - 0.03), bevel=0.02))
 
     # ── 6. DECK FURNITURE: handrails, stair, collar catwalk ─────────────────
     hr = DECK_Z + 1.05
@@ -403,36 +433,38 @@ def build(out_path):
                         (1.16, FRAME_Y1 - 0.05, DECK_Z + 0.52)], 0.020, R.MAT_PAINT))
     # access stair off the rear left
     for i in range(3):
-        A(R.box('step%d' % i, (0.62, 0.24, 0.035), R.MAT_STEEL,
+        A(box('step%d' % i, (0.62, 0.24, 0.035), R.MAT_STEEL,
                 loc=(-0.72, FRAME_Y1 + 0.16 + i * 0.24, DECK_Z - 0.24 - i * 0.24)))
     A(rail('stair_rail', [(-1.04, FRAME_Y1 + 0.05, hr), (-1.04, FRAME_Y1 + 0.80, DECK_Z + 0.30)],
            0.024, R.MAT_PAINT))
     A(rail('stair_rail2', [(-0.40, FRAME_Y1 + 0.05, hr), (-0.40, FRAME_Y1 + 0.80, DECK_Z + 0.30)],
            0.024, R.MAT_PAINT))
     # detached grating catwalk on legs, out in front at the collar [XP] p.18
-    A(R.box('catwalk', (1.70, 1.15, 0.05), R.MAT_STEEL, loc=(0, -1.30, 0.50)))
-    cb = R.box('catwalk_bar', (1.62, 0.028, 0.028), R.MAT_STEEL, loc=(0, -1.80, 0.535))
-    arr(cb, (0, 0.098, 0), 11)
+    A(box('catwalk', (1.46, 1.00, 0.05), R.MAT_STEEL, loc=(0, -1.18, 0.50)))
+    cb = box('catwalk_bar', (1.40, 0.028, 0.028), R.MAT_STEEL, loc=(0, -1.62, 0.535))
+    arr(cb, (0, 0.098, 0), 10)
     A(cb)
-    for lx in (-0.78, 0.78):
-        for ly in (-1.80, -0.82):
+    for lx in (-0.66, 0.66):
+        for ly in (-1.62, -0.76):
             A(R.tube('catleg%d%d' % (int(lx * 10), int(ly * 10)), 0.032, 0.48,
                      R.MAT_STEEL, loc=(lx, ly, 0), sides=6))
-    A(R.box('catwalk_toe', (1.70, 0.04, 0.09), R.MAT_HAZARD, loc=(0, -1.86, 0.57)))
+    A(box('catwalk_toe', (1.46, 0.04, 0.09), R.MAT_HAZARD, loc=(0, -1.66, 0.57)))
 
     # ── 7. LEVELLING JACKS - four, 550 mm, pad 230 mm ───────────────────────
     # NOT outriggers: short vertical rams that level the rig [C140] p.6.
     for jx, jy, tag in ((-1.05, FRAME_Y0 + 0.05, 'fl'), (1.05, FRAME_Y0 + 0.05, 'fr'),
                         (-1.05, FRAME_Y1 - 0.05, 'rl'), (1.05, FRAME_Y1 - 0.05, 'rr')):
-        A(R.box('jack_mount_' + tag, (0.20, 0.24, 0.30), R.MAT_DARK,
+        A(box('jack_mount_' + tag, (0.20, 0.24, 0.30), R.MAT_DARK,
                 loc=(jx, jy, DECK_Z - 0.20), bevel=0.015))
         A(R.tube('jack_case_' + tag, 0.085, 0.42, R.MAT_DARK, loc=(jx, jy, 0.42), sides=10))
         node = R.empty(R.NODE_SLIDE, 'jack-' + tag, loc=(jx, jy, 0.42))
+        node['travel_m'] = JACK_STROKE      # 550 mm [CS14] p.3
+        node['axis'] = 'z'
         # parked with the pad exactly on the ground: the node's own travel is
         # the published 550 mm, so the game can lift the machine off its tracks.
         parts = [R.tube('jrod', 0.062, 0.42, R.MAT_CHROME, loc=(0, 0, -0.37), sides=10),
                  disc('jpad', JACK_PAD_R, 0.05, R.MAT_WORN, (0, 0, -0.395), 'Z', sides=12),
-                 R.box('jpin', (0.20, 0.05, 0.05), R.MAT_STEEL, loc=(0, 0, -0.33))]
+                 box('jpin', (0.20, 0.05, 0.05), R.MAT_STEEL, loc=(0, 0, -0.33))]
         weld(parts, node, 'jack-' + tag)
 
     # ── 8. WINCHES - two, and they are different [C140] p.6 ─────────────────
@@ -443,12 +475,16 @@ def build(out_path):
     WY = 1.20
     for s, tag, r0, w in ((1, 'main', 0.24, 0.40), (-1, 'wire', 0.20, 0.34)):
         wx = s * 0.46
-        A(R.box('winch_bed_' + tag, (w + 0.16, 0.34, 0.22), R.MAT_DARK,
+        A(box('winch_bed_' + tag, (w + 0.16, 0.34, 0.22), R.MAT_DARK,
                 loc=(wx, WY, DECK_Z + 0.11), bevel=0.015))
         for e in (-1, 1):
-            A(R.box('winch_stand_%s%d' % (tag, e), (0.06, 0.30, 0.42), R.MAT_DARK,
+            A(box('winch_stand_%s%d' % (tag, e), (0.06, 0.30, 0.42), R.MAT_DARK,
                     loc=(wx + e * (w / 2 + 0.05), WY, DECK_Z + 0.40), bevel=0.01))
         node = R.empty(R.NODE_PIVOT, 'winch-' + tag, loc=(wx, WY, DECK_Z + 0.52))
+        node['axis'] = 'x'
+        node['rope_mm'] = 16.0 if tag == 'main' else 4.76      # [C140] p.6
+        node['rope_m'] = 29 if tag == 'main' else 2000
+        node['drum_r_m'] = r0 * 0.62
         parts = [disc('drum', r0 * 0.62, w, R.MAT_CAST, (0, 0, 0), 'X', sides=14),
                  disc('flange_a', r0, 0.035, R.MAT_CAST, (-w / 2, 0, 0), 'X', sides=14),
                  disc('flange_b', r0, 0.035, R.MAT_CAST, (w / 2, 0, 0), 'X', sides=14)]
@@ -464,9 +500,9 @@ def build(out_path):
             A(R.tube('levelwind_shaft', 0.018, w + 0.10, R.MAT_STEEL,
                      loc=(wx - (w + 0.10) / 2, WY - 0.28, DECK_Z + 0.52),
                      rot=(0, math.pi / 2, 0), sides=8))
-            A(R.box('levelwind_guide', (0.09, 0.07, 0.10), R.MAT_STEEL,
+            A(box('levelwind_guide', (0.09, 0.07, 0.10), R.MAT_STEEL,
                     loc=(wx - 0.06, WY - 0.28, DECK_Z + 0.52)))
-            A(R.box('wireline_counter', (0.13, 0.09, 0.13), R.MAT_DARK,
+            A(box('wireline_counter', (0.13, 0.09, 0.13), R.MAT_DARK,
                     loc=(wx - 0.24, WY - 0.20, DECK_Z + 0.62), bevel=0.01))
 
     # ── 9. THE MAST ─────────────────────────────────────────────────────────
@@ -476,10 +512,16 @@ def build(out_path):
     # and 18 and in the [GA] elevations.  Beam 394 mm deep [GA], holes 120 mm
     # at 260 mm pitch [GA], joint band at 5.8 m [GA].
     mast = R.empty(R.NODE_PIVOT, 'mast', loc=(0, BEAM_Y, MAST_PIVOT_Z))
+    # the datasheet travels ride along in the file as glTF `extras`, so the
+    # loader never has to hard-code a number this module already knows.
+    mast['axis'] = 'x'
+    mast['angle_min_deg'] = 45         # [C140] p.10 "drilling angles 45-90"
+    mast['angle_max_deg'] = 90
+    mast['length_m'] = MAST_TOP_Z - MAST_FOOT_Z
     mp = []                      # mast-local parts, welded at the end
     zf, zt = MASTL_Z(MAST_FOOT_Z), MASTL_Z(MAST_TOP_Z - 0.66)
     beam_len = zt - zf
-    beam = R.box('mast_beam', (BEAM_DX, BEAM_DY, beam_len), R.MAT_PAINT,
+    beam = box('mast_beam', (BEAM_DX, BEAM_DY, beam_len), R.MAT_PAINT,
                  loc=(0, 0, (zf + zt) / 2), bevel=0.012)
     n_holes = int((beam_len - 2.4) / HOLE_PITCH)
     cutter = R.tube('holecut', HOLE_D / 2, BEAM_DX + 0.3, R.MAT_STEEL,
@@ -493,19 +535,19 @@ def build(out_path):
     mp.append(beam)
     # feed rails on the front face - the carriage gibs bear on these
     for s in (-1, 1):
-        mp.append(R.box('mast_rail%d' % s, (0.05, 0.06, beam_len - 0.3), R.MAT_STEEL,
+        mp.append(box('mast_rail%d' % s, (0.05, 0.06, beam_len - 0.3), R.MAT_STEEL,
                         loc=(s * (BEAM_DX / 2 - 0.05), -BEAM_DY / 2 - 0.03, (zf + zt) / 2)))
     # replaceable wear lines on the lower mast, where rods drag [C140] p.6
-    mp.append(R.box('wear_line', (BEAM_DX - 0.08, 0.03, 2.6), R.MAT_WORN,
+    mp.append(box('wear_line', (BEAM_DX - 0.08, 0.03, 2.6), R.MAT_WORN,
                     loc=(0, -BEAM_DY / 2 - 0.015, zf + 1.3)))
     # the two-section joint: hinge plates and pin bosses [C140] p.3, p.6
     for s in (-1, 1):
-        mp.append(R.box('hinge_plate%d' % s, (0.022, BEAM_DY + 0.10, 0.52), R.MAT_DARK,
+        mp.append(box('hinge_plate%d' % s, (0.022, BEAM_DY + 0.10, 0.52), R.MAT_DARK,
                         loc=(s * (BEAM_DX / 2 + 0.012), 0, MASTL_Z(HINGE_Z)), bevel=0.008))
         for hy in (-0.14, 0.14):
             mp.append(disc('hinge_boss%d%d' % (s, int(hy * 100)), 0.055, 0.05, R.MAT_CAST,
                            (s * (BEAM_DX / 2 + 0.035), hy, MASTL_Z(HINGE_Z)), 'X', sides=10))
-    mp.append(R.box('hinge_band', (BEAM_DX + 0.03, BEAM_DY + 0.03, 0.10), R.MAT_DARK,
+    mp.append(box('hinge_band', (BEAM_DX + 0.03, BEAM_DY + 0.03, 0.10), R.MAT_DARK,
                     loc=(0, 0, MASTL_Z(HINGE_Z) + 0.30), bevel=0.008))
     # feed cylinder and chain: "chain and hydraulic cylinder" feed [LF] p.12
     mp.append(R.tube('feed_barrel', 0.075, 2.0, R.MAT_DARK,
@@ -519,20 +561,20 @@ def build(out_path):
     # showing as bosses each side, grab handles on top [GA], [MET] p.18.
     CR_X, CR_Y, CR_Z = 0.70, 0.84, 0.72
     cz = MASTL_Z(MAST_TOP_Z) - CR_Z / 2
-    mp.append(R.box('crown_box', (CR_X, CR_Y, CR_Z), R.MAT_PAINT, loc=(0, 0.02, cz),
+    mp.append(box('crown_box', (CR_X, CR_Y, CR_Z), R.MAT_PAINT, loc=(0, 0.02, cz),
                     bevel=0.02))
     # cheek plates: the sheaves run between them, which is what makes a crown
     # block read as a block instead of two loose wheels
     for s in (-1, 1):
-        mp.append(R.box('crown_cheek%d' % s, (0.03, CR_Y - 0.06, CR_Z - 0.06),
+        mp.append(box('crown_cheek%d' % s, (0.03, CR_Y - 0.22, CR_Z - 0.22),
                         R.MAT_DARK, loc=(s * (CR_X / 2 + 0.015), 0.02, cz)))
         mp.append(disc('crown_boss%d' % s, 0.065, 0.05, R.MAT_CAST,
                        (s * (CR_X / 2 + 0.04), 0.14, cz - 0.04), 'X', sides=10))
         # the two lifting / tie-off lugs on the crown roof [GA]
-        mp.append(R.box('crown_lug%d' % s, (0.05, 0.15, 0.14), R.MAT_STEEL,
+        mp.append(box('crown_lug%d' % s, (0.05, 0.15, 0.14), R.MAT_STEEL,
                         loc=(s * 0.24, -0.16, cz + CR_Z / 2 + 0.04)))
     # tapered collar down onto the beam
-    mp.append(R.box('crown_collar', (BEAM_DX + 0.14, BEAM_DY + 0.20, 0.22), R.MAT_PAINT,
+    mp.append(box('crown_collar', (BEAM_DX + 0.14, BEAM_DY + 0.20, 0.22), R.MAT_PAINT,
                     loc=(0, 0.02, cz - CR_Z / 2 - 0.08), bevel=0.03))
     # work lights: crown pair aimed at the collar, plus one over the deck.
     # env.js reads mount:/aim: world positions EVERY FRAME and re-aims the
@@ -542,13 +584,13 @@ def build(out_path):
                                (s * 0.30, -0.44, cz - 0.30),
                                aim_dir=(-s * 0.30, -0.10, -(cz - 0.30) - 0.9),
                                cone_deg=46, range_m=30)
-        mp.append(R.box('lamp_body%d' % s, (0.13, 0.10, 0.13), R.MAT_DARK,
+        mp.append(box('lamp_body%d' % s, (0.13, 0.10, 0.13), R.MAT_DARK,
                         loc=(s * 0.30, -0.44, cz - 0.30), bevel=0.01))
         mp.append(disc('lamp_lens%d' % s, 0.055, 0.02, R.MAT_GLASS,
                        (s * 0.30, -0.50, cz - 0.32), 'Y', sides=10))
     mnt, aim = R.worklight('lamp-collar', mast, (0.0, -0.52, MASTL_Z(2.55)),
                            aim_dir=(0, -0.35, -2.0), cone_deg=60, range_m=18)
-    mp.append(R.box('lamp_body_c', (0.14, 0.11, 0.14), R.MAT_DARK,
+    mp.append(box('lamp_body_c', (0.14, 0.11, 0.14), R.MAT_DARK,
                     loc=(0, -0.52, MASTL_Z(2.55)), bevel=0.01))
     mp.append(disc('lamp_lens_c', 0.058, 0.02, R.MAT_GLASS,
                    (0, -0.58, MASTL_Z(2.53)), 'Y', sides=10))
@@ -556,14 +598,14 @@ def build(out_path):
     # rod holder / foot clamp at the collar: hydraulic, P/PW bore, closes on
     # loss of pressure [C140] p.6, [CS14] p.2 (max clamping 114.7 mm).
     fz = MASTL_Z(0.62)
-    mp.append(R.box('rodholder_body', (0.74, 0.52, 0.30), R.MAT_DARK,
+    mp.append(box('rodholder_body', (0.74, 0.52, 0.30), R.MAT_DARK,
                     loc=(0, MASTL_Y(0.0) + 0.02, fz), bevel=0.02))
     for s in (-1, 1):
-        mp.append(R.box('rodholder_jaw%d' % s, (0.20, 0.22, 0.16), R.MAT_STEEL,
+        mp.append(box('rodholder_jaw%d' % s, (0.20, 0.22, 0.16), R.MAT_STEEL,
                         loc=(s * 0.17, MASTL_Y(0.0), fz + 0.16)))
         mp.append(disc('rodholder_cyl%d' % s, 0.055, 0.22, R.MAT_CAST,
                        (s * 0.37, MASTL_Y(0.0), fz), 'X', sides=10))
-    mp.append(R.box('mast_foot', (BEAM_DX + 0.16, 0.62, 0.34), R.MAT_PAINT,
+    mp.append(box('mast_foot', (BEAM_DX + 0.16, 0.62, 0.34), R.MAT_PAINT,
                     loc=(0, -0.10, MASTL_Z(MAST_FOOT_Z) + 0.17), bevel=0.02))
     # mast pivot trunnions
     for s in (-1, 1):
@@ -583,21 +625,21 @@ def build(out_path):
                      pitch=0.105)
     # frames - a guard reads as a guard because of its frame, not its mesh
     for zz in (gz - GH / 2, gz + GH / 2):
-        mp.append(R.box('barrier_fr_f%d' % int(zz * 100), (GW + 0.06, 0.05, 0.05),
+        mp.append(box('barrier_fr_f%d' % int(zz * 100), (GW + 0.06, 0.05, 0.05),
                         R.MAT_PAINT, loc=(0, MASTL_Y(-0.68), zz)))
-        mp.append(R.box('barrier_fr_l%d' % int(zz * 100), (0.05, 1.02, 0.05),
+        mp.append(box('barrier_fr_l%d' % int(zz * 100), (0.05, 1.02, 0.05),
                         R.MAT_PAINT, loc=(-0.62, MASTL_Y(-0.18), zz)))
     for xx in (-GW / 2, GW / 2):
-        mp.append(R.box('barrier_post%d' % int(xx * 100), (0.05, 0.05, GH),
+        mp.append(box('barrier_post%d' % int(xx * 100), (0.05, 0.05, GH),
                         R.MAT_PAINT, loc=(xx, MASTL_Y(-0.68), gz)))
     for yy in (MASTL_Y(-0.68), MASTL_Y(0.32)):
-        mp.append(R.box('barrier_postl%d' % int(yy * 100), (0.05, 0.05, GH),
+        mp.append(box('barrier_postl%d' % int(yy * 100), (0.05, 0.05, GH),
                         R.MAT_PAINT, loc=(-0.62, yy, gz)))
-    mp.append(R.box('barrier_stripe', (GW + 0.06, 0.06, 0.11), R.MAT_HAZARD,
+    mp.append(box('barrier_stripe', (GW + 0.06, 0.06, 0.11), R.MAT_HAZARD,
                     loc=(0, MASTL_Y(-0.70), gz - GH / 2 + 0.12)))
     # interlock switch on the hinge side [C140] p.3 "safety guard with an
     # interlock function that automatically stops the rig when activated"
-    mp.append(R.box('barrier_interlock', (0.09, 0.07, 0.13), R.MAT_DARK,
+    mp.append(box('barrier_interlock', (0.09, 0.07, 0.13), R.MAT_DARK,
                     loc=(-0.60, MASTL_Y(-0.66), gz + 0.40)))
 
     # rod kicker: the arm that positions a rod off the rack onto the drill
@@ -605,11 +647,11 @@ def build(out_path):
     # cheapest piece of story on the whole machine, and it is what makes the
     # rack read as a magazine rather than a bin.
     kz = MASTL_Z(2.30)
-    mp.append(R.box('kicker_mount', (0.16, 0.20, 0.30), R.MAT_DARK,
+    mp.append(box('kicker_mount', (0.16, 0.20, 0.30), R.MAT_DARK,
                     loc=(BEAM_DX / 2 + 0.06, -0.06, kz), bevel=0.012))
-    mp.append(R.box('kicker_arm', (0.62, 0.09, 0.09), R.MAT_PAINT,
+    mp.append(box('kicker_arm', (0.62, 0.09, 0.09), R.MAT_PAINT,
                     loc=(BEAM_DX / 2 + 0.38, -0.24, kz + 0.06), rot=(0, 0, -0.35)))
-    mp.append(R.box('kicker_fork', (0.10, 0.24, 0.16), R.MAT_STEEL,
+    mp.append(box('kicker_fork', (0.10, 0.24, 0.16), R.MAT_STEEL,
                     loc=(BEAM_DX / 2 + 0.66, -0.34, kz + 0.06)))
     mp.append(disc('kicker_cyl', 0.045, 0.34, R.MAT_CHROME,
                    (BEAM_DX / 2 + 0.30, -0.02, kz - 0.16), 'X', sides=8))
@@ -637,18 +679,23 @@ def build(out_path):
     # 20 rpm.  Spindle bore 117 mm [CS14] p.3.  Stroke 3.5 m [CS14] p.2.
     car_z = MASTL_Z(2.35)          # parked mid-stroke
     car = R.empty(R.NODE_SLIDE, 'carriage', mast, (0, 0, car_z))
+    car['axis'] = 'z'
+    car['travel_m'] = FEED_STROKE      # 3.5 m [CS14] p.2
+    car['travel_min_m'] = MASTL_Z(1.15) - car_z
+    car['travel_max_m'] = MASTL_Z(1.15 + FEED_STROKE) - car_z
+    car['rod_pull_m'] = ROD_PULL
     cp = []
-    cp.append(R.box('sled', (BEAM_DX + 0.12, 0.16, 0.62), R.MAT_DARK,
+    cp.append(box('sled', (BEAM_DX + 0.12, 0.16, 0.62), R.MAT_DARK,
                     loc=(0, -BEAM_DY / 2 - 0.08, 0), bevel=0.015))
     for s in (-1, 1):
         for gz2 in (-0.26, 0.26):
-            cp.append(R.box('gib%d%d' % (s, int(gz2 * 100)), (0.09, 0.12, 0.10),
+            cp.append(box('gib%d%d' % (s, int(gz2 * 100)), (0.09, 0.12, 0.10),
                             R.MAT_STEEL, loc=(s * (BEAM_DX / 2 - 0.05),
                                               -BEAM_DY / 2 - 0.03, gz2)))
     hy = MASTL_Y(0.0)              # spindle axis = the drilling axis
-    cp.append(R.box('head_case', (0.62, 0.52, 0.58), R.MAT_DARK,
-                    loc=(0, hy - 0.02, 0.04), bevel=0.02))
-    cp.append(R.box('head_gearbox', (0.40, 0.30, 0.22), R.MAT_DARK,
+    cp.append(box('head_case', (0.62, 0.46, 0.58), R.MAT_DARK,
+                    loc=(0, hy - 0.10, 0.04), bevel=0.02))
+    cp.append(box('head_gearbox', (0.40, 0.30, 0.22), R.MAT_DARK,
                     loc=(0.10, hy + 0.10, 0.40), bevel=0.015))
     cp.append(disc('head_motor', 0.105, 0.24, R.MAT_CAST, (-0.42, hy + 0.02, 0.18),
                    'X', sides=12))
@@ -658,17 +705,21 @@ def build(out_path):
     cp.append(disc('chuck', 0.17, 0.24, R.MAT_CAST, (0, hy, -0.38), 'Z', sides=14))
     for i in range(3):
         a = i * 2.094
-        cp.append(R.box('chuck_jaw%d' % i, (0.09, 0.09, 0.14), R.MAT_STEEL,
+        cp.append(box('chuck_jaw%d' % i, (0.09, 0.09, 0.14), R.MAT_STEEL,
                         loc=(math.sin(a) * 0.13, hy + math.cos(a) * 0.13, -0.44),
                         rot=(0, 0, -a)))
     # water swivel on the spindle top - a core rig flushes continuously
     cp.append(disc('swivel', 0.085, 0.20, R.MAT_CAST, (0, hy, 0.36), 'Z', sides=12))
-    cp.append(R.box('swivel_port', (0.10, 0.14, 0.09), R.MAT_STEEL,
+    cp.append(box('swivel_port', (0.10, 0.14, 0.09), R.MAT_STEEL,
                     loc=(0, hy - 0.14, 0.40)))
     # rod-spin guard on the carriage [XP] p.14
     cp += mesh_panel('spinguard', 0.62, 0.36, R.MAT_HAZARD, (0, hy - 0.30, -0.30))
     weld(cp, car, 'carriage')
     spin = R.empty(R.NODE_PIVOT, 'spindle', car, (0, hy, -0.26))
+    spin['axis'] = 'z'
+    spin['rpm_max'] = 1500             # [XP] p.19 - fast and light, not a
+    spin['torque_nm'] = 3212           # foundation rig's 20 rpm
+    spin['bore_mm'] = 117              # [CS14] p.3 hollow spindle
     weld([R.tube('spindle_stub', 0.062, 0.34, R.MAT_STEEL, loc=(0, 0, -0.34), sides=12),
           disc('spindle_collar', 0.088, 0.06, R.MAT_STEEL, (0, 0, -0.06), 'Z', sides=12)],
          spin, 'spindle')
@@ -680,7 +731,10 @@ def build(out_path):
     # view gives it as 2.9 m long x 0.9 m deep.  Capacity follows rod size:
     # B 25 / N 20 / H 15 / P 11 [C140] p.10 - twenty N-size rods here.
     rr_node = R.empty(R.NODE_PIVOT, 'rodrack', mast,
-                      (0.60, MASTL_Y(-0.60), MASTL_Z(0.52)), rot=(0.20, 0, 0))
+                      (0.60, MASTL_Y(-0.58), MASTL_Z(0.52)), rot=(-0.20, 0, 0))
+    rr_node['axis'] = 'x'
+    rr_node['rods'] = 20               # N-size; B 25 / H 15 / P 11 [C140] p.10
+    rr_node['rod_len_m'] = ROD_LEN
     rp = []
     RK_L, RK_W, RK_D = 3.05, 0.94, 0.50     # [GA] transport view: 2.9 x 0.9 m
     # an OPEN basket: two mesh sides, a mesh floor, end plates, and cradle
@@ -691,9 +745,9 @@ def build(out_path):
         rp += mesh_panel('rack_side%d' % s, RK_L, RK_D, R.MAT_PAINT,
                          (s * RK_W / 2, RK_D / 2 - 0.04, RK_L / 2),
                          rot=(0, math.pi / 2, math.pi / 2), pitch=0.20)
-        rp.append(R.box('rack_top%d' % s, (0.06, 0.06, RK_L), R.MAT_PAINT,
+        rp.append(box('rack_top%d' % s, (0.06, 0.06, RK_L), R.MAT_PAINT,
                         loc=(s * RK_W / 2, RK_D - 0.05, RK_L / 2)))
-        rp.append(R.box('rack_bot%d' % s, (0.06, 0.06, RK_L), R.MAT_PAINT,
+        rp.append(box('rack_bot%d' % s, (0.06, 0.06, RK_L), R.MAT_PAINT,
                         loc=(s * RK_W / 2, 0.02, RK_L / 2)))
     # floor: authored straight in the panel's own XZ plane - width across the
     # rack, length up it.  Rotating it into place was the bug that laid a 3 m
@@ -701,16 +755,16 @@ def build(out_path):
     rp += mesh_panel('rack_floor', RK_W, RK_L, R.MAT_PAINT, (0, 0.02, RK_L / 2),
                      pitch=0.20)
     for e in (0.05, RK_L - 0.05):
-        rp.append(R.box('rack_end%d' % int(e * 10), (RK_W + 0.10, RK_D, 0.06),
+        rp.append(box('rack_end%d' % int(e * 10), (RK_W + 0.10, RK_D, 0.06),
                         R.MAT_PAINT, loc=(0, RK_D / 2 - 0.02, e), bevel=0.012))
     for cz in (0.55, 1.55, 2.55):
-        rp.append(R.box('rack_cradle%d' % int(cz * 10), (RK_W, 0.05, 0.05),
+        rp.append(box('rack_cradle%d' % int(cz * 10), (RK_W, 0.05, 0.05),
                         R.MAT_WORN, loc=(0, 0.04, cz)))
     # mounting arms back to the mast foot
     for s in (-1, 1):
-        rp.append(R.box('rack_arm%d' % s, (0.10, 0.62, 0.10), R.MAT_PAINT,
+        rp.append(box('rack_arm%d' % s, (0.10, 0.62, 0.10), R.MAT_PAINT,
                         loc=(s * 0.34, -0.30, 0.30), rot=(0.42, 0, 0)))
-    rp.append(R.box('rack_spine', (0.12, 0.12, RK_L * 0.8), R.MAT_PAINT,
+    rp.append(box('rack_spine', (0.12, 0.12, RK_L * 0.8), R.MAT_PAINT,
                     loc=(0, -0.06, RK_L / 2)))
     # rods: bare rust-brown mild steel, NOT chrome, NOT painted [C140] p.9.
     # Wrist-thick, not thigh-thick: 70 mm OD against a 117 mm spindle bore
@@ -781,7 +835,7 @@ def build(out_path):
                           (hx, MASTL_Y(0.30) + 0.07, MASTL_Z(5.60))],
                          radius=0.022, mat=R.MAT_RUBBER, sides=5))
     for cz2 in (1.6, 3.4, 5.2):
-        mp.append(R.box('hose_clamp%d' % int(cz2 * 10), (0.30, 0.05, 0.05), R.MAT_STEEL,
+        mp.append(box('hose_clamp%d' % int(cz2 * 10), (0.30, 0.05, 0.05), R.MAT_STEEL,
                         loc=(0, MASTL_Y(0.30) + 0.09, MASTL_Z(cz2))))
     # deck hoses: pump to mast foot, valve bank to mast
     A(R.hose('hose_water', [(0.42, 3.62, 1.05), (0.86, 2.20, 1.02),
@@ -795,7 +849,7 @@ def build(out_path):
     # deck work light over the console, plus one on the power pack
     mnt, aim = R.worklight('lamp-deck', None, (-1.30, 0.30, H_TRANSPORT - 0.10),
                            aim_dir=(0.6, -0.9, -1.4), cone_deg=70, range_m=14)
-    A(R.box('lamp_body_d', (0.13, 0.10, 0.12), R.MAT_DARK,
+    A(box('lamp_body_d', (0.13, 0.10, 0.12), R.MAT_DARK,
             loc=(-1.30, 0.30, H_TRANSPORT - 0.10), bevel=0.01))
     A(disc('lamp_lens_d', 0.052, 0.02, R.MAT_GLASS, (-1.28, 0.24, H_TRANSPORT - 0.14),
            'Y', sides=10))
