@@ -945,25 +945,42 @@ canvas { display: block; }
 }
 .sitedock--plain .dock__aux { display: none; }
 
+/* The two rows the unit card covers, wrapped so the card has something real to
+   be the size of. It is `position: relative` for exactly that reason — see
+   `.unitcard`. Its own height is the sum of its children, so it is correct on
+   `--dock-aux: 34px` and on the plain dock where `.dock__aux` is display:none
+   and contributes neither height nor gap. */
+.dock__top  { position: relative; flex: none; display: flex; flex-direction: column; gap: var(--s-1); }
 .dock__inst { flex: none; height: 86px; display: flex; gap: var(--s-3); align-items: stretch; }
 .dock__aux  { flex: none; height: var(--dock-aux); display: flex; align-items: center; gap: var(--s-2); }
 .dock__ctl  { flex: none; height: 80px; display: flex; gap: var(--s-2); align-items: stretch; }
 
-/* The gauge is the game. It gets the width, the radius and the row. */
-/* The caption used to be absolutely positioned over the bottom 11px of the
-   dial. It now has its own row and the canvas is sized to the remainder
-   (site.js resizeGauge subtracts it), so the label never sits on the needle. */
+/* The gauge is the game. It gets the width, the radius and the row.
+
+   ── THE CAPTION AND THE DIAL CANNOT OVERLAP, BY CONSTRUCTION ──────────────
+   The caption began as an absolutely-positioned label over the bottom 11px of
+   the dial. It was then given its own row, and the canvas was sized to "the
+   box minus a CAP_H constant" that site.js kept a copy of — two numbers
+   describing one thing (HANDOFF §8B), and they drifted: the box is 86px and
+   the harness measured a 75px canvas against a 14px caption, 89px of content
+   in an 86px box, so the caption sat 2px into the needle.
+
+   Neither number exists any more. The caption is a fixed row and the canvas
+   takes WHAT IS LEFT — `flex: 1 1 0` against `min-height: 0` — so the sum is
+   the box height whatever either one is, and the media queries below can
+   change the box height without a matching edit anywhere in the JS.
+
+   The canvas must therefore never be given an inline width/height STYLE:
+   site.js sets only the backing-store attributes, from the size flex gave it.
+   Setting the style back would restore the two-numbers problem. */
 .gaugebox {
   position: relative; flex: none; width: 150px; height: 86px;
   display: flex; flex-direction: column;
 }
-.gaugebox canvas { flex: none; display: block; }
-/* 14px, NOT 11: at font-size 11px the line box this text actually paints is
-   14px tall, so an 11px row let it spill ~1.5px top and bottom — over the
-   dial above it every single frame. `line-height` is pinned to the row height
-   so the two can never drift apart again.
-   THIS NUMBER IS COUPLED to `CAP_H` in src/ui/screens/site.js (resizeGauge
-   subtracts it from the canvas). Change one and you must change the other. */
+.gaugebox canvas { flex: 1 1 0; min-height: 0; width: 100%; display: block; }
+/* `line-height` is pinned to the row height so the glyph box cannot exceed the
+   row: at font-size 11px the line box this text actually paints is 14px tall,
+   and an 11px row let it spill ~1.5px top and bottom. */
 .gaugebox__cap {
   position: static; flex: none; height: 14px;
   display: flex; align-items: center; justify-content: center;
@@ -1118,11 +1135,24 @@ canvas { display: block; }
 }
 /* A 34px control in a 34px row — min-height: var(--dock-aux) is what makes
    that true; without it the button was its label's 12px. The hit area is
-   expanded to the 44px target inside the dock, where there is nothing behind
-   it to steal, and .hudqa/enumerate.js verifies that by HIT-TESTING rather
-   than by reading this rule. */
+   expanded to the 44px target by the ::after below: 34 + 5 above + 5 below,
+   which reaches 1px past the 4px gap into the row on each side.
+
+   ── z-index: 1 IS LOad-BEARING ─────────────────────────────────────────────
+   The comment that used to stand here said the overhang sits "where there is
+   nothing behind it to steal". That was wrong, and .hudqa/enumerate.js —
+   which now really does hit-test, with elementFromPoint, rather than reading
+   this rule — measured the difference: rail buttons whose 1px overhang landed
+   over a painted `.dock__ctl` child below and a painted `.dock__inst` child
+   above measured a 43px hit box, while ones overhanging a gap measured 45.
+   Repeatable, 2px, not rounding. `.dock__ctl` comes later in the DOM, so its
+   children painted over the overhang and took the hit with it.
+
+   z-index lifts the button and its expander over both neighbouring rows. What
+   it takes in exchange is 1px off the top of a slider, which is 80x80 and can
+   spare it; the rail button cannot spare anything. */
 .railbtn::after { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: var(--touch); transform: translateY(-50%); }
-.railbtn { position: relative; }
+.railbtn { position: relative; z-index: 1; }
 .railbtn__l {
   font-size: var(--t-2xs); line-height: 1.1; font-weight: 850;
   letter-spacing: var(--tr-label); text-transform: uppercase;
@@ -1262,10 +1292,16 @@ canvas { display: block; }
    pressed blind. */
 .dock__inst.is-taken, .dock__aux.is-taken { visibility: hidden; }
 
+/* `inset: 0` against `.dock__top`, NOT a height computed from the rows.
+   It used to read `top: 9px; height: calc(86px + var(--s-1) + var(--dock-aux))`
+   — the instrument row's height, the gap and the auxiliary row's height, all
+   written down a second time in a third place. The harness measured the
+   consequence on `rc`: the card's foot 3-5px into `.dock__ctl`, over the
+   sliders and the primary action. `.dock__top` wraps exactly the two rows the
+   card covers, so `inset: 0` is that space by construction — on the plain dock
+   too, where `.dock__aux` is display:none and this formula had to know it. */
 .unitcard {
-  position: absolute; z-index: 2;
-  left: var(--s-3); right: var(--s-3); top: 9px;
-  height: calc(86px + var(--s-1) + var(--dock-aux));
+  position: absolute; z-index: 2; inset: 0;
   display: flex; flex-direction: column; justify-content: center; gap: 4px;
   padding-left: var(--s-3);
   background: var(--c-bg-deep);
@@ -1726,7 +1762,8 @@ canvas { display: block; }
      to fit without clipping. */
   .vsl__name { letter-spacing: .06em; }
   .rop__v { font-size: var(--t-xl); }
-  .unitcard { height: calc(74px + var(--s-1) + var(--dock-aux)); }
+  /* No .unitcard height here: it is inset:0 against .dock__top and follows the
+     rows automatically. This override was a third copy of the same sum. */
 }
 @media (min-height: 900px) {
   :root { --hud-dock: calc(var(--sa-b) + 249px); }   /* 1+9+98+4+36+4+88+9 */
@@ -1734,7 +1771,7 @@ canvas { display: block; }
   .dock__ctl  { height: 88px; }
   .sitedock { --dock-aux: 36px; }
   .gaugebox { height: 98px; }
-  .unitcard { height: calc(98px + var(--s-1) + var(--dock-aux)); }
+  /* .unitcard needs no height override — see the note in the block above. */
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

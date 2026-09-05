@@ -1303,14 +1303,26 @@ export function createSiteScreen(app) {
      driller reads them in. */
   const dockAux = C.h('div.dock__aux', wellEl, railEl);
 
+  /* THE UNIT CARD LIVES INSIDE THE ROWS IT REPLACES.
+     It used to be a sibling of all three rows, positioned against the dock and
+     sized by `height: calc(86px + var(--s-1) + var(--dock-aux))` — the two row
+     heights and the gap, written down a second time. That arithmetic is what
+     the harness caught overlapping `.dock__ctl` by 3-5px on `rc`: three
+     numbers restated in a fourth place, and the restatement was wrong.
+
+     Wrapping the two rows it covers gives it something real to be the size of.
+     `inset: 0` against `.dock__top` is exactly the instrument row plus the gap
+     plus the auxiliary row, by construction, on every method — including the
+     ones where `--dock-aux` is 0 and `.dock__aux` is display:none, which the
+     formula also had to know about. Nothing to keep in sync. */
+  const dockTop = C.h('div.dock__top', dockInst, dockAux, unitCard);
+
   const dock = C.h('div.sitedock.cluster',
-    dockInst,
-    dockAux,
+    dockTop,
     C.h('div.dock__ctl',
       C.h('div.controls__sliders', feedSl.el, rotSl.el, flushSl.el),
       actionBtn,
     ),
-    unitCard,
   );
 
   const el = C.h('div.site',
@@ -1352,10 +1364,11 @@ export function createSiteScreen(app) {
   const A0 = Math.PI;
   const SWEEP = Math.PI;
   const REDLINE = 0.86;
-  /* The caption row at the foot of the box. COUPLED to `.gaugebox__cap`'s
-     `height` in src/ui/styles.css — 14px is the line box this 11px text
-     actually paints, and an 11px row let it spill onto the dial. */
-  const CAP_H = 14;
+  /* `const CAP_H = 14` used to live here, as this file's copy of
+     `.gaugebox__cap`'s height in styles.css. Two numbers describing one thing
+     (HANDOFF §8B), and they drifted — see the note over `.gaugebox`. The
+     caption row and the dial are now sized against each other by flexbox and
+     neither height is written down twice. */
 
   /** roundRect is not in every Safari the game has to run on. */
   function roundRectPath(c, x, y, w, h, rr) {
@@ -1370,27 +1383,31 @@ export function createSiteScreen(app) {
     c.closePath();
   }
 
-  /* THE CANVAS IS THE BOX MINUS THE CAPTION ROW.
-     The caption used to be absolutely positioned over the bottom `CAP_H` px
-     of the dial; `styles.css .gaugebox` is now a flex column and the caption
-     is a real row in it. The canvas therefore no longer contains the caption
-     and must not be sized as if it did — taking the whole box height pushed
-     the 11px caption out of the bottom of `.gaugebox` entirely, where it
-     painted on the dial above it AND on `.railbtn` in the aux row below.
-     `cy` below drops its own `- CAP_H` for the same reason: the space is
-     already gone from `gH`, and subtracting it twice moved the dial up. */
+  /* ASK THE CANVAS HOW BIG IT IS. DO NOT COMPUTE IT.
+     This used to measure `.gaugebox` and subtract a local copy of the caption
+     row's height. Both halves of that were mistakes: the subtraction meant two
+     files had to agree on one number, and when they disagreed the caption
+     printed 2px into the needle. `.gaugebox canvas` is now `flex: 1 1 0` with
+     `min-height: 0`, so flexbox has ALREADY given the canvas exactly the box
+     minus the caption, whatever either height is.
+
+     Only the backing store is written here — `.width` / `.height` are the
+     attributes, not the CSS. Writing `style.width` / `style.height` would put
+     this function back in charge of layout and re-open the same gap; the
+     stylesheet says so too. `offsetWidth/offsetHeight` rather than a rect,
+     for the same reason as publishChrome(): during `@keyframes dock-in` and
+     `screen-in` the rendered box is scaled and the laid-out one is not. */
   function resizeGauge() {
-    const r = gaugeBox.getBoundingClientRect();
+    const w = gaugeCanvas.offsetWidth;
+    const h = gaugeCanvas.offsetHeight;
     // Not laid out — the unit card has the instrument row. Keep the last good
     // size rather than writing a fallback one over it.
-    if (!r.width || !r.height) return;
-    gW = Math.max(80, Math.round(r.width || 158));
-    gH = Math.max(48, Math.round((r.height || 90) - CAP_H));
+    if (!w || !h) return;
+    gW = Math.max(80, w);
+    gH = Math.max(48, h);
     gDpr = app.viewport.dpr || window.devicePixelRatio || 1;
     gaugeCanvas.width = Math.round(gW * gDpr);
     gaugeCanvas.height = Math.round(gH * gDpr);
-    gaugeCanvas.style.width = gW + 'px';
-    gaugeCanvas.style.height = gH + 'px';
     readTokens();
   }
 
@@ -1466,7 +1483,7 @@ export function createSiteScreen(app) {
        clearances are real: the 13px band halo must not clip at 12 o'clock, and
        the hub must not touch the caption — it used to overlap it by 3px. */
     const cx = gW / 2;
-    const cy = gH - 10;   // CAP_H already removed from gH in resizeGauge()
+    const cy = gH - 10;   // gH is the canvas's own height; the caption row is not in it
     const r = Math.min(gW / 2 - 8, cy - 7);
     const at = (v) => A0 + SWEEP * clamp(v, 0, 1);
     const bandW = bandHi - bandLo;
@@ -1516,13 +1533,32 @@ export function createSiteScreen(app) {
       c.restore();
     }
 
-    // Value arc
     const v = clamp(torque, 0, 1);
-    const valCol = (gauge.redline && v > REDLINE) ? tokens.danger
-      : inBand ? tokens.success : tokens.amber;
-    arc(c, cx, cy, r - 8.5, A0, at(v), 3, rgba(valCol, 0.9), 'round');
+    const over = !!(gauge.redline && v > REDLINE);
 
-    // Needle
+    /* ── ONE VALUE, STATED TWICE, AND THAT IS THE INSTRUMENT ──────────────
+       Rubric 7a: state any value once. This dial used to state `v` FOUR times
+       in a 150x86 box — a coloured value arc at r-8.5, the needle, the hub
+       ring tinted by the same colour, and the numeral on the plate. Two of
+       those are gone.
+
+       The arc was the clearest duplicate: a second angular reading of exactly
+       what the needle already points at, drawn 8.5 px inside it. The hub tint
+       was a fourth, encoding band state — which the sweet-spot band itself
+       already says by going near-opaque and glowing when `inBand`, and which
+       the groove chip says again in words.
+
+       What is left is one instrument, not two readings: the NEEDLE gives the
+       value's position relative to the band and the redline, and the NUMERAL
+       gives the figure. Neither is legible without the other — a bare dial
+       cannot be read to a number, and a bare number has no band.
+
+       Every other mark on the face is a different quantity: the tick ring is
+       the scale, the redline arc is the limit, the green band is the target.
+       The one signal that survives is the needle going red past the limit,
+       because that states a LIMIT BREACH, not the value. One mark, one job. */
+
+    // Needle — the value's position
     const na = at(needle.value);
     const nc = Math.cos(na), ns = Math.sin(na);
     c.save();
@@ -1532,14 +1568,14 @@ export function createSiteScreen(app) {
     c.moveTo(cx - nc * 9, cy - ns * 9);
     c.lineTo(cx + nc * (r - 3), cy + ns * (r - 3));
     c.lineWidth = 2.6; c.lineCap = 'round';
-    c.strokeStyle = rgba(tokens.fg, 0.97);
+    c.strokeStyle = over ? rgba(tokens.danger, 0.98) : rgba(tokens.fg, 0.97);
     c.stroke();
     c.restore();
 
-    // Hub
+    // Hub — the needle's pivot, and nothing else. It carries no reading.
     c.beginPath(); c.arc(cx, cy, 7.5, 0, Math.PI * 2);
     c.fillStyle = rgba(tokens.black, 0.85); c.fill();
-    c.lineWidth = 1.5; c.strokeStyle = rgba(valCol, 0.9); c.stroke();
+    c.lineWidth = 1.5; c.strokeStyle = rgba(tokens.fg, 0.28); c.stroke();
 
     /* Readout. The needle used to stroke straight through the numerals; it now
        passes UNDER a knockout plate. One label for one quantity: the unit is

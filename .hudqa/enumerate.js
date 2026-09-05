@@ -250,10 +250,27 @@ export const ENUMERATE = function measureScreen(opts) {
     const t = document.elementFromPoint(x, y);
     return !!t && (t === el || el.contains(t));
   };
-  const span = (el, cx, cy, dx, dy) => {
-    let n = 0;
-    for (let i = 1; i <= REACH; i++) { if (!ownedAt(el, cx + dx * i, cy + dy * i)) break; n = i; }
-    return n;
+  /* The owned distance from the exact centre along one direction.
+
+     An earlier version stepped whole pixels from a ROUNDED centre and counted
+     them, which quantises the answer to ±1 px: two rail buttons in the same
+     row, with the same 44 px `::after`, measured 44 and 43. A gate that fails a
+     compliant control one time in two sends the next reader hunting a defect
+     that is not there, which is the same disease as passing a broken one.
+
+     So: walk out in whole pixels to find the bracket, then bisect the last one
+     to ~0.02 px. Probing is at the true fractional centre, and the extent is
+     the sum of the two distances — no +1 for a centre pixel that does not
+     exist in a continuous coordinate space. */
+  const edge = (el, cx, cy, dx, dy) => {
+    let lo = 0, hi = 1;
+    while (hi <= REACH && ownedAt(el, cx + dx * hi, cy + dy * hi)) { lo = hi; hi += 1; }
+    if (hi > REACH) return REACH;
+    for (let i = 0; i < 6; i++) {
+      const mid = (lo + hi) / 2;
+      if (ownedAt(el, cx + dx * mid, cy + dy * mid)) lo = mid; else hi = mid;
+    }
+    return lo;
   };
   const targets = [];
   for (const el of live.querySelectorAll(TAP)) {
@@ -263,8 +280,8 @@ export const ENUMERATE = function measureScreen(opts) {
     if (cs.pointerEvents === 'none' || el.disabled) continue;
     const r = el.getBoundingClientRect();
     if (r.width < 1 || r.height < 1) continue;
-    const cx = Math.round((r.left + r.right) / 2);
-    const cy = Math.round((r.top + r.bottom) / 2);
+    const cx = (r.left + r.right) / 2;
+    const cy = (r.top + r.bottom) / 2;
     const cls = (typeof el.className === 'string' && el.className.trim())
       ? el.className.trim().split(/\s+/)[0] : el.tagName.toLowerCase();
 
@@ -275,8 +292,8 @@ export const ENUMERATE = function measureScreen(opts) {
         ok: false, blocked: true });
       continue;
     }
-    const w = span(el, cx, cy, -1, 0) + span(el, cx, cy, 1, 0) + 1;
-    const h = span(el, cx, cy, 0, -1) + span(el, cx, cy, 0, 1) + 1;
+    const w = +(edge(el, cx, cy, -1, 0) + edge(el, cx, cy, 1, 0)).toFixed(1);
+    const h = +(edge(el, cx, cy, 0, -1) + edge(el, cx, cy, 0, 1)).toFixed(1);
     targets.push({
       cls, w, h, box: `${Math.round(r.width)}x${Math.round(r.height)}`,
       ok: w >= 43.5 && h >= 43.5, blocked: false,
