@@ -368,6 +368,10 @@ async function pageMetrics() {
     /* MEASURED over `frame.samples` real frames, not read off c.clock. */
     fps: rafMs ? +(1000 / rafMs).toFixed(1) : null,
     fpsClock: c.clock ? +(c.clock.fps || 0).toFixed(1) : null,
+    /* rAF over 400 ms is Chrome's 1 Hz clamp on a hidden/occluded tab, not a
+       frame rate. Carried so nothing downstream can print it as one. */
+    throttled: !!(rafMs && rafMs > 400),
+    visible: document.visibilityState, focused: document.hasFocus(),
     quality: c.quality && c.quality.id,
     ctxLost,
     frame, surface, section, rig,
@@ -426,6 +430,13 @@ async function pageWarmSample() {
     rafMs: rafMs != null ? +rafMs.toFixed(2) : null,
     worstMs: s.length ? +s[s.length - 1].toFixed(2) : null,
     sessionSec: +(performance.now() / 1000).toFixed(1),
+    /* A HIDDEN OR OCCLUDED TAB THROTTLES rAF TO 1 Hz. That reads as 1.0 fps
+       and it is not a measurement of anything — Chrome does this to a headed
+       window that ends up behind another window, which is easy to arrange on
+       a machine where several agents are opening browsers. Report the two
+       flags so the caller can say "throttled" instead of "slow". */
+    visible: document.visibilityState,
+    focused: document.hasFocus(),
   };
 }
 
@@ -747,10 +758,18 @@ async function drive(page, ticks = 18, ms = 130) {
  */
 async function warmUp(page, opts = {}) {
   const {
+    /* `minMs` exists because a plateau is not the same as a finish. Measured:
+       a session polled from t+0.8s sat at 65 programs and 35-38 ms/frame for
+       seven straight seconds — programs stable, pace "stopped improving" —
+       and the gate declared it warm at 26.3 fps. The same states measured
+       108-131 fps a few seconds later. Both signals were quiet because the
+       session was in the middle of a stall, not past it. So the session gate
+       gets a floor long enough to sit through one, and the cheap per-stop
+       gate catches whatever a given state brings with it. */
     label = 'session',
-    minMs = 6_000,        // never declare warm before this much has elapsed
+    minMs = 25_000,       // never declare warm before this much has elapsed
     maxMs = 150_000,      // hard ceiling — report cold rather than hang
-    quietMs = 6_000,      // programs must hold still this long
+    quietMs = 10_000,     // programs must hold still this long
     tolerance = 0.08,     // rAF within 8 % of the best window = stopped improving
     verbose = false,
   } = opts;
@@ -762,6 +781,7 @@ async function warmUp(page, opts = {}) {
   let bestRafAt = t0;
   let last = null;
   let samples = 0;
+  let throttleTries = 0;
 
   for (;;) {
     const s = await page.evaluate(pageWarmSample).catch(() => null);
@@ -771,6 +791,31 @@ async function warmUp(page, opts = {}) {
                programs: null, rafMs: null, fps: null, samples };
     }
     last = s; samples++;
+
+    /* ── THROTTLED, NOT SLOW ──────────────────────────────────────────────
+       Chrome clamps rAF to 1 Hz in a tab that is hidden or fully occluded.
+       That arrives as ~1000 ms/frame, which the pace gate would happily
+       accept as "stopped improving" and the report would file as 1.0 fps.
+       Raise the window and try again; if it will not come forward, refuse to
+       call anything warm and say WHY, because "1 fps" as a performance claim
+       is exactly the class of bug this whole change exists to end. */
+    if (s.rafMs != null && s.rafMs > 400) {
+      if (throttleTries < 6) {
+        throttleTries++;
+        await page.bringToFront().catch(() => {});
+        await sleep(600);
+        continue;   // do not let a throttled window poison bestRaf
+      }
+      return {
+        warm: false,
+        why: `THROTTLED, NOT SLOW — rAF is clamped at ${s.rafMs} ms (visibility "${s.visible}", ` +
+             `focused ${s.focused}). Chrome throttles a hidden or occluded tab to 1 Hz. ` +
+             `The browser window could not be brought forward after ${throttleTries} attempts; ` +
+             `no fps in this run is a measurement of the game.`,
+        sec: +(elapsed / 1000).toFixed(1),
+        programs: s.programs, rafMs: s.rafMs, fps: null, throttled: true, samples,
+      };
+    }
 
     if (s.programs !== lastPrograms) { lastPrograms = s.programs; programsStableAt = Date.now(); }
     if (s.rafMs != null && s.rafMs < bestRaf * (1 - tolerance)) { bestRaf = s.rafMs; bestRafAt = Date.now(); }
@@ -1185,6 +1230,9 @@ const run = async () => {
   let warm = { warm: false, why: 'skipped (--nowarm)', sec: 0, programs: null, rafMs: null, fps: null, samples: 0 };
   if (!has('nowarm')) {
     process.stdout.write('warming up (shader/program compile) ...\n');
+    /* Chrome throttles rAF to 1 Hz in an occluded window, and this run is
+       about to spend a minute not touching the browser. Raise it first. */
+    await page.bringToFront().catch(() => {});
     // real ticks first: a parked frame never touches the impact, dust or
     // cuttings materials, and those are programs too.
     await drive(page, 12, 130);
@@ -1293,6 +1341,7 @@ const run = async () => {
       ? { warm: false, why: 'skipped (--nowarm)', sec: 0, programs: null, rafMs: null, fps: null, samples: 0 }
       : await warmUp(page, { label: shot.id, minMs: 0, quietMs: 1_500, maxMs: 15_000, tolerance: 0.12 });
     if (!stopWarm.warm) logs.push(`[warm:${shot.id}] ${stopWarm.why}`);
+    if (stopWarm.throttled) await page.bringToFront().catch(() => {});
 
     const metrics = await page.evaluate(pageMetrics).catch((e) => ({ error: e.message }));
     const ident = await page.evaluate(pageIdentity).catch(() => ({ counts: {} }));
@@ -1412,11 +1461,26 @@ function writeReport({ results, logs, content, methods, rigs, skipped, unlisted,
     L.push('  was ranking states by capture order. Every fps in a shots/*-report.json written');
     L.push('  before this section existed is unreliable and is not comparable to the numbers');
     L.push('  below.');
+  } else if (warm && warm.throttled) {
+    L.push('  ***** THROTTLED — THERE IS NO FPS MEASUREMENT IN THIS RUN *****');
+    L.push(`  ${warm.why}`);
+    L.push('  Nothing here is a statement about the game. Re-run with the Chrome window');
+    L.push('  visible and unobstructed. Draw calls, triangles and the frames themselves are');
+    L.push('  unaffected and remain usable.');
   } else {
     L.push('  ***** COLD — DO NOT TRUST THE FPS COLUMN *****');
     L.push(`  ${(warm && warm.why) || 'no warm-up ran'}`);
     L.push('  Program linking stalls the MAIN THREAD, so a cold state reads slow while its GPU');
     L.push('  frame is cheap. The numbers below rank capture order, not performance.');
+  }
+  const throttledShots = shot.filter((r) => r.metrics && r.metrics.throttled);
+  if (throttledShots.length) {
+    L.push('');
+    L.push(`  ${throttledShots.length} shot(s) sampled a THROTTLED tab (rAF clamped near 1 Hz):`);
+    for (const r of throttledShots.slice(0, 12)) {
+      L.push(`    ${r.id.padEnd(26)} rAF ${r.metrics.frame && r.metrics.frame.rafMs} ms · visibility "${r.metrics.visible}" · focused ${r.metrics.focused}`);
+    }
+    L.push('  Their fps is Chrome\'s background clamp, not the game. Not graded.');
   }
   if (coldShots.length) {
     L.push('');
@@ -1425,7 +1489,8 @@ function writeReport({ results, logs, content, methods, rigs, skipped, unlisted,
       const d = r.warmDetail || {};
       L.push(`    ${r.id.padEnd(26)} ${d.session === false ? 'session never warmed'
         : d.stop === false ? `stop gate: ${d.stopWhy}`
-        : `${d.programsDelta} programs linked DURING the fps window`}`);
+        : d.programsDelta ? `${d.programsDelta} programs linked DURING the fps window`
+        : 'no warm gate ran for this shot (it is not part of the plan)'}`);
     }
     if (coldShots.length > 12) L.push(`    ... and ${coldShots.length - 12} more`);
   } else if (HEADED && warm && warm.warm) {
@@ -1491,7 +1556,12 @@ function writeReport({ results, logs, content, methods, rigs, skipped, unlisted,
     if (m.surface && m.surface.calls > b.surface) over.surface.push(`${r.id}=${m.surface.calls}`);
     if (m.section && m.section.calls > b.section) over.section.push(`${r.id}=${m.section.calls}`);
     if (m.rig && m.rig.calls > b.rig) over.rig.push(`${r.id}=${m.rig.calls}`);
-    if (HEADED && m.fps != null && m.fps < b.fps) over.fps.push(`${r.id}=${m.fps}`);
+    /* Only a WARM, unthrottled fps may fail the budget. A cold number is
+       capture order and a throttled one is Chrome's 1 Hz clamp on a hidden
+       tab; grading either produces a FAIL verdict about the harness, not
+       about the game — which is precisely how the "24-27 fps states" spent
+       four review rounds being treated as an art problem. */
+    if (HEADED && m.fps != null && !m.throttled && r.warm && m.fps < b.fps) over.fps.push(`${r.id}=${m.fps}`);
     if (m.texEstMB > b.textureMB) over.tex.push(`${r.id}=${m.texEstMB}MB`);
     if (m.particles && m.particles.live > b.particles) over.particles.push(`${r.id}=${m.particles.live}`);
   }
@@ -1550,7 +1620,7 @@ function writeReport({ results, logs, content, methods, rigs, skipped, unlisted,
     if (r.skipped) { L.push(`  ${r.id.padEnd(26)} SKIPPED — ${r.skipped}`); continue; }
     const m = r.metrics || {};
     L.push('  ' + r.id.padEnd(26) +
-      num(m.fps, 6) + ' ' + (m.fps == null ? '  -' : r.warm ? '  W' : 'COLD') + ' ' +
+      num(m.fps, 6) + ' ' + (m.fps == null ? '   -' : m.throttled ? 'THRT' : r.warm ? '   W' : 'COLD') + ' ' +
       num(m.frame && m.frame.calls, 6) + ' ' +
       num(m.surface && m.surface.calls, 5) + ' ' + num(m.section && m.section.calls, 5) + ' ' +
       num(m.rig && m.rig.calls, 5) + ' ' +
@@ -1634,6 +1704,7 @@ function writeReport({ results, logs, content, methods, rigs, skipped, unlisted,
         warm: r.warm ?? null, warmDetail: r.warmDetail || null,
         metrics: r.metrics ? {
           fps: r.metrics.fps, fpsClock: r.metrics.fpsClock,
+          throttled: r.metrics.throttled, visible: r.metrics.visible, focused: r.metrics.focused,
           programs: r.metrics.programs, programsDelta: r.metrics.programsDelta,
           sessionSec: r.metrics.sessionSec,
           ctxLost: r.metrics.ctxLost, frame: r.metrics.frame, surface: r.metrics.surface,
