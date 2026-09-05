@@ -15,8 +15,26 @@
  *                 undrivable and underground lighting has nothing to aim at.
  *   materials   — must be NAMES ONLY with no texture references. A `.glb` that
  *                 ships baked maps has silently opted out of the wear system.
+ *   DIMENSIONS  — the world-space bounding box, in metres, computed by
+ *                 transforming EVERY vertex by its node's world matrix. This
+ *                 exists because `blender/lib/rig.py` shipped a `box()` that
+ *                 built at half scale for weeks and nothing caught it: the
+ *                 wireframe looked right because `tube()` was correct, so a
+ *                 machine came out as correct cylinders bolted to half-size
+ *                 plates. A model whose dimensions are never read back is a
+ *                 model whose datasheet provenance is decorative. Corners of
+ *                 the local AABB would have been cheaper and wrong — a raked
+ *                 mast inflates one — so the vertices are actually transformed.
+ *
+ * glTF is Y-UP (the Blender exporter runs with export_yup=True), so the axes
+ * printed here are WIDTH = x, HEIGHT = y, LENGTH = z. Blender's Z is this Y.
  *
  * Usage:  node tools/glbinfo.mjs public/models/teststub.glb [more.glb ...]
+ *         node tools/glbinfo.mjs --parts public/models/pd55.glb
+ *
+ * `--parts` additionally prints the bounding box of every named node's whole
+ * subtree, which is how you find WHICH assembly is the wrong size rather than
+ * only that the machine is.
  */
 import { readFileSync, statSync } from 'node:fs';
 
@@ -39,9 +57,133 @@ function parseGLB(buf) {
   return { version, json, bin };
 }
 
+
+/* -- world-space measurement -------------------------------------------------
+   glTF stores matrices column-major; a node has EITHER `matrix` OR any of
+   translation/rotation/scale. Both forms reach this project (Blender writes
+   TRS, `gltf-transform` can bake to `matrix`), so both are handled. */
+function m4identity() { return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]; }
+
+function m4mul(a, b) {                        // a * b, column-major
+  const o = new Array(16);
+  for (let c = 0; c < 4; c++) {
+    for (let r = 0; r < 4; r++) {
+      o[c * 4 + r] = a[r] * b[c * 4]
+        + a[4 + r] * b[c * 4 + 1]
+        + a[8 + r] * b[c * 4 + 2]
+        + a[12 + r] * b[c * 4 + 3];
+    }
+  }
+  return o;
+}
+
+function trs(node) {
+  if (node.matrix) return node.matrix.slice();
+  const t = node.translation || [0, 0, 0];
+  const q = node.rotation || [0, 0, 0, 1];
+  const s = node.scale || [1, 1, 1];
+  const x = q[0], y = q[1], z = q[2], w = q[3];
+  const x2 = x + x, y2 = y + y, z2 = z + z;
+  const xx = x * x2, xy = x * y2, xz = x * z2;
+  const yy = y * y2, yz = y * z2, zz = z * z2;
+  const wx = w * x2, wy = w * y2, wz = w * z2;
+  return [
+    (1 - (yy + zz)) * s[0], (xy + wz) * s[0], (xz - wy) * s[0], 0,
+    (xy - wz) * s[1], (1 - (xx + zz)) * s[1], (yz + wx) * s[1], 0,
+    (xz + wy) * s[2], (yz - wx) * s[2], (1 - (xx + yy)) * s[2], 0,
+    t[0], t[1], t[2], 1,
+  ];
+}
+
+const COMPONENT = {
+  5120: [Int8Array, 1], 5121: [Uint8Array, 1], 5122: [Int16Array, 2],
+  5123: [Uint16Array, 2], 5125: [Uint32Array, 4], 5126: [Float32Array, 4],
+};
+
+/** Read a VEC3 accessor as a flat array, honouring byteStride and normalisation. */
+function readVec3(g, bin, accessorIndex) {
+  const acc = g.accessors[accessorIndex];
+  if (acc.type !== 'VEC3') throw new Error('accessor ' + accessorIndex + ' is ' + acc.type + ', not VEC3');
+  const out = new Float64Array(acc.count * 3);
+  if (acc.bufferView === undefined) return out;          // all-zero, valid glTF
+  const bv = g.bufferViews[acc.bufferView];
+  const spec = COMPONENT[acc.componentType];
+  if (!spec) throw new Error('unknown componentType ' + acc.componentType);
+  const Ctor = spec[0], size = spec[1];
+  const stride = bv.byteStride || size * 3;
+  const base = (bv.byteOffset || 0) + (acc.byteOffset || 0);
+  for (let i = 0; i < acc.count; i++) {
+    /* A fresh typed array per vertex rather than one view over the whole
+       range: POSITION accessors are only guaranteed to be aligned to their
+       own component size, and an interleaved bufferView can start a vertex on
+       any 4-byte boundary the stride lands on. */
+    const v = new Ctor(bin.buffer, bin.byteOffset + base + i * stride, 3);
+    out[i * 3] = v[0]; out[i * 3 + 1] = v[1]; out[i * 3 + 2] = v[2];
+  }
+  if (acc.normalized && acc.componentType !== 5126) {
+    const d = { 5120: 127, 5121: 255, 5122: 32767, 5123: 65535 }[acc.componentType];
+    for (let i = 0; i < out.length; i++) out[i] = Math.max(out[i] / d, -1);
+  }
+  return out;
+}
+
+/** World-space AABB of the whole file, plus one per node subtree. */
+function measure(g, bin) {
+  const nodes = g.nodes || [];
+  const sub = new Array(nodes.length);                   // node + descendants
+  const sceneIndex = g.scene === undefined ? 0 : g.scene;
+  const scene = (g.scenes || [])[sceneIndex] || {};
+  const roots = scene.nodes || [];
+  const EMPTY = () => ({ min: [Infinity, Infinity, Infinity], max: [-Infinity, -Infinity, -Infinity] });
+  const real = (b) => b.min[0] <= b.max[0];
+  const grow = (box, p) => {
+    for (let k = 0; k < 3; k++) {
+      if (p[k] < box.min[k]) box.min[k] = p[k];
+      if (p[k] > box.max[k]) box.max[k] = p[k];
+    }
+  };
+  const merge = (a, b) => { grow(a, b.min); grow(a, b.max); };
+
+  const walk = (i, parentMatrix) => {
+    const n = nodes[i];
+    const m = m4mul(parentMatrix, trs(n));
+    const total = EMPTY();
+    if (n.mesh !== undefined && g.meshes[n.mesh]) {
+      for (const prim of g.meshes[n.mesh].primitives) {
+        if (prim.attributes.POSITION === undefined) continue;
+        const v = readVec3(g, bin, prim.attributes.POSITION);
+        for (let k = 0; k < v.length; k += 3) {
+          const x = v[k], y = v[k + 1], z = v[k + 2];
+          grow(total, [
+            m[0] * x + m[4] * y + m[8] * z + m[12],
+            m[1] * x + m[5] * y + m[9] * z + m[13],
+            m[2] * x + m[6] * y + m[10] * z + m[14],
+          ]);
+        }
+      }
+    }
+    for (const c of n.children || []) {
+      const cb = walk(c, m);
+      if (real(cb)) merge(total, cb);
+    }
+    sub[i] = total;
+    return total;
+  };
+
+  const all = EMPTY();
+  for (const r of roots) {
+    const b = walk(r, m4identity());
+    if (real(b)) merge(all, b);
+  }
+  return { all, sub, empty: !real(all) };
+}
+
+const f3 = (n) => (Math.abs(n) < 5e-4 ? 0 : n).toFixed(3);
+const dimsOf = (b) => [b.max[0] - b.min[0], b.max[1] - b.min[1], b.max[2] - b.min[2]];
+
 function report(path) {
   const buf = readFileSync(path);
-  const { version, json: g } = parseGLB(buf);
+  const { version, json: g, bin } = parseGLB(buf);
   const bytes = statSync(path).size;
 
   const meshes = g.meshes || [];
@@ -124,10 +266,48 @@ function report(path) {
     console.log(`   unprefixed meshes (${others.length}): `
       + others.map((n) => n.name).join(', '));
   }
-  return { prims, tris, bytes };
+
+  /* -- dimensions. Printed LAST because it is the number that gets checked
+     against a datasheet page, and a number you have to scroll past is a number
+     nobody reads. -- */
+  let dims = null;
+  const compressed = ext.filter((e) => /draco|meshopt|quantiz/i.test(e));
+  if (compressed.length) {
+    console.log(`   DIMENSIONS  UNMEASURABLE - geometry is compressed (${compressed.join(', ')}).`
+      + ' Measure the uncompressed source.');
+  } else if (!bin && (g.bufferViews || []).length) {
+    console.log('   DIMENSIONS  UNMEASURABLE - no BIN chunk (external .bin not supported).');
+  } else {
+    const m = measure(g, bin);
+    if (m.empty) {
+      console.log('   DIMENSIONS  no geometry.');
+    } else {
+      const d = dimsOf(m.all);
+      console.log(`   DIMENSIONS (m)  W ${f3(d[0])} x H ${f3(d[1])} x L ${f3(d[2])}`
+        + '   [glTF Y-up: W=x H=y L=z]');
+      console.log(`   BOUNDS     x ${f3(m.all.min[0])}..${f3(m.all.max[0])}`
+        + `   y ${f3(m.all.min[1])}..${f3(m.all.max[1])}`
+        + `   z ${f3(m.all.min[2])}..${f3(m.all.max[2])}`);
+      if (PARTS) {
+        for (let i = 0; i < nodes.length; i++) {
+          const nm = nodes[i].name || '';
+          if (!/^(pivot|slide|mount|aim|static):/.test(nm)) continue;
+          const b = m.sub[i];
+          if (!b || b.min[0] > b.max[0]) { console.log(`     ${nm}  (no geometry)`); continue; }
+          const pd = dimsOf(b);
+          console.log(`     ${nm}  ${f3(pd[0])} x ${f3(pd[1])} x ${f3(pd[2])}`
+            + `   at y ${f3(b.min[1])}..${f3(b.max[1])}`);
+        }
+      }
+      dims = d;
+    }
+  }
+  return { prims, tris, bytes, dims };
 }
 
-const files = process.argv.slice(2);
+const argv = process.argv.slice(2);
+const PARTS = argv.includes('--parts');
+const files = argv.filter((a) => !a.startsWith('--'));
 if (!files.length) {
   console.error('usage: node tools/glbinfo.mjs <file.glb> [...]');
   process.exit(2);
