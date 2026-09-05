@@ -361,6 +361,70 @@ top-hammer rigs.** `catalog_rocktool_english.pdf` holds no embedded photos at al
 
 ## 8. NOT SOURCED
 
+> ### RESOLVED 2026-09-05 — read this before using the list below
+>
+> Three entries in this section are **no longer true**, and one of them was
+> blocking the other two.
+>
+> **1. PDF pages CAN be rasterised on this machine.** The note at the foot of
+> this section says poppler / `pdftoppm` is missing and that "what remains
+> unread is anything that lives as vector line art or a dimensioned drawing on
+> the page". Poppler is indeed missing — but **PyMuPDF is installed**, and it
+> renders any page of any catalogue in this library at readable resolution:
+>
+> ```python
+> import pymupdf
+> d = pymupdf.open(path)
+> d[9].get_pixmap(matrix=pymupdf.Matrix(3, 3)).save('p10.png')   # 0-based page
+> ```
+>
+> That is how the `foundation-bg` general arrangement was finally read this
+> session. **Reach for it before writing another NOT SOURCED entry.**
+>
+> **2. "No rig-maker specification sheet for a top-hammer surface crawler
+> exists in the folder at all" — true of the folder, and no longer the
+> constraint.** `blender/crawler_th.py` now carries five, [S1]–[S5], each with
+> the URL it came from. The one that closes this section is **[S5] Epiroc
+> PowerROC T35 MkII, doc 9868 0035 01e**, whose PDF p.4 is a dimensioned GA —
+> side views labelled L1, L2, H1, H2, h2, l1, l2 and a plan view labelled W1 —
+> printed beside the table those letters belong to:
+>
+> | dimension | value |
+> |---|---|
+> | Length L1 / L2 | **8 900 / 9 030 mm** |
+> | **Width W1** | **2 430 mm** |
+> | Height H1 / H2 | **3 126 / 2 986 mm** |
+> | Feed height h1 · cab height h2 | 7 820 · 2 925 mm |
+> | Track l1 / l2 | 3 175 / 4 750 mm |
+> | Operating weight | **14 000 kg** (Tier 3) |
+> | Engine | CAT C7.1, **168 kW** @ 2 200 rpm |
+> | Compressor | screw, 9.3 bar, FAD **130 l/s** |
+> | Feed total / travel / extension / force | 7 820 / 4 400 / 1 500 mm / 21 kN |
+> | Hole diameter | **64–115 mm**, T38/T45/T51 |
+> | Boom | extension 800 mm, lift **+55° / −20°**, swing **43° right / 15° left** |
+>
+> So "overall length, width, height, transport height", "operating weight",
+> "engine power", "feed length and feed force" and the boom's travel are all
+> **now sourced**. The boom angles in particular were the gap that left the
+> model's defining motion undeclared, and they are now on the `pivot:` nodes.
+>
+> **3. The 2.45 m width is corroborated four more times.** It was [S1] alone
+> (Sandvik Ranger DX800). It is now Ranger **DX600 / DX700 / DX800 / DX800i /
+> DX900i all at 2.45 m**, PowerROC T35 at 2.430, FlexiROC T35 at 2.490 (plan
+> callout), PowerROC T25 DC at 2.350 and FlexiROC T30 R at 2.410. Nothing in
+> the class exceeds ~2.5 m, because road transport caps it.
+>
+> **A trap, recorded so nobody falls in it:** a widely-circulated snippet gives
+> the FlexiROC T35 R a width of "3 200 mm". **3 200 is H1, the height.**
+> Neither T35 brochure publishes a width row at all.
+>
+> **Still genuinely NOT SOURCED** out of the list below: track gauge as a
+> published figure (Epiroc and Sandvik publish overall width, grouser width and
+> ground-contact length, never centre-to-centre), oscillating/extendable
+> undercarriage, winch, ground pressure, gradeability, tramming speed, rod
+> magazine capacity on the quarry machine, and the drifter's own stroke.
+
+
 - **Overall length, width, height, transport height** — no dimensioned drawing
   of a top-hammer surface crawler exists in the supplied folder.
 - **Operating weight** — not found locally. The game claims 12 500 kg; I can

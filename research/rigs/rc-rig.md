@@ -422,6 +422,64 @@ place RC differs sharply from every other rig in the game:
 
 ## 8. NOT SOURCED
 
+> ### RESOLVED 2026-09-05 — a dimensioned GA of a tracked RC rig does exist
+>
+> This section's headline claim — that no dimensioned general arrangement of
+> any RC rig was found — is **no longer true**. Two manufacturer brochures
+> carry a dimensioned three-view of a tracked RC exploration rig, and both are
+> now cited in `blender/rc_rig.py`'s header with their URLs.
+>
+> **[E235] Epiroc Explorac 235**, doc 9868 0310 01f, brochure **p.7** — a
+> dimensioned 3-view in BOTH working and transport pose, spec tables pp.4-6.
+>
+> | dimension | value |
+> |---|---|
+> | Transport L x W x H | **11 100 x 3 450 x 4 640 mm** |
+> | Height, mast erected 90 deg | **11 220 mm** (8 050 at 45 deg) |
+> | Track shoe / grouser | **500 mm** |
+> | Feed stroke / pullback | **7 680 mm** / 220 kN |
+> | Operating weight | **46 500 kg** GMM (min 35 100) |
+> | Engine / compressor | 522 kW / 555 l/s at 35 bar (1 250 cfm at 510 psi) |
+> | Rods | **6 m (20 ft), OD 4.5 in (114.3 mm)**, 50 in the rack |
+>
+> **[E100] Epiroc Explorac 100**, doc 9868 0018 01f (2022-10), lettered GA on
+> **p.7** with its letter table on **p.6**: A overall height mast erected
+> **7 840**, B overall length working **6 120**, D transport height **2 980**,
+> E transport length **7 730**, F transport width **2 240** without rod rack /
+> **2 800** with. Weight 14 400 kg, feed travel 4 400 mm, rods 3 m OD 114.3 mm.
+>
+> **Section 9.A's lattice-truss instruction is now backed by a drawing.** The
+> [E235] mast on p.7 is unmistakably an open lattice with diagonal web bracing
+> between two chords along its full length. The [E100] mast on its p.7 is a
+> plain closed box beam. So **lattice-vs-box splits by size class and both
+> answers are sourced** — big, deep-capacity, 6 m rods, on-board ~1 250 cfm
+> means lattice.
+>
+> **What the model measures against that, verified per primitive, not assumed.**
+> `glbinfo` reports 7.883 x 7.214 x 7.606. The MACHINE lies inside
+> x = +/-1.561 — 3.12 m over the deployed jacks, between [E100]'s 2.80 and
+> [E235]'s 3.45, and **not too wide**. The 7.883 m bounding box is the site
+> spread: the free-standing cyclone stand, the calico bag rows, the chip trays
+> and the reject pile out at x = +5.250, plus the bull hose at -2.633. That is
+> correct content in the wrong NODE, not in the wrong place — and there is no
+> blender-side lever for it, because `src/core/gltfRig.js` derives `prep.size`
+> and `prep.radius` from the whole scene graph with no exclusion.
+>
+> **Left open on purpose, not guessed:** the machine is built at [E100] SIZE
+> (5.45 m mast, 3.05 m rods, 7.2 m erected against 7.84, 7.6 m long against
+> 7.73) but with [E235] FEATURES (open lattice mast, on-board power-and-air
+> pack). Those belong to different size classes. Committing to [E235] means
+> re-scaling by ~1.45 and going to 6 m rods; committing to [E100] means tearing
+> out the lattice this document asked for. That is a design decision with real
+> consequences either way and it is not made here.
+>
+> **Still NOT SOURCED:** mast cross-section (width x depth) for any machine in
+> the class — no manufacturer publishes it; track gauge as distinct from
+> overall width; cyclone STAND height (barrel diameter and body height are
+> published, e.g. Multi-Power PI at 27.5 in barrel / 36 in body for 1 150 CFM,
+> which is the right band for a 1 250 cfm rig).
+
+
 This list is as important as the findings. **Nothing below may be invented and presented as
 fact.** Where the model needs a number that is here, it must be declared as a modelling
 choice, not a specification.

@@ -357,6 +357,68 @@ mast foot with the tool on the ground) this document's weakest section closes.
 
 ## 8. NOT SOURCED
 
+> ### RESOLVED 2026-09-05 — the overall dimensions ARE published, and the
+> ### 27.100 m figure is real
+>
+> The first two bullets below say overall length/width/height and track
+> gauge/shoe width are unsourced "from a *local* file", and that "the bauma
+> catalogue pages carry no general arrangement". True of the bauma catalogue.
+> **Not true of the machine.** `blender/foundation_bg.py` [S1] is the full
+> product brochure for the 385 kNm rig on the 95-class base carrier, doc
+> 905.868.2, 12/2020, and this session re-fetched it and **read the drawings**
+> rather than only the extracted text.
+>
+> **How, because this is the part that was actually blocking everyone:**
+> poppler is missing on this machine (`crawler-th.md` section 8 records it) but
+> **PyMuPDF is installed**, and
+> `page.get_pixmap(matrix=pymupdf.Matrix(3, 3)).save(...)` renders any page of
+> any catalogue in this library legibly. Use it before writing a NOT SOURCED
+> entry about a drawing.
+>
+> **p.10 "Dimensions - Basic Version"**, operating weight 112 t as shown:
+> 25600 / 23390 / 19640 / Stroke 10000 / 13630 / 3630 / 1100 / 1170 /
+> 4040-5540* / 5680 / R 4640 / 1500 / **3380-4580** / **800** /
+> BK 420/470/3/36 / 5-5-5-15 deg.
+>
+> **p.16 "Application - Kelly Drilling"**, two GAs side by side. Upgraded
+> version: **27100** / 24110 / 19640 / Stroke 10000 / 13630 / 3630 / **1400** /
+> 1170 / 4340-5840* / R 4640 / **3000** / BK 420/470/4/48, over a table giving
+> mast extension 3 m, upper Kelly guide fitted, drilling axis 1 400 mm, max
+> drilling diameter 2 500 uncased / 2 200 cased, operating weight **131 t**.
+>
+> **So 27.100 m is printed on the page**, and the decode is confirmed rather
+> than merely arithmetic: 4 460 + 19 640 + 1 500 = 25 600 and
+> 4 460 + 19 640 + 3 000 = 27 100 are both printed, side by side, on one
+> drawing. ASTRA.md section 7.5 calls this figure unsourced; **that note is
+> stale.**
+>
+> **p.11 "Technical Specifications":** crawler overall length 5 680 / 6 090 /
+> 6 090 mm; track shoes **800 / 900 mm**; KDK 340 K and KDK 385 S at 342 / 385
+> kNm and 40 / 53 rpm; max sledge stroke with 3 m mast extension 20 090 mm.
+>
+> **p.23:** crawler unit dimensioned **6 090 x 1 070 x 1 130 mm**, 2 x 9.8 t.
+> Table "Width of crawlers retracted / extended" — 800 mm shoes
+> **3 400 - 4 600**; 900 mm shoes **3 500 - 4 700** (Standard and Upgraded),
+> 4 000 - 4 800 (Transport optimized). The 800 and 900 rows differ by exactly
+> one shoe-width step, which **proves the figures are measured over the shoes**
+> and that the centre gauge is 2 600 retracted / 3 800 extended either way.
+> Also: "Transport with UW 110 Transport Optimized Version, G = 63.9 t,
+> **B = 3,000 mm**" with the crawlers listed separately — so the whole
+> uppercarriage, cab included, is 3 000 mm across.
+>
+> **One correction to make in the file, recorded here too:** the counterweight
+> on p.23 is dimensioned **950 x 450** with B = 3 000 mm and G = 1 x 4.9 t +
+> 4 x 2.5 t. **1 720 is the ROTARY DRIVE's width** in the adjacent panel, not a
+> counterweight dimension — `foundation_bg.py`'s `CW_H` cites it as one. Do not
+> quote 1.720 as sourced.
+>
+> **Still NOT SOURCED** from the list below: mast cross-section width x depth
+> (BAUER's closest proxies are transport envelopes — lower mast section
+> 2 480 mm, upper section with masthead 2 100 mm); KDK external dimensions
+> (only masses: KDK 340 K 6.7 t, KDK 385 S 7.2 t); crowd-cylinder vs
+> crowd-winch architecture; Kelly element taper ratio; Kelly paint finish; cab
+> dimensions and whether it elevates.
+
 Honest list. None of these should be invented.
 
 - **Overall machine length / width / height** for any BG rig, from a *local* file.
