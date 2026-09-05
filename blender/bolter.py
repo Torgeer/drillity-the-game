@@ -1085,3 +1085,256 @@ def build_operator_station(root):
     roof = build_canopy(None)
     build_controls(None)
     return roof
+
+
+# =============================================================================
+# S6  THE BOOM, AND HOW ITS LENGTH IS DERIVED
+#
+#     One heavy universal boom - a bolter takes one where a jumbo takes two or
+#     three [R]S4.3. [BS]p.5 names the boom type but publishes no length, and
+#     [R]S8 is explicit that no bolter feed or boom length exists in any source
+#     it could reach. So both are DERIVED, and the derivation is arithmetic on
+#     printed dimensions rather than a guess:
+#
+#       [BS]p.7 prints tramming length            10.020 m
+#       [BS]p.7 chain sums to the bare carrier      6.457 m
+#       => boom + feed project ahead of the nose    3.563 m   FOLDED
+#
+#     Folded, the boom lies horizontal and retracted and the feed lies across
+#     it cradled at its middle, so that 3.563 m is spent as
+#
+#       (boom foot -> nose) is NEGATIVE: the foot is behind the nose
+#       BOOM_LEN + FEED_BODY/2 + FEED_NOSE  -  (Y_NOSE - Y_FOOT)  =  PROJ
+#
+#     which solves for BOOM_LEN. Every other term is either printed or set
+#     below with its own reasoning, so the boom length is the one unknown in an
+#     equation of knowns. It is still NOT a published figure and is marked so.
+#
+#     THE FEED IS TELESCOPIC, AND THAT IS THE POINT.
+#     A 2.4 m bolt [BS]p.5 needs a hole at least 50 mm longer (the game's own
+#     sourced rule, [GF] spec.holeRule) - 2.45 m - and this machine is sold for
+#     drives from 3 x 3 m [R]S3.1. A single-piece feed long enough to drill
+#     2.45 m could not stand up in a 3 m drive. Real bolting units solve it by
+#     extending: [BS]p.2 advertises "100 mm reduced feed length" and a short
+#     dead length as features, which only makes sense on a telescopic unit. So
+#     the hole depth here is the SUM of two strokes,
+#
+#       FEED_EXT (the beam pushes its centraliser onto the rock)  1.250
+#     + CARR_TRAV (the drill then runs up the beam)               1.300
+#     = 2.550 m of hole  >=  2.400 m bolt + 0.050 m               [BS]p.5 + [GF]
+#
+#     and the retracted unit is only 2.200 m tall, which stands up in a 3 m
+#     drive with room over it. That closure is why these three numbers are the
+#     ones chosen out of the family that would fit the same constraints.
+# =============================================================================
+
+Y_FOOT     = (Y_TICK_F + Y_NOSE) / 2   # 2.525 - the pedestal stands on the
+                                       # front-frame bay bounded by the two
+                                       # printed ticks [BS]p.7; the swing axis
+                                       # sits at its centre. DERIVED.
+Z_FOOT     = 1.440   # swing-bearing height. DERIVED: clear above the 0.920
+                     # deck by half a boom depth, so the boom can swing across
+                     # the front of the machine without sweeping the platform.
+                     # NOT SOURCED.
+
+FEED_BODY  = 2.200   # outer feed beam, cradle-mounted. DERIVED (see above):
+                     # it must stand in a 3 x 3 m drive [R]S3.1.
+FEED_EXT   = 1.250   # beam extension stroke                DERIVED (see above)
+CARR_TRAV  = 1.300   # carriage stroke on the beam          DERIVED (see above)
+HOLE_DEPTH = FEED_EXT + CARR_TRAV      # 2.550 m of hole for a 2.400 m bolt
+FEED_NOSE  = 0.350   # centraliser + feed foot standing proud of the beam at
+                     # rest. NOT SOURCED; sized off the 39 mm bolt and the
+                     # dust shroud it has to carry.
+FEED_W     = 0.300   # feed beam across the flats. NOT SOURCED - [R]S8 records
+FEED_D     = 0.240   # that no bolter feed section is published anywhere it
+                     # could reach. Sized off the drifter that has to sit in it.
+CRADLE_OFF = FEED_BODY / 2             # 1.100 - the cradle takes the beam at
+                                       # its middle, which is what makes the
+                                       # folded arithmetic above work.
+
+BOOM_LEN   = PROJ + Y_NOSE - Y_FOOT - CRADLE_OFF - FEED_NOSE   # 2.538 DERIVED
+BOOM_TELE  = 0.900   # telescope stroke. NOT SOURCED. [BS]p.7's coverage
+                     # diagram wants 2 m either side of centre with 2.4 m
+                     # bolts; swing plus this stroke reaches it.
+BOOM_W     = 0.290   # boom outer section. NOT SOURCED - sized so the inner
+BOOM_D     = 0.270   # section and its wear pads fit inside it.
+
+# The working pose. The machine is authored DRILLING THE BACK: feed vertical,
+# collar on the sourced 4.000 m coverage height [BS]p.7.
+COLLAR_Z   = COV_UP                       # 4.000 [BS]p.7 coverage diagram
+TIP_Z      = COLLAR_Z - (CRADLE_OFF + FEED_NOSE)   # 2.550 boom tip height
+BOOM_LIFT  = math.asin((TIP_Z - Z_FOOT) / BOOM_LEN)          # 0.4526 rad, 25.9 deg
+TIP_Y      = Y_FOOT + BOOM_LEN * math.cos(BOOM_LIFT)         # 4.807
+
+# The collar therefore lands ~1.86 m AHEAD of the nose. That is not an
+# accident of the arithmetic, it is how the machine is used: it bolts the
+# ground in front of itself so that the operator under the canopy is always
+# standing under back that has already been supported ([R]S2 - "it parks under
+# freshly blasted, unsupported ground" is the hazard the whole machine exists
+# to remove).
+
+
+def build_pedestal(parent):
+    """The boom pedestal: a tall triangular fabrication at the extreme front.
+
+    [R]S4.0: "the boom pedestal is a tall triangular fabrication at the extreme
+    front of the front frame, carrying the machine's name badge on its flank".
+    That flank is where mount:marque goes - the game's own invented marque, not
+    a copied badge (DOMAIN.md S10, [R] naming rule).
+    """
+    y0, y1 = Y_TICK_F - 0.060, Y_NOSE - 0.120
+    box('ped_base', (0.940, y1 - y0, 0.240), R.MAT_DARK, parent,
+        (0, (y0 + y1) / 2, FRAME_Z1 + 0.120), bevel=0.018)
+    # the two triangular cheek plates
+    for s in (-1, 1):
+        for i, (ay, az, by, bz) in enumerate((
+                (y0 + 0.080, FRAME_Z1 + 0.240, Y_FOOT, Z_FOOT),          # back leg
+                (y1 - 0.080, FRAME_Z1 + 0.240, Y_FOOT, Z_FOOT),          # front leg
+                (y0 + 0.080, FRAME_Z1 + 0.240, y1 - 0.080, FRAME_Z1 + 0.240))):
+            aim_box('ped_leg%d_%d' % (s > 0, i), 0.032, 0.190,
+                    (s * 0.300, ay, az), (s * 0.300, by, bz), R.MAT_PAINT,
+                    parent, bev=0.010)
+        box('ped_web%d' % (s > 0), (0.026, (y1 - y0) * 0.62, 0.560),
+            R.MAT_PAINT, parent,
+            (s * 0.300, (y0 + y1) / 2, FRAME_Z1 + 0.480), bevel=0.008)
+    # the swing-bearing housing at the top, with its bolt circle
+    cyl('ped_bearing', 0.230, 0.230, R.MAT_CAST, parent,
+        (0, Y_FOOT, Z_FOOT - 0.150), sides=18)
+    bolt_ring(parent, 'ped_bearingbolt', 0.185, 12, 0.020, 0.028, R.MAT_WORN,
+              (0, Y_FOOT, Z_FOOT + 0.080))
+    # the badge plate on the flank - a named attachment point, not geometry
+    R.empty(R.NODE_MOUNT, 'marque', parent,
+            (-0.316, (y0 + y1) / 2, FRAME_Z1 + 0.480), (0, math.radians(90), 0))
+    box('ped_badgeplate', (0.014, 0.520, 0.150), R.MAT_PAINT, parent,
+        (-0.316, (y0 + y1) / 2, FRAME_Z1 + 0.480), bevel=0.006)
+    # automatic boom lubrication on the rear part of the boom [BS]p.5
+    box('ped_lubepump', (0.180, 0.200, 0.260), R.MAT_DARK, parent,
+        (0.330, y0 + 0.200, FRAME_Z1 + 0.380), bevel=0.014)
+
+
+def build_boom(root):
+    """swing -> lift -> telescope, with the parallel-hold link and the hose
+    loom that rides over the top of it.
+
+    Node chain, and why each one exists:
+      pivot:boomSwing  vertical axis. This is a BOOM on a HINGED CARRIER, not
+                       a turret: the machine aims itself down the drive by
+                       breaking at the articulation pin, and the boom only
+                       trims from there [R]S4.1.
+      pivot:boomLift   transverse axis, the one big movement.
+      slide:boomTele   "square-section outer with a smaller inner that slides
+                       out; the joint line and the wear-pad adjusters are
+                       visible" [R]S4.3.
+
+    THE PARALLEL-HOLD LINKAGE is modelled and it is not trim: "a second link
+    rod running the length of the boom keeps the feed at a constant attitude
+    while the boom lifts. This is what lets the operator set the feed square to
+    the back and then just move the boom" [R]S4.3. In this file it is why
+    pivot:mast is authored at exactly -BOOM_LIFT: the feed's own frame cancels
+    the boom's lift, which is the linkage's job expressed as a transform.
+    """
+    swing = R.empty(R.NODE_PIVOT, 'boomSwing', root, (0, Y_FOOT, Z_FOOT))
+    swing['axis'] = 'z'
+    cyl('boom_slewhousing', 0.200, 0.260, R.MAT_CAST, swing, (0, 0, -0.130),
+        sides=18)
+    cyl('boom_slewcollar', 0.155, 0.120, R.MAT_PAINT, swing, (0, 0, 0.110),
+        sides=14)
+
+    lift = R.empty(R.NODE_PIVOT, 'boomLift', swing, (0, 0, 0),
+                   (BOOM_LIFT, 0, 0))
+    lift['axis'] = 'x'
+    # the lift knuckle
+    cyl('boom_knuckle', 0.135, 0.420, R.MAT_CAST, lift, (-0.210, 0, 0),
+        (0, math.pi / 2, 0), sides=14)
+    # outer boom section, along the boom's own +Y
+    L_OUT = BOOM_LEN - 0.620
+    box('boom_outer', (BOOM_W, L_OUT, BOOM_D), R.MAT_PAINT, lift,
+        (0, L_OUT / 2 + 0.140, 0), bevel=0.016)
+    # wear-pad adjuster bosses at the mouth of the outer section [R]S4.3
+    for s in (-1, 1):
+        for zz in (BOOM_D / 2 - 0.020, -BOOM_D / 2 + 0.020):
+            cyl('boom_pad%d_%d' % (s > 0, zz > 0), 0.026, 0.030, R.MAT_WORN,
+                lift, (s * (BOOM_W / 2 - 0.030), L_OUT + 0.120, zz), sides=6)
+    # the parallel-hold link rod, running the whole length beside the boom
+    aim_tube('boom_parlink', 0.030, (0.185, 0.060, 0.150),
+             (0.185, L_OUT + 0.060, 0.150), R.MAT_STEEL, lift, sides=8)
+    cyl('boom_parbell', 0.070, 0.110, R.MAT_WORN, lift, (0.185, 0.030, 0.150),
+        (0, math.pi / 2, 0), sides=10)
+
+    tele = R.empty(R.NODE_SLIDE, 'boomTele', lift, (0, L_OUT + 0.020, 0))
+    tele['travel_m'] = BOOM_TELE
+    tele['axis'] = 'y'
+    L_IN = BOOM_LEN - (L_OUT + 0.020)
+    box('boom_inner', (BOOM_W * 0.78, L_IN + 0.360, BOOM_D * 0.78), R.MAT_PAINT,
+        tele, (0, L_IN / 2 - 0.180, 0), bevel=0.012)
+    # head casting at the tip
+    cyl('boom_head', 0.150, 0.340, R.MAT_CAST, tele, (-0.170, L_IN, 0),
+        (0, math.pi / 2, 0), sides=14)
+
+    # -- the lift cylinder: barrel on the pedestal, chrome rod to the boom ----
+    # "one large cylinder under the boom, rod-out when the boom is up ... rods
+    # are bright chrome / Ni-Cr plated ... a chrome rod standing 400-800 mm
+    # proud of its barrel is the strongest single 'this machine is under load
+    # right now' cue in the whole model" [R]S4.3, [BS]p.5 Ni-Cr plated rods.
+    a = Vector((0, Y_FOOT - 0.520, Z_FOOT - 0.560))            # pedestal anchor
+    b_local = Vector((0, BOOM_LEN * 0.46, -BOOM_D / 2 - 0.075))  # on the boom
+    b = Vector((0, Y_FOOT, Z_FOOT)) + Vector((
+        0,
+        b_local.y * math.cos(BOOM_LIFT) - b_local.z * math.sin(BOOM_LIFT),
+        b_local.y * math.sin(BOOM_LIFT) + b_local.z * math.cos(BOOM_LIFT)))
+    v = b - a
+    mid = a + v * 0.54
+    ramp = R.empty(R.NODE_PIVOT, 'boomRam', root, tuple(a))
+    aim_tube('boomram_barrel', 0.085, tuple(a), tuple(mid), R.MAT_DARK, root,
+             sides=14)
+    aim_tube('boomram_rod', 0.046, tuple(mid), tuple(b), R.MAT_CHROME, root,
+             sides=12)
+    cyl('boomram_gland', 0.092, 0.070, R.MAT_WORN, root, tuple(mid),
+        tuple((b - a).to_track_quat('Z', 'Y').to_euler()), sides=12)
+    for p in (a, b):
+        cyl('boomram_eye%d' % (p is b), 0.062, 0.110, R.MAT_WORN, root,
+            (p.x - 0.055, p.y, p.z), (0, math.pi / 2, 0), sides=10)
+
+    return swing, lift, tele, L_IN
+
+
+def build_boom_hoses(lift, tele, L_out, L_in):
+    """The hose loom over the top of the boom, on saddle clamps.
+
+    "The hose loom runs OVER the top of the boom in a shallow arc, on a row of
+    regularly spaced saddle clamps - the drawing shows roughly eight clamps
+    along the boom. This is the single most characteristic service detail of
+    the machine, and it is drawn as an ordered run, not a mess" [R]S4.0.
+    And [R]S5.3 makes the catenary one of the six thumbnail tells: "thick
+    spiral-wrapped bundles hanging in visible loops ... a fat black scribble
+    across the yellow. Recognisable at 64 px."
+
+    So: an ORDERED run over the boom, and a DEEP FREE LOOP where it leaves the
+    frame. The loops are generous, not tight - they have to survive full boom
+    articulation, and "get the loop slack wrong and the machine reads as a toy"
+    [R]S4.7.
+    """
+    n_clamp = 8
+    for i in range(n_clamp):
+        y = 0.220 + (L_out - 0.320) * i / (n_clamp - 1)
+        cheapbox('boom_saddle%d' % i, (0.150, 0.048, 0.058), R.MAT_DARK, lift,
+                 (0, y, BOOM_D / 2 + 0.030))
+        cheapbox('boom_saddlecap%d' % i, (0.160, 0.040, 0.018), R.MAT_WORN,
+                 lift, (0, y, BOOM_D / 2 + 0.062))
+    # four hoses riding those saddles in a shallow arc
+    for j, (dx, rr) in enumerate(((-0.050, 0.024), (-0.017, 0.024),
+                                  (0.017, 0.028), (0.050, 0.021))):
+        pts = []
+        for i in range(6):
+            t = i / 5.0
+            y = 0.180 + (L_out + 0.140) * t
+            z = BOOM_D / 2 + 0.072 + math.sin(t * math.pi) * 0.045
+            pts.append((dx, y, z))
+        R.hose('boom_hose%d' % j, pts, radius=rr, parent=lift, sides=6)
+    # the drag loop that serves the sliding inner section
+    R.hose('boom_teleloop', [
+        (0.075, L_out - 0.320, BOOM_D / 2 + 0.080),
+        (0.135, L_out + 0.140, BOOM_D / 2 + 0.310),
+        (0.100, L_out + 0.560, BOOM_D / 2 + 0.180),
+        (0.060, L_out + L_in + 0.060, BOOM_D / 2 - 0.010),
+    ], radius=0.026, parent=lift, sides=6)
