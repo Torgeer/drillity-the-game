@@ -109,7 +109,7 @@ CAB_Y      =  0.720
 BOOM_X     = -0.320     # boom foot left of centreline so the operator in the
                         # right-hand cab sees the collar past it [P1][P2]
 BOOM_FOOT  = (BOOM_X, 1.380, 1.180)   # boom foot pin, on the front bulkhead
-BOOM_LEN   = 3.240      # gives a collar ~3.1 m ahead of the foot, inside the
+BOOM_LEN   = 3.200      # gives a collar ~3.1 m ahead of the foot, inside the
                         # 2.86-3.39 m sourced reach envelope [R]S3.1
 BOOM_RISE  = math.radians(17.0)   # rest attitude; 17 deg is a quoted feed
                                   # angle in the brochure diagrams [R]S4.2
@@ -638,11 +638,12 @@ BOOM_END = (0.0, BOOM_LEN * math.cos(BOOM_RISE), BOOM_LEN * math.sin(BOOM_RISE))
 UY = math.cos(BOOM_RISE)               # unit step along the boom, Y component
 UZ = math.sin(BOOM_RISE)               # ... and Z
 FEED_X = BOOM_X                        # beam axis, in line with the boom
-FEED_Y = BOOM_FOOT[1] + BOOM_END[1] + 0.140
-# 3.24 m ahead of the boom foot pin - inside the sourced 2.86-3.39 m envelope,
-# and 2.67 m of daylight ahead of the track front, which is the silhouette.
-FEED_GRIP = 2.060                      # height up the beam at which the cradle
+FEED_Y = BOOM_FOOT[1] + BOOM_END[1] + 0.320
+# 3.38 m ahead of the boom foot pin - inside the sourced 2.86-3.39 m envelope,
+# and 2.6 m of daylight ahead of the track front, which is the silhouette.
+FEED_GRIP = 2.256                      # height up the beam at which the cradle
                                        # grips it, so the foot lands at grade
+                                       # (mast pivot sits at z = 2.316)
 BW, BD = 0.430, 0.470                  # boom box section across / deep
 
 
@@ -655,7 +656,7 @@ def build_boom(root):
     for s in (-1, 1):
         R.box('boomcheek%d' % s, (0.040, 0.560, 0.640), R.MAT_DARK, root,
               (fx + s * (BW / 2 + 0.055), fy - 0.14, fz), bevel=0.012)
-    cyl('boompin_boss', 0.110, BW + 0.19, R.MAT_CAST, root,
+    cyl('boompin_boss', 0.110, BW + 0.19, R.MAT_DARK, root,
         (fx - (BW + 0.19) / 2, fy, fz), (0, math.radians(90), 0), sides=14)
     for s in (-1, 1):                                  # ram foot bracket
         R.box('rambkt%d' % s, (0.035, 0.320, 0.300), R.MAT_DARK, root,
@@ -766,10 +767,527 @@ def build_boom(root):
     join_by_mat(fswing, 'knuckle')
 
     # pivot:mast - the hole-angle node. Identity here = a vertical hole.
-    mast = R.empty(R.NODE_PIVOT, 'mast', fswing, (0, 0.140, 0.200))
+    mast = R.empty(R.NODE_PIVOT, 'mast', fswing, (0, 0.320, 0.200))
     mast['tilt_min_deg'] = -25.0   # brochure quotes feed angles at 17 and 25
     mast['tilt_max_deg'] = 50.0    # deg; the class drills "well past 45" [R]S2
     return mast
+
+
+def arrayed(name, size, mat, parent, start, step, count, rot=(0, 0, 0),
+            bev=0.0):
+    """One small part repeated by an ARRAY modifier.
+
+    A 45 mm feed chain over 9.9 m of beam is ~220 links. As 220 objects that is
+    220 join operations and a slow build; as one object with an ARRAY it is a
+    single mesh, baked at export by finish(export_apply=True), and it lands in
+    the same primitive as the rest of its material. Triangles, not draw calls.
+    """
+    o = R.box(name, size, mat, parent, start, rot, bevel=bev)
+    m = o.modifiers.new('arr', 'ARRAY')
+    m.use_relative_offset = False
+    m.use_constant_offset = True
+    m.constant_offset_displace = step
+    m.count = count
+    return o
+
+
+# =============================================================================
+# 4. FEED ASSEMBLY
+#
+#    Call it a FEED, never a mast [R]S4.1. It is an extruded ALUMINIUM profile
+#    of constant section end to end - not a lattice, not a welded steel box,
+#    and not painted the machine colour. "Getting this wrong is the fastest way
+#    to make the model read as the wrong tier of machine." [R]S4.1/S6.1
+#
+#    MATERIAL CAVEAT: src/core/assets.js has no aluminium kind. rawSteel is the
+#    nearest of the nine names rig.py exposes - satin, unpainted, bright. This
+#    is recorded as wrong-but-least-wrong; the right fix is an 'aluminium' kind
+#    in assets.js (see the report's stillWrong).
+#
+#    Beam-local frame: origin at the FEED FOOT, +Z up the beam, +Y away from
+#    the machine (the side the drill string runs on), +X to the machine's right.
+#
+#    The drill string axis is offset STRING_Y ahead of the beam's own axis, so
+#    the collar lands 3.19 m ahead of the front of the undercarriage - inside
+#    the sourced 2.70-3.19 m horizontal-reach envelope [R]S3.1. ASSUMPTION,
+#    recorded: the brochure does not say what that reach is measured from; this
+#    model reads it as track-front to hole centre, which is the only datum that
+#    makes both quoted figures land on a real machine layout.
+# =============================================================================
+
+STRING_Y  = 0.380      # drill string axis, ahead of the beam's own axis
+CARR_Z0   = 0.950      # bottom of carriage travel (clears the break-out table)
+CARR_Z1   = CARR_Z0 + FEED_TRAV        # 6.674 - leaves the top 3.29 m of beam
+                                       # never covered, which is exactly what
+                                       # [R]S4.11 describes
+CARR_REST = 3.350      # rest pose: mid-pass
+CAROUSEL_X = 0.640     # tube magazine, inboard side of the beam
+DUST_X    = -0.790     # cyclone + filter box, OUTBOARD side [R]S4.5
+
+
+def build_feed_beam(fx):
+    """The aluminium extrusion itself, its ways, its chain and its furniture."""
+    w, d, L = FEED_SEC_W, FEED_SEC_D, FEED_LEN
+
+    # -- the extrusion. Constant section end to end - extrusions do not taper.
+    R.box('feedprofile', (w, d, L), R.MAT_STEEL, fx, (0, 0, L / 2), bevel=0.012)
+    # integral machined ways along both side faces: the carriage clamps round
+    # these with slide pads, there are no separate round rails [R]S4.1
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            R.box('feedway%d%d' % (sx, sy), (0.030, 0.078, L), R.MAT_STEEL, fx,
+                  (sx * (w / 2 + 0.013), sy * (d / 2 - 0.062), L / 2), bevel=0.005)
+    # longitudinal flutes on the outer face - the visual tell of an extrusion
+    for i, x in enumerate((-0.150, -0.050, 0.050, 0.150)):
+        R.box('feedflute%d' % i, (0.044, 0.020, L), R.MAT_STEEL, fx,
+              (x, d / 2 + 0.009, L / 2), bevel=0.004)
+    for i, x in enumerate((-0.120, 0.120)):
+        R.box('feedrib%d' % i, (0.040, 0.018, L), R.MAT_STEEL, fx,
+              (x, -d / 2 - 0.008, L / 2), bevel=0.004)
+    # end castings
+    for z in (0.0, L):
+        R.box('feedend%d' % int(z), (w + 0.050, d + 0.050, 0.070), R.MAT_STEEL,
+              fx, (0, 0, z), bevel=0.010)
+
+    # -- 45 mm feed chain [R]S3.1, both runs, on the beam's inboard face -----
+    cz0, cz1 = 0.30, L - 0.34
+    n = int((cz1 - cz0) / 0.090)
+    for sx, tag in ((-1, 'a'), (1, 'b')):
+        arrayed('feedchain_' + tag, (0.030, 0.052, 0.046), R.MAT_WORN, fx,
+                (sx * 0.062, -d / 2 - 0.052, cz0), (0, 0, 0.090), n)
+    # chain guard strip over the run
+    R.box('chainguard', (0.230, 0.030, L - 0.80), R.MAT_DARK, fx,
+          (0, -d / 2 - 0.086, L / 2), bevel=0.005)
+    # feed motor + drive sprocket at the top, idler and tensioner at the foot
+    cyl('feedmotor', 0.108, 0.260, R.MAT_CAST, fx,
+        (0.300, -d / 2 - 0.075, L - 0.42), (0, math.radians(-90), 0), sides=12)
+    R.box('feedgearbox', (0.260, 0.230, 0.290), R.MAT_CAST, fx,
+          (0.130, -d / 2 - 0.075, L - 0.42), bevel=0.012)
+    cyl('feedsprocket', 0.118, 0.130, R.MAT_WORN, fx,
+        (-0.065, -d / 2 - 0.075, L - 0.42), (0, math.radians(90), 0), sides=14)
+    cyl('feedidler', 0.098, 0.120, R.MAT_WORN, fx,
+        (-0.060, -d / 2 - 0.075, 0.30), (0, math.radians(90), 0), sides=12)
+    cyl('feedtension', 0.026, 0.300, R.MAT_STEEL, fx,
+        (0, -d / 2 - 0.075, 0.30), (math.radians(90), 0, 0), sides=8)
+
+    # -- double drill tube support [R]S4.1: two centralisers that stop the
+    #    tube whipping, at the two heights the brochure implies.
+    for i, z in enumerate((1.320, 3.180)):
+        R.box('tubesup%d' % i, (0.300, 0.360, 0.110), R.MAT_DARK, fx,
+              (0, d / 2 + 0.190, z), bevel=0.010)
+        torus_ring('tubering%d' % i, TUBE_OD * 1.55, 0.030, R.MAT_WORN, fx,
+                   (0, STRING_Y, z))
+        R.box('tubesuparm%d' % i, (0.070, 0.230, 0.090), R.MAT_DARK, fx,
+              (0.150, d / 2 + 0.150, z), bevel=0.008)
+
+    # -- hose guide: the run to the rotary head must FOLLOW the carriage, so a
+    #    guided moving loop, never a straight taut line [R]S4.1/S4.10.
+    R.box('hosecarrier', (0.150, 0.075, CARR_Z1 - 0.30), R.MAT_DARK, fx,
+          (-w / 2 - 0.115, -0.030, (CARR_Z1 + 0.30) / 2), bevel=0.006)
+    arrayed('hoseclink', (0.130, 0.062, 0.060), R.MAT_DARK, fx,
+            (-w / 2 - 0.115, 0.060, 0.42), (0, 0, 0.085),
+            int((CARR_REST - 0.42) / 0.085))
+    for i, (r, dx) in enumerate(((0.052, 0.00), (0.030, 0.055), (0.022, -0.048))):
+        R.hose('feedhose%d' % i,
+               [(-w / 2 - 0.115 + dx, 0.06, 0.44),
+                (-w / 2 - 0.135 + dx, 0.10, CARR_REST - 0.85),
+                (-w / 2 - 0.330 + dx, 0.16, CARR_REST - 0.24),
+                (-w / 2 - 0.140 + dx, 0.20, CARR_REST + 0.12)],
+               radius=r, mat=R.MAT_RUBBER, parent=fx, sides=6)
+
+    # -- break-out table for cracking joints [R]S4.1 -------------------------
+    R.box('breakout', (0.760, 0.520, 0.170), R.MAT_DARK, fx,
+          (0, STRING_Y, 0.610), bevel=0.014)
+    for s in (-1, 1):
+        R.box('bojaw%d' % s, (0.300, 0.230, 0.130), R.MAT_WORN, fx,
+              (s * 0.230, STRING_Y + 0.03, 0.720), (0, 0, s * 0.24), bevel=0.010)
+        cyl('boram%d' % s, 0.034, 0.330, R.MAT_CHROME, fx,
+            (s * 0.100, STRING_Y - 0.180, 0.700), (0, s * math.radians(90), 0),
+            sides=10)
+        cyl('borambarrel%d' % s, 0.052, 0.220, R.MAT_DARK, fx,
+            (s * 0.430, STRING_Y - 0.180, 0.700), (0, s * math.radians(-90), 0),
+            sides=10)
+    # thread lubrication spray head - the one wet, dark, shiny area [R]S6.2
+    R.box('lubespray', (0.110, 0.130, 0.150), R.MAT_CAST, fx,
+          (-0.290, STRING_Y + 0.16, 0.860), bevel=0.008)
+
+    # -- feed foot: a substantial plate, not a peg ("wide feed foot" is a
+    #    listed option) [R]S4.1. Takes the drilling reaction on the rock.
+    R.box('feedfoot', (0.820, 0.680, 0.075), R.MAT_WORN, fx,
+          (0, STRING_Y * 0.55, 0.040), bevel=0.010)
+    for s in (-1, 1):
+        R.box('feedfootrib%d' % s, (0.045, 0.560, 0.190), R.MAT_WORN, fx,
+              (s * 0.300, STRING_Y * 0.55, 0.150), bevel=0.008)
+    R.box('feedfoothaz', (0.840, 0.110, 0.045), R.MAT_HAZARD, fx,
+          (0, STRING_Y * 0.55 + 0.330, 0.100), bevel=0.006)
+
+    # -- service winch jib near the top of the beam [R]S4.1 (listed option) --
+    cyl('jibmast', 0.048, 0.560, R.MAT_STEEL, fx, (0.190, 0.10, L - 0.90), sides=10)
+    aim_tube('jib', 0.042, (0.190, 0.10, L - 0.36), (0.190, 0.86, L - 0.20),
+             R.MAT_STEEL, fx, sides=10)
+    cyl('jibsheave', 0.075, 0.045, R.MAT_CAST, fx,
+        (0.168, 0.86, L - 0.20), (0, math.radians(90), 0), sides=14)
+    R.hose('jibrope', [(0.190, 0.86, L - 0.24), (0.190, 0.87, L - 1.60),
+                       (0.185, 0.84, L - 2.60)],
+           radius=0.010, mat=R.MAT_STEEL, parent=fx, sides=4)
+
+
+def build_dust_package(fx):
+    """Cyclone + filter box hung on the OUTBOARD side of the feed, with the
+    203 mm corrugated suction hose sweeping in a lazy S from the collar hood.
+
+    [R]S9.4 records that the game currently has only a small skirt at the mast
+    base. On a DTH rig this package is second only to the compressor in visual
+    weight: 1,270 l/s of suction through an 8 in hose that is "as thick as a
+    man's thigh". [R]S4.5 / S5 #3.
+    """
+    # brackets off the beam
+    for z in (3.30, 5.05):
+        R.box('dustbkt%d' % int(z * 10), (0.560, 0.170, 0.120), R.MAT_DARK, fx,
+              (DUST_X / 2 - 0.12, 0.020, z), bevel=0.010)
+    # cyclone can - tall, black, with a conical bottom
+    cyl('cyclone', 0.320, 1.560, R.MAT_DARK, fx, (DUST_X, 0.020, 3.320), sides=18)
+    bpy.ops.mesh.primitive_cone_add(radius1=0.320, radius2=0.105, depth=0.520,
+                                    vertices=18)
+    R.part('cyclonecone', bpy.context.active_object, R.MAT_DARK, fx,
+           (DUST_X, 0.020, 3.060))
+    cyl('cyclonespout', 0.105, 0.230, R.MAT_DARK, fx, (DUST_X, 0.020, 2.640), sides=12)
+    torus_ring('cyclonering', 0.325, 0.024, R.MAT_DARK, fx, (DUST_X, 0.020, 3.900))
+    # tangential inlet - where the 203 mm hose lands
+    cyl('cycloneinlet', SUCT_D / 2 + 0.020, 0.320, R.MAT_DARK, fx,
+        (DUST_X + 0.300, -0.240, 4.560), (math.radians(78), 0, math.radians(38)),
+        sides=12)
+    # filter box on top - house colour in both photographs [R]S4.5
+    R.box('filterbox', (0.900, 0.700, 0.860), R.MAT_PAINT, fx,
+          (DUST_X, 0.020, 5.310), bevel=0.026)
+    R.box('filterlid', (0.940, 0.740, 0.070), R.MAT_PAINT, fx,
+          (DUST_X, 0.020, 5.770), bevel=0.014)
+    for i in range(3):                       # filter element access caps
+        cyl('filtcap%d' % i, 0.098, 0.075, R.MAT_DARK, fx,
+            (DUST_X - 0.28 + 0.28 * i, 0.020, 5.805), sides=12)
+    # pulse-clean air line down to the filter box
+    R.hose('pulseline', [(DUST_X + 0.42, -0.15, 3.10), (DUST_X + 0.44, -0.22, 4.40),
+                         (DUST_X + 0.36, -0.28, 5.30)],
+           radius=0.018, mat=R.MAT_RUBBER, parent=fx, sides=4)
+    # cleaned-air return, the smaller second hose [R]S4.5
+    R.hose('cleanreturn', [(DUST_X - 0.30, 0.34, 5.10), (DUST_X - 0.44, 0.50, 3.60),
+                           (DUST_X - 0.28, 0.46, 2.10), (-0.14, STRING_Y + 0.34, 0.95)],
+           radius=0.062, mat=R.MAT_RUBBER, parent=fx, sides=8)
+    # THE hose: 203 mm corrugated, hood at the collar up to the cyclone inlet.
+    # At 8 in this is unmissable at thumbnail size and nothing else in the
+    # game's fleet has it [R]S5 #3.
+    R.hose('suctionhose',
+           [(-0.18, STRING_Y + 0.30, 0.62),
+            (DUST_X + 0.55, STRING_Y + 0.55, 1.55),
+            (DUST_X + 0.10, STRING_Y + 0.10, 2.90),
+            (DUST_X + 0.34, -0.16, 4.30),
+            (DUST_X + 0.30, -0.24, 4.52)],
+           radius=SUCT_D / 2, mat=R.MAT_RUBBER, parent=fx, sides=12)
+    # corrugation rings on the suction hose - triangles, not draw calls
+    for i in range(14):
+        t = i / 13.0
+        z = 0.75 + t * 3.60
+        x = -0.18 + (DUST_X + 0.30 + 0.18) * (t ** 0.65)
+        y = STRING_Y + 0.30 - (STRING_Y + 0.54) * (t ** 1.3)
+        torus_ring('corr%d' % i, SUCT_D / 2 + 0.014, 0.016, R.MAT_RUBBER, fx,
+                   (x, y, z), (math.radians(20 * (1 - t)), 0, 0), maj=12, min_=5)
+
+
+def build_carousel(fx):
+    """Hydraulic tube handling: a magazine of tubes on the feed with a swing
+    arm that lifts one into line with the head [R]S4.9. Tubes are visibly
+    FATTER and FEWER than a top-hammer rod magazine - 114 mm OD, 5 m long."""
+    cx, cy = CAROUSEL_X, 0.060
+    z0, z1 = 2.100, 2.100 + TUBE_LEN
+    drum = R.empty(R.NODE_PIVOT, 'carousel', fx, (cx, cy, (z0 + z1) / 2))
+    drum['tubes'] = 6
+    drum['tube_od_m'] = TUBE_OD
+    drum['tube_len_m'] = TUBE_LEN
+    for z in (-(TUBE_LEN / 2) - 0.09, (TUBE_LEN / 2) + 0.09):
+        cyl('carplate', 0.360, 0.075, R.MAT_DARK, drum, (0, 0, z), sides=16)
+    cyl('carshaft', 0.075, TUBE_LEN + 0.18, R.MAT_DARK, drum,
+        (0, 0, -(TUBE_LEN / 2) - 0.09), sides=12)
+    for i in range(6):
+        a = TAU * i / 6
+        px, py = 0.280 * math.cos(a), 0.280 * math.sin(a)
+        cyl('tube%d' % i, TUBE_OD / 2, TUBE_LEN, R.MAT_STEEL, drum,
+            (px, py, -TUBE_LEN / 2), sides=10)
+        # upset thread ends, polished bright where the wrench grips [R]S6.1
+        for zz in (-TUBE_LEN / 2, TUBE_LEN / 2 - 0.140):
+            cyl('tubeend%d' % i, TUBE_OD / 2 + 0.011, 0.140, R.MAT_WORN, drum,
+                (px, py, zz), sides=10)
+    join_by_mat(drum, 'carousel')
+
+    # magazine frame and the swing arm that presents a tube to the head
+    R.box('carframe', (0.520, 0.240, 0.180), R.MAT_DARK, fx,
+          (cx - 0.180, cy, z0 - 0.220), bevel=0.012)
+    R.box('carframe2', (0.520, 0.240, 0.180), R.MAT_DARK, fx,
+          (cx - 0.180, cy, z1 + 0.220), bevel=0.012)
+    arm = R.empty(R.NODE_PIVOT, 'rodArm', fx, (cx - 0.150, cy, z1 - 0.520))
+    arm['reach_m'] = 0.760
+    R.box('rodarm', (0.700, 0.130, 0.110), R.MAT_DARK, arm, (-0.330, 0, 0),
+          bevel=0.010)
+    torus_ring('rodgrip', TUBE_OD / 2 + 0.048, 0.036, R.MAT_DARK, arm,
+               (-0.680, 0, 0), (math.radians(90), 0, 0))
+    cyl('rodarmpin', 0.055, 0.180, R.MAT_CAST, arm, (0, -0.090, 0),
+        (math.radians(-90), 0, 0), sides=10)
+    join_by_mat(arm, 'rodarm')
+
+
+def build_carriage(fx):
+    """slide:carriage - the rotary head and what it rides on.
+
+    NOT a drifter. There is no percussion on the deck: the hammer is at the
+    bottom of the hole. A compact gearbox with a hydraulic motor hanging off
+    it, an air/water swivel above, two big hoses in from the side, and a
+    threaded box output (API 2 3/8 or 3 1/2 REG) [R]S4.3. Silhouette-wise the
+    carriage must read as a LUMP, not a sausage [R]S5 #5.
+    """
+    car = R.empty(R.NODE_SLIDE, 'carriage', fx, (0, 0, CARR_REST))
+    car['travel_min_m'] = CARR_Z0
+    car['travel_max_m'] = CARR_Z1
+    car['travel_m'] = FEED_TRAV
+    car['rate_ms'] = 0.9              # feed rate 0.9 m/s [R]S3.1
+    car['force_kn'] = 40.0            # feed force 40 kN [R]S3.1
+
+    w, d = FEED_SEC_W, FEED_SEC_D
+    # the sled that clamps round the extrusion's machined ways
+    R.box('sled', (w + 0.150, d + 0.090, 0.620), R.MAT_DARK, car, (0, 0, 0),
+          bevel=0.016)
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            R.box('slidepad%d%d' % (sx, sy), (0.045, 0.110, 0.560),
+                  R.MAT_WORN, car, (sx * (w / 2 + 0.020), sy * (d / 2 - 0.062), 0),
+                  bevel=0.005)
+    R.box('chainlug', (0.120, 0.090, 0.240), R.MAT_DARK, car,
+          (0.062, -d / 2 - 0.055, 0), bevel=0.008)
+
+    # rotary head: a dark, oily, cast-and-fabricated block
+    R.box('rothead', (0.420, 0.480, 0.520), R.MAT_CAST, car,
+          (0, STRING_Y - 0.030, 0.020), bevel=0.020)
+    cyl('rotmotor', 0.135, 0.320, R.MAT_CAST, car,
+        (-0.190, STRING_Y - 0.030, 0.150), (0, math.radians(-90), 0), sides=14)
+    R.box('rotmotorface', (0.075, 0.260, 0.260), R.MAT_CAST, car,
+          (-0.520, STRING_Y - 0.030, 0.150), bevel=0.010)
+    torus_ring('rotflange', 0.150, 0.022, R.MAT_WORN, car,
+               (-0.208, STRING_Y - 0.030, 0.150), (0, math.radians(90), 0))
+    # air / water swivel above the head, and the 30 bar line into it
+    cyl('swivel', 0.105, 0.240, R.MAT_CAST, car, (0, STRING_Y, 0.290), sides=14)
+    cyl('swivelinlet', 0.060, 0.190, R.MAT_WORN, car,
+        (0, STRING_Y, 0.360), (math.radians(-90), 0, 0), sides=10)
+    for i, (r, dx) in enumerate(((0.058, -0.14), (0.034, 0.10), (0.026, 0.16))):
+        R.hose('carhose%d' % i,
+               [(-FEED_SEC_W / 2 - 0.14, 0.20, 0.10),
+                (-0.34 + dx * 0.5, STRING_Y - 0.24, 0.34 + i * 0.04),
+                (dx, STRING_Y + 0.05, 0.40)],
+               radius=r, mat=R.MAT_RUBBER, parent=car, sides=6)
+    # threaded box output - API REG. The tool hangs from mount:tool.
+    cyl('spindlebox', 0.098, 0.260, R.MAT_STEEL, car,
+        (0, STRING_Y, -0.360), sides=12)
+    for i in range(5):
+        torus_ring('thread%d' % i, 0.099, 0.007, R.MAT_STEEL, car,
+                   (0, STRING_Y, -0.330 + i * 0.020), maj=10, min_=4)
+    join_by_mat(car, 'carriage')
+
+    spindle = R.empty(R.NODE_PIVOT, 'spindle', car, (0, STRING_Y, -0.100))
+    spindle['rpm_min'] = 54.0         # rotary head 54-137 rpm [R]S4.3.
+    spindle['rpm_max'] = 137.0        # torque range 1,839-6,600 Nm, but the
+                                      # rpm<->torque PAIRING is NOT SOURCED.
+    R.empty(R.NODE_MOUNT, 'tool', spindle, (0, 0, -0.290))
+    return car
+
+
+def build_dust_hood(fx):
+    """The movable lower guide / dust hood that seals against the ground at the
+    collar [R]S4.1. slide:dustHood drops it onto the rock. The lower 1.5 m of
+    the beam and the whole hood are the filthiest parts of the machine
+    [R]S6.2 - caked, not filmed."""
+    hood = R.empty(R.NODE_SLIDE, 'dustHood', fx, (0, STRING_Y, 0.160))
+    hood['drop_m'] = 0.420
+    R.box('hoodbody', (0.680, 0.640, 0.300), R.MAT_PAINT, hood, (0, 0, 0.180),
+          bevel=0.016)
+    R.box('hoodmouth', (0.760, 0.720, 0.070), R.MAT_PAINT, hood, (0, 0, 0.020),
+          bevel=0.012)
+    R.box('hoodhaz', (0.780, 0.090, 0.190), R.MAT_HAZARD, hood, (0, 0.360, 0.185),
+          bevel=0.008)
+    # rubber skirt that actually seals on broken rock
+    for i in range(12):
+        a = TAU * i / 12
+        R.box('skirt%d' % i, (0.130, 0.030, 0.170), R.MAT_RUBBER, hood,
+              (0.330 * math.cos(a), 0.330 * math.sin(a), -0.060), (0, 0, -a),
+              bevel=0.004)
+    cyl('hoodport', SUCT_D / 2 + 0.018, 0.220, R.MAT_DARK, hood,
+        (-0.180, -0.060, 0.230), (math.radians(-64), 0, math.radians(-30)),
+        sides=12)
+    # the guide bushing the drill tube actually passes through
+    torus_ring('hoodguide', TUBE_OD * 1.9, 0.034, R.MAT_WORN, hood, (0, 0, 0.330))
+    join_by_mat(hood, 'dusthood')
+    return hood
+
+
+def build_feed(mast):
+    """Assemble everything that hangs off pivot:mast."""
+    # cradle: the fabricated saddle the beam slides in, painted the dark tone
+    # Open-fronted U: a back plate and two cheeks. It cannot be a closed box -
+    # the carriage has to pass it on the ways when the head runs low.
+    R.box('cradleback', (FEED_SEC_W + 0.300, 0.110, 1.180), R.MAT_DARK, mast,
+          (0, -FEED_SEC_D / 2 - 0.085, 0), bevel=0.018)
+    for sx in (-1, 1):
+        R.box('cradlecheek%d' % sx, (0.055, FEED_SEC_D + 0.110, 1.180),
+              R.MAT_DARK, mast, (sx * (FEED_SEC_W / 2 + 0.112), -0.010, 0),
+              bevel=0.012)
+        R.box('cradlerib%d' % sx, (0.120, 0.090, 0.240), R.MAT_DARK, mast,
+              (sx * (FEED_SEC_W / 2 + 0.112), -FEED_SEC_D / 2 - 0.140, 0.420),
+              bevel=0.008)
+        R.box('cradlepad%d' % sx, (0.032, FEED_SEC_D - 0.04, 1.020), R.MAT_WORN,
+              mast, (sx * (FEED_SEC_W / 2 + 0.070), 0, 0), bevel=0.006)
+    # feed-extension ram: the beam slides 2.01 m in the cradle to place the
+    # collar without moving the boom [R]S3.1/S4.1
+    cyl('extbarrel', 0.070, 1.020, R.MAT_DARK, mast,
+        (-FEED_SEC_W / 2 - 0.150, -FEED_SEC_D / 2 - 0.060, -0.500), sides=12)
+    R.box('cradlebkt', (0.180, 0.160, 0.130), R.MAT_DARK, mast,
+          (-FEED_SEC_W / 2 - 0.150, -FEED_SEC_D / 2 - 0.060, -0.560), bevel=0.008)
+    # bulkhead plate: the hose package terminates here, it does not run end to
+    # end [H] "Schottplatte"
+    R.box('bulkhead', (0.330, 0.032, 0.240), R.MAT_WORN, mast,
+          (FEED_SEC_W / 2 + 0.180, -FEED_SEC_D / 2 - 0.150, 0.180), bevel=0.006)
+    for i in range(6):
+        cyl('bhcoupling%d' % i, 0.019, 0.075, R.MAT_WORN, mast,
+            (FEED_SEC_W / 2 + 0.075 + 0.042 * (i % 3),
+             -FEED_SEC_D / 2 - 0.190, 0.110 + 0.130 * (i // 3)),
+            (math.radians(-90), 0, 0), sides=6)
+    join_by_mat(mast, 'cradle')
+
+    # slide:feedExtend - the beam and everything bolted to it
+    fx = R.empty(R.NODE_SLIDE, 'feedExtend', mast, (0, 0, -FEED_GRIP))
+    fx['travel_m'] = FEED_EXT
+
+    build_feed_beam(fx)
+    build_dust_package(fx)
+
+    # feed-mounted work lights, including the one the brochure names:
+    # "halogen work light pointing to feed support" [R]S4.6
+    R.box('lampbox_hi', (0.200, 0.150, 0.150), R.MAT_DARK, fx,
+          (0.330, 0.230, CARR_Z1 + 0.60), bevel=0.010)
+    R.worklight('feedHigh', fx, (0.330, 0.300, CARR_Z1 + 0.60),
+                (0.0, 0.35, -1.0), cone_deg=48, range_m=22)
+    R.box('lampbox_lo', (0.180, 0.140, 0.140), R.MAT_DARK, fx,
+          (0.360, 0.240, 1.560), bevel=0.010)
+    R.worklight('feedCollar', fx, (0.360, 0.310, 1.560),
+                (0.0, 0.45, -1.0), cone_deg=60, range_m=14)
+
+    build_string_guard(fx)
+    build_carousel(fx)
+    build_carriage(fx)
+    build_dust_hood(fx)
+    # joined LAST, so the carousel frame and the guard fold into the same
+    # primitives as the beam instead of buying draw calls of their own
+    join_by_mat(fx, 'feed')
+    return fx
+
+
+# =============================================================================
+# 5. SUPPORT LEG, GUARDING AND WORK LIGHTS
+#
+#    [R]S9.3: the game puts FOUR outriggers on this rig. Neither reference
+#    photograph shows four jacks on a machine this size - the brochure lists
+#    "a single hydraulic support leg", and levelling is done by the boom plus
+#    the feed foot on the rock. One leg, therefore, and it is recorded in
+#    [R]S9.3 as read from photographs rather than from a spec sheet.
+#
+#    Work lights matter more here than they look: src/core/env.js reads the
+#    world position of every mount:/aim: pair EVERY FRAME and re-aims a
+#    spotlight at it, which is why a lamp on a boom sweeps as the boom works.
+#    Two of these are on the feed (built with the feed), one is on the boom so
+#    it sweeps, and the rest are on the carrier.
+# =============================================================================
+
+def build_support_leg(root):
+    """Single rear hydraulic support leg [R]S4.8. Not four outriggers."""
+    lx, ly = 0.0, BODY_Y0 - 0.060
+    R.box('leghousing', (0.420, 0.360, 0.560), R.MAT_DARK, root,
+          (lx, ly, DECK_Z - 0.420), bevel=0.016)
+    cyl('legbarrel', 0.115, 0.640, R.MAT_DARK, root, (lx, ly, 0.220), sides=14)
+    cyl('leggland', 0.098, 0.070, R.MAT_CAST, root, (lx, ly, 0.180), sides=14)
+    for i, s in enumerate((-1, 1)):
+        R.hose('leghose%d' % i,
+               [(lx + s * 0.14, ly + 0.10, DECK_Z - 0.30),
+                (lx + s * 0.22, ly + 0.02, 0.62),
+                (lx + s * 0.13, ly + 0.06, 0.30)],
+               radius=0.018, mat=R.MAT_RUBBER, sides=4)
+    leg = R.empty(R.NODE_SLIDE, 'supportLeg', root, (lx, ly, 0.180))
+    leg['stroke_m'] = 0.560
+    cyl('legrod', 0.070, 0.360, R.MAT_CHROME, leg, (0, 0, -0.360), sides=12)
+    cyl('legpivot', 0.080, 0.180, R.MAT_CAST, leg, (-0.090, 0, -0.360),
+        (0, math.radians(90), 0), sides=10)
+    R.box('legfoot', (0.480, 0.480, 0.070), R.MAT_WORN, leg, (0, 0, -0.400),
+          bevel=0.012)
+    R.box('legfoothaz', (0.500, 0.090, 0.050), R.MAT_HAZARD, leg,
+          (0, 0.230, -0.372), bevel=0.006)
+    join_by_mat(leg, 'supportleg')
+    return leg
+
+
+def build_string_guard(fx):
+    """EN 16228 guarding round the rotating string at the working level
+    [R]S4.7 (a listed option on the brochure). Galvanised mesh, dull grey, no
+    gloss - and it is the detail that says this machine was built after the
+    standard existed."""
+    gy = STRING_Y
+    for sx in (-1, 1):
+        R.box('guardpost%d' % sx, (0.045, 0.045, 1.180), R.MAT_STEEL, fx,
+              (sx * 0.560, gy + 0.480, 0.700), bevel=0.005)
+        R.box('guardpostb%d' % sx, (0.045, 0.045, 1.180), R.MAT_STEEL, fx,
+              (sx * 0.560, gy - 0.180, 0.700), bevel=0.005)
+        for i in range(6):                      # mesh infill, vertical wires
+            R.box('guardw%d%d' % (sx, i), (0.016, 0.016, 1.080), R.MAT_STEEL, fx,
+                  (sx * 0.560, gy - 0.180 + 0.132 * i, 0.700), bevel=0.003)
+    for i in range(5):                          # horizontal wires, both sides
+        z = 0.180 + 0.260 * i
+        for sx in (-1, 1):
+            R.box('guardh%d%d' % (sx, i), (0.016, 0.700, 0.016), R.MAT_STEEL, fx,
+                  (sx * 0.560, gy + 0.150, z), bevel=0.003)
+    R.box('guardhaz', (1.180, 0.030, 0.090), R.MAT_HAZARD, fx,
+          (0, gy + 0.500, 1.240), bevel=0.005)
+
+
+def build_lights(root, boom_lift):
+    """Lamp housings plus the mount:/aim: pairs env.js drives.
+
+    Sourced fitting list [R]S4.6: "LED / halogen work lights front, rear and on
+    the feed", including a "halogen work light pointing to feed support".
+    """
+    x0 = CAB_X - CAB_W / 2
+    z_roof = DECK_Z + 0.070 + CAB_H
+    # two forward lamps on the cab roof bar
+    cyl('lampbar', 0.022, CAB_W + 0.20, R.MAT_DARK, root,
+        (CAB_X - (CAB_W + 0.20) / 2, CAB_Y + CAB_D / 2 - 0.02, z_roof + 0.090),
+        (0, math.radians(90), 0), sides=8)
+    for i, dx in enumerate((-0.34, 0.34)):
+        R.box('lamphead%d' % i, (0.200, 0.130, 0.170), R.MAT_DARK, root,
+              (CAB_X + dx, CAB_Y + CAB_D / 2 + 0.03, z_roof + 0.150), bevel=0.012)
+        R.box('lamplens%d' % i, (0.165, 0.020, 0.135), R.MAT_GLASS, root,
+              (CAB_X + dx, CAB_Y + CAB_D / 2 + 0.10, z_roof + 0.150), bevel=0.004)
+        R.worklight('cab%d' % i, root,
+                    (CAB_X + dx, CAB_Y + CAB_D / 2 + 0.11, z_roof + 0.150),
+                    (dx * 0.35, 1.0, -0.55), cone_deg=56, range_m=30)
+    # rear lamp over the cooler face, for tramming and service
+    R.box('lampheadr', (0.190, 0.130, 0.160), R.MAT_DARK, root,
+          (-0.70, BODY_Y0 - 0.03, CANOPY_Z - 0.22), bevel=0.012)
+    R.box('lamplensr', (0.155, 0.020, 0.125), R.MAT_GLASS, root,
+          (-0.70, BODY_Y0 - 0.10, CANOPY_Z - 0.22), bevel=0.004)
+    R.worklight('rear', root, (-0.70, BODY_Y0 - 0.11, CANOPY_Z - 0.22),
+                (0.0, -1.0, -0.60), cone_deg=64, range_m=22)
+    # the boom lamp - parented to pivot:boomLift, so it SWEEPS as the boom
+    # works. This is the whole reason env.js reads these nodes every frame.
+    R.box('lamphead_b', (0.180, 0.150, 0.150), R.MAT_DARK, boom_lift,
+          (0.290, UY * 1.05, UZ * 1.05 + BD / 2 + 0.11), bevel=0.010)
+    R.worklight('boom', boom_lift,
+                (0.290, UY * 1.05 + 0.09, UZ * 1.05 + BD / 2 + 0.11),
+                (-0.25, 1.0, -0.42), cone_deg=44, range_m=34)
+    # re-run the boom join so the lamp housing folds into the mesh that is
+    # already there instead of buying a draw call of its own
+    join_by_mat(boom_lift, 'boom')
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -785,7 +1303,10 @@ def build(out_path):
     build_canopy(None)
     build_cab(None)
     build_access(None)
-    build_boom(root)
+    mast = build_boom(root)
+    build_feed(mast)
+    build_support_leg(root)
+    build_lights(root, bpy.data.objects[R.NODE_PIVOT + 'boomLift'])
 
     bake_all()
     return R.finish(out_path)
