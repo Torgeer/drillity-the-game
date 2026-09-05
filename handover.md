@@ -216,3 +216,26 @@ every preserved asset/WIP lives, then pause the follow-up and stop.
 **Final shutdown commit:** pending.
 **Verified GitHub head:** pending; only authentication dry-run completed so far.
 **Final full-build result:** pending after integration.
+
+## Live update after parallel-Claude planning
+
+Latest integrations after the initial draft: 119e5cf contract board (44 headed
+states/160 assertions, root self-test and visual review; task archived), 1b913e8
+completion receipts and owned rig capacity (all frozen independent-review hashes
+matched before commit), and the reviewed shop-preview source plus root 98-case
+catalogue against all19 current models. Preview task is archived after review.
+The older uncommitted/pending descriptions above describe the first draft.
+
+CLAUDE_PARALLEL.md now defines a proposed20worker site-environment team: eight
+builders, eight independent critics, and four runtime/asset/provenance/performance
+specialists. Claude has not yet been connected or confirmed running. Codex has
+reserved the eight new Blender sites and site portions of terrain.js/site.py
+from duplicate assignment. The same shared GPU lease applies to concurrent work.
+
+Current GPU owner: ui-atlas. Parent agents are regenerating four optimization
+exports with current shared libraries and fixing the instrument composite's
+missing shader warm-up. Domain follow-up incremental source is independently
+reviewed, actual-font browser validation remains due. Tunnel-cycle delivery
+fixes the economy fallback only; measured-par progression and public estimator
+still need a coordinated follow-through. The new tool catalogue task owns alias
+arguments and narrow T45 bit data, not rockbolt items or rig definitions.
