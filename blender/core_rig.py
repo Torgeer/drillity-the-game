@@ -447,7 +447,15 @@ def build(out_path):
         node['axis'] = 'z'
         # parked with the pad exactly on the ground: the node's own travel is
         # the published 550 mm, so the game can lift the machine off its tracks.
-        parts = [R.tube('jrod', 0.062, 0.42, R.MAT_CHROME, loc=(0, 0, -0.37), sides=10),
+        # R.MAT_WORN, not R.MAT_CHROME.  Same arithmetic as jpin below: 36
+        # triangles in each of FOUR jack groups is four draw calls for 144
+        # triangles.  A chrome rod earns a call when it is long, extended, lit
+        # and moving; this one is a 420 mm stub that spends the whole game
+        # parked with its pad on the ground, buried in the case above it and
+        # the pad below it, both of which are already dark or worn.  The mast
+        # tilt rams and the feed rod - the two chrome rods on this machine a
+        # player can actually see extend - are untouched.
+        parts = [R.tube('jrod', 0.062, 0.42, R.MAT_WORN, loc=(0, 0, -0.37), sides=10),
                  disc('jpad', JACK_PAD_R, 0.05, R.MAT_WORN, (0, 0, -0.395), 'Z', sides=12),
                  # R.MAT_WORN, not R.MAT_STEEL.  Twelve triangles — one
                  # unbevelled box — and because it appears in all four jack
@@ -527,7 +535,12 @@ def build(out_path):
         mp.append(box('mast_rail%d' % s, (0.05, 0.06, beam_len - 0.3), R.MAT_STEEL,
                         loc=(s * (BEAM_DX / 2 - 0.05), -BEAM_DY / 2 - 0.03, (zf + zt) / 2)))
     # replaceable wear lines on the lower mast, where rods drag [C140] p.6
-    mp.append(box('wear_line', (BEAM_DX - 0.08, 0.03, 2.6), R.MAT_WORN,
+    # R.MAT_STEEL, not R.MAT_WORN.  Twelve triangles - one unbevelled box - and
+    # it was the ONLY wornSteel in pivot:mast, so it cost a whole draw call on
+    # its own.  It shares a face with the two mast_rails immediately beside it,
+    # which are already rawSteel, and a wear strip that rods drag across all day
+    # reads bright and polished rather than oxidised anyway.
+    mp.append(box('wear_line', (BEAM_DX - 0.08, 0.03, 2.6), R.MAT_STEEL,
                     loc=(0, -BEAM_DY / 2 - 0.015, zf + 1.3)))
     # the two-section joint: hinge plates and pin bosses [C140] p.3, p.6
     for s in (-1, 1):
@@ -624,7 +637,14 @@ def build(out_path):
     for yy in (MASTL_Y(-0.68), MASTL_Y(0.32)):
         mp.append(box('barrier_postl%d' % int(yy * 100), (0.05, 0.05, GH),
                         R.MAT_PAINT, loc=(-0.62, yy, gz)))
-    mp.append(box('barrier_stripe', (GW + 0.06, 0.06, 0.11), R.MAT_HAZARD,
+    # R.MAT_PAINT, not R.MAT_HAZARD.  Twelve triangles, and the only
+    # safetyStripe under pivot:mast, so it was a draw call to itself.  It is a
+    # 110 mm band on the bottom rail of a guard that is already painted frame,
+    # painted posts and painted mesh: at any camera distance this game uses
+    # nobody resolves it AS striping, which is the test.  The striping that
+    # does pass that test - the two 2.1 m deck toe boards, the catwalk toe and
+    # the spin guard at the chuck - keeps its call.
+    mp.append(box('barrier_stripe', (GW + 0.06, 0.06, 0.11), R.MAT_PAINT,
                     loc=(0, MASTL_Y(-0.70), gz - GH / 2 + 0.12)))
     # interlock switch on the hinge side [C140] p.3 "safety guard with an
     # interlock function that automatically stops the rig when activated"
