@@ -610,23 +610,51 @@ export const THREAD_SPECS = {
  * that short upset at one end is the single clearest way to tell an MF rod
  * from an MM rod at a glance.
  *
+ * WHICH OF THESE ARE ACTUALLY PUBLISHED, AND WHICH ARE NOT
+ * ---------------------------------------------------------
+ * The line under this block used to read "Epiroc Tophammer catalogue and
+ * Sandvik Top hammer drilling tools 2024" over the WHOLE table, which claimed
+ * a source for seventeen rows when the catalogues cover six. Hard rule 1 says
+ * an admitted gap beats a plausible number, so the rows are marked one by one
+ * and three figures that matched no catalogue at all have been corrected:
+ *
+ *   R28 coupling was 38 x 150   ->  41 x 160   (Epiroc TH cat p. 27)
+ *   R38 coupling OD was 55      ->  54         (Epiroc TH cat p. 33)
+ *   T51 coupling length was 255 ->  235        (Epiroc TH cat p. 53)
+ *
+ * 255 mm was the clearest of the three: Epiroc prints 72 x 235 standard,
+ * 77 x 235 heavy and 72 x 250 long, and 255 is none of them.
+ *
+ * TWO GAPS THIS TABLE CANNOT EXPRESS, both recorded rather than papered over:
+ *
+ * 1. MM and MF rods of the same thread have DIFFERENT body diameters, and
+ *    there is only one `odMm` column. T51 is MM Ø46 and MF Ø52 (top-hammer
+ *    brochure p. 56); the table carries 52, so a T51 MM rod is built 6 mm fat.
+ *    Adding the column is a real fix and is NOT done here because the value
+ *    needed to complete it does not exist — see 2.
+ * 2. T45 body OD is NOT SOURCED. It is not in any of the four catalogues read.
+ *    46 is a plausible interpolation and is flagged as one below; it must not
+ *    be quoted as a fact anywhere.
+ *
  * [odMm, boreMm, couplingOdMm, couplingLenMm, mfCollarOdMm]
- * Epiroc Tophammer catalogue and Sandvik Top hammer drilling tools 2024.
  */
 export const ROD_SPECS = {
-  R25:  [25, 8.6, 33, 150, 33],
-  R28:  [28, 8.8, 38, 150, 38],
-  R32:  [32, 11.7, 44, 150, 45],
-  R38:  [38, 14.5, 55, 170, 56],
-  R44:  [44, 17, 62, 190, 62],
-  R51:  [51, 21.5, 70, 210, 70],
-  T38:  [39, 14.5, 52, 190, 56],
-  T45:  [46, 17, 63, 210, 63],
-  T51:  [52, 21.5, 72, 255, 72],
-  T60:  [60, 25, 85, 275, 85],
-  GT60: [60, 25, 85, 275, 85],
-  T76:  [76, 32, 102, 300, 102],
-  H90:  [90, 38, 118, 320, 118],
+  // Bore 8.6 / 8.8 are the HEX 25 and HEX 28 rod bores (Epiroc TH cat); no
+  // round R25 or R28 extension-rod body OD is catalogued by any of the four
+  // makers, so both ODs here are NOT SOURCED, as are both couplings for R25.
+  R25:  [25, 8.6, 33, 150, 33],           // NOT SOURCED except the bore
+  R28:  [28, 8.8, 41, 160, 41],           // coupling 41 x 160 sourced; OD NOT SOURCED
+  R32:  [32, 11.7, 44, 150, 45],          // all sourced. Epiroc sleeve 45, Sandvik 44
+  R38:  [38, 14.5, 54, 170, 56],          // coupling sourced; Rockmore calls the body 39
+  R44:  [44, 17, 62, 190, 62],            // NOT SOURCED — ISO 10208 stops at R38
+  R51:  [51, 21.5, 70, 210, 70],          // NOT SOURCED
+  T38:  [39, 14.5, 52, 190, 56],          // 52 is the FACE coupling; bench is 55
+  T45:  [46, 17, 63, 210, 63],            // coupling sourced; BODY OD NOT SOURCED
+  T51:  [52, 21.5, 72, 235, 72],          // 52 is the MF body — MM is 46 (see note 1)
+  T60:  [60, 25, 85, 275, 85],            // NOT SOURCED
+  GT60: [60, 25, 85, 275, 85],            // body/bore sourced; coupling NOT SOURCED
+  T76:  [76, 32, 102, 300, 102],          // NOT SOURCED
+  H90:  [90, 38, 118, 320, 118],          // NOT SOURCED
   BQ:   [55.6, 46.0, 55.6, 0, 55.6],
   NQ:   [69.9, 60.3, 69.9, 0, 69.9],
   HQ:   [88.9, 77.8, 88.9, 0, 88.9],
@@ -3754,19 +3782,50 @@ export function buildDrillRod(THREE_, ctx, opts) {
   if (type === 'MF') {
     // Box (female) end at the top: a short swelled collar, a shoulder taper
     // back onto the body, then the plain body all the way to the pin.
-    part(T, g, G.lathe(T, [
+    /* A WRENCH FLAT REMOVES METAL. IT CANNOT ADD ANY.
+       This used to bolt two boxes onto the OUTSIDE of the collar, standing
+       them 3 mm proud at x = collarR * 0.965 with a half-depth of
+       collarR * 0.65. The corner of such a slab reaches
+       hypot(0.965 R + 1.5 mm, 0.65 R) = 1.22 R — so the widest point of every
+       MF rod in the game was 22 % OVER the collar it was supposedly cut into.
+       Measured off the mesh before the fix: R32 Ø54.9 against a PUBLISHED box
+       OD of Ø45, T38 Ø67.7 against 56, T45 Ø75.8 against 63, T51 Ø86.3
+       against 72. The box OD is the one dimension makers actually print for an
+       MF rod — it is what tells an MF from an MM across a yard — so this was
+       the most legible number on the tool and it was wrong on all four
+       threads at once.
+
+       The flats are now milled by the profile itself, the way
+       buildCouplingSleeve() already does it: the radius is CLAMPED to a plane,
+       so a vertex can only move inward and the collar can never grow.
+
+       ACROSS-FLATS / OD = 0.82. Three unrelated families agree and the spread
+       is tight: DTH drill pipe 0.73-0.86 across nine ODs (Epiroc DTH product
+       catalog pp. 34-35), a top-hammer rod's 32 mm flats on a Ø39 body = 0.82
+       (top-hammer brochure p. 52), and a Ø88.9 sub stamped `SW80 2-Flächen`
+       on a Ø94 body = 0.85. TWO flats, not six — the same two sources say so
+       in as many words ("2-Flächen"; "2 x 95 mm wrench flats in BOX").
+       NOT SOURCED: the flat's axial length, its depth as a printed figure, its
+       corner radius and its position along the rod. Every catalogue prints
+       across-flats and nothing else, so the band below is drawn to the
+       collar's own length rather than to a number nobody publishes. */
+    const flatFrac = 0.82;
+    part(T, g, profiledLathe(T, [
       [collarR, 0], [collarR, -collarL], [R, -collarL - (collarR - R) * 1.6],
       [R, -L + mm(40)], [R * 0.985, -L],
       [boreR, -L], [boreR, 0],
-    ], seg, true), steel, { name: 'body' });
+    ], {
+      segments: Math.max(seg, low ? 12 : 24),
+      radiusFn: (th, r0, y) => {
+        // The collar band only, and only its outside surface — the bore rows
+        // share this y range and must not be touched.
+        if (y > 0 || y < -collarL || r0 < collarR * 0.99) return 1;
+        const c = Math.abs(Math.cos(th));
+        return c > flatFrac ? flatFrac / c : 1;
+      },
+    }), steel, { name: 'body' });
     addBoxThread(T, ctx, g, thread, { y0: -mm(6), length: thrL, quality: low ? 0 : 0.6 });
     addPinThread(T, ctx, g, thread, { y0: -L + thrL, length: thrL, quality: low ? 0 : 0.6, mat: steel });
-    // Two wrench flats milled into the collar — that is where the tongs go.
-    for (let i = 0; i < 2; i++) {
-      part(T, g, G.box(T, mm(3), collarL * 0.62, collarR * 1.3), worn, {
-        p: [Math.cos(i * Math.PI) * collarR * 0.965, -collarL * 0.5, 0], r: [0, i * Math.PI, 0],
-      });
-    }
   } else {
     part(T, g, G.lathe(T, [
       [R, -mm(30)], [R, -L + mm(30)],
@@ -3840,11 +3899,26 @@ export function buildCouplingSleeve(THREE_, ctx, opts) {
     [boreR, -L * 0.44], [boreR, 0],
   ], {
     segments: seg,
+    /* TWO spanner flats, not six.
+       This asked for six, and six is what a hex nut has, not what a coupling
+       sleeve has. Both dimensioned sources in the library say two in as many
+       words: a Ø88.9 sub annotated `SW80 2-Flächen` — across-flats 80, TWO
+       faces, on a Ø94 body — and Epiroc's DTH product catalog p. 31, which
+       footnotes "2 x 95 mm wrench flats in BOX". Nothing anywhere prints six.
+
+       They are also cut as real planes now rather than as a cosine dimple. The
+       old expression eased the radius by up to 8.5 % on a smooth falloff, so
+       the "flats" were six shallow scallops that a pipe wrench would slip
+       straight off; a milled flat has a hard edge where it meets the barrel
+       and that edge is the whole read at thumbnail size.
+
+       ACROSS-FLATS / OD = 0.82, the same sourced ratio the MF rod collar uses
+       — DTH drill pipe 0.73-0.86 (Epiroc DTH pp. 34-35), top-hammer rod 32 on
+       Ø39 = 0.82, the SW80-on-Ø94 sub = 0.85. */
     radiusFn: (th, r, y) => {
       if (r < R * 0.9 || y > bandTop + mm(6.1) || y < bandBot - mm(6.1)) return 1;
-      const a = ((th * 6) % TAU + TAU) % TAU;   // six spanner flats
-      const d = Math.min(a, TAU - a) / Math.PI;
-      return 1 - 0.085 * Math.max(0, 1 - d * 2.6);
+      const c = Math.abs(Math.cos(th));
+      return c > 0.82 ? 0.82 / c : 1;
     },
   }), steel, { name: 'sleeve' });
   addBoxThread(T, ctx, g, thread, { y0: -mm(4), length: mm(ts.pitchMm * 4.2), quality: low ? 0 : 0.6 });
