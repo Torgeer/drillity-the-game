@@ -1081,7 +1081,21 @@ export function upkeepFor(rigId, hours, opts = {}) {
   // Service, parts and diesel all arrive on the same truck as everything else,
   // so they carry the region's cost of doing business. Insurance and
   // depreciation do not: they are properties of the machine, not of the site.
-  const regionCost = getRegion(regionId)?.costMult ?? 1;
+  /* AN UNKNOWN REGION MUST NOT SILENTLY BILL AT BASE RATE.
+     `settleRun` already warns when a contract arrives with NO regionId. It did
+     not warn when the id was PRESENT and unknown, and that is the worse case:
+     the number looks answered. Both `upkeep` and `fuel` below multiply by this,
+     and the results screen prints the total with no sign the multiplier never
+     applied — so a player in Sahara or Arctic is quietly billed Nordic
+     operating costs. `?? 1` is the right VALUE to fall back to; being quiet
+     about it was the defect. */
+  const regionRow = getRegion(regionId);
+  if (regionId && !regionRow) {
+    warnOnce('[economy] unknown regionId "' + regionId + '" — not in data.js '
+      + 'REGIONS. Upkeep and fuel are being billed at the base rate, with no '
+      + 'region cost multiplier applied.', regionId);
+  }
+  const regionCost = regionRow?.costMult ?? 1;
 
   const upkeep = rig.upkeepPerHour * h * sk.m('upkeep.cost') * roleDiscount
     * conditionUpkeepPenalty(condition) * regionCost;
