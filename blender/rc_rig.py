@@ -888,7 +888,16 @@ def build_head(pv):
     """
     sl = empty(NODE_SLIDE, 'carriage', pv, (0, 0, MAST_LEN - 2.05))
     sl['axis'] = 'z'
-    sl['range_m'] = [-(MAST_LEN - 2.95), 1.55]
+    # FEED STROKE, and it is a checkable number rather than a guess.
+    # Down: the head stops with the spindle nose 50 mm clear of the drill floor,
+    # because the rotary head on this class never travels below the floor — the
+    # rod clamp and the breakout table are down there. The nose sits 1.36 m below
+    # the carriage centre, so the bottom of travel is carriage local z 1.76.
+    # Up: the carriage rides the rails, which stop 0.45 m short of the mast top.
+    # 1.64 + 1.55 = 3.19 m of stroke, against a 3.05 m rod — just over a rod
+    # length, which is what a real feed frame gives you, and in the same country
+    # as the 3400 mm published for a comparable published crawler RC rig.
+    sl['range_m'] = [-1.64, 1.55]
     hw, hd = MAST_W / 2, MAST_D / 2
 
     box('carriage-plate', (MAST_W + 0.22, 0.16, 0.86), MAT_PAINT, sl,
