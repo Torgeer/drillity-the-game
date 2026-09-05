@@ -402,6 +402,40 @@ const overScenes = nav.filter((n) => n.screens > SCENE_COUNT);
 if (overScenes.length) {
   grew.push(`.screen nodes ${Math.max(...nav.map((n) => n.screens))} > ${SCENE_COUNT} registered scenes — duplicate nodes`);
 }
+
+/* ── WHICH 648? ───────────────────────────────────────────────────────────
+   `docNodes` moving is the alarm; on its own it is not a finding. When this
+   number went 163 -> 811 the instrument could say only that 648 elements had
+   appeared, and answering "which ones" cost this project two separate
+   investigations before somebody worked out it was the garage being built
+   lazily on visit 2 and then kept — not a leak at all.
+
+   enumerate.js now returns a per-screen census, so the report can simply name
+   the subtree that moved. A row that appears between visits is lazy
+   instantiation; a row that GROWS between visits is the leak. */
+const census = (n) => new Map((n.perScreen || []).map((r) => {
+  const mod = (r.className.match(/screen--[a-z0-9-]+/g) || ['screen--?'])
+    .filter((c) => c !== 'screen--solid' && c !== 'screen--boot')[0]
+    || (/screen--boot/.test(r.className) ? 'screen--boot' : 'screen--?');
+  return [mod, r.subtreeCount];
+}));
+const c0 = census(nav[0]);
+const cN = census(nav[nav.length - 1]);
+const keys = [...new Set([...c0.keys(), ...cN.keys()])].sort();
+say('\n  per-screen census (descendants), first visit -> last:');
+for (const k of keys) {
+  const a2 = c0.get(k);
+  const b2 = cN.get(k);
+  const moved = a2 !== b2;
+  say(`    ${k.padEnd(22)} ${String(a2 ?? '—').padStart(5)} -> ${String(b2 ?? '—').padStart(5)}`
+    + (moved ? '   <-- MOVED' : ''));
+  if (moved) grew.push(`${k} ${a2 ?? 'absent'} -> ${b2 ?? 'absent'} nodes`);
+}
+const e0 = nav[0].elsewhere;
+const eN = nav[nav.length - 1].elsewhere;
+say(`    ${'(outside any .screen)'.padEnd(22)} ${String(e0).padStart(5)} -> ${String(eN).padStart(5)}`
+  + (e0 !== eN ? '   <-- MOVED' : ''));
+if (e0 !== eN) grew.push(`elsewhere (outside any .screen) ${e0} -> ${eN} nodes`);
 say(`\n  DOCK HEIGHT ${nav.map((n) => n.dockH + 'px').join('  ->  ')}`);
 say(`  GROWTH      ${grew.length ? grew.join('\n              ') + '   <-- GATE FAIL' : 'none — dock, chrome and node counts identical across all five visits   ok'}`);
 

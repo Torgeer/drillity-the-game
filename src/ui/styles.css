@@ -1411,7 +1411,21 @@ canvas { display: block; }
   border-left: 2px solid var(--c-fg-dim);
   animation: unit-in var(--dur-3) var(--ease-out) both;
 }
-@keyframes unit-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+/* NOTHING PHYSICALLY MOVED, SO NOTHING SLIDES — and the slide was also an
+   overlap. `from { transform: translateY(10px) }` displaced the card DOWNWARD
+   out of the two rows it is inset against, so for the 300 ms of its entrance
+   its bottom edge hung over `.dock__ctl`. Caught by `.hudqa/measure.mjs` on
+   `rc`: `unitcard(366x118@12,598) x vsl__val(14x14@64,715) = 14x2`, three
+   times, the card sampled 4 px into its own travel. Intermittent, because the
+   card is only up for a few seconds at a unit boundary — which is why the
+   overlap gate had to actually fail a build before anybody saw it.
+
+   `.sitedock` lost `animation: dock-in` for exactly this reason and the note
+   is still above it: the dock is chrome at a fixed height in a reserved row,
+   and it was sliding because entrances look expensive. The unit card is the
+   same — information arriving in a slot that was already there. The fade
+   stays; it is the appearance, and the appearance is what happened. */
+@keyframes unit-in { from { opacity: 0; } to { opacity: 1; } }
 .unitcard--good { border-left-color: var(--c-success); }
 .unitcard--warn { border-left-color: var(--c-warning); }
 .unitcard--bad  { border-left-color: var(--c-danger); }
