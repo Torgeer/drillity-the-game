@@ -18,6 +18,9 @@ import * as THREE from 'three';
 import { BRAND, clamp, damp } from './contract.js';
 
 const THUMB = 256;
+// Authored composition margin: leave 6% of the square on each side.
+const FRAME_FILL = 0.88;
+const LIVE_PITCH = 0.12;
 
 /** Maps a data.js item to a tools.js builder id. */
 const CATEGORY_MODEL_HINTS = [
@@ -439,7 +442,10 @@ export function createPreview(ctx) {
   let renderer = null;
   let scene = null;
   let camera = null;
+  let liveCamera = null;
   let pivot = null;
+  let thumbPivot = null;
+  let environmentTarget = null;
   let backdrop = null;   // studio gradient sphere — scaled to the shot in frame()
   let current = null;          // { itemId, group }
   const thumbCache = new Map(); // itemId -> ImageBitmap | HTMLCanvasElement
@@ -454,6 +460,7 @@ export function createPreview(ctx) {
   let liveAccum = 0;
   let spin = 0;
   let lastFrame = null;   // framing telemetry from the last frame() — see below
+  let generation = 0;
 
 
   // Content identifies a machine; live loader availability chooses its source.
@@ -523,97 +530,162 @@ export function createPreview(ctx) {
     panel(-5, 1, 2, 0x7fa8c0, 0.5);
     panel(0, -4, 0, 0x2a3038, 0.4);
     const env = pmrem.fromScene(envScene, 0.04);
+    environmentTarget = env;
     scene.environment = env.texture;
     pmrem.dispose();
     envScene.traverse((o) => { o.geometry?.dispose?.(); o.material?.dispose?.(); });
 
     camera = new THREE_.PerspectiveCamera(30, 1, 0.05, 60);
+    liveCamera = camera.clone();
     pivot = new THREE_.Group();
-    scene.add(pivot);
+    thumbPivot = new THREE_.Group();
+    scene.add(pivot, thumbPivot);
   }
 
-  /** Frame the built group so it fills the thumbnail consistently. */
-  function frame(group) {
-    // Measure from a known zero. `Box3.setFromObject` reports WORLD space, and
-    // `pivot` is already rotated when frame() runs — yaw for a thumbnail, an
-    // arbitrary turntable angle for a live card. Subtracting a world-space
-    // centre from a LOCAL `position` therefore only cancels out when the yaw
-    // happens to be zero; at any other angle the object is left off-centre by
-    // (c - R·c), which is nothing on a symmetric bit and most of a card on a
-    // 22 m tube pile. Zero the offset, measure, then convert back through the
-    // parent so the number is in the space `position` is actually expressed in.
-    group.position.set(0, 0, 0);
-
-    /* HONOUR THE BUILDER'S DECLARED VIEW. `tools.js` finalise() has always
-       computed `userData.preview.aim` — the direction to look FROM, in the
-       tool's own space — and `preview.roll`, how far to lay a long thin tool
-       back so a 3.6 m rod is not three pixels wide in a square card. Its own
-       comment ended "Until preview.js reads it, this is inert", and nothing
-       read it. Another declared contract with no consumer, exactly like
-       gltfRig.builder() having zero call sites (ASTRA.md §8).
-
-       It matters more than it sounds. Every bit, crown, shoe, auger and bolt
-       in the library is built business-end-DOWN, and the fixed camera sat
-       above the equator — so the card showed the back of the tool. Measured by
-       raycast over a 96x96 grid, the carbide a player is buying covered 3.8 %
-       of a T45 button bit's card and 1.7 % of a DTH bit's. Through the
-       declared aim: 17.9 % and 8.6 % — 4.7x and 5.1x.
-
-       Roll is applied BEFORE the box is measured, so the framing accounts for
-       the tool's new attitude rather than fitting the upright pose and then
-       tipping it out of frame. */
-    const pv = group.userData && group.userData.preview;
-    if (pv && typeof pv.roll === 'number' && pv.roll) group.rotation.x = pv.roll;
-
-    group.updateWorldMatrix(true, true);
-    const box = new THREE_.Box3().setFromObject(group);
-    if (!isFinite(box.min.x)) return;
-    const size = box.getSize(new THREE_.Vector3());
-    const center = box.getCenter(new THREE_.Vector3());
-    if (group.parent) group.parent.worldToLocal(center);
-    group.position.copy(center).negate();
-    // Frame on the bounding SPHERE, not the longest axis. max(x,y,z)*0.5 does
-    // not enclose a tall thin object seen from an oblique angle, which cropped
-    // the mast off the top and the track off the bottom of every rig card.
-    const radius = size.length() * 0.5 || 1;
-    const dist = radius / Math.tan((camera.fov * Math.PI) / 360) * 1.9;
-    // The builder knows where its own face is; only fall back to the fixed
-    // three-quarter view when it has not said. Normalised on read rather than
-    // trusted, so a hand-written aim cannot change the framing distance.
-    const aim = (pv && Array.isArray(pv.aim) && pv.aim.length === 3) ? pv.aim : [0.42, 0.34, 0.86];
-    const aimLen = Math.hypot(aim[0], aim[1], aim[2]) || 1;
-    camera.position.set(
-      (dist * aim[0]) / aimLen, (dist * aim[1]) / aimLen, (dist * aim[2]) / aimLen);
-    camera.lookAt(0, 0, 0);
-    camera.near = Math.max(0.01, dist * 0.05);
-    camera.far = Math.max(dist * 6, 40);
-    // Scale the backdrop to the shot. Authored at radius 12, it was always
-    // BEHIND the camera for anything bigger than ~3.4 m across — measured
-    // 22.6 units for the small crawler, 191 for the derrick — so every rig card
-    // and a third of the tool cards cleared to opaque black.
-    if (backdrop) backdrop.scale.setScalar(Math.max(1, dist / 6));
-    camera.updateProjectionMatrix();
-
-    // Framing telemetry. The two framing bugs this file has had were both
-    // NUMBERS — a backdrop authored at radius 12 while the camera stood at 191,
-    // and a bounding box that did not enclose a mast — and neither is visible
-    // in a thumbnail until it is already wrong. The catalogue now spans an M24
-    // dome nut to a 21 m piling leader, four orders of magnitude of `dist`, so
-    // the invariants are recorded here and asserted by the QA harness:
-    //   backdropRadius > dist   camera stays INSIDE the gradient sphere
-    //   near < dist - radius    the near plane never clips into the subject
-    //   far  > dist + radius    nor the far plane
-    //   0 < coverage < 1        the bounding sphere fits the vertical frame
-    const backdropRadius = backdrop ? 12 * backdrop.scale.x : Infinity;
-    lastFrame = {
-      radius, dist, near: camera.near, far: camera.far, backdropRadius,
-      coverage: (2 * Math.asin(Math.min(1, radius / dist))) / (camera.fov * Math.PI / 180),
-      size: { x: size.x, y: size.y, z: size.z },
-      ok: backdropRadius > dist
-        && camera.near < dist - radius
-        && camera.far > dist + radius
-        && radius < dist,
+  // Support of a point swept through every turntable yaw and the bounded
+  // pitch. THREE's XYZ Euler order is Rx(pitch) * Ry(yaw). For a fit-plane
+  // normal q, rotating yaw leaves the radial term rho * sqrt(|q|²-w²),
+  // where w=q.y*cos(pitch)+q.z*sin(pitch). Maximise that concave expression
+  // over the exact interval of w; this keeps a fixed camera without sampled
+  // angle gaps or a full bounding sphere around a thin tool.
+  function sweepSupport(q) {
+    const lengthSq = q.lengthSq(), length = Math.sqrt(lengthSq);
+    const w = (pitch) => q.y * Math.cos(pitch) + q.z * Math.sin(pitch);
+    let lo = Math.min(w(-LIVE_PITCH), w(LIVE_PITCH));
+    let hi = Math.max(w(-LIVE_PITCH), w(LIVE_PITCH));
+    const phase = Math.atan2(q.z, q.y);
+    for (let k = -1; k <= 1; k++) {
+      const pitch = phase + k * Math.PI;
+      if (pitch >= -LIVE_PITCH && pitch <= LIVE_PITCH) {
+        lo = Math.min(lo, w(pitch)); hi = Math.max(hi, w(pitch));
+      }
+    }
+    return (y, rho, unitY) => {
+      const at = clamp(length * unitY, lo, hi);
+      return y * at + rho * Math.sqrt(Math.max(0, lengthSq - at * at));
     };
+  }
+
+  /** Fit actual geometry, including instance transforms, in camera space. */
+  function frame(group, shotCamera = camera, turntable = false) {
+    group.position.set(0, 0, 0);
+    const pv = group.userData?.preview;
+    if (Number.isFinite(pv?.roll)) group.rotation.x = pv.roll;
+    group.updateWorldMatrix(true, true);
+
+    const points = [];
+    const box = new THREE_.Box3();
+    const point = new THREE_.Vector3();
+    const matrix = new THREE_.Matrix4();
+    const instance = new THREE_.Matrix4();
+    group.traverseVisible((o) => {
+      const positions = o.geometry?.attributes?.position;
+      if (!positions) return;
+      for (let j = 0; j < (o.isInstancedMesh ? o.count : 1); j++) {
+        matrix.copy(o.matrixWorld);
+        if (o.isInstancedMesh) {
+          o.getMatrixAt(j, instance);
+          matrix.multiply(instance);
+        }
+        for (let i = 0; i < positions.count; i++) {
+          if (o.getVertexPosition) o.getVertexPosition(i, point);
+          else point.fromBufferAttribute(positions, i);
+          point.applyMatrix4(matrix);
+          if (!Number.isFinite(point.x + point.y + point.z)) continue;
+          points.push(point.x, point.y, point.z);
+          box.expandByPoint(point);
+        }
+      }
+    });
+    if (box.isEmpty()) { lastFrame = null; return false; }
+
+    const center = box.getCenter(new THREE_.Vector3());
+    const localCenter = center.clone();
+    if (group.parent) group.parent.worldToLocal(localCenter);
+    group.position.copy(localCenter).negate();
+    group.updateWorldMatrix(true, true);
+
+    // Preserve the builder's business-end view and roll. Normalise on read;
+    // malformed metadata must not place the camera at the origin or at NaN.
+    const aim = Array.isArray(pv?.aim) && pv.aim.length === 3
+      && pv.aim.every(Number.isFinite) && Math.hypot(...pv.aim) > 0
+      ? pv.aim : [0.42, 0.34, 0.86];
+    const back = new THREE_.Vector3(...aim).normalize();
+    // lookAt perturbs a direction parallel to camera.up. Use a perpendicular
+    // up axis for pole views so the fitted basis and rendered basis agree.
+    shotCamera.up.set(0, Math.abs(back.y) > 0.999 ? 0 : 1, Math.abs(back.y) > 0.999 ? 1 : 0);
+    shotCamera.position.copy(back);
+    shotCamera.lookAt(0, 0, 0);
+    shotCamera.updateMatrixWorld(true);
+    const right = new THREE_.Vector3().setFromMatrixColumn(shotCamera.matrixWorld, 0);
+    const up = new THREE_.Vector3().setFromMatrixColumn(shotCamera.matrixWorld, 1);
+    const tanV = Math.tan(shotCamera.fov * Math.PI / 360) / shotCamera.zoom;
+    const tanH = tanV * shotCamera.aspect;
+    const planes = [
+      back.clone().addScaledVector(right, 1 / (tanH * FRAME_FILL)),
+      back.clone().addScaledVector(right, -1 / (tanH * FRAME_FILL)),
+      back.clone().addScaledVector(up, 1 / (tanV * FRAME_FILL)),
+      back.clone().addScaledVector(up, -1 / (tanV * FRAME_FILL)),
+      back, back.clone().negate(),
+    ];
+    const supports = turntable ? planes.map(sweepSupport) : null;
+    let dist = 0, radiusSq = 0, maxZ = -Infinity, minZ = Infinity;
+    for (let i = 0; i < points.length; i += 3) {
+      const x = points[i] -= center.x;
+      const y = points[i + 1] -= center.y;
+      const z = points[i + 2] -= center.z;
+      const radialSq = x * x + z * z, pointSq = radialSq + y * y;
+      radiusSq = Math.max(radiusSq, pointSq);
+      // Perspective requires D >= z + |x|/(tan(fovX/2)*fill), and likewise y.
+      if (turntable) {
+        // Shared across all six planes. Recomputing two hypot calls in every
+        // support dominated attachment time for large GLB previews.
+        const rho = Math.sqrt(radialSq), norm = Math.sqrt(pointSq);
+        const unitY = norm ? y / norm : 0;
+        for (let k = 0; k < 4; k++) dist = Math.max(dist, supports[k](y, rho, unitY));
+        maxZ = Math.max(maxZ, supports[4](y, rho, unitY));
+        minZ = Math.min(minZ, -supports[5](y, rho, unitY));
+      } else {
+        const cameraX = right.x * x + right.y * y + right.z * z;
+        const cameraY = up.x * x + up.y * y + up.z * z;
+        const cameraZ = back.x * x + back.y * y + back.z * z;
+        dist = Math.max(dist, cameraZ + Math.abs(cameraX) / (tanH * FRAME_FILL),
+          cameraZ + Math.abs(cameraY) / (tanV * FRAME_FILL));
+        maxZ = Math.max(maxZ, cameraZ); minZ = Math.min(minZ, cameraZ);
+      }
+    }
+    const radius = Math.sqrt(radiusSq);
+    const clearance = Math.max(radius * 1e-4, 1e-6);
+    dist = Math.max(dist, maxZ + clearance);
+    const depthMin = dist - maxZ, depthMax = dist - minZ;
+    shotCamera.position.copy(back).multiplyScalar(dist);
+    shotCamera.near = Math.max(1e-7, depthMin * 0.5);
+    const backdropRadius = Math.max(12, dist * 2);
+    shotCamera.far = Math.max(depthMax + clearance, dist + backdropRadius * 1.1);
+    backdrop.scale.setScalar(backdropRadius / 12);
+    shotCamera.updateProjectionMatrix();
+    shotCamera.updateMatrixWorld(true);
+
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    for (let i = 0; i < points.length; i += 3) {
+      point.fromArray(points, i);
+      const depth = dist - point.dot(back);
+      const x = point.dot(right) / (depth * tanH);
+      const y = point.dot(up) / (depth * tanV);
+      minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+      minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+    }
+    const maxNdc = Math.max(Math.abs(minX), Math.abs(maxX), Math.abs(minY), Math.abs(maxY));
+    lastFrame = {
+      radius, dist, near: shotCamera.near, far: shotCamera.far, backdropRadius,
+      depthMin, depthMax, maxNdc, fill: FRAME_FILL, turntable,
+      coverage: (maxY - minY) / 2,
+      projected: { minX, maxX, minY, maxY },
+      size: { x: box.max.x - box.min.x, y: box.max.y - box.min.y, z: box.max.z - box.min.z },
+      ok: backdropRadius > dist && shotCamera.near < depthMin
+        && shotCamera.far > depthMax && maxNdc <= FRAME_FILL + 1e-6,
+    };
+    return true;
   }
 
   function build(ref, wear = 0) {
@@ -708,31 +780,36 @@ export function createPreview(ctx) {
       new THREE_.MeshStandardMaterial({ color: 0x6b5638, roughness: 0.95, metalness: 0 }));
     pallet.position.y = 0.055;
     g.add(pallet);
-    g.userData.dispose = () => {
-      g.traverse((o) => { o.geometry?.dispose?.(); o.material?.dispose?.(); });
-    };
     return g;
   }
 
   function disposeGroup(g) {
     if (!g) return;
     if (typeof g.userData?.dispose === 'function') { g.userData.dispose(); return; }
+    const geometries = new Set(), materials = new Set();
     g.traverse((o) => {
-      o.geometry?.dispose?.();
-      const m = o.material;
-      if (Array.isArray(m)) m.forEach((x) => x?.dispose?.());
-      else m?.dispose?.();
+      if (o.geometry) geometries.add(o.geometry);
+      for (const m of Array.isArray(o.material) ? o.material : [o.material]) {
+        if (m) materials.add(m);
+      }
     });
+    for (const geometry of geometries) geometry.dispose?.();
+    for (const material of materials) material.dispose?.();
   }
 
   /** Render `itemId` once and return a bitmap suitable for drawImage. */
   async function thumbnail(ref, opts = {}) {
     if (!ok) return null;
+    const epoch = generation;
     const itemId = typeof ref === 'string' ? ref : (ref?.id || '');
+    const item = (typeof ref === 'object' && ref) || ctx.data?.getItem?.(itemId);
     const source = sourceFor(itemId);
-    const key = `${itemId}|${source}|${modelIdFor(ref)}|${opts.wear || 0}`;
+    const yaw = Number.isFinite(opts.yaw) ? opts.yaw : -0.5;
+    const key = `${itemId}|${source}|${JSON.stringify([modelIdFor(ref), opts.wear || 0, yaw,
+      item?.thread, item?.diameterMm ?? item?.holeDia ?? item?.stats?.diameterMm,
+      item?.material, item?.duty])}`;
     if (thumbSources.get(itemId) !== source) {
-      // A streamed Blender model replaces an earlier procedural/stand-in card.
+      // A streamed Blender model replaces its earlier stand-in card.
       for (const [oldKey, bitmap] of thumbCache) {
         if (!oldKey.startsWith(itemId + '|')) continue;
         bitmap.close?.();
@@ -745,37 +822,40 @@ export function createPreview(ctx) {
 
     const p = (async () => {
       const group = build(ref, opts.wear || 0);
+      let snapshot;
       try {
-        pivot.clear();
-        pivot.add(group);
-        pivot.rotation.set(0, opts.yaw ?? -0.5, 0);
+        thumbPivot.add(group);
+        thumbPivot.rotation.set(0, yaw, 0);
+        pivot.visible = false;
         frame(group);
         renderer.setSize(THUMB, THUMB, false);
         renderer.render(scene, camera);
-
-        let bmp;
         const src = renderer.domElement;
         if (typeof createImageBitmap === 'function') {
-          bmp = await createImageBitmap(src);
+          snapshot = createImageBitmap(src);
         } else {
           const c = document.createElement('canvas');
           c.width = c.height = THUMB;
           c.getContext('2d').drawImage(src, 0, 0);
-          bmp = c;
+          snapshot = c;
         }
-        if (!ok) { bmp.close?.(); return null; }
-        if (sourceFor(itemId) !== source) {
-          bmp.close?.();
-          return thumbnail(ref, opts);
-        }
-        thumbCache.set(key, bmp);
-        return bmp;
       } finally {
-        // Another request may already own pivot by the time its bitmap resolves.
+        // Pixels are captured synchronously. Detach and release this owned
+        // group before any await, so dispose() cannot reach shared materials
+        // through an in-flight thumbnail. The live group has its own pivot.
         group.removeFromParent();
         disposeGroup(group);
+        pivot.visible = true;
       }
-    })().finally(() => pending.delete(key));
+      const bmp = await snapshot;
+      if (!ok || epoch !== generation) { bmp.close?.(); return null; }
+      if (sourceFor(itemId) !== source) {
+        bmp.close?.();
+        return thumbnail(ref, opts);
+      }
+      thumbCache.set(key, bmp);
+      return bmp;
+    })().finally(() => { if (pending.get(key) === p) pending.delete(key); });
 
     pending.set(key, p);
     return p;
@@ -793,8 +873,8 @@ export function createPreview(ctx) {
     canvasEl.height = Math.round(h * dpr);
     const g = canvasEl.getContext('2d');
     g.clearRect(0, 0, canvasEl.width, canvasEl.height);
-    // Cover-fit, preserving the square render.
-    const s = Math.max(canvasEl.width / THUMB, canvasEl.height / THUMB);
+    // Contain the complete shot even when the destination is rectangular.
+    const s = Math.min(canvasEl.width / THUMB, canvasEl.height / THUMB);
     const dw = THUMB * s, dh = THUMB * s;
     g.drawImage(bmp, (canvasEl.width - dw) / 2, (canvasEl.height - dh) / 2, dw, dh);
     return true;
@@ -806,20 +886,24 @@ export function createPreview(ctx) {
     if (!ok || !canvasEl) return;
     const itemId = typeof ref === 'string' ? ref : (ref?.id || '');
     const group = build(ref, opts.wear || 0);
-    pivot.clear();
+    pivot.rotation.set(0, 0, 0);
+    spin = 0; liveAccum = 0;
     pivot.add(group);
-    frame(group);
-    current = { itemId, group, ref, opts, source: sourceFor(itemId) };
+    frame(group, liveCamera, true);
+    current = { itemId, group, ref, opts, source: sourceFor(itemId), frame: lastFrame };
     liveTargets.add({ canvas: canvasEl, ctx2d: canvasEl.getContext('2d') });
   }
 
   function clearLive() {
     liveTargets.clear();
-    if (current) { pivot.clear(); disposeGroup(current.group); current = null; }
+    if (current) { current.group.removeFromParent(); disposeGroup(current.group); current = null; }
   }
 
   const api = {
     async init() {
+      if (ok) return;
+      if (renderer) api.dispose();
+      const epoch = ++generation;
       try {
         const canvas = document.createElement('canvas');
         canvas.width = canvas.height = THUMB;
@@ -834,25 +918,34 @@ export function createPreview(ctx) {
         makeStudio();
         try {
           const tools = await import('../rig/tools.js');
+          if (epoch !== generation) return;
           buildTool = tools.buildTool || tools.default || null;
           const ids = typeof tools.listTools === 'function'
             ? tools.listTools()
             : Object.keys(tools.TOOL_BUILDERS || {}).concat(Object.keys(tools.TOOL_ALIASES || {}));
           toolIds = new Set(ids);
-        } catch { buildTool = null; toolIds = null; }
+        } catch {
+          if (epoch !== generation) return;
+          buildTool = null; toolIds = null;
+        }
         try {
           const rf = await import('../rig/rigFactory.js');
+          if (epoch !== generation) return;
           rigIds = rf.RIG_IDS || null;
           // buildPreview is a factory-level helper; bind it if present.
           buildRigPreview = typeof ctx.rig?.buildPreview === 'function'
             ? (id) => ctx.rig.buildPreview(id)
             : (typeof rf.buildRigPreview === 'function' ? rf.buildRigPreview : null);
-        } catch { rigIds = null; buildRigPreview = null; }
+        } catch {
+          if (epoch !== generation) return;
+          rigIds = null; buildRigPreview = null;
+        }
+        if (epoch !== generation) return;
         ok = true;
         ctx.shopPreview = api;
       } catch (e) {
         console.warn('[preview] unavailable —', e.message);
-        ok = false;
+        if (epoch === generation) api.dispose();
       }
     },
 
@@ -865,18 +958,24 @@ export function createPreview(ctx) {
         disposeGroup(current.group);
         current.group = next;
         current.source = source;
+        const rotation = pivot.rotation.clone();
+        pivot.rotation.set(0, 0, 0);
         pivot.add(next);
-        frame(next);
+        frame(next, liveCamera, true);
+        current.frame = lastFrame;
+        pivot.rotation.copy(rotation);
       }
       liveAccum += dt;
       if (liveAccum < 1 / 30) return;          // cap the turntable at 30 fps
+      const elapsed = liveAccum;
       liveAccum = 0;
-      spin += dt * 0.55;
+      spin += elapsed * 0.55;
       pivot.rotation.y = spin;
-      pivot.rotation.x = damp(pivot.rotation.x, Math.sin(spin * 0.4) * 0.12, 4, dt);
+      pivot.rotation.x = damp(pivot.rotation.x, Math.sin(spin * 0.4) * LIVE_PITCH, 4, elapsed);
       const size = 512;
       renderer.setSize(size, size, false);
-      renderer.render(scene, camera);
+      if (current.frame) backdrop.scale.setScalar(current.frame.backdropRadius / 12);
+      renderer.render(scene, liveCamera);
       for (const t of liveTargets) {
         const el = t.canvas;
         if (!el.isConnected) continue;
@@ -884,7 +983,7 @@ export function createPreview(ctx) {
         const w = Math.max(1, Math.round((el.clientWidth || 200) * dpr));
         const h = Math.max(1, Math.round((el.clientHeight || 200) * dpr));
         if (el.width !== w || el.height !== h) { el.width = w; el.height = h; }
-        const s = Math.max(w / size, h / size);
+        const s = Math.min(w / size, h / size);
         t.ctx2d.clearRect(0, 0, w, h);
         t.ctx2d.drawImage(renderer.domElement, (w - size * s) / 2, (h - size * s) / 2, size * s, size * s);
       }
@@ -893,15 +992,20 @@ export function createPreview(ctx) {
     resize() {},
 
     dispose() {
+      generation++;
+      ok = false;
       clearLive();
       for (const bmp of thumbCache.values()) bmp.close?.();
       thumbCache.clear();
       thumbSources.clear();
       pending.clear();
       scene?.traverse?.((o) => { o.geometry?.dispose?.(); const m = o.material; Array.isArray(m) ? m.forEach((x) => x?.dispose?.()) : m?.dispose?.(); });
-      scene?.environment?.dispose?.();
+      environmentTarget?.dispose?.();
+      environmentTarget = null;
       renderer?.dispose?.();
-      renderer = null; ok = false;
+      renderer = null; scene = null; backdrop = null;
+      pivot = null; thumbPivot = null; camera = null; liveCamera = null;
+      lastFrame = null;
     },
 
     // public
