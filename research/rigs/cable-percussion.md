@@ -19,6 +19,7 @@ purpose: GEOMETRY AND MATERIALS reference for modelling. Not a spec sheet, not m
 ## 7. Photo references
 ## 8. NOT SOURCED
 ## 9. Domain-truth warnings (what the game currently gets wrong)
+## 10. Corrections and additions from the modelling pass
 
 ---
 
@@ -213,10 +214,21 @@ breaking load ≈6,500 kg**, and supplies a wire grip sized *"up to 5/8" (19mm)"
 So the British tripod's wire is **roughly half the diameter of the American drill
 line** — 10 mm against 19.1 mm. That one number changes the silhouette: on family A
 the rope is a **thin, whippy line**; on family B a **thick, sagging cable**.
-Still `NOT SOURCED` for family A: **construction and lay.** Do **not** assume the
+~~Still `NOT SOURCED` for family A: **construction and lay.** Do **not** assume the
 American left-lay 6 × 19 applies — British tools screw together on API tapers
 above a **swivel**, and a swivel removes the mechanical reason left lay exists.
-See §8.
+See §8.~~
+
+> ⚠ **BOTH HALVES OF THIS ARE NOW ANSWERED, AND ONE OF THEM THE OTHER WAY — see
+> §10.2.** The swivel argument is good reasoning and it is not what the makers
+> do: a current machine of this family is specified with **"90m of 16mm LH lay
+> wireline"**, i.e. **LEFT LAY on the British rig too**. A second, older and
+> completely unrelated source — a US water-well manual held in the owner's own
+> library — independently gives **"a left lay cable of 6 × 19 or 6 × 21
+> construction"**. And the 10 mm above belongs to the **0.5 t mini machine** of
+> that maker's range, not to a working GI tripod: at 2 t the wire is **16 mm**,
+> so the claim that family A's rope is "about half" the American drill line is
+> also wrong — it is within 16 % of it.
 
 ### 4.2 Family A — the British / Nordic ground-investigation tripod
 
@@ -258,9 +270,15 @@ prior to mobilisation to site.")*
    **6,550–6,830 mm** gives **base : height ≈ 0.31 : 1**, i.e. each leg about
    **8.5–9° off vertical**. §3c's period-engraving reads (0.62–0.7 : 1,
    17–20°) describe a *hand rig from the 1800s*, not this machine. §3c already
-   suspected this and marked it `[I]`; it is now a measurement. **Build the
-   modern GI tripod narrow and steep — 0.31 : 1.** Both readings stay on the
-   record.
+   suspected this and marked it `[I]`; it is now a measurement.
+
+   > ⚠ **THIS ITEM IS WRONG AND §10.1 CORRECTS IT.** 0.31 : 1 is the LATERAL
+   > half-spread of the front pair only. A tripod leg rakes in the plane that
+   > contains it and the apex, and that plane has the FORE-AFT offset in it too.
+   > All three feet in fact lie on one circle of radius 2.176 m about the
+   > drilling axis, so the true rake is atan(2.176 / 6.650) = **18.1° off
+   > vertical** — within a degree of the engraving this item dismisses. **Do not
+   > build it narrow and steep.** See §10.1 for the arithmetic.
 2. **`width between legs` is identical (2,072 mm) on all three machines** while
    every other dimension changes. The tripod is a **common frame** across the
    range; the winch is what differs. A standard weldment, shared.
@@ -1876,3 +1894,182 @@ are real gaps, not omissions. The single highest-value addition anyone could mak
 is the **BDA *Guidance for the Operation of Cable Percussion Rigs and
 Equipment***, which holds the British tool weights, and **two or three
 photographs** of an erected GI tripod (§7)._
+
+---
+
+## 10. Corrections and additions from the modelling pass (2026-09-05)
+
+Written while building `blender/cable_percussion.py`, which models **family A**.
+Everything here either **corrects** something above or **closes** an item in §8.
+Where this section disagrees with an earlier one the earlier text is left in
+place and flagged, per this document's own convention.
+
+**Two source classes are new.** First, a **dimensioned general-arrangement
+drawing** — side elevation, front elevation and plan, with red dimension
+callouts — published on a UK contractor's cable-percussion capability sheet
+(<https://www.van-elle.co.uk/wp-content/uploads/2023/06/Dando-Cable-Percussion-Drilling-Rig.pdf>
+p.1, accessed 2026-09-05) `[GA]`. **This is the only dimensioned drawing of this
+machine found anywhere**, and §7's "there are no photographs" is now also out of
+date: eight photographs of working machines were examined for this pass. Second,
+**three PDFs already in the owner's library that §1 never read** — see §10.8.
+
+### 10.1 The leg rake in §4.2.0 item 1 is wrong, and the engraving was right
+
+§4.2.0 item 1 reads width-between-legs 2,072 against operating height 6,650 as
+**"8.5–9° off vertical"** and instructs the modeller to *"build the modern GI
+tripod narrow and steep"*, discarding §3c's period-engraving read of ~17–20°.
+
+**0.31 : 1 is the lateral half-spread of the FRONT PAIR only.** A tripod leg
+rakes in the plane containing it and the apex, and that plane also carries the
+fore-aft offset. Solve `[ST]`'s three published envelope numbers together,
+assuming three legs meeting at one apex over the hole:
+
+```
+    H = 6.650   operating height
+    W = 2.072   width between legs        front feet at (+-W/2, -a)
+    L = 4.090   operating length          back foot   at (0, +b),  a + b = L
+    equal legs  =>  (W/2)^2 + a^2 = b^2   =>  b = 2.1762, a = 1.9138
+    LEG = sqrt(b^2 + H^2) = 6.9970 m
+```
+
+**6.997 m**, against §3a's *"approximately 7 m"* from a completely independent
+source — and `LEG + a ~0.5 m drawbar = 7.500 m`, which is `[ST]`'s published
+**travelling length to the millimetre**. All three feet therefore sit on **one
+circle of radius 2.176 m**, and the true rake is
+
+**atan(2.176 / 6.650) = 18.1° off vertical, all three legs** —
+
+within a degree of the engraving §4.2.0 dismisses. **The old machines and the
+modern one splay by the same amount.** §3c's `[I]` was sound and should not have
+been overruled by the arithmetic that overruled it.
+
+### 10.2 The rope is 16 mm and it is LEFT LAY — §4.1 and §4.2.0b both need amending
+
+- **Diameter.** §4.2.0b's **10 mm** is `[CON]`'s **Forager-55**, the **0.5 t**
+  machine at the bottom of the range (a hire fleet lists it at 0.5 t against
+  1.8–2.25 t for the rest). A current 2 t-class machine of this family is
+  specified with **"90m of 16mm LH lay wireline"** on the main free-fall winch
+  and **"38.5m of 6mm wireline"** on the tooling winch
+  (<https://dando.co.uk/products/dando-duke-cable-percussion/>, accessed
+  2026-09-05) `[MFR]`. So **16 mm is the working GI figure and 10 mm is the mini
+  rig's**, and §4.1's conclusion that family A's rope is "a thin, whippy line …
+  roughly half the diameter of the American drill line" does not hold: 16 mm
+  against 19.1 mm is a 16 % difference, not 50 %. Two ropes of visibly different
+  thickness on one machine is still right — but the pair is **16 mm and 6 mm on
+  the same rig**, not 16 against 19 across families.
+- **Lay — §4.1 explicitly warns against assuming it, and the warning is
+  disproved.** The reasoning (British tools carry a swivel, and a swivel removes
+  the mechanical argument for left lay) is good, and the makers do it anyway:
+  **"16mm LH lay"** is the manufacturer's own words. Independently, a US
+  water-well manual **already in the owner's library** (§10.8) gives *"a left lay
+  cable of 6 x 19 or 6 x 21 construction"* — an older, unrelated source that also
+  **adds 6 × 21** to §4.1's 6 × 19. **Warning 9.Q therefore gets stronger, not
+  weaker**: the drilling line runs the opposite way to every other rope in the
+  fleet, on BOTH families.
+- **Rope safety factor, new and hard.** British Drilling Association Technical
+  Guide SWR/WLL/MBL, November 2023 `[STD]`: *"Cable tool percussion drilling =
+  5:1 … the ratio between MBL and the static weight of the drilling tool when
+  empty."* The same guide carries a **modelling instruction**: *"Rope end
+  connections using wire rope clamps (Bulldog grips) are only permitted for free
+  fall applications."* **Bulldog grips at the rope termination are correct on
+  this machine and on almost nothing else in the fleet.**
+
+### 10.3 The third leg does not reach the ground — it foots on the chassis
+
+§4.2.1 says "three legs, not two" and stops there. `[GA]`'s two elevations say
+more, and eight photographs agree: the **front elevation** shows two splayed
+legs with **ground feet 2,072 mm apart plus a central ladder-mast**, and the
+**side elevation** shows that third leg **landing on the chassis over the
+axle**. So the erected machine has three ground reactions — two leg feet and the
+wheel pair — and **the centre leg carries a ladder running its full height**,
+which is why every photograph of one of these has rungs up the middle.
+
+`[GA]` also dimensions **2208 mm chassis base fore/aft** and **1981 mm plan
+width**, and its side elevation scales the front feet to **2.5–3.0 m ahead of the
+axle**. The model built for this pass puts them at 2.750 m, which reproduces
+`[ST]`'s operating length of 4.090 m exactly.
+
+### 10.4 The sheave — count, position and diameter, all previously NOT SOURCED
+
+§8.1 lists "sheave count and diameter … neither the count nor any diameter is
+published." Both close.
+
+- **Two sheaves**, and `[GA]` shows where: the **main sheave on the FRONT FACE
+  of the head casting**, a **smaller tooling sheave below and behind it**. Not
+  two in one casting, and not the snatch block §4.2.1 offers as the alternative —
+  though `[CON]`'s apex strong-point is real and separate, and the block goes on
+  it for multi-part tackle.
+- **Ground to main-sheave centre: 5 622 mm**, dimensioned on `[GA]` (the
+  dimension line terminates on the circled sheave), against **6 830 mm** overall
+  erected height.
+- **Sheave diameter ~400 mm [D].** Two independent routes agree to 4 mm: the
+  `[GA]` ratio 5622/6830 applied to `[ST]`'s 6 650 machine puts the centre at
+  **5.474 m**, and `[ST]`'s own *"working height under sheaves 5 200"* plus a
+  400 mm sheave and a thin block bottom gives **5.470 m**.
+- ⚠ **A "1.5 m / 60 in" crown-sheave figure circulates in drilling literature.
+  It is an OIL-RIG CROWN BLOCK and is about ten times too large here.**
+
+### 10.5 Four more §8.1 items closed
+
+| §8.1 item | Now |
+|---|---|
+| **"The engine … power in kW or hp: NOT SOURCED"** | **13 kW (18 HP) at 1800 rpm** on the 2000 class and **15 kW (20 HP) at 1600 rpm** on the 3000; 8.1 kW on the 1500 LHR; 19.3 kW on the 4000; 23.9 kW on the current machine. One brochure names an **air-cooled twin-cylinder diesel** through a **heavy-duty worm-drive gearbox**. **Note that `data.js` asserts 82 kW for this rig — six times the sourced figure, because it describes the American truck spudder.** |
+| **"Erection method … whether the tripod is raised by hand, by its own winch, or by a gin. Unsourced."** | **Neither: a SAMPSON POST with its own electric winch.** *"An independent electrically operated winch with remote cable control is fitted on the Sampson post so that the derrick legs can be raised and lowered safely."* A second maker's rig is instead *"self-erecting using its own winch"*, with the Sampson post an **optional extra** — so both methods exist and the post is the modern one. |
+| **"The feet. … Spike, plate, shoe or bare leg end: unknown."** | **Flat steel spread plates**, photographed under the leg feet. That is also what `[CON]`'s "feet prevented from spreading" acts on. |
+| **"Leg section. Tube, square section, channel or built-up?"** | **Both, and the difference is photographic.** The orange machines of one maker carry **square box section**; another maker's blue machine uses **round tube**. Wall thickness and outside dimension remain unpublished. |
+
+### 10.6 Travelling height — new, and it is a hard geometric constraint
+
+A hire-fleet plant list carrying six of these machines in one table
+(<https://phoenixdrilling.co.uk/wp-content/uploads/2020/09/plant-specifications-sep-2020.pdf>,
+accessed 2026-09-05) `[HIRE]` publishes **travelling heights of 1.50–1.75 m**,
+alongside weights of **1.8–2.25 t** and working heights of **6.6–7.1 m**.
+
+**A 7 m leg lying at 1.55 m is FLAT ALONG THE CHASSIS, not tipped back.** So the
+folded legs sweep the whole deck, and *nothing bolted to the chassis may stand
+higher than the underside of those legs*. That turns a published number into a
+check anybody can run against geometry, and `blender/cable_percussion.py` runs it
+at build time — the first layout failed it four times over (a 2.09 m Sampson
+post, a 1.82 m exhaust stack, a lamp on a 1.64 m pillar, and the engine).
+
+### 10.7 Two things not to say about family A
+
+- **Do not give this machine a blows-per-minute figure.** §4.3.1 item 9 and
+  warning 9.K quote *"15 to 60 strokes per minute"* — that is the **American
+  walking-beam** rig, where a crank sets the rate. On a free-fall winch there is
+  no rate to publish, and the British sources describe only **"long drop"** and
+  **"short stroke"** technique. The **1–3 m stroke** (§4.4.4) is separately
+  corroborated by the Rural Water Supply Network.
+- **One machine named in §1's research set is not this class at all.** The
+  "Terrier" of that maker's range is a small **tracked window-sampling and
+  dynamic-probing rig** with a short vertical mast — *"The rig can even fit
+  through a standard doorway"* — not a cable percussion tripod, and it should not
+  be used as geometry evidence here. (A useful naming note for the invented
+  marque: on this family **the model number IS the winch line pull in kg** —
+  1500, 2000, 2500, 3000, 4000.)
+
+### 10.8 Three primary documents already in the library that §1 never read
+
+All three are stronger source classes than several of the web citations §1 leans
+on, and all three are on disk.
+
+| Document | What it adds |
+|---|---|
+| `Downloads\pile-design-and-construction.pdf` — Tomlinson & Woodward, *Pile Design and Construction Practice*, 566 pp. `[STD]` | §3.3.7 **"Tripod rigs"** (PDF pp.133–135): the clay cutter is *"a simple tube with a sharpened cutting edge, the tube being driven down under the impact of a heavy drill stem"*, the plug *"prised out by spade"*; the shell is *"a simple tube with a cutting edge and flap valve"*. Tripod rigs bore **piles up to 600 mm diameter, 10 m deep, working loads to 1 200 kN**, and are used *"in situations where low headroom or difficult access"* rule out lorry- or track-mounted augers. Ch. 11 (pp. 514–518): *"Cable percussion borings give the most reliable information for piling work. **Operation of the boring tools from the winch rope gives a good indication of the state of compaction of the soil strata**"* — the best one-line statement anywhere of what the driller is actually doing. Plus an engineering warning §4.6 lacks: the shell's suction **loosens the soil at the pile base**, and piles drilled by baler must be designed on a **reduced φ ≈ 28–30°**. |
+| `Downloads\212.0-79WA-526.pdf` — US water-well drilling manual, ch. 3 *"Cable Tool"*, scanned `[CAT]` | **Independently confirms the left-lay rule** (§10.2) and adds **6 × 21**; bailer lines **⅜, 7/16 or ½ in of 6 × 25 regular lay**; drill line sized to hole (⅝ in for 3–6 in, ¾ in for 6–10 in, **⅞ or 1 in for big holes**); *"do not allow the bit to get more than **¼ in below gauge**"* — the hard number behind the wear model §9.R praises; set-up geometry (a **6–8 ft deep, 4–5 ft square** curbed pit, and a working platform of **3 × 8 in planking**); and **a trough to lead the bailer dumpings away from the rig**, which is site furniture §4.6 does not have. |
+| `Downloads\12261277_02.pdf` — DDCAP *Technical Manual for Drilling Works*, 170 pp. `[STD]` | Carries **"Figure 3 Structure of Cable and Tool Drilling Machine"**, a labelled colour schematic — **the only machine-level illustration of this class in the local library**, and §7 does not know about it. Also **Table 1**, a formation-by-formation performance matrix (cable-and-tool against mud rotary and DTH) covering dune sand, loose sand and gravel, quicksand and **loose boulders in alluvial fans or glacial drift** — *"slow but generally can be handled by driving pipe"*, where mud rotary is *"frequently impossible"* and DTH *"not recommended"*. Directly usable for the game's ground model, and nothing equivalent exists in `research/`. |
+
+### 10.9 What the model built this pass does and does not claim
+
+`blender/cable_percussion.py` builds **family A**. `src/rig/rigFactory.js`
+`buildCablePercussion` and `data.js`'s description text (*"a folding derrick over
+a walking beam"*) both describe **family B**. **That divergence is real and it is
+warning 9.B, not a modelling error** — but it now exists in two places rather
+than one, and it should be resolved the way 9.B suggests rather than left to be
+discovered by a player.
+
+Still `NOT SOURCED` after this pass, and correspondingly not asserted in the
+model: leg wall thickness and outside dimension; the fold/splice joint itself
+(the legs demonstrably fold, but no source shows how); drum diameter and rope
+capacity for this size; tyre size; head-casting form and material; and every
+British tool weight except the sinker bar. §8 stands otherwise.
