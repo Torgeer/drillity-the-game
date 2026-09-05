@@ -225,6 +225,88 @@ if (existsSync(BUILD_PY)) {
   }
 }
 
+/* ── 5. THE NODE CONTRACT `gltfRig.js` ACTUALLY DEPENDS ON ───────────────────
+   Added on a critic's ranked-first recommendation, and its reasoning is the
+   whole justification: **a class of bug fixed instance-by-instance reproduces
+   at the rate content is added.**
+
+   The carriage contract is the proof. `makeDyn()` publishes `dyn.carriage`
+   only alongside a usable `carriageRange`, because `setCarriage()` reads the
+   range straight after the carriage guard with no guard of its own and does
+   `position.z = -flexA * dyn.mastHeight * 0.5 * frac * frac` — where
+   `-0 * undefined` is **NaN written into a world matrix, and the machine
+   silently disappears**. That was diagnosed, written up, and fixed BY HAND on
+   one machine after another; then new machines arrived carrying it again.
+
+   It passes on all 19 as this is written. That is exactly when to add the
+   gate: it costs nothing today and it cannot come back tomorrow.
+
+   What is checked, and why each one:
+     - a TOOL ANCHOR, `mount:tool` or `slide:carriage`. Without either,
+       `dyn.toolAnchor` is null and the machine cannot hold a tool at all.
+     - if `slide:carriage` exists it must declare a non-zero finite `travel_m`.
+       A carriage with no stroke is not an error anywhere — it just never
+       moves. Note the sign is NOT constrained: foundation_bg exports -11.5 for
+       a Kelly that telescopes downward, and an earlier `travel > 0` guard
+       silently turned that into no stroke.
+     - `pivot:spindle` is REPORTED, not required. A cable-percussion tripod and
+       a CPT unit have nothing that rotates, so demanding one would be wrong. */
+{
+  const readJson = (file) => {
+    const buf = readFileSync(join(MODELS, file));
+    if (buf.length < 12 || buf.readUInt32LE(0) !== 0x46546c67) return null;
+    let off = 12;
+    while (off + 8 <= buf.length) {
+      const len = buf.readUInt32LE(off);
+      if (buf.readUInt32LE(off + 4) === 0x4e4f534a) {
+        return JSON.parse(buf.slice(off + 8, off + 8 + len).toString('utf8'));
+      }
+      off += 8 + len;
+    }
+    return null;
+  };
+
+  const noSpindle = [];
+  let checked = 0;
+  for (const f of models) {
+    const stem = f.slice(0, -4);
+    if (NOT_A_RIG.has(stem)) continue;
+    let g = null;
+    try { g = readJson(f); } catch (e) { warn.push(`${f}: unreadable — ${e.message}`); continue; }
+    if (!g) continue;
+    checked++;
+    const byName = new Map((g.nodes || []).filter((n) => n.name).map((n) => [n.name, n]));
+    const carriage = byName.get('slide:carriage');
+    const tool = byName.get('mount:tool');
+
+    if (!carriage && !tool) {
+      fail.push(`${f} has neither "mount:tool" nor "slide:carriage" — dyn.toolAnchor `
+        + 'will be null and the machine cannot hold a tool at all.');
+    }
+    if (carriage) {
+      const t = carriage.extras && carriage.extras.travel_m;
+      if (!(typeof t === 'number' && Number.isFinite(t) && t !== 0)) {
+        fail.push(`${f} has "slide:carriage" but no usable travel_m `
+          + `(got ${JSON.stringify(t)}). The carriage will never move, and nothing `
+          + 'anywhere reports it. Any non-zero finite value is a stroke; the sign '
+          + 'says which way it telescopes.');
+      }
+    }
+    if (!byName.get('pivot:spindle')) noSpindle.push(stem);
+  }
+
+  if (!checked && models.length) {
+    fail.push('the node-contract check read 0 machines out of '
+      + `${models.length} files — it measured nothing and would have passed.`);
+  }
+  if (noSpindle.length) {
+    console.log(`
+no pivot:spindle (nothing rotates, or nothing turns it): `
+      + noSpindle.join(' '));
+  }
+  console.log(`node contract    ${checked} machine(s) checked`);
+}
+
 /* ── what has been modelled, and what has not ────────────────────────────── */
 const modelled = new Set([...byRig.keys()]);
 const haveModule = new Set(modules.map(intended).filter(Boolean));
