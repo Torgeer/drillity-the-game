@@ -1565,6 +1565,146 @@ export function createRenderer(ctx) {
   }
 
   /* ═══════════════════════════════════════════════════════════════════════
+     BAND REGISTRATION — making the two bands draw the SAME hole
+     ═══════════════════════════════════════════════════════════════════════
+
+     GAMEDESIGN §1: "The two bands are one continuous world fiction: the
+     borehole in the section lines up horizontally with the mast above it."
+     Measured warm at 390x844, chrome live, identical on dth / cfa / auger
+     (they are camera properties, so every method reads the same):
+
+       collarOffsetPx   62.44   world (0,0,0) lands at x 257.44 in the surface
+                                band and at x 195.00 in the section. 16.0 % of
+                                the stage width apart.
+       groundAtSeamPx  -22.81   ground level at the collar projects to y 355.19
+                                against a seam at y 378, so the cut opened
+                                22.8 px BELOW where the ground was drawn.
+
+     Both are now solved every frame, from the projection itself, by a LENS
+     SHIFT on the surface camera (`setViewOffset`). Why that, and why on that
+     camera:
+
+     ── why a lens shift, not a re-solved camera ──────────────────────────
+     `setViewOffset` renders a translated window of the SAME frustum. Every
+     ray is unchanged, so the machine's pixels are identical and merely move;
+     nothing about the hero solve above (fov 34, the 13 deg sun sitting 14 deg
+     off the camera's right, the shadow raking left) is disturbed. Re-solving
+     `pos` / `look` would change the convergence on the mast and re-open the
+     aperture arithmetic in CAMERA_MODES.hero every time the dock height
+     changed. And the error is not a constant: it moves with the camera mode,
+     the band aspect and the measured HUD chrome, so a hand-tuned literal
+     would be right on one phone and wrong on the next. This is measured, so
+     it is right on all of them.
+
+     ── why the SURFACE camera carries both shifts ────────────────────────
+     The obvious alternative for the horizontal is to slide the SECTION across
+     instead, which keeps the hero framing untouched. It does not survive
+     contact with world/geology.js. Its instrument strips are re-anchored to
+     the camera's x ONLY on a long-section (`if (horiz)`, ~:7031); in the
+     sixteen vertical methods the ruler sits at world `halfW - rulerWidth*0.55`
+     and the log strip at `-halfW + logWidth*0.5`, nailed to world x 0, and
+     `buildFace()` cuts the strata slab at `halfW * 2 * 1.02` — 2 % of margin.
+     Shifting the cut 3.22 m would carry the ruler clean off the right edge and
+     open ~58 px of bare backdrop down the left. So the section is not free to
+     move, and GAMEDESIGN's own wording agrees about which one is the
+     reference: the section lines up with the MAST, not the mast with the cut.
+
+     What it costs, measured rather than assumed: the machine's ground
+     footprint is x 214.7-400.8, y 333.0-364.1. After the shift it is
+     x 152.3-338.4, y 355.8-386.9. That
+       • FIXES an overflow — the rig currently runs 11 px off the right edge
+         of a 390 px stage;
+       • leaves 152 px of clear ground to the LEFT, which is the side the sun
+         rakes its shadow into, so the negative space the hero solve wanted is
+         still there;
+       • loses ~9 px off the nearest track corner under the seam. That corner
+         is 12.96 m from the eye where the collar is 13.79 m — i.e. it is IN
+         FRONT OF THE CUT PLANE, and a cutaway is supposed to remove what is
+         in front of it. Trading 9 px of track for a hole that is one hole.
+
+     ── sign convention, since it is easy to get backwards ────────────────
+     With fullWidth/fullHeight set to the band's own size, three.js shifts the
+     frustum WINDOW, so the rendered image moves the other way: a positive
+     offsetX moves the image LEFT by offsetX px and a positive offsetY moves
+     it UP by offsetY px. The offset therefore IS the signed error, directly.
+     Nothing here relies on that being true, though — the solve reads the
+     UNSHIFTED projection every frame and re-derives from pixels, so a sign
+     error would show up as a wrong answer in .qa-collar.mjs on the first run
+     rather than as a drift nobody notices until it is 200 px.
+
+     ── what is deliberately NOT fixed here ───────────────────────────────
+     `scaleRatio` 2.81x (54.58 px/m above, 19.42 below). It is not a framing
+     error and a lens shift cannot touch it; see the note on updateSectionFrustum
+     and the report in HANDOFF §10. Matching it needs the hero eye at 38.4 m
+     instead of 13.69, which puts a 4.2 m mast at 82 px — 7 % of the frame.
+     ═══════════════════════════════════════════════════════════════════════ */
+
+  /** Off = the pre-2026-09-05 behaviour, for an A/B. See `__qaRegisterBands`. */
+  let registerBandsOn = true;
+  /** Bounds on the shift, as a fraction of the surface band. A stale or absurd
+      solve may never throw the frame away; it may only be imperfect. */
+  const REG_MAX_X = 0.22;
+  const REG_MAX_Y = 0.12;
+  const registration = { x: 0, y: 0, active: false, collarErrPx: 0, groundErrPx: 0 };
+  const regPoint = new THREE.Vector3();
+
+  function clearRegistration() {
+    if (camera.view && camera.view.enabled) camera.clearViewOffset();
+    registration.x = 0;
+    registration.y = 0;
+    registration.active = false;
+    registration.collarErrPx = 0;
+    registration.groundErrPx = 0;
+  }
+
+  function registerBands(dt) {
+    /* The invariant is a property of the SITE screen: it is the only place
+       where both bands describe one hole. Elsewhere the section band is
+       backdrop behind a DOM overlay, and on `orbit` / `menu` the camera
+       revolves around the world origin — pinning the origin there would
+       cancel the orbit it exists to perform. Same gate as the HUD chrome, and
+       read live rather than from `chromeScene` so it cannot lag a frame. */
+    if (!registerBandsOn || !onSiteScene()) { clearRegistration(); return; }
+
+    const band = bands.surface;
+    const sect = bands.section;
+
+    // solve against the UNSHIFTED projection, so the answer is a measurement
+    if (camera.view && camera.view.enabled) camera.clearViewOffset();
+
+    regPoint.set(0, 0, 0).project(camera);
+    if (!Number.isFinite(regPoint.x) || !Number.isFinite(regPoint.y)) return;
+    const collarX = band.x + (regPoint.x * 0.5 + 0.5) * band.w;
+    const collarY = band.y + (1 - (regPoint.y * 0.5 + 0.5)) * band.h;
+
+    /* Where the CUT draws the same hole. Projected rather than assumed to be
+       the band centre: the section camera is parked at x 0 today, and this
+       stays correct on the day it is not. */
+    regPoint.set(0, 0, 0).project(sectionCamera);
+    if (!Number.isFinite(regPoint.x)) return;
+    const holeX = sect.x + (regPoint.x * 0.5 + 0.5) * sect.w;
+
+    const wantX = clamp(collarX - holeX, -band.w * REG_MAX_X, band.w * REG_MAX_X);
+    const wantY = clamp(collarY - sect.y, -band.h * REG_MAX_Y, band.h * REG_MAX_Y);
+
+    /* Damped, not snapped. Entering the site screen springs the camera from
+       `menu` to `hero`, and an offset that tracked the collar exactly through
+       that would cancel a chunk of the move — the hole would sit still while
+       the world swung around it. Lagging it lets the transition read as a
+       camera move and converges to exact well inside the first second. */
+    if (!registration.active) { registration.x = wantX; registration.y = wantY; }
+    else {
+      registration.x = damp(registration.x, wantX, 8, dt);
+      registration.y = damp(registration.y, wantY, 8, dt);
+    }
+    registration.active = true;
+    registration.collarErrPx = collarX - holeX - registration.x;
+    registration.groundErrPx = collarY - sect.y - registration.y;
+
+    camera.setViewOffset(band.w, band.h, registration.x, registration.y, band.w, band.h);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
      Adaptive quality — downgrade only, long cooldown, so it cannot oscillate.
      ═══════════════════════════════════════════════════════════════════════ */
   /** True when main.js was launched with ?quality=... — see ADAPTIVE_GRACE. */
@@ -1751,6 +1891,9 @@ export function createRenderer(ctx) {
 
       updateSurfaceCamera(step, state);
       updateSectionCamera(step, state);
+      /* after both cameras, because it reads one against the other; before
+         syncDynamic(), which copies the surface projection into the AO pass. */
+      registerBands(step);
       syncDynamic();
 
       if (gradePass) {
@@ -1920,6 +2063,24 @@ export function createRenderer(ctx) {
       postScaleOverride = (typeof s === 'number' && s > 0) ? clamp(s, 0.5, 2) : null;
       buildPost();
       return postScale;
+    },
+
+    /**
+     * The live band-registration state, in CSS px: the lens shift being
+     * applied and the RESIDUAL error left after it. `.qa-collar.mjs` grades
+     * against the residual — a report that only showed the shift could not
+     * tell a solved frame from a clamped one.
+     */
+    get registration() { return registration; },
+
+    /**
+     * QA ONLY — turn band registration off to reproduce the 62.44 / -22.81
+     * frame for a paired A/B. Nothing in the game calls it.
+     */
+    __qaRegisterBands(on) {
+      registerBandsOn = on !== false;
+      if (!registerBandsOn) clearRegistration();
+      return registerBandsOn;
     },
 
     /** Render once and read the canvas back — for the screenshot harness. */

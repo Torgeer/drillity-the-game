@@ -141,6 +141,47 @@ for (const mid of METHODS) {
     const surfPxPerM = Math.abs(g0.y - g1.y);
     const sectPxPerM = Math.abs(s0.y - s1.y);
 
+    /* ── the SECTION's own ground line ────────────────────────────────────
+       The two numbers above compare the SURFACE band's ground line to the
+       seam. They say nothing about where the CUT puts depth 0 — and a depth
+       ruler zeroed anywhere else is a ruler with the wrong origin. geology
+       scrolls `root` and maps depth through `secYForDepth(m) = depthAtY0 - m`,
+       so the ground line is a live world Y, not a constant. */
+    const sv = c.sectionView || {};
+    let sectionGroundCssY = null, sectionGroundAtSeamPx = null;
+    if (Number.isFinite(sv.depthAtY0)) {
+      let rootY = 0;
+      c.sectionScene.traverse((o) => {
+        if (o.name === 'section-face' && o.parent) rootY = o.parent.position.y;
+      });
+      const p = toBand(c.sectionCamera, b.section, 0, sv.depthAtY0 + rootY, 0);
+      sectionGroundCssY = +p.y.toFixed(2);
+      sectionGroundAtSeamPx = +(p.y - b.section.y).toFixed(2);
+    }
+
+    /* ── each band's KEY LIGHT, in that band's OWN screen space ───────────
+       World azimuth is not what the eye reads. What the eye reads is which
+       SIDE of the frame the light falls from and how steep it is — i.e. the
+       light's direction transformed into the camera's own basis. screenAz is
+       measured clockwise from screen-up, so 90 = from the right of frame.
+       towardCamera > 0 means the light is behind the viewer (frontal fill). */
+    const screenLight = (cam, light) => {
+      if (!light) return null;
+      const d = new T.Vector3().copy(light.position);
+      if (light.target) d.sub(light.target.position);
+      if (d.lengthSq() < 1e-9) return null;
+      d.normalize();                                   // surface -> light
+      const q = d.clone().transformDirection(cam.matrixWorldInverse);
+      return {
+        screenAzDeg: +(((Math.atan2(q.x, q.y) * 180) / Math.PI + 360) % 360).toFixed(1),
+        towardCameraDeg: +((Math.asin(Math.max(-1, Math.min(1, q.z))) * 180) / Math.PI).toFixed(1),
+        worldElDeg: +((Math.asin(Math.max(-1, Math.min(1, d.y))) * 180) / Math.PI).toFixed(1),
+        colour: '#' + light.color.getHexString(),
+        intensity: +light.intensity.toFixed(3),
+      };
+    };
+    const byName = (root, n) => { let f = null; root.traverse((o) => { if (!f && o.name === n) f = o; }); return f; };
+
     /* ── the rig, as a world AABB and as a band rect ──────────────────── */
     let rigNode = null;
     c.scene.traverse((o) => { if (!rigNode && /^rig:/.test(o.name || '')) rigNode = o; });
@@ -158,11 +199,22 @@ for (const mid of METHODS) {
           x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x);
           y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y);
         }
+        /* the four y=0 corners on their own. The full AABB dips below grade
+           (track pads, and the string already in the hole), so its projected
+           bottom says nothing about what the seam clips off the MACHINE. */
+        let gx0 = Infinity, gy0 = Infinity, gx1 = -Infinity, gy1 = -Infinity;
+        for (let i = 0; i < 4; i++) {
+          const p = toBand(c.camera, b.surface,
+            (i & 1) ? box.max.x : box.min.x, 0, (i & 2) ? box.max.z : box.min.z);
+          gx0 = Math.min(gx0, p.x); gx1 = Math.max(gx1, p.x);
+          gy0 = Math.min(gy0, p.y); gy1 = Math.max(gy1, p.y);
+        }
         rig = {
           name: rigNode.name,
           worldMin: { x: +box.min.x.toFixed(3), y: +box.min.y.toFixed(3), z: +box.min.z.toFixed(3) },
           worldMax: { x: +box.max.x.toFixed(3), y: +box.max.y.toFixed(3), z: +box.max.z.toFixed(3) },
           bandRect: { left: +x0.toFixed(2), right: +x1.toFixed(2), top: +y0.toFixed(2), bottom: +y1.toFixed(2) },
+          groundRect: { left: +gx0.toFixed(2), right: +gx1.toFixed(2), top: +gy0.toFixed(2), bottom: +gy1.toFixed(2) },
         };
       }
     }
@@ -182,6 +234,7 @@ for (const mid of METHODS) {
       const box = new T.Box3().setFromObject(o);
       if (box.isEmpty() || !Number.isFinite(box.min.z)) return;
       zs.push({ name: o.name || o.type, z0: +box.min.z.toFixed(2), z1: +box.max.z.toFixed(2),
+                x0: +box.min.x.toFixed(2), x1: +box.max.x.toFixed(2),
                 visible: o.visible });
     });
     const zvis = zs.filter((q) => q.visible && Math.abs(q.z0) < 500 && Math.abs(q.z1) < 500);
@@ -208,6 +261,16 @@ for (const mid of METHODS) {
         surfPxPerM: +surfPxPerM.toFixed(2),
         sectPxPerM: +sectPxPerM.toFixed(2),
         scaleRatio: sectPxPerM > 0.01 ? +(surfPxPerM / sectPxPerM).toFixed(3) : null,
+        sectionGroundCssY,
+        sectionGroundAtSeamPx,
+        sectionMode: sv.profileMode || null,
+        depthAtY0: Number.isFinite(sv.depthAtY0) ? +sv.depthAtY0.toFixed(3) : null,
+        holeX: Number.isFinite(sv.holeX) ? +sv.holeX.toFixed(3) : null,
+      },
+      lights: {
+        surfaceKey: screenLight(c.camera, byName(c.scene, 'keySun')),
+        sectionKey: screenLight(c.sectionCamera, byName(c.sectionScene, 'sectionKey')),
+        sectionFill: screenLight(c.sectionCamera, byName(c.sectionScene, 'sectionFill')),
       },
       camera: {
         fov: +c.camera.fov.toFixed(3),
@@ -255,6 +318,10 @@ for (const mid of METHODS) {
   const k = m.collar;
   console.log(`${mid.padEnd(10)} [${m.warm ? 'warm' : 'COLD'}${live ? '' : ', CHROME NOT LIVE'}]`);
   console.log(`  collarOffsetPx ${k.collarOffsetPx}  groundAtSeamPx ${k.groundAtSeamPx}  scaleRatio ${k.scaleRatio}`);
+  console.log(`  section mode ${k.sectionMode} depthAtY0 ${k.depthAtY0} holeX ${k.holeX}  sectionGroundAtSeamPx ${k.sectionGroundAtSeamPx}`);
+  console.log(`  light surf ${JSON.stringify(m.lights.surfaceKey)}`);
+  console.log(`  light sect ${JSON.stringify(m.lights.sectionKey)}`);
+  if (m.rig) console.log(`  rig GROUND rect ${JSON.stringify(m.rig.groundRect)}`);
   console.log(`  surf ${k.surfPxPerM} px/m   sect ${k.sectPxPerM} px/m   lens ${JSON.stringify(m.camera.view)}`);
   if (m.rig) console.log(`  rig ${m.rig.name} band rect ${JSON.stringify(m.rig.bandRect)}  world y ${m.rig.worldMin.y}..${m.rig.worldMax.y}`);
   console.log(`  section z ${m.sectionZ.min}..${m.sectionZ.max} over ${m.sectionZ.count} meshes`);
