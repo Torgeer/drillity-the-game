@@ -26,8 +26,8 @@ Repo: <https://github.com/Torgeer/drillity-the-game> (public, branch `master`).
 | `tools/checkdata.mjs` + `validateData()` | pass — **0 problems** |
 | `tools/checkbeds.mjs` | pass — 0 undrillable contracts in 6,400 sampled |
 | `tools/checkmodels.mjs` | pass — every exported model is named for the rig that asks for it |
-| content | **21 methods · 18 rigs · 260 items · 8 regions** |
-| Blender machines | **17 of 18 modelled and exported.** Only `sonic-truck` is still procedural |
+| content | **21 methods · 19 rigs · 260 items · 8 regions** |
+| Blender machines | **18 of 19 modelled and exported.** Only `sonic-truck` is still procedural |
 | commits this session | **145**, all pushed |
 
 **Nothing needs repairing before work resumes.** There is uncommitted-then-
@@ -414,13 +414,60 @@ the section must match what the sim resolved.
   visits to the site screen. A hard gate failure. The last agent on it said
   *"both remaining failures trace to one cross-file cause"* and **that cause is
   not written down anywhere** — re-derive it.
-- **`pd55` is modelled but not registered in `data.js`.** 4.56 MB of RM 20-class
-  leader rig with nowhere to go. Adding it needs a `RIGS` row, a builder in
-  `rigFactory.js`, and agreement between `RIGS[].methods` and `METHODS[].rigIds`
-  (which `checkdata.mjs` enforces).
+- ~~`pd55` is modelled but not registered.~~ **DONE.** It is a rig — 19 now —
+  with every stat cited against the datasheet and `renderRigId: 'piling-leader'`
+  as its procedural stand-in. The `NOT_A_RIG` exemption `checkmodels.mjs` was
+  carrying for it is deleted, which was the point: **the list of modelled-but-
+  unreachable machines is empty.**
 - **The seventeen un-cleared marque prefixes** (§3.2).
 
 ---
+
+## 7b. Two more fixed after this file was first written
+
+**The shop card was showing the back of every tool.** `tools.js` has always
+computed `userData.preview.aim` — the direction to look FROM — and its own
+comment ended *"Until preview.js reads it, this is inert."* Nothing read it. A
+declared contract with no consumer, exactly like `gltfRig.builder()`. Every
+bit, crown, shoe and bolt is built business-end-DOWN while the camera sat above
+the equator. Raycast-measured over a 96×96 grid, the carbide the player is
+buying went **3.8 % → 17.9 %** of the card on a T45 bit and **1.7 % → 8.6 %** on
+a DTH bit. **Still open:** the tool covers only 8–10 % of the card because the
+framing uses the bounding SPHERE, which is far larger than a long thin tool's
+on-screen extent. The `* 1.9` padding exists to stop a rig's mast being
+cropped, so changing it needs the coverage harness across the whole catalogue.
+
+**`checkmodels.mjs` could not see a subdirectory.** `readdirSync` is not
+recursive, so a `.glb` in `public/models/tools/` was invisible to every check
+while the gate printed OK. Fixed before the first tool landed. Top-level `.glb`
+files are machines and must be named for a rig id; nested ones are tooling or
+site furniture under their own loader, so only the **material** rule applies to
+them.
+
+## 7c. A decision waiting on the owner: tooling in Blender
+
+The owner asked for the whole game in Blender. An agent was briefed to convert
+the tooling on the premise that **wear is a material, not geometry** — true for
+machines — and it **measured that premise false for tools**:
+
+| T45 89 mm bit | wear 0 | wear 0.5 | wear 1 |
+|---|---|---|---|
+| carbide Ø | 89.89 | 88.76 | 87.64 |
+| carbide over body | **+1.69 mm** | +0.56 | **−0.56 mm** |
+| buttons present | 13 | 13 | **6** |
+
+That is Rockmore's four wear stages, Halco's +0.80 mm build tolerance and Boart
+Longyear's scrap rule (finished when gauge ≤ body) rendered as **mesh**: buttons
+flatten, the face scours away leaving survivors on pedestals, then they fall out
+and leave sockets. **Ship a Blender bit with material-only wear and all of that
+is deleted.**
+
+It also found the collapse had already been done in code: **270 ids = 92 builder
+functions + 178 aliases**, zero overlap. `tools.js` *is* the parametric family
+library. Three options, none free: port the wear logic to Python and ship
+92 × 3 = 276 GLBs; a hybrid (Blender body, procedural carbide); or leave tools
+procedural because that version is **more** realistic. The recommendation on
+file is the hybrid.
 
 ## 8. Failure patterns that cost the most time
 

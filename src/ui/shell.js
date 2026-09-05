@@ -578,6 +578,7 @@ export function createUI(ctx) {
     // Force a reflow so the animation restarts cleanly on re-entry.
     void inst.el.offsetWidth;
     inst.el.classList.add(goingBack ? 'is-entering--back' : 'is-entering');
+    armSettle(inst.el);
     current = { id: sceneId, inst };
 
     try { inst.mount?.(params || {}); } catch (e) { console.error(`[ui] mount ${sceneId}`, e); }
@@ -587,6 +588,52 @@ export function createUI(ctx) {
       state.scene = sceneId;
       bus.emit(EVENTS.SCENE_CHANGE, { scene: sceneId, params: params || null, from: 'ui' });
     }
+  }
+
+  /* ── `is-entering` COMES OFF WHEN THE ENTRANCE ENDS ──────────────────────
+     It used not to. The class was added on show and removed only when that
+     screen LEFT, so the screen the player is looking at always carried
+     `is-entering`, for as long as they looked at it — a state class asserting
+     that a screen which arrived ten minutes ago is still arriving.
+
+     That is not cosmetic. It is one of the three lies that made
+     `tools/checkreach.mjs` report zero controls and call it a PASS: the site
+     screen "keeps is-entering indefinitely", so a harness waiting for it to
+     clear waits for ever, and one sampling during it measures a dock at
+     682 px against its settled 227. Both QA harnesses carry a workaround for
+     this — sample for twelve seconds and keep the last non-empty shot —
+     written because the DOM would not say when the screen had settled. The
+     DOM should say. `animation-fill-mode: both` also keeps the animation
+     alive as long as the class is there, holding every screen on its own
+     compositing layer.
+
+     `animationend` BUBBLES, and `.stagger > *` runs `rise` on children of
+     this very element, so the target and the animation name are both
+     checked. The timer is a backstop, not the mechanism: an animation on a
+     screen shown while the tab is hidden may never fire an end event at all,
+     and reduced-motion turns the animation off outright. */
+  const ENTER_ANIMS = new Set(['screen-in', 'screen-in-back']);
+  let settling = null;
+
+  function clearSettle() {
+    if (!settling) return;
+    clearTimeout(settling.timer);
+    settling.el.removeEventListener('animationend', settling.onEnd);
+    settling = null;
+  }
+
+  function armSettle(el) {
+    clearSettle();
+    const drop = () => {
+      el.classList.remove('is-entering', 'is-entering--back');
+      clearSettle();
+    };
+    const onEnd = (e) => {
+      if (e.target !== el || !ENTER_ANIMS.has(e.animationName)) return;
+      drop();
+    };
+    el.addEventListener('animationend', onEnd);
+    settling = { el, onEnd, timer: setTimeout(drop, reduced ? 20 : TRANSITION_MS + 120) };
   }
 
   function finishLeave() {
@@ -826,12 +873,28 @@ ${(e && e.stack) || ''}`);
       const wide = w / h > 0.62 || w > 560;
       root.classList.toggle('is-wide', wide);
       for (const [, inst] of screens) {
+        /* HIDDEN SCREENS DO NOT GET RESIZED. `display: none` gives every
+           element on them a zero box, so a resize handler that measures
+           anything measures nothing — and garage.js's and shop.js's re-mount
+           all their card previews, each of which then re-armed a
+           requestAnimationFrame chain that could never terminate, because
+           `hidden` leaves the canvas CONNECTED (see mountPreview in
+           components.js). One orientation change off the garage left
+           nineteen of those running for the rest of the session.
+
+           Nothing is lost by skipping: show() calls `inst.resize()` on the
+           screen it is mounting, which is the first moment that screen has a
+           box worth measuring. */
+        if (inst.el?.hidden) continue;
         try { inst.resize?.(viewport.w, viewport.h, viewport.dpr); } catch (e) { console.error(e); }
       }
     },
 
     dispose() {
       disposed = true;
+      // The entrance settle holds a listener and a timer on a live screen.
+      clearSettle();
+      if (leaving) finishLeave();
       for (const u of unsubs) { try { u(); } catch (_) { /* already gone */ } }
       unsubs.length = 0;
       for (const [, inst] of screens) { try { inst.destroy?.(); } catch (_) { /* ignore */ } }

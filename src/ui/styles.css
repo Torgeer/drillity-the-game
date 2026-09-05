@@ -293,9 +293,20 @@ canvas { display: block; }
 .screen {
   position: absolute; inset: 0;
   display: flex; flex-direction: column;
-  will-change: transform, opacity;
 }
 .screen[hidden] { display: none !important; }
+/* `will-change: transform, opacity` used to sit on `.screen` itself, and
+   shell.js RETAINS every screen it has ever shown — so the browser was asked
+   to hold up to eight full-viewport compositing layers permanently, for four
+   states that last 440 ms each. will-change is a hint about what is ABOUT to
+   change; standing on something that is not changing, it is just a bill.
+   It now lives on the four transition states, which is exactly when it is
+   true. shell.js drops `is-entering` when the entrance actually ends, so
+   these come off on their own. */
+.screen.is-entering,
+.screen.is-leaving,
+.screen.is-entering--back,
+.screen.is-leaving--back { will-change: transform, opacity; }
 .screen.is-entering { animation: screen-in var(--dur-4) var(--ease-spring) both; }
 .screen.is-leaving  { animation: screen-out var(--dur-3) var(--ease-out) both; pointer-events: none; }
 .screen.is-entering--back { animation: screen-in-back var(--dur-4) var(--ease-spring) both; }
@@ -881,11 +892,27 @@ canvas { display: block; }
   font-variant-numeric: tabular-nums; letter-spacing: var(--tr-tight); white-space: nowrap;
 }
 .sstrip__v em { font-style: normal; color: var(--c-fg-dim); font-weight: 600; }
+/* THE LEVEL IS NOT A MACHINE READING, SO IT DOES NOT GET THE MACHINE'S
+   COLOUR — and it does not get a box either.
+
+   This was a 28px plate with an amber fill, an amber border and amber text,
+   sitting first in the strip: the loudest element on the drilling screen,
+   spent on the one number there that has nothing to do with the hole. Amber
+   is this game's plant colour; it belongs to the gauge, the job rule and the
+   beat — the things the machine is doing. A career ornament wearing it
+   competes with the instruments for the same glance, and it is the glance
+   the instruments need.
+
+   The box goes with it. A border around a numeral is an admission that the
+   spacing did not separate it, and the strip already separates its cells
+   with `.sstrip__div` hairlines. Same size, same weight, same tabular
+   figures as `.sstrip__v` beside it, so it reads as the first cell of the
+   row it is in rather than as a badge pinned to the front of it. */
 .sstrip__lvl {
-  display: grid; place-items: center; width: 28px; height: 28px; flex: none;
-  border-radius: var(--r-sm); background: rgb(var(--rgb-amber) / .16);
-  border: 1px solid rgb(var(--rgb-amber) / .4); color: var(--c-amber-hot);
+  display: grid; place-items: center; min-width: 22px; height: 28px; flex: none;
+  color: var(--c-fg-dim);
   font-size: var(--t-sm); font-weight: 850;
+  font-variant-numeric: tabular-nums; letter-spacing: var(--tr-tight);
 }
 .sstrip__div { width: 1px; height: 26px; align-self: center; background: var(--hair); flex: none; }
 /* The visible plate is 30px so it stays quiet in a 52px strip, but the TARGET

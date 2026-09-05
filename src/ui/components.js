@@ -567,6 +567,15 @@ export function paintPreview(canvas, bmp, o = {}) {
   return true;
 }
 
+/* Retry budget for a canvas that has no layout yet. Keyed weakly by the
+   canvas, so a card the list replaced takes its counter with it. ~4 frames
+   short of half a second at 60 Hz: long enough for a layout pass, a font and
+   an image decode; short enough that a canvas which will NEVER get a box
+   costs 26 frames rather than every frame until the player opens the screen.
+   See the re-arm in mountPreview for what this is guarding against. */
+const PREVIEW_TRIES = new WeakMap();
+const PREVIEW_MAX_TRIES = 26;
+
 /**
  * Ask the preview system for `ref`'s thumbnail and paint it, falling back to
  * the caller's authored art whenever the 3D path is unavailable or declines.
@@ -609,12 +618,39 @@ export function mountPreview(o = {}) {
      its own `!canvas.isConnected`, and the identical guard at the head of
      `drawPlaceholder` and `drawRig` — so a card that lost the race showed
      neither the render nor the fallback, and nothing ever tried again. */
+  /* ── AND THE RE-ARM IS BOUNDED, BECAUSE `hidden` DOES NOT DISCONNECT ──
+     `canvas.isConnected` was the only condition on the retry, and it is true
+     of every canvas on every RETAINED screen: ui/shell.js instantiates a
+     screen once and keeps its node under `.screens` with `hidden = true`
+     (`.screen[hidden] { display: none }`), so the canvas stays in the
+     document while `clientWidth` is 0 for ever. `paintable()` could never
+     become true, so the chain could never end.
+
+     One `window.resize` or `orientationchange` while the player was off the
+     garage armed it: shell.js resize() walked EVERY screen in the map,
+     garage.js resize() re-mounts all 19 rig previews, and each re-armed
+     itself every frame — nineteen self-perpetuating rAF chains, each calling
+     `fallback()` → `drawRig()`, which reallocates a 212 x 92 x dpr² backing
+     store and forces a style recalc, running for the whole time the player
+     is drilling. Invisible to every node count in the QA harness.
+
+     The retry answers a real race — a card whose layout has not landed yet —
+     so it stays, with a ceiling. Past it the authored art is already on the
+     canvas, so nothing is lost; and the screen's own `resize()` re-mounts
+     when it is next shown, which is exactly when the canvas gets a box.
+     shell.js no longer resizes hidden screens either. */
   const paintable = () => canvas.isConnected && canvas.clientWidth > 0 && canvas.clientHeight > 0;
   if (!paintable() || sp.ready === false) {
     fallback();
-    if (canvas.isConnected) requestAnimationFrame(() => mountPreview(o));
+    const tries = (PREVIEW_TRIES.get(canvas) || 0) + 1;
+    PREVIEW_TRIES.set(canvas, tries);
+    if (canvas.isConnected && tries <= PREVIEW_MAX_TRIES) {
+      requestAnimationFrame(() => mountPreview(o));
+    }
     return;
   }
+  // It painted: the next unpaintable mount gets its own full budget.
+  PREVIEW_TRIES.delete(canvas);
 
   if (typeof sp.thumbnail === 'function') {
     let p;
