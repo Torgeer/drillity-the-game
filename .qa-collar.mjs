@@ -301,14 +301,25 @@ for (const mid of METHODS) {
         sectionMode: sv.profileMode || null,
         depthAtY0: Number.isFinite(sv.depthAtY0) ? +sv.depthAtY0.toFixed(3) : null,
         holeX: Number.isFinite(sv.holeX) ? +sv.holeX.toFixed(3) : null,
-        /* geology sizes `halfH` as viewMetres*0.5 and lays its headroom, its
-           strip-recentring window and its ruler framing out against it; the
-           renderer anchors the cut's WIDTH, so the frustum's true height is
-           whatever a shorter band can show at 19.4 px/m. When these two
-           disagree, everything geology positions from halfH is off by the
-           ratio — including a depth ruler. */
-        viewMetresClaimed: Number.isFinite(sv.viewMetres) ? +sv.viewMetres.toFixed(3) : null,
+        /* THESE TWO ARE NOT MEANT TO MATCH, and this comment used to imply
+           they were — which is how "viewMetres claims 19.988 against an actual
+           frustum of 14.261" went onto the record as a fault in its own right.
+           `sv.viewMetres` is geology's authored SCALE ANCHOR: renderer.js reads
+           it back to fix the cut's WIDTH at 19.4 CSS px/m whatever the HUD
+           chrome does, and the frustum's HEIGHT is then whatever a shorter band
+           can show at that scale. 20 against 13.4 is the chrome inset.
+
+           The number that must equal the frustum is `sv.visibleMetres`, which
+           geology adopts from the camera and lays its headroom, its
+           strip-recentring window, its scale plate and its ruler out from.
+           THAT is the one to watch: while it and viewMetresActual disagreed,
+           CFG.headroom asked for 1.6 m of air above the collar and delivered
+           MINUS 1.26. */
+        scaleAnchor: Number.isFinite(sv.viewMetres) ? +sv.viewMetres.toFixed(3) : null,
+        visibleMetres: Number.isFinite(sv.visibleMetres) ? +sv.visibleMetres.toFixed(3) : null,
         viewMetresActual: +(c.sectionCamera.top - c.sectionCamera.bottom).toFixed(3),
+        /* where the drill log stops saying LOGGED and starts saying PROJECTED */
+        loggedDepth: Number.isFinite(sv.loggedDepth) ? +sv.loggedDepth.toFixed(2) : null,
       },
       lights: {
         surfaceKey: screenLight(c.camera, byName(c.scene, 'keySun')),
@@ -362,7 +373,15 @@ for (const mid of METHODS) {
   console.log(`${mid.padEnd(10)} [${m.warm ? 'warm' : 'COLD'}${live ? '' : ', CHROME NOT LIVE'}]`);
   console.log(`  collarOffsetPx ${k.collarOffsetPx}  groundAtSeamPx ${k.groundAtSeamPx}  scaleRatio ${k.scaleRatio}`);
   console.log(`  section mode ${k.sectionMode} depthAtY0 ${k.depthAtY0} holeX ${k.holeX}  sectionGroundAtSeamPx ${k.sectionGroundAtSeamPx}`);
-  console.log(`  viewMetres claimed ${k.viewMetresClaimed} vs actual frustum ${k.viewMetresActual}`);
+  {
+    const d = k.visibleMetres == null ? null
+      : Math.abs(k.visibleMetres - k.viewMetresActual);
+    const verdict = d == null ? 'NOT PUBLISHED — geology is not adopting the camera'
+      : d < 0.01 ? 'agree' : `DISAGREE by ${d.toFixed(3)} m — every placement is out by that ratio`;
+    console.log(`  visibleMetres ${k.visibleMetres} vs actual frustum ${k.viewMetresActual}  ${verdict}`);
+    console.log(`  scale anchor ${k.scaleAnchor} (published to renderer.js; NOT a height)`
+              + `   loggedDepth ${k.loggedDepth}`);
+  }
   console.log(`  light surf ${JSON.stringify(m.lights.surfaceKey)}`);
   console.log(`  light sect ${JSON.stringify(m.lights.sectionKey)}`);
   if (m.rig) console.log(`  rig GROUND rect ${JSON.stringify(m.rig.groundRect)}`);
