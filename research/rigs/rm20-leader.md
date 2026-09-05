@@ -186,7 +186,7 @@ to use next.
 ## 11. How this maps into the game
 
 Closest existing rig is **`piling-leader`** (currently a Junttan-class machine,
-badged *Bergholt PM-78 Leaderline*). An RM 20-class machine is a **different
+badged *Bergholt DP-78 Leaderline*). An RM 20-class machine is a **different
 proposition** and arguably deserves its own entry, because:
 
 - it is **dual-configuration** (impact hammer *and* DTH rotary head), which the

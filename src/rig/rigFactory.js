@@ -6061,7 +6061,7 @@ function buildLeaderMast(T, ctx, parent, o) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   RIG 15 — 'piling-leader' : Bergholt PM-78 Leaderline
+   RIG 15 — 'piling-leader' : Bergholt DP-78 Leaderline
    Leader-mounted impact piling rig, 78 t class.
 
    There is no boom. The whole visual identity is one vertical line, one heavy
@@ -6275,7 +6275,7 @@ function buildPilingLeader(T, ctx) {
   return {
     root: root, dyn: dyn,
     spec: {
-      id: 'piling-leader', name: 'Bergholt PM-78 Leaderline',
+      id: 'piling-leader', name: 'Bergholt DP-78 Leaderline',
       klass: 'Leader-mounted impact piling rig', weightKg: 78000, powerKw: 280,
       leaderM: leaderH, telescopeStrokeMm: 4000, leaderShiftMm: 1500,
       leaderCapacityKg: 20000, recommendedRamKg: '5000-9000', maxPileM: 25,
@@ -7531,16 +7531,66 @@ export function createRigSystem(ctx) {
   }
 
   /* ── build / cache ─────────────────────────────────────────────────────── */
+  /**
+   * THE BLENDER MACHINE, IF THERE IS ONE — otherwise the procedural one.
+   *
+   * This function used to read `RIG_BUILDERS` and nothing else, and that was
+   * the whole reason the Blender pipeline never reached the screen. Thirteen
+   * machines had been modelled, exported, fetched, magic-checked, parsed,
+   * material-swapped and had their triangles counted — and then discarded,
+   * because `gltfRig.js`'s `builder()` had ZERO call sites in `src/` and
+   * `rig:model-ready` had no subscriber. Every log line was correct. Nothing
+   * was wrong except that the machine on screen was the old one.
+   *
+   * `main.js` already awaited `warmOwnedModels(true)` before this system
+   * inits, with a comment explaining why the models must be in memory first.
+   * The intent was written down; the consumption was never built.
+   *
+   * `builder()` returns a function with exactly this file's own builder
+   * signature — `(T, ctx) => { root, dyn, spec }` — so the two are
+   * interchangeable here and the rest of the runtime cannot tell them apart.
+   * It returns null when there is no model, which is the ordinary case for the
+   * machines nobody has modelled yet; under `?glb=strict` it returns a builder
+   * that THROWS, so a missing model is loud instead of invisible; and under
+   * `?glb=off` it returns null for everything, which is how the procedural and
+   * Blender machines get compared side by side in one warm session.
+   *
+   * The fallback below is a real one. `gltfRig.js` describes itself as falling
+   * "through to the PROCEDURAL builder", and until this existed that was a
+   * fall-through with nothing to fall from — the pattern commit `36d1b36`
+   * named: it reads as a live defence and is camouflage.
+   */
   function ensureBuild(id) {
     if (builds.has(id)) return builds.get(id);
-    const fn = RIG_BUILDERS[id];
+
+    const glbFn = (ctx.gltfRigs && ctx.gltfRigs.builder)
+      ? ctx.gltfRigs.builder(id) : null;
+    const fn = glbFn || RIG_BUILDERS[id];
     if (!fn) return null;
     let b = null;
     try {
       b = fn(T, ctx);
     } catch (e) {
       if (typeof console !== 'undefined') console.error('[rig] build "' + id + '" failed —', e);
-      return null;
+      // A model that loaded but cannot be BUILT is a different failure from one
+      // that never arrived, and it must not take the machine off screen. Fall
+      // back to the procedural builder and SAY SO — a silent substitution here
+      // would be the same defect this whole comment is about.
+      //
+      // Under ?glb=strict there is deliberately no second chance: that mode
+      // exists to make a missing or broken model impossible to miss, and
+      // builder() has already handed us a thrower to guarantee it.
+      const alt = glbFn ? RIG_BUILDERS[id] : null;
+      if (!alt) return null;
+      if (typeof console !== 'undefined') {
+        console.warn('[rig] "' + id + '" built from .glb FAILED; drawing the procedural machine instead');
+      }
+      try {
+        b = alt(T, ctx);
+      } catch (e2) {
+        if (typeof console !== 'undefined') console.error('[rig] procedural "' + id + '" also failed —', e2);
+        return null;
+      }
     }
     mergeStatic(T, b.root);
     b.root.visible = false;

@@ -82,6 +82,15 @@ export function createGltfRigs(ctx) {
   const T = ctx && ctx.THREE;
   if (!T) throw new Error('[gltfRig] ctx.THREE is required');
   const strict = !!(ctx && ctx.qs && ctx.qs.get('glb') === 'strict');
+  /**
+   * `?glb=off` — never build from a model, even one that loaded cleanly.
+   *
+   * The procedural machines have been tuned for months and a first-pass export
+   * is not automatically better. Judging that needs the two side by side in the
+   * same session, on the same GPU, warm — so the switch has to be a URL
+   * parameter rather than a code edit and a rebuild.
+   */
+  const disabled = !!(ctx && ctx.qs && ctx.qs.get('glb') === 'off');
 
   /** id -> { root, nodes, tris, prims } — the parsed, material-swapped master. */
   const prepared = new Map();
@@ -683,6 +692,7 @@ export function createGltfRigs(ctx) {
      * drawing the procedural machine.
      */
     builder(id) {
+      if (disabled) return null;          // ?glb=off — draw the procedural machine
       const prep = prepared.get(id);
       if (!prep) {
         if (strict && failures.has(id)) {

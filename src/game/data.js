@@ -1280,7 +1280,7 @@ export const RIGS = deepFreeze([
   {
     /* No boom at all: a 21 m telescopic leader with a 9 t ram on it and a
        counterweight that slides back as the leader rakes. */
-    id: 'piling-leader', name: 'Bergholt PM-78 Leaderline', maker: 'Bergholt',
+    id: 'piling-leader', name: 'Bergholt DP-78 Leaderline', maker: 'Bergholt',
     price: 980000, unlockLevel: 33,
     methods: ['driven-pile'],
     stats: { power: 280, torque: 0, feedForce: 0, depthCapacity: 25, rodHandling: 0.8, mobility: 0.28, comfort: 0.82 },
@@ -4822,7 +4822,7 @@ const DEPTH_BY_METHOD_APPLICATION = Object.freeze({
  *
  *   rotary-kelly   worst card 90 m   deepest rig  78 m   (Torvald KR-46)
  *   jet-grouting   worst card 46 m   deepest rig  45 m   (Steinbach TH-320)
- *   driven-pile    worst card 30 m   deepest rig  25 m   (Bergholt PM-78)
+ *   driven-pile    worst card 30 m   deepest rig  25 m   (Bergholt DP-78)
  *
  * The last one is the clearest: `research/rigs/piling-leader.md` sources the
  * 25 m pile off the manufacturer's own table ("max pile length 25 m with the

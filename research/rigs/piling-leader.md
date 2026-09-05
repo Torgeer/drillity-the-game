@@ -1,7 +1,7 @@
 # Rig reference: `piling-leader` — Driven-piling leader rig, hydraulic impact hammer (Junttan class)
 
 status: complete (2026-09-04)
-Subject: game rig id `piling-leader` (in-game name "Bergholt PM-78 Leaderline")
+Subject: game rig id `piling-leader` (in-game name "Bergholt DP-78 Leaderline")
 Builder: `C:\Users\henri\Downloads\drillity-the-game\src\rig\rigFactory.js` → `buildPilingLeader()`
 Purpose: GEOMETRY + MATERIALS reference for the modeller. Not a gameplay balance sheet.
 
@@ -506,7 +506,7 @@ The spec block reproduces the Junttan PM 25H datasheet almost line for line: 78 
 20 000 kg leader capacity, 5 000-9 000 kg recommended ram, 25 m pile, 4 000 mm telescope,
 1 500 mm leader shift, 5 700 mm undercarriage, 3 380-4 880 mm tracks, 6 000 + 2 000 kg
 counterweight, electronic inclinometer as standard. Using the *numbers* is fine and correct — they
-are how the machine is proportioned. But the in-game name is **"Bergholt PM-78 Leaderline"**, and
+are how the machine is proportioned. But the in-game name is **"Bergholt DP-78 Leaderline"**, and
 **`PM` is Junttan's own model prefix** (PM16, PM25H, PMx22…). Under DOMAIN.md §10 that is a real
 manufacturer model designation. **Change the letter prefix**, and make sure no decal, badge shape
 or panel graphic on the model imitates a real maker's mark. Same applies to the tool:
