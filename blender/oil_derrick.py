@@ -1030,13 +1030,25 @@ def build_drill_floor(root, rotary):
     railing('floor-rail-y-b', [(vw + 0.4, hy, z), (hx, hy, z)], root, None)
 
     # ── the rig floor wind wall: the bottom 15 ft of the derrick is screened
-    #    ([S2 p.19]).  The LATTICE is not clad - the floor is.  Getting this
-    #    the wrong way round is the common error ([S6] §4.1 item 7). ─────────
+    #    ([S2 p.19]).  The LATTICE is not clad - the FLOOR is.  Getting this
+    #    the wrong way round is the common error ([S6] §4.1 item 7), and
+    #    [S1 §B.1.6] agrees from the other side: rig floor windbreaks fitted,
+    #    no derrick wind wall.
+    #
+    #    It stands at the SUBSTRUCTURE EDGE, not at the derrick base - [S2 p.19]
+    #    says so in as many words ("The floor wind wall is on the substructure")
+    #    and it is also what keeps the 2.4 m working margin round the derrick
+    #    legs open, which is where every piece of floor equipment lives.
+    #    Two faces only: the V-door face and the drawworks face stay open, so
+    #    the floor is never screened from the side the player looks in. ──────
     for sx in (-1, 1):
-        bx('floor-windwall', (0.06, SUB_Y * 0.80, WALL_F_H), R.MAT_PAINT, root,
-           None, (sx * (DER_BASE / 2 + 0.10), 0, z + WALL_F_H / 2), bevel=0.0)
-    bx('floor-windwall-back', (DER_BASE, 0.06, WALL_F_H), R.MAT_PAINT, root,
-       None, (0, -DER_BASE / 2 - 0.10, z + WALL_F_H / 2), bevel=0.0)
+        bx('floor-windwall', (0.06, SUB_Y * 0.86, WALL_F_H), R.MAT_PAINT, root,
+           None, (sx * (SUB_X / 2 - 0.08), 0, z + WALL_F_H / 2), bevel=0.0)
+        for k in range(4):                     # stiffener posts on the panel
+            yy = -SUB_Y * 0.40 + k * (SUB_Y * 0.80 / 3)
+            bar('windwall-stud', (sx * (SUB_X / 2 - 0.14), yy, z),
+                (sx * (SUB_X / 2 - 0.14), yy, z + WALL_F_H), 0.07,
+                R.MAT_PAINT, root, None, square=True)
 
 
 def build_derrick(root):
@@ -1218,16 +1230,32 @@ def build_racking(root):
                (x, y, bz - 0.16), bevel=0.0)
 
     # ── the racking board wind wall, 80 to 95 ft ([S2 p.19]).  It shelters the
-    #    derrickman and it is one of the few genuinely SOLID panels that
-    #    belongs on a derrick. ───────────────────────────────────────────────
+    #    derrickman, and it is one of the few genuinely SOLID panels that
+    #    belongs anywhere on a derrick.
+    #
+    #    SIZED TO THE MAN, NOT TO THE FACE.  Run full width it became a 8.4 x
+    #    4.6 m slab that closed off the top of the setback and read as exactly
+    #    the failure the brief warns about - a solid panel where there should
+    #    be structure and air.  [S2] gives the wall's ELEVATION BAND and says
+    #    nothing about its width, so the width is a modelling decision: it
+    #    screens the derrickman's working position and its two returns, and
+    #    the rest of the bay stays open lattice.  The sourced 80-95 ft band is
+    #    unchanged. ─────────────────────────────────────────────────────────
     wh = WALL_R_Z1 - WALL_R_Z0
     hb = half_at(BOARD_Z)
-    bx('racking-windwall', (0.06, DER_BASE * 0.92, wh), R.MAT_PAINT, root, None,
+    ww = DER_BASE * 0.46                       # the screened width
+    bx('racking-windwall', (0.06, ww, wh), R.MAT_PAINT, root, None,
        (hb - 0.10, 0, z0 + WALL_R_Z0 + wh / 2), bevel=0.0)
     for sy in (-1, 1):
-        bx('racking-windwall-r', (DER_BASE * 0.34, 0.06, wh), R.MAT_PAINT, root,
-           None, (hb - DER_BASE * 0.17, sy * DER_BASE * 0.46,
-                  z0 + WALL_R_Z0 + wh / 2), bevel=0.0)
+        bx('racking-windwall-r', (DER_BASE * 0.22, 0.06, wh), R.MAT_PAINT, root,
+           None, (hb - DER_BASE * 0.11, sy * ww / 2, z0 + WALL_R_Z0 + wh / 2),
+           bevel=0.0)
+    # the frame the panels hang on, so the screen reads as fitted rather than
+    # as a hole in the lattice
+    for sy in (-1, 1):
+        bar('windwall-post', (hb - 0.10, sy * ww / 2, z0 + WALL_R_Z0),
+            (hb - 0.10, sy * ww / 2, z0 + WALL_R_Z1), 0.055, R.MAT_PAINT,
+            root, None, square=True)
 
     # ── access ladder to the board, and the derrickman's escape line down to
     #    a ground anchor ([S6] §4.2).  The escape line is a long, obvious,
@@ -1313,27 +1341,45 @@ def build_crown(root):
              (h + 0.45, h + 0.45, ztop + 0.10), (-h - 0.45, h + 0.45, ztop + 0.10),
              (-h - 0.45, -h - 0.45, ztop + 0.10)], root, None)
 
-    # ── the gin pole frame.  [S2 p.19]: it reaches 192 ft above the base of
-    #    the structure, i.e. 32 ft above the 160 ft clear height.  A gin pole
-    #    is how the crown block is landed at rig-up, so it is an accessory -
-    #    built slender, so it never reads as more derrick. ─────────────────
+    # ── the gin pole.  [S2 p.19]: the frame above the crown reaches 192 ft
+    #    above the base of the structure - 32 ft above the 160 ft clear height.
+    #
+    #    IT IS TWO RAKED LEGS, NOT A SPIRE.  A gin pole is the pair of poles
+    #    that lands the crown block at rig-up; built as a four-leg pyramid to a
+    #    point it read as a transmission-tower finial and took over the whole
+    #    silhouette, which is the opposite of an accessory.  Two legs with a
+    #    head sheave and a back stay is what the thing actually is, and it
+    #    keeps the sourced height without pretending to be more derrick. ─────
+    #    The head is a BEAM, not a point.  Two legs converging on one vertex
+    #    made a 10 m needle that read as a cathedral spire and took over the
+    #    silhouette; a real gin pole carries a head beam with the sheaves
+    #    hanging off it, so the top stays as wide as the equipment it lifts.
     gz = z0 + GIN_TOP
-    apex = (0, 0, gz)
+    hw = 0.82                                  # half the head beam
+    gy = -h * 0.30
+    foot_y = h * 0.58
     for sx in (-1, 1):
-        for sy in (-1, 1):
-            bar('gin-pole', (sx * h * 0.80, sy * h * 0.80, ztop + 1.0), apex,
-                0.10, R.MAT_PAINT, root, None, sides=8)
-    for k in range(3):
-        t = (k + 1) / 4.0
-        hh = h * 0.80 * (1 - t)
-        zz = ztop + 1.0 + t * (gz - ztop - 1.0)
-        for j in range(4):
-            a = [(-hh, -hh), (hh, -hh), (hh, hh), (-hh, hh)]
-            p, q = a[j], a[(j + 1) % 4]
-            bar('gin-girt', (p[0], p[1], zz), (q[0], q[1], zz), 0.05,
-                R.MAT_PAINT, root, None, sides=5)
-    tb('gin-head-sheave', 0.34, 0.16, R.MAT_CAST, root, None,
-       (0, 0, gz - 0.45), (0, math.pi / 2, 0), sides=14)
+        foot = (sx * h * 0.88, foot_y, ztop + 0.95)
+        head = (sx * hw, gy, gz - 0.30)
+        bar('gin-pole', foot, head, 0.135, R.MAT_PAINT, root, None, sides=8)
+        # a back stay to the far side of the water table
+        bar('gin-stay', (sx * h * 0.62, -h * 0.88, ztop + 0.95),
+            (sx * hw * 0.85, gy - 0.12, gz - 1.35), 0.062,
+            R.MAT_PAINT, root, None, sides=6)
+        for k in (1, 2, 3):                    # ladder-like spreaders per leg
+            t = k / 4.0
+            p = Vector(foot).lerp(Vector(head), t)
+            q = Vector((sx * h * 0.62, -h * 0.88, ztop + 0.95)).lerp(
+                Vector((sx * hw * 0.85, gy - 0.12, gz - 1.35)), t)
+            bar('gin-lace', p, q, 0.040, R.MAT_PAINT, root, None, sides=5)
+    # the head beam, and the two sheaves that make it a gin pole
+    bar('gin-head-beam', (-hw - 0.18, gy, gz - 0.30), (hw + 0.18, gy, gz - 0.30),
+        0.11, R.MAT_PAINT, root, None, square=True)
+    for sx in (-1, 1):
+        tb('gin-head-sheave', 0.34, 0.16, R.MAT_CAST, root, None,
+           (sx * hw * 0.55, gy, gz - 0.80), (0, math.pi / 2, 0), sides=14)
+    bx('gin-head-plate', (hw * 2, 0.34, 0.34), R.MAT_PAINT, root, None,
+       (0, gy, gz - 0.13), bevel=0.02)
 
     # ── the deadline anchor, on the floor at -Y with its weight sensor
     #    ([S1 §B.3.6] "Type EB with weight sensor and deadline dampener"). ──
@@ -1712,6 +1758,32 @@ def build(out_path):
 #    · No iron roughneck, which is CORRECT and deliberate: [S1 §D.2.21] records
 #      None on this rig, and it works with two manual tongs, a spinner and a
 #      hydraulic makeup machine instead ([S6] §9.I).  Do not "fix" it.
+#
+# 5b. **A DEFECT FOUND HERE THAT IS NOT THIS MACHINE'S — `paintedDark` IS NOT A
+#     MATERIAL.**  `blender/lib/rig.py` declares
+#
+#         MAT_DARK = 'paintedDark'    # chassis, frames, guarding
+#
+#     under a heading that says these names "MUST match kinds in
+#     src/core/assets.js".  It does not: `grep -c paintedDark src/core/assets.js`
+#     returns **0**.  The KINDS table has paintedSteel, rawSteel, wornSteel,
+#     carbide, castIron, chrome, rubber, hose, plastic, glass, dirt, concrete,
+#     gravel, grass, snow, sand, rockFace, foam, safetyStripe and brandedPanel —
+#     and no paintedDark.
+#
+#     `gltfRig.js` already knows what happens next and says so at load time:
+#     assets.js "will substitute rawSteel for it", so every chassis, frame and
+#     guard authored as MAT_DARK renders as BRIGHT BARE STEEL.  **Nineteen
+#     builder modules in blender/ use MAT_DARK**, so this is the whole fleet,
+#     not one machine.
+#
+#     This file deliberately keeps using MAT_DARK rather than quietly
+#     substituting its own name.  Diverging would make this machine look right
+#     and the other eighteen wrong, and would plant a second private table of
+#     material names — the exact pattern HANDOFF §8B is about.  **The fix is one
+#     line in assets.js (add the kind) or one line in rig.py (point MAT_DARK at
+#     an existing kind); both files belong to somebody else.**  It is loud, not
+#     silent, so it will be caught the first time anyone reads a load log.
 #
 # 6. **THE FLEX HINT.**  `pivot:mast-upper` carries a `flex_scale` extra that
 #    nothing reads.  gltfRig.js's makeDyn() could set `dyn.flexScale` from it in
