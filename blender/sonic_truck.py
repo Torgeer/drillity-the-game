@@ -1249,7 +1249,18 @@ def build_mast():
     box('tilt_head', (MAST_W + 0.24, MAST_D + 0.06, 0.130), MAT_PAINT, piv,
         (0, 0, 0.130), bevel=0.010)
 
-    dump = empty(NODE_SLIDE, 'mast-dump', piv, (0, 0, 0))
+    # `pivot:mast-upper` EXISTS SO THE FOLD AND THE FLEX ARE NOT THE SAME NODE.
+    # `gltfRig.js` makeDyn: `pivots.get('mast-upper') || mastPivot`, and the
+    # update loop then writes `mastLower.rotation.x = flex` and, two lines later,
+    # `mastPivot.rotation.x = lerp(transportTilt, workTilt, mastAnim)`.  A
+    # machine that publishes only `pivot:mast` gets both writes on ONE node and
+    # the second silently overwrites the first, so its mast never flexes under
+    # load.  One empty fixes it, and `_model-critique.md` section 3.1 calls the
+    # animation contract the highest-value thing in the whole review.
+    upper = empty(NODE_PIVOT, 'mast-upper', piv, (0, 0, 0))
+    upper['flex_only'] = True
+
+    dump = empty(NODE_SLIDE, 'mast-dump', upper, (0, 0, 0))
     dump['travel_m'] = MAST_DUMP    # [TSI-CT] "Mast Dump: 55 in".  Authored
     dump['axis'] = 'z'              # DUMPED (working); the machine raises the
                                     # mast by this before it folds it.
@@ -1334,7 +1345,7 @@ def build_mast():
          (-0.029, -MAST_D / 2 - 0.240, MAST_Z1 - 2.67), sides=8)
     box('winch_drum_h', (0.240, 0.230, 0.220), MAT_DARK, dump,
         (0.26, MAST_D / 2 + 0.130, MAST_Z0 + 0.90), bevel=0.010)
-    return piv, dump
+    return piv, upper, dump
 
 
 def build_mast_rams():
@@ -1519,9 +1530,18 @@ def build_jacks():
             # posed at ~60 % of stroke: the machine is LEVELLED, not jacked
             # clear ([REF] section 4.5), so the tyres still carry it.
             pad_z = 0.100
+            # THREE MATERIALS PER JACK, NOT FIVE.  `_model-critique.md` section
+            # 3.2: a material here is not a texture cost, it is purely a
+            # draw-call partition, and about twenty calls fleet-wide carry under
+            # a hundred triangles each.  Four jacks at five materials was 20
+            # draw calls for 1,300 triangles.  The barrel takes the body paint
+            # it would really be sprayed in and the ball joint takes the same
+            # worn steel as the gland and the pad it sits between: 12 calls, no
+            # visible difference, and 8 back in the budget.
             ram('jack_%s' % tag, (0, 0, 0), (0, 0, pad_z - top + 0.055), n,
-                barrel_r=JACK_BORE * 0.78, rod_r=JACK_BORE / 2, ext=0.44)
-            tube('jack_ball_%s' % tag, JACK_BORE * 0.60, 0.055, MAT_CAST, n,
+                barrel_r=JACK_BORE * 0.78, rod_r=JACK_BORE / 2, ext=0.44,
+                mat_b=MAT_PAINT)
+            tube('jack_ball_%s' % tag, JACK_BORE * 0.60, 0.055, MAT_WORN, n,
                  (0, 0, pad_z - top), sides=10)
             tube('jack_pad_%s' % tag, JACK_PAD_R, 0.030, MAT_WORN, n,
                  (0, 0, pad_z - top - 0.030), sides=12)
@@ -1652,7 +1672,7 @@ def build(out_path):
     build_cab()
     build_deck()
     build_station()
-    piv, dump = build_mast()
+    piv, upper, dump = build_mast()
     build_mast_rams()
     carr, spin = build_carriage(dump)
     jacks = build_jacks()
@@ -1665,7 +1685,7 @@ def build(out_path):
     # Deepest first.  `finish()` leaves every pivot:/slide: subtree alone
     # because it has to move independently, so each moving assembly is joined
     # by material HERE or the mast alone is ~110 draw calls against a 70 budget.
-    for node in [spin, carr, dump, piv] + jacks:
+    for node in [spin, carr, dump, upper, piv] + jacks:
         join_under(node)
 
     finish(out_path)
