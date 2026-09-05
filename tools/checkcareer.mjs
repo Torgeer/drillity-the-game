@@ -38,6 +38,10 @@
  *               This prints which rig sets each cap and how far the board
  *               moves if it changes — the arithmetic behind the
  *               `cable-percussion` data/model contradiction.
+ *   7. RATES    What the game charges per metre and per day, all-in, in the
+ *               units a contractor would compare against a rate card. Asserts
+ *               nothing: there is no sourced schedule in this repo to assert
+ *               against, and inventing one would be worse than saying so.
  *
  * WHAT IS MEASURED AND WHAT IS ASSUMED
  * ------------------------------------
@@ -80,7 +84,7 @@ const SEED = Number(flag('seed', 0)) || 20260905;
    to skip every probe, run nothing, assert nothing and print OK in green. The
    whole point of writing `checkreach` up as a cautionary tale was that it
    "reported zero targets and called it a PASS". A typo must be a failure. */
-const PROBES = ['board', 'ruin', 'payback', 'upkeep', 'dual', 'depth'];
+const PROBES = ['board', 'ruin', 'payback', 'upkeep', 'dual', 'depth', 'rates'];
 if (ONLY && !PROBES.includes(ONLY)) {
   console.error(`checkcareer: no probe named "${ONLY}". Known: ${PROBES.join(', ')}`);
   process.exit(1);
@@ -605,6 +609,87 @@ function probeUpkeep() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   7. RATES — what the game actually charges, in the units a contractor checks
+
+   "A drilling contractor is the imagined player, and rates are the first thing
+   they check." `data.js` carries `basePayPerMetre`, but that is NOT the rate:
+   the tender multiplies it by ground, diameter, region, difficulty and adds a
+   fixed item per hole and a mobilisation lump. What a contractor would compare
+   against a published schedule of rates is the ALL-IN figure at the bottom of
+   the invoice, per metre of the contract's own unit, and per day on site.
+
+   This probe prints that. It asserts nothing — there is no sourced schedule in
+   this repo to assert against, and inventing one to compare with would be
+   worse than printing the numbers and saying so. It exists so that anybody
+   holding a real rate card can check twenty-one methods in one screen instead
+   of deriving each from five multipliers in two files.
+
+   ⚠ NOT ONE OF THESE HAS BEEN CHECKED AGAINST A PUBLISHED RATE. The euros are
+   what the game charges; whether they are what the trade charges is open.
+   ═══════════════════════════════════════════════════════════════════════════ */
+function probeRates() {
+  head('7. RATES — what the game charges, in the units a contractor would check');
+  console.log(`All-in tender value, measured off ${Math.min(30, SAMPLES)} generated cards per method at`);
+  console.log(`unlock level + 2, in the best region open then. NOT the raw basePayPerMetre —`);
+  console.log(`the figure after ground, diameter, region, difficulty, the per-hole item and`);
+  console.log(`mobilisation, which is what appears on an invoice.\n`);
+  console.log(`  ${pad('method', 20)}${pad('unit', 8)}${rpad('base/m', 8)}${rpad('all-in/unit', 12)}${rpad('per day', 10)}${rpad('net/day', 10)}${rpad('margin', 8)}  region`);
+  const rows = [];
+  for (const method of METHODS) {
+    const level = method.unlockLevel + 2;
+    const cards = cardsFor(method.id, level, Math.min(30, SAMPLES));
+    if (!cards.length) { console.log(`  ${pad(method.id, 20)}  (no card generated)`); continue; }
+    const rig = rigsFor(method.id).slice().sort((a, b) => a.price - b.price)[0];
+    let payout = 0, metres = 0, hours = 0, net = 0, revenue = 0, n = 0;
+    for (const c of cards) {
+      const r = run(c, rig.id, level);
+      payout += c.payout; metres += c.metres; hours += r.hours;
+      net += r.net; revenue += r.revenue; n++;
+    }
+    // A shift is 10 hours on site — the same basis `mobilisationHours` and the
+    // crew line are charged on. Stated, because a "day rate" means nothing
+    // without one.
+    const SHIFT_H = 10;
+    const unit = (D.getMethod(method.id)?.id && ['rockbolt', 'driven-pile'].includes(method.id))
+      ? (method.id === 'rockbolt' ? 'drive m' : 'pile m')
+      : method.id === 'tunnel-jumbo' ? 'chainage' : 'metre';
+    const row = {
+      method: method.id, unit, base: method.basePayPerMetre,
+      perUnit: payout / Math.max(1, metres),
+      perDay: (payout / Math.max(0.5, hours)) * SHIFT_H,
+      netPerDay: (net / Math.max(0.5, hours)) * SHIFT_H,
+      margin: net / Math.max(1, revenue),
+      region: cards[0].regionId,
+    };
+    rows.push(row);
+    console.log(`  ${pad(row.method, 20)}${pad(row.unit, 8)}${rpad(row.base, 8)}${rpad(eur(row.perUnit), 12)}`
+      + `${rpad(eur(row.perDay), 10)}${rpad(eur(row.netPerDay), 10)}${rpad(pct(row.margin), 8)}  ${row.region}`);
+  }
+  console.log(`\n  "per day" is a 10-hour shift on site, the same basis mobilisationHours and`);
+  console.log(`  the crew line are charged on. A day rate means nothing without one.`);
+  console.log(`  ⚠ NOT ONE FIGURE ABOVE HAS BEEN CHECKED AGAINST A PUBLISHED RATE. Nothing`);
+  console.log(`  in research/ carries a schedule of rates for any of these twenty-one`);
+  console.log(`  methods, so this table is what the game charges and not what the trade`);
+  console.log(`  does. It is printed so somebody holding a real rate card can check all`);
+  console.log(`  twenty-one in one screen instead of deriving each from five multipliers.`);
+
+  /* ONE THING THE TABLE SAYS ON ITS OWN. `basePayPerMetre` is not the rate and
+     on some methods it is not even close: driven-pile is authored at EUR 88/m
+     and invoices at EUR 2.2k per pile metre, because a driven-pile contract is
+     ONE pile and the mobilisation lump is most of the tender. dth goes 62 ->
+     249. Anybody checking data.js's numbers against a rate card is checking
+     the wrong column, which is the reason this probe exists. */
+  const worst = rows.slice().sort((a, b) => (b.perUnit / b.base) - (a.perUnit / a.base))[0];
+  if (worst) {
+    console.log(`
+  basePayPerMetre is NOT the rate: the widest gap is ${worst.method}, authored`);
+    console.log(`  at EUR ${worst.base}/m and invoicing EUR ${eur(worst.perUnit)} per ${worst.unit} — ${(worst.perUnit / worst.base).toFixed(1)}x. Anybody`);
+    console.log(`  checking data.js against a rate card is checking the wrong column.`);
+  }
+  return { rows };
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    5. pd55 — the only dual-configuration machine, priced on balance not source
    ═══════════════════════════════════════════════════════════════════════════ */
 function probeDual() {
@@ -891,18 +976,27 @@ if (want('payback')) results.payback = probePayback();
 if (want('upkeep')) results.upkeep = probeUpkeep();
 if (want('dual')) results.dual = probeDual();
 if (want('depth')) results.depth = probeDepth();
+if (want('rates')) results.rates = probeRates();
 
 head('SUMMARY');
-/* …and the same rule one level up: if the probes ran but nothing was actually
-   asserted, that is not a pass either. `assert` is the only thing that can
-   make this number move. */
+/* …and the same rule one level up, stated carefully enough to be true.
+   `rates` asserts NOTHING BY DESIGN — there is no sourced schedule of rates in
+   this repo to assert against — so "zero assertions" is only a fault when it
+   means "zero probes ran". Those are different failures and conflating them
+   made `--only rates` exit 1 on a probe doing exactly what it says it does. */
 const assertions = failures.length + (globalThis.__ccPassCount || 0);
-if (assertions === 0) {
-  console.error('FAIL: checkcareer asserted nothing. A gate over an empty set '
-    + 'passes forever — see ASTRA §8.');
+const ran = Object.keys(results).length;
+if (ran === 0) {
+  console.error('FAIL: checkcareer ran no probe at all. A gate over an empty '
+    + 'set passes forever — see ASTRA §8.');
   process.exit(1);
 }
-console.log(`${assertions} assertion(s) checked.`);
+if (!ONLY && assertions === 0) {
+  console.error('FAIL: a full checkcareer run asserted nothing. Every probe but '
+    + '`rates` carries assertions; if none fired, the probes are not running.');
+  process.exit(1);
+}
+console.log(`${ran} probe(s), ${assertions} assertion(s) checked.`);
 if (notes.length) {
   console.log('Notes (not failures — findings the numbers support):');
   for (const n of notes) console.log('  · ' + n);
