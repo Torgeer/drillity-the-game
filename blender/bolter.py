@@ -434,14 +434,22 @@ def aim_box(name, w, d, a, b, mat, parent=None, bev=0.010):
                tuple(q.to_euler()), bevel=bev)
 
 
-def bolt_ring(parent, name, radius, count, r_bolt, h, mat, loc, rot=(0, 0, 0)):
+def bolt_ring(parent, name, radius, count, r_bolt, h, mat, loc, rot=(0, 0, 0),
+              plane='xy'):
     """A ring of hex bolt heads round a flange. Pure triangle spend, and
-    triangles are the lane this pipeline is allowed to spend in."""
+    triangles are the lane this pipeline is allowed to spend in.
+
+    `plane` is not decoration. A wheel flange faces sideways, so its nut ring
+    lies in YZ; laying it out in XY instead threw the nuts 107 mm outboard of
+    the tyre and put the machine 246 mm over its published 2 115 mm width.
+    Only measuring the exported mesh shows that - it is invisible in the code.
+    """
     for i in range(count):
         a = TAU * i / count
+        c, sn = math.cos(a) * radius, math.sin(a) * radius
+        off = (0.0, c, sn) if plane == 'yz' else (c, sn, 0.0)
         cyl('%s_b%d' % (name, i), r_bolt, h, mat, parent,
-            (loc[0] + radius * math.cos(a), loc[1] + radius * math.sin(a), loc[2]),
-            rot, sides=6)
+            (loc[0] + off[0], loc[1] + off[1], loc[2] + off[2]), rot, sides=6)
 
 
 def louvres(parent, name, count, x, y0, y1, z0, z1, mat=R.MAT_DARK, depth=0.028):
@@ -512,17 +520,29 @@ def build_wheel(parent, name, x, y):
     Tread is "deep, chunky, near-square block with wide voids - not an
     agricultural lug pattern and not a smooth industrial tyre" ([R]S4.2, off
     the [BM] printed p.2-3 photograph).
+
+    EVERY PART IS PLACED FROM THE OUTBOARD TYRE FACE AND GROWS INWARD. The
+    published 2 115 mm is measured OVER THE TYRES [BS]p.7, so the outer face of
+    the tyre IS the width of the machine and nothing - hub, dish, nut, sidewall
+    - may cross it. Building the hub and the sidewalls outward instead put this
+    machine 84 mm over its own published width, which only showed up when the
+    exported mesh was measured (HANDOFF S8E).
     """
-    ry = (0, math.pi / 2, 0)          # tube() builds along +Z; lay it along X
+    ob = 1.0 if x > 0 else -1.0                    # +1 = outboard is +X
+    x_out = x + ob * WHEEL_W / 2                   # the 2 115 mm line
+    x_in = x - ob * WHEEL_W / 2
+    ax_out = (0, math.pi / 2 if ob > 0 else -math.pi / 2, 0)   # +Z -> outboard
+    ax_in = (0, -math.pi / 2 if ob > 0 else math.pi / 2, 0)    # +Z -> inboard
+
     cyl(name + '_carcass', WHEEL_R * 0.90, WHEEL_W, R.MAT_RUBBER, parent,
-        (x - WHEEL_W / 2 * (1 if x > 0 else 1), y, WHEEL_R), ry, sides=20)
-    # sidewall shoulders, so the tyre is not a plain drum
-    for s, ox in ((1, WHEEL_W * 0.5), (-1, -WHEEL_W * 0.5)):
-        cone(name + ('_wall%d' % (s > 0)), WHEEL_R * 0.90, WHEEL_R * 0.80,
-             WHEEL_W * 0.16, R.MAT_RUBBER, parent,
-             (x - WHEEL_W / 2 + (WHEEL_W if s > 0 else 0), y, WHEEL_R),
-             (0, math.pi / 2 if s > 0 else -math.pi / 2, 0), sides=20)
-    # 18 blocks with wide voids, full section width
+        (x_in, y, WHEEL_R), ax_out, sides=20)
+    # sidewall shoulders, each growing INWARD from its own face
+    cone(name + '_wallo', WHEEL_R * 0.80, WHEEL_R * 0.90, WHEEL_W * 0.16,
+         R.MAT_RUBBER, parent, (x_out, y, WHEEL_R), ax_in, sides=20)
+    cone(name + '_walli', WHEEL_R * 0.80, WHEEL_R * 0.90, WHEEL_W * 0.16,
+         R.MAT_RUBBER, parent, (x_in, y, WHEEL_R), ax_out, sides=20)
+    # 18 blocks with wide voids, standing 1.5 mm proud so the machine rests on
+    # its grousers rather than on the carcass
     n_lug = 18
     for i in range(n_lug):
         a = TAU * i / n_lug
@@ -533,13 +553,13 @@ def build_wheel(parent, name, x, y):
                  (a, 0, 0))
     # rim: a shallow-dish centre with a ring of nuts [R]S4.2
     cyl(name + '_rim', RIM_R, WHEEL_W * 0.72, R.MAT_DARK, parent,
-        (x - WHEEL_W * 0.36, y, WHEEL_R), ry, sides=16)
+        (x - ob * WHEEL_W * 0.36, y, WHEEL_R), ax_out, sides=16)
     cone(name + '_dish', RIM_R * 0.92, RIM_R * 0.40, 0.052, R.MAT_DARK, parent,
-         (x + WHEEL_W * 0.36, y, WHEEL_R), (0, math.pi / 2, 0), sides=16)
+         (x + ob * (WHEEL_W / 2 - 0.052), y, WHEEL_R), ax_out, sides=16)
     bolt_ring(parent, name + '_nut', RIM_R * 0.42, 8, 0.020, 0.026, R.MAT_DARK,
-              (x + WHEEL_W * 0.40, y, WHEEL_R), (0, math.pi / 2, 0))
+              (x + ob * (WHEEL_W / 2 - 0.030), y, WHEEL_R), ax_out, plane='yz')
     cyl(name + '_hub', RIM_R * 0.26, 0.070, R.MAT_DARK, parent,
-        (x + WHEEL_W * 0.40, y, WHEEL_R), ry, sides=12)
+        (x + ob * (WHEEL_W / 2 - 0.070), y, WHEEL_R), ax_out, sides=12)
 
 
 def build_mudguard(parent, name, x, y, back, fwd):
@@ -550,17 +570,20 @@ def build_mudguard(parent, name, x, y, back, fwd):
     the tyre closely, front and rear" [R]S4.0. Dark, because everything that
     meets the ground on this machine is the second, darker paint [R]S6.
     """
+    # 2 115 mm is measured OVER THE TYRES [BS]p.7, so nothing may stand proud
+    # of one. The arch is exactly tyre width and the skirt closes it from
+    # INBOARD - which is also right for a machine that works in a drive, where
+    # anything projecting past the tyre catches the rib.
     r = WHEEL_R + 0.070
     a0, a1 = -math.radians(back), math.radians(fwd)
     n = 7
     for i in range(n):
         a = a0 + (a1 - a0) * (i + 0.5) / n
         seg = (a1 - a0) * r / n
-        cheapbox('%s_arch%d' % (name, i), (WHEEL_W + 0.100, seg * 1.10, 0.026),
+        cheapbox('%s_arch%d' % (name, i), (WHEEL_W, seg * 1.10, 0.026),
                  R.MAT_DARK, parent,
                  (x, y + math.sin(a) * r, WHEEL_R + math.cos(a) * r), (a, 0, 0))
-    # the outer skirt that closes the arch off from the side
-    sx = x + (WHEEL_W / 2 + 0.048) * (1 if x > 0 else -1)
+    sx = x - (WHEEL_W / 2 + 0.030) * (1 if x > 0 else -1)
     cheapbox(name + '_skirt', (0.020, (a1 - a0) * r * 0.92, 0.180), R.MAT_DARK,
              parent, (sx, y, WHEEL_R + r * 0.62), (0, 0, 0))
 
@@ -602,11 +625,15 @@ def build_frame(parent, name, y0, y1, nose=False, tail=False):
                  R.MAT_DARK, parent, (0, y, FRAME_Z1 - 0.080))
     if nose:
         # "The nose below the boom pedestal slopes down and forward into a low
-        # bumper/skid" [R]S4.0, at the 22 deg front clearance angle [BM]p.6.
-        run = FRAME_D / math.tan(CLEAR_ANGLE_F)
+        # bumper/skid" [R]S4.0, rising at the 22 deg front clearance angle
+        # [BM]p.6. It is a CHAMFER on the belly, not a full-depth plate:
+        # sizing it as FRAME_D / tan(angle) made a 1.87 m plate that swung
+        # 306 mm BELOW the floor. Caught by measuring the mesh; invisible in
+        # the source (HANDOFF S8E - read the figure off the mesh).
+        run = 0.520
         box(name + '_noseslope', (2 * RAIL_X + RAIL_W, run, 0.030), R.MAT_DARK,
-            parent, (0, y1 - run / 2 + 0.02, FRAME_Z0 + FRAME_D / 2 - 0.02),
-            (CLEAR_ANGLE_F - math.pi / 2, 0, 0), bevel=0.010)
+            parent, (0, y1 - run / 2, FRAME_Z0 + 0.100),
+            (CLEAR_ANGLE_F, 0, 0), bevel=0.010)
         box(name + '_bumper', (W * 0.78, 0.160, 0.230), R.MAT_DARK, parent,
             (0, y1 - 0.080, FRAME_Z0 + 0.150), bevel=0.020)
         for s in (-1, 1):     # tow eyes
@@ -614,10 +641,10 @@ def build_frame(parent, name, y0, y1, nose=False, tail=False):
                      R.MAT_WORN, parent,
                      (s * 0.230, y1 - 0.060, FRAME_Z0 + 0.150))
     if tail:
-        run = FRAME_D / math.tan(CLEAR_ANGLE_R)
+        run = 0.620
         box(name + '_tailslope', (2 * RAIL_X + RAIL_W, run, 0.030), R.MAT_DARK,
-            parent, (0, y0 + run / 2 - 0.02, FRAME_Z0 + FRAME_D / 2 - 0.02),
-            (math.pi / 2 - CLEAR_ANGLE_R, 0, 0), bevel=0.010)
+            parent, (0, y0 + run / 2, FRAME_Z0 + 0.090),
+            (-CLEAR_ANGLE_R, 0, 0), bevel=0.010)
 
 
 def build_articulation(parent):
@@ -688,8 +715,9 @@ def build_carrier(root):
 #     why the reel, not the exhaust, is the tell.
 # =============================================================================
 
-HOOD_HALF  = 0.900   # hood half-width. Inboard of the 1.0575 machine half so
-                     # the tyres are the widest thing at the rear. NOT SOURCED.
+HOOD_HALF  = 0.860   # hood half-width. Set so the cabinet, its door, its
+                     # louvres and the wash kit hung off the flank all stay
+                     # INSIDE the published 2 115 mm over tyres. NOT SOURCED.
 HOOD_Y1    = -0.300  # hood front face, clear of the articulation [R]S4.1
 CAB_STAIN  = R.MAT_STEEL   # the electrical enclosure is "stainless steel"
                            # [BS]p.5 - bare, not painted. It is the only
@@ -766,18 +794,18 @@ def build_electrical_cabinet(parent):
     shares MAT_STEEL with the feed rails and the rods, so it is free in
     draw-call terms too.
     """
-    x = -(HOOD_HALF + 0.075)
+    x = -(HOOD_HALF + 0.045)
     box('elec_cabinet', (0.150, 0.960, 0.720), CAB_STAIN, parent,
         (x, -0.900, 1.240), bevel=0.014)
     box('elec_door', (0.026, 0.860, 0.620), CAB_STAIN, parent,
         (x - 0.086, -0.900, 1.240), bevel=0.010)
-    louvres(parent, 'elec_vent', 5, x - 0.100, -1.280, -0.560, 1.360, 1.560,
+    louvres(parent, 'elec_vent', 5, x - 0.085, -1.280, -0.560, 1.360, 1.560,
             mat=CAB_STAIN, depth=0.022)
     cyl('elec_handle', 0.018, 0.180, R.MAT_WORN, parent,
-        (x - 0.104, -0.520, 1.150), sides=8)
+        (x - 0.098, -0.520, 1.150), sides=8)
     # isolator: the one control that is always on the outside of the cabinet
-    cyl('elec_isolator', 0.048, 0.060, R.MAT_HAZARD, parent,
-        (x - 0.100, -1.360, 1.120), (0, -math.pi / 2, 0), sides=10)
+    cyl('elec_isolator', 0.042, 0.042, R.MAT_HAZARD, parent,
+        (x - 0.086, -1.360, 1.120), (0, -math.pi / 2, 0), sides=10)
 
 
 def build_cable_reel(parent):
@@ -865,11 +893,11 @@ def build_air_water_package(parent):
     cyl('waterpump_motor', 0.105, 0.300, R.MAT_CAST, parent,
         (0.380, -1.480, FRAME_Z1 + 0.170), (math.pi / 2, 0, 0), sides=12)
     # the wash-down hose, coiled on a hook
-    cyl('washhook', 0.022, 0.180, R.MAT_WORN, parent,
+    cyl('washhook', 0.022, 0.140, R.MAT_WORN, parent,
         (HOOD_HALF + 0.020, -2.400, 1.060), (0, math.pi / 2, 0), sides=8)
     for i in range(5):
         torus_ring('washcoil%d' % i, 0.135, 0.016, R.MAT_RUBBER, parent,
-                   (HOOD_HALF + 0.115, -2.400, 1.040 - i * 0.028),
+                   (HOOD_HALF + 0.095, -2.400, 1.040 - i * 0.028),
                    (0, math.pi / 2, 0), maj=16, min_=6)
 
 
@@ -912,11 +940,11 @@ def build_rear_module(root):
 
 DECK_Y0    = 0.150   # deck plate, rear edge (just ahead of the hinge)
 DECK_Y1    = 2.050   # ... and front edge (just behind the boom pedestal)
-CAN_X0, CAN_X1 = -1.000, 0.120     # canopy footprint, on the LEFT
+CAN_X0, CAN_X1 = -0.960, 0.140     # canopy footprint, on the LEFT
 CAN_Y0, CAN_Y1 = 0.480, 1.760
 POST_R     = 0.055   # "four heavy posts" [R]S4.6. NOT SOURCED as a figure.
 ROOF_UND   = ROOF_Z_UP - ROOF_T    # 2.751 roof underside, working
-ROOF_W     = (CAN_X1 - CAN_X0) + 0.220
+ROOF_W     = (CAN_X1 - CAN_X0) + 0.180
 ROOF_D     = (CAN_Y1 - CAN_Y0) + 0.260
 
 
@@ -971,27 +999,27 @@ def build_stair(parent):
     0.52 and 0.72, then the landing. The bottom tread clears the belly, which
     is the constraint that sets the pitch.
     """
-    x = -(DECK_HALF - 0.140)
+    x = -(DECK_HALF - 0.230)
     y0 = DECK_Y0 - 0.560
     for i, z in enumerate((0.320, 0.520, 0.720)):
         y = y0 + 0.150 * i
-        box('stair_tread%d' % i, (0.520, 0.230, 0.024), R.MAT_DARK, parent,
+        box('stair_tread%d' % i, (0.470, 0.230, 0.024), R.MAT_DARK, parent,
             (x, y, z), bevel=0.005)
-        cheapbox('stair_riser%d' % i, (0.520, 0.020, 0.090), R.MAT_DARK,
+        cheapbox('stair_riser%d' % i, (0.470, 0.020, 0.090), R.MAT_DARK,
                  parent, (x, y - 0.105, z - 0.050))
     # stringers
     for s in (-1, 1):
         aim_box('stair_stringer%d' % (s > 0), 0.018, 0.150,
-                (x + s * 0.270, y0 - 0.130, 0.280),
-                (x + s * 0.270, DECK_Y0 + 0.040, DECK_Z - 0.020),
+                (x + s * 0.245, y0 - 0.130, 0.280),
+                (x + s * 0.245, DECK_Y0 + 0.040, DECK_Z - 0.020),
                 R.MAT_DARK, parent, bev=0.006)
     handrail(parent, 'stair_rail', [
-        (x - 0.290, y0 - 0.120, 0.300),
-        (x - 0.290, DECK_Y0 + 0.020, DECK_Z),
+        (x - 0.235, y0 - 0.120, 0.300),
+        (x - 0.235, DECK_Y0 + 0.020, DECK_Z),
     ], h=0.940, r=0.019)
     # "illuminated stairs for platform" [BS]p.5 - a lamp in the stringer
     cheapbox('stair_lamp_housing', (0.070, 0.130, 0.080), R.MAT_DARK, parent,
-             (x + 0.280, y0 + 0.120, 0.560))
+             (x + 0.250, y0 + 0.120, 0.560))
 
 
 def build_canopy(parent):
@@ -1087,91 +1115,122 @@ def build_operator_station(root):
     return roof
 
 
+
 # =============================================================================
-# S6  THE BOOM, AND HOW ITS LENGTH IS DERIVED
+# S6  THE BOOM
 #
 #     One heavy universal boom - a bolter takes one where a jumbo takes two or
-#     three [R]S4.3. [BS]p.5 names the boom type but publishes no length, and
-#     [R]S8 is explicit that no bolter feed or boom length exists in any source
-#     it could reach. So both are DERIVED, and the derivation is arithmetic on
-#     printed dimensions rather than a guess:
+#     three [R]S4.3. The boom TYPE is named on [BS]p.5, and the type's own
+#     specification is published in full, so unlike almost everything else on
+#     the working end these are printed numbers, not derivations:
 #
-#       [BS]p.7 prints tramming length            10.020 m
-#       [BS]p.7 chain sums to the bare carrier      6.457 m
-#       => boom + feed project ahead of the nose    3.563 m   FOLDED
+#       boom extension        1 250 mm          [BS]p.7 boom table
+#       feed extension        0 - 400 mm        [BS]p.7 boom table
+#       feed roll-over        240 deg           [BS]p.7  (360 deg on the S10)
+#       max lifting angle     +70 / -30 deg     [BS]p.7
+#       max swinging angle    +/- 45 deg        [BS]p.7
+#       boom weight           2 550 kg          [BS]p.7
 #
-#     Folded, the boom lies horizontal and retracted and the feed lies across
-#     it cradled at its middle, so that 3.563 m is spent as
+#     NOTE WHAT THAT CORRECTS. "Feed extension" is 400 mm, not metres, and it
+#     is a POSITIONING stroke - it presses the feed's front foot onto the rock
+#     to hold the collar. It adds nothing to hole depth. The 1 250 mm figure is
+#     the BOOM's telescope. Confusing the two would have put a metre of
+#     imaginary drilling stroke into this machine.
 #
-#       (boom foot -> nose) is NEGATIVE: the foot is behind the nose
-#       BOOM_LEN + FEED_BODY/2 + FEED_NOSE  -  (Y_NOSE - Y_FOOT)  =  PROJ
+#     BOOM LENGTH is still not published, and is derived from an equation whose
+#     every other term is printed:
 #
-#     which solves for BOOM_LEN. Every other term is either printed or set
-#     below with its own reasoning, so the boom length is the one unknown in an
-#     equation of knowns. It is still NOT a published figure and is marked so.
+#       [BS]p.7   tramming length                     10.020 m
+#       [BS]p.7   chain sums to the bare carrier       6.457 m
+#       =>        boom + feed project ahead of the nose 3.563 m  FOLDED
 #
-#     THE FEED IS TELESCOPIC, AND THAT IS THE POINT.
-#     A 2.4 m bolt [BS]p.5 needs a hole at least 50 mm longer (the game's own
-#     sourced rule, [GF] spec.holeRule) - 2.45 m - and this machine is sold for
-#     drives from 3 x 3 m [R]S3.1. A single-piece feed long enough to drill
-#     2.45 m could not stand up in a 3 m drive. Real bolting units solve it by
-#     extending: [BS]p.2 advertises "100 mm reduced feed length" and a short
-#     dead length as features, which only makes sense on a telescopic unit. So
-#     the hole depth here is the SUM of two strokes,
+#       BOOM_LEN = PROJ + (Y_NOSE - Y_FOOT) - (FEED_BODY - CRADLE_OFF + FEED_NOSE)
+#                = 3.563 + 0.425 - 2.474
+#                = 1.514 m
 #
-#       FEED_EXT (the beam pushes its centraliser onto the rock)  1.250
-#     + CARR_TRAV (the drill then runs up the beam)               1.300
-#     = 2.550 m of hole  >=  2.400 m bolt + 0.050 m               [BS]p.5 + [GF]
-#
-#     and the retracted unit is only 2.200 m tall, which stands up in a 3 m
-#     drive with room over it. That closure is why these three numbers are the
-#     ones chosen out of the family that would fit the same constraints.
+#     AND IT IS CROSS-CHECKED AGAINST A SECOND, INDEPENDENT PRINTED FIGURE.
+#     [BS]p.7's coverage diagram says the machine reaches 2.000 m either side
+#     of rig centre with 2.4 m bolts. Boom fully extended is 1.514 + 1.250 =
+#     2.764 m, and at the printed +/-45 deg swing limit that is
+#     2.764 x sin 45 = 1.954 m of lateral reach. Two numbers from different
+#     tables on the same page agree to 46 mm. That agreement is the reason to
+#     believe the derivation; without it, 1.514 would just be a number.
 # =============================================================================
+
+BOOM_TELE   = 1.250              # boom extension                  [BS]p.7
+FEED_EXT    = 0.400              # feed extension, 0-400 mm        [BS]p.7
+FEED_ROLL   = math.radians(240)  # feed roll-over                  [BS]p.7
+LIFT_MAX    = math.radians(70)   # max lifting angle               [BS]p.7
+LIFT_MIN    = math.radians(-30)  # ...                             [BS]p.7
+SWING_MAX   = math.radians(45)   # max swinging angle              [BS]p.7
+BOOM_MASS   = 2550               # boom only, kg                   [BS]p.7
 
 Y_FOOT     = (Y_TICK_F + Y_NOSE) / 2   # 2.525 - the pedestal stands on the
                                        # front-frame bay bounded by the two
                                        # printed ticks [BS]p.7; the swing axis
                                        # sits at its centre. DERIVED.
-Z_FOOT     = 1.440   # swing-bearing height. DERIVED: clear above the 0.920
-                     # deck by half a boom depth, so the boom can swing across
-                     # the front of the machine without sweeping the platform.
-                     # NOT SOURCED.
+Z_FOOT     = 1.240   # swing-bearing height above ground. DERIVED: the
+                     # pedestal is "a tall triangular fabrication at the
+                     # extreme front of the front frame" [R]S4.0, so the
+                     # bearing sits 375 mm above the frame rails. NOT SOURCED.
 
-FEED_BODY  = 2.200   # outer feed beam, cradle-mounted. DERIVED (see above):
-                     # it must stand in a 3 x 3 m drive [R]S3.1.
-FEED_EXT   = 1.250   # beam extension stroke                DERIVED (see above)
-CARR_TRAV  = 1.300   # carriage stroke on the beam          DERIVED (see above)
-HOLE_DEPTH = FEED_EXT + CARR_TRAV      # 2.550 m of hole for a 2.400 m bolt
-FEED_NOSE  = 0.350   # centraliser + feed foot standing proud of the beam at
-                     # rest. NOT SOURCED; sized off the 39 mm bolt and the
-                     # dust shroud it has to carry.
-FEED_W     = 0.300   # feed beam across the flats. NOT SOURCED - [R]S8 records
-FEED_D     = 0.240   # that no bolter feed section is published anywhere it
-                     # could reach. Sized off the drifter that has to sit in it.
-CRADLE_OFF = FEED_BODY / 2             # 1.100 - the cradle takes the beam at
-                                       # its middle, which is what makes the
-                                       # folded arithmetic above work.
+# -- the feed, i.e. the bolting unit --------------------------------------
+# [R]S8 and the web sweep agree: NO manufacturer publishes a bolting-unit feed
+# length. Epiroc publishes only the feed EXTENSION and a relative claim of
+# "100 mm reduced overall feed length" versus earlier units. So the length here
+# comes from the one competitor that DOES publish it, on a directly comparable
+# machine:
+#
+#   Sandvik DS411 specification sheet TS2-051:11 (2022),
+#   https://www.mining.sandvik/globalassets/products/underground-drill-rigs-
+#   and-bolters/pdf/ds411-specification-sheet-english.pdf
+#   "Bolt head length max 4 142 mm" for the BH30 head, which takes 1.5-3.0 m
+#   bolts. The BH24 head on the same table takes 1.5-2.4 m bolts.
+#
+# One bolting head differs from another by the bolt it has to hold, so a head
+# for a 2.4 m bolt is a head for a 3.0 m bolt less 600 mm:
+#     4.142 - 0.600 = 3.542  ->  FEED_BODY = 3.540 m
+#
+# CROSS-CHECK, and it is the reason this number is used rather than a guess:
+# build the same length up from the parts instead, and it must come out the
+# same. Carriage stroke has to equal the hole, which is the bolt plus the 50 mm
+# the game's own sourced rule demands ([GF] spec.holeRule, "Hole smaller than
+# the bolt, and at least 50 mm longer"): 2.400 + 0.050 = 2.450. Add the rock
+# drill, 0.735 m PRINTED (see S7). That is 3.185, leaving 0.355 m of shank,
+# chuck and dead length in a 3.540 m unit - and [BS]p.2 advertises a SHORT dead
+# length as a feature of this exact unit. The two roads meet.
+FEED_BODY  = 3.540   # DERIVED from Sandvik DS411 TS2-051:11 BH30 = 4 142 mm
+CARR_TRAV  = 2.450   # carriage stroke = hole depth = 2.400 bolt + 0.050
+                     # [BS]p.5 bolt length + [GF] spec.holeRule
+HOLE_DEPTH = CARR_TRAV   # feed extension is POSITIONING, not penetration
+FEED_NOSE  = 0.350   # centraliser + dust shroud + feed foot standing proud of
+                     # the beam. NOT SOURCED.
+FEED_W     = 0.320   # feed beam across the flats. DERIVED: it has to carry a
+FEED_D     = 0.250   # drill 290 mm wide over its connectors (S7). NOT SOURCED.
+CRADLE_OFF = 0.40 * FEED_BODY    # 1.416 - the cradle takes the beam BELOW its
+                                 # middle, so most of the unit stands above the
+                                 # boom tip. That is what lets a 1.5 m boom put
+                                 # a collar 4.6 m up. DERIVED; the 0.40 is the
+                                 # value that closes the folded-length equation
+                                 # above AND the coverage cross-check.
 
-BOOM_LEN   = PROJ + Y_NOSE - Y_FOOT - CRADLE_OFF - FEED_NOSE   # 2.538 DERIVED
-BOOM_TELE  = 0.900   # telescope stroke. NOT SOURCED. [BS]p.7's coverage
-                     # diagram wants 2 m either side of centre with 2.4 m
-                     # bolts; swing plus this stroke reaches it.
+BOOM_LEN   = PROJ + (Y_NOSE - Y_FOOT) - (FEED_BODY - CRADLE_OFF + FEED_NOSE)
 BOOM_W     = 0.290   # boom outer section. NOT SOURCED - sized so the inner
 BOOM_D     = 0.270   # section and its wear pads fit inside it.
 
-# The working pose. The machine is authored DRILLING THE BACK: feed vertical,
-# collar on the sourced 4.000 m coverage height [BS]p.7.
-COLLAR_Z   = COV_UP                       # 4.000 [BS]p.7 coverage diagram
-TIP_Z      = COLLAR_Z - (CRADLE_OFF + FEED_NOSE)   # 2.550 boom tip height
-BOOM_LIFT  = math.asin((TIP_Z - Z_FOOT) / BOOM_LEN)          # 0.4526 rad, 25.9 deg
-TIP_Y      = Y_FOOT + BOOM_LEN * math.cos(BOOM_LIFT)         # 4.807
-
-# The collar therefore lands ~1.86 m AHEAD of the nose. That is not an
-# accident of the arithmetic, it is how the machine is used: it bolts the
-# ground in front of itself so that the operator under the canopy is always
-# standing under back that has already been supported ([R]S2 - "it parks under
-# freshly blasted, unsupported ground" is the hazard the whole machine exists
-# to remove).
+# -- the working pose ---------------------------------------------------------
+# The machine is authored DRILLING THE BACK: feed vertical, collar on the rock.
+# COLLAR_Z is a POSE choice and it is declared as one. [BS]p.7's coverage
+# diagram gives 4.000 m of roof coverage with 2.4 m bolts, and [BS]p.2 rates
+# the same machine for heading heights up to 7.5 m; the game's own underground
+# drive is 5 x 5 m (research/16-site-archetypes.md, HANDOFF S11). 4.600 m sits
+# inside both envelopes and puts the plate against the back of the game's own
+# drive instead of a metre below it.
+COLLAR_Z   = 4.600
+COV_CHECK  = (BOOM_LEN + BOOM_TELE) * math.sin(SWING_MAX)   # 1.954 vs 2.000
+TIP_Z      = COLLAR_Z - (FEED_BODY - CRADLE_OFF + FEED_NOSE)     # 2.126
+BOOM_LIFT  = math.asin((TIP_Z - Z_FOOT) / BOOM_LEN)              # 35.8 deg
+TIP_Y      = Y_FOOT + BOOM_LEN * math.cos(BOOM_LIFT)             # 3.753
 
 
 def build_pedestal(parent):
@@ -1185,156 +1244,888 @@ def build_pedestal(parent):
     y0, y1 = Y_TICK_F - 0.060, Y_NOSE - 0.120
     box('ped_base', (0.940, y1 - y0, 0.240), R.MAT_DARK, parent,
         (0, (y0 + y1) / 2, FRAME_Z1 + 0.120), bevel=0.018)
-    # the two triangular cheek plates
     for s in (-1, 1):
         for i, (ay, az, by, bz) in enumerate((
-                (y0 + 0.080, FRAME_Z1 + 0.240, Y_FOOT, Z_FOOT),          # back leg
-                (y1 - 0.080, FRAME_Z1 + 0.240, Y_FOOT, Z_FOOT),          # front leg
+                (y0 + 0.080, FRAME_Z1 + 0.240, Y_FOOT, Z_FOOT),
+                (y1 - 0.080, FRAME_Z1 + 0.240, Y_FOOT, Z_FOOT),
                 (y0 + 0.080, FRAME_Z1 + 0.240, y1 - 0.080, FRAME_Z1 + 0.240))):
             aim_box('ped_leg%d_%d' % (s > 0, i), 0.032, 0.190,
                     (s * 0.300, ay, az), (s * 0.300, by, bz), R.MAT_PAINT,
                     parent, bev=0.010)
-        box('ped_web%d' % (s > 0), (0.026, (y1 - y0) * 0.62, 0.560),
+        box('ped_web%d' % (s > 0), (0.026, (y1 - y0) * 0.62, 0.340),
             R.MAT_PAINT, parent,
-            (s * 0.300, (y0 + y1) / 2, FRAME_Z1 + 0.480), bevel=0.008)
-    # the swing-bearing housing at the top, with its bolt circle
+            (s * 0.300, (y0 + y1) / 2, FRAME_Z1 + 0.400), bevel=0.008)
     cyl('ped_bearing', 0.230, 0.230, R.MAT_CAST, parent,
         (0, Y_FOOT, Z_FOOT - 0.150), sides=18)
     bolt_ring(parent, 'ped_bearingbolt', 0.185, 12, 0.020, 0.028, R.MAT_WORN,
               (0, Y_FOOT, Z_FOOT + 0.080))
-    # the badge plate on the flank - a named attachment point, not geometry
     R.empty(R.NODE_MOUNT, 'marque', parent,
-            (-0.316, (y0 + y1) / 2, FRAME_Z1 + 0.480), (0, math.radians(90), 0))
+            (-0.316, (y0 + y1) / 2, FRAME_Z1 + 0.400), (0, math.radians(90), 0))
     box('ped_badgeplate', (0.014, 0.520, 0.150), R.MAT_PAINT, parent,
-        (-0.316, (y0 + y1) / 2, FRAME_Z1 + 0.480), bevel=0.006)
+        (-0.316, (y0 + y1) / 2, FRAME_Z1 + 0.400), bevel=0.006)
     # automatic boom lubrication on the rear part of the boom [BS]p.5
     box('ped_lubepump', (0.180, 0.200, 0.260), R.MAT_DARK, parent,
         (0.330, y0 + 0.200, FRAME_Z1 + 0.380), bevel=0.014)
 
 
 def build_boom(root):
-    """swing -> lift -> telescope, with the parallel-hold link and the hose
-    loom that rides over the top of it.
+    """swing -> lift -> telescope, with the parallel-hold link.
 
-    Node chain, and why each one exists:
-      pivot:boomSwing  vertical axis. This is a BOOM on a HINGED CARRIER, not
-                       a turret: the machine aims itself down the drive by
-                       breaking at the articulation pin, and the boom only
-                       trims from there [R]S4.1.
-      pivot:boomLift   transverse axis, the one big movement.
-      slide:boomTele   "square-section outer with a smaller inner that slides
-                       out; the joint line and the wear-pad adjusters are
-                       visible" [R]S4.3.
+    Every published limit rides on its node as an extra, so the game can drive
+    the boom without re-deriving anything and without going outside what the
+    real machine does.
 
     THE PARALLEL-HOLD LINKAGE is modelled and it is not trim: "a second link
     rod running the length of the boom keeps the feed at a constant attitude
     while the boom lifts. This is what lets the operator set the feed square to
-    the back and then just move the boom" [R]S4.3. In this file it is why
-    pivot:mast is authored at exactly -BOOM_LIFT: the feed's own frame cancels
-    the boom's lift, which is the linkage's job expressed as a transform.
+    the back and then just move the boom" [R]S4.3. It is also why pivot:mast is
+    authored at exactly -BOOM_LIFT: the feed's frame cancels the boom's lift,
+    which is the linkage's job written as a transform.
     """
     swing = R.empty(R.NODE_PIVOT, 'boomSwing', root, (0, Y_FOOT, Z_FOOT))
     swing['axis'] = 'z'
+    swing['range_deg'] = math.degrees(SWING_MAX)      # +/-45 [BS]p.7
     cyl('boom_slewhousing', 0.200, 0.260, R.MAT_CAST, swing, (0, 0, -0.130),
         sides=18)
     cyl('boom_slewcollar', 0.155, 0.120, R.MAT_PAINT, swing, (0, 0, 0.110),
         sides=14)
 
-    lift = R.empty(R.NODE_PIVOT, 'boomLift', swing, (0, 0, 0),
-                   (BOOM_LIFT, 0, 0))
+    lift = R.empty(R.NODE_PIVOT, 'boomLift', swing, (0, 0, 0), (BOOM_LIFT, 0, 0))
     lift['axis'] = 'x'
-    # the lift knuckle
+    lift['max_deg'] = math.degrees(LIFT_MAX)          # +70 [BS]p.7
+    lift['min_deg'] = math.degrees(LIFT_MIN)          # -30 [BS]p.7
     cyl('boom_knuckle', 0.135, 0.420, R.MAT_CAST, lift, (-0.210, 0, 0),
         (0, math.pi / 2, 0), sides=14)
-    # outer boom section, along the boom's own +Y
-    L_OUT = BOOM_LEN - 0.620
+    L_OUT = BOOM_LEN - 0.460
     box('boom_outer', (BOOM_W, L_OUT, BOOM_D), R.MAT_PAINT, lift,
-        (0, L_OUT / 2 + 0.140, 0), bevel=0.016)
-    # wear-pad adjuster bosses at the mouth of the outer section [R]S4.3
+        (0, L_OUT / 2 + 0.120, 0), bevel=0.016)
     for s in (-1, 1):
         for zz in (BOOM_D / 2 - 0.020, -BOOM_D / 2 + 0.020):
             cyl('boom_pad%d_%d' % (s > 0, zz > 0), 0.026, 0.030, R.MAT_WORN,
-                lift, (s * (BOOM_W / 2 - 0.030), L_OUT + 0.120, zz), sides=6)
-    # the parallel-hold link rod, running the whole length beside the boom
-    aim_tube('boom_parlink', 0.030, (0.185, 0.060, 0.150),
-             (0.185, L_OUT + 0.060, 0.150), R.MAT_STEEL, lift, sides=8)
-    cyl('boom_parbell', 0.070, 0.110, R.MAT_WORN, lift, (0.185, 0.030, 0.150),
+                lift, (s * (BOOM_W / 2 - 0.030), L_OUT + 0.100, zz), sides=6)
+    aim_tube('boom_parlink', 0.030, (0.185, 0.050, 0.150),
+             (0.185, L_OUT + 0.050, 0.150), R.MAT_STEEL, lift, sides=8)
+    cyl('boom_parbell', 0.070, 0.110, R.MAT_WORN, lift, (0.185, 0.025, 0.150),
         (0, math.pi / 2, 0), sides=10)
 
     tele = R.empty(R.NODE_SLIDE, 'boomTele', lift, (0, L_OUT + 0.020, 0))
-    tele['travel_m'] = BOOM_TELE
+    tele['travel_m'] = BOOM_TELE                       # 1.250 [BS]p.7
     tele['axis'] = 'y'
     L_IN = BOOM_LEN - (L_OUT + 0.020)
-    box('boom_inner', (BOOM_W * 0.78, L_IN + 0.360, BOOM_D * 0.78), R.MAT_PAINT,
-        tele, (0, L_IN / 2 - 0.180, 0), bevel=0.012)
-    # head casting at the tip
+    box('boom_inner', (BOOM_W * 0.78, L_IN + 0.320, BOOM_D * 0.78), R.MAT_PAINT,
+        tele, (0, L_IN / 2 - 0.160, 0), bevel=0.012)
     cyl('boom_head', 0.150, 0.340, R.MAT_CAST, tele, (-0.170, L_IN, 0),
         (0, math.pi / 2, 0), sides=14)
 
-    # -- the lift cylinder: barrel on the pedestal, chrome rod to the boom ----
+    # -- the lift cylinder ---------------------------------------------------
     # "one large cylinder under the boom, rod-out when the boom is up ... rods
-    # are bright chrome / Ni-Cr plated ... a chrome rod standing 400-800 mm
-    # proud of its barrel is the strongest single 'this machine is under load
-    # right now' cue in the whole model" [R]S4.3, [BS]p.5 Ni-Cr plated rods.
-    a = Vector((0, Y_FOOT - 0.520, Z_FOOT - 0.560))            # pedestal anchor
-    b_local = Vector((0, BOOM_LEN * 0.46, -BOOM_D / 2 - 0.075))  # on the boom
+    # are bright chrome / Ni-Cr plated" [R]S4.3, [BS]p.5. "A chrome rod
+    # standing 400-800 mm proud of its barrel is the strongest single 'this
+    # machine is under load right now' cue in the whole model."
+    a = Vector((0, Y_FOOT - 0.480, Z_FOOT - 0.480))
+    bl = Vector((0, BOOM_LEN * 0.52, -BOOM_D / 2 - 0.070))
     b = Vector((0, Y_FOOT, Z_FOOT)) + Vector((
         0,
-        b_local.y * math.cos(BOOM_LIFT) - b_local.z * math.sin(BOOM_LIFT),
-        b_local.y * math.sin(BOOM_LIFT) + b_local.z * math.cos(BOOM_LIFT)))
+        bl.y * math.cos(BOOM_LIFT) - bl.z * math.sin(BOOM_LIFT),
+        bl.y * math.sin(BOOM_LIFT) + bl.z * math.cos(BOOM_LIFT)))
     v = b - a
-    mid = a + v * 0.54
-    ramp = R.empty(R.NODE_PIVOT, 'boomRam', root, tuple(a))
-    aim_tube('boomram_barrel', 0.085, tuple(a), tuple(mid), R.MAT_DARK, root,
+    mid = a + v * 0.52
+    R.empty(R.NODE_PIVOT, 'boomRam', root, tuple(a))
+    aim_tube('boomram_barrel', 0.082, tuple(a), tuple(mid), R.MAT_DARK, root,
              sides=14)
-    aim_tube('boomram_rod', 0.046, tuple(mid), tuple(b), R.MAT_CHROME, root,
+    aim_tube('boomram_rod', 0.044, tuple(mid), tuple(b), R.MAT_CHROME, root,
              sides=12)
-    cyl('boomram_gland', 0.092, 0.070, R.MAT_WORN, root, tuple(mid),
-        tuple((b - a).to_track_quat('Z', 'Y').to_euler()), sides=12)
-    for p in (a, b):
-        cyl('boomram_eye%d' % (p is b), 0.062, 0.110, R.MAT_WORN, root,
+    cyl('boomram_gland', 0.090, 0.070, R.MAT_WORN, root, tuple(mid),
+        tuple(v.to_track_quat('Z', 'Y').to_euler()), sides=12)
+    for i, p in enumerate((a, b)):
+        cyl('boomram_eye%d' % i, 0.060, 0.110, R.MAT_WORN, root,
             (p.x - 0.055, p.y, p.z), (0, math.pi / 2, 0), sides=10)
 
-    return swing, lift, tele, L_IN
+    return swing, lift, tele, L_OUT, L_IN
 
 
-def build_boom_hoses(lift, tele, L_out, L_in):
-    """The hose loom over the top of the boom, on saddle clamps.
+def build_boom_hoses(lift, L_out, L_in):
+    """The hose loom, which is the machine's loudest visual feature.
 
-    "The hose loom runs OVER the top of the boom in a shallow arc, on a row of
-    regularly spaced saddle clamps - the drawing shows roughly eight clamps
-    along the boom. This is the single most characteristic service detail of
-    the machine, and it is drawn as an ordered run, not a mess" [R]S4.0.
-    And [R]S5.3 makes the catenary one of the six thumbnail tells: "thick
-    spiral-wrapped bundles hanging in visible loops ... a fat black scribble
-    across the yellow. Recognisable at 64 px."
-
-    So: an ORDERED run over the boom, and a DEEP FREE LOOP where it leaves the
-    frame. The loops are generous, not tight - they have to survive full boom
-    articulation, and "get the loop slack wrong and the machine reads as a toy"
-    [R]S4.7.
+    Two sources, and they describe two different runs, so both are built:
+      * [R]S4.0, off the dedicated-bolter line elevation: "the hose loom runs
+        OVER the top of the boom in a shallow arc, on a row of regularly spaced
+        saddle clamps - roughly eight clamps along the boom. This is the single
+        most characteristic service detail of the machine, and it is drawn as
+        an ORDERED run, not a mess."
+      * Manufacturer product photography of the same class: the bundle breaks
+        into "a large free-hanging loop at the boom-to-feed transition", a
+        loose almost-circular bundle of black spiral-wrap hanging clear below
+        the head, mixed black hydraulic and pale water lines.
+    [R]S4.7 is blunt about why the second one matters: "the loops are generous,
+    not tight: they have to survive full boom articulation. Get the loop slack
+    wrong and the machine reads as a toy."
     """
     n_clamp = 8
     for i in range(n_clamp):
-        y = 0.220 + (L_out - 0.320) * i / (n_clamp - 1)
+        y = 0.200 + (L_out - 0.300) * i / (n_clamp - 1)
         cheapbox('boom_saddle%d' % i, (0.150, 0.048, 0.058), R.MAT_DARK, lift,
                  (0, y, BOOM_D / 2 + 0.030))
         cheapbox('boom_saddlecap%d' % i, (0.160, 0.040, 0.018), R.MAT_WORN,
                  lift, (0, y, BOOM_D / 2 + 0.062))
-    # four hoses riding those saddles in a shallow arc
     for j, (dx, rr) in enumerate(((-0.050, 0.024), (-0.017, 0.024),
                                   (0.017, 0.028), (0.050, 0.021))):
         pts = []
         for i in range(6):
             t = i / 5.0
-            y = 0.180 + (L_out + 0.140) * t
+            y = 0.160 + (L_out + 0.120) * t
             z = BOOM_D / 2 + 0.072 + math.sin(t * math.pi) * 0.045
             pts.append((dx, y, z))
         R.hose('boom_hose%d' % j, pts, radius=rr, parent=lift, sides=6)
-    # the drag loop that serves the sliding inner section
-    R.hose('boom_teleloop', [
-        (0.075, L_out - 0.320, BOOM_D / 2 + 0.080),
-        (0.135, L_out + 0.140, BOOM_D / 2 + 0.310),
-        (0.100, L_out + 0.560, BOOM_D / 2 + 0.180),
-        (0.060, L_out + L_in + 0.060, BOOM_D / 2 - 0.010),
-    ], radius=0.026, parent=lift, sides=6)
+    # the big free loop at the boom-to-feed transition
+    for j, (dx, rr) in enumerate(((-0.030, 0.032), (0.030, 0.030))):
+        R.hose('boom_loop%d' % j, [
+            (dx, L_out - 0.180, BOOM_D / 2 + 0.090),
+            (dx + 0.060, L_out + 0.320, BOOM_D / 2 + 0.360),
+            (dx + 0.040, L_out + L_in + 0.140, BOOM_D / 2 - 0.020),
+            (dx, L_out + L_in - 0.120, -BOOM_D / 2 - 0.420),
+            (dx - 0.020, L_out + L_in + 0.180, -BOOM_D / 2 - 0.120),
+        ], radius=rr, parent=lift, sides=6)
+
+
+# =============================================================================
+# S7  TOOL SYSTEM 1 OF 2 - DRILLING
+#
+#     "A short feed beam, not a mast ... an extruded/fabricated beam of roughly
+#     square section with a machined bright top face, drilled with a regular
+#     row of lightening/fixing holes along the web. The carriage runs on rails
+#     machined into the beam's flanks, not on a lattice." [R]S4.4
+#
+#     THE ROCK DRILL IS FULLY DIMENSIONED, which almost nothing else on the
+#     working end is. [BS]p.5 names it and the manufacturer publishes its own
+#     brochure for it (doc 9865 0007 01, 2018-05,
+#     epiroc.com/.../9865%200007%2001%20COP%20RR11%20brochure.pdf):
+#
+#       length without shank adapter   735 mm
+#       width including connectors     290 mm
+#       height                         194 mm
+#       height over drill centre        77 mm   <- the axis is LOW in the body
+#       weight                          81 kg
+#       hole range                   33-51 mm
+#       impact power, max              11 kW at 100 Hz, 210 bar
+#       shank adapters      SR28H, R32, R32E, R32F
+#
+#     Those five dimensions size the carriage, the beam section and the whole
+#     feed. The 77 mm is worth having: the drill axis sits 77 mm below the top
+#     of a 194 mm body, so the drill hangs BELOW its own centreline, which is
+#     why a bolting unit can be as slim as it is.
+#
+#     THE FEED'S LOCAL +Z POINTS AT THE ROCK - a hard requirement, not a
+#     preference. src/core/gltfRig.js reads slide:carriage's authored position
+#     and publishes carriageRange = [y, y + travel_m], so the carriage must be
+#     authored at the START of its stroke and advance POSITIVELY; the exporter
+#     maps Blender +Z to three.js +Y.
+# =============================================================================
+
+DRIFTER_L  = 0.735   # rock drill length without shank adapter    COP RR11 doc
+DRIFTER_W  = 0.290   # width including connectors                 COP RR11 doc
+DRIFTER_H  = 0.194   # height                                     COP RR11 doc
+DRIFTER_AX = 0.077   # height over drill centre                   COP RR11 doc
+SHANK_OFF  = 0.150   # chuck face above the drifter body front.   NOT SOURCED
+ROD_LEN    = 3.000   # drill rod. 3 m is the stock length for this thread
+                     # family (Minova EPD 140/2020 Fig. 3 "L = 3 m"; Mitsubishi
+                     # Top_Hammer_Tools.pdf lists 2 800 / 3 100 mm rods). It
+                     # also FALLS OUT of the geometry: with the bit at the
+                     # collar and the carriage at the bottom of its stroke, the
+                     # gap from chuck to collar is 3.000 m. Two independent
+                     # routes to the same rod.
+ROD_OD     = 0.038   # rod OD. The smallest published drill string on the
+                     # sister machine drills a 38 mm hole ([BM]p.7).
+BIT_OD     = 0.035   # 35 mm hole for a 39 mm friction bolt - the bolt is
+                     # LARGER than its hole, which is what makes a friction
+                     # bolt grip.  research/16-site-archetypes.md S B.13
+CARR_Z0    = (FEED_BODY - CRADLE_OFF + FEED_NOSE) - ROD_LEN - DRIFTER_L - SHANK_OFF
+             # -1.411, i.e. 5 mm off the bottom of the beam. DERIVED, and the
+             # fact that it lands 5 mm inside the beam rather than 300 mm
+             # outside it is the check that FEED_BODY is right.
+
+
+def build_feed(mast_parent):
+    """Cradle, roll-over, feed extension, beam, carriage, drill.
+
+    Returns (mast, fx, index) where `index` is pivot:boltIndex - the node the
+    bolting unit in S8 rotates about, because on this class BOTH TOOL SYSTEMS
+    SHARE ONE FEED and the feeder itself indexes between them.
+    """
+    mast = R.empty(R.NODE_PIVOT, 'mast', mast_parent, (0, 0, 0),
+                   (-BOOM_LIFT, 0, 0))
+    mast['feed_body_m'] = FEED_BODY
+    mast['hole_depth_m'] = HOLE_DEPTH
+    mast['roll_over_deg'] = math.degrees(FEED_ROLL)     # 240 [BS]p.7
+
+    # -- roll-over cradle ----------------------------------------------------
+    box('feed_cradle', (FEED_W + 0.190, FEED_D + 0.180, 0.360), R.MAT_PAINT,
+        mast, (0, 0, 0), bevel=0.016)
+    for s in (-1, 1):
+        cheapbox('feed_cradleear%d' % (s > 0), (0.030, FEED_D + 0.230, 0.280),
+                 R.MAT_PAINT, mast, (s * (FEED_W / 2 + 0.110), 0, 0))
+    # the roll-over motor: 240 deg of feed rotation is a big ring gear, and it
+    # is what lets one boom bolt the back and both walls [BS]p.7
+    cyl('feed_rollmotor', 0.105, 0.200, R.MAT_CAST, mast,
+        (FEED_W / 2 + 0.125, 0, 0), (0, math.pi / 2, 0), sides=12)
+    cyl('feed_rollring', 0.185, 0.080, R.MAT_WORN, mast,
+        (-FEED_W / 2 - 0.150, 0, 0), (0, math.pi / 2, 0), sides=20)
+    cyl('feed_rollpin', 0.062, 0.440, R.MAT_WORN, mast, (-0.220, 0, 0),
+        (0, math.pi / 2, 0), sides=10)
+    box('feed_waterkit', (0.150, 0.170, 0.150), R.MAT_DARK, mast,
+        (-FEED_W / 2 - 0.140, 0.070, 0.190), bevel=0.012)
+    # the 400 mm feed-extension cylinder, alongside the cradle
+    aim_tube('feedext_barrel', 0.050, (-FEED_W / 2 - 0.080, 0.050, -0.320),
+             (-FEED_W / 2 - 0.080, 0.050, 0.180), R.MAT_DARK, mast, sides=10)
+
+    # -- the 400 mm positioning extension ------------------------------------
+    fx = R.empty(R.NODE_SLIDE, 'feedExtend', mast, (0, 0, 0))
+    fx['travel_m'] = FEED_EXT                            # 0.400 [BS]p.7
+    fx['axis'] = 'z'
+    fx['purpose'] = 'position'    # NOT penetration - see the S6 note
+    aim_tube('feedext_rod', 0.026, (-FEED_W / 2 - 0.080, 0.050, 0.180),
+             (-FEED_W / 2 - 0.080, 0.050, 0.520), R.MAT_CHROME, fx, sides=8)
+
+    COL_Z = FEED_BODY - CRADLE_OFF + FEED_NOSE           # 2.474, the collar
+    TOP_Z = FEED_BODY - CRADLE_OFF                       # 2.124, beam top
+    BOT_Z = -CRADLE_OFF                                  # -1.416, beam bottom
+
+    # The collar hardware stays on the HOLE AXIS while the feeder indexes
+    # behind it, so it hangs off fx and not off pivot:boltIndex.
+    box('feedx_centraliser', (0.320, 0.250, 0.100), R.MAT_DARK, fx,
+        (0, 0, TOP_Z + 0.080), bevel=0.010)
+    cyl('feedx_centbore', 0.052, 0.120, R.MAT_WORN, fx, (0, 0, TOP_Z + 0.060),
+        sides=12)
+    cone('feedx_shroud', 0.145, 0.085, 0.130, R.MAT_RUBBER, fx,
+         (0, 0, TOP_Z + 0.140), sides=14)
+    # the feed-front support foot, pushed onto the rock to hold the collar
+    box('feedx_foot', (0.360, 0.160, 0.048), R.MAT_WORN, fx,
+        (0, 0, COL_Z - 0.024), bevel=0.008)
+    for s in (-1, 1):
+        cyl('feedx_footleg%d' % (s > 0), 0.026, 0.220, R.MAT_WORN, fx,
+            (s * 0.150, 0, TOP_Z + 0.130), sides=8)
+    cyl('feedx_tiproller', 0.058, 0.170, R.MAT_RUBBER, fx,
+        (-0.090, 0, COL_Z + 0.030), (0, math.pi / 2, 0), sides=12)
+    cyl('feedx_flushhead', 0.060, 0.120, R.MAT_CAST, fx,
+        (0.150, -0.070, TOP_Z - 0.060), (math.radians(90), 0, 0), sides=10)
+
+    # -- THE INDEXER: the whole feeder rotates to swap drill for bolt ---------
+    # See S8's header for the source. Axis A sits midway between the drill
+    # centreline and the bolt centreline, so 180 degrees about it puts whichever
+    # one you want onto the hole.
+    index = R.empty(R.NODE_PIVOT, 'boltIndex', fx, (INDEX_X, 0, 0))
+    index['axis'] = 'z'
+    index['range_deg'] = 180.0
+    index['drill_at_deg'] = 0.0
+    index['bolt_at_deg'] = 180.0
+    dx = -INDEX_X          # the drill side of the indexer, on the hole axis
+
+    # -- the feed beam --------------------------------------------------------
+    box('feed_beam', (FEED_W, FEED_D, FEED_BODY), R.MAT_PAINT, index,
+        (dx, 0, (BOT_Z + TOP_Z) / 2), bevel=0.012)
+    for s in (-1, 1):
+        box('feed_rail%d' % (s > 0), (0.030, 0.054, FEED_BODY - 0.040),
+            R.MAT_STEEL, index,
+            (dx + s * (FEED_W / 2 + 0.008), -FEED_D / 2 + 0.062,
+             (BOT_Z + TOP_Z) / 2), bevel=0.004)
+    box('feed_topface', (FEED_W - 0.060, 0.020, FEED_BODY - 0.060),
+        R.MAT_STEEL, index, (dx, FEED_D / 2 + 0.004, (BOT_Z + TOP_Z) / 2),
+        bevel=0.003)
+    n_hole = 15
+    for i in range(n_hole):
+        z = BOT_Z + 0.150 + (FEED_BODY - 0.300) * i / (n_hole - 1)
+        cyl('feed_web%d' % i, 0.038, FEED_D * 0.55, R.MAT_DARK, index,
+            (dx, -FEED_D * 0.275, z), (math.pi / 2, 0, 0), sides=8)
+    # the chain drive that pulls the carriage - visible full length on every
+    # photograph of this class of bolting head
+    for s in (-1, 1):
+        cyl('feed_chainsprk%d' % (s > 0), 0.062, 0.070, R.MAT_WORN, index,
+            (dx + FEED_W / 2 + 0.010, 0.030,
+             (TOP_Z - 0.090) if s > 0 else (BOT_Z + 0.090)),
+            (0, math.pi / 2, 0), sides=12)
+    for s in (-1, 1):
+        cheapbox('feed_chain%d' % (s > 0),
+                 (0.018, 0.026, FEED_BODY - 0.180), R.MAT_WORN, index,
+                 (dx + FEED_W / 2 + 0.010 + s * 0.052, 0.030,
+                  (BOT_Z + TOP_Z) / 2))
+
+    # -- the drill carriage ---------------------------------------------------
+    car = R.empty(R.NODE_SLIDE, 'carriage', index, (dx, 0, CARR_Z0))
+    car['travel_m'] = CARR_TRAV                          # 2.450
+    car['axis'] = 'z'
+    box('carr_saddle', (FEED_W + 0.080, FEED_D * 0.82, 0.260), R.MAT_DARK, car,
+        (0, 0, DRIFTER_L / 2), bevel=0.010)
+    for s in (-1, 1):
+        cheapbox('carr_shoe%d' % (s > 0), (0.050, 0.082, 0.230), R.MAT_WORN,
+                 car, (s * (FEED_W / 2 + 0.012), -FEED_D / 2 + 0.062,
+                       DRIFTER_L / 2))
+    # the drill, at its published 735 x 290 x 194 with the axis 77 mm down
+    # from the top of the body
+    body_dz = DRIFTER_H / 2 - DRIFTER_AX
+    box('drifter_body', (DRIFTER_W, DRIFTER_H, DRIFTER_L), R.MAT_DARK, car,
+        (0, body_dz, DRIFTER_L / 2), bevel=0.014)
+    for i in range(8):
+        z = 0.086 + i * 0.076
+        cheapbox('drifter_rib%d' % i,
+                 (DRIFTER_W + 0.022, DRIFTER_H + 0.018, 0.020), R.MAT_DARK,
+                 car, (0, body_dz, z))
+    cyl('drifter_rotmotor', 0.088, 0.180, R.MAT_CAST, car,
+        (DRIFTER_W / 2 - 0.010, body_dz, 0.300), (0, math.pi / 2, 0), sides=12)
+    cyl('drifter_accum', 0.062, 0.150, R.MAT_DARK, car,
+        (-DRIFTER_W / 2 - 0.038, body_dz, 0.190), sides=10)
+    box('drifter_backhead', (DRIFTER_W - 0.020, DRIFTER_H - 0.018, 0.090),
+        R.MAT_CAST, car, (0, body_dz, 0.048), bevel=0.010)
+    for j, (hx, rr) in enumerate(((-0.062, 0.019), (-0.021, 0.019),
+                                  (0.021, 0.022), (0.062, 0.016))):
+        R.hose('drifter_hose%d' % j, [
+            (hx, -0.130, -0.200), (hx * 1.5, -0.200, 0.010),
+            (hx, -0.070, 0.140), (hx, body_dz - 0.060, 0.200),
+        ], radius=rr, parent=car, sides=6)
+
+    # The spindle sits exactly DRIFTER_L above the carriage datum, so that
+    # CARR_Z0 + DRIFTER_L + SHANK_OFF + ROD_LEN lands the bit ON the collar.
+    # That is the same arithmetic CARR_Z0 was derived from, and the two have
+    # to agree or the bit floats above the rock.
+    spindle = R.empty(R.NODE_PIVOT, 'spindle', car, (0, 0, DRIFTER_L))
+    spindle['axis'] = 'z'
+    cyl('spindle_chuck', 0.072, 0.155, R.MAT_WORN, spindle, (0, 0, -0.010),
+        sides=12)
+    cyl('spindle_shank', 0.045, 0.200, R.MAT_STEEL, spindle, (0, 0, 0.120),
+        sides=10)
+    R.empty(R.NODE_MOUNT, 'tool', spindle, (0, 0, SHANK_OFF))
+    # the rod standing in the feed, bit exactly at the collar: the machine is
+    # authored at the moment the hole is started.
+    cyl('drill_rod', ROD_OD / 2, ROD_LEN, R.MAT_STEEL, spindle,
+        (0, 0, SHANK_OFF), sides=8)
+    cyl('drill_bit', BIT_OD / 2 + 0.005, 0.078, R.MAT_WORN, spindle,
+        (0, 0, SHANK_OFF + ROD_LEN), sides=10)
+
+    return mast, fx, index, car, BOT_Z, TOP_Z, COL_Z
+
+
+# =============================================================================
+# S8  TOOL SYSTEM 2 OF 2 - THE BOLTING UNIT
+#
+#     THIS IS THE PART A MODEL BUILT FROM A PHOTOGRAPH GETS WRONG, so the
+#     mechanism is sourced rather than imagined. It is not "a magazine bolted
+#     beside the drill". The FEEDER ITSELF ROTATES, and the two centrelines
+#     trade places over the hole.
+#
+#     Primary source, and it is a specification of the mechanism rather than a
+#     description of a picture: patent US9856733B2, "Method and rock bolting
+#     rig for installation of a rock bolt", Epiroc Rock Drills AB (formerly
+#     Atlas Copco Rock Drills AB), inventors Jan Olsson and Rene Deutsch,
+#     priority 2012-07-09, https://patents.google.com/patent/US9856733B2/en :
+#
+#       * the feeder unit (104) carries the drilling machine (105), which is
+#         displaced by A SLIDE (122) running along the feeder;
+#       * "the feeder unit is rotatable about an axis (A)" between two end
+#         positions - position one has "the drilling machine coaxial with the
+#         drilling axis", position two has "the center of the bolt of said rock
+#         bolt ... coaxial with said drilling axis";
+#       * bolts are held by a REAR BOLT HOLDER (123) fixed to the slide and a
+#         FRONT BOLT HOLDER (125);
+#       * the cycle is drill -> rotate the feeder to the second end position ->
+#         insert the bolt by driving the slide forward -> rotate back.
+#
+#     Confirmed operationally on the manufacturer's own sheets: "Automated
+#     bolting tool retraction and INDEXING OVER TO DRILLING MODE at completion
+#     of bolting" (Boltec M spec 9869 0097 01d p.2), and "MBU bolting unit ON A
+#     SINGLE FEED SYSTEM" (Boltec 235 sheet).
+#
+#     So: pivot:boltIndex sits MIDWAY between the drill centreline and the bolt
+#     centreline, and 180 degrees about it swaps them. That is why the drill in
+#     S7 is built at index-local x = -INDEX_X and everything here at +INDEX_X.
+#
+#     THE MAGAZINE. Capacity 10 bolts [BS]p.5 - three separate machines in this
+#     family publish the same 10. [R]S8 records the drum geometry as NOT
+#     SOURCED, and it is still not published, but the FORM is now sourced from
+#     manufacturer product photography of this exact unit: the bolts stand
+#     PARALLEL TO THE FEED, arranged in a circle, retained by TWO PERFORATED
+#     CIRCULAR GUIDE DISCS at top and bottom, rotating about an axis parallel
+#     to and offset from the drill axis, with the feed beam running up the
+#     middle of the assembly. The radius is then arithmetic on two printed
+#     numbers rather than a guess - see MAG_R.
+#
+#     DUAL BOLT LENGTHS are a listed option, "shorter bolt 70 % the length of
+#     the longer" [BS]p.5, so the magazine here is loaded with both.
+#
+#     WHAT IS DELIBERATELY ABSENT. No cement silo and no grout mixer. Those are
+#     real - the larger machines carry a 1 000 kg bulk silo, and the competitor
+#     mounts a 500 kg dry cement silo "above right mud guard" - but THIS
+#     machine's equipment list offers only "rebar bolts - manual resin/cement
+#     cartridges" plus an "extension system for injection hose for resin
+#     cartridges" [BS]p.5. [R]S8 flags exactly this: the game's deck-mounted
+#     grout pump and mixer "may belong to a cement-grouted variant rather than
+#     this one, and I could not confirm which." So this model carries the
+#     cartridge stowage and the injection hose that ARE listed, and not the
+#     silo that is not. No mesh handling arm either, for the same reason: it is
+#     a real class feature (research/03-mining.md S C.2.3) but it is not on
+#     this machine's list, and the current small model publishes it as an
+#     option that adds 500 mm of length and 430 mm of turning radius.
+# =============================================================================
+
+BOLT_OFFSET = 0.320  # drill centreline to bolt centreline. DERIVED: the drill
+                     # is 290 mm wide over its connectors (printed, S7), so the
+                     # bolt clears it at 145 + 100 (a 200 mm round face plate)
+                     # + 35 mm. NOT SOURCED as a figure.
+INDEX_X     = BOLT_OFFSET / 2        # 0.160 - axis A, midway between the two
+MAG_R       = 0.280  # magazine pitch radius. DERIVED from two printed numbers:
+                     # 10 bolts [BS]p.5 carrying 150 x 150 mm face plates
+                     # [BS]p.5 need at least 10 x 0.165 = 1.65 m of
+                     # circumference, i.e. r >= 0.263. 0.280 is that with a
+                     # working clearance. [R]S8 lists the drum diameter as NOT
+                     # SOURCED and it still is - this is a floor, not a figure.
+MAG_DISC_T  = 0.026  # guide disc thickness                        NOT SOURCED
+BOLT_STORE_Z0 = -1.116               # magazine bolts, lower ends
+INJ_HOSE_R  = 0.019  # resin injection hose                        NOT SOURCED
+
+
+def _bolt(parent, name, x, y, z, length, plated=True):
+    """One friction bolt with its face plate and domed nut.
+
+    39 mm tube into a 35 mm hole - the bolt is LARGER than the hole, which is
+    what makes a friction bolt grip (research/16-site-archetypes.md S B.13,
+    Split Set 90 kN, 33/39/46 mm tube into 32/35/41 mm holes).
+
+    The plate bore is CHAMFERED and the nut cap is DOMED, so the bar can sit up
+    to 5 degrees off square to the plate ([MIN] PDF p.2 and p.7). [R]S4.5 is
+    explicit: "a flat washer face on a game bolt plate is wrong."
+
+    Galvanized consumables would ideally carry their own material; there is no
+    galvanising kind in the shared list, so they use MAT_STEEL, which is the
+    closest of the nine (hot-dip galv reads dull blue-grey, not orange-rust and
+    not chrome - [R]S6).
+    """
+    cyl(name, BOLT_OD / 2, length, R.MAT_STEEL, parent, (x, y, z), sides=8)
+    # the longitudinal slot that makes it a friction bolt
+    cheapbox(name + '_slot', (0.006, BOLT_OD * 0.9, length - 0.10), R.MAT_DARK,
+             parent, (x + BOLT_OD / 2, y, z + length / 2))
+    if plated:
+        box(name + '_plate', (PLATE_SQ, PLATE_SQ, PLATE_T), R.MAT_STEEL,
+            parent, (x, y, z + 0.030), bevel=0.010)
+        cone(name + '_nut', NUT_AF / 2 * 1.15, NUT_AF / 2 * 0.62, 0.030,
+             R.MAT_STEEL, parent, (x, y, z + 0.034), sides=6)
+
+
+def build_bolting_unit(index, car, spindle_parent, bot_z, top_z, col_z):
+    """The magazine, the two bolt holders, the pusher and the injection line.
+
+    Everything here hangs off pivot:boltIndex at index-local x = +INDEX_X, i.e.
+    on the BOLT centreline, 320 mm across the feeder from the drill.
+    """
+    bx = INDEX_X                       # the bolt centreline, in index-local x
+
+    # -- the carousel ---------------------------------------------------------
+    # Axis parallel to the feed and offset by MAG_R from the bolt centreline,
+    # so the station at -Y sits exactly on the bolt axis and can be pushed
+    # straight up into the hole without a transfer arm.
+    # The drum sits on the -Y side, i.e. between the feed and the operator.
+    # That is where it has to be: [BS]p.2 says the magazine "can be loaded in
+    # the vertical position without power to the machine", which means the
+    # unit swings back to the platform and the operator reaches it from the
+    # machine side. Putting it on the +Y side would point it at the face.
+    mag = R.empty(R.NODE_PIVOT, 'carousel', index, (bx, -MAG_R, 0))
+    mag['axis'] = 'z'
+    mag['capacity'] = MAG_BOLTS                     # 10 [BS]p.5
+    mag['index_deg'] = 360.0 / MAG_BOLTS            # 36 deg per bolt
+    z_lo = BOLT_STORE_Z0
+    # the two perforated guide discs
+    for tag, dz in (('lo', z_lo - MAG_DISC_T), ('hi', z_lo + BOLT_LEN)):
+        cyl('mag_disc_' + tag, MAG_R + 0.085, MAG_DISC_T, R.MAT_DARK, mag,
+            (0, 0, dz), sides=24)
+        for i in range(MAG_BOLTS):     # the perforations the bolts stand in
+            a = TAU * i / MAG_BOLTS + math.pi / 2
+            cyl('mag_eye_%s%d' % (tag, i), BOLT_OD * 0.86, MAG_DISC_T + 0.010,
+                R.MAT_WORN, mag,
+                (math.cos(a) * MAG_R, math.sin(a) * MAG_R, dz - 0.005), sides=8)
+    cyl('mag_hub', 0.062, BOLT_LEN + 0.120, R.MAT_DARK, mag, (0, 0, z_lo - 0.06),
+        sides=10)
+    for i in range(4):                 # spokes
+        a = TAU * i / 4
+        for dz in (z_lo - MAG_DISC_T, z_lo + BOLT_LEN):
+            cheapbox('mag_spoke%d_%d' % (i, dz > 0), (0.024, MAG_R, 0.030),
+                     R.MAT_DARK, mag,
+                     (math.cos(a) * MAG_R / 2, math.sin(a) * MAG_R / 2, dz),
+                     (0, 0, a - math.pi / 2))
+    # ten bolts, loaded to the dual-length option: six at full length and four
+    # at 70 %, which is exactly what [BS]p.5 permits
+    for i in range(MAG_BOLTS):
+        a = TAU * i / MAG_BOLTS + math.pi / 2
+        L = BOLT_LEN if i < 6 else BOLT_LEN_2
+        _bolt(mag, 'mag_bolt%d' % i, math.cos(a) * MAG_R,
+              math.sin(a) * MAG_R, z_lo, L)
+    # the index motor and its pawl
+    cyl('mag_motor', 0.072, 0.150, R.MAT_CAST, index,
+        (bx + MAG_R, -MAG_R - 0.090, z_lo - 0.170), sides=10)
+    box('mag_guard', (MAG_R * 1.5, 0.030, BOLT_LEN * 0.55), R.MAT_PAINT, index,
+        (bx + MAG_R * 0.2, -MAG_R * 2.0, z_lo + BOLT_LEN * 0.45), bevel=0.010)
+
+    # -- the two bolt holders of the patent -----------------------------------
+    # front holder (125), on the feeder near the collar
+    box('bolt_holder_front', (0.170, 0.150, 0.110), R.MAT_DARK, index,
+        (bx, 0, top_z - 0.120), bevel=0.010)
+    cyl('bolt_holder_frontjaw', BOLT_OD * 0.95, 0.130, R.MAT_WORN, index,
+        (bx, 0, top_z - 0.130), sides=10)
+    # rear holder (123), FIXED TO THE SLIDE - so it rides the carriage, which
+    # is what actually pushes the bolt into the hole
+    box('bolt_holder_rear', (0.160, 0.140, 0.130), R.MAT_DARK, car,
+        (BOLT_OFFSET, 0, 0.090), bevel=0.010)
+    cyl('bolt_holder_rearjaw', BOLT_OD * 0.95, 0.150, R.MAT_WORN, car,
+        (BOLT_OFFSET, 0, 0.020), sides=10)
+    # the bolt adapter on the drill - the drill spins the bolt for its final
+    # set once the feeder has indexed back to the drilling position
+    cyl('bolt_adapter', 0.058, 0.120, R.MAT_WORN, car,
+        (BOLT_OFFSET, 0, DRIFTER_L - 0.020), sides=10)
+
+    # -- the bolt the machine is about to install -----------------------------
+    # It stands in the two holders on the bolt centreline, ready for the
+    # feeder to index it over the hole the drill is making. Showing this bolt
+    # and the drill rod AT THE SAME TIME is the whole point: it is the one
+    # frame in which both tool systems are visibly present and distinct.
+    _bolt(index, 'bolt_in_holder', bx, 0, bot_z + 0.740, BOLT_LEN)
+
+    # -- resin cartridge injection --------------------------------------------
+    # [BS]p.5 lists an "extension system for injection hose for resin
+    # cartridges" and nothing heavier. So: a hose guide on the feeder and a
+    # line running up to the collar, not a pump skid.
+    box('inject_guide', (0.130, 0.110, 0.180), R.MAT_DARK, index,
+        (bx + 0.190, 0.150, bot_z + 1.180), bevel=0.010)
+    R.hose('inject_hose', [
+        (bx + 0.190, 0.230, bot_z + 1.180),
+        (bx + 0.250, 0.330, bot_z + 1.900),
+        (bx + 0.100, 0.240, top_z - 0.500),
+        (bx, 0.110, top_z - 0.120),
+    ], radius=INJ_HOSE_R, parent=index, sides=6)
+
+
+def build_deck_stores(parent):
+    """What a bolter actually carries on its deck: plates, nuts, cartridges.
+
+    Face plates in both sourced sizes - rectangular max 150 x 150 mm and round
+    max dia 200 mm [BS]p.5. [R]S9 W8d notes the game already gets both right
+    and that the distinction matters: 150 is the square one, 200 the round one.
+
+    The resin cartridge box is the ONLY grout hardware on this machine, for the
+    reason set out in S8's header.
+    """
+    # a stack of square plates
+    for i in range(5):
+        box('store_plate%d' % i, (PLATE_SQ, PLATE_SQ, PLATE_T), R.MAT_STEEL,
+            parent, (0.720, 0.430, DECK_Z + 0.010 + i * (PLATE_T + 0.002)),
+            (0, 0, 0.06 * i), bevel=0.008)
+    # and a short stack of round ones
+    for i in range(3):
+        cyl('store_rplate%d' % i, PLATE_RD_D / 2, PLATE_T, R.MAT_STEEL, parent,
+            (0.720, 0.700, DECK_Z + 0.010 + i * (PLATE_T + 0.002)), sides=16)
+    # a nut tray
+    box('store_nuttray', (0.240, 0.180, 0.070), R.MAT_DARK, parent,
+        (0.720, 0.960, DECK_Z + 0.035), bevel=0.008)
+    for i in range(6):
+        cone('store_nut%d' % i, NUT_AF / 2 * 1.15, NUT_AF / 2 * 0.62, 0.030,
+             R.MAT_STEEL, parent,
+             (0.660 + (i % 3) * 0.058, 0.930 + (i // 3) * 0.058,
+              DECK_Z + 0.070), sides=6)
+    # the resin cartridge box, lid up, cartridges standing in it
+    box('resin_box', (0.360, 0.300, 0.340), R.MAT_PAINT, parent,
+        (0.760, 1.560, DECK_Z + 0.170), bevel=0.014)
+    box('resin_lid', (0.370, 0.310, 0.026), R.MAT_DARK, parent,
+        (0.760, 1.560, DECK_Z + 0.352), bevel=0.008)
+    for i in range(6):
+        cyl('resin_cart%d' % i, 0.016, 0.190, R.MAT_HAZARD, parent,
+            (0.660 + (i % 3) * 0.100, 1.490 + (i // 3) * 0.140,
+             DECK_Z + 0.250), sides=8)
+    box('resin_label', (0.014, 0.220, 0.140), R.MAT_HAZARD, parent,
+        (0.945, 1.560, DECK_Z + 0.200), bevel=0.006)
+
+
+# =============================================================================
+# S9  JACKS, LIGHTS, SERVICE HOSES
+# =============================================================================
+
+JACK_STROKE = 0.400   # NOT SOURCED. Sized to lift a 365 mm belly clear.
+JACK_X      = 0.620   # jack pair half-spacing. NOT SOURCED.
+JACK_Y_F    = Y_AXLE_F + CH_FRONT     # +2.100. SOURCED: the current small
+                      # model's dimension table labels the printed 700 mm tick
+                      # "Front axle to front jack leg", which identifies what
+                      # that tick on [BS]p.7 actually marks.
+JACK_Y_R    = Y_TICK_R                # -2.037. The matching rear tick.
+                      # [R]S4.0 puts a jack "behind the rear wheel"; the tick
+                      # is the only printed station there. DERIVED.
+
+
+def build_jacks(root):
+    """Front and rear hydraulic jacks [BS]p.5, authored DOWN.
+
+    The machine is modelled working, and a bolter at the face is always on its
+    jacks - it is drilling upward into rock and the reaction goes into the
+    ground, not the tyres.
+
+    Both jacks of a pair ride ONE slide node. Four separate nodes would cost
+    four extra draw calls for a motion that is always symmetric.
+    """
+    out = []
+    for tag, jy in (('front', JACK_Y_F), ('rear', JACK_Y_R)):
+        nd = R.empty(R.NODE_SLIDE, 'jack-' + tag, root, (0, jy, 0))
+        nd['travel_m'] = -JACK_STROKE      # negative Z = extend to the ground
+        nd['axis'] = 'z'
+        for s in (-1, 1):
+            x = s * JACK_X
+            cheapbox('jack_%s_box%d' % (tag, s > 0), (0.150, 0.170, 0.320),
+                     R.MAT_DARK, nd, (x, 0, FRAME_Z0 + 0.160))
+            cyl('jack_%s_rod%d' % (tag, s > 0), 0.048, FRAME_Z0 - 0.050,
+                R.MAT_CHROME, nd, (x, 0, 0.050), sides=10)
+            cyl('jack_%s_pad%d' % (tag, s > 0), 0.135, 0.052, R.MAT_WORN, nd,
+                (x, 0, 0.000), sides=14)
+            cone('jack_%s_boss%d' % (tag, s > 0), 0.085, 0.050, 0.050,
+                 R.MAT_WORN, nd, (x, 0, 0.050), sides=12)
+            # hazard striping on the leg guard: a jack leg is a crush point
+            cheapbox('jack_%s_stripe%d' % (tag, s > 0), (0.156, 0.176, 0.070),
+                     R.MAT_HAZARD, nd, (x, 0, FRAME_Z0 + 0.020))
+        out.append(nd)
+    return out
+
+
+def build_lights(root, roof, fx):
+    """Every lamp this machine is published as carrying, plus the one the game
+    binds by name.
+
+    [BS]p.5 for this machine:
+        tramming   6 x 40 W LED  +  2 x 70 W halogen      = 8 lamps
+        working    3 x 35 W, 24 V HID, MOUNTED ON THE ROOF
+        illuminated stairs for platform
+    [R]S4.9: "underground, the machine's own lamps are the only light source in
+    frame ... and a lamp aimed UP THE FEED AT THE COLLAR is what a bolter
+    actually needs."
+
+    ORDER MATTERS. src/core/env.js binds the underground work light by the
+    string 'feed-work-light' and falls back to ORDINAL 0 when the name misses
+    (env.js ~L512). So the feed lamp is created FIRST and named exactly. Get
+    this wrong and the drive goes dark, or the beam lands in empty air.
+
+    The feed lamp is the one lamp here that is NOT on [BS]p.5's list - it is
+    the game's own contract, endorsed by [R]S4.9. Everything else is the
+    published fit, at the published counts and wattages.
+    """
+    lights = []
+    # 1. the lamp the game binds. On the feeder, looking up the feed at the
+    #    collar - the parallel-hold keeps the feed on the back whatever the
+    #    boom does, so this lamp is always aimed at the work.
+    m, _ = R.worklight('feed-work-light', fx, (0.300, -0.230, 0.850),
+                       (0, -0.55, 1.0), cone_deg=58, range_m=16)
+    m['watt_hint'] = 50
+    m['colour_hex'] = 0xF4F0E2
+    box('lamp_feed_housing', (0.130, 0.120, 0.130), R.MAT_DARK, fx,
+        (0.300, -0.230, 0.850), (math.radians(28), 0, 0), bevel=0.012)
+    lights.append(m)
+
+    # 2. the three roof working lights - 3 x 35 W, 24 V HID [BS]p.5
+    cx = (CAN_X0 + CAN_X1) / 2
+    for i, ox in enumerate((-0.380, 0.0, 0.380)):
+        m, _ = R.worklight('roof-work-%d' % (i + 1), roof,
+                           (cx + ox, CAN_Y1 + 0.090, ROOF_UND - 0.070),
+                           (0, 1.0, -0.42), cone_deg=62, range_m=20)
+        m['watt_hint'] = 35
+        m['colour_hex'] = 0xEAF2FF          # HID reads cool
+        box('lamp_roof%d' % i, (0.180, 0.100, 0.150), R.MAT_DARK, roof,
+            (cx + ox, CAN_Y1 + 0.090, ROOF_UND - 0.070),
+            (math.radians(-22), 0, 0), bevel=0.012)
+        lights.append(m)
+
+    # 3. eight tramming lamps: 6 x 40 W LED + 2 x 70 W halogen [BS]p.5.
+    #    The two halogens are the long-throw pair and go on the front.
+    tram = [
+        ('tram-f1', (-0.760, Y_NOSE - 0.020, FRAME_Z1 + 0.320), (0, 1, -0.30), 70, 0xFFE6BE),
+        ('tram-f2', (0.760, Y_NOSE - 0.020, FRAME_Z1 + 0.320), (0, 1, -0.30), 70, 0xFFE6BE),
+        ('tram-f3', (-0.520, Y_NOSE - 0.060, FRAME_Z1 + 0.560), (0, 1, -0.16), 40, 0xF2F6FF),
+        ('tram-f4', (0.520, Y_NOSE - 0.060, FRAME_Z1 + 0.560), (0, 1, -0.16), 40, 0xF2F6FF),
+        ('tram-r1', (-0.640, Y_TAIL + 0.020, 1.420), (0, -1, -0.28), 40, 0xF2F6FF),
+        ('tram-r2', (0.640, Y_TAIL + 0.020, 1.420), (0, -1, -0.28), 40, 0xF2F6FF),
+        ('tram-r3', (-0.640, Y_TAIL + 0.020, 0.980), (0, -1, -0.46), 40, 0xF2F6FF),
+        ('tram-r4', (0.640, Y_TAIL + 0.020, 0.980), (0, -1, -0.46), 40, 0xF2F6FF),
+    ]
+    for name, loc, aim, watt, col in tram:
+        m, _ = R.worklight(name, root, loc, aim, cone_deg=46, range_m=22)
+        m['watt_hint'] = watt
+        m['colour_hex'] = col
+        cyl('lamp_%s' % name, 0.062, 0.090, R.MAT_DARK, root, loc,
+            (math.radians(90) if loc[1] > 0 else math.radians(-90), 0, 0),
+            sides=10)
+        lights.append(m)
+
+    # 4. "illuminated stairs for platform" [BS]p.5
+    m, _ = R.worklight('stair-light', root,
+                       (-(DECK_HALF - 0.230) + 0.250, DECK_Y0 - 0.440, 0.560),
+                       (-0.4, -0.3, -1.0), cone_deg=90, range_m=6)
+    m['watt_hint'] = 18
+    m['colour_hex'] = 0xF2F6FF
+    lights.append(m)
+    return lights
+
+
+def build_service_hoses(root):
+    """The frame-to-boom bundle and the trailing cable.
+
+    "Bundles of 4-8 hoses in black spiral-wrap protection leave the front
+    frame, drop into a DEEP FREE CATENARY LOOP below the boom pedestal, and run
+    up the boom in shallow S-curves" [R]S4.7.
+
+    The trailing cable is 37 mm OD - [BS]p.7's cable table gives the 380-525 V
+    cable as dia 37 mm x 110 m, and dia 28 mm x 200 m at 1 000 V. It is STATIC
+    even though the reel is a pivot:, because a cable parented to the drum
+    would swing with it.
+    """
+    for j, (dx, rr, sag) in enumerate(((-0.130, 0.026, 0.44),
+                                       (-0.060, 0.026, 0.50),
+                                       (0.060, 0.030, 0.47),
+                                       (0.130, 0.024, 0.41))):
+        R.hose('svc_hose%d' % j, [
+            (dx - 0.180, 0.420, DECK_Z - 0.120),
+            (dx - 0.120, 1.150, FRAME_Z1 - sag * 0.35),
+            (dx, Y_TICK_F - 0.120, FRAME_Z1 - sag),
+            (dx + 0.040, Y_FOOT - 0.230, Z_FOOT - 0.560),
+            (dx * 0.5, Y_FOOT - 0.060, Z_FOOT - 0.140),
+        ], radius=rr, parent=root, sides=6)
+    # the water line to the boom, run separately as it is on the real machine
+    R.hose('svc_water', [
+        (0.640, -2.700, 1.240), (0.680, -1.200, 1.020),
+        (0.520, 0.600, DECK_Z + 0.060), (0.300, Y_TICK_F, FRAME_Z1 - 0.240),
+        (0.140, Y_FOOT - 0.100, Z_FOOT - 0.220),
+    ], radius=0.022, parent=root, sides=6)
+    # the trailing cable, off the reel and away down the drive
+    R.hose('trailing_cable', [
+        (0.170, REEL_Y - 0.640, REEL_Z - 0.320),
+        (0.240, REEL_Y - 1.150, 0.760),
+        (0.120, Y_TAIL - 0.400, 0.180),
+        (-0.320, Y_TAIL - 2.100, 0.045),
+        (-0.880, Y_TAIL - 4.200, 0.040),
+    ], radius=CABLE_R, parent=root, sides=6)
+
+
+# =============================================================================
+# S10  BUILD
+# =============================================================================
+
+def build(out_path):
+    col = R.reset()
+    for _p in (os.path.join(_HERE, 'lib'), _HERE):   # reset() rebuilds sys.path
+        if _p not in sys.path:
+            sys.path.insert(0, _p)
+
+    _assert_box_is_true()
+
+    root = R.empty('', 'rig:bolter', None, (0, 0, 0))
+
+    build_carrier(root)
+    build_rear_module(root)
+    roof = build_operator_station(root)
+    build_pedestal(None)
+    swing, lift, tele, L_out, L_in = build_boom(root)
+    build_boom_hoses(lift, L_out, L_in)
+
+    head = R.empty(R.NODE_PIVOT, 'feedRoll', tele, (0, L_in, 0))
+    head['axis'] = 'y'
+    head['range_deg'] = math.degrees(FEED_ROLL)      # 240 [BS]p.7
+    mast, fx, index, car, bot_z, top_z, col_z = build_feed(head)
+    build_bolting_unit(index, car, None, bot_z, top_z, col_z)
+
+    build_deck_stores(None)
+    build_jacks(root)
+    build_lights(root, roof, fx)
+    build_service_hoses(root)
+
+    # Everything authored loose belongs to the machine; then the whole machine
+    # turns to face the fleet's forward. Authored facing +Y so every station in
+    # S1 reads forwards (tail at -3.507, nose at +2.950, collar at +3.753).
+    for o in list(bpy.context.scene.objects):
+        if o.parent is None and o is not root:
+            o.parent = root
+    root.rotation_euler = (0, 0, math.pi)
+
+    # Join every dynamic subassembly by material before finish() runs. finish()
+    # deliberately will not touch anything under a pivot:/slide: node, so
+    # without this each of those groups exports one draw call per BOX.
+    # Collect NAMES first. join() deletes the objects it merges, so a snapshot
+    # of live Object references goes stale the moment the first group is joined
+    # and raises ReferenceError on the next attribute access.
+    dyn_names = [o.name for o in bpy.context.scene.objects
+                 if o.type == 'EMPTY' and (o.name.startswith(R.NODE_PIVOT)
+                                           or o.name.startswith(R.NODE_SLIDE))]
+    for nm in dyn_names:
+        nd = bpy.context.scene.objects.get(nm)
+        if nd is None:
+            continue
+        if any(k.type in ('MESH', 'CURVE') for k in nd.children):
+            join_by_mat(nd, 'dyn_' + nm.split(':', 1)[1])
+
+    bake_all()
+    R.finish(out_path)
+
+    print('BOLTER derived: BOOM_LEN=%.3f  coverage check %.3f vs 2.000 '
+          'sourced  lift=%.1f deg  collar=(0, %.3f, %.3f)'
+          % (BOOM_LEN, COV_CHECK, math.degrees(BOOM_LIFT), TIP_Y, COLLAR_Z))
+    return out_path
+
+
+# =============================================================================
+# S11  NOT SOURCED - the register, in one place
+#
+# Sourced and used, for contrast: width 2 115 · height roof down/up 2 100 /
+# 2 841 · tramming length 10 020 · ground clearance 365 · the 1 470 | 637 |
+# 1 400 | 1 400 | 700 | 850 side-elevation chain · turning radii 5 200 / 2 780 ·
+# weight 13 700 (9 000 / 4 700) · articulation +/-40 deg · tyres 9.00 x R20 ·
+# rear clearance angle 15 deg · fuel 60 l · batteries 2 x 12 V 70 Ah ·
+# magazine 10 bolts · bolt lengths 1.5-2.4 m and the 70 % dual-length rule ·
+# face plates 150 x 150 rect and dia 200 round · coverage 2 m either side and
+# 4 m roof · boom extension 1 250 · feed extension 0-400 · feed roll-over
+# 240 deg · lift +70/-30 · swing +/-45 · boom mass 2 550 kg · rock drill
+# 735 x 290 x 194 with the axis 77 mm down, 11 kW at 100 Hz, 33-51 mm holes ·
+# trailing cable dia 37 mm · lamps 6 x 40 W LED + 2 x 70 W halogen tramming and
+# 3 x 35 W HID on the roof · front jack 700 mm ahead of the front axle.
+#
+# NOT SOURCED, and marked at the constant as well as here:
+#  1. FRAME_D, DECK_Z, HOOD_Z, RAIL_X, DECK_HALF - no source breaks this
+#     carrier down internally. DECK_Z is derived from three printed heights
+#     (S3 note) but is not itself printed.
+#  2. ROOF_T, POST_R, ROOF_W, ROOF_D - only the canopy's MOUNTING heights are
+#     published, never its plate size or post spacing. Confirmed still missing
+#     by a fresh web sweep of five manufacturers.
+#  3. REEL_R, REEL_W, WREEL_R, WREEL_W - no manufacturer publishes a cable-reel
+#     drum size for any machine in this class; only cable length and gauge.
+#     REEL_R is derived from the hood cavity and the requirement that the reel
+#     be the largest circle on the machine [R]S4.0.
+#  4. FEED_W, FEED_D, BOOM_W, BOOM_D - no bolter feed or boom SECTION is
+#     published anywhere. Sized off the printed 290 mm drill width.
+#  5. FEED_BODY - derived from a COMPETITOR'S published bolting-head length
+#     (Sandvik DS411 TS2-051:11, BH30 = 4 142 mm for 3.0 m bolts) scaled by the
+#     600 mm bolt-length difference, and cross-checked against the parts
+#     build-up. Epiroc publishes no feed length for any Boltec.
+#  6. CRADLE_OFF at 0.40 of the feed - the value that closes both the folded
+#     tramming length and the coverage width. Not a published figure.
+#  7. Z_FOOT, FEED_NOSE, SHANK_OFF, DRIFTER lubrication/accumulator detail.
+#  8. BOLT_OFFSET and MAG_R - the indexer offset and the carousel radius.
+#     The MECHANISM is sourced (US9856733B2) and the CAPACITY is sourced
+#     (10 bolts), but no drum diameter is published. MAG_R is the arithmetic
+#     floor for 10 bolts on 150 mm plates, not a measurement.
+#  9. JACK_STROKE, JACK_X. JACK_Y_F is sourced; JACK_Y_R is derived from the
+#     printed tick plus [R]S4.0's "one behind the rear wheel".
+# 10. Colour. Deliberately absent: the palette is the game's, from
+#     src/core/assets.js, and copying a manufacturer's yellow-and-graphite
+#     would be copying a brand ([R]S8, DOMAIN.md S10). Only the MATERIAL
+#     breakdown of [R]S6 is transferable, and that is what the material names
+#     in this file carry.
+#
+# DELIBERATELY OMITTED, with the reason:
+#  * Cement silo, grout pump, mixer, water tank. Real on other machines in the
+#    family; not on this one's equipment list, which offers only manual
+#    resin/cement cartridges and an injection-hose extension [BS]p.5.
+#  * Mesh handling arm. A real class feature (research/03-mining.md S C.2.3)
+#    but an OPTION on this size of machine, and one that changes the published
+#    tramming length and turning radius when fitted - so fitting it silently
+#    would make every dimension in S1 wrong.
+#  * A roof jack / vertical stinger. [BS]p.5 lists front and rear jacks only.
+#    [R]S4.8: "I found no source putting one on a bolter."
+#  * Any glazing. This is the protective-roof variant, which has no glass at
+#    all - which is also what makes it impossible for a transmission > 0
+#    material to reach this machine (HANDOFF S8F).
+# =============================================================================
