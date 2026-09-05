@@ -583,6 +583,27 @@ International HV607"*.
 crawler in §3. A truck rig uses more of its mast. That is a real published
 difference between the two carriers, not a modelling liberty.
 
+### 10.1a The stroke ratio is a HEAD-HEIGHT measurement, and that is useful
+
+**A mast carries its stroke plus one head height.** The sub face cannot rise
+past `mast top - head height`, so whatever a maker does not spend on stroke is
+the space the head occupies:
+
+| | mast | stroke | left for the head |
+|---|---|---|---|
+| TSi 150CT | 6.134 | 4.293 | **1.841 m** |
+| Comacchio crawler (§3) | 6.200 | 3.600 | 2.600 m |
+
+That is the only figure anywhere that constrains the **height** of a sonic head,
+and §8 item 4 has been open on exactly that question since this document was
+written. It is not a dimension of the housing, but it is a hard ceiling on the
+whole stack from the sub face to the top of the hose manifold, and it is
+published twice by two different makers. Use it.
+
+The same arithmetic is a good sanity check on any rig in this class: if a
+published mast and stroke leave less than about 1.5 m, one of the two figures is
+wrong.
+
 ### 10.2 The larger truck - Terra Sonic **TSi 150T**, for cross-check only
 
 `.../2025/04/150T_vF.pdf`: 8 ft 6 in x 33 ft 10 in x 12 ft 4 in; 42,000 lb;
