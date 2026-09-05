@@ -108,8 +108,12 @@ def shoot(lo, hi, az, el, out, res=(900, 1400), ortho=False, fit=1.06):
         d = reach * 2.2
     else:
         cam.lens = 55
-        d = need * 0.9 * (36.0 / cam.lens) * 1.35
-        d = max(d, reach * 0.9)
+        # Blender fits the 36 mm sensor to the LONGER image side, so for a
+        # portrait frame the vertical half-angle is atan(18 / lens). Solve for
+        # the distance that makes `need` fill the frame instead of guessing:
+        # the first pass guessed, and rendered a 26 m machine as a hairline.
+        d = (need / 2.0) / math.tan(math.atan(18.0 / cam.lens)) * 1.08
+        d = max(d, reach * 0.6)
     loc = Vector((math.cos(math.radians(az)) * math.cos(math.radians(el)),
                   math.sin(math.radians(az)) * math.cos(math.radians(el)),
                   math.sin(math.radians(el)))) * d + ctr
@@ -151,6 +155,7 @@ def main():
     bpy.context.scene.render.film_transparent = False
 
     shoot(lo, hi, -58, 12, stem + '-hero.png', res=(900, 1400))
+    shoot(lo, hi, -30, 6, stem + '-hero2.png', res=(900, 1400))
     shoot(lo, hi, 0, 0, stem + '-side.png', res=(760, 1400), ortho=True)
     lo2 = Vector((lo.x, lo.y, -0.2))
     hi2 = Vector((hi.x, hi.y, 8.0))

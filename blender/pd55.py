@@ -1315,8 +1315,12 @@ def build(out_path):
     build_lights(slew, carrier, head)
     build_ropes(root)
 
-    # weld the slew and the carrier LAST: their dynamic children are empties,
-    # never meshes, so nothing that has to move gets swallowed.
+    # Weld LAST, and weld the head again: build_lights() adds a housing to the
+    # head AFTER build_head() has already welded it, and three loose lamp boxes
+    # under a pivot: node are three draw calls finish() will never reach.
+    # Every dynamic child here is an empty, never a mesh, so nothing that has
+    # to move independently gets swallowed by a join.
+    weld(head, 'mast-head')
     weld(carrier, 'mast-carrier')
     weld(mast, 'mast')
     weld(slew, 'upper')

@@ -948,10 +948,10 @@ def build(out_path):
     # hardware the 1 500 mm horizontal shift runs in.
     for sx in (-1, 1):
         ld.append(plate('carrcheek',
-                        [(Y0 + LEADER_D + 0.10, COLLAR_Z0 - 0.10),
-                         (Y0 + LEADER_D + 1.55, COLLAR_Z0 - 1.55),
-                         (Y0 + LEADER_D + 1.85, COLLAR_Z0 - 1.20),
-                         (Y0 + LEADER_D + 0.35, COLLAR_Z1)],
+                        [(Y0 + LEADER_D + 0.08, COLLAR_Z0 - 0.30),
+                         (Y0 + LEADER_D + 0.95, COLLAR_Z0 - 1.62),
+                         (Y0 + LEADER_D + 1.20, COLLAR_Z0 - 1.30),
+                         (Y0 + LEADER_D + 0.30, COLLAR_Z1)],
                         0.10, MAT_DARK, None, (sx * 0.62, 0, 0), bevel=0.02))
     ld.append(box('collar', (LEADER_W + 0.44, LEADER_D + 0.34, COLLAR_Z1 - COLLAR_Z0),
                   MAT_DARK, None, (0, YC + 0.04, (COLLAR_Z0 + COLLAR_Z1) / 2),
@@ -1103,7 +1103,7 @@ def build(out_path):
     # s9.10]. That loose, grubby, oversize joint — splintered hardwood dolly,
     # shredded packing hanging out, hammered and burred steel, concrete dust —
     # is where this machine's wear story actually lives.
-    cap = empty(NODE_SLIDE, 'drive-cap', ham, (0, 0, -0.45))
+    cap = empty(NODE_SLIDE, 'drive-cap', ham, (0, 0, PILE_TOP - HAMMER_BOT + 0.10))
     cap['axis'] = 'z'
     cpl = [box('helmet', (DRIVE_CAP, DRIVE_CAP, 0.32), MAT_CAST, None,
                (0, 0, 0.16), bevel=0.025),
@@ -1173,12 +1173,12 @@ def build(out_path):
     # its own line beside the one being driven.
     ropes.append(hose('rope_aux',
                       [(0.26, YC - 0.20, HB + 0.75),
-                       (0.32, Y0 + LEADER_D + 1.15, HB - 6.5),
-                       (0.30, Y0 + LEADER_D + 0.95, 3.60)],
+                       (0.34, Y0 + LEADER_D + 0.55, HB - 6.5),
+                       (0.32, Y0 + LEADER_D + 0.42, 3.60)],
                       radius=0.015, mat=MAT_WORN, parent=root, sides=6))
     ropes = [to_mesh(r) for r in ropes]
-    ropes.append(box('auxhook', (0.11, 0.15, 0.50), MAT_WORN, None,
-                     (0.30, Y0 + LEADER_D + 0.95, 3.28), bevel=0.02))
+    ropes.append(box('auxhook', (0.11, 0.15, 0.50), MAT_WORN, root,
+                     (0.32, Y0 + LEADER_D + 0.42, 3.28), bevel=0.02))
     merge('leader_ropes', ropes, root)
 
     # ══ HOSES ══════════════════════════════════════════════════════════════
@@ -1191,7 +1191,7 @@ def build(out_path):
     # to add, and it animates for free with the carriage [REF s9.5].
     hz = []
     for i in range(4):
-        ox = 0.30 + i * 0.055
+        ox = 0.055 + i * 0.075
         hz.append(hose('hose_up%d' % i,
                        [(LEADER_W / 2 + 0.05, Y0 + LEADER_D + 0.20, DECK_Z + 0.30),
                         (LEADER_W / 2 + ox, Y0 + LEADER_D + 0.16, 5.0),
@@ -1200,15 +1200,19 @@ def build(out_path):
                        radius=0.036, parent=root, sides=6))
     for i in range(2):
         hz.append(hose('hose_loop%d' % i,
-                       [(LEADER_W / 2 + 0.32 + i * 0.06,
+                       [(LEADER_W / 2 + 0.10 + i * 0.06,
                          Y0 + LEADER_D + 0.14, 12.6),
-                        (LEADER_W / 2 + 0.62, Y0 + LEADER_D + 0.75, 10.4 - i * 0.3),
+                        (LEADER_W / 2 + 0.55, Y0 + LEADER_D + 0.80, 10.4 - i * 0.3),
                         (HAMMER_W / 2 + 0.34, Y0 + 0.20, 13.6),
                         (HAMMER_W / 2 + 0.22, 0.06, HAMMER_BOT + HAMMER_L * 0.70)],
                        radius=0.034, parent=root, sides=6))
     for zz in (2.4, 5.2, 8.0, 10.8):
-        hz.append(box('pclip', (0.30, 0.17, 0.08), MAT_RUBBER, None,
-                      (LEADER_W / 2 + 0.36, Y0 + LEADER_D + 0.14, zz)))
+        # NOTE: parent=root, not None. Everything else in `hz` came from
+        # hose(..., parent=root) and is therefore in LEADER-LOCAL coordinates;
+        # an unparented sibling carrying the same numbers is in WORLD space and
+        # object.join() bakes it 4.10 m off the side of the machine.
+        hz.append(box('pclip', (0.34, 0.19, 0.08), MAT_RUBBER, root,
+                      (LEADER_W / 2 + 0.16, Y0 + LEADER_D + 0.14, zz)))
     hz = [to_mesh(h) if h.type == 'CURVE' else h for h in hz]
     merge('leader_hoses', hz, root)
 

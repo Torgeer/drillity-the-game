@@ -295,8 +295,11 @@ def build_undercarriage():
     for k in (-1, 0, 1):
         # triple grouser. No bevel here: this template is cloned 164 times, so
         # every triangle in it is paid for 164 times over.
-        grsr.append(box('gr%d' % (k + 1), (SHOE_W * 0.94, 0.030, 0.030), MAT_WORN,
-                        loc=(0, k * 0.055, 0.028)))
+        # grousers on local -Z. Every shoe is placed with local +Z pointing at
+        # the CENTRE of the chain, so the bars have to be on the other face or
+        # they bite into the track frame instead of the ground.
+        grsr.append(box('gr%d' % (k + 1), (SHOE_W * 0.94, 0.030, 0.032), MAT_WORN,
+                        loc=(0, k * 0.055, -0.029)))
     bake(plate)
     for g in grsr:
         bake(g)
@@ -409,6 +412,22 @@ def build_uppercarriage():
     for side in (-1, 1):
         objs.append(tube('cwtpin', 0.05, 0.22, MAT_STEEL,
                          loc=(side * 0.95, CW_BACK + 0.46, DECK_Z + 1.72), sides=10))
+
+    # the housing roof is not a blank plate: cooler grille, hatches, filler
+    objs.append(box('coolergrille', (1.60, 0.90, 0.06), MAT_DARK,
+                    loc=(0.55, -3.40, HOUSE_Z + 0.04), bevel=0.012))
+    for i in range(7):
+        objs.append(box('coolerfin', (1.52, 0.055, 0.05), MAT_WORN,
+                        loc=(0.55, -3.76 + i * 0.12, HOUSE_Z + 0.08)))
+    objs.append(box('hatch', (0.86, 0.78, 0.07), MAT_PAINT,
+                    loc=(-0.72, -2.10, HOUSE_Z + 0.05), bevel=0.015))
+    for sx in (-1, 1):
+        objs.append(tube('hatchlatch', 0.030, 0.06, MAT_STEEL,
+                         loc=(-0.72 + sx * 0.36, -2.10, HOUSE_Z + 0.09), sides=8))
+    objs.append(tube('filler', 0.105, 0.16, MAT_DARK,
+                     loc=(-1.05, -1.55, HOUSE_Z + 0.02), sides=12))
+    objs.append(tube('fillercap', 0.075, 0.05, MAT_STEEL,
+                     loc=(-1.05, -1.55, HOUSE_Z + 0.18), sides=10))
 
     # walkway + toe boards along the top of the housing
     objs.append(box('walk', (BODY_W - 0.10, 3.00, 0.05), MAT_STEEL,

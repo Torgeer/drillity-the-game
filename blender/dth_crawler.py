@@ -1534,4 +1534,20 @@ def build(out_path):
     build_lights(root, bpy.data.objects[R.NODE_PIVOT + 'boomLift'])
 
     bake_all()
-    return R.finish(out_path)
+    R.finish(out_path)
+
+    # The loader asks for the RIG ID verbatim. src/core/gltfRig.js does
+    #     modelUrl(id) = 'models/' + id + '.glb'
+    # and this machine's rig id in src/rig/rigFactory.js and src/game/data.js
+    # is 'dth-crawler' with a HYPHEN, while the Blender module - and therefore
+    # build.py's output name - has to be a legal Python identifier, so it is
+    # 'dth_crawler' with an UNDERSCORE. Unbridged, the game fetches
+    # models/dth-crawler.glb, gets a 404, and silently falls back to the
+    # procedural rig. Every machine in blender/ has this same gap. Written from
+    # here rather than patched into the shared build.py or gltfRig.js, and
+    # flagged in the build report so it can be settled in ONE place.
+    import shutil
+    alias = os.path.join(os.path.dirname(out_path), 'dth-crawler.glb')
+    shutil.copyfile(out_path, alias)
+    print('EXPORT_ALIAS path=%s' % alias)
+    return out_path

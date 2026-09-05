@@ -100,7 +100,7 @@ ROPE_WIRE_R   = 0.003   # [C140] p.6 wireline 4.76 mm x 2 000 m.  Modelled 25 %
                         # thinner than the main line, which is the point.
 DECK_Z        = 0.95    # [GA] grating deck over the frame
 FRAME_Y0, FRAME_Y1 = 0.55, 4.15   # [GA] main frame, drill axis to rear
-ENG_Y0, ENG_Y1     = 2.15, 3.90   # [GA] power pack enclosure
+ENG_Y0, ENG_Y1     = 2.22, 3.72   # [GA] power pack enclosure
 ENG_TOP            = 2.30         # [GA]
 
 MASTL_Z = lambda z: z - MAST_PIVOT_Z     # world Z -> mast-local Z
@@ -291,9 +291,13 @@ def build(out_path):
     A(R.box('engine_case', (1.90, ENG_Y1 - ENG_Y0, ENG_TOP - DECK_Z), R.MAT_PAINT,
             loc=(0, eyc, (DECK_Z + ENG_TOP) / 2), bevel=0.025))
     for s in (-1, 1):
-        lv = R.box('louvre%d' % s, (0.02, ENG_Y1 - ENG_Y0 - 0.30, 0.035), R.MAT_DARK,
-                   loc=(s * 0.955, eyc, ENG_TOP - 0.10))
-        arr(lv, (0, 0, -0.058), 5)
+        # a recessed dark panel behind the slats, so the louvres read as an
+        # opening in the sheet metal rather than as bars stuck on the side
+        A(R.box('louvre_recess%d' % s, (0.03, ENG_Y1 - ENG_Y0 - 0.26, 0.34), R.MAT_DARK,
+                loc=(s * 0.935, eyc, ENG_TOP - 0.19)))
+        lv = R.box('louvre%d' % s, (0.02, ENG_Y1 - ENG_Y0 - 0.30, 0.030), R.MAT_PAINT,
+                   loc=(s * 0.955, eyc, ENG_TOP - 0.08))
+        arr(lv, (0, 0, -0.055), 6)
         A(lv)
         A(R.box('door%d' % s, (0.015, 0.78, 0.60), R.MAT_DARK,
                 loc=(s * 0.953, eyc - 0.42, 1.52), bevel=0.01))
@@ -324,27 +328,40 @@ def build(out_path):
     # ── 4. WATER / MUD SYSTEM - a core rig is a WET machine ──────────────────
     # Trido 140H triplex, 140 l/min at 68.95 bar [C140] p.6 / 64 bar [CS14] p.3:
     # crankcase, three fluid-end cylinders in a row, suction manifold.
-    A(R.box('tank', (1.86, 1.10, 0.58), R.MAT_PAINT, loc=(0, 1.70, 1.26), bevel=0.03))
-    A(disc('tank_fill', 0.10, 0.07, R.MAT_STEEL, (-0.55, 1.30, 1.57), 'Z', sides=10))
-    A(R.box('tank_sight', (0.05, 0.05, 0.42), R.MAT_STEEL, loc=(0.95, 1.35, 1.26)))
+    A(R.box('tank', (1.86, 0.74, 0.58), R.MAT_PAINT, loc=(0, 1.82, 1.26), bevel=0.03))
+    A(disc('tank_fill', 0.10, 0.07, R.MAT_STEEL, (0.45, 1.62, 1.57), 'Z', sides=10))
+    A(R.box('tank_sight', (0.05, 0.05, 0.42), R.MAT_STEEL, loc=(0.95, 1.72, 1.26)))
     # hydraulic mud mixer hopper (standard equipment [C140] p.6)
-    A(R.box('mixer_hopper', (0.44, 0.44, 0.34), R.MAT_PAINT, loc=(-0.62, 2.05, 1.72),
+    A(R.box('mixer_hopper', (0.46, 0.46, 0.34), R.MAT_PAINT, loc=(-0.58, 1.82, 1.72),
             bevel=0.02))
-    A(disc('mixer_drive', 0.09, 0.16, R.MAT_DARK, (-0.62, 2.05, 1.97), 'Z', sides=10))
-    A(R.box('pump_crank', (0.44, 0.40, 0.34), R.MAT_DARK, loc=(0.78, 3.62, 1.17),
+    A(disc('mixer_drive', 0.09, 0.16, R.MAT_DARK, (-0.58, 1.82, 1.97), 'Z', sides=10))
+    # Trido 140H triplex on the rear shelf, behind the power pack: crankcase,
+    # three fluid ends in a row, suction manifold, pulsation bottle.
+    A(R.box('pump_crank', (0.46, 0.34, 0.34), R.MAT_DARK, loc=(0.42, 4.00, 1.17),
             bevel=0.02))
     for i in range(3):
-        A(disc('pump_cyl%d' % i, 0.072, 0.30, R.MAT_STEEL,
-               (0.78 + (i - 1) * 0.17, 3.40, 1.22), 'Y', sides=10))
+        A(disc('pump_cyl%d' % i, 0.072, 0.28, R.MAT_STEEL,
+               (0.42 + (i - 1) * 0.17, 3.82, 1.22), 'Y', sides=10))
         A(disc('pump_cap%d' % i, 0.055, 0.09, R.MAT_CAST,
-               (0.78 + (i - 1) * 0.17, 3.26, 1.22), 'Y', sides=8))
-    A(R.box('pump_manifold', (0.62, 0.13, 0.13), R.MAT_STEEL, loc=(0.78, 3.30, 1.02)))
-    A(disc('pump_motor', 0.11, 0.26, R.MAT_CAST, (0.78, 3.92, 1.17), 'Y', sides=12))
-    # hydraulic tank (100 l) and fuel tank (200 l) [C140] p.6
-    A(R.box('hyd_tank', (0.52, 0.60, 0.50), R.MAT_PAINT, loc=(-0.72, 2.95, 1.28),
-            bevel=0.02))
-    A(R.box('fuel_tank', (0.50, 0.72, 0.52), R.MAT_PAINT, loc=(0.74, 2.55, 1.28),
-            bevel=0.02))
+               (0.42 + (i - 1) * 0.17, 3.70, 1.22), 'Y', sides=8))
+    A(R.box('pump_manifold', (0.62, 0.13, 0.13), R.MAT_STEEL, loc=(0.42, 3.76, 1.00)))
+    A(disc('pump_bottle', 0.085, 0.30, R.MAT_STEEL, (0.42, 3.86, 1.52), 'Z', sides=10))
+    A(disc('pump_motor', 0.11, 0.24, R.MAT_CAST, (0.42, 4.20, 1.17), 'Y', sides=12))
+    # hydraulic oil cooler - the system is AIR cooled [C140] p.6
+    A(R.box('oil_cooler', (0.52, 0.16, 0.46), R.MAT_DARK, loc=(-0.60, 3.90, 1.30),
+            bevel=0.015))
+    cf = R.box('cooler_fin', (0.48, 0.02, 0.03), R.MAT_STEEL, loc=(-0.60, 3.81, 1.10))
+    arr(cf, (0, 0, 0.055), 8)
+    A(cf)
+    # 200 l diesel and 100 l hydraulic tanks live inside the frame [C140] p.6;
+    # what shows outside is the filler and the sight gauge.
+    A(disc('fuel_fill', 0.075, 0.06, R.MAT_STEEL, (-1.02, 3.30, DECK_Z + 0.03), 'Z',
+           sides=10))
+    A(R.box('valve_bank', (0.40, 0.26, 0.30), R.MAT_DARK, loc=(0.62, 1.34, 1.12),
+            bevel=0.012))
+    for i in range(4):
+        A(R.tube('valve_lever%d' % i, 0.012, 0.20, R.MAT_STEEL,
+                 loc=(0.47 + i * 0.10, 1.26, 1.27), rot=(-0.4, 0, 0), sides=6))
 
     # ── 5. OPERATOR STATION - NO CAB, the driller stands ────────────────────
     # Pilot-controlled console with a joystick, a constant-penetration-rate
@@ -500,17 +517,23 @@ def build(out_path):
                        (0, BEAM_DY / 2 + 0.09, cz), 'X', sides=12))
     # crown block: a boxy housing WIDER than the mast, with the sheave axles
     # showing as bosses each side, grab handles on top [GA], [MET] p.18.
-    cz = MASTL_Z(MAST_TOP_Z) - 0.33
-    mp.append(R.box('crown_box', (0.72, 0.80, 0.66), R.MAT_PAINT, loc=(0, 0.02, cz),
+    CR_X, CR_Y, CR_Z = 0.70, 0.84, 0.72
+    cz = MASTL_Z(MAST_TOP_Z) - CR_Z / 2
+    mp.append(R.box('crown_box', (CR_X, CR_Y, CR_Z), R.MAT_PAINT, loc=(0, 0.02, cz),
                     bevel=0.02))
+    # cheek plates: the sheaves run between them, which is what makes a crown
+    # block read as a block instead of two loose wheels
     for s in (-1, 1):
-        mp.append(disc('crown_boss%d' % s, 0.07, 0.06, R.MAT_CAST,
-                       (s * 0.38, 0.10, cz - 0.02), 'X', sides=10))
-        # the two lifting/tie-off lugs on the crown roof [GA]
-        mp.append(R.box('crown_lug%d' % s, (0.05, 0.16, 0.13), R.MAT_STEEL,
-                        loc=(s * 0.26, -0.22, cz + 0.38)))
-        mp.append(R.box('crown_gusset%d' % s, (0.03, 0.34, 0.34), R.MAT_PAINT,
-                        loc=(s * 0.30, 0.0, cz - 0.42), rot=(0.5, 0, 0)))
+        mp.append(R.box('crown_cheek%d' % s, (0.03, CR_Y - 0.06, CR_Z - 0.06),
+                        R.MAT_DARK, loc=(s * (CR_X / 2 + 0.015), 0.02, cz)))
+        mp.append(disc('crown_boss%d' % s, 0.065, 0.05, R.MAT_CAST,
+                       (s * (CR_X / 2 + 0.04), 0.14, cz - 0.04), 'X', sides=10))
+        # the two lifting / tie-off lugs on the crown roof [GA]
+        mp.append(R.box('crown_lug%d' % s, (0.05, 0.15, 0.14), R.MAT_STEEL,
+                        loc=(s * 0.24, -0.16, cz + CR_Z / 2 + 0.04)))
+    # tapered collar down onto the beam
+    mp.append(R.box('crown_collar', (BEAM_DX + 0.14, BEAM_DY + 0.20, 0.22), R.MAT_PAINT,
+                    loc=(0, 0.02, cz - CR_Z / 2 - 0.08), bevel=0.03))
     # work lights: crown pair aimed at the collar, plus one over the deck.
     # env.js reads mount:/aim: world positions EVERY FRAME and re-aims the
     # spotlights, so these have to be nodes, not baked geometry.
@@ -553,15 +576,29 @@ def build(out_path):
     # [C140] pp.3, 6 "safety guards with inter-lock"; [LF] p.7 "Rotation
     # Barrier with Interlocks".
     gz = MASTL_Z(1.30)
-    mp += mesh_panel('barrier_l', 1.05, 1.45, R.MAT_PAINT,
-                     (-0.62, MASTL_Y(-0.16), gz), rot=(0, 0, math.pi / 2))
-    mp += mesh_panel('barrier_f', 1.30, 1.45, R.MAT_PAINT, (0, MASTL_Y(-0.66), gz))
-    mp.append(R.box('barrier_rail_l', (0.05, 1.05, 0.05), R.MAT_PAINT,
-                    loc=(-0.62, MASTL_Y(-0.16), gz + 0.74)))
-    mp.append(R.box('barrier_rail_f', (1.32, 0.05, 0.05), R.MAT_PAINT,
-                    loc=(0, MASTL_Y(-0.66), gz + 0.74)))
-    mp.append(R.box('barrier_stripe', (1.32, 0.06, 0.10), R.MAT_HAZARD,
-                    loc=(0, MASTL_Y(-0.68), gz - 0.70)))
+    GW, GH = 1.28, 1.44
+    mp += mesh_panel('barrier_l', 1.00, GH, R.MAT_PAINT,
+                     (-0.62, MASTL_Y(-0.18), gz), rot=(0, 0, math.pi / 2), pitch=0.105)
+    mp += mesh_panel('barrier_f', GW, GH, R.MAT_PAINT, (0, MASTL_Y(-0.68), gz),
+                     pitch=0.105)
+    # frames - a guard reads as a guard because of its frame, not its mesh
+    for zz in (gz - GH / 2, gz + GH / 2):
+        mp.append(R.box('barrier_fr_f%d' % int(zz * 100), (GW + 0.06, 0.05, 0.05),
+                        R.MAT_PAINT, loc=(0, MASTL_Y(-0.68), zz)))
+        mp.append(R.box('barrier_fr_l%d' % int(zz * 100), (0.05, 1.02, 0.05),
+                        R.MAT_PAINT, loc=(-0.62, MASTL_Y(-0.18), zz)))
+    for xx in (-GW / 2, GW / 2):
+        mp.append(R.box('barrier_post%d' % int(xx * 100), (0.05, 0.05, GH),
+                        R.MAT_PAINT, loc=(xx, MASTL_Y(-0.68), gz)))
+    for yy in (MASTL_Y(-0.68), MASTL_Y(0.32)):
+        mp.append(R.box('barrier_postl%d' % int(yy * 100), (0.05, 0.05, GH),
+                        R.MAT_PAINT, loc=(-0.62, yy, gz)))
+    mp.append(R.box('barrier_stripe', (GW + 0.06, 0.06, 0.11), R.MAT_HAZARD,
+                    loc=(0, MASTL_Y(-0.70), gz - GH / 2 + 0.12)))
+    # interlock switch on the hinge side [C140] p.3 "safety guard with an
+    # interlock function that automatically stops the rig when activated"
+    mp.append(R.box('barrier_interlock', (0.09, 0.07, 0.13), R.MAT_DARK,
+                    loc=(-0.60, MASTL_Y(-0.66), gz + 0.40)))
 
     # rod kicker: the arm that positions a rod off the rack onto the drill
     # centreline.  "It has a rod kicker for rod positioning" [CS14] p.2 - the
@@ -578,15 +615,20 @@ def build(out_path):
                    (BEAM_DX / 2 + 0.30, -0.02, kz - 0.16), 'X', sides=8))
 
     # ── 9b. CROWN SHEAVES (rotate) ──────────────────────────────────────────
+    # "Large crown sheave wheel" and "steel sheaves and larger wireline pulleys"
+    # [C140] pp.3, 6 - plural, but neither the count nor the diameter is ever
+    # published.  Two here, sized off the ropes they carry (D/d ~ 21 on the
+    # 16 mm hoist line, ~46 on the 4.76 mm wireline) and cross-checked against
+    # the ~0.21 m circles drawn inside the crown on the [GA] elevation.
     shm = R.empty(R.NODE_PIVOT, 'sheave-main', mast, (0, 0.16, cz - 0.02))
-    weld([disc('sh', 0.21, 0.055, R.MAT_CAST, (0, 0, 0), 'X', sides=18),
-          disc('shr1', 0.235, 0.012, R.MAT_CAST, (-0.033, 0, 0), 'X', sides=18),
-          disc('shr2', 0.235, 0.012, R.MAT_CAST, (0.033, 0, 0), 'X', sides=18)],
+    weld([disc('sh', 0.155, 0.050, R.MAT_CAST, (0, 0, 0), 'X', sides=18),
+          disc('shr1', 0.175, 0.012, R.MAT_CAST, (-0.030, 0, 0), 'X', sides=18),
+          disc('shr2', 0.175, 0.012, R.MAT_CAST, (0.030, 0, 0), 'X', sides=18)],
          shm, 'sheave-main')
-    shw = R.empty(R.NODE_PIVOT, 'sheave-wire', mast, (0, -0.22, cz + 0.10))
-    weld([disc('sh', 0.15, 0.035, R.MAT_CAST, (0, 0, 0), 'X', sides=16),
-          disc('shr1', 0.168, 0.010, R.MAT_CAST, (-0.022, 0, 0), 'X', sides=16),
-          disc('shr2', 0.168, 0.010, R.MAT_CAST, (0.022, 0, 0), 'X', sides=16)],
+    shw = R.empty(R.NODE_PIVOT, 'sheave-wire', mast, (0, -0.24, cz + 0.14))
+    weld([disc('sh', 0.100, 0.028, R.MAT_CAST, (0, 0, 0), 'X', sides=16),
+          disc('shr1', 0.115, 0.009, R.MAT_CAST, (-0.018, 0, 0), 'X', sides=16),
+          disc('shr2', 0.115, 0.009, R.MAT_CAST, (0.018, 0, 0), 'X', sides=16)],
          shw, 'sheave-wire')
 
     # ── 10. FEED CARRIAGE AND ROTATION HEAD (slides) ────────────────────────

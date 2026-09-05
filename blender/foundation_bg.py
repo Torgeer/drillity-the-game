@@ -296,11 +296,21 @@ def tb(name, r, l, mat, owner, parent, loc=(0, 0, 0), rot=(0, 0, 0), sides=12):
     return B(R.tube(name, r, l, mat, parent, loc, rot, sides), owner, mat)
 
 
-def hs(name, pts, r, mat, owner, parent):
+def hs(name, pts, r, mat, owner, parent, taut=False):
     """A draping curve — hose, rope, cable — filed into a weld bin so it does
     not spend a draw call of its own. rig.hose() gives the sag; weld_all()
-    converts it to mesh and folds it in with everything else on that material."""
-    return B(R.hose(name, pts, r, mat, parent), owner, mat)
+    converts it to mesh and folds it in with everything else on that material.
+
+    `taut` swaps the AUTO handles for VECTOR ones. A hose sags and AUTO is
+    exactly right for it, but a WIRE ROPE under load is straight between
+    sheaves, and AUTO handles on a four-point rope overshoot into a bow metres
+    wide — measured at 2.4 m in front of the drill axis before this was fixed.
+    Ropes are taut; hoses are not."""
+    o = R.hose(name, pts, r, mat, parent)
+    if taut:
+        for bp in o.data.splines[0].bezier_points:
+            bp.handle_left_type = bp.handle_right_type = 'VECTOR'
+    return B(o, owner, mat)
 
 
 def strut(name, p0, p1, r, mat, owner, parent, sides=10, square=False):
@@ -493,16 +503,30 @@ def build_upper(slew):
        (CW_W / 2 + 0.05, CW_FACE_Y + CW_D / 2, cwz + CW_H / 2), bevel=0.02)
 
     # ── power pack ───────────────────────────────────────────────────────────
-    bx('engine-house', (3.10, 2.70, HOUSE_TOP_Z - DECK_Z), R.MAT_PAINT, own, slew,
-       (0, -2.30, (DECK_Z + HOUSE_TOP_Z) / 2), bevel=0.05)
-    bx('engine-hood', (2.85, 2.45, 0.16), R.MAT_PAINT, own, slew,
-       (0, -2.30, HOUSE_TOP_Z + 0.05), bevel=0.05)
+    # The house fills the deck between the kinematics pedestals and the
+    # counterweight — on a rig this size it is the mass that balances the
+    # leader, not a bonnet sitting on an open frame.
+    bx('engine-house', (3.20, 3.10, HOUSE_TOP_Z - DECK_Z), R.MAT_PAINT, own, slew,
+       (0, -2.20, (DECK_Z + HOUSE_TOP_Z) / 2), bevel=0.05)
+    bx('engine-hood', (2.95, 2.85, 0.18), R.MAT_PAINT, own, slew,
+       (0, -2.20, HOUSE_TOP_Z + 0.06), bevel=0.05)
+    bx('house-front-bay', (3.20, 1.10, 1.35), R.MAT_PAINT, own, slew,
+       (0, -0.10, DECK_Z + 0.70), bevel=0.05)
+    for sy in (-3.55, -2.05, -0.75):          # hinged service doors
+        for sx in (-1, 1):
+            bx('house-door-seam', (0.03, 0.05, 1.25), R.MAT_DARK, own, slew,
+               (sx * 1.61, sy, DECK_Z + 0.82), bevel=0.006)
+            bx('house-latch', (0.06, 0.10, 0.14), R.MAT_WORN, own, slew,
+               (sx * 1.62, sy + 0.60, DECK_Z + 0.82), bevel=0.012)
     for sx in (-1, 1):                            # louvre banks, both flanks
         for i in range(5):
             bx('louvre', (0.05, 0.40, 0.85), R.MAT_DARK, own, slew,
                (sx * 1.56, -1.35 - i * 0.44, DECK_Z + 0.85), bevel=0.01)
-    bx('cooler-pack', (1.45, 0.22, 1.20), R.MAT_DARK, own, slew,
-       (0.75, -3.62, DECK_Z + 0.95), bevel=0.02)
+    bx('cooler-pack', (1.60, 0.16, 1.25), R.MAT_DARK, own, slew,
+       (0.68, -3.77, DECK_Z + 0.95), bevel=0.02)
+    for i in range(9):                        # cooler core fins
+        bx('cooler-fin', (0.14, 0.06, 1.10), R.MAT_WORN, own, slew,
+           (-0.10 + i * 0.19, -3.80, DECK_Z + 0.95), bevel=0.006, seg=1)
     bx('hyd-tank', (0.90, 1.30, 1.05), R.MAT_PAINT, own, slew,
        (-1.05, -0.55, DECK_Z + 0.60), bevel=0.04)
     bx('fuel-tank', (0.85, 1.60, 0.95), R.MAT_PAINT, own, slew,
@@ -532,6 +556,16 @@ def build_upper(slew):
               0.022, R.MAT_WORN, own, slew, sides=6)
     bx('cab-step', (0.55, 0.34, 0.06), R.MAT_HAZARD, own, slew,
        (cx0 - 0.30, cy0 - CAB_D / 2 - 0.18, DECK_Z - 0.35), bevel=0.01)
+
+    # service platform at the leader foot — where the crew stand to change the
+    # tool and to work on the drive when it is racked at the bottom
+    bx('front-platform', (2.60, 1.35, 0.08), R.MAT_DARK, own, slew,
+       (0, 2.15, DECK_Z + 0.02), bevel=0.015)
+    for i in range(11):                       # grating bars
+        bx('front-grating', (2.50, 0.05, 0.05), R.MAT_WORN, own, slew,
+           (0, 1.55 + i * 0.12, DECK_Z + 0.05), bevel=0.006, seg=1)
+    bx('front-platform-nose', (2.60, 0.06, 0.14), R.MAT_HAZARD, own, slew,
+       (0, 2.80, DECK_Z + 0.06), bevel=0.012)
 
     # ── walkways, folding handrails, ladder ──────────────────────────────────
     rail = [(-1.62, 2.35), (-1.62, -4.55), (1.62, -4.55), (1.62, 2.35)]
@@ -862,15 +896,18 @@ def build_sledge_and_drive(sledge, spindle):
     # an "Öffnerplatte" / trigger plate that releases the telescopic locks.  The
     # Kelly does NOT pass through a plain hole [S2 §9-G]; there is a stepped
     # collar, and the trigger plate is visible on it.
-    tb('adapter-body', 0.315, 0.52, R.MAT_CAST, spindle, spindle, (0, 0, -1.06), sides=20)
-    tb('adapter-collar', 0.375, 0.16, R.MAT_CAST, spindle, spindle, (0, 0, -0.98), sides=20)
-    tb('adapter-stem', 0.275, 0.46, R.MAT_CAST, spindle, spindle, (0, 0, -1.52), sides=18)
-    bx('adapter-trigger-plate', (0.86, 0.10, 0.30), R.MAT_STEEL, spindle, spindle,
-       (0, 0.30, -1.28), bevel=0.015)
+    # The spindle node sits ON the drive's lower face, which is the height the
+    # datasheet dimensions from (3 630 mm at the bottom of the crowd stroke), so
+    # the adapter hangs straight off it — no second offset.
+    tb('adapter-collar', 0.375, 0.16, R.MAT_CAST, spindle, spindle, (0, 0, -0.16), sides=20)
+    tb('adapter-body', 0.315, 0.54, R.MAT_CAST, spindle, spindle, (0, 0, -0.70), sides=20)
+    tb('adapter-stem', 0.275, 0.46, R.MAT_CAST, spindle, spindle, (0, 0, -1.16), sides=18)
+    bx('adapter-trigger-plate', (0.86, 0.10, 0.28), R.MAT_STEEL, spindle, spindle,
+       (0, 0.30, -0.46), bevel=0.015)
     for i in range(6):                       # cardanic-joint bolt ring
         th = i * math.tau / 6
         bx('adapter-bolt', (0.07, 0.07, 0.11), R.MAT_STEEL, spindle, spindle,
-           (math.cos(th) * 0.335, math.sin(th) * 0.335, -0.98), bevel=0.01)
+           (math.cos(th) * 0.335, math.sin(th) * 0.335, -0.10), bevel=0.01)
 
 
 def build_kelly(spindle, top0):
@@ -956,7 +993,7 @@ def build_kelly(spindle, top0):
                (0, 0, -KELLY_L - 0.83), bevel=0.010)
             tb('kelly-stub-pin', 0.030, STUB_MM * 1.4, R.MAT_STEEL, own, node,
                (0, -STUB_MM * 0.7, -KELLY_L - 1.02), (-math.pi / 2, 0, 0), sides=8)
-            R.empty(R.NODE_MOUNT, 'tool', node, (0, 0, -KELLY_L - 1.14))
+            R.empty(R.NODE_MOUNT, 'tool', node, (0, 0, -KELLY_L - KELLY_STUB_A))
 
         nodes.append(node)
         host = node
@@ -989,7 +1026,7 @@ def build_ropes_and_hoses(mast, sledge_z, head_z):
                      (-0.20, ax - 0.55, top + 0.28),
                      (-0.02, ax, top - 1.40),
                      (0.0, ax, sw_bot + SWIVEL_L)],
-       MAIN_ROPE_D / 2, R.MAT_WORN, own, mast)
+       MAIN_ROPE_D / 2, R.MAT_WORN, own, mast, taut=True)
     tb('swivel-body', SWIVEL_D / 2, SWIVEL_L * 0.62, R.MAT_CAST, own, mast,
        (0, ax, sw_bot + 0.16), sides=16)
     tb('swivel-neck', SWIVEL_D / 2 * 0.55, 0.24, R.MAT_STEEL, own, mast,
@@ -1005,11 +1042,11 @@ def build_ropes_and_hoses(mast, sledge_z, head_z):
                          (0.32, MAST_BACK_Y - 0.20, top * 0.55),
                          (0.31, yc + 0.30, top + 0.72),
                          (0.34, MAST_FACE_Y + 0.42, sledge_z + 1.05)],
-       CROWD_ROPE_D / 2, R.MAT_WORN, own, mast)
+       CROWD_ROPE_D / 2, R.MAT_WORN, own, mast, taut=True)
     hs('rope-crowd-down', [(0.34, MAST_BACK_Y - 0.34, MAST_FOOT_Z + 0.45),
                            (0.36, MAST_FACE_Y + 0.30, MAST_FOOT_Z + 0.25),
                            (0.34, MAST_FACE_Y + 0.42, sledge_z - 1.05)],
-       CROWD_ROPE_D / 2, R.MAT_WORN, own, mast)
+       CROWD_ROPE_D / 2, R.MAT_WORN, own, mast, taut=True)
     tb('crowd-foot-sheave', 0.30, 0.09, R.MAT_CAST, own, mast,
        (0.29, MAST_FACE_Y + 0.30, MAST_FOOT_Z + 0.10), (0, math.pi / 2, 0), sides=18)
 
@@ -1019,7 +1056,7 @@ def build_ropes_and_hoses(mast, sledge_z, head_z):
     hs('rope-aux', [(0.30, yc + 0.20, top + 0.88),
                     (0.46, ax + 0.42, top - 0.60),
                     (0.48, ax + 0.62, hook_z + 0.55)],
-       AUX_ROPE_D / 2, R.MAT_WORN, own, mast)
+       AUX_ROPE_D / 2, R.MAT_WORN, own, mast, taut=True)
     bx('aux-hook-block', (0.26, 0.20, 0.46), R.MAT_CAST, own, mast,
        (0.48, ax + 0.62, hook_z + 0.30), bevel=0.03)
     tb('aux-hook-shank', 0.05, 0.34, R.MAT_STEEL, own, mast,
@@ -1121,7 +1158,8 @@ def build(out_path):
     sledge_home = SLEDGE_LO_Z + DRIVE_FACE_OFF        # 4.33
     sledge = R.empty(R.NODE_SLIDE, 'carriage', frame, (0, 0, sledge_home))
     sledge['travel_m'] = CROWD_STROKE                 # 10.000 [S1 p.10]
-    spindle = R.empty(R.NODE_PIVOT, 'spindle', sledge, (0, DRILL_AXIS_Y, -1.06))
+    spindle = R.empty(R.NODE_PIVOT, 'spindle', sledge,
+                      (0, DRILL_AXIS_Y, -DRIVE_FACE_OFF))
     spindle['rpm_max'] = RPM_MAX                      # 53 rpm [S1 p.11]
     spindle['torque_knm'] = TORQUE_KNM                # 385 kNm [S1 p.11]
 
@@ -1129,8 +1167,8 @@ def build(out_path):
     # retracted and its drive stub is AT GRADE — head high, stub on the ground,
     # which is the pose [S2 §3] describes and the one the machine parks in.
     #   stub bottom 0.000 → head top 15.300 (= A) → outer-tube top 14.350
-    #   spindle at 4.330 − 1.060 = 3.270 → the tube top is 11.080 above it.
-    kelly_top = (KELLY_A - KELLY_HEAD_L) - (sledge_home - 1.06)
+    #   spindle sits on the drive face at 3.630 → the tube top is 10.720 above.
+    kelly_top = (KELLY_A - KELLY_HEAD_L) - SLEDGE_LO_Z
 
     # fixed references the game can ask for
     R.empty(R.NODE_MOUNT, 'drill-axis', slew, (0, DRILL_AXIS_Y, 0))
@@ -1142,8 +1180,8 @@ def build(out_path):
     build_mast(frame)
     build_sledge_and_drive(sledge, spindle)
     build_kelly(spindle, kelly_top)
-    build_ropes_and_hoses(frame, sledge_home, kelly_top + (sledge_home - 1.06)
-                          + KELLY_HEAD_L)
+    build_ropes_and_hoses(frame, sledge_home,
+                          SLEDGE_LO_Z + kelly_top + KELLY_HEAD_L)
     build_lamp_housings(slew, frame, sledge)
     build_lights(slew, frame, sledge)
 
