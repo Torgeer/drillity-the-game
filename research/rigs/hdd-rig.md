@@ -559,6 +559,117 @@ pipe-box rows × columns; track gauge and shoe width; ground clearance except on
 (147 mm). These are §8 items — the mesh's current values for them are plausible art, not
 measurements, and must not be quoted back as facts.
 
+### 3.9 The component LAYOUT — closed 2026-09-05 by the manufacturer's own overview diagram
+
+**This section did not exist before the `blender/hdd_rig.py` modelling pass, and it closes the
+largest remaining practical gap: not "how big is it" but "what is where".** Ratios and
+envelopes tell a modeller the box the machine fits in; they do not say whether the engine is in
+front of the cab or behind it, and every earlier section of this document is silent on it.
+
+**The source is a numbered component overview printed on the TRACTO GRUNDODRILL 18ACS / 18N
+factory sheet** (`en.tracto.com` Brand Portal, EN edition; text-extracted in full 2026-09-05;
+cited as a dimensional source only per DOMAIN.md §10). Ten callouts, verbatim:
+
+| # | Callout, verbatim |
+|---|---|
+| 01 | *"Comfort cabin hydraulically-adjustable and vibration, dampened, user-friendly, clear layout, **can be positioned flexibly**"* |
+| 02 | *"**Large rod magazine** — up to 225 m of TD 73 jet drilling rods or 210 m of ELICON 80 rock drilling rods on board"* |
+| 03 | *"**Anchoring system** for enhanced stability while drilling"* |
+| 04 | *"**Hydraulic loading crane** for self-sufficient handling of optional stacking boxes, drilling rods and attachments"* |
+| 05 | *"**Bentonite collecting tray** — optionally with Bentonite suction pump"* |
+| 06 | *"**Two stabilisers** — maximum stability, **variable inclination of the cradle for an ideal penetration angle**"* |
+| 07 | *"**Broad undercarriage** — with **rubberised steel tracks** — extremely mobile and self-supporting"* |
+| 08 | *"**High performance bentonite pump** — for rapid reaming speed and large reaming diameters"* |
+| 09 | *"**Diesel engine** with the highest output of its class"* |
+| 10 | *"**Large GRP hood** — easily accessible for service and maintenance"* |
+
+**Read in plan order from the drilling end, that is the machine's arrangement:**
+
+> **NOSE** → bentonite collecting tray (05) + two stabilisers (06) → anchoring system (03) →
+> hydraulic loading crane (04) → rod magazine (02) → cabin (01) → bentonite pump (08) →
+> diesel engine (09) under the GRP hood (10) → **REAR**
+
+with the undercarriage (07) under the middle of it. `blender/hdd_rig.py` is built to exactly
+this order.
+
+**Four things fall out of it that no other source in this document states:**
+
+1. **The mud pump is ON the rig and it sits between the cabin and the engine**, in its own bay
+   rather than under the engine hood. §4.7 already knew the rig carries the high-pressure pump;
+   this says where. The JCS300's is a **750 l/min @ 60 bar** unit and the 18ACS's **320–400
+   l/min @ 90 bar** — a pump the size of a large chest freezer, not an incidental.
+2. **The cabin sits BEHIND the rod magazine, not in front of it** — so the operator looks
+   forward *along* the magazine and *down* the rack. That is the same problem the cab swivel
+   solves (§4.7), and it is why the offset station in the game's mesh is defensible.
+3. **The tilt mechanism is the STABILISERS.** Callout 06 does not call them outriggers or
+   levelling jacks: it says they give *"variable inclination of the cradle for an ideal
+   penetration angle"*. So on this machine family the entry angle is set by **jacking the
+   machine**, not only by rams between chassis and beam — which is the mechanism §3.2 rule 3
+   inferred from Ditch Witch publishing 18° and 12° "tracks on ground" for one rig, now
+   confirmed directly by a second manufacturer. **And the beam is called a "cradle".**
+4. **The anchor system and the drip tray are two callouts, not one** (03 and 05), and the tray
+   is listed at the very nose with its own optional suction pump. §4.6 had them as one object.
+
+**Corroborated on the JCS130E sheet**, whose overview repeats the same arrangement with three
+useful additions: *"**Anchor plate as drip pan for drilling fluid** contributes to a clean
+jobsite"*, *"Undercarriage options with a choice of **rubber, steel or rubberised steel
+tracks**"*, and — for the magazine — *"Quick connection of an **additional drill rod box** with
+automatic retrieval via the drill rod crane"*. **The crane exists to serve the rod box**, which
+is why those two callouts sit together on both sheets.
+
+### 3.10 Pose geometry — the same machine dimensioned at two rack angles
+
+**The most useful geometric find of the modelling pass, and the one that says what happens when
+the game drives `pivot:rack`.** The GRUNDODRILL JCS130E sheet (EN, text-extracted 2026-09-05)
+dimensions **one machine in three poses**, which nothing else in this document does:
+
+| Pose | L × W × H |
+|---|---|
+| Transport | **7,020–7,484 × 1,910–2,577 × 2,782 mm** |
+| Working, **14°** | **8,365–8,637 × 1,910–2,577 × 3,424 mm** |
+| Working, **30°** | **7,175–7,537 × 1,910–2,577 × 4,652 mm** |
+
+*(the L and W ranges are "depending on configuration"; H is single-valued.)*
+
+**Two rules, and both are modelling instructions:**
+
+1. **Coming down makes the machine LONGER.** Transport → 14° adds **~1.2–1.35 m of length** and
+   ~0.64 m of height. The rack extends forward off the nose as it lowers, so the working
+   footprint is *bigger* than the transport one. This is the opposite of every other machine in
+   this game, where deploying a mast makes the footprint smaller and the machine taller. It
+   also reinforces §9-E: the beam folds **down and back** to travel, never up.
+2. **Standing up makes it SHORTER and TALLER.** 14° → 30° costs **~1.15 m of length** and gains
+   **~1.23 m of height**. Rack angle drives overall height hard, so any transport- or
+   clearance-checking logic has to read the angle.
+
+**And an honest negative result, recorded because it stopped an invention.** Those two deltas
+**cannot both be produced by rotating a rigid beam about a single fixed pivot**: the length
+change implies an effective radius of ~11.0 m and the height change one of ~4.8 m, on a machine
+8.6 m long. So the real linkage is doing something more — almost certainly **tipping the whole
+machine on its stabilisers as well as rotating the cradle**, which is exactly what §3.9 callout
+06 describes. **The exact linkage remains `NOT SOURCED`** and must not be reverse-engineered
+from three envelope numbers. `blender/hdd_rig.py` therefore gives the game one honest
+`pivot:rack` plus a separate `slide:` pair for the stabilisers, and says so at the constant.
+
+**Also newly read off the same family of sheets** (all accessed 2026-09-05):
+
+- **18ACS dimensioned poses**, which carry the rack-angle callout directly on the drawing:
+  **working 7,150 long × 3,150 high with "13–19°" printed against the rack**; **transport
+  6,700 × 2,350 × 2,620 mm**. This is the drawing §3.2's rack-angle table cites.
+- **JCS300**: *"Up to **six additional rods** can be reloaded simultaneously"* — the mechanism
+  behind the stack-up box, quantified.
+- **Vermeer D40x55 S3** (PN 296431556, read in full): with the **4.6 m × 67 mm** rod its
+  **carrying capacity is 160 m — about 35 rods**, against 152 m / ~50 rods for the 3 m rod. So
+  a longer rod does *not* buy more metres on board; it buys fewer, larger pieces, which is a
+  real trade and not a spec-sheet artefact. Also *"Breakout system: **Standard hydraulic
+  vise**"*, *"**Stakedown system: Standard**"*, and *"**Drilling lights: Standard**"* — the
+  only sourced statement anywhere that work lights are standard fit on this class (the
+  **count** remains `NOT SOURCED`, §8.5). And **"Min bore diameter 4 in (10.2 cm)"**, an
+  independent check on §3.4's 121 mm pilot.
+- **18ACS**: bentonite pump **320 / 400 l/min at 90 bar**, **fresh water tank 105 l**, diesel
+  **180 l**, **bore length 400 m**, **upsizing 600 / outer pipe 500 mm**, sound **77 dB LPA /
+  104 dB LWA**, workplace vibration **0.5 m/s²**.
+
 ---
 
 ## 4. Component inventory
@@ -1188,6 +1299,29 @@ shaft diameters; and mud-recycler plan dimensions.
 
 Two of §9's warnings were **withdrawn or softened** by that evidence — the entry angle (§9-F)
 and the carriage drive (§9-D). Both are recorded in place rather than quietly deleted.
+
+**Closed again 2026-09-05 by the `blender/hdd_rig.py` modelling pass** (§3.9, §3.10). A gap
+only shows up when somebody tries to build the thing, and this one did: the document could size
+the machine but could not say **what sits where on it**. Now sourced, from the manufacturers'
+own numbered overview diagrams and multi-pose dimensioned drawings:
+
+- **the front-to-back component layout** — tray and stabilisers at the nose, then anchors,
+  loading crane, rod magazine, cabin, bentonite pump, and the engine under a GRP hood at the
+  rear;
+- **that the on-board mud pump has its own bay between the cabin and the engine**;
+- **that the cabin sits behind the rod magazine**, looking forward along it and down the rack;
+- **that the entry angle is set by jacking the machine on its two stabilisers** — the sheet's
+  own words are *"variable inclination of the cradle"* — confirming from a second manufacturer
+  what §3.2 rule 3 had only inferred from Ditch Witch's two published angles;
+- **how the envelope changes with rack angle**, from one machine dimensioned in three poses;
+- **that work lights are standard fit** on this class (the count is still unsourced, §8.5);
+- **that a longer rod buys FEWER metres on board**, not more — 160 m on a 4.6 m rod against
+  152 m on a 3 m rod, same machine.
+
+One thing the pass deliberately did **not** close, and recorded as a negative result instead:
+the **rack tilt linkage** (§3.10). Three published envelope numbers are not enough to determine
+it, and inventing a mechanism that fits them would have been exactly the failure this document
+exists to prevent.
 
 ### 8.1 The machine envelope — what is still missing
 
