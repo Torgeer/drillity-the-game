@@ -630,8 +630,13 @@ def build_bench():
     # speed-limit number is lettered on anything: it would not be legible at
     # this range and an unreadable number is not a citation.
     for i in range(10):
+        # KEPT OFF THE EXTREME LEFT EDGE. Geometry that reaches past about
+        # NDC x -0.85 comes back with coloured speckle along the band's own
+        # scissor edge — see THE EDGE ARTEFACT at the foot of this file. The
+        # road still runs away and out of shot; it just does not graze the
+        # boundary while it does it.
         d = 20.0 + i * 4.2
-        px, py = on_axis(d, CREST_ACROSS - 1.5 - i * 1.15)
+        px, py = on_axis(d, max(-0.80 * half_width(d), CREST_ACROSS - 1.5 - i * 1.15))
         S.box('haul-%d' % i, (9.5, 6.0, 0.30), S.MAT_GRAVEL,
               loc=(px, py, -0.10), rot=(0.0, 0.0, yaw + 0.30))
 
@@ -691,80 +696,118 @@ def build_plant():
     # the feed hopper: the flared box a haul truck tips into
     S.box('crusher-hopper', (6.6, 5.6, 2.4), S.MAT_STEEL,
           loc=(cx, cy - 0.6, 13.2), rot=(0.10, 0.0, 0.0), bevel=0.06)
-    S.box('crusher-rail', (8.2, 6.2, 0.09), S.MAT_STEEL, loc=(cx, cy, 8.6))
+    # NO 90 mm WALKWAY PLATE. It was drawn here and it is the same sub-pixel
+    # mistake as the belt skirting: at 62 m an 0.09 m edge is a fraction of a
+    # pixel, and a 8.2 x 0.09 m face carries its texture at 90:1. The handrail
+    # it stands for is below the resolution of this shot; the deck it sits on
+    # already carries the read.
     # the tipping ramp the trucks back up — a graded bank against the hopper
-    S.rubble('crusher-ramp', (cx, cy - 9.0, 3.0), (9.0, 13.0, 6.6),
+    # `on_axis`, NOT `cy - 9.0`. Mixing frame placement with raw Blender-Y
+    # offsets puts an object in a direction that has nothing to do with the
+    # view, which is how half the plant ended up outside the picture.
+    rax, ray = on_axis(D + 9.0, -13.0)
+    S.rubble('crusher-ramp', (rax, ray, 3.0), (9.0, 13.0, 6.6),
              S.MAT_GRAVEL, block=2.6, n=14, seed=401.0, yaw=yaw)
 
     # ── two trestle conveyors, one per product ──────────────────────────────
-    # "belt conveyors with full-length skirting" [MINSYS-DUST]. The skirting is
-    # the continuous rubber lip down both sides of the belt that keeps the fines
-    # in, and at this range it is the thing that makes a conveyor read as one.
-    for k, (across, length, rise, sign) in enumerate(
-            [(-15.0, 30.0, 12.0, -1.0), (-11.0, 24.0, 9.0, 1.0)]):
-        bx, by = on_axis(D - 6.0, across)
-        pitch = math.atan2(rise, length)
-        run = math.cos(pitch)
-        # trestles under the run
-        for t in range(6):
-            f = t / 5.0
-            tx = bx + RIGHT[0] * (length * run * f * sign)
-            ty = by + RIGHT[1] * (length * run * f * sign)
-            S.tube('belt%d-trestle-%d' % (k, t), 0.16, max(0.8, rise * f + 2.6),
-                   S.MAT_DARK, loc=(tx, ty, -1.6), sides=6)
-        mx = bx + RIGHT[0] * (length * run * 0.5 * sign)
-        my = by + RIGHT[1] * (length * run * 0.5 * sign)
+    # "belt conveyors with full-length skirting" [MINSYS-DUST], each rising from
+    # the crusher to a head pulley over its own stockpile.
+    #
+    # THE FIRST VERSION OF THIS RAN THEM ACROSS THE FRAME AND MOST OF IT WAS
+    # NOT IN THE PICTURE. Projected against the measured frame, `belt0` ran from
+    # NDC x -0.67 out to -1.90 and its head, transfer chute, misting cannon and
+    # entire stockpile were off the left edge — geometry that cost triangles and
+    # was never seen. The frame is only +-22.5 m wide at 56 m, so a 30 m
+    # conveyor cannot lie across it at all. They run TOWARD THE CAMERA instead,
+    # which is both what keeps them in shot and the stronger composition: a
+    # rising diagonal against a wall made entirely of horizontals.
+    #
+    # It also had a real orientation bug worth recording. `rot=(0, -pitch*sign,
+    # yaw)` in Blender's XYZ Euler order resolves to Rz(yaw)*Ry(-pitch*sign), so
+    # the box's long axis comes out along +RIGHT WHATEVER `sign` is — while its
+    # own trestles and drums were placed along RIGHT*sign. For `sign = -1` the
+    # gantry therefore pointed the opposite way to the legs holding it up. A
+    # 30 m plate at a wrong angle is what the coloured moire in the top-left of
+    # shots/q5-quarry-bench.png was.
+    #
+    # So a conveyor is now defined by its two ENDS in frame coordinates and the
+    # orientation is derived from the vector between them. There is no `sign`.
+    def conveyor(k, d0, a0, z0, d1, a1, z1, stock_r):
+        """Tail (d0, a0, z0) to head (d1, a1, z1), all in frame coordinates."""
+        x0, y0 = on_axis(d0, a0)
+        x1, y1 = on_axis(d1, a1)
+        dx, dy, dz = x1 - x0, y1 - y0, z1 - z0
+        run = math.hypot(dx, dy)
+        length = math.hypot(run, dz)
+        # A box's local +X lies along `v` when it is rotated (0, -pitch, yaw) in
+        # Blender's XYZ order: Rz(yaw)*Ry(-pitch)*X = (cos y cos p, sin y cos p,
+        # sin p). Derived, not guessed — see the note above.
+        ang = math.atan2(dy, dx)
+        pitch = math.atan2(dz, run)
+        rot = (0.0, -pitch, ang)
+        mx, my, mz = (x0 + x1) * 0.5, (y0 + y1) * 0.5, (z0 + z1) * 0.5
+
+        # trestles under the run, feet 1.6 m below grade (see the crusher legs)
+        for t in range(5):
+            f = (t + 0.5) / 5.0
+            tz = z0 + dz * f
+            S.tube('belt%d-trestle-%d' % (k, t), 0.16, tz + 1.6 - 0.9, S.MAT_DARK,
+                   loc=(x0 + dx * f, y0 + dy * f, -1.6), sides=6)
         S.box('belt%d-gantry' % k, (length, 1.5, 0.55), S.MAT_DARK,
-              loc=(mx, my, rise * 0.5 + 1.4),
-              rot=(0.0, -pitch * sign, yaw))
-        S.box('belt%d-belt' % k, (length, 1.16, 0.10), S.MAT_RUBBER,
-              loc=(mx, my, rise * 0.5 + 1.76),
-              rot=(0.0, -pitch * sign, yaw))
-        S.box('belt%d-skirt-a' % k, (length, 0.09, 0.34), S.MAT_RUBBER,
-              loc=(mx + AXIS[0] * 0.62, my + AXIS[1] * 0.62, rise * 0.5 + 1.92),
-              rot=(0.0, -pitch * sign, yaw))
-        S.box('belt%d-skirt-b' % k, (length, 0.09, 0.34), S.MAT_RUBBER,
-              loc=(mx - AXIS[0] * 0.62, my - AXIS[1] * 0.62, rise * 0.5 + 1.92),
-              rot=(0.0, -pitch * sign, yaw))
-        # head and tail drums
-        for e, ez in ((0.0, 1.4), (1.0, rise + 1.4)):
-            ex = bx + RIGHT[0] * (length * run * e * sign)
-            ey = by + RIGHT[1] * (length * run * e * sign)
-            S.tube('belt%d-drum-%d' % (k, int(e)), 0.34, 1.4, S.MAT_STEEL,
-                   loc=(ex - AXIS[0] * 0.7, ey - AXIS[1] * 0.7, ez),
-                   rot=(math.pi * 0.5, 0.0, yaw), sides=10)
+              loc=(mx, my, mz), rot=rot)
+        # THE BELT AND ITS SKIRTING ARE ONE OBJECT, AND THAT IS A DECISION.
+        # [MINSYS-DUST] specifies "full-length skirting" — the continuous rubber
+        # lip down both sides that keeps the fines on the belt — and it was first
+        # modelled as it is built, two strips 90 mm thick and 30 m long. That is
+        # SUB-PIXEL GEOMETRY: at 56 m a 90 mm edge is a fraction of a pixel and a
+        # 30 m x 0.09 m face carries its texture at 330:1. Detail below the
+        # resolution of the shot does not read as detail, it reads as noise, and
+        # it costs triangles to produce the noise. So the belt is drawn at the
+        # width of belt-plus-skirting, which is the silhouette the two of them
+        # actually make at this range.
+        S.box('belt%d-belt' % k, (length, 1.30, 0.34), S.MAT_RUBBER,
+              loc=(mx, my, mz + 0.44), rot=rot)
+        for e, (ex, ey, ez) in enumerate(((x0, y0, z0), (x1, y1, z1))):
+            S.tube('belt%d-drum-%d' % (k, e), 0.34, 1.4, S.MAT_STEEL,
+                   loc=(ex, ey, ez + 0.44), rot=(math.pi * 0.5, 0.0, ang), sides=10)
 
         # ── the transfer point, and the misting cannon on it ────────────────
         # [MINSYS-DUST] puts sprays "at feed chutes, crusher inlets and transfer
         # points" specifically, so the cannon goes where the source says.
-        hx = bx + RIGHT[0] * (length * run * sign)
-        hy = by + RIGHT[1] * (length * run * sign)
-        S.box('belt%d-chute' % k, (1.5, 1.5, 2.6), S.MAT_DARK,
-              loc=(hx, hy, rise - 0.4), rot=(0.0, 0.0, yaw))
-        S.tube('cannon%d-mast' % k, 0.13, 4.6, S.MAT_DARK,
-               loc=(hx + 2.1, hy + 1.0, -1.6), sides=6)
+        S.box('belt%d-chute' % k, (1.6, 1.6, 2.8), S.MAT_DARK,
+              loc=(x1, y1, z1 - 1.6), rot=(0.0, 0.0, ang))
+        ccx, ccy = on_axis(d1 + 2.4, a1 + 2.4)
+        S.tube('cannon%d-mast' % k, 0.13, 5.0, S.MAT_DARK, loc=(ccx, ccy, -1.6), sides=6)
         S.tube('cannon%d-barrel' % k, 0.44, 1.5, S.MAT_STEEL,
-               loc=(hx + 2.1, hy + 1.0, 3.0),
-               rot=(1.15, 0.0, yaw), sides=12)
+               loc=(ccx, ccy, 3.2), rot=(1.15, 0.0, ang), sides=12)
 
-        # ── the conical stockpile under the head ───────────────────────────
-        # "conical stockpiles graded by product size" [§A.4 photograph, I].
-        # Cone geometry falls out of the angle of repose, which is a property of
-        # the material and is NOT quoted here; the piles are built as rubble so
-        # they read as heaped stone rather than as turned cones.
-        S.rubble('stock%d' % k, (hx, hy - 6.0, rise * 0.30),
-                 (14.0 - k * 3.0, 14.0 - k * 3.0, rise * 0.62),
-                 S.MAT_GRAVEL, block=2.4, n=20, seed=500.0 + k * 17, yaw=yaw)
+        # ── the conical stockpile under the head ────────────────────────────
+        # "conical stockpiles graded by product size" [§A.4 photograph, I]. The
+        # angle of repose that sets a real cone's shape is a property of the
+        # material and is NOT quoted here; these are built as rubble so they
+        # read as heaped stone rather than as turned cones.
+        sx2, sy2 = on_axis(d1 - 2.0, a1 - 1.0)
+        S.rubble('stock%d' % k, (sx2, sy2, z1 * 0.28),
+                 (stock_r * 2, stock_r * 2, z1 * 0.62), S.MAT_GRAVEL,
+                 block=2.2, n=18, seed=500.0 + k * 17, yaw=yaw)
+
+    # Heads placed by NDC, not by eye. `belt0`'s first head landed at
+    # (-0.91, +0.82) — jammed into the top-left corner against bright sky,
+    # which is the worst place on the screen to put a high-contrast thin
+    # object and is where the aliased patch in shots/qb-quarry-bench.png was.
+    #        k   tail (d, across, z)      head (d, across, z)      stockpile r
+    conveyor(0, D - 1.0, -13.5, 2.2,     D - 14.0, -12.5, 8.2,     6.0)
+    conveyor(1, D + 1.0, -12.0, 2.2,     D + 8.0,  -18.0, 8.0,     5.0)
 
     # ── the vibrating screen house ──────────────────────────────────────────
-    scx, scy = on_axis(D + 8.0, -24.0)
+    scx, scy = on_axis(D + 8.0, -20.0)
     for sx in (-2.4, 2.4):
         for sy in (-2.0, 2.0):
             S.tube('screen-leg-%.0f-%.0f' % (sx, sy), 0.17, 7.0, S.MAT_DARK,
                    loc=(scx + sx, scy + sy, -1.6), sides=6)
     S.box('screen-body', (5.6, 4.6, 3.2), S.MAT_STEEL, loc=(scx, scy, 7.0), bevel=0.06)
     S.box('screen-deck', (6.0, 5.0, 0.32), S.MAT_DARK, loc=(scx, scy, 5.5))
-    S.box('screen-rail', (6.2, 5.2, 0.08), S.MAT_STEEL, loc=(scx, scy, 6.5))
+    # (no 80 mm rail plate here either — see the crusher)
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -806,3 +849,32 @@ if __name__ == '__main__':
     out = os.path.abspath(os.path.join(HERE, '..', '..', 'public', 'models', 'sites'))
     os.makedirs(out, exist_ok=True)
     build(os.path.join(out, 'quarry-bench.glb'))
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# THE EDGE ARTEFACT — measured, not diagnosed, and it is NOT this file's
+#
+# Geometry from this model that reaches the outer ~6 % of the surface band's
+# WIDTH comes back as vertical coloured speckle along that edge. Measured:
+#
+#   · it is present in shots/q4, q5, q6, qb and qc — every build — always at
+#     the same screen position, in the outer ~40 px of a 744 px band;
+#   · the SAME FRAME with only `site:quarry-bench` set invisible has none of it
+#     (shots/qb-quarry-noglb.png). So it is this model's geometry that triggers
+#     it;
+#   · it did NOT move when the conveyors were rewritten twice and repositioned,
+#     which is what rules out any one object as the cause. It is positional, not
+#     object-specific.
+#
+# The surface band is a SCISSORED region of one shared context with a shared
+# post chain (src/core/renderer.js), and the procedural site never put a
+# high-contrast object against that boundary — nothing in the six-cone quarry
+# reached the frame edge at all. A post-process that samples its neighbourhood
+# across a scissor boundary would produce exactly this, and that is a renderer
+# question, not a modelling one. `src/core/renderer.js` is not this agent's
+# file; the finding is handed over rather than guessed at.
+#
+# What this file does about it: keeps its own geometry inboard of about
+# NDC x -0.85. That is a mitigation, not a fix, and it should be removed when
+# the cause is found.
+# ═════════════════════════════════════════════════════════════════════════════

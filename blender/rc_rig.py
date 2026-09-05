@@ -486,18 +486,22 @@ def perforated_panel(name, w, h, parent=None, loc=(0, 0, 0), rot=(0, 0, 0),
     hole is fragile and slow, the material is procedural anyway, and it is the
     dot grid that actually reads at silhouette distance. Triangles, not calls.
     """
-    p = box(name, (w, 0.008, h), MAT_DARK, parent, loc, rot, bevel=0.004)
+    # The GRID is the cue and the grid is untouched — 282 dots on a 78 mm pitch
+    # across the three panels. What is dropped here is chamfer and section on
+    # the carrier: an 8 mm plate and its 24 mm frame angles do not need a 4-5 mm
+    # bevel (96 triangles apiece), and a 42 mm blind hole does not need six
+    # sides. Same rule as the track shoes at L460-465.
+    p = box(name, (w, 0.008, h), MAT_DARK, parent, loc, rot)
     nx = max(1, int(w / pitch) - 1)
     nz = max(1, int(h / pitch) - 1)
     d = tube(name + '-perf', 0.021, 0.012, MAT_DARK, p,
              (-(nx - 1) * pitch / 2, -0.007, -(nz - 1) * pitch / 2),
-             rot=(math.pi / 2, 0, 0), sides=6)
+             rot=(math.pi / 2, 0, 0), sides=4)
     arrayed(d, nx, (pitch, 0, 0))
     arrayed(d, nz, (0, 0, pitch), name='arr2')
     for (fx, fz, fw, fh) in ((0, h / 2, w, 0.05), (0, -h / 2, w, 0.05),
                              (-w / 2, 0, 0.05, h), (w / 2, 0, 0.05, h)):
-        box(name + '-frame', (fw, 0.024, fh), MAT_DARK, p, (fx, 0, fz),
-            bevel=0.005)
+        box(name + '-frame', (fw, 0.024, fh), MAT_DARK, p, (fx, 0, fz))
     return p
 
 
@@ -827,9 +831,12 @@ def build_mast():
             lk = box('feed-chain-link', (0.030, 0.054, 0.056), MAT_WORN, pv,
                      (sx * (hw + 0.030), face * (hd + 0.045), 0.22))
             arrayed(lk, n_link, (0, 0, 0.060))
+            # 4 sides, not 6: the pin is a 24 mm cylinder seen end-on inside the
+            # link it pins, and 332 of them. A square and a hexagon are the same
+            # two pixels here; the BAND is the cue, not the pin's section.
             pin = tube('feed-chain-pin', 0.012, 0.056, MAT_STEEL, pv,
                        (sx * (hw + 0.030) - 0.028, face * (hd + 0.045), 0.250),
-                       rot=(0, math.pi / 2, 0), sides=6)
+                       rot=(0, math.pi / 2, 0), sides=4)
             arrayed(pin, n_link, (0, 0, 0.060))
 
     box('mast-foot-hood', (MAST_W + 0.16, MAST_D + 0.20, 0.42), MAT_PAINT, pv,
@@ -885,8 +892,11 @@ def build_crown(pv):
             strut('mast2-web', (x, idp / 2, za), (x, -idp / 2, za + 0.58),
                   0.038, MAT_DARK, sl)
         for sy in (-1, 1):
+            # 8 transverse rungs, 40 mm section, 4.9-7.0 m up. No bevel: they
+            # are the rungs BETWEEN the chords, and it is the chords and the
+            # X-web that carry the truss read.
             box('mast2-strut', (iw - 0.062, 0.04, 0.04), MAT_DARK, sl,
-                (0, sy * (idp / 2 - 0.031), za), bevel=0.005)
+                (0, sy * (idp / 2 - 0.031), za))
     for sx in (-1, 1):
         box('mast2-rail', (0.048, 0.09, IL - 0.20), MAT_DARK, sl,
             (sx * (iw / 2 - 0.045), -idp / 2 - 0.03, z0 + IL / 2), bevel=0.006)
@@ -896,15 +906,23 @@ def build_crown(pv):
         (0, 0, ct + 0.15), bevel=0.02)
     box('crown-cheek', (MAST_W + 0.16, 0.05, 0.46), MAT_DARK, sl,
         (0, MAST_D / 2 + 0.05, ct + 0.10), bevel=0.01)
+    # Sprockets and sheave in MAT_WORN, not MAT_CAST: they were the only three
+    # castIron objects on slide:mast-telescope — 164 triangles for a whole draw
+    # call — and a chain sprocket running 6.9 m up is polished and rusted by the
+    # chain, not a clean casting. They now join the crown teeth they mesh with.
     for sx in (-1, 1):
-        tube('crown-sprocket', 0.115, 0.05, MAT_CAST, sl,
+        tube('crown-sprocket', 0.115, 0.05, MAT_WORN, sl,
              (sx * (MAST_W / 2 + 0.035) - 0.025, 0, ct + 0.16),
              rot=(0, math.pi / 2, 0), sides=14)
         for t in range(12):
             a = t / 12 * TAU
+            # 24 teeth, no bevel. Same rule as the track shoes at L460-465 and
+            # the chain at L823-826: bevel the STRUCTURE, never the ARRAY. A
+            # 3 mm chamfer on a 26 mm tooth 6.9 m up is 96 triangles each and
+            # sub-pixel at every camera distance the game uses.
             box('crown-tooth', (0.045, 0.026, 0.030), MAT_WORN, sl,
                 (sx * (MAST_W / 2 + 0.035), math.sin(a) * 0.126,
-                 ct + 0.16 + math.cos(a) * 0.126), rot=(-a, 0, 0), bevel=0.003)
+                 ct + 0.16 + math.cos(a) * 0.126), rot=(-a, 0, 0))
 
     jib_y = -MAST_D / 2 - 0.86
     strut('crown-jib', (0, -MAST_D / 2 + 0.04, ct + 0.24), (0, jib_y, ct + 0.30),
@@ -920,8 +938,12 @@ def build_crown(pv):
     hk = empty(NODE_SLIDE, 'winch-hook', sl, (0, jib_y - 0.02, ct + 0.28))
     hk['axis'] = 'z'
     hk['range_m'] = [-6.0, 0.0]
+    # MAT_WORN, not MAT_STEEL: a hanging winch rope is not bright rail steel,
+    # and on rawSteel it was the only object in its material inside
+    # slide:winch-hook — one draw call for 192 triangles. It now joins the
+    # swivel, shank and bill it hangs.
     hose('winch-line', [(0, 0, -0.10), (0.004, 0.0, -0.74), (0, 0, -1.32)],
-         radius=0.009, mat=MAT_STEEL, parent=hk, sides=6)
+         radius=0.009, mat=MAT_WORN, parent=hk, sides=6)
     tube('hook-swivel', 0.045, 0.16, MAT_WORN, hk, (0, 0, -1.48))
     tube('hook-shank', 0.028, 0.14, MAT_WORN, hk, (0, 0, -1.62))
     torus('hook-bill', 0.075, 0.026, MAT_WORN, hk, (0, 0, -1.68),
@@ -979,17 +1001,23 @@ def build_head(pv):
 
     box('carriage-plate', (MAST_W + 0.22, 0.16, 0.86), MAT_PAINT, sl,
         (0, -hd - 0.13, 0), bevel=0.02)
+    # slide:carriage was FOUR materials for 736 triangles: paintedSteel 108,
+    # paintedDark 216, castIron 196, wornSteel 216. Four draw calls on a rig
+    # that is over its call budget and nowhere near its triangle budget. The
+    # rollers, the chain anchors and the swing boss all sit bolted to, or
+    # inside, the paintedDark roller boxes; they go into paintedDark and the
+    # group becomes two calls. Nothing is deleted and nothing moves.
     for sx in (-1, 1):
         box('carriage-roller-box', (0.15, 0.22, 0.80), MAT_DARK, sl,
             (sx * (hw + 0.04), -hd - 0.06, 0), bevel=0.012)
         for z in (-0.30, 0.30):
-            tube('carriage-roller', 0.055, 0.09, MAT_CAST, sl,
+            tube('carriage-roller', 0.055, 0.09, MAT_DARK, sl,
                  (sx * (hw + 0.04) - 0.045, -hd - 0.06, z),
                  rot=(0, math.pi / 2, 0), sides=10)
-        box('chain-anchor', (0.07, 0.10, 0.20), MAT_WORN, sl,
+        box('chain-anchor', (0.07, 0.10, 0.20), MAT_DARK, sl,
             (sx * (hw + 0.036), -hd - 0.02, 0.42), bevel=0.008)
 
-    tube('head-swing-boss', 0.13, 0.30, MAT_CAST, sl,
+    tube('head-swing-boss', 0.13, 0.30, MAT_DARK, sl,
          (-0.15, -hd - 0.30, 0.10), rot=(0, math.pi / 2, 0), sides=14)
     pvh = empty(NODE_PIVOT, 'head-swing', sl, (0, -hd - 0.30, 0.10))
     pvh['axis'] = 'y'
@@ -1003,17 +1031,23 @@ def build_head(pv):
         bevel=0.03)
     box('head-motor-pad', (0.30, 0.34, 0.22), MAT_PAINT, pvh,
         (-0.40, -0.16, 0.02), bevel=0.02)
-    tube('head-motor', 0.115, 0.30, MAT_DARK, pvh, (-0.62, -0.16, 0.02),
+    # The two rotation motors are bolted to the painted motor pad on a painted
+    # gearbox. MAT_PAINT, not MAT_DARK: they were the whole of pivot:head-swing's
+    # paintedDark material — 88 triangles for a draw call — and a motor in the
+    # machine colour is what the reference actually shows [MET p.22].
+    tube('head-motor', 0.115, 0.30, MAT_PAINT, pvh, (-0.62, -0.16, 0.02),
          rot=(0, -math.pi / 2, 0), sides=12)
-    tube('head-motor', 0.115, 0.30, MAT_DARK, pvh, (0.42, -0.16, 0.02),
+    tube('head-motor', 0.115, 0.30, MAT_PAINT, pvh, (0.42, -0.16, 0.02),
          rot=(0, math.pi / 2, 0), sides=12)
     cone('head-bell', 0.30, 0.155, 0.34, MAT_PAINT, pvh, (0, -0.16, -0.80),
          sides=18)
     for t in range(10):
         a = t / 10 * TAU
+        # ring of 10 — no bevel, same rule as the splitter bolts at L1301 and
+        # the arm base bolts at L1416, which already state it.
         box('head-bolt', (0.036, 0.036, 0.026), MAT_WORN, pvh,
             (math.cos(a) * 0.255, -0.16 + math.sin(a) * 0.255, -0.47),
-            rot=(0, 0, a), bevel=0.004)
+            rot=(0, 0, a))
 
     spn = empty(NODE_PIVOT, 'spindle', pvh, (0, -0.16, -0.80))
     spn['axis'] = 'z'
@@ -1022,12 +1056,22 @@ def build_head(pv):
         a = t / 16 * TAU
         box('spindle-spline', (0.016, 0.016, 0.30), MAT_STEEL, spn,
             (math.cos(a) * 0.088, math.sin(a) * 0.088, -0.36), rot=(0, 0, a))
-    tube('saver-sub', 0.098, 0.20, MAT_WORN, spn, (0, 0, -0.66), sides=14)
+    # MAT_STEEL, not MAT_WORN. A saver sub is a sacrificial thread protector and
+    # it is genuinely worn, but pivot:spindle is a two-object group and the sub
+    # sits bolted to the splined spindle it protects: on wornSteel it is the
+    # ONLY object in its material and costs a whole draw call for 52 triangles.
+    # rawSteel is the neighbour it is threaded into. Draw calls, not triangles,
+    # are what this rig is over budget on.
+    tube('saver-sub', 0.098, 0.20, MAT_STEEL, spn, (0, 0, -0.66), sides=14)
     empty(NODE_MOUNT, 'tool', spn, (0, 0, -0.66))
 
     # combination / dual swivel: one rotating joint carrying TWO flow paths,
     # air in and sample out, on a stepped chrome shaft in a compact housing
-    tube('dual-swivel', 0.135, 0.30, MAT_CAST, pvh, (0, -0.16, 0.30), sides=16)
+    # MAT_WORN, not MAT_CAST: it was the only castIron object in the head, 60
+    # triangles for a draw call, and it sits between the worn air-inlet elbow
+    # and the worn wear tube it feeds. pivot:head-swing was SIX materials for
+    # 3,208 triangles; this, the motors and the water line take it to three.
+    tube('dual-swivel', 0.135, 0.30, MAT_WORN, pvh, (0, -0.16, 0.30), sides=16)
     tube('swivel-shaft', 0.062, 0.16, MAT_CHROME, pvh, (0, -0.16, 0.58), sides=12)
     tube('air-inlet-elbow', 0.055, 0.24, MAT_WORN, pvh, (0, 0.04, 0.42),
          rot=(math.pi / 2, 0, 0), sides=10)
@@ -1051,16 +1095,20 @@ def build_head(pv):
         a = t / 8 * TAU
         box('deflector-bolt', (0.030, 0.030, 0.024), MAT_WORN, pvh,
             (0.44 + math.cos(a) * 0.17, -0.16 + math.sin(a) * 0.17, -0.415),
-            rot=(0, 0, a), bevel=0.003)
+            rot=(0, 0, a))                 # ring of 8 — no bevel
     cone('hose-tail', 0.088, 0.070, 0.26, MAT_WORN, pvh, (0.62, -0.16, -0.68),
          rot=(0, math.pi / 2 + 0.22, 0), sides=14)
     tube('knock-on-nut', 0.105, 0.055, MAT_WORN, pvh, (0.66, -0.16, -0.665),
          rot=(0, math.pi / 2 + 0.22, 0), sides=12)
     empty(NODE_MOUNT, 'sample-out', pvh, (0.90, -0.16, -0.735))
 
+    # MAT_WORN, not MAT_RUBBER. A 32 mm water line braided to the head is not
+    # the same object as the 124 mm sample hose, and rubber here bought one
+    # draw call for 192 triangles inside the head group. The sample hose keeps
+    # rubber, which is the one place on this machine where it identifies.
     hose('head-water-line', [(-0.34, 0.14, 0.30), (-0.30, 0.20, -0.10),
                              (-0.16, 0.08, -0.55)], radius=0.016,
-         mat=MAT_RUBBER, parent=pvh, sides=6)
+         mat=MAT_WORN, parent=pvh, sides=6)
     worklight('head', pvh, (-0.44, -0.44, -0.30), aim_dir=(0.2, -0.4, -3.0),
               cone_deg=60, range_m=18)
     return sl, pvh, spn
@@ -1110,7 +1158,9 @@ def build_rod_handling(pv):
     grp['axis'] = 'z'
     box('gripper-body', (0.22, 0.20, 0.22), MAT_PAINT, grp, (0, 0, 0), bevel=0.018)
     for sy in (-1, 1):
-        box('gripper-jaw', (0.09, 0.20, 0.16), MAT_WORN, grp,
+        # MAT_PAINT to join the gripper body: two jaws are the whole of
+        # pivot:rod-gripper's second material, 216 triangles for a draw call.
+        box('gripper-jaw', (0.09, 0.20, 0.16), MAT_PAINT, grp,
             (0.13, sy * 0.10, 0), rot=(0, 0, sy * 0.35), bevel=0.01)
     return arm, grp
 
@@ -1354,8 +1404,10 @@ def build_sample_train():
         y = ty - 0.20 + k * 0.19
         box('chip-tray', (1.22, 0.17, 0.045), MAT_DARK, loc=(tx, y, z),
             bevel=0.006)
+        # 60 cups at 72 mm across, arrayed down three trays on a trestle. What
+        # reads at any range is the ROW of cups, not the cup's own section.
         cup = tube('chip-cup', 0.036, 0.030, MAT_WORN,
-                   loc=(tx - 0.55, y, z + 0.014), sides=8)
+                   loc=(tx - 0.55, y, z + 0.014), sides=4)
         arrayed(cup, 20, (0.058, 0, 0))
 
     # Bulk reject pile, growing all shift under the splitter's reject spout.
@@ -1393,7 +1445,9 @@ def build_sample_train():
         box('reject-chip', (0.09 + 0.03 * (i % 3), 0.07, 0.045), MAT_WORN,
             loc=(CYC_X - 0.15 + math.cos(a) * rr,
                  CYC_Y - 1.25 + math.sin(a) * rr, 0.022),
-            rot=(0, 0.1 * (i % 3), a), bevel=0.006)
+            rot=(0, 0.1 * (i % 3), a))   # 14 chips on the dirt — no bevel; a
+        # rock chip wants a hard edge anyway, and a 6 mm chamfer on a 90 mm
+        # chip cost 96 triangles each to round off the one thing that is sharp.
     return st
 
 

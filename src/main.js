@@ -254,6 +254,188 @@ function ownedRigIds() {
  */
 const MODEL_BOOT_TIMEOUT_MS = 4000;
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE TITLE — what the first twelve seconds show
+   ═══════════════════════════════════════════════════════════════════════════
+
+   The first thing a player ever sees was a wordmark and a percentage over
+   black, for the best part of half a minute, because the main thread was
+   pinned solid compiling shaders and nothing could animate over it. The
+   warm-up in core/renderer.js moved that work onto the driver's own threads
+   (19.4 s of blocked main thread down to 1.0 s), and what is left is twelve
+   seconds of guaranteed attention with a free CPU behind it.
+
+   `blender/title.py` authors the composition — a machine, ground, and a slow
+   mast raise — exported to `public/models/title/title.glb` under its own
+   subdirectory, because `tools/checkmodels.mjs` requires every TOP-LEVEL
+   model to be named for a rig id and to declare the node contract, and this
+   is not a rig.
+
+   THREE RULES, in the order they matter:
+
+   1. **It may never delay the game.** The fetch is started the moment
+      gltfRigs is up and is never awaited on the critical path; the title is
+      built only if the model has already arrived by the time the systems are
+      done. `TITLE_WAIT_MS` is the whole budget, and it is spent against a
+      file coming off the same origin as the page.
+   2. **Its absence is not an error.** No banner, no console.error. A game
+      with no title sequence boots exactly as it did before, which is the
+      correct degradation for decoration. (Contrast `showModelError` above,
+      which IS loud, because a missing MACHINE is a bug the player would
+      otherwise photograph without noticing.)
+   3. **The camera does not move; the machine does.** ASTRA and the owner
+      both: *"the world moves, the camera does not"*. The title is a
+      locked-off shot of something that is itself full of motion.
+*/
+const TITLE_MODEL_ID = 'title/title';
+/** How long the systems phase is allowed to wait for the title. Never more. */
+const TITLE_WAIT_MS = 250;
+/** The clip `blender/title.py` authors. Absent = a still composition. */
+const TITLE_CLIP = 'title';
+
+/**
+ * Frame the composition from its OWN measured bounds.
+ *
+ * Not a hardcoded eye position: the title model is authored in Blender by a
+ * different file and its size is that file's business, so a literal here
+ * would be a second table describing one thing — ASTRA §5's most expensive
+ * failure pattern. `focusOn()` is not used either; it frames by bounding
+ * SPHERE, which for a machine with a tall mast is far larger than its
+ * on-screen extent and would leave the subject at a third of the height.
+ *
+ * A 3/4 azimuth at a low elevation, distance solved so the composition fills
+ * `FILL` of whichever axis binds first at 390x844 portrait.
+ */
+function frameTitle(root) {
+  const box = new THREE.Box3().setFromObject(root);
+  if (box.isEmpty()) return null;
+  const size = box.getSize(new THREE.Vector3());
+  const mid = box.getCenter(new THREE.Vector3());
+
+  const FOV = 34;                     // matches CAMERA_MODES.hero — the same lens
+  /* Sized against the aperture the boot screen leaves, not against the stage:
+     ui/screens/boot.js re-lays itself 8:52:6 when a title is live, so the
+     lockup and the rule own the top ~30 % and the field fact the bottom ~14 %.
+     0.62 of the stage height, dropped 12 % below the frame centre, lands the
+     crown just under the rule and the tracks just above the fact block. */
+  const FILL = 0.62;
+  const DROP = 0.12;                  // how far below frame centre the subject sits
+  const AZ = THREE.MathUtils.degToRad(38);   // 3/4, from the machine's right
+  const EL = THREE.MathUtils.degToRad(11);   // low: a mast reads taller from below
+
+  const stage = ctx.stage || { w: 390, h: 844 };
+  const aspect = stage.w / Math.max(1, stage.h);
+  const halfV = Math.tan(THREE.MathUtils.degToRad(FOV) * 0.5);
+  const halfH = halfV * aspect;
+
+  /* The horizontal extent a 3/4 view actually presents is the diagonal of the
+     footprint, not either side of it. */
+  const wide = Math.hypot(size.x, size.z);
+  const distV = (size.y * 0.5) / (halfV * FILL);
+  const distH = (wide * 0.5) / (halfH * FILL);
+  const dist = Math.max(distV, distH, 4);
+
+  /* Look ABOVE the box centre, which pushes the subject DOWN the frame — the
+     sign is easy to get backwards. Everything above the look point is drawn
+     above the frame centre, so raising the look point lowers the machine into
+     the gap the boot layout opens for it. */
+  const look = new THREE.Vector3(mid.x, mid.y + size.y * DROP, mid.z);
+  const pos = new THREE.Vector3(
+    look.x + Math.sin(AZ) * Math.cos(EL) * dist,
+    look.y + Math.sin(EL) * dist,
+    look.z + Math.cos(AZ) * Math.cos(EL) * dist,
+  );
+  return { pos: pos.toArray(), look: look.toArray(), fov: FOV, size, dist };
+}
+
+/**
+ * Light the title. Three lights, and they are this scene's alone.
+ *
+ * core/env.js owns every light in the GAME — that is its rule and this does
+ * not break it, because the title stage is a separate scene that is deleted
+ * before the game is on screen. It borrows env's IBL if one exists by then
+ * (free: already baked) and reads perfectly well without one.
+ */
+function lightTitle(sc) {
+  const key = new THREE.DirectionalLight(0xffe0a6, 3.1);   // BRAND-warm, as env's sun
+  key.position.set(6.2, 5.4, 4.8);
+  const fill = new THREE.DirectionalLight(0xbcd2e8, 0.55); // cool sky bounce
+  fill.position.set(-5.0, 2.4, -3.0);
+  const amb = new THREE.HemisphereLight(0x9fb6cc, 0x2a231c, 0.85);
+  sc.add(key, fill, amb);
+  try { if (ctx.scene && ctx.scene.environment) sc.environment = ctx.scene.environment; }
+  catch { /* no IBL yet — the three lights carry it */ }
+}
+
+/** The live title: `{ root, dyn }` while it is on screen, else null. */
+let title = null;
+/** Set once, so the title and the hand-off cannot start two rAF chains. */
+let loopRunning = false;
+
+/**
+ * Put the title on screen, and start the frame loop under it.
+ *
+ * Returns quietly having done nothing at all if the model is not there yet,
+ * did not load, or draws nothing — every one of which is a reason to boot
+ * without a title rather than to boot late.
+ *
+ * @param {Promise<boolean>} fetched  the load started when gltfRigs came up
+ */
+async function startTitle(fetched) {
+  const r = ctx.renderer;
+  const g = ctx.gltfRigs;
+  if (!r || !g || !r.beginTitle) return;
+
+  const t0 = performance.now();
+  try {
+    /* Raced, never awaited outright. TITLE_WAIT_MS is the ENTIRE budget the
+       title is allowed to add to boot. */
+    const ok = await Promise.race([
+      fetched,
+      new Promise((res) => setTimeout(() => res(false), TITLE_WAIT_MS)),
+    ]);
+    if (!ok || !g.has(TITLE_MODEL_ID)) { mark('title', t0); return; }
+
+    const build = g.builder(TITLE_MODEL_ID);
+    if (!build) { mark('title', t0); return; }
+    const built = build();
+    if (!built || !built.root) { mark('title', t0); return; }
+
+    const frame0 = frameTitle(built.root);
+    if (!frame0) { mark('title', t0); return; }
+
+    r.titleScene.add(built.root);
+    lightTitle(r.titleScene);
+    r.setTitleCamera(frame0.pos, frame0.look, frame0.fov);
+
+    /* The clip. `gltfAnim.js` refuses a track on any node that is not a
+       `pivot:` or a `slide:`, and refuses a clip whole rather than playing it
+       half-bound — so `play()` returning false means the model does not carry
+       what it claims, and a still composition is the honest result. */
+    if (built.dyn && built.dyn.anim && built.dyn.anim.has(TITLE_CLIP)) {
+      built.dyn.anim.play(TITLE_CLIP, { loop: true, fadeIn: 0 });
+    }
+
+    await r.warmTitle();
+    r.beginTitle();
+    title = built;
+    if (!loopRunning) { loopRunning = true; requestAnimationFrame(frame); }
+  } catch (e) {
+    // Decoration. It is allowed to be missing; it is not allowed to be loud.
+    console.info('[boot] no title sequence this session —', e && e.message);
+    title = null;
+  }
+  mark('title', t0);
+}
+
+/** Take the title down and give its geometry back. Idempotent. */
+function endTitle() {
+  if (!title) return;
+  try { title.dyn?.anim?.stopAll?.(); } catch { /* noop */ }
+  try { ctx.renderer?.endTitle?.(); } catch { /* noop */ }
+  title = null;
+}
+
 async function warmOwnedModels(blocking) {
   const g = ctx.gltfRigs;
   if (!g) return;
@@ -359,6 +541,12 @@ async function boot() {
   await loadSystem('renderer', 'createRenderer');
   await loadSystem('assets', 'createAssets');
   await loadSystem('gltfRigs', 'createGltfRigs');
+  /* Started here and never awaited on the critical path — it streams while the
+     remaining ten systems come up, and the systems phase is 1.9 s against a
+     same-origin fetch. See THE TITLE above. */
+  const titleFetch = ctx.gltfRigs
+    ? ctx.gltfRigs.load(TITLE_MODEL_ID).then(() => true, () => false)
+    : Promise.resolve(false);
   await loadSystem('env', 'createEnvironment');
   await loadSystem('geology', 'createGeology');
   await loadSystem('terrain', 'createTerrain');
@@ -398,6 +586,21 @@ async function boot() {
     // Yield so the boot screen can actually paint between heavy systems.
     await new Promise((r) => requestAnimationFrame(() => r()));
   }
+  /* ── the entrance ─────────────────────────────────────────────────────
+     Everything the title needs is ready by here: the scene it draws into is
+     the renderer's own, the model has had the whole systems phase to arrive,
+     and env has baked the IBL it borrows. Its programs are warmed first and
+     the frame loop is started BEFORE the big warm-up, so the machine is
+     moving on screen for the whole of it.
+
+     Wired in this order deliberately: a resize during a twelve-second boot
+     used to be ignored entirely, because the listener was not installed until
+     after it. */
+  resize();
+  window.addEventListener('resize', resize, { passive: true });
+  window.addEventListener('orientationchange', () => setTimeout(resize, 120));
+  await startTitle(titleFetch);
+
   setPhase('shaders', SYSTEMS_SHARE);
 
   /**
@@ -432,16 +635,13 @@ async function boot() {
     }
   }
   setPhase('ready', 1);
+  endTitle();
 
   // Audio can only start from a user gesture.
   const unlockAudio = () => { try { ctx.audio?.unlock?.(); } catch { /* ignore */ } };
   window.addEventListener('pointerdown', unlockAudio, { once: true });
   window.addEventListener('touchstart', unlockAudio, { once: true, passive: true });
   window.addEventListener('keydown', unlockAudio, { once: true });
-
-  resize();
-  window.addEventListener('resize', resize, { passive: true });
-  window.addEventListener('orientationchange', () => setTimeout(resize, 120));
 
   /**
    * Keep the owned set warm.
@@ -463,7 +663,11 @@ async function boot() {
   installQABridge();
 
   document.body.classList.add('booted');
-  requestAnimationFrame(frame);
+  /* The loop is already running if the title started it. Starting a second
+     rAF chain here would double every system's update() for the rest of the
+     session — the exact shape of the nineteen-chain leak in components.js
+     (ASTRA §7.5). */
+  if (!loopRunning) { loopRunning = true; requestAnimationFrame(frame); }
 
   // Hand the shell the menu explicitly. Emitting SCENE_CHANGE alone is not
   // enough — the shell is the *emitter* of that event, so it does not listen to
@@ -708,6 +912,7 @@ let fpsAccum = 0, fpsFrames = 0;
  */
 const BOOT_FRAMES_TRACKED = 8;
 ctx.bootFrames = [];
+let tracked = 0;
 
 function frame(now) {
   requestAnimationFrame(frame);
@@ -723,14 +928,32 @@ function frame(now) {
   fpsAccum += dt; fpsFrames++;
   if (fpsAccum >= 0.5) { ctx.clock.fps = fpsFrames / fpsAccum; fpsAccum = 0; fpsFrames = 0; }
 
-  const tracking = ctx.clock.frame <= BOOT_FRAMES_TRACKED;
-  const row = tracking ? { frame: ctx.clock.frame, at: +now.toFixed(1), systems: {} } : null;
+  /* Counted over the first REAL frames, not the title's. The title runs
+     without the game's systems, so tracking its frames would replace the one
+     measurement this array exists for — what the first frame of the actual
+     game costs — with eight rows of zeroes. */
+  const tracking = !title && tracked < BOOT_FRAMES_TRACKED;
+  const row = tracking ? { frame: ++tracked, at: +now.toFixed(1), systems: {} } : null;
   const fT0 = tracking ? performance.now() : 0;
 
-  for (const s of ctx.systems) {
-    const t0 = tracking ? performance.now() : 0;
-    if (s.update) { try { s.update(dt, ctx.state); } catch (e) { console.error(`[update] ${s.__name}`, e); } }
-    if (tracking) row.systems[s.__name] = +(performance.now() - t0).toFixed(1);
+  if (title) {
+    /* WHILE THE TITLE IS UP, ONLY TWO THINGS RUN.
+       The game's systems have nothing to do — no contract, no hole, no
+       screen but the boot screen — and one of them (geology) spends 632 ms
+       on its first update building the section it is about to be asked for.
+       Paying that under a title sequence would put a visible hitch in the
+       one shot that exists to look effortless; it is paid on the first real
+       frame instead, where the boot screen is already fading over it.
+       The UI does run: it is what rotates the field facts and advances the
+       loading rule the player is reading. */
+    if (ctx.ui?.update) { try { ctx.ui.update(dt, ctx.state); } catch (e) { console.error('[update] ui', e); } }
+    try { title.dyn?.anim?.update?.(dt); } catch (e) { console.error('[update] title', e); }
+  } else {
+    for (const s of ctx.systems) {
+      const t0 = tracking ? performance.now() : 0;
+      if (s.update) { try { s.update(dt, ctx.state); } catch (e) { console.error(`[update] ${s.__name}`, e); } }
+      if (tracking) row.systems[s.__name] = +(performance.now() - t0).toFixed(1);
+    }
   }
 
   // Sim → audio telemetry pump (audio never reaches into the sim itself).
@@ -740,7 +963,7 @@ function frame(now) {
 
   const rT0 = tracking ? performance.now() : 0;
   if (ctx.renderer && ctx.renderer.render) ctx.renderer.render(dt);
-  if (tracking) {
+  if (tracking && row) {
     row.renderMs = +(performance.now() - rT0).toFixed(1);
     row.totalMs = +(performance.now() - fT0).toFixed(1);
     try { row.programs = ctx.renderer?.info?.programs?.length ?? null; } catch { /* noop */ }

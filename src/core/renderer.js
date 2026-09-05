@@ -1098,6 +1098,8 @@ export function createRenderer(ctx) {
     camera.updateProjectionMatrix();
     updateSectionFrustum();
 
+    updateTitleCamera();
+
     ctx.stage = stage;
     ctx.bands = bands;
     ctx.chrome = chrome;
@@ -1832,6 +1834,72 @@ export function createRenderer(ctx) {
      doing there: the driver may overlap the work anyway, and it cannot be
      slower than asking for them one at a time. */
 
+  /* ═══════════════════════════════════════════════════════════════════════
+     THE TITLE STAGE — a third, throwaway world, drawn only during boot
+     ═══════════════════════════════════════════════════════════════════════
+
+     The shader warm-up above turned the boot stall from 19 s of BLOCKED main
+     thread into ~12 s of GPU work happening on the driver's own threads. That
+     changes what boot can be: the main thread is now free, at 60 fps, for the
+     whole of it. A guaranteed twelve seconds of the player's attention that
+     currently shows a wordmark and a percentage.
+
+     So there is a third scene. It exists only while the game's own programs
+     compile behind it, and it is deleted the moment they are ready.
+
+     ── WHY IT IS SEPARATE FROM `scene` ──────────────────────────────────
+     Because the entire point is to draw something before the game's shaders
+     exist. Putting the title machine in `scene` and rendering `scene` would
+     block on all 71 programs, which is the stall this is meant to fill.
+     A private scene with its own handful of materials compiles in about a
+     second, and everything else keeps compiling behind it.
+
+     ── AND WHY IT SKIPS THE POST CHAIN ──────────────────────────────────
+     Same reason: the composer's own 13 programs are in the batch being
+     warmed. Rendering to the canvas directly costs the title nothing but a
+     few to-screen program variants of its own — and three.js applies
+     `toneMapping` and `outputColorSpace` automatically when the render target
+     is null, which is exactly the ACES + sRGB the grade pass mirrors. So the
+     title is graded like the game without needing the game's grade pass.
+
+     ── IT MUST NOT LENGTHEN BOOT ────────────────────────────────────────
+     Its model is fetched alongside the machine models during the systems
+     phase (main.js), not on the critical path; its own programs are warmed by
+     the same non-blocking route as everything else; and if any of that is not
+     ready in time the title is simply skipped. A title that delays the game
+     is worse than no title. */
+
+  const titleScene = new THREE.Scene();
+  titleScene.name = 'title';
+  const titleCamera = new THREE.PerspectiveCamera(34, 9 / 16, 0.1, 400);
+  titleCamera.name = 'titleCamera';
+  titleScene.add(titleCamera);
+  let titleMode = false;
+
+  /** Frame the title stage — the WHOLE stage, not one of the two bands. */
+  function updateTitleCamera() {
+    const a = stage.w / Math.max(1, stage.h);
+    if (Math.abs(titleCamera.aspect - a) < 1e-4) return;
+    titleCamera.aspect = a;
+    titleCamera.updateProjectionMatrix();
+  }
+
+  function drawTitle() {
+    gl.setRenderTarget(null);
+    // flood the whole canvas first, so the letterbox is the brand's deep slate
+    gl.setScissorTest(false);
+    gl.setViewport(0, 0, cssW, cssH);
+    gl.setClearColor(clearDeep, 1);
+    gl.clear(true, true, true);
+
+    const y = cssH - (stage.y + stage.h);
+    gl.setViewport(stage.x, y, stage.w, stage.h);
+    gl.setScissor(stage.x, y, stage.w, stage.h);
+    gl.setScissorTest(true);
+    gl.render(titleScene, titleCamera);
+    gl.setScissorTest(false);
+  }
+
   /** Has the driver got a non-blocking "is it linked yet?" query? */
   const hasParallelCompile = () => {
     try { return !!gl.extensions.get('KHR_parallel_shader_compile'); }
@@ -2141,10 +2209,80 @@ export function createRenderer(ctx) {
       syncStatic();
     },
 
+    /* ── the title stage ─────────────────────────────────────────────── */
+    /** The boot title's private world. main.js fills it; nothing else may. */
+    get titleScene() { return titleScene; },
+    get titleCamera() { return titleCamera; },
+    get titleActive() { return titleMode; },
+
+    /** Point the title camera. Metres; `fov` is vertical degrees. */
+    setTitleCamera(pos, look, fov) {
+      if (pos) titleCamera.position.set(pos[0], pos[1], pos[2]);
+      if (look) titleCamera.lookAt(look[0], look[1], look[2]);
+      if (fov) titleCamera.fov = clamp(fov, 8, 120);
+      updateTitleCamera();
+      titleCamera.updateProjectionMatrix();
+      titleCamera.updateMatrixWorld();
+    },
+
+    /**
+     * Link the title's own programs — the to-screen variants, so no render
+     * target is bound. A handful, and they are the only ones between the
+     * player and something moving on screen.
+     */
+    async warmTitle() {
+      const t0 = performance.now();
+      try { gl.compile(titleScene, titleCamera); }
+      catch (e) { warnOnce('the title could not be pre-compiled.', e); return { ms: 0 }; }
+      if (hasParallelCompile()) {
+        await new Promise((resolve) => {
+          const deadline = performance.now() + 8000;
+          const poll = () => {
+            const { done, total } = programReadiness();
+            if (done >= total || performance.now() > deadline) { resolve(); return; }
+            setTimeout(poll, 16);
+          };
+          poll();
+        });
+      }
+      return { ms: performance.now() - t0 };
+    },
+
+    /** Draw the title instead of the game until `endTitle()`. */
+    beginTitle() { titleMode = true; updateTitleCamera(); },
+
+    /**
+     * Stop drawing the title and give its memory back.
+     *
+     * Geometries are this scene's own (gltfRig clones one per instantiation)
+     * so they are disposed. MATERIALS ARE NOT: core/assets.js hands out shared
+     * instances, and the game is still using them — disposing one here would
+     * take a texture out from under the machine the player is about to see.
+     */
+    endTitle() {
+      titleMode = false;
+      titleScene.traverse((o) => {
+        if (o.isMesh && o.geometry && o !== titleCamera) { try { o.geometry.dispose(); } catch { /* noop */ } }
+      });
+      for (let i = titleScene.children.length - 1; i >= 0; i--) {
+        const c = titleScene.children[i];
+        if (c !== titleCamera) titleScene.remove(c);
+      }
+    },
+
     /** Called by main.js once every system has updated. */
     render(dt) {
       const step = clamp(dt || 0, 0, 1 / 15);
       const state = ctx.state;
+
+      /* THE TITLE OWNS THE FRAME WHILE IT IS UP. Nothing below runs: the
+         camera springs, the band registration and the post chain all belong
+         to a world that is still compiling. */
+      if (titleMode) {
+        gl.info.reset();
+        drawTitle();
+        return;
+      }
 
       updateSurfaceCamera(step, state);
       updateSectionCamera(step, state);

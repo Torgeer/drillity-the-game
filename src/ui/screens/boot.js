@@ -21,6 +21,26 @@
  * array; it never edits, reorders or appends to it. Two claims — ring-bit vs
  * wing-bit recovery, and Odex/Symmetrix eccentric-vs-concentric — were removed
  * for being wrong and must not come back.
+ *
+ * ── AND WHEN THERE IS A TITLE BEHIND IT ────────────────────────────────────
+ * `.boot` in styles.css paints an OPAQUE gradient, which was right while
+ * there was nothing behind it: main.js did not start the frame loop until
+ * every system was up, so for the whole of boot the 3D drew nothing at all.
+ * It draws now — a title composition on the renderer's own private stage,
+ * while the GPU compiles the game's shaders behind it — so this screen has
+ * to get out of its way.
+ *
+ * Two things change, and only while a title is actually live (`ctx.renderer
+ * .titleActive`); with no title the composition above is untouched:
+ *
+ *   • the opaque fill becomes a SCRIM — dark at the top and the bottom where
+ *     the type is, clear through the middle where the machine is. The same
+ *     shape and the same reasoning as `.menu`'s hero scrim, which exists
+ *     because a wordmark over a lit tree trunk measured 3.08:1 and that is
+ *     not a legible title.
+ *   • the three flex spacers go 39:24:37 -> 8:52:6, which lifts the lockup
+ *     and the rule to the top of the stage and opens the middle for the
+ *     machine. main.js frames the camera to the space this leaves.
  */
 import { FACTS } from './catalog.js';
 
@@ -81,6 +101,28 @@ export function createBootScreen(app) {
     'aria-hidden': 'true',
     style: { flex: `${grow} 1 0`, 'min-height': '0', display: 'block' },
   });
+  const spTop = spacer(39);
+  const spMid = spacer(24);
+  const spBot = spacer(37);
+
+  /**
+   * The two compositions, and the scrim that makes the second one legible.
+   *
+   * `over3d` is the same idea as `.menu`'s hero scrim: a shaped darkening
+   * that peaks where the type is and is gone where the subject is, rather
+   * than a flat wash that would put the machine back behind a curtain.
+   */
+  const LAYOUT_FLAT = [39, 24, 37];   // nothing behind: the composition as authored
+  const LAYOUT_TITLE = [8, 52, 6];    // a machine behind: type to the edges
+  const SCRIM_OVER_3D = [
+    'linear-gradient(180deg, rgb(var(--rgb-bg-deep) / .92) 0%,'
+      + ' rgb(var(--rgb-bg-deep) / .55) 22%,'
+      + ' rgb(var(--rgb-bg-deep) / 0) 40%,'
+      + ' rgb(var(--rgb-bg-deep) / 0) 58%,'
+      + ' rgb(var(--rgb-bg-deep) / .72) 82%,'
+      + ' rgb(var(--rgb-bg-deep) / .94) 100%)',
+    'radial-gradient(78% 30% at 50% 12%, rgb(var(--rgb-amber) / .07), transparent 72%)',
+  ].join(',');
 
   // The lockup, the sub-title and the progress rule read as one group, so they
   // are one element with their own internal rhythm.
@@ -115,17 +157,41 @@ export function createBootScreen(app) {
   );
 
   const el = C.h('div.boot', { style: { 'justify-content': 'flex-start', gap: '0' } },
-    spacer(39),
+    spTop,
     group,
-    spacer(24),
+    spMid,
     factwrap,
-    spacer(37),
+    spBot,
   );
 
   let p = 0;
   let factIdx = Math.floor(Math.random() * FACTS.length);
   let factT = 0;
   let swapping = false;
+  /** null until the first check, so the first answer always applies itself. */
+  let overTitle = null;
+
+  /**
+   * Re-lay the screen for whichever of the two situations is true right now.
+   *
+   * Polled from `update()` rather than pushed, because the renderer decides
+   * when the title goes up and comes down and there is no event for it. It is
+   * a boolean read and an early return on every frame but two.
+   */
+  function syncTitleLayout() {
+    let live = false;
+    try { live = !!(app.ctx && app.ctx.renderer && app.ctx.renderer.titleActive); }
+    catch { live = false; }
+    if (live === overTitle) return;
+    overTitle = live;
+
+    const [a, b, c] = live ? LAYOUT_TITLE : LAYOUT_FLAT;
+    spTop.style.flex = `${a} 1 0`;
+    spMid.style.flex = `${b} 1 0`;
+    spBot.style.flex = `${c} 1 0`;
+    // '' hands the background back to styles.css's opaque `.boot` rule.
+    el.style.background = live ? SCRIM_OVER_3D : '';
+  }
 
   /**
    * The caption for whatever main.js says is happening right now.
@@ -178,8 +244,11 @@ export function createBootScreen(app) {
       factEl.textContent = FACTS[factIdx];
       factT = 0;
       rule.style.setProperty('--p', '0');
+      overTitle = null;      // re-decide; a remount may be a different session
+      syncTitleLayout();
     },
     update(dt) {
+      syncTitleLayout();
       factT += dt;
       if (factT >= FACT_PERIOD && !swapping) { factT = 0; rotateFact(); }
     },
