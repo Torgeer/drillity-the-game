@@ -73,6 +73,30 @@ WHAT THIS FILE IS NOT ALLOWED TO DO
 #         vs resin-grouted bolt types, and mesh handling as a class feature.
 # [R16]   research/16-site-archetypes.md S B.13 - the rockbolt machine class and
 #         the bolt-vs-hole diameter rule.
+# A DEFECT IN THE SHARED MATERIAL CONTRACT, FOUND WHILE BUILDING THIS MACHINE
+# -------------------------------------------------------------------------
+# `blender/lib/rig.py` declares MAT_DARK = 'paintedDark' for "chassis, frames,
+# guarding". THERE IS NO `paintedDark` KIND IN src/core/assets.js. Its KINDS
+# table runs paintedSteel, rawSteel, wornSteel, carbide, castIron, chrome,
+# rubber, hose, plastic, glass, ... and `resolveKind()` answers an unknown kind
+# by warning once and SUBSTITUTING rawSteel. The procedural rigs never hit it
+# because rigFactory.js gets its dark from
+#     material(ctx, 'paintedSteel', { color: 0x232A33, roughness: .62, ... })
+# - paintedSteel with a colour override, not a kind of its own.
+#
+# So every Blender-authored machine's chassis, belly plate, mudguards, boom
+# saddles and deck currently resolve to BRIGHT BARE STEEL in game. That is the
+# exact contrast [R]S6 and [R]S9 W18 call the single biggest realism win on
+# this machine - "a dark chassis under a bright body would do more for realism
+# than any added geometry" - inverted.
+#
+# NOT FIXED HERE. lib/rig.py and assets.js both belong to other people, and
+# this file keeps the library's declared constant rather than quietly routing
+# around a bug that affects all ten machines. The fix is one of: add a
+# `paintedDark` kind to assets.js KINDS, or have the glTF loader map the name
+# onto paintedSteel with the 0x232A33 override rigFactory already uses.
+# Reported rather than worked around.
+#
 # [GF]    src/rig/rigFactory.js buildBolter() L5729-5975 + src/game/data.js
 #         L1272 - the game's own procedural bolter and its spec block. Read for
 #         the CONTRACT (names, marque, bolt length, magazine) and for [R] S9's
@@ -534,30 +558,40 @@ def build_wheel(parent, name, x, y):
     ax_out = (0, math.pi / 2 if ob > 0 else -math.pi / 2, 0)   # +Z -> outboard
     ax_in = (0, -math.pi / 2 if ob > 0 else math.pi / 2, 0)    # +Z -> inboard
 
-    cyl(name + '_carcass', WHEEL_R * 0.90, WHEEL_W, R.MAT_RUBBER, parent,
-        (x_in, y, WHEEL_R), ax_out, sides=20)
+    # THE CARCASS CARRIES THE TREAD; the tread is a 32 mm block, not a tooth.
+    # The first pass gave it 75 mm of relief on a 483 mm radius and rotated
+    # each block by +a instead of -a, so every block leaned the wrong way and
+    # its corners flew off the tyre. Rendered, the wheel read as a saw blade.
+    # A rotation sign is exactly the class of error that is invisible in source
+    # and obvious in one picture (REVIEW_RUBRIC axis 4).
+    r_c = WHEEL_R - 0.030                       # carcass radius under the tread
+    cyl(name + '_carcass', r_c, WHEEL_W, R.MAT_RUBBER, parent,
+        (x_in, y, WHEEL_R), ax_out, sides=24)
     # sidewall shoulders, each growing INWARD from its own face
-    cone(name + '_wallo', WHEEL_R * 0.80, WHEEL_R * 0.90, WHEEL_W * 0.16,
-         R.MAT_RUBBER, parent, (x_out, y, WHEEL_R), ax_in, sides=20)
-    cone(name + '_walli', WHEEL_R * 0.80, WHEEL_R * 0.90, WHEEL_W * 0.16,
-         R.MAT_RUBBER, parent, (x_in, y, WHEEL_R), ax_out, sides=20)
-    # 18 blocks with wide voids, standing 1.5 mm proud so the machine rests on
-    # its grousers rather than on the carcass
-    n_lug = 18
+    cone(name + '_wallo', r_c * 0.86, r_c, WHEEL_W * 0.18,
+         R.MAT_RUBBER, parent, (x_out, y, WHEEL_R), ax_in, sides=24)
+    cone(name + '_walli', r_c * 0.86, r_c, WHEEL_W * 0.18,
+         R.MAT_RUBBER, parent, (x_in, y, WHEEL_R), ax_out, sides=24)
+    # 24 near-square blocks with wide voids [R]S4.2, tips 2 mm proud of the
+    # nominal radius so the machine stands on its grousers
+    n_lug = 24
     for i in range(n_lug):
         a = TAU * i / n_lug
+        rr = r_c + 0.016
         cheapbox('%s_lug%d' % (name, i),
-                 (WHEEL_W * 0.86, 0.105, 0.075), R.MAT_RUBBER, parent,
-                 (x, y + math.sin(a) * (WHEEL_R - 0.036),
-                  WHEEL_R + math.cos(a) * (WHEEL_R - 0.036)),
-                 (a, 0, 0))
+                 (WHEEL_W * 0.84, 0.082, 0.032), R.MAT_RUBBER, parent,
+                 (x, y + math.sin(a) * rr, WHEEL_R + math.cos(a) * rr),
+                 (-a, 0, 0))
     # rim: a shallow-dish centre with a ring of nuts [R]S4.2
     cyl(name + '_rim', RIM_R, WHEEL_W * 0.72, R.MAT_DARK, parent,
         (x - ob * WHEEL_W * 0.36, y, WHEEL_R), ax_out, sides=16)
     cone(name + '_dish', RIM_R * 0.92, RIM_R * 0.40, 0.052, R.MAT_DARK, parent,
          (x + ob * (WHEEL_W / 2 - 0.052), y, WHEEL_R), ax_out, sides=16)
-    bolt_ring(parent, name + '_nut', RIM_R * 0.42, 8, 0.020, 0.026, R.MAT_DARK,
-              (x + ob * (WHEEL_W / 2 - 0.030), y, WHEEL_R), ax_out, plane='yz')
+    # Bare steel, not paint: [R]S4.2 wants "a visible ring of wheel nuts on a
+    # shallow-dish centre", and nuts painted the same dark as the rim they sit
+    # in are not visible. Wheel nuts are bare on every machine anyway.
+    bolt_ring(parent, name + '_nut', RIM_R * 0.42, 8, 0.021, 0.028, R.MAT_WORN,
+              (x + ob * (WHEEL_W / 2 - 0.032), y, WHEEL_R), ax_out, plane='yz')
     cyl(name + '_hub', RIM_R * 0.26, 0.070, R.MAT_DARK, parent,
         (x + ob * (WHEEL_W / 2 - 0.070), y, WHEEL_R), ax_out, sides=12)
 
@@ -580,9 +614,12 @@ def build_mudguard(parent, name, x, y, back, fwd):
     for i in range(n):
         a = a0 + (a1 - a0) * (i + 0.5) / n
         seg = (a1 - a0) * r / n
-        cheapbox('%s_arch%d' % (name, i), (WHEEL_W, seg * 1.10, 0.026),
+        # rot -a, not +a. With +a every plate was mirrored about the radius
+        # and the guard splayed off the tyre like a paper fan - plainly wrong
+        # in the first side elevation, invisible in the code.
+        cheapbox('%s_arch%d' % (name, i), (WHEEL_W, seg * 1.14, 0.026),
                  R.MAT_DARK, parent,
-                 (x, y + math.sin(a) * r, WHEEL_R + math.cos(a) * r), (a, 0, 0))
+                 (x, y + math.sin(a) * r, WHEEL_R + math.cos(a) * r), (-a, 0, 0))
     sx = x - (WHEEL_W / 2 + 0.030) * (1 if x > 0 else -1)
     cheapbox(name + '_skirt', (0.020, (a1 - a0) * r * 0.92, 0.180), R.MAT_DARK,
              parent, (sx, y, WHEEL_R + r * 0.62), (0, 0, 0))
@@ -726,13 +763,39 @@ CAB_STAIN  = R.MAT_STEEL   # the electrical enclosure is "stainless steel"
 
 
 def build_hood(parent):
-    """The faired rear hood: one sculpted volume, not a boxy engine cover."""
+    """The faired rear hood, WITH AN OPEN BAY OVER THE CABLE REEL.
+
+    [R]S5.4 makes the reel one of the six thumbnail tells - "a circle standing
+    above the rear deck, with a cable running away from it along the floor. It
+    says 'plugged in', i.e. underground." The first build put it inside a
+    closed hood and it vanished: correct in the node graph, absent from every
+    render. [R]S4.0's source is a LINE elevation, where a drum inside an
+    outline is still visible; a solid model has to open the flank.
+
+    So the hood is two volumes with a reel bay between them, spanned by the
+    shoulder cap above and two frame posts each side. That is also how the
+    machine really reads in photographs of this class, where the drum and the
+    cable leaving it are plainly in view at the tail.
+    """
     y0, y1 = Y_TAIL, HOOD_Y1
     L = y1 - y0
     yc = (y0 + y1) / 2
-    # main body, from the frame rails up to the shoulder
-    box('hood_body', (2 * HOOD_HALF, L, 1.600 - FRAME_Z1), R.MAT_PAINT, parent,
-        (0, yc, (FRAME_Z1 + 1.600) / 2), bevel=0.026)
+    BAY0, BAY1 = REEL_Y - 0.600, REEL_Y + 0.600      # the open reel bay
+    # machinery bay, forward of the reel
+    box('hood_bodyF', (2 * HOOD_HALF, y1 - BAY1, 1.600 - FRAME_Z1), R.MAT_PAINT,
+        parent, (0, (BAY1 + y1) / 2, (FRAME_Z1 + 1.600) / 2), bevel=0.026)
+    # cooler bay, behind the reel
+    box('hood_bodyR', (2 * HOOD_HALF, BAY0 - y0, 1.600 - FRAME_Z1), R.MAT_PAINT,
+        parent, (0, (y0 + BAY0) / 2, (FRAME_Z1 + 1.600) / 2), bevel=0.026)
+    # the four corner posts that carry the cap across the open bay
+    for s in (-1, 1):
+        for by in (BAY0, BAY1):
+            cheapbox('hood_baypost%d_%d' % (s > 0, by > REEL_Y),
+                     (0.075, 0.075, 1.600 - FRAME_Z1), R.MAT_PAINT, parent,
+                     (s * (HOOD_HALF - 0.038), by, (FRAME_Z1 + 1.600) / 2))
+        cheapbox('hood_baysill%d' % (s > 0), (0.075, BAY1 - BAY0, 0.110),
+                 R.MAT_PAINT, parent,
+                 (s * (HOOD_HALF - 0.038), REEL_Y, FRAME_Z1 + 0.055))
     # the chamfered shoulder cap that runs the whole length [R]S4.0
     box('hood_cap', (2 * HOOD_HALF - 0.150, L - 0.070, HOOD_Z - 1.600),
         R.MAT_PAINT, parent, (0, yc, (1.600 + HOOD_Z) / 2), bevel=0.034)
@@ -740,9 +803,9 @@ def build_hood(parent):
     box('hood_tailfair', (2 * HOOD_HALF - 0.220, 0.560, 0.170), R.MAT_PAINT,
         parent, (0, y0 + 0.250, HOOD_Z - 0.130),
         (math.radians(-13), 0, 0), bevel=0.026)
-    # hinged service doors let into the flank [R]S4.0
+    # hinged service doors let into the flank [R]S4.0, clear of the reel bay
     for s in (-1, 1):
-        for i, dy in enumerate((-2.55, -1.55)):
+        for i, dy in enumerate((-3.020, -0.860)):
             box('hood_door%d_%d' % (s > 0, i), (0.024, 0.860, 0.560),
                 R.MAT_PAINT, parent, (s * (HOOD_HALF + 0.012), dy, 1.180),
                 bevel=0.014)
@@ -829,14 +892,18 @@ def build_cable_reel(parent):
     drum['drum_r_m'] = REEL_R
     cyl('reel_core', REEL_R * 0.46, REEL_W, R.MAT_DARK, drum,
         (-REEL_W / 2, 0, 0), (0, math.pi / 2, 0), sides=16)
+    # PAINTED flanges, not dark. Built in the chassis grey they were a dark
+    # disc inside a dark bay and disappeared in every render - present in the
+    # node graph, absent from the picture, which is the one failure [R]S5.4
+    # says this machine cannot afford: the reel is a thumbnail tell.
     for s in (-1, 1):
-        cyl('reel_flange%d' % (s > 0), REEL_R, 0.028, R.MAT_DARK, drum,
+        cyl('reel_flange%d' % (s > 0), REEL_R, 0.028, R.MAT_PAINT, drum,
             (s * REEL_W / 2 - (0.028 if s > 0 else 0), 0, 0),
             (0, math.pi / 2, 0), sides=24)
         for i in range(6):          # spokes / stiffeners on the flange
             a = TAU * i / 6
             cheapbox('reel_spoke%d_%d' % (s > 0, i),
-                     (0.022, REEL_R * 0.80, 0.050), R.MAT_DARK, drum,
+                     (0.022, REEL_R * 0.80, 0.050), R.MAT_PAINT, drum,
                      (s * (REEL_W / 2 + 0.020),
                       math.cos(a) * REEL_R * 0.44, math.sin(a) * REEL_R * 0.44),
                      (0, 0, a))
@@ -848,6 +915,20 @@ def build_cable_reel(parent):
         (REEL_W / 2, 0, 0), (0, math.pi / 2, 0), sides=12)
     cheapbox('reel_limitsw', (0.070, 0.110, 0.090), R.MAT_DARK, parent,
              (REEL_W / 2 + 0.170, REEL_Y - 0.240, REEL_Z + 0.150))
+    # the A-frame the drum turns in, which is what makes it read as mounted
+    # rather than floating in the bay
+    for s in (-1, 1):
+        aim_box('reel_leg%d_f' % (s > 0), 0.055, 0.150,
+                (s * (REEL_W / 2 + 0.075), REEL_Y, REEL_Z),
+                (s * (REEL_W / 2 + 0.075), REEL_Y - 0.330, FRAME_Z1),
+                R.MAT_DARK, parent, bev=0.008)
+        aim_box('reel_leg%d_r' % (s > 0), 0.055, 0.150,
+                (s * (REEL_W / 2 + 0.075), REEL_Y, REEL_Z),
+                (s * (REEL_W / 2 + 0.075), REEL_Y + 0.330, FRAME_Z1),
+                R.MAT_DARK, parent, bev=0.008)
+        cyl('reel_bearing%d' % (s > 0), 0.075, 0.090, R.MAT_CAST, parent,
+            (s * (REEL_W / 2 + 0.040), REEL_Y, REEL_Z), (0, math.pi / 2, 0),
+            sides=12)
     # the fairlead the cable pays out through - "hose/cable guiding at
     # water/cable reel" is a listed fitting [BM]p.6
     for s in (-1, 1):
@@ -862,7 +943,7 @@ def build_water_reel(parent):
     larger machine [BM]p.6. Static - it is small, it is never driven, and a
     second pivot would cost draw calls this machine would rather spend on the
     bolting unit."""
-    x, y, z = 0.520, -2.950, 1.240
+    x, y, z = 0.560, -3.140, 0.860
     cyl('wreel_core', WREEL_R * 0.44, WREEL_W, R.MAT_DARK, parent,
         (x - WREEL_W / 2, y, z), (0, math.pi / 2, 0), sides=12)
     for s in (-1, 1):
@@ -884,20 +965,23 @@ def build_air_water_package(parent):
     Sizes are NOT SOURCED; these are recognisable boxes of the right kind in
     the right place, which is what [R]S4.7 asks for.
     """
-    box('compressor', (0.520, 0.700, 0.480), R.MAT_DARK, parent,
-        (-0.300, -1.900, FRAME_Z1 + 0.250), bevel=0.020)
-    cyl('compressor_recv', 0.150, 0.560, R.MAT_DARK, parent,
-        (-0.300, -1.480, FRAME_Z1 + 0.180), (math.pi / 2, 0, 0), sides=14)
-    box('waterpump', (0.360, 0.420, 0.320), R.MAT_DARK, parent,
-        (0.380, -1.700, FRAME_Z1 + 0.170), bevel=0.018)
-    cyl('waterpump_motor', 0.105, 0.300, R.MAT_CAST, parent,
-        (0.380, -1.480, FRAME_Z1 + 0.170), (math.pi / 2, 0, 0), sides=12)
-    # the wash-down hose, coiled on a hook
+    # Forward of the reel bay, under the closed part of the hood. They sat in
+    # the open bay in the first build and stood between the camera and the
+    # drum - the one object at the tail that has to be seen.
+    box('compressor', (0.520, 0.640, 0.480), R.MAT_DARK, parent,
+        (-0.300, -1.030, FRAME_Z1 + 0.250), bevel=0.020)
+    cyl('compressor_recv', 0.140, 0.500, R.MAT_DARK, parent,
+        (-0.300, -0.620, FRAME_Z1 + 0.180), (math.pi / 2, 0, 0), sides=14)
+    box('waterpump', (0.360, 0.400, 0.320), R.MAT_DARK, parent,
+        (0.380, -1.040, FRAME_Z1 + 0.170), bevel=0.018)
+    cyl('waterpump_motor', 0.105, 0.280, R.MAT_CAST, parent,
+        (0.380, -0.680, FRAME_Z1 + 0.170), (math.pi / 2, 0, 0), sides=12)
+    # the wash-down hose, coiled on a hook on the rear hood section
     cyl('washhook', 0.022, 0.140, R.MAT_WORN, parent,
-        (HOOD_HALF + 0.020, -2.400, 1.060), (0, math.pi / 2, 0), sides=8)
+        (HOOD_HALF + 0.020, -3.140, 1.060), (0, math.pi / 2, 0), sides=8)
     for i in range(5):
         torus_ring('washcoil%d' % i, 0.135, 0.016, R.MAT_RUBBER, parent,
-                   (HOOD_HALF + 0.095, -2.400, 1.040 - i * 0.028),
+                   (HOOD_HALF + 0.095, -3.140, 1.040 - i * 0.028),
                    (0, math.pi / 2, 0), maj=16, min_=6)
 
 
@@ -1330,16 +1414,26 @@ def build_boom(root):
         bl.y * math.sin(BOOM_LIFT) + bl.z * math.cos(BOOM_LIFT)))
     v = b - a
     mid = a + v * 0.52
-    R.empty(R.NODE_PIVOT, 'boomRam', root, tuple(a))
-    aim_tube('boomram_barrel', 0.082, tuple(a), tuple(mid), R.MAT_DARK, root,
-             sides=14)
-    aim_tube('boomram_rod', 0.044, tuple(mid), tuple(b), R.MAT_CHROME, root,
-             sides=12)
-    cyl('boomram_gland', 0.090, 0.070, R.MAT_WORN, root, tuple(mid),
-        tuple(v.to_track_quat('Z', 'Y').to_euler()), sides=12)
-    for i, p in enumerate((a, b)):
-        cyl('boomram_eye%d' % i, 0.060, 0.110, R.MAT_WORN, root,
-            (p.x - 0.055, p.y, p.z), (0, math.pi / 2, 0), sides=10)
+    # THE RAM HAS TO RIDE ITS OWN NODES. Built static under the root it looked
+    # right in one pose and stayed behind the instant the boom moved: an
+    # unparented cylinder pointing at where the boom used to be. The barrel
+    # swings about its pedestal pin (pivot:boomRam) and the rod extends out of
+    # it (slide:boomRamRod), which is what a cylinder actually does.
+    ramp = R.empty(R.NODE_PIVOT, 'boomRam', root, tuple(a))
+    ramp.rotation_euler = v.to_track_quat('Z', 'Y').to_euler()
+    ramp['axis'] = 'x'
+    L = v.length
+    cyl('boomram_barrel', 0.082, L * 0.52, R.MAT_DARK, ramp, (0, 0, 0), sides=14)
+    cyl('boomram_gland', 0.090, 0.070, R.MAT_WORN, ramp, (0, 0, L * 0.52 - 0.035),
+        sides=12)
+    cyl('boomram_eyeA', 0.060, 0.110, R.MAT_WORN, ramp, (-0.055, 0, 0),
+        (0, math.pi / 2, 0), sides=10)
+    rod = R.empty(R.NODE_SLIDE, 'boomRamRod', ramp, (0, 0, L * 0.52))
+    rod['travel_m'] = L * 0.44
+    rod['axis'] = 'z'
+    cyl('boomram_rod', 0.044, L * 0.48, R.MAT_CHROME, rod, (0, 0, 0), sides=12)
+    cyl('boomram_eyeB', 0.060, 0.110, R.MAT_WORN, rod, (-0.055, 0, L * 0.48),
+        (0, math.pi / 2, 0), sides=10)
 
     return swing, lift, tele, L_OUT, L_IN
 
@@ -1361,13 +1455,18 @@ def build_boom_hoses(lift, L_out, L_in):
     not tight: they have to survive full boom articulation. Get the loop slack
     wrong and the machine reads as a toy."
     """
-    n_clamp = 8
+    # FIVE clamps, not eight, and smaller. [R]S4.0 counts "roughly eight
+    # clamps along the boom" - but that is along a boom on a LARGER machine.
+    # Eight on this 1.5 m boom put a clamp every 130 mm, and rendered, the run
+    # read as a staircase bolted to the boom rather than as hose saddles. The
+    # source's spacing matters more than its count.
+    n_clamp = 5
     for i in range(n_clamp):
-        y = 0.200 + (L_out - 0.300) * i / (n_clamp - 1)
-        cheapbox('boom_saddle%d' % i, (0.150, 0.048, 0.058), R.MAT_DARK, lift,
-                 (0, y, BOOM_D / 2 + 0.030))
-        cheapbox('boom_saddlecap%d' % i, (0.160, 0.040, 0.018), R.MAT_WORN,
-                 lift, (0, y, BOOM_D / 2 + 0.062))
+        y = 0.200 + (L_out - 0.280) * i / (n_clamp - 1)
+        cheapbox('boom_saddle%d' % i, (0.110, 0.036, 0.038), R.MAT_DARK, lift,
+                 (0, y, BOOM_D / 2 + 0.020))
+        cheapbox('boom_saddlecap%d' % i, (0.118, 0.030, 0.012), R.MAT_WORN,
+                 lift, (0, y, BOOM_D / 2 + 0.042))
     for j, (dx, rr) in enumerate(((-0.050, 0.024), (-0.017, 0.024),
                                   (0.017, 0.028), (0.050, 0.021))):
         pts = []
@@ -1680,6 +1779,18 @@ MAG_DISC_T  = 0.026  # guide disc thickness                        NOT SOURCED
 BOLT_STORE_Z0 = -1.116               # magazine bolts, lower ends
 INJ_HOSE_R  = 0.019  # resin injection hose                        NOT SOURCED
 
+# THE CONSUMABLES ARE GALVANISED, AND THE GAME HAS A KIND FOR IT.
+# blender/lib/rig.py's MAT_ constants stop at nine and none of them is
+# galvanising, but src/core/assets.js KINDS carries `galvanised` - so this file
+# names that kind directly rather than settling for bare steel. It matters:
+# [MIN] PDF p.6 gives hot-dip galvanizing to ASTM A123 as the standard finish,
+# and [R]S6 describes the look precisely - "a dull, crystalline, blue-grey
+# spangled finish, NOT chrome and NOT painted", and "galvanized items do not
+# rust orange - they go dull grey and chalky". Bolts, plates and nuts are the
+# only galvanised things on the machine, so this costs exactly one draw call
+# and buys the material the ground support is actually made of.
+MAT_GALV    = 'galvanised'
+
 
 def _bolt(parent, name, x, y, z, length, plated=True):
     """One friction bolt with its face plate and domed nut.
@@ -1697,15 +1808,15 @@ def _bolt(parent, name, x, y, z, length, plated=True):
     closest of the nine (hot-dip galv reads dull blue-grey, not orange-rust and
     not chrome - [R]S6).
     """
-    cyl(name, BOLT_OD / 2, length, R.MAT_STEEL, parent, (x, y, z), sides=8)
+    cyl(name, BOLT_OD / 2, length, MAT_GALV, parent, (x, y, z), sides=8)
     # the longitudinal slot that makes it a friction bolt
     cheapbox(name + '_slot', (0.006, BOLT_OD * 0.9, length - 0.10), R.MAT_DARK,
              parent, (x + BOLT_OD / 2, y, z + length / 2))
     if plated:
-        box(name + '_plate', (PLATE_SQ, PLATE_SQ, PLATE_T), R.MAT_STEEL,
+        box(name + '_plate', (PLATE_SQ, PLATE_SQ, PLATE_T), MAT_GALV,
             parent, (x, y, z + 0.030), bevel=0.010)
         cone(name + '_nut', NUT_AF / 2 * 1.15, NUT_AF / 2 * 0.62, 0.030,
-             R.MAT_STEEL, parent, (x, y, z + 0.034), sides=6)
+             MAT_GALV, parent, (x, y, z + 0.034), sides=6)
 
 
 def build_bolting_unit(index, car, spindle_parent, bot_z, top_z, col_z):
@@ -1811,19 +1922,19 @@ def build_deck_stores(parent):
     """
     # a stack of square plates
     for i in range(5):
-        box('store_plate%d' % i, (PLATE_SQ, PLATE_SQ, PLATE_T), R.MAT_STEEL,
+        box('store_plate%d' % i, (PLATE_SQ, PLATE_SQ, PLATE_T), MAT_GALV,
             parent, (0.720, 0.430, DECK_Z + 0.010 + i * (PLATE_T + 0.002)),
             (0, 0, 0.06 * i), bevel=0.008)
     # and a short stack of round ones
     for i in range(3):
-        cyl('store_rplate%d' % i, PLATE_RD_D / 2, PLATE_T, R.MAT_STEEL, parent,
+        cyl('store_rplate%d' % i, PLATE_RD_D / 2, PLATE_T, MAT_GALV, parent,
             (0.720, 0.700, DECK_Z + 0.010 + i * (PLATE_T + 0.002)), sides=16)
     # a nut tray
     box('store_nuttray', (0.240, 0.180, 0.070), R.MAT_DARK, parent,
         (0.720, 0.960, DECK_Z + 0.035), bevel=0.008)
     for i in range(6):
         cone('store_nut%d' % i, NUT_AF / 2 * 1.15, NUT_AF / 2 * 0.62, 0.030,
-             R.MAT_STEEL, parent,
+             MAT_GALV, parent,
              (0.660 + (i % 3) * 0.058, 0.930 + (i // 3) * 0.058,
               DECK_Z + 0.070), sides=6)
     # the resin cartridge box, lid up, cartridges standing in it
@@ -1993,8 +2104,12 @@ def build_service_hoses(root):
         (0.140, Y_FOOT - 0.100, Z_FOOT - 0.220),
     ], radius=0.022, parent=root, sides=6)
     # the trailing cable, off the reel and away down the drive
+    # It leaves the drum's underside on the tail side and falls to the floor.
+    # Starting it at the bay edge instead broke the one thing the reel is for:
+    # a cable that visibly comes OFF the drum.
     R.hose('trailing_cable', [
-        (0.170, REEL_Y - 0.640, REEL_Z - 0.320),
+        (0.120, REEL_Y + 0.140, REEL_Z - REEL_R * 0.94),
+        (0.170, REEL_Y + 0.560, REEL_Z - 0.640),
         (0.240, REEL_Y - 1.150, 0.760),
         (0.120, Y_TAIL - 0.400, 0.180),
         (-0.320, Y_TAIL - 2.100, 0.045),
