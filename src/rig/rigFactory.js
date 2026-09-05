@@ -6623,16 +6623,6 @@ function buildCPTUnit(T, ctx) {
   dyn.toolAnchor = out;
   dyn.cptPush = { lowClamp: lowClamp, upClamp: upClamp, rateMmS: 20 };
   dyn.pushBreak = true;
-  // This machine shares `site-investigation` with the SI rig and runs entirely
-  // different tooling on it: a PUSHED piezocone on 44.5 mm push rods, never a
-  // driven split spoon and never a bit.
-  dyn.tooling = {
-    'site-investigation': {
-      surface: null,
-      downhole: { id: 'cpt-piezocone', opts: { areaCm2: 10 } },
-      stringDia: 0.0445, stringMat: 'steel',
-    },
-  };
   // the data cable coming off the rod head to the logger
   part(T, stack.lower, G.tube(T, [
     [0.0, 0.60, 0.08], [0.34, 0.95, 0.34], [0.72, 0.80, 0.56], [0.92, 0.50, 0.62],
@@ -7281,6 +7271,20 @@ const METHOD_TOOLING = {
   },
 };
 
+// Machine overrides apply after either builder. CPT shares a method id with
+// SPT, but its pushed piezocone must also survive the switch to a GLB model.
+const MACHINE_TOOLING = {
+  'cpt-unit': {
+    'site-investigation': {
+      surface: null,
+      // Existing CPT configuration; authoring provenance: blender/cpt_unit.py
+      // [D5778] and CONE_R/ROD_R (10 cm² cone, 44.5 mm push rods).
+      downhole: { id: 'cpt-piezocone', opts: { areaCm2: 10 } },
+      stringDia: 0.0445, stringMat: 'steel',
+    },
+  },
+};
+
 /* ═══════════════════════════════════════════════════════════════════════════
    THE SYSTEM
    ═══════════════════════════════════════════════════════════════════════════ */
@@ -7620,6 +7624,8 @@ export function createRigSystem(ctx) {
     if (cached && cached.sourceKey === key) return cached;
     const b = buildMachine(id);
     if (!b) return null;
+    const tooling = MACHINE_TOOLING[b.spec.id];
+    if (tooling) b.dyn.tooling = { ...b.dyn.tooling, ...tooling };
     mergeStatic(T, b.root);
     b.root.visible = false;
     b.dyn.bodyBaseY = b.dyn.body ? b.dyn.body.position.y : 0;
