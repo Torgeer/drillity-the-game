@@ -220,55 +220,78 @@ const CAMERA_MODES = {
  *                                              is a tunnel at envIntensity
  *                                              0.15, the cut is lit at 0.56
  *
- *   THE TWO BANDS ARE LIT BY DIFFERENT SUNS. Projected into each band's own
- *   screen space:
+ *   THE TWO BANDS ARE LIT BY DIFFERENT SUNS — but NOT by as much as this
+ *   note used to say, and the error was in the instrument.
  *     surface keySun      az 79.9-103.9°   el 14.8-16.2°   #ffe0a6 (warm)
  *     section sectionKey  az 150.8°        el 49.3°        #e8e5dc (neutral)
- *     → 47-71° apart in azimuth, 33-35° in elevation. Golden hour above the
- *       line, near-noon below it.
+ *   Those two azimuths are not the same quantity. The surface one is a SCREEN
+ *   azimuth; 150.8 is `sectionKey`'s WORLD azimuth, measured against a camera
+ *   pointing somewhere else entirely, and subtracting them produced "47-71°
+ *   apart" out of thin air. HANDOFF §8C. `.qa-collar.mjs` now reports each
+ *   band's key in THAT BAND'S own screen space, and the honest figure is
+ *   22.8° for the cut against 76.3° for nordic's sun: 53.5° apart, BOTH from
+ *   the right of frame.
  *
- *   THERE IS NO AERIAL PERSPECTIVE BELOW THE SEAM AT ALL.
+ *   The real defect was one the wrong instrument could not see. The cut's key
+ *   was a CONSTANT while the surface sun moves with the region, so
+ *   `.probe-suns.mjs` found 14 of 32 sampled region-hours lighting the two
+ *   bands from OPPOSITE sides. Fixed in core/env.js — the section lights now
+ *   mirror to follow the sun's side at their authored angle; 0 of 32.
+ *
+ *   THERE IS NO AERIAL PERSPECTIVE BELOW THE SEAM AT ALL — and there should
+ *   not be. An orthographic projection has no perspective to haze, and the
+ *   section has no depth to fog: every visible mesh in it lies between z -9
+ *   and z +2.2, over which the surface's own density buys 0.33 %.
  *     scene.fog         exp2, density 0.0052-0.027
- *     sectionScene.fog  null
+ *     sectionScene.fog  null  — CORRECT ON PURPOSE, see core/env.js
  *     env intensity     0.62 surface / 0.56 section (0.15 / 0.56 underground)
  *
- *   BAND EXPOSURE IS NOT MATCHED. section/surface mean luma 1.03 (dth),
- *   1.20 (cfa), 1.54 (auger), 1.61 (rockbolt); the section's p05 floor is
- *   1.9-4.2x the surface's, i.e. the cut has no deep shadow.
+ *   BAND EXPOSURE section/surface mean luma 1.03 (dth), 1.20 (cfa), 1.54
+ *   (auger), 1.61 (rockbolt). The first two ARE the author's stated target
+ *   (`SECTION_GAIN`); the last two are the surface band moving, not the cut.
+ *   Also correct on purpose — the reasoning is recorded in core/env.js.
  *
- * All four live in core/env.js (`keySun` ≈:1336, `sectionKey` ≈:1379), not
- * here. They are the seam.
+ * All of it lives in core/env.js, not here.
  *
  * ── AND THE THREE GEOMETRIC CLAIMS, WHICH ARE THIS FILE'S ──────────────
  *
- * Identical on every method measured, because they are camera properties:
+ * Identical on every method measured, because they are camera properties.
+ * The first two are FIXED — see `registerBands()`, which solves them from the
+ * projection every frame rather than trusting these numbers to stay true:
  *
- *   collarOffsetPx   62.44 px    the borehole axis (world 0,0,0) projects to
- *                                x 257.4 in the surface band; the section
- *                                camera is centred on it and draws it at
- *                                x 195. GAMEDESIGN §1's invariant — "the
- *                                borehole in the section lines up horizontally
- *                                with the mast above it" — is out by 16.0 %
- *                                OF THE STAGE WIDTH. The hero camera's 3/4
- *                                framing is deliberate; this consequence of it
- *                                does not appear to be.
- *   groundAtSeamPx   -22.81 px   the world ground plane at the collar projects
- *                                22.8 px ABOVE the seam, so the cut opens
- *                                below where the ground is.
- *   scaleRatio       2.81x       surface 54.58 CSS px/m at the collar against
- *                                the section's 19.42. A rod crossing the seam
+ *   collarOffsetPx   62.44 -> 0.00   the borehole axis (world 0,0,0) projected
+ *                                to x 257.44 in the surface band while the
+ *                                section drew it at x 195.00 — GAMEDESIGN §1's
+ *                                invariant out by 16.0 % OF THE STAGE WIDTH.
+ *   groundAtSeamPx  -22.81 -> 0.00   ground level at the collar projected
+ *                                22.8 px ABOVE the seam, so the cut opened
+ *                                below where the ground was drawn.
+ *                                (`shots/base-collar.json` is the before,
+ *                                 `shots/reg-collar.json` the after, both warm
+ *                                 on dth / cfa / auger.)
+ *
+ *   scaleRatio       2.81x   NOT FIXED, and not a framing error — surface
+ *                                54.58 CSS px/m at the collar against the
+ *                                section's 19.42. A rod crossing the seam
  *                                changes size by 2.81x.
  *
  * scaleRatio is the hard one and it is a genuine design tension, not an
- * oversight: 19.42 px/m is not free to move — world/geology.js lays its
- * gutter, ruler and 19.4 px/m out against the REFERENCE aspect and
- * `adoptCameraScale()` rejects a camera more than 35 % off it (see
- * updateSectionFrustum below). Matching at the collar the other way needs the
- * hero camera at ~39 m instead of 14 m, which would shrink the machine to
- * nothing. The reference frame gets both because its rig is genuinely far
- * away. Whoever takes this needs a decision, not a patch — and it is worth
- * noting that collarOffsetPx and groundAtSeamPx do NOT depend on it and can
- * be fixed independently.
+ * oversight. 19.42 px/m is not free to move: world/geology.js authors its
+ * gutter (`logWidth` 5.6), its ruler (`rulerWidth` 2.6), `holeRBase/Gain/Max`
+ * and its contact bands in SECTION UNITS, so every one of them scales 1:1
+ * with px/m — at 54.58 the log and ruler alone want 8.2 units of a 7.15-unit
+ * band and `uGeoX` inverts. Its `adoptCameraScale()` also clamps the adopted
+ * view to `clamp(h, 12, 160)`, a ceiling of 32.35 px/m on the reference band,
+ * so 54.58 is unreachable from that side whatever anyone decides.
+ *
+ * Matching at the collar the other way needs the hero eye at 38.4 m instead
+ * of 13.69 (measured, not estimated: 328 px / 19.42 = 16.89 m of visible
+ * height, / 2 tan 12.41°). That puts crawler-lite's 4.2 m mast at 82 px — 25 %
+ * of the band against 70 % today, and about 7 % of the frame by area instead
+ * of 53 %. It also lifts the eye to ~6.3 m along the ray, which re-opens the
+ * horizon/exposure solve in the `orbit` note above and terrain.js's pit-ring
+ * framing. The reference frame (research/18) gets both because its rig is
+ * genuinely far away. This needs an art decision, not a patch.
  */
 const GradeShader = {
   name: 'DrillityGrade',
