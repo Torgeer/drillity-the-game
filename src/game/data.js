@@ -1190,9 +1190,14 @@ export const RIGS = deepFreeze([
     id: 'cfa-rig', name: 'Lindhorst CF-28 Continuum', maker: 'Lindhorst',
     price: 720000, unlockLevel: 27,
     methods: ['cfa', 'cased-cfa', 'auger', 'rotary-kelly'],
-    stats: { power: 261, torque: 132, feedForce: 190, depthCapacity: 32, rodHandling: 0.7, mobility: 0.4, comfort: 0.85 },
+    // Basic CFA configuration without a Kelly extension: 15 m. The OEM's 22 m
+    // rating needs its 6 m extension, which this model does not contain.
+    // Sunward S-series, printed p.24 (PDF p.25), configuration table:
+    // https://sunward.eu/wp-content/uploads/2023/08/SUNWARD_DRILLING-RIGS_S-SERIES_EN.pdf
+    // See research/rigs/cfa-capacity-verification-2026-09-06.md for the model audit.
+    stats: { power: 261, torque: 132, feedForce: 190, depthCapacity: 15, rodHandling: 0.7, mobility: 0.4, comfort: 0.85 },
     upkeepPerHour: 74, fuelPerHour: 69, transportTons: 82,
-    description: 'Fixed-mast CFA rig with concrete-pressure and auger-rotation logging on the cab screen. Add the counter-rotating casing drive and it becomes a double-rotary machine without leaving the yard.',
+    description: 'A 15 m fixed-mast CFA setup with concrete-pressure and auger-rotation logging on the cab screen. Add the counter-rotating casing drive and it becomes a double-rotary machine without leaving the yard.',
     family: CAT.rigFoundation,
   },
   {

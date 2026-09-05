@@ -140,38 +140,20 @@ DRIVE_LO_Z  = 3.60       # derived: the drive cannot come lower than the
 DRIVE_HI_Z  = DRIVE_LO_Z + CROWD   # 20.60 — so the drive parks just under the
                          #      masthead, as it does on both source elevations
 DRIVE_Z     = 20.55      # default pose: top of stroke, auger COLLARED.
-                         #      Bottom of stroke puts the tip at -17.05, so the
-                         #      23.10 m mast comfortably exceeds the pile length
-                         #      — the rule the game's own 21.5 m mast against a
-                         #      24 m depth currently breaks.
-                         #
-                         # WHY THIS MODEL MEASURES -0.660 BELOW y=0, AND WHY
-                         # THAT IS CORRECT.  `glbinfo` flags any model reaching
-                         # more than 250 mm under the ground plane.  Here the
-                         # whole of it is the AUGER TIP, hanging off
-                         # `pivot:spindle` under `slide:carriage`: the flight
-                         # bottom sits at -0.100 and the starter head, pick
-                         # holders, tips and sacrificial toecap reach -0.660.
-                         # The machine's own statics stop at -0.030 (chassis)
-                         # and -0.100 (base box skirt) — i.e. ON grade.
-                         # A CFA rig is DEFINED by a single continuous auger
-                         # that never leaves the machine: there is no detach-
-                         # able tool to swap in, so the auger has to be in the
-                         # .glb, and an auger drawn stopping dead at the ground
-                         # plane is the one thing that would read as wrong.
-                         # DO NOT "fix" this by shortening the auger or lifting
-                         # the carriage — measure with
-                         #   node tools/glbinfo.mjs --parts public/models/cfa-rig.glb
-                         # and you will land back on `pivot:spindle` every time.
-                         #
-                         # NOT RESOLVED, recorded rather than invented: at
-                         # DRIVE_HI_Z the flight bottom is still at -0.05, so as
-                         # modelled the machine cannot withdraw its auger fully
-                         # clear of the hole. [S1] gives auger length 16 000 /
-                         # 19 000 against a 17 000 crowd stroke, so the shortfall
-                         # is in the SOURCE numbers, not in this file. Closing it
-                         # needs a sourced mast height for the CFA configuration,
-                         # which no local file and no web pass has produced.
+                         # Measured with tools/glbinfo.mjs on the 2026-09-06
+                         # export: spindle subtree tip Y is -0.660 at rest,
+                         # -0.610 at DRIVE_HI_Z and -17.610 at DRIVE_LO_Z.
+                         # This is geometric reach, not a certified pile depth.
+                         # [S1] printed p.24 rates the basic no-Kelly-extension
+                         # CFA setup at 15 m; its 22 m rating requires a 6 m
+                         # extension. This assembly has no translating Kelly
+                         # extension, so data.js now uses the basic rating.
+                         # NOT RESOLVED: the tip cannot clear grade even at the
+                         # upper endpoint. The authored 19.6 m auger length is
+                         # NOT SOURCED; it must not be blamed on [S1], which
+                         # does not specify that length. [W1]'s 16/19 m augers
+                         # belong to different configurations of another rig.
+                         # See research/rigs/cfa-capacity-verification-2026-09-06.md.
 
 # tool [S1]/[S2]/[W1]
 AUGER_D     = 1.000      # [S1] max drilling diameter dimensioned on the drawing.
@@ -182,8 +164,9 @@ STEM_R      = 0.2225     # [S2] central pipe 445 x 10 for the large sizes
 PITCH       = 0.400      # [S2] flight pitch 250-400 mm for large diameter; the
                          #      [W1] elevation draws pitch/diameter near 0.45, so
                          #      take the top of the sourced band, not the middle
-TURNS       = 49         # [W1] auger length 16 000 / 19 000 mm
-AUGER_LEN   = PITCH * TURNS          # 18.0; [W1] auger length 16 000 / 19 000
+TURNS       = 49         # NOT SOURCED: retained authored turn count.
+AUGER_LEN   = PITCH * TURNS          # 19.6 m; NOT SOURCED for this configuration.
+                                    # [W1] p.18 dimensions 16/19 m, not 19.6 m.
 FLIGHT_T    = 0.022      # [S2] flight plate thickness S
 CLEANER_Z   = 1.10       # [S1] auger cleaner height above ground
 BASEBOX_H   = 1.630      # [S1] base / drilling-table box height
