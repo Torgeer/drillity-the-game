@@ -599,6 +599,35 @@ def build_upper(slew):
               0.022, R.MAT_WORN, own, slew, sides=6)
     bx('cab-step', (0.55, 0.34, 0.06), R.MAT_HAZARD, own, slew,
        (cx0 - 0.30, cy0 - CAB_D / 2 - 0.18, DECK_Z - 0.35), bevel=0.01)
+    # A cab glazed on four sides and a roof cannot be an empty shell: through
+    # the screen you see the seat, the two joystick consoles and the display.
+    bx('cab-seat-base', (0.52, 0.50, 0.16), R.MAT_DARK, own, slew,
+       (cx0, cy0 - 0.28, cz0 + 0.52), bevel=0.03)
+    bx('cab-seat-squab', (0.52, 0.52, 0.14), R.MAT_RUBBER, own, slew,
+       (cx0, cy0 - 0.26, cz0 + 0.66), bevel=0.04)
+    bx('cab-seat-back', (0.50, 0.14, 0.62), R.MAT_RUBBER, own, slew,
+       (cx0, cy0 - 0.52, cz0 + 1.02), (-0.16, 0, 0), bevel=0.04)
+    for sx in (-1, 1):
+        bx('cab-console', (0.20, 0.44, 0.16), R.MAT_DARK, own, slew,
+           (cx0 + sx * 0.40, cy0 - 0.22, cz0 + 0.78), bevel=0.03)
+        tb('cab-joystick', 0.028, 0.20, R.MAT_RUBBER, own, slew,
+           (cx0 + sx * 0.40, cy0 - 0.12, cz0 + 0.86), sides=8)
+    bx('cab-display', (0.34, 0.05, 0.24), R.MAT_GLASS, own, slew,
+       (cx0 + 0.32, cy0 + 0.46, cz0 + 1.22), (0.25, 0, 0), bevel=0.0)
+    bx('cab-display-case', (0.38, 0.10, 0.28), R.MAT_DARK, own, slew,
+       (cx0 + 0.32, cy0 + 0.50, cz0 + 1.22), (0.25, 0, 0), bevel=0.02)
+    bx('cab-floor', (CAB_W - 0.12, CAB_D - 0.12, 0.05), R.MAT_DARK, own, slew,
+       (cx0, cy0, cz0 + 0.06), bevel=0.01)
+    # mirrors, and the wiper on the screen a driller looks through all day
+    for sx in (-1, 1):
+        strut('cab-mirror-arm', (cx0 + sx * (CAB_W / 2 - 0.03), cy0 + 0.70, cz0 + 1.85),
+              (cx0 + sx * (CAB_W / 2 + 0.34), cy0 + 0.76, cz0 + 1.92),
+              0.018, R.MAT_WORN, own, slew, sides=6)
+        bx('cab-mirror', (0.05, 0.16, 0.26), R.MAT_GLASS, own, slew,
+           (cx0 + sx * (CAB_W / 2 + 0.36), cy0 + 0.76, cz0 + 1.86), bevel=0.0)
+    strut('cab-wiper', (cx0 - 0.30, cy0 + CAB_D / 2 + 0.04, cz0 + 0.55),
+          (cx0 + 0.26, cy0 + CAB_D / 2 + 0.04, cz0 + 1.42),
+          0.014, R.MAT_RUBBER, own, slew, sides=6)
 
     # service platform at the leader foot — where the crew stand to change the
     # tool and to work on the drive when it is racked at the bottom
@@ -855,13 +884,24 @@ def build_mast(mast):
           (-0.42, DRILL_AXIS_Y - 0.05, gz), 0.075, R.MAT_DARK, own, mast, square=True)
     strut('kelly-guide-arm-r', (0.45, MAST_FACE_Y, gz),
           (0.42, DRILL_AXIS_Y - 0.05, gz), 0.075, R.MAT_DARK, own, mast, square=True)
-    bx('kelly-guide-collar', (1.06, 0.34, 0.42), R.MAT_DARK, own, mast,
-       (0, DRILL_AXIS_Y, gz), bevel=0.03)
+    bx('kelly-guide-collar', (1.24, 1.10, 0.56), R.MAT_DARK, own, mast,
+       (0, DRILL_AXIS_Y, gz), bevel=0.04)
+    tb('kelly-guide-bore', 0.42, 0.62, R.MAT_WORN, own, mast,
+       (0, DRILL_AXIS_Y, gz - 0.31), sides=18)
     for a in range(4):                                # guide rollers, 4 round
         th = a * math.tau / 4 + math.pi / 4
-        tb('kelly-guide-roller', 0.085, 0.34, R.MAT_STEEL, own, mast,
-           (math.cos(th) * 0.36, DRILL_AXIS_Y + math.sin(th) * 0.36, gz - 0.17),
+        tb('kelly-guide-roller', 0.095, 0.40, R.MAT_STEEL, own, mast,
+           (math.cos(th) * 0.40, DRILL_AXIS_Y + math.sin(th) * 0.40, gz - 0.20),
            (0, 0, 0), sides=10)
+        bx('kelly-guide-roller-cap', (0.16, 0.16, 0.07), R.MAT_CAST, own, mast,
+           (math.cos(th) * 0.40, DRILL_AXIS_Y + math.sin(th) * 0.40, gz + 0.22),
+           bevel=0.012)
+    strut('kelly-guide-brace-l', (-0.50, MAST_FACE_Y + 0.05, gz - 1.30),
+          (-0.44, DRILL_AXIS_Y - 0.30, gz - 0.20), 0.055, R.MAT_DARK, own, mast,
+          square=True)
+    strut('kelly-guide-brace-r', (0.50, MAST_FACE_Y + 0.05, gz - 1.30),
+          (0.44, DRILL_AXIS_Y - 0.30, gz - 0.20), 0.055, R.MAT_DARK, own, mast,
+          square=True)
 
     # hose deflection roller: where the bundle turns up the leader [S4]
     tb('hose-deflect-roller', 0.16, 0.62, R.MAT_STEEL, own, mast,
@@ -912,10 +952,18 @@ def build_sledge_and_drive(sledge, spindle):
                (sx * (RAIL_X + 0.13), MAST_FACE_Y + 0.11, sz), bevel=0.01)
     bx('sledge-crossbeam', (1.55, 0.26, 0.30), R.MAT_DARK, own, sledge,
        (0, MAST_FACE_Y + 0.52, 0.85), bevel=0.025)
-    # crowd rope terminations, top and bottom of the sledge
+    # Crowd reeving hardware. This machine crowds on a ROPE system — 400/513 kN
+    # push and pull through a 28 mm rope [S1 p.11] — so the sledge carries a
+    # sheave block top and bottom and the rope dead-ends on it, rather than
+    # being pushed by a pair of long cylinders. Getting this wrong would put the
+    # wrong architecture on the leader.
     for sz in (1.05, -1.05):
-        bx('crowd-rope-anchor', (0.24, 0.22, 0.24), R.MAT_WORN, own, sledge,
-           (0.34, MAST_FACE_Y + 0.42, sz), bevel=0.02)
+        bx('crowd-block', (0.30, 0.26, 0.30), R.MAT_WORN, own, sledge,
+           (0.34, MAST_FACE_Y + 0.42, sz), bevel=0.025)
+        tb('crowd-sheave', 0.155, 0.075, R.MAT_CAST, own, sledge,
+           (0.30, MAST_FACE_Y + 0.42, sz), (0, math.pi / 2, 0), sides=16)
+        bx('crowd-wedge-socket', (0.12, 0.13, 0.20), R.MAT_STEEL, own, sledge,
+           (0.05, MAST_FACE_Y + 0.42, sz), bevel=0.015)
 
     # arms out to the drill axis — this is the 1 400 mm stand-off, in the metal
     for sx in (-1, 1):
