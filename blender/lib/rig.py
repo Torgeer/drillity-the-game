@@ -30,6 +30,21 @@ THE THREE CONTRACTS THIS FILE ENFORCES
    a material is therefore free in draw-call terms and costs only triangles —
    that is the lane to spend in.
 
+   Contract 3 fights contract 1, and contract 1 wins. Joining deletes objects,
+   and a `mount:`/`aim:` empty parented to a deleted object loses its world
+   position without losing its name. `finish()` therefore restores every world
+   transform after the joins. Read the note in `finish()` before touching it.
+
+MEASURE, DO NOT READ
+--------------------
+`box()` built every machine at half scale for a week. It was not caught by
+reading the code — six builders read it and each wrote a local workaround
+instead — and it could not be caught in a viewport, because `tube()` was
+correct, so the machines were correct cylinders bolted to half-size plates.
+`reset()` now measures both primitives on every build and raises if either
+lies, and `tools/glbinfo.mjs` reports the world bounding box of an exported
+file. A dimension nobody has read back is a dimension nobody knows.
+
 UNITS AND AXES
 --------------
 Metres. Blender is Z-up; the exporter converts to three.js Y-up. Build with Z as
@@ -61,12 +76,54 @@ MAT_CHROME  = 'chrome'         # cylinder rods
 MAT_HAZARD  = 'safetyStripe'   # hazard striping, toe boards
 
 
+def _selfcheck():
+    """Build one box and one tube of known size, MEASURE them, and refuse to
+    continue if either lies.
+
+    This exists because `box()` was wrong by a factor of two for a week and no
+    instrument in the tree would have said so. Every dimension in every machine
+    here is supposed to trace to a datasheet page; a primitive that silently
+    rescales makes that provenance decorative. `foundation_bg.py` had already
+    invented this check locally and used it to compensate at build time — the
+    idea was right and the place was wrong, so it lives here now and it raises
+    instead of compensating. Cost is two primitives per build.
+    """
+    probe = box('__selfcheck_box__', (4.0, 2.0, 10.0), MAT_PAINT)
+    d = probe.dimensions
+    got = (d.x, d.y, d.z)
+    bpy.data.objects.remove(probe, do_unlink=True)
+    if max(abs(g - w) for g, w in zip(got, (4.0, 2.0, 10.0))) > 1e-4:
+        raise AssertionError(
+            'rig.box() is not building at the size it is asked for: wanted '
+            '(4.000, 2.000, 10.000), measured (%.3f, %.3f, %.3f). Every machine '
+            'in blender/ is dimensioned in real metres against a datasheet, so '
+            'this is not cosmetic.' % got)
+
+    probe = tube('__selfcheck_tube__', 0.5, 3.0, MAT_STEEL)
+    d = probe.dimensions
+    zs = [v.co.z for v in probe.data.vertices]
+    got = (d.x, d.y, d.z, min(zs), max(zs))
+    bpy.data.objects.remove(probe, do_unlink=True)
+    if (max(abs(g - w) for g, w in zip(got[:3], (1.0, 1.0, 3.0))) > 1e-4
+            or abs(got[3]) > 1e-4 or abs(got[4] - 3.0) > 1e-4):
+        raise AssertionError(
+            'rig.tube() is not building at the size it is asked for, or its '
+            'origin is not at its base: wanted d=(1.000, 1.000, 3.000) '
+            'z=0.000..3.000, measured d=(%.3f, %.3f, %.3f) z=%.3f..%.3f' % got)
+
+
 def reset():
-    """Empty scene, metric units, nothing inherited from a previous run."""
+    """Empty scene, metric units, nothing inherited from a previous run.
+
+    Also runs `_selfcheck()`: the primitives are measured at the start of every
+    build, so a machine cannot be exported by a library that has quietly stopped
+    building at true scale.
+    """
     bpy.ops.wm.read_factory_settings(use_empty=True)
     sc = bpy.context.scene
     sc.unit_settings.system = 'METRIC'
     sc.unit_settings.length_unit = 'METERS'
+    _selfcheck()
     return bpy.context.collection
 
 
@@ -92,11 +149,25 @@ def part(name, mesh_obj, mat=MAT_PAINT, parent=None, loc=(0, 0, 0), rot=(0, 0, 0
 
 
 def box(name, size, mat=MAT_PAINT, parent=None, loc=(0, 0, 0), rot=(0, 0, 0), bevel=0.0):
-    """A box. `bevel` in metres — a bevelled edge is what stops steel reading as
-    cardboard, and it costs triangles, not draw calls."""
+    """A box `size` metres on each edge. `bevel` in metres — a bevelled edge is
+    what stops steel reading as cardboard, and it costs triangles, not draws.
+
+    `size` on `primitive_cube_add` is the EDGE LENGTH, not a half-extent: with
+    size=1 the cube already spans −0.5..+0.5. This function used to scale that
+    by `size/2` as well, so every box it built came out at HALF the dimension
+    asked for, for the whole first week of the pipeline. It survived because
+    `tube()` was right, so machines rendered as correct cylinders bolted to
+    half-size plates: nothing looked broken, the proportions were quietly wrong.
+    Six of the nine builders had each independently discovered it and shadowed
+    this function locally rather than change a file the others were building
+    against, which is why it went on being true for so long.
+
+    Do not "simplify" this back to a scale of size/2, and do not change the
+    primitive's `size=` without re-running the check in `reset()`.
+    """
     bpy.ops.mesh.primitive_cube_add(size=1)
     o = bpy.context.active_object
-    o.scale = (size[0] / 2, size[1] / 2, size[2] / 2)
+    o.scale = (size[0], size[1], size[2])
     bpy.ops.object.transform_apply(scale=True)
     if bevel > 0:
         m = o.modifiers.new('bev', 'BEVEL')
@@ -175,6 +246,31 @@ def finish(out_path, join_by_material=True):
     emits one draw call per material per mesh, so 300 separate bolts in one
     material are 300 draw calls unjoined and 1 joined. Anything parented to a
     pivot: or slide: node is left alone — it has to move independently.
+
+    WHAT THE JOIN USED TO DO TO NAMED NODES, AND WHY IT MATTERS
+    ----------------------------------------------------------
+    `bpy.ops.object.join()` deletes the objects it eats, and the children of a
+    deleted object do NOT keep their world transform. Measured: a
+    `mount:` empty parented to a static box at x = 6 came back at x = 0 after
+    the join, dragging its `aim:` child with it. `env.js` reads those two world
+    positions EVERY FRAME to aim a spotlight, so a lamp silently moved six
+    metres and then lit the wrong place forever.
+
+    That was live and undetected. The export it produced still contained a node
+    called `mount:...`, so any check that asked "did the name survive?" passed —
+    the name is not the contract, the POSITION is. So the world matrix of every
+    object is snapshotted before the joins and restored after them, parents
+    before children.
+
+    A mesh parented under a `mount:` node IS joined away — `mount:` is
+    documented as a FIXED attachment point and the game only reads its
+    position, never drives it. If you need geometry to move, hang it on a
+    `pivot:` or a `slide:`.
+
+    Curve objects (hoses, ropes) are converted and joined too. They were
+    skipped, because the grouping loop tested `o.type != 'MESH'`, so every
+    unwelded hose was an uncounted draw call in a machine measured against a
+    budget of 70.
     """
     bpy.ops.object.select_all(action='DESELECT')
 
@@ -187,6 +283,25 @@ def finish(out_path, join_by_material=True):
         return False
 
     if join_by_material:
+        # A hose is a CURVE until something converts it. Do that first, or it
+        # never reaches the grouping below and spends a draw call alone.
+        for o in list(bpy.context.scene.objects):
+            if o.type != 'CURVE' or is_dynamic(o):
+                continue
+            bpy.ops.object.select_all(action='DESELECT')
+            o.select_set(True)
+            bpy.context.view_layer.objects.active = o
+            bpy.ops.object.convert(target='MESH')
+
+        # Snapshot every world transform BEFORE the first join. See the note
+        # above: join() is what moves named nodes, and it moves them silently.
+        bpy.context.view_layer.update()
+        # Keyed by NAME, not by object: join() removes the objects it eats and
+        # a held Python reference to one becomes a dead StructRNA that raises
+        # on any attribute access, including the `is it still here?` test.
+        snapshot = [(o.name, o.matrix_world.copy())
+                    for o in bpy.context.scene.objects]
+
         groups = {}
         for o in list(bpy.context.scene.objects):
             if o.type != 'MESH' or is_dynamic(o):
@@ -194,14 +309,40 @@ def finish(out_path, join_by_material=True):
             key = o.data.materials[0].name if o.data.materials else 'none'
             groups.setdefault(key, []).append(o)
         for key, objs in groups.items():
-            if len(objs) < 2:
-                continue
-            bpy.ops.object.select_all(action='DESELECT')
-            for o in objs:
-                o.select_set(True)
-            bpy.context.view_layer.objects.active = objs[0]
-            bpy.ops.object.join()
-            bpy.context.active_object.name = 'static:' + key
+            if len(objs) > 1:
+                bpy.ops.object.select_all(action='DESELECT')
+                for o in objs:
+                    o.select_set(True)
+                bpy.context.view_layer.objects.active = objs[0]
+                bpy.ops.object.join()
+                target = bpy.context.active_object
+            else:
+                target = objs[0]
+            # Name a group of one the same way as a group of many. The prefix
+            # is how a reader of the .glb tells joined static geometry from a
+            # mesh that escaped the join; when only some of them carried it,
+            # the distinction could not be read off the file.
+            target.name = 'static:' + key
+
+        # Put the named nodes back. Parents first: `matrix_world` is resolved
+        # against whatever the parent is at that moment, so restoring a child
+        # before its parent would bake in the parent's wrong position.
+        def _depth(o):
+            d, q = 0, o.parent
+            while q is not None:
+                d, q = d + 1, q.parent
+            return d
+
+        # A name that no longer resolves was eaten by a join. A join TARGET
+        # has been renamed to `static:<mat>` and so does not resolve either —
+        # correct to skip, because join() leaves the active object's own
+        # transform alone; it is only the children of the eaten objects that
+        # move.
+        live = [(bpy.data.objects[n], m) for n, m in snapshot
+                if n in bpy.data.objects]
+        for o, m in sorted(live, key=lambda kv: _depth(kv[0])):
+            o.matrix_world = m
+        bpy.context.view_layer.update()
 
     bpy.ops.object.select_all(action='DESELECT')
     bpy.ops.export_scene.gltf(
@@ -215,9 +356,29 @@ def finish(out_path, join_by_material=True):
     )
 
     import os
-    mesh_count = len([o for o in bpy.context.scene.objects if o.type == 'MESH'])
-    tris = sum(len(o.data.loop_triangles) for o in bpy.context.scene.objects
-               if o.type == 'MESH' and o.data.loop_triangles is not None)
-    print('EXPORT_OK path=%s bytes=%d meshes=%d' % (
-        out_path, os.path.getsize(out_path), mesh_count))
+    # Count off the EVALUATED depsgraph. The previous version summed
+    # `o.data.loop_triangles`, which is empty until something calls
+    # calc_loop_triangles() and in any case ignores the bevel modifiers that
+    # `export_apply=True` bakes in — so it reported 0 and was never printed.
+    # `tools/glbinfo.mjs` counts the same things off the exported file and is
+    # the authority; this line exists so a build that has gone wrong says so
+    # without anyone having to run a second command.
+    dg = bpy.context.evaluated_depsgraph_get()
+    meshes = 0
+    draws = 0
+    tris = 0
+    for o in bpy.context.scene.objects:
+        if o.type not in {'MESH', 'CURVE', 'SURFACE', 'FONT'}:
+            continue
+        meshes += 1
+        ev = o.evaluated_get(dg)
+        me = ev.to_mesh()
+        if me is None:
+            continue
+        me.calc_loop_triangles()
+        tris += len(me.loop_triangles)
+        draws += max(1, len(me.materials))
+        ev.to_mesh_clear()
+    print('EXPORT_OK path=%s bytes=%d meshes=%d draws~=%d tris=%d' % (
+        out_path, os.path.getsize(out_path), meshes, draws, tris))
     return out_path
