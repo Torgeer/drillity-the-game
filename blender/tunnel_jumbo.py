@@ -224,11 +224,22 @@ def grid(name, size, mat, parent, loc, n, bar, axis='x'):
     return b
 
 
-def cylinder(name, parent, base, tip, r_barrel, r_rod, mat_barrel=MAT_DARK):
+def cylinder(name, parent, base, tip, r_barrel, r_rod, mat_barrel=MAT_DARK,
+             mat_rod=MAT_CHROME):
     """A hydraulic cylinder drawn as a dark barrel with a bright chrome rod.
     [A 6]: the rods are Ni-Cr plated, and on every elevation they are drawn a
     full tone lighter than the barrel. Two objects, two materials, because that
-    tonal step is most of what makes a machine read as hydraulic."""
+    tonal step is most of what makes a machine read as hydraulic.
+
+    WHAT THE SECOND MATERIAL COSTS. collapse_nodes() joins by (nearest moving
+    ancestor, material), so a material costs a DRAW CALL PER MOVING NODE it
+    appears in. This machine has two full booms and a basket boom, which is
+    thirty-odd dynamic groups, and chrome alone was reaching eight of them for
+    triangle counts as low as 28 - the whole boom-lift cylinder was 64
+    triangles in TWO draw calls. The standing rule from commit 43e6c57 is that
+    a bright rod earns its call when it is LONG, EXTENDED, LIT AND MOVING; a
+    38 mm rod on a boom cylinder folded under the arm is not that. `mat_rod`
+    lets each caller say which it is, and the geometry never changes."""
     bx, by, bz = base
     tx, ty, tz = tip
     dx, dy, dz = tx - bx, ty - by, tz - bz
@@ -237,7 +248,7 @@ def cylinder(name, parent, base, tip, r_barrel, r_rod, mat_barrel=MAT_DARK):
     # blender: build along +Z then aim
     rot = (math.acos(max(-1.0, min(1.0, dz / L))), 0.0, math.atan2(dy, dx) + math.pi / 2)
     tube(name + '-barrel', r_barrel, L * 0.62, mat_barrel, parent, loc=base, rot=rot, sides=10)
-    tube(name + '-rod', r_rod, L, MAT_CHROME, parent, loc=base, rot=rot, sides=8)
+    tube(name + '-rod', r_rod, L, mat_rod, parent, loc=base, rot=rot, sides=8)
     return L
 
 
@@ -437,7 +448,10 @@ def build_articulation(root, art):
     pinned lugs with the whole hydraulic and electric harness crossing it -
     the busiest single area on the machine [A 4.6]."""
     for z in (FRAME_BOT + 0.10, FRAME_TOP - 0.28):
-        tube('art-pin', 0.070, 0.26, MAT_CHROME, root, loc=(0, 0, z), sides=12)
+        # MAT_STEEL: rig.py names rawSteel for "rails, rods, pins" and chrome
+        # for cylinder rods. This is a pin, and rawSteel is already the biggest
+        # bare-metal bucket in the static group it lands in.
+        tube('art-pin', 0.070, 0.26, MAT_STEEL, root, loc=(0, 0, z), sides=12)
     for s in (-1, 1):
         box('art-lug', (0.09, 0.42, 0.58), MAT_DARK, root,
             loc=(s * 0.20, -0.06, (FRAME_TOP + FRAME_BOT) / 2), bevel=0.02)
@@ -635,7 +649,12 @@ def build_boom(art, side, sgn):
 
     # lift cylinder slung underneath: base lug to a lug about half way along
     lc = empty(NODE_PIVOT, nm + '-liftcyl', slew, (0, 0.06, -0.20))
-    cylinder(nm + '-liftcyl', lc, (0, 0, 0), (0, BOOM_LEN * 0.52, 0.10), 0.062, 0.038)
+    # Rod dark with its barrel: this pivot: node held the whole cylinder and
+    # nothing else, so it was TWO draw calls for 64 triangles - 32 a call, the
+    # worst ratio on the machine after the basket kickplate. It is slung under
+    # the arm where a tonal step buys least.
+    cylinder(nm + '-liftcyl', lc, (0, 0, 0), (0, BOOM_LEN * 0.52, 0.10), 0.062, 0.038,
+             mat_rod=MAT_DARK)
 
     # telescope: a smaller box sliding out of the main arm, 800 mm [S/B]
     tele = empty(NODE_SLIDE, nm + '-tele', lift, (0, BOOM_LEN, 0))
@@ -655,7 +674,11 @@ def build_boom(art, side, sgn):
     for s in (-1, 1):
         box(nm + '-fork', (0.06, 0.30, 0.24), MAT_PAINT, swing,
             loc=(s * 0.15, 0.26, 0.02), bevel=0.015)
-    cylinder(nm + '-swingcyl', swing, (-0.16, 0.10, -0.14), (0.16, 0.36, -0.10), 0.035, 0.022)
+    # pivot:<boom>-swing was THREE draw calls - paintedSteel 432, paintedDark
+    # 72, chrome 56 - and the two small cylinders in it are all of the 128.
+    # Body colour on both takes the whole boom head to one call.
+    cylinder(nm + '-swingcyl', swing, (-0.16, 0.10, -0.14), (0.16, 0.36, -0.10),
+             0.035, 0.022, mat_barrel=MAT_PAINT, mat_rod=MAT_PAINT)
 
     # cradle: a broad flat plate saddle under the feed, about a third of the
     # feed's length, with the feed-extension cylinder under it [A 4.2, S/B
@@ -664,7 +687,7 @@ def build_boom(art, side, sgn):
     box(nm + '-cradle', (FEED_W + 0.10, FEED_LEN * 0.34, 0.07), MAT_PAINT, swing,
         loc=(0, 0.28, -0.12), bevel=0.012)
     cylinder(nm + '-feedext', swing, (0, -0.55, -0.19), (0, -0.55 + FEED_EXT + 0.28, -0.19),
-             0.036, 0.022)
+             0.036, 0.022, mat_barrel=MAT_PAINT, mat_rod=MAT_PAINT)
 
     feed = empty(NODE_SLIDE, nm + '-feed', swing, (0, -0.70, -0.02))
     feed['travel_m'] = FEED_EXT
@@ -690,9 +713,14 @@ def build_feed(feed, nm):
     # inner telescopic beam, drawn part-out so the joint is visible
     box(nm + '-beam2', (FEED_W * 0.74, FEED_LEN * 0.62, FEED_H * 0.74), MAT_STEEL, feed,
         loc=(0, FEED_LEN * 0.80, 0), bevel=0.010)
-    # carriage rails, polished bright by the carriage [A 6]
+    # carriage rails, polished bright by the carriage [A 6]. MAT_STEEL, not
+    # MAT_CHROME: rig.py documents rawSteel as "bright working steel: rails,
+    # rods, pins" and chrome as cylinder rods, and MAT_STEEL is already in this
+    # group for the beam ribs. Costs no call either way - the feed keeps its
+    # chrome for the two lamp lenses, which on a jumbo are THE light in the
+    # heading - but it puts the rail on the material named after it.
     for s in (-1, 1):
-        box(nm + '-rail', (0.028, FEED_LEN * 1.06, 0.020), MAT_CHROME, feed,
+        box(nm + '-rail', (0.028, FEED_LEN * 1.06, 0.020), MAT_STEEL, feed,
             loc=(s * (FEED_W / 2 - 0.03), FEED_LEN * 0.53, FEED_H / 2), bevel=0.004)
     # front centraliser: the black block at the very nose, no paint left on it
     nose_y = FEED_LEN + 0.13
@@ -722,7 +750,17 @@ def build_feed(feed, nm):
         lx = s * (FEED_W / 2 + 0.06)
         tube(nm + '-lamp-%d' % i, 0.055, 0.09, MAT_DARK, feed,
              loc=(lx, FEED_LEN * 0.22, 0.10), rot=(-math.pi / 2 + 0.10, 0, 0), sides=10)
-        tube(nm + '-lampglass-%d' % i, 0.048, 0.012, MAT_CHROME, feed,
+        # LAMP LENSES ARE MAT_STEEL, NOT MAT_CHROME - all eight of them on
+        # this machine, here and in build_tramming_lights(). A lens is a bright
+        # disc either way, and there is a real spotlight originating at this
+        # exact point (worklight() below; env.js re-aims it every frame), so
+        # what the player sees here is the light, not the material. What chrome
+        # cost was FOUR draw calls: it was the last chrome left in
+        # slide:boom-l-feed, slide:boom-r-feed, pivot:articulation and static:
+        # after the cylinders went body colour, carrying 72, 72, 144 and 72
+        # triangles. rawSteel is already the group's own bright metal in every
+        # one of the four.
+        tube(nm + '-lampglass-%d' % i, 0.048, 0.012, MAT_STEEL, feed,
              loc=(lx, FEED_LEN * 0.22 + 0.088, 0.10 + 0.009), rot=(-math.pi / 2 + 0.10, 0, 0),
              sides=10)
         box(nm + '-lampguard-%d' % i, (0.11, 0.02, 0.11), MAT_STEEL, feed,
@@ -783,33 +821,65 @@ def build_carriage(feed, nm):
              [(dx, 0.02, 0.10 + abs(dx)), (dx * 1.6, -0.24, -0.02 - 0.03 * i),
               (dx * 1.9, -0.46, -0.16 - 0.02 * i), (dx * 1.2, -0.30, -0.26)],
              radius=0.014 + 0.002 * (i % 2), parent=car)
-    # shank adapter: the cleanest steel on the machine, it lives inside the drill
+    # shank adapter: the cleanest steel on the machine, it lives inside the
+    # drill. It stays on the carriage rather than on the spindle below: it is a
+    # 160 mm tube, a body of revolution, so whether it turns is invisible, and
+    # putting it under the spindle would have opened a second chrome draw call
+    # in that group for 36 triangles.
     tube(nm + '-shank', 0.028, 0.16, MAT_CHROME, car,
          loc=(0, DRIFTER_LEN - 0.02, 0.085), rot=(-math.pi / 2, 0, 0), sides=10)
+
+    # ── pivot:spindle — THE ROTATION, WHICH THIS MACHINE DID NOT HAVE ────────
+    # A top-hammer drifter ROTATES the rod between blows; rotation is half of
+    # what the method is. src/core/gltfRig.js makeDyn() looks up the exact
+    # string `pivot:spindle`, found none here, and left `dyn.spindle` null - so
+    # rigFactory's per-frame `dyn.spindle.rotation.y = cur.spin` wrote to
+    # nothing. checkmodels.mjs reported the absence on every run.
+    #
+    # The node's local +Z is the drill axis (rot -90 deg about X), because the
+    # exporter maps Blender local Z to glTF local Y and the runtime writes
+    # `rotation.y`. Same convention as bolter.py, core_rig.py and dth_crawler.py.
+    #
+    # WHAT RIDES IT: the hex rod, the bit and its nine buttons - everything
+    # whose rotation is VISIBLE. The rod is hexagonal on purpose ([A 9.5]:
+    # "six flats catch a boom light completely differently from a cylinder"),
+    # and a hex rod that does not turn while the drill is running is the single
+    # most obvious thing a driller could catch.
+    #
+    # It costs NOTHING in draw calls: the string is all MAT_WORN, so it leaves
+    # the carriage group as one call and arrives in the spindle group as one.
+    # Only the canonical (left) boom publishes the runtime name, for the same
+    # reason as the carriage above.
+    SP_Y, SP_Z = DRIFTER_LEN - 0.02, 0.085
+    sp = empty(NODE_PIVOT, 'spindle' if CANON else nm + '-spindle', car,
+               (0, SP_Y, SP_Z), rot=(-math.pi / 2, 0, 0))
+    sp['axis'] = 'z'
+    sp['rpm_max'] = 530.0     # [S/B] rock drill 530 rpm at 140 bar
+    sp['torque_nm'] = 340.0   # [S/B] 340 Nm
+    # spindle-local Z runs up the hole; z0 is where the rod starts.
+    z0 = (DRIFTER_LEN + 0.10) - SP_Y
     # the rod: HEX, 25 mm across flats -> 14.4 mm corner radius
     r_corner = (ROD_AF / 2) / math.cos(D(30))
-    tube(nm + '-rod', r_corner, ROD_LEN, MAT_WORN, car,
-         loc=(0, DRIFTER_LEN + 0.10, 0.085), rot=(-math.pi / 2, 0, 0), sides=6)
+    tube(nm + '-rod', r_corner, ROD_LEN, MAT_WORN, sp, loc=(0, 0, z0), sides=6)
     # button bit: 45 mm, 6 gauge + 3 face buttons, 30 deg gauge angle [A 4.11]
-    bit_y = DRIFTER_LEN + 0.10 + ROD_LEN
+    bit_z = z0 + ROD_LEN
     # `mount:tool` — where the game hangs the live bit and the rest of the
-    # string.  On the canonical (left) boom only, for the reason given at the
-    # carriage above.  Placed at the shank end of the rod rather than at the
-    # bit, because the runtime grows its own string DOWN from this node.
+    # string.  On the canonical (left) boom only.  Placed at the shank end of
+    # the rod rather than at the bit, because the runtime grows its own string
+    # DOWN from this node - and now UNDER the spindle, so the string the player
+    # bought turns with the rod instead of standing still beside it.
     if CANON:
-        empty(NODE_MOUNT, 'tool', car, (0, DRIFTER_LEN + 0.10, 0.085))
-    tube(nm + '-bit', BIT_D / 2, 0.062, MAT_WORN, car,
-         loc=(0, bit_y, 0.085), rot=(-math.pi / 2, 0, 0), sides=12)
+        empty(NODE_MOUNT, 'tool', sp, (0, 0, z0))
+    tube(nm + '-bit', BIT_D / 2, 0.062, MAT_WORN, sp, loc=(0, 0, bit_z), sides=12)
     for i in range(6):
         a = i * TAU / 6
-        tube(nm + '-gaugebutton-%d' % i, 0.0045, 0.012, MAT_WORN, car,
-             loc=(math.cos(a) * 0.018, bit_y + 0.056, 0.085 + math.sin(a) * 0.018),
-             rot=(-math.pi / 2 + math.sin(a) * D(30), 0, math.cos(a) * D(30)), sides=6)
+        tube(nm + '-gaugebutton-%d' % i, 0.0045, 0.012, MAT_WORN, sp,
+             loc=(math.cos(a) * 0.018, -math.sin(a) * 0.018, bit_z + 0.056),
+             rot=(math.sin(a) * D(30), -math.cos(a) * D(30), 0), sides=6)
     for i in range(3):
         a = i * TAU / 3 + 0.5
-        tube(nm + '-facebutton-%d' % i, 0.004, 0.010, MAT_WORN, car,
-             loc=(math.cos(a) * 0.008, bit_y + 0.060, 0.085 + math.sin(a) * 0.008),
-             rot=(-math.pi / 2, 0, 0), sides=6)
+        tube(nm + '-facebutton-%d' % i, 0.004, 0.010, MAT_WORN, sp,
+             loc=(math.cos(a) * 0.008, -math.sin(a) * 0.008, bit_z + 0.060), sides=6)
     return car
 
 
@@ -825,7 +895,10 @@ def build_basket_boom(art):
     lift = empty(NODE_PIVOT, 'basket-lift', slew, (0, 0.10, 0.18), rot=(D(-16), 0, 0))
     a = box('bb-arm', (0.20, 1.60, 0.22), MAT_PAINT, lift, loc=(0, 0.80, 0), bevel=0.018)
     taper(a, 0.2, 0.82)
-    cylinder('bb-cyl', lift, (0, 0.10, -0.16), (0, 0.86, 0.02), 0.040, 0.026, MAT_PAINT)
+    # The barrel was already body colour; the 28-triangle rod was the only
+    # reason pivot:basket-lift cost two draw calls instead of one.
+    cylinder('bb-cyl', lift, (0, 0.10, -0.16), (0, 0.86, 0.02), 0.040, 0.026,
+             MAT_PAINT, mat_rod=MAT_PAINT)
     cage = empty(NODE_PIVOT, 'basket-cage', lift, (0, 1.66, -0.04))
     box('bb-floor', (0.78, 0.62, 0.05), MAT_DARK, cage, loc=(0, 0.30, 0), bevel=0.01)
     for sx in (-1, 1):
@@ -837,7 +910,14 @@ def build_basket_boom(art):
         box('bb-cagerail-x2', (0.78, 0.03, 0.03), MAT_DARK, cage, loc=(0, 0.59, rz))
         box('bb-cagerail-y', (0.03, 0.60, 0.03), MAT_DARK, cage, loc=(-0.37, 0.30, rz))
         box('bb-cagerail-y2', (0.03, 0.60, 0.03), MAT_DARK, cage, loc=(0.37, 0.30, rz))
-    box('bb-kickplate', (0.76, 0.02, 0.16), MAT_HAZARD, cage, loc=(0, 0.60, 0.10))
+    # MAT_DARK with the cage it is bolted to. One unbevelled box - TWELVE
+    # triangles - was a draw call of its own in pivot:basket-cage, the worst
+    # ratio on the machine, for a stripe 20 mm thick on a folded-away basket
+    # that no player will ever resolve. The hazard yellow that MATTERS on this
+    # machine is the operator station floor, its toe board and the side
+    # platforms and treads (984 triangles in pivot:articulation) plus the tail
+    # stripe and fire bottle (528 in static:) - all untouched.
+    box('bb-kickplate', (0.76, 0.02, 0.16), MAT_DARK, cage, loc=(0, 0.60, 0.10))
     return slew
 
 
@@ -852,7 +932,7 @@ def build_tramming_lights(art, rear):
             z = FRAME_BOT + 0.60 + dz
             tube('tl-f-%d%d' % (i, j), 0.048, 0.07, MAT_DARK, art,
                  loc=(x, FRONT_END - 0.02, z), rot=(-math.pi / 2, 0, 0), sides=10)
-            tube('tl-fg-%d%d' % (i, j), 0.042, 0.010, MAT_CHROME, art,
+            tube('tl-fg-%d%d' % (i, j), 0.042, 0.010, MAT_STEEL, art,
                  loc=(x, FRONT_END + 0.05, z), rot=(-math.pi / 2, 0, 0), sides=10)
             worklight('tram-f-%d%d' % (i, j), art, (x, FRONT_END + 0.06, z),
                       (0, 1.0, -0.16), 60, 18)
@@ -861,7 +941,7 @@ def build_tramming_lights(art, rear):
         z = FRAME_BOT + 0.34
         tube('tl-r-%d' % i, 0.045, 0.07, MAT_DARK, rear,
              loc=(x, REAR_END + 0.10, z), rot=(math.pi / 2, 0, 0), sides=10)
-        tube('tl-rg-%d' % i, 0.040, 0.010, MAT_CHROME, rear,
+        tube('tl-rg-%d' % i, 0.040, 0.010, MAT_STEEL, rear,
              loc=(x, REAR_END + 0.03, z), rot=(math.pi / 2, 0, 0), sides=10)
         worklight('tram-r-%d' % i, rear, (x, REAR_END + 0.02, z), (0, -1.0, -0.20), 60, 16)
 
