@@ -75,6 +75,16 @@ const ONLY = flag('only', null);
 const SAMPLES = Number(flag('samples', 0)) || 220;
 const SEED = Number(flag('seed', 0)) || 20260905;
 
+/* ⚠ A GATE OVER AN EMPTY SET PASSES FOREVER — ASTRA §8, and this tool had one
+   the moment `--only` existed. `--only payback` is right; `--only paback` used
+   to skip every probe, run nothing, assert nothing and print OK in green. The
+   whole point of writing `checkreach` up as a cautionary tale was that it
+   "reported zero targets and called it a PASS". A typo must be a failure. */
+const PROBES = ['board', 'ruin', 'payback', 'upkeep', 'dual', 'depth'];
+if (ONLY && !PROBES.includes(ONLY)) {
+  console.error(`checkcareer: no probe named "${ONLY}". Known: ${PROBES.join(', ')}`);
+  process.exit(1);
+}
 const want = (name) => !ONLY || ONLY === name;
 
 /* ── formatting ───────────────────────────────────────────────────────────── */
@@ -88,6 +98,7 @@ const rpad = (s, n) => String(s).padStart(n);
 const failures = [];
 const notes = [];
 function assert(ok, label, detail) {
+  globalThis.__ccPassCount = (globalThis.__ccPassCount || 0) + (ok ? 1 : 0);
   if (ok) { console.log(`  PASS  ${label}`); return true; }
   console.log(`  FAIL  ${label}`);
   if (detail) console.log(`        ${detail}`);
@@ -882,6 +893,16 @@ if (want('dual')) results.dual = probeDual();
 if (want('depth')) results.depth = probeDepth();
 
 head('SUMMARY');
+/* …and the same rule one level up: if the probes ran but nothing was actually
+   asserted, that is not a pass either. `assert` is the only thing that can
+   make this number move. */
+const assertions = failures.length + (globalThis.__ccPassCount || 0);
+if (assertions === 0) {
+  console.error('FAIL: checkcareer asserted nothing. A gate over an empty set '
+    + 'passes forever — see ASTRA §8.');
+  process.exit(1);
+}
+console.log(`${assertions} assertion(s) checked.`);
 if (notes.length) {
   console.log('Notes (not failures — findings the numbers support):');
   for (const n of notes) console.log('  · ' + n);
