@@ -2989,6 +2989,19 @@ export function createGeology(ctx) {
   let camBaseY = 0;
   let lastFrustumSolve = -1e9;       // update()'s re-solve rate limit, in seconds
 
+  /* One line per distinct reason, not one per frame. Declared up here with the
+     rest of the state and not next to its only caller, because its only caller
+     is adoptCameraScale(), which computeView() runs at init: a `const` further
+     down the module body is in the temporal dead zone at that point, and a
+     ReferenceError out of computeView() is precisely what once stopped the
+     ENTIRE section band from building (see boreExag below). */
+  const saidOnce = new Set();
+  function sayOnce(key, msg) {
+    if (saidOnce.has(key)) return;
+    saidOnce.add(key);
+    console.warn(msg);
+  }
+
   /** VISUAL borehole radius, in section units. Derived — never a constant. */
   let holeR = CFG.holeRadius;
   /** Drawn bore diameter / true bore diameter. Derived in applyHoleDiameter()
@@ -7079,14 +7092,6 @@ export function createGeology(ctx) {
     if (b && b.w > 1 && b.h > 1) return { w: b.w, h: b.h, measured: true };
     const v = vp();
     return { w: v.w, h: Math.max(1, v.h * (LAYOUT.sectionHeight || 0.46)), measured: false };
-  }
-
-  /* One line per distinct reason, not one per frame. */
-  const saidOnce = new Set();
-  function sayOnce(key, msg) {
-    if (saidOnce.has(key)) return;
-    saidOnce.add(key);
-    console.warn(msg);
   }
 
   /**
