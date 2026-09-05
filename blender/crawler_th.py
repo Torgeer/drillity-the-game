@@ -318,12 +318,26 @@ def hz(name, size, parent, loc, rot=(0, 0, 0)):
 
 
 def ram(name, parent, base, tip, barrel_r=0.055, rod_r=0.032, mat_b=R.MAT_DARK,
-        mat_eye=R.MAT_CAST):
+        mat_eye=R.MAT_CAST, mat_rod=R.MAT_CHROME):
     """A hydraulic cylinder drawn between two points: barrel off the base, bare
     chrome rod out of the gland, a gland nut and two cast eye-ends.  Without
     those three it is just two cylinders.  Cylinder rods are the brightest and
     most specular thing on a working machine ([R1] §6) and the eye finds them
     first, so they get their own material.
+
+    THE GLAND TAKES `mat_eye` AND NOT A MATERIAL OF ITS OWN.  A MATERIAL COSTS A
+    DRAW CALL PER DYNAMIC GROUP IT APPEARS IN: `finish()` leaves anything under a
+    `pivot:`/`slide:` node out of the global join, and `weld()` then joins that
+    subtree by material on its own, so a gland nut carrying a material nothing
+    else in its group uses is one whole draw call in EVERY ram-bearing node on
+    the machine.  It was exactly that in three of them — `boom-swing` (two
+    glands, 88 tris), `boom-lift` (44) and `boom-fold` (44) — three draw calls
+    for a 64 mm collar that sits between two eye-ends of the same machined-steel
+    family and physically touches one of them.  Callers that already pass
+    `mat_eye=R.MAT_WORN` (both ground supports) see no change at all.
+
+    `mat_rod` exists for the one rod on this machine that does not earn a draw
+    call of its own; see `build_supports()`.  Every other rod here stays chrome.
     """
     bxx, byy, bzz = base
     dx, dy, dz = tip[0] - bxx, tip[1] - byy, tip[2] - bzz
@@ -335,8 +349,8 @@ def ram(name, parent, base, tip, barrel_r=0.055, rod_r=0.032, mat_b=R.MAT_DARK,
     f = bl / L
     return [
         tb(name + '_barrel', barrel_r, bl, mat_b, parent, base, rot, 12),
-        tb(name + '_rod', rod_r, L, R.MAT_CHROME, parent, base, rot, 10),
-        tb(name + '_gland', barrel_r * 1.16, 0.055, R.MAT_WORN, parent,
+        tb(name + '_rod', rod_r, L, mat_rod, parent, base, rot, 10),
+        tb(name + '_gland', barrel_r * 1.16, 0.055, mat_eye, parent,
            (bxx + dx * f, byy + dy * f, bzz + dz * f), rot, 12),
         tb(name + '_eyeA', barrel_r * 1.05, 0.075, mat_eye, parent, base,
            (rot[0], rot[1] + math.pi / 2, rot[2]), 10),
@@ -749,10 +763,24 @@ def build_supports():
     leg = R.empty(R.NODE_SLIDE, 'support-leg-front', None,
                   (0.30, BODY_FRONT - 0.16, DECK_Z - 0.30))
     g = [bx('leg_bracket', (0.42, 0.34, 0.30), R.MAT_DARK, leg, (0, 0.10, 0.06), bevel=0.016)]
+    # `mat_rod=R.MAT_WORN`: the ONE chrome rod on this machine that does not
+    # earn its draw call.  43e6c57 set the standard — a bright rod earns a call
+    # when it is long, extended, lit and MOVING.  This is a 620 mm jack rod
+    # under the frame nose pointing at the ground, and [S3] describes the leg as
+    # one "that can be used during tramming", i.e. it spends the game stowed.
+    # The pad it lands on and the eye-ends above it are already wornSteel, so
+    # with `mat_eye` already wornSteel here the whole leg collapses from four
+    # draw calls to two.  Every other rod on the machine is left chrome: the
+    # lift, fold and swing rams, the feed tilt and extend rams, the blade rams,
+    # the kingpin and the two boom pins.
     g += ram('leg_ram', leg, (0, 0, 0.02), (0, 0, -0.62), 0.070, 0.045,
-             mat_eye=R.MAT_WORN)
+             mat_eye=R.MAT_WORN, mat_rod=R.MAT_WORN)
     g.append(bx('leg_pad', (0.44, 0.44, 0.06), R.MAT_WORN, leg, (0, 0, -0.66), bevel=0.012))
-    g.append(tb('leg_ball', 0.075, 0.09, R.MAT_CAST, leg, (0, 0, -0.72), (0, 0, 0), 10))
+    # R.MAT_WORN, not R.MAT_CAST.  36 triangles of castIron, the only castIron
+    # in this group, bought a whole draw call for a 150 mm ball trapped between
+    # the wornSteel pad under it and the wornSteel eye-end on top of it.  The
+    # same fix as cpt-unit's `jack_knuckle` and si-rig's `jack_ball` in 43e6c57.
+    g.append(tb('leg_ball', 0.075, 0.09, R.MAT_WORN, leg, (0, 0, -0.72), (0, 0, 0), 10))
     weld(g, 'support-front', leg)
 
     blade = R.empty(R.NODE_SLIDE, 'ground-support-rear', None,
@@ -986,7 +1014,13 @@ def build_feed(tilt):
     # gets 4.24 m of carriage travel out of a much shorter cylinder [S2]
     g.append(bx('feed_channel', (0.15, 0.11, BEAM_LEN - 0.30), R.MAT_DARK, slide,
                 (0, BEAM_D * 0.52, BEAM_LEN / 2), bevel=0.010))
-    g.append(tb('feed_cyl', 0.052, BEAM_LEN * 0.52, R.MAT_CHROME, slide,
+    # R.MAT_DARK, not R.MAT_CHROME.  This is the one chrome object on the
+    # machine that CANNOT BE SEEN AT ALL: `feed_channel` above is 0.150 x 0.110
+    # spanning z 0.15..5.59, and this cylinder is 0.104 across spanning
+    # z 0.40..3.39 on the same centreline, so the channel encloses it on every
+    # side.  It was still a draw call of its own inside `slide:feed-extend` — 36
+    # triangles — and the channel hiding it is already paintedDark.
+    g.append(tb('feed_cyl', 0.052, BEAM_LEN * 0.52, R.MAT_DARK, slide,
                 (0.0, BEAM_D * 0.52, 0.40), (0, 0, 0), 10))
 
     # ── the end sheaves ──────────────────────────────────────────────────────
@@ -1031,20 +1065,58 @@ def build_feed(tilt):
               (0, 0, 0), 12),
            tb('accum_lp', 0.058, 0.20, R.MAT_DARK, carr, (0.13, ax - 0.14, 0.34),
               (0, 0, 0), 12),
-           # shank adapter: bare bright machined splines ([R1] §6, tool materials)
-           tb('shank', 0.038, 0.34, R.MAT_STEEL, carr, (0, ax, -0.98), (0, 0, 0), 10),
+           # shank adapter: machined splines, oxidised in service ([R1] §6,
+           # tool materials).  R.MAT_WORN, not R.MAT_STEEL — the shank and the
+           # coupling below it were the only rawSteel in `slide:carriage`, 72
+           # triangles buying a draw call, and `drifter_chuck` is the wornSteel
+           # they screw straight into.  The painted rod body and the bright
+           # thread ends in the carousel are untouched.
+           tb('shank', 0.038, 0.34, R.MAT_WORN, carr, (0, ax, -0.98), (0, 0, 0), 10),
            # the string in the hole: painted body, bare thread ends [R1] §6
            tb('rod_in_string', ROD_DIA / 2, ROD_LEN, R.MAT_PAINT, carr,
               (0, ax, -0.98 - ROD_LEN), (0, 0, 0), 10),
-           tb('coupling', ROD_DIA * 0.72, 0.15, R.MAT_STEEL, carr, (0, ax, -1.06),
+           tb('coupling', ROD_DIA * 0.72, 0.15, R.MAT_WORN, carr, (0, ax, -1.06),
               (0, 0, 0), 10)]
-    # where the game hangs the live bit and the rest of the string
-    # `mount:tool`, NOT `mount:tool-anchor`.  src/core/gltfRig.js makeDyn()
-    # does `nodes.mounts.get('tool') || nodes.slides.get('carriage')` — with the
-    # old name the lookup missed and fell through to the carriage, so a tool did
-    # attach, silently, at the carriage origin instead of at the chuck, 0.98 m
-    # up the drifter. A working fallback that hides the fault: ASTRA.md §8.
-    R.empty(R.NODE_MOUNT, 'tool', carr, (0, ax, -0.98))
+    # ── pivot:spindle — THE ROTATION HALF OF TOP-HAMMER DRILLING ────────────
+    # `tools/checkmodels.mjs` listed this machine under "no pivot:spindle
+    # (nothing rotates, or nothing turns it)".  A top hammer does not only
+    # hammer: the drifter INDEXES THE BIT BETWEEN BLOWS, and this file's own
+    # `drifter_body` comment already says "Percussion AND rotation come through
+    # it".  `src/core/gltfRig.js` makeDyn() looks the node up BY STRING —
+    # `nodes.pivots.get('spindle')` — and `src/rig/rigFactory.js` then writes
+    # `dyn.spindle.rotation.y = cur.spin` every frame.  With no such node
+    # `dyn.spindle` stayed null and that write went nowhere: a rotary machine
+    # whose rotary did not turn, and not one warning anywhere.
+    #
+    # It is an EMPTY, at the chuck, on the drilling axis.  Local +Z is the
+    # rotation axis — the exporter maps Blender Z to three.js Y and the runtime
+    # writes `rotation.y`, so the two agree — and inside `carr` local +Z is
+    # already the drill string's axis, which is what `drifter_body`,
+    # `drifter_chuck`, `shank` and the rod are all built along.  z = -0.78 is
+    # `drifter_chuck`'s output face, where the shank leaves the machine.
+    #
+    # NO GEOMETRY MOVES ONTO IT, DELIBERATELY.  Anything parented here would
+    # form a dynamic group of its own and `weld()` would give it its own draw
+    # calls; and the four objects that would go there — chuck, shank, coupling
+    # and rod — are cylinders on the axis of rotation, so turning them is
+    # invisible.  Two draw calls to rotate something rotationally symmetric is
+    # not a trade this machine can make at 63 calls.  `blender/dth_crawler.py`
+    # does the same: its spindle carries only `mount:tool`.
+    spindle = R.empty(R.NODE_PIVOT, 'spindle', carr, (0, ax, -0.78))
+    spindle['axis'] = 'z'
+    # NOT SOURCED: no rotation speed for this machine's drifter is published in
+    # [S1]-[S5], and `research/rigs/crawler-th.md` §10 lists "drifter percussion
+    # power (kW), impact rate, rotation torque — not found" as an open gap.
+    # [S2]'s "42-71 Hz" is the PERCUSSION rate, not rotation, and [S2]'s
+    # "1 180-1 970 Nm" is torque with no rpm paired to it.  So this node
+    # declares NO rpm rather than an invented one — ASTRA.md §3.1.  Nothing in
+    # `src/` reads an rpm off the extras today; the game drives the node from
+    # `state.drill.rpm`.
+    #
+    # `mount:tool` is a CHILD OF THE SPINDLE, which is what makes the rod and
+    # the bit turn with it.  Its world position is unchanged: -0.78 + -0.20 =
+    # -0.98, the same z it had on the carriage.
+    R.empty(R.NODE_MOUNT, 'tool', spindle, (0, 0, -0.20))
     # the drifter's own hoses, which MUST move with it
     for i, xo in enumerate((-0.11, -0.04, 0.04, 0.11)):
         cg.append(curve_to_mesh(R.hose(
@@ -1144,7 +1216,11 @@ def build_feed(tilt):
              (0, 0, 0), 14),
           tb('caro_plate_b', 0.30, 0.055, R.MAT_DARK, caro, (0, 0, -ROD_LEN / 2),
              (0, 0, 0), 14),
-          tb('caro_shaft', 0.055, ROD_LEN + 0.10, R.MAT_WORN, caro,
+          # R.MAT_DARK, not R.MAT_WORN: 36 triangles, the only wornSteel in
+          # `pivot:rod-carousel`, on the 110 mm centre column that the two
+          # paintedDark plates above and below it are keyed onto, and that seven
+          # rods and the guard cage stand in front of.
+          tb('caro_shaft', 0.055, ROD_LEN + 0.10, R.MAT_DARK, caro,
              (0, 0, -ROD_LEN / 2 - 0.05), (0, 0, 0), 10)]
     # [S2] "Carousel type rod handling system, 1 + 7 rods".  Painted bodies with
     # bare bright thread ends ([R1] §6) — a two-material rod costs triangles and
