@@ -31,10 +31,9 @@
  *      accident, not a decision;
  *   3. every `blender/<id>.py` maps to a rig id (or is a known non-rig).
  *
- * An EMPTY `public/models/` is not a failure. Models are gitignored and are
- * built by `npm run blender`, so a fresh clone legitimately has none and the
- * game is fully playable procedurally. What is a failure is a file that is
- * *there* and cannot be *found*.
+ * Every registered Blender machine must have a readable export. Models are
+ * gitignored: run `npm run blender` after cloning. A procedural fallback is
+ * useful during development, but does not prove the shipping models work.
  *
  * Exits 0 clean, 1 on any violation.
  */
@@ -42,6 +41,7 @@ import { pathToFileURL } from 'node:url';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readdirSync, readFileSync, existsSync, statSync } from 'node:fs';
+import { parseGLB, measure } from './glbinfo.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const data = await import(pathToFileURL(join(ROOT, 'src/game/data.js')).href);
@@ -97,6 +97,25 @@ const models = allGlb.filter((f) => !f.includes('/'));
 /** Everything else, checked for materials but not for rig names. */
 const nested = allGlb.filter((f) => f.includes('/'));
 
+// Parse each export once. An unreadable model must not disappear from either
+// the material gate or the node gate and make their measured set smaller.
+const parsed = new Map();
+for (const file of allGlb) {
+  try {
+    const buf = readFileSync(join(MODELS, file));
+    const { json, bin } = parseGLB(buf);
+    if (!json || !json.nodes?.length || !json.meshes?.length || !json.materials?.length) {
+      throw new Error('missing nodes, meshes or materials');
+    }
+    const measured = measure(json, bin);
+    if (measured.unreadable.length) throw new Error(`INCOMPLETE geometry: ${measured.unreadable.join('; ')}`);
+    if (measured.empty) throw new Error('no positioned geometry');
+    parsed.set(file, json);
+  } catch (e) {
+    fail.push(`${file}: unreadable model — ${e.message}`);
+  }
+}
+
 /** Which rig, if any, a filename is TRYING to be. */
 const intended = (stem) => (rigIds.has(stem) ? stem
   : rigIds.has(stem.replace(/_/g, '-')) ? stem.replace(/_/g, '-')
@@ -149,10 +168,15 @@ if (existsSync(BUILD_PY)) {
       + 'names the loader never asks for.');
   } else {
     modules = [...m[1].matchAll(/['"]([^'"]+)['"]/g)].map((x) => x[1]);
+    if (!modules.length) fail.push('blender/build.py MACHINES list is empty');
   }
-}
+} else fail.push('blender/build.py is missing; model exports cannot be verified');
 for (const stem of modules) {
   if (NOT_A_RIG.has(stem)) continue;
+  const rig = intended(stem);
+  if (rig && !models.includes(`${rig}.glb`)) {
+    fail.push(`${rig}.glb is missing. Run npm run blender; a procedural fallback is not a verified model.`);
+  }
   if (!intended(stem)) {
     warn.push(`build.py lists "${stem}", which is not a rig id and is not in `
       + 'NOT_A_RIG. Either register the machine in data.js or say here why it is not one.');
@@ -198,23 +222,12 @@ if (existsSync(BUILD_PY)) {
     ...[...src.matchAll(/KINDS\.([A-Za-z0-9_]+)\s*=/g)].map((m) => m[1]),
   ]);
   for (const f of [...models, ...nested]) {
-    let names = [];
-    try {
-      const buf = readFileSync(join(MODELS, f));
-      if (buf.length > 12 && buf.readUInt32LE(0) === 0x46546c67) {
-        let off = 12;
-        while (off + 8 <= buf.length) {
-          const len = buf.readUInt32LE(off);
-          const type = buf.readUInt32LE(off + 4);
-          if (type === 0x4e4f534a) {
-            const j = JSON.parse(buf.slice(off + 8, off + 8 + len).toString('utf8'));
-            names = (j.materials || []).map((m) => m.name).filter(Boolean);
-            break;
-          }
-          off += 8 + len;
-        }
-      }
-    } catch (e) { warn.push(`${f}: could not read materials — ${e.message}`); continue; }
+    const g = parsed.get(f);
+    if (!g) continue; // already recorded as a failure above
+    const names = g.materials.map((m) => m.name);
+    if (names.some((n) => typeof n !== 'string' || !n)) {
+      fail.push(`${f} has an unnamed material; the runtime cannot resolve it.`);
+    }
     const unknown = [...new Set(names)].filter((n) => !kinds.has(n));
     if (unknown.length) {
       fail.push(`${f} asks for material(s) assets.js does not have: ${unknown.join(', ')}. `
@@ -252,27 +265,12 @@ if (existsSync(BUILD_PY)) {
      - `pivot:spindle` is REPORTED, not required. A cable-percussion tripod and
        a CPT unit have nothing that rotates, so demanding one would be wrong. */
 {
-  const readJson = (file) => {
-    const buf = readFileSync(join(MODELS, file));
-    if (buf.length < 12 || buf.readUInt32LE(0) !== 0x46546c67) return null;
-    let off = 12;
-    while (off + 8 <= buf.length) {
-      const len = buf.readUInt32LE(off);
-      if (buf.readUInt32LE(off + 4) === 0x4e4f534a) {
-        return JSON.parse(buf.slice(off + 8, off + 8 + len).toString('utf8'));
-      }
-      off += 8 + len;
-    }
-    return null;
-  };
-
   const noSpindle = [];
   let checked = 0;
   for (const f of models) {
     const stem = f.slice(0, -4);
     if (NOT_A_RIG.has(stem)) continue;
-    let g = null;
-    try { g = readJson(f); } catch (e) { warn.push(`${f}: unreadable — ${e.message}`); continue; }
+    const g = parsed.get(f);
     if (!g) continue;
     checked++;
     const byName = new Map((g.nodes || []).filter((n) => n.name).map((n) => [n.name, n]));
@@ -295,7 +293,7 @@ if (existsSync(BUILD_PY)) {
     if (!byName.get('pivot:spindle')) noSpindle.push(stem);
   }
 
-  if (!checked && models.length) {
+  if (!checked) {
     fail.push('the node-contract check read 0 machines out of '
       + `${models.length} files — it measured nothing and would have passed.`);
   }
@@ -320,8 +318,7 @@ if (missing.length) {
   console.log(`\nno Blender model yet (drawn procedurally): ${missing.join(' ')}`);
 }
 if (!models.length) {
-  console.log('\npublic/models/ is empty — nothing has been exported. That is fine: '
-    + 'models are gitignored and built by `npm run blender`.');
+  console.log('\npublic/models/ is empty — build the models with `npm run blender`.');
 }
 for (const n of note) console.log('NOTE  ' + n);
 for (const w of warn) console.log('WARN  ' + w);

@@ -45,10 +45,11 @@ import { mkdirSync, writeFileSync, readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assessQaRun } from './qa-verdict.mjs';
+import { blenderRigIds } from './checkrigloader.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = resolve(ROOT, 'shots');
-mkdirSync(OUT, { recursive: true });
 
 const argv = process.argv.slice(2);
 const flag = (name, dflt) => {
@@ -75,6 +76,18 @@ const GROUP = (flag('only', '') || '').toLowerCase();   // ui | methods | rigs
 const VALUE_FLAGS = new Set(['quality', 'url', 'tag', 'only', 'manifest', 'warmmax']);
 const only = argv.filter((a, i) =>
   !a.startsWith('--') && !(i > 0 && argv[i - 1].startsWith('--') && VALUE_FLAGS.has(argv[i - 1].slice(2))));
+
+/** The requested states must exist before any capture or burn-in can count. */
+export function selectCapturePlan(plan, { group = '', filters = [], listOnly = false } = {}) {
+  let wanted = plan;
+  if (group) wanted = wanted.filter((s) => s.group === group);
+  if (filters.length) wanted = wanted.filter((s) => filters.some((filter) => s.id.includes(filter)));
+  if (!wanted.length && !listOnly) {
+    const selection = [group && `--only ${group}`, ...filters].filter(Boolean).join(' ') || 'full capture plan';
+    throw new Error(`No requested capture states match ${selection}; burn-in cannot replace requested coverage.`);
+  }
+  return wanted;
+}
 
 const PHONE = {
   ...devices['iPhone 13 Pro'],
@@ -157,11 +170,11 @@ const UNDERGROUND = new Set(['tunnel-jumbo', 'longhole', 'rockbolt']);
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /** Enumerate the content tables and the engine surface, at run time. */
-function pageContent() {
+function pageContent(modelIds) {
   const c = window.__DRILLITY;
   const d = c && c.data;
   const rigSys = c && c.rig;
-  const buildable = (rigSys && rigSys.listRigs && rigSys.listRigs()) || [];
+  const buildable = [...new Set([...(rigSys?.listRigs?.() || []), ...modelIds])];
   const MAXL = (d && d.MAX_LEVEL) || 60;
 
   const regionsFor = (methodId) => {
@@ -177,10 +190,12 @@ function pageContent() {
       id: m.id, name: m.name, shortName: m.shortName, sectionMode: m.sectionMode || 'vertical',
       unlockLevel: m.unlockLevel, depthRange: m.depthRange, rigIds: m.rigIds || [],
       scoredOn: m.scoredOn || null, regions: regionsFor(m.id),
+      modelIds,
     })),
     rigs: ((d && d.RIGS) || []).map((r) => ({
       id: r.id, name: r.name, maker: r.maker, price: r.price, unlockLevel: r.unlockLevel,
       methods: r.methods || [],
+      hasModel: modelIds.includes(r.id),
       // rigRenderId() is data.js's own stand-in rule; ask it what the factory
       // can actually build so a portrait is never silently the wrong machine.
       renderId: d && d.rigRenderId ? d.rigRenderId(r.id, buildable) : r.id,
@@ -269,28 +284,33 @@ async function pageMetrics() {
      a 32 px target is exact and free. Shadow auto-update is parked for the
      probe so shadow passes do not inflate the scene numbers. */
   const prevShadow = gl.shadowMap.autoUpdate;
+  const prevTarget = gl.getRenderTarget();
   gl.shadowMap.autoUpdate = false;
   const rt = new THREE.WebGLRenderTarget(32, 32);
   const one = (scene, cam) => {
     info.reset();
     gl.setRenderTarget(rt);
-    try { gl.render(scene, cam); } catch (e) { void e; }
-    gl.setRenderTarget(null);
+    try { gl.render(scene, cam); } finally { gl.setRenderTarget(prevTarget); }
     return { calls: info.render.calls, tris: info.render.triangles };
   };
-  const surface = one(c.scene, c.camera);
-  let rig = null;
+  let surface, rig = null, section;
   const rigGroup = c.rig && c.rig.group;
-  if (rigGroup) {
-    const was = rigGroup.visible;
-    rigGroup.visible = false;
-    const without = one(c.scene, c.camera);
-    rigGroup.visible = was;
-    rig = { calls: surface.calls - without.calls, tris: surface.tris - without.tris };
+  const wasVisible = rigGroup?.visible;
+  try {
+    surface = one(c.scene, c.camera);
+    if (rigGroup) {
+      rigGroup.visible = false;
+      const without = one(c.scene, c.camera);
+      rigGroup.visible = wasVisible;
+      rig = { calls: surface.calls - without.calls, tris: surface.tris - without.tris };
+    }
+    section = c.sectionScene && c.sectionCamera ? one(c.sectionScene, c.sectionCamera) : null;
+  } finally {
+    if (rigGroup) rigGroup.visible = wasVisible;
+    gl.setRenderTarget(prevTarget);
+    rt.dispose();
+    gl.shadowMap.autoUpdate = prevShadow;
   }
-  const section = c.sectionScene && c.sectionCamera ? one(c.sectionScene, c.sectionCamera) : null;
-  rt.dispose();
-  gl.shadowMap.autoUpdate = prevShadow;
 
   /* ── texture memory estimate ───────────────────────────────────────────
      gl.info.memory.textures is a COUNT, and the budget is in megabytes. Walk
@@ -491,6 +511,7 @@ function pageIdentity() {
     liveHeading: liveEl ? ((liveEl.querySelector('h1, h2, .shead__t, .schead') || {}).textContent || '').trim().slice(0, 40) : null,
     cameraMode: c && c.renderer && c.renderer.cameraMode,
     rigId: c && c.rig && c.rig.getRigId && c.rig.getRigId(),
+    rigSource: c?.rig?.getActiveSourceKey?.(),
     rigMethodId: c && c.rig && c.rig.getMethodId && c.rig.getMethodId(),
     simMethodId: c && c.sim && c.sim.methodId,
     simActive: !!(c && c.sim && c.sim.active),
@@ -859,6 +880,80 @@ async function warmUp(page, opts = {}) {
   }
 }
 
+/** Seed the real method capture; self-contained for page.evaluate and CPU fixtures. */
+export async function pageSeedMethod(M) {
+  const c = window.__DRILLITY;
+  const notes = [];
+  const region = (M.regions && M.regions[0]) || null;
+  if (!region) notes.push('no region legitimately offers this method — using the harness stub contract');
+  const contract = await c.__qa.startDemoContract({ method: M.id, region: region || undefined, depth: 8 });
+  if (!contract) return { ok: false, notes: ['startDemoContract returned nothing'] };
+  if (contract.methodId !== M.id) notes.push(`contract came back as "${contract.methodId}"`);
+
+  /* KEEP THE JOB INSIDE THE METHOD'S OWN RANGE.
+     __qa.startDemoContract() asks for `depth + 30` and deepens whatever
+     it finds to reach it, which is right for a water well and wrong for a
+     tunnel round: `tunnel-jumbo` tops out at 24 m of heading advance, so
+     the bridge hands back a 38 m one. Clamp it back into depthRange and
+     re-cut the hole rather than photographing a job the method cannot do. */
+  const range = M.depthRange;
+  if (range && contract.targetDepth > range[1]) {
+    const was = contract.targetDepth;
+    contract.targetDepth = +(range[0] + (range[1] - range[0]) * 0.7).toFixed(1);
+    notes.push(`QA bridge deepened this job to ${was} m — clamped back to ${contract.targetDepth} m (method range ${range[0]}-${range[1]})`);
+    try {
+      c.geology.generateProfile({
+        regionId: contract.regionId, applicationId: contract.applicationId,
+        targetDepth: contract.targetDepth, seed: 1337, difficulty: contract.difficulty ?? 2,
+      });
+    } catch (e) { void e; }
+    try { c.sim.startHole(contract); } catch (e) { void e; }
+  }
+
+  /* Put the bit somewhere worth photographing: a third of the way in, so
+     there is hole above the bit in the section band and programme left
+     below it. startDemoContract seeks a flat 10 m, which on a 2,400 m
+     oil well is the conductor and on a 4 m tunnel round is past the end. */
+  const target = contract.targetDepth || 30;
+  const seek = Math.max(0.5, Math.min(target - Math.max(1, target * 0.25), target * 0.35));
+  try { c.sim.debug.setDepth(seek); } catch (e) { void e; }
+  try { c.geology.setDepth(seek); } catch (e) { void e; }
+
+  /* Put the RIGHT MACHINE under it. startDemoContract sets the method but
+     never the rig, so without this every method shot is whatever machine
+     was left standing on the pad by the previous shot. */
+  const d = c.data;
+  let rigId = null, substituted = null, expectedRigSource = null, rigSelected = false;
+  const candidates = (d.rigsForMethod ? d.rigsForMethod(M.id) : []).map((r) => r.id);
+  for (const id of candidates) {
+    const expectBlender = M.modelIds.includes(id) && c.qs?.get('glb') !== 'off';
+    if (expectBlender) await c.gltfRigs.load(id);
+    const buildable = c.rig.listRigs ? c.rig.listRigs() : [];
+    const render = d.rigRenderId ? d.rigRenderId(id, buildable) : id;
+    if (buildable.includes(render)) {
+      rigId = render;
+      // Requested Blender content cannot pass by drawing a procedural
+      // substitute, even if the factory reports the same requested id.
+      expectedRigSource = expectBlender ? 'glb:' + id : c.rig.getSourceKey?.(render) || null;
+      if (render !== id) substituted = id;
+      break;
+    }
+  }
+  if (rigId) {
+    c.state.garage.rigId = rigId;
+    rigSelected = c.rig.setRig(rigId) === true;
+    if (rigSelected) c.rig.setMethod(M.id);
+    else notes.push(`rigFactory.js refused to select "${rigId}"`);
+    if (substituted) notes.push(`no builder for "${substituted}" — showing stand-in "${rigId}"`);
+  } else {
+    notes.push(`no buildable rig for this method (data lists ${candidates.join(', ') || 'none'})`);
+  }
+  c.ui.show('site');
+  c.renderer.setCameraMode('hero');
+  return { ok: rigSelected, notes, target, seek: +seek.toFixed(2), rigId,
+    expectedRigSource, rigSelected, stageCount: null };
+}
+
 /**
  * One live gameplay shot per method.
  *
@@ -868,7 +963,7 @@ async function warmUp(page, opts = {}) {
  * actually offers it, handed to a competent-driller policy, and photographed
  * while it is working.
  */
-function methodShot(m) {
+export function methodShot(m) {
   const ug = UNDERGROUND.has(m.id);
   return {
     id: `m${pad2(m.__i)}-${m.id}`,
@@ -877,68 +972,9 @@ function methodShot(m) {
     label: `${m.name} — ${m.scoredOn || 'live'}`,
     settle: 700,
     async setup(page) {
-      const seed = await page.evaluate(async (M) => {
-        const c = window.__DRILLITY;
-        const notes = [];
-        const region = (M.regions && M.regions[0]) || null;
-        if (!region) notes.push('no region legitimately offers this method — using the harness stub contract');
-        const contract = await c.__qa.startDemoContract({ method: M.id, region: region || undefined, depth: 8 });
-        if (!contract) return { ok: false, notes: ['startDemoContract returned nothing'] };
-        if (contract.methodId !== M.id) notes.push(`contract came back as "${contract.methodId}"`);
-
-        /* KEEP THE JOB INSIDE THE METHOD'S OWN RANGE.
-           __qa.startDemoContract() asks for `depth + 30` and deepens whatever
-           it finds to reach it, which is right for a water well and wrong for a
-           tunnel round: `tunnel-jumbo` tops out at 24 m of heading advance, so
-           the bridge hands back a 38 m one. Clamp it back into depthRange and
-           re-cut the hole rather than photographing a job the method cannot do. */
-        const range = M.depthRange;
-        if (range && contract.targetDepth > range[1]) {
-          const was = contract.targetDepth;
-          contract.targetDepth = +(range[0] + (range[1] - range[0]) * 0.7).toFixed(1);
-          notes.push(`QA bridge deepened this job to ${was} m — clamped back to ${contract.targetDepth} m (method range ${range[0]}-${range[1]})`);
-          try {
-            c.geology.generateProfile({
-              regionId: contract.regionId, applicationId: contract.applicationId,
-              targetDepth: contract.targetDepth, seed: 1337, difficulty: contract.difficulty ?? 2,
-            });
-          } catch (e) { void e; }
-          try { c.sim.startHole(contract); } catch (e) { void e; }
-        }
-
-        /* Put the bit somewhere worth photographing: a third of the way in, so
-           there is hole above the bit in the section band and programme left
-           below it. startDemoContract seeks a flat 10 m, which on a 2,400 m
-           oil well is the conductor and on a 4 m tunnel round is past the end. */
-        const target = contract.targetDepth || 30;
-        const seek = Math.max(0.5, Math.min(target - Math.max(1, target * 0.25), target * 0.35));
-        try { c.sim.debug.setDepth(seek); } catch (e) { void e; }
-        try { c.geology.setDepth(seek); } catch (e) { void e; }
-
-        /* Put the RIGHT MACHINE under it. startDemoContract sets the method but
-           never the rig, so without this every method shot is whatever machine
-           was left standing on the pad by the previous shot. */
-        const d = c.data;
-        let rigId = null, substituted = null;
-        const candidates = (d.rigsForMethod ? d.rigsForMethod(M.id) : []).map((r) => r.id);
-        const buildable = c.rig.listRigs ? c.rig.listRigs() : [];
-        for (const id of candidates) {
-          const render = d.rigRenderId ? d.rigRenderId(id, buildable) : id;
-          if (buildable.includes(render)) { rigId = render; if (render !== id) substituted = id; break; }
-        }
-        if (rigId) {
-          c.state.garage.rigId = rigId;
-          c.rig.setRig(rigId);
-          c.rig.setMethod(M.id);
-          if (substituted) notes.push(`no builder for "${substituted}" — showing stand-in "${rigId}"`);
-        } else {
-          notes.push(`no buildable rig for this method (data lists ${candidates.join(', ') || 'none'})`);
-        }
-        c.ui.show('site');
-        c.renderer.setCameraMode('hero');
-        return { ok: true, notes, target, seek: +seek.toFixed(2), rigId, stageCount: null };
-      }, m);
+      const seed = await page.evaluate(pageSeedMethod, m);
       this.__seed = seed || {};
+      if (!seed?.ok) return;
 
       /* Two-pass methods (raise boring: pilot down then ream up; HDD: pilot
          bore then backream and pullback) do their characteristic work on the
@@ -974,6 +1010,8 @@ function methodShot(m) {
     },
     verify(id, met) {
       const checks = [
+        ['a machine was selected for this method', this.__seed?.rigSelected === true && !!this.__seed?.rigId],
+        ['requested rig source is active', !!this.__seed?.expectedRigSource && id.rigSource === this.__seed.expectedRigSource],
         [`sim is running "${m.id}"`, id.simMethodId === m.id],
         [`rig is tooled for "${m.id}"`, id.rigMethodId === m.id],
         ['a hole is live', id.simActive === true],
@@ -995,6 +1033,8 @@ function methodShot(m) {
         if (this.__seed.notes && this.__seed.notes.length) e.notes = this.__seed.notes;
         if (this.__seed.target) e.target = this.__seed.target;
         if (this.__seed.seek != null) e.seek = this.__seed.seek;
+        e.expectedRigSource = this.__seed.expectedRigSource || null;
+        e.rigSelected = this.__seed.rigSelected === true;
       }
       if (this.__ug) e.underground = this.__ug;
       return e;
@@ -1018,6 +1058,7 @@ function rigShot(r) {
         const c = window.__DRILLITY;
         const notes = [];
         const d = c.data;
+        if (R.hasModel && c.qs?.get('glb') !== 'off') await c.gltfRigs.load(R.id);
         const buildable = c.rig.listRigs ? c.rig.listRigs() : [];
         const render = d.rigRenderId ? d.rigRenderId(R.id, buildable) : R.id;
         if (!buildable.includes(render)) return { ok: false, notes: [`rigFactory.js cannot build "${R.id}"`] };
@@ -1037,7 +1078,8 @@ function rigShot(r) {
         c.rig.setMethod(methodId);
         c.ui.show('site');
         c.renderer.setCameraMode('orbit');
-        return { ok: true, notes, render, methodId, methodName: method ? method.shortName : methodId };
+        return { ok: true, notes, render, methodId, expectBlender: R.hasModel && c.qs?.get('glb') !== 'off',
+          methodName: method ? method.shortName : methodId };
       }, r);
       this.__seed = seed || {};
       if (!seed || !seed.ok) { this.__skip = (seed && seed.notes && seed.notes[0]) || 'setup failed'; return; }
@@ -1056,6 +1098,7 @@ function rigShot(r) {
       const want = (this.__seed && this.__seed.render) || r.id;
       return [
         [`machine is "${want}"`, id.rigId === want],
+        ['requested Blender model is active', !this.__seed?.expectBlender || id.rigSource === 'glb:' + r.id],
         ['orbit camera', id.cameraMode === 'orbit'],
         ['frame is not black', !!met && !!met.canvas && !met.canvas.error && met.canvas.surface.max > 24],
         ['GL context alive', !met || met.ctxLost !== true],
@@ -1076,6 +1119,7 @@ function rigShot(r) {
    ═══════════════════════════════════════════════════════════════════════════ */
 let BROWSER = null;
 const run = async () => {
+  mkdirSync(OUT, { recursive: true });
   /* Drive the real Chrome/Edge already installed on this machine — the bundled
      Playwright chromium build does not match the local browser cache.
      Headless Chrome cannot bind the discrete NVIDIA context here, so it renders
@@ -1247,7 +1291,7 @@ const run = async () => {
   }
 
   /* ── build the plan from the live content tables ─────────────────────── */
-  const content = await page.evaluate(pageContent).catch(() => null);
+  const content = await page.evaluate(pageContent, blenderRigIds()).catch(() => null);
   if (!content) { logs.push('[harness] FATAL: could not read window.__DRILLITY.data'); }
   const methods = (content && content.methods) || [];
   const rigs = (content && content.rigs) || [];
@@ -1266,7 +1310,7 @@ const run = async () => {
   const unlisted = methods.filter((m) => MANIFEST.methods.length && !MANIFEST.methods.includes(m.id)).map((m) => m.id);
   for (const r of rigs) {
     if (!content.buildable.includes(r.renderId)) {
-      skipped.push({ kind: 'rig', id: r.id, why: 'rig/rigFactory.js has no builder and data.js offers no renderRigId stand-in' });
+      skipped.push({ kind: 'rig', id: r.id, why: 'no live factory source, declared stand-in or registered Blender export' });
     }
   }
   const shootableRigs = rigs.filter((r) => content.buildable.includes(r.renderId));
@@ -1276,9 +1320,7 @@ const run = async () => {
     ...methods.map(methodShot),
     ...shootableRigs.map(rigShot),
   ];
-  let wanted = plan;
-  if (GROUP) wanted = wanted.filter((s) => s.group === GROUP);
-  if (only.length) wanted = wanted.filter((s) => only.some((o) => s.id.includes(o)));
+  const wanted = selectCapturePlan(plan, { group: GROUP, filters: only, listOnly: LIST_ONLY });
 
   process.stdout.write(
     `plan: ${methods.length} methods · ${shootableRigs.length}/${rigs.length} rigs · ` +
@@ -1404,14 +1446,21 @@ const run = async () => {
     }, i).catch(() => {});
     await sleep(60);
   }
-  const burnMetrics = await page.evaluate(pageMetrics).catch(() => null);
+  const burnWarm = has('nowarm') ? { warm: false, why: 'skipped (--nowarm)' }
+    : await warmUp(page, { label: 'burn-in', maxMs: +flag('warmmax', 150_000) });
+  const burnMetrics = await page.evaluate(pageMetrics).catch(e => ({error:String(e)}));
+  const burnIdent = await page.evaluate(pageIdentity).catch(() => ({}));
   await sleep(400);
   const burnBuf = await page.screenshot({ timeout: 180_000 });
   writeFileSync(resolve(OUT, name('13-burnin')), burnBuf);
   results.push({
     id: '13-burnin', group: 'ui', file: name('13-burnin'),
     md5: createHash('md5').update(burnBuf).digest('hex'),
-    metrics: burnMetrics, ident: {}, checks: [], failed: [],
+    metrics: burnMetrics, ident: burnIdent, checks: [],
+    failed: burnIdent.liveScreen === 'site' && burnIdent.simActive ? [] : ['burn-in did not reach live drilling'],
+    warm: !!(warm.warm && burnWarm.warm && burnMetrics?.programsDelta === 0),
+    warmDetail: { session: warm.warm, stop: burnWarm.warm, stopSec: burnWarm.sec,
+      stopWhy: burnWarm.why, programsDelta: burnMetrics?.programsDelta ?? null },
     errors: logs.slice(burnMark).filter((l) => l.startsWith('[error]') || l.startsWith('[pageerror]')).length,
     errorLines: [],
   });
@@ -1424,16 +1473,21 @@ const run = async () => {
    REPORT — the thing a reviewer reads before looking at a single PNG. It has
    to make a regression ATTRIBUTABLE: which state, which band, which number.
    ═══════════════════════════════════════════════════════════════════════════ */
-function writeReport({ results, logs, content, methods, rigs, skipped, unlisted, bootSec, hashes, loads, render, warm }) {
+export function writeReport({ results, logs, content, methods, rigs, skipped: plannedSkips = [], unlisted, bootSec, hashes, loads, render, warm },
+  { outputDir = OUT, headed = HEADED, stdout = process.stdout } = {}) {
   const L = [];
   const shot = results.filter((r) => !r.skipped);
+  const skipped = [...plannedSkips, ...results.filter((r) => r.skipped).map((r) => ({
+    kind: r.group === 'methods' ? 'method' : r.group === 'rigs' ? 'rig' : 'ui',
+    id: r.id, why: r.skipped, stage: 'runtime',
+  }))];
   const num = (v, w) => String(v == null ? '-' : v).padStart(w);
   const b = BUDGET;
 
   L.push(`DRILLITY — visual QA harness`);
   L.push(`when      ${new Date().toISOString()}`);
   L.push(`url       ${URL_}`);
-  L.push(`mode      ${HEADED ? 'HEADED (real GPU — fps is meaningful)' : 'HEADLESS / SwiftShader — FPS NUMBERS BELOW ARE NOT MEANINGFUL'}`);
+  L.push(`mode      ${headed ? 'HEADED (real GPU — fps is meaningful)' : 'HEADLESS / SwiftShader — FPS NUMBERS BELOW ARE NOT MEANINGFUL'}`);
   L.push(`quality   ${(content && content.quality) || QUALITY}`);
   L.push(`filter    ${GROUP || only.length ? [GROUP && '--only ' + GROUP, ...only].filter(Boolean).join(' ') : 'none — full coverage run'}`);
   L.push(`boot      ${bootSec}s`);
@@ -1445,7 +1499,7 @@ function writeReport({ results, logs, content, methods, rigs, skipped, unlisted,
      whether any of those numbers mean anything. */
   const coldShots = shot.filter((r) => r.metrics && r.metrics.fps != null && !r.warm);
   L.push('── FPS PROVENANCE — WARM OR COLD ───────────────────────────────────────');
-  if (!HEADED) {
+  if (!headed) {
     L.push('  HEADLESS. Every fps below is SwiftShader and says nothing about this game on a');
     L.push('  real GPU. Warm-up is beside the point here; run with --headed.');
   } else if (warm && warm.warm) {
@@ -1493,7 +1547,7 @@ function writeReport({ results, logs, content, methods, rigs, skipped, unlisted,
         : 'no warm gate ran for this shot (it is not part of the plan)'}`);
     }
     if (coldShots.length > 12) L.push(`    ... and ${coldShots.length - 12} more`);
-  } else if (HEADED && warm && warm.warm) {
+  } else if (headed && warm && warm.warm) {
     L.push('');
     L.push(`  All ${shot.length} shots measured warm — the program count did not move during any`);
     L.push('  of their fps windows.');
@@ -1523,7 +1577,7 @@ function writeReport({ results, logs, content, methods, rigs, skipped, unlisted,
   const uShots = shot.filter((r) => r.group === 'ui');
   L.push('── COVERAGE ────────────────────────────────────────────────────────────');
   L.push(`methods    ${mShots.length}/${methods.length} photographed` +
-         (skipped.filter((s) => s.kind === 'method').length ? `  ·  ${skipped.filter((s) => s.kind === 'method').length} MISSING FROM data.js` : ''));
+         (plannedSkips.filter((s) => s.kind === 'method').length ? `  ·  ${plannedSkips.filter((s) => s.kind === 'method').length} MISSING FROM data.js` : ''));
   L.push(`rigs       ${rShots.length}/${rigs.length} photographed` +
          (skipped.filter((s) => s.kind === 'rig').length ? `  ·  ${skipped.filter((s) => s.kind === 'rig').length} unbuildable` : ''));
   L.push(`UI states  ${uShots.length}`);
@@ -1548,29 +1602,19 @@ function writeReport({ results, logs, content, methods, rigs, skipped, unlisted,
   L.push('── BUDGET ──────────────────────────────────────────────────────────────');
   L.push(`source: ${b.source}`);
   L.push(`  draw calls   surface ≤ ${b.surface}   section ≤ ${b.section}   rig ≤ ${b.rig}`);
-  L.push(`  frame rate   ≥ ${b.fps} fps${HEADED ? '' : '   (NOT ASSESSED — headless)'}`);
+  L.push(`  frame rate   ≥ ${b.fps} fps${headed ? '' : '   (NOT ASSESSED — headless)'}`);
   L.push(`  texture mem  ≤ ${b.textureMB} MB (HIGH)      particles ≤ ${b.particles}`);
-  const over = { surface: [], section: [], rig: [], fps: [], tex: [], particles: [] };
-  for (const r of shot) {
-    const m = r.metrics; if (!m || m.error) continue;
-    if (m.surface && m.surface.calls > b.surface) over.surface.push(`${r.id}=${m.surface.calls}`);
-    if (m.section && m.section.calls > b.section) over.section.push(`${r.id}=${m.section.calls}`);
-    if (m.rig && m.rig.calls > b.rig) over.rig.push(`${r.id}=${m.rig.calls}`);
-    /* Only a WARM, unthrottled fps may fail the budget. A cold number is
-       capture order and a throttled one is Chrome's 1 Hz clamp on a hidden
-       tab; grading either produces a FAIL verdict about the harness, not
-       about the game — which is precisely how the "24-27 fps states" spent
-       four review rounds being treated as an art problem. */
-    if (HEADED && m.fps != null && !m.throttled && r.warm && m.fps < b.fps) over.fps.push(`${r.id}=${m.fps}`);
-    if (m.texEstMB > b.textureMB) over.tex.push(`${r.id}=${m.texEstMB}MB`);
-    if (m.particles && m.particles.live > b.particles) over.particles.push(`${r.id}=${m.particles.live}`);
-  }
+  const verdict = assessQaRun({ shots: shot, budget: b, headed, render, skipped, logs });
+  const { over } = verdict;
+  process.exitCode = Math.max(process.exitCode || 0, verdict.exitCode);
   const budgetFails = Object.entries(over).filter(([, v]) => v.length);
-  if (!budgetFails.length) {
+  if (verdict.status === 'PASS') {
     L.push('  VERDICT: PASS — every captured state is inside every documented ceiling.');
   } else {
-    L.push('  VERDICT: FAIL');
+    L.push(`  VERDICT: ${verdict.status}`);
     for (const [k, v] of budgetFails) L.push(`    ${k.padEnd(10)} over budget in ${v.length} state(s): ${v.slice(0, 8).join(' ')}${v.length > 8 ? ' …' : ''}`);
+    for (const problem of verdict.failures) L.push(`    FAIL: ${problem}`);
+    for (const problem of verdict.incomplete) L.push(`    UNMEASURED: ${problem}`);
   }
   L.push('  (texture MB is an estimate from live material maps, RGBA8 + mip tail.');
   L.push('   per-band calls exclude shadow passes; frame totals include them.)');
@@ -1639,6 +1683,8 @@ function writeReport({ results, logs, content, methods, rigs, skipped, unlisted,
     if (r.label) bits.push(r.label);
     if (id.simMethodId) bits.push(`method=${id.simMethodId}`);
     if (id.rigId) bits.push(`rig=${id.rigId}`);
+    if (id.rigSource) bits.push(`source=${id.rigSource}`);
+    if (r.extra && 'expectedRigSource' in r.extra) bits.push(`expected source=${r.extra.expectedRigSource || 'unavailable'}`);
     if (id.regionId) bits.push(`region=${id.regionId}`);
     if (id.profileMode) bits.push(`section=${id.profileMode}`);
     if (id.cameraMode) bits.push(`cam=${id.cameraMode}`);
@@ -1683,15 +1729,16 @@ function writeReport({ results, logs, content, methods, rigs, skipped, unlisted,
   L.push(logs.slice(0, 400).join('\n'));
 
   const text = L.join('\n') + '\n';
-  writeFileSync(resolve(OUT, `${TAG ? TAG + '-' : ''}report.txt`), text, 'utf8');
+  writeFileSync(resolve(outputDir, `${TAG ? TAG + '-' : ''}report.txt`), text, 'utf8');
 
   /* Machine-readable twin, so a later round can diff two runs numerically
      instead of a reviewer eyeballing two text files. */
   writeFileSync(
-    resolve(OUT, `${TAG ? TAG + '-' : ''}report.json`),
+    resolve(outputDir, `${TAG ? TAG + '-' : ''}report.json`),
     JSON.stringify({
-      when: new Date().toISOString(), url: URL_, headed: HEADED, quality: QUALITY,
+      when: new Date().toISOString(), url: URL_, headed, quality: QUALITY,
       budget: BUDGET, renderHealth: render || null,
+      verdict,
       /* THE PROVENANCE OF EVERY fps IN THIS FILE. A consumer that compares
          `shots[].metrics.fps` across runs must check `warmUp.warm` and the
          per-shot `warm` first; a cold number is capture order, not cost. */
@@ -1717,12 +1764,15 @@ function writeReport({ results, logs, content, methods, rigs, skipped, unlisted,
 
   /* ── stdout summary ─────────────────────────────────────────────────── */
   const cut = L.findIndex((l) => l.startsWith('── PER-SHOT DETAIL'));
-  process.stdout.write('\n' + L.slice(0, cut > 0 ? cut : L.length).join('\n') + '\n');
-  process.stdout.write(`\nreport → shots/${TAG ? TAG + '-' : ''}report.txt (+ .json)\n`);
+  stdout.write('\n' + L.slice(0, cut > 0 ? cut : L.length).join('\n') + '\n');
+  stdout.write(`\nreport → ${resolve(outputDir, `${TAG ? TAG + '-' : ''}report.txt`)} (+ .json)\n`);
+  return verdict;
 }
 
 /* A crash used to leave a headed Chrome running with the GPU still claimed,
    and the NEXT run then failed to get a WebGL context at all. Always close. */
-run()
-  .catch((e) => { console.error(e); process.exitCode = 1; })
-  .finally(async () => { try { if (BROWSER) await BROWSER.close(); } catch { /* already gone */ } });
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  run()
+    .catch((e) => { console.error(e); process.exitCode = 1; })
+    .finally(async () => { try { if (BROWSER) await BROWSER.close(); } catch { /* already gone */ } });
+}

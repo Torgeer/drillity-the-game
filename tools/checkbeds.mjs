@@ -39,8 +39,12 @@ const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const D = await import(pathToFileURL(join(ROOT, 'src/game/data.js')).href);
 const { makeRandom } = await import(pathToFileURL(join(ROOT, 'src/core/contract.js')).href);
 
-const PER_REGION = Number(process.argv[2]) || 800;
+const PER_REGION = process.argv[2] === undefined ? 800 : Number(process.argv[2]);
 const ONLY = process.argv[3] || null;
+if (!Number.isSafeInteger(PER_REGION) || PER_REGION <= 0) {
+  console.error('FAIL: cards per region must be a positive integer.');
+  process.exit(1);
+}
 
 const methodById = new Map(D.METHODS.map((m) => [m.id, m]));
 
@@ -60,8 +64,22 @@ function faults(c) {
   const method = methodById.get(c.methodId);
   if (!method) return ['unknown method ' + c.methodId];
   const vg = new Set(method.validGround);
-  const spec = c.groundSpec || [];
-  if (!spec.length) return ['empty groundSpec'];
+  const spec = c.groundSpec;
+  if (!Array.isArray(spec) || !spec.length) return ['empty or invalid groundSpec'];
+  // Comparisons against NaN are false. Validate the measurements before the
+  // depth and overburden checks can silently treat missing evidence as legal.
+  if (!Number.isFinite(c.targetDepth) || c.targetDepth <= 0) {
+    out.push('targetDepth must be finite and positive');
+  }
+  for (const [i, layer] of spec.entries()) {
+    if (!layer || typeof layer.id !== 'string' || !layer.id.length) {
+      out.push(`groundSpec[${i}] has no ground id`);
+    }
+    if (!Number.isFinite(layer?.thickness) || layer.thickness <= 0) {
+      out.push(`groundSpec[${i}].thickness must be finite and positive`);
+    }
+  }
+  if (out.length) return out;
 
   // 1. the bed the hole bottoms in
   const bottom = spec[spec.length - 1];
@@ -75,14 +93,21 @@ function faults(c) {
     .filter((l) => !vg.has(l.id))
     .reduce((a, l) => a + l.thickness, 0);
   const allowance = D.preCollarFor(method, c.archetype);
-  if (blocked > allowance + 0.01) {
+  // data.js deliberately uses +Infinity for casing-through methods and
+  // offshore spreads. It is an unlimited allowance, never a measured depth.
+  if (typeof allowance !== 'number' || Number.isNaN(allowance) || allowance < 0) {
+    out.push('pre-collar allowance must be a nonnegative number');
+  } else if (!Number.isFinite(blocked) || blocked > allowance + 0.01) {
     out.push(`passes ${blocked.toFixed(2)} m of undrillable ground on the way `
       + `down, allowance at ${c.archetype} is ${allowance} m`);
   }
 
   // 3. the depth window for this method AT THIS SITE
-  const [lo, hi] = D.depthWindow(method, c.applicationId, c.archetype);
-  if (c.targetDepth > hi + 0.05 || c.targetDepth < Math.min(lo, hi) - 0.05) {
+  const window = D.depthWindow(method, c.applicationId, c.archetype);
+  const [lo, hi] = Array.isArray(window) ? window : [];
+  if (!Number.isFinite(lo) || !Number.isFinite(hi) || lo <= 0 || hi < lo) {
+    out.push('depth window must contain finite positive ordered bounds');
+  } else if (c.targetDepth > hi + 0.05 || c.targetDepth < lo - 0.05) {
     out.push(`targetDepth ${c.targetDepth} m is outside the window `
       + `${lo}-${hi} m for ${method.id}/${c.applicationId}/${c.archetype}`);
   }
@@ -96,7 +121,8 @@ function faults(c) {
     const able = D.RIGS.filter((r) => r.methods.includes(c.methodId));
     if (!able.length) {
       out.push('no rig in the game runs this method at all');
-    } else if (!able.some((r) => (r.stats.depthCapacity || 0) >= c.targetDepth)) {
+    } else if (!able.some((r) => Number.isFinite(r.stats?.depthCapacity)
+      && r.stats.depthCapacity >= c.targetDepth)) {
       const deepest = Math.max(...able.map((r) => r.stats.depthCapacity || 0));
       out.push(`asks for ${c.targetDepth} m; the deepest rig that runs `
         + `${c.methodId} reaches ${deepest} m`);
@@ -133,8 +159,11 @@ for (const region of regions) {
       n++;
       continue;
     }
-    if (!c) continue;
     n++;
+    if (!c) {
+      bad.push({ seed, level, why: ['makeContract returned no contract'] });
+      continue;
+    }
     const why = faults(c);
     if (why.length) bad.push({ seed, level, method: c.methodId, site: c.archetype, why });
   }
@@ -166,6 +195,10 @@ for (const r of rows) {
 }
 console.log(`  ${'TOTAL'.padEnd(22)} ${String(totalBad).padStart(5)} / ${String(totalCards).padEnd(6)}`);
 
+if (!totalCards) {
+  console.error('\nFAIL: no contracts were measured.');
+  process.exit(1);
+}
 if (totalBad) {
   console.error(`\nFAIL: ${totalBad} contract(s) cannot be completed by the method they demand.`);
   process.exit(1);

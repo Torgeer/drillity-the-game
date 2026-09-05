@@ -1,5 +1,32 @@
 import { defineConfig } from 'vite';
 import { viteSingleFile } from 'vite-plugin-singlefile';
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+// Public files bypass Rollup's import graph. Emit them explicitly so the
+// pipeline proof stays available to developers without shipping to players.
+function gamePublicAssets() {
+  let publicDir;
+  return {
+    name: 'drillity:public-assets',
+    apply: 'build',
+    configResolved(config) { publicDir = config.publicDir; },
+    generateBundle() {
+      if (!publicDir) return;
+      const walk = (dir, prefix = '') => {
+        for (const entry of readdirSync(dir, { withFileTypes: true })) {
+          const fileName = prefix + entry.name;
+          const path = join(dir, entry.name);
+          if (entry.isDirectory()) walk(path, fileName + '/');
+          else if (fileName !== 'models/teststub.glb') {
+            this.emitFile({ type: 'asset', fileName, source: readFileSync(path) });
+          }
+        }
+      };
+      walk(publicDir);
+    },
+  };
+}
 
 /**
  * ONE FILE FOR THE GAME, SEPARATE FILES FOR THE MACHINES.
@@ -48,9 +75,13 @@ const NEVER_INLINE = /\.(glb|gltf|bin|ktx2|basis|hdr|exr|drc)$/i;
 
 export default defineConfig({
   base: './',
-  plugins: [viteSingleFile({ removeViteModuleLoader: true })],
+  // Its recommended config overwrites assetsInlineLimit with () => true.
+  // Every required single-file option is explicit below; preserve our guard.
+  plugins: [gamePublicAssets(), viteSingleFile({ removeViteModuleLoader: true, useRecommendedBuildConfig: false })],
   build: {
     target: 'es2020',
+    assetsDir: '',
+    copyPublicDir: false,
     // `true`  → inline it (the old blanket 100 MB limit, for everything small)
     // `false` → emit a file (meshes and any other payload asset)
     assetsInlineLimit: (filePath) => !NEVER_INLINE.test(filePath),

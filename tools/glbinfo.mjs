@@ -37,24 +37,38 @@
  * only that the machine is.
  */
 import { readFileSync, statSync, readdirSync, existsSync } from 'node:fs';
-import { join, basename } from 'node:path';
+import { join, basename, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 /** Split a GLB container into its JSON chunk and its BIN chunk. */
-function parseGLB(buf) {
+export function parseGLB(buf) {
+  if (buf.byteLength < 20) throw new Error('invalid GLB 2 header or declared length');
   const dv = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
   if (dv.getUint32(0, true) !== 0x46546c67) throw new Error('not a GLB (bad magic)');
   const version = dv.getUint32(4, true);
+  if (version !== 2 || dv.getUint32(8, true) !== buf.byteLength) {
+    throw new Error('invalid GLB 2 header or declared length');
+  }
   let off = 12;
   let json = null;
   let bin = null;
   while (off < buf.byteLength) {
+    if (off + 8 > buf.byteLength) throw new Error('truncated chunk header');
     const len = dv.getUint32(off, true);
     const type = dv.getUint32(off + 4, true);
+    if (len % 4 || off + 8 + len > buf.byteLength) throw new Error('invalid chunk length');
+    if (off === 12 && type !== 0x4e4f534a) throw new Error('first chunk is not JSON');
     const body = buf.subarray(off + 8, off + 8 + len);
-    if (type === 0x4e4f534a) json = JSON.parse(new TextDecoder().decode(body));
-    else if (type === 0x004e4942) bin = body;
-    off += 8 + len + ((4 - (len % 4)) % 4) * 0; // chunks are already 4-byte padded
+    if (type === 0x4e4f534a) {
+      if (json) throw new Error('duplicate JSON chunk');
+      json = JSON.parse(new TextDecoder().decode(body));
+    } else if (type === 0x004e4942) {
+      if (bin) throw new Error('duplicate BIN chunk');
+      bin = body;
+    }
+    off += 8 + len;
   }
+  if (!json || json.asset?.version !== '2.0') throw new Error('missing glTF 2.0 JSON');
   return { version, json, bin };
 }
 
@@ -103,16 +117,28 @@ const COMPONENT = {
 
 /** Read a VEC3 accessor as a flat array, honouring byteStride and normalisation. */
 function readVec3(g, bin, accessorIndex) {
-  const acc = g.accessors[accessorIndex];
+  const acc = g.accessors?.[accessorIndex];
+  if (!acc || !Number.isInteger(acc.count) || acc.count <= 0) throw new Error('missing or empty POSITION accessor');
+  if (acc.sparse) throw new Error('sparse POSITION accessor is not supported by this ruler');
   if (acc.type !== 'VEC3') throw new Error('accessor ' + accessorIndex + ' is ' + acc.type + ', not VEC3');
   const out = new Float64Array(acc.count * 3);
   if (acc.bufferView === undefined) return out;          // all-zero, valid glTF
   const bv = g.bufferViews[acc.bufferView];
+  const buffer = g.buffers?.[bv?.buffer];
+  if (!bv || bv.buffer !== 0 || !buffer || buffer.uri || !bin) throw new Error('POSITION requires a local BIN buffer');
   const spec = COMPONENT[acc.componentType];
   if (!spec) throw new Error('unknown componentType ' + acc.componentType);
   const Ctor = spec[0], size = spec[1];
   const stride = bv.byteStride || size * 3;
   const base = (bv.byteOffset || 0) + (acc.byteOffset || 0);
+  const viewStart = bv.byteOffset || 0;
+  const accessorOffset = acc.byteOffset || 0;
+  if (![viewStart, accessorOffset, bv.byteLength, buffer.byteLength, stride].every((n) => Number.isInteger(n) && n >= 0)
+    || stride < size * 3 || stride % size || base % size
+    || accessorOffset + (acc.count - 1) * stride + size * 3 > bv.byteLength
+    || viewStart + bv.byteLength > buffer.byteLength || buffer.byteLength > bin.byteLength) {
+    throw new Error('POSITION accessor exceeds or misaligns its bufferView/BIN storage');
+  }
   for (let i = 0; i < acc.count; i++) {
     /* A fresh typed array per vertex rather than one view over the whole
        range: POSITION accessors are only guaranteed to be aligned to their
@@ -129,8 +155,22 @@ function readVec3(g, bin, accessorIndex) {
 }
 
 /** World-space AABB of the whole file, plus one per node subtree. */
-function measure(g, bin) {
+export function measure(g, bin) {
+  const compressed = (g.extensionsUsed || []).filter((e) => /draco|meshopt|quantiz/i.test(e));
+  if (compressed.length) throw new Error(`compressed geometry (${compressed.join(', ')}); measure the uncompressed source`);
   const unreadable = [];
+  // Validate every primitive, including unattached meshes. The model gate uses
+  // this same reader; a named but unreadable primitive cannot pass separately.
+  const positions = new Map();
+  for (const mesh of g.meshes || []) {
+    if (!mesh.primitives?.length) unreadable.push('empty mesh');
+    for (const prim of mesh.primitives || []) {
+      if (prim.attributes?.POSITION === undefined) { unreadable.push('no POSITION'); continue; }
+      try {
+        if (!positions.has(prim.attributes.POSITION)) positions.set(prim.attributes.POSITION, readVec3(g, bin, prim.attributes.POSITION));
+      } catch (e) { unreadable.push(e.message); }
+    }
+  }
   const nodes = g.nodes || [];
   const sub = new Array(nodes.length);                   // node + descendants
   const sceneIndex = g.scene === undefined ? 0 : g.scene;
@@ -146,10 +186,15 @@ function measure(g, bin) {
   };
   const merge = (a, b) => { grow(a, b.min); grow(a, b.max); };
 
+  const visiting = new Set();
   const walk = (i, parentMatrix) => {
     const n = nodes[i];
+    if (!n || visiting.has(i)) throw new Error('invalid or cyclic scene node');
+    visiting.add(i);
     const m = m4mul(parentMatrix, trs(n));
+    if (!m.every(Number.isFinite)) throw new Error('non-finite node transform');
     const total = EMPTY();
+    if (n.mesh !== undefined && !g.meshes?.[n.mesh]) throw new Error('missing node mesh');
     if (n.mesh !== undefined && g.meshes[n.mesh]) {
       for (const prim of g.meshes[n.mesh].primitives) {
         /* REFUSE TO REPORT A NUMBER THIS CANNOT MEASURE.
@@ -157,13 +202,11 @@ function measure(g, bin) {
            used to be skipped in silence — and a skipped primitive makes the
            machine come out SMALLER, which is indistinguishable from a machine
            that is correctly small. Count them and say so on the row instead. */
-        if (prim.attributes.POSITION === undefined) { unreadable.push('no POSITION'); continue; }
-        let v;
-        try {
-          v = readVec3(g, bin, prim.attributes.POSITION);
-        } catch (e) { unreadable.push(e.message); continue; }
+        const v = positions.get(prim.attributes?.POSITION);
+        if (!v) continue;
         for (let k = 0; k < v.length; k += 3) {
           const x = v[k], y = v[k + 1], z = v[k + 2];
+          if (![x, y, z].every(Number.isFinite)) throw new Error('non-finite POSITION vertex');
           grow(total, [
             m[0] * x + m[4] * y + m[8] * z + m[12],
             m[1] * x + m[5] * y + m[9] * z + m[13],
@@ -177,6 +220,7 @@ function measure(g, bin) {
       if (real(cb)) merge(total, cb);
     }
     sub[i] = total;
+    visiting.delete(i);
     return total;
   };
 
@@ -210,6 +254,7 @@ function report(path) {
   const perMesh = meshes.map((m) => {
     let t = 0;
     for (const p of m.primitives) {
+      if (p.attributes?.POSITION === undefined) throw new Error('DIMENSIONS INCOMPLETE: primitive has no POSITION');
       const mode = p.mode === undefined ? 4 : p.mode;
       if (mode !== 4) continue;                       // TRIANGLES only
       const count = p.indices !== undefined
@@ -283,14 +328,15 @@ function report(path) {
   let dims = null;
   const compressed = ext.filter((e) => /draco|meshopt|quantiz/i.test(e));
   if (compressed.length) {
-    console.log(`   DIMENSIONS  UNMEASURABLE - geometry is compressed (${compressed.join(', ')}).`
-      + ' Measure the uncompressed source.');
+    throw new Error(`DIMENSIONS UNMEASURABLE: geometry is compressed (${compressed.join(', ')}). `
+      + 'Measure the uncompressed source.');
   } else if (!bin && (g.bufferViews || []).length) {
-    console.log('   DIMENSIONS  UNMEASURABLE - no BIN chunk (external .bin not supported).');
+    throw new Error('DIMENSIONS UNMEASURABLE: no BIN chunk (external .bin not supported).');
   } else {
     const m = measure(g, bin);
+    if (m.unreadable.length) throw new Error(`DIMENSIONS INCOMPLETE: ${m.unreadable.join('; ')}`);
     if (m.empty) {
-      console.log('   DIMENSIONS  no geometry.');
+      throw new Error('DIMENSIONS UNMEASURABLE: no geometry.');
     } else {
       const d = dimsOf(m.all);
       console.log(`   DIMENSIONS (m)  W ${f3(d[0])} x H ${f3(d[1])} x L ${f3(d[2])}`
@@ -340,6 +386,7 @@ let files = argv.filter((a) => !a.startsWith('--'));
    `measure()` above transforms every actual VERTEX, so it is exact. ONE ruler:
    HANDOFF.md 8B — two tables describing one thing will drift, and the one that
    is wrong will be believed. */
+function main() {
 if (!files.length) {
   const MODELS = 'public/models';
   if (!existsSync(MODELS)) {
@@ -350,7 +397,7 @@ if (!files.length) {
   if (!files.length) {
     console.log(MODELS + '/ is empty — nothing exported. Models are gitignored;'
       + ' build them with `npm run blender`.');
-    process.exit(0);
+    process.exit(1);
   }
   console.log('EXACT world-space bounds — every vertex transformed.');
   console.log('');
@@ -360,11 +407,12 @@ if (!files.length) {
     try {
       const { json: g, bin } = parseGLB(readFileSync(f));
       const m = measure(g, bin);
+      if (m.unreadable.length) throw new Error(`DIMENSIONS INCOMPLETE: ${m.unreadable.join('; ')}`);
       let prims = 0;
       for (const n of (g.nodes || [])) {
         if (n.mesh !== undefined && g.meshes[n.mesh]) prims += g.meshes[n.mesh].primitives.length;
       }
-      if (m.empty) { console.log(basename(f).padEnd(22) + ' no positioned geometry'); continue; }
+      if (m.empty) throw new Error('no positioned geometry');
       const d = dimsOf(m.all);
       const below = m.all.min[1] < -0.25;
       if (below) bad++;
@@ -375,6 +423,7 @@ if (!files.length) {
         + (m.unreadable.length ? '   INCOMPLETE (' + m.unreadable.length + ' prim)' : ''));
     } catch (e) {
       console.log(basename(f).padEnd(22) + ' FAILED: ' + e.message);
+      process.exitCode = 1;
     }
   }
   if (bad) {
@@ -388,9 +437,15 @@ if (!files.length) {
     + ' This tool has no opinion about what the number should be.');
   console.log('One machine in full:  node tools/glbinfo.mjs --parts <file.glb>');
   console.log('');
-  process.exit(0);
+  process.exit(process.exitCode || 0);
 }
 for (const f of files) {
-  try { report(f); } catch (e) { console.error(`\n── ${f}\n   FAILED: ${e.message}`); }
+  try { report(f); } catch (e) {
+    console.error(`\n── ${f}\n   FAILED: ${e.message}`);
+    process.exitCode = 1;
+  }
 }
 console.log('');
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main();
