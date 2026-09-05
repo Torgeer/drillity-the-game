@@ -449,24 +449,42 @@ has a double-weighted domain-truth axis and a measured HUD-restraint gate.
 
 ### Found 2026-09-05, all measured, none fixed
 
-**`box()` in `blender/lib/rig.py` returns boxes at HALF the size asked for, and
-every machine is built on it.** `primitive_cube_add(size=1)` makes a cube of
-EDGE 1 (-0.5..+0.5), and the next line sets `scale = size/2`, so the edge ends
-up `size/2`. Measured in Blender 5.2.1: `box((4, 2, 10))` has dimensions
-**(2.000, 1.000, 5.000)**.
+**~~`box()` in `blender/lib/rig.py` returns boxes at HALF the size asked for~~ —
+FIXED 2026-09-05, with all eight per-machine workarounds removed in the same
+pass.** `primitive_cube_add(size=1)` makes a cube of EDGE 1, and the next line
+scaled by `size/2` as well. `tube()` was always correct, so machines came out as
+correct cylinders bolted to half-size plates and nothing looked broken.
 
-`tube()` is correct — radius and depth both come out as asked. So a machine
-built from both silently gets **correct cylinders and half-size boxes**, which
-is the hardest possible version of this failure to catch in a wireframe: nothing
-looks broken, the proportions are just quietly wrong.
+Eight of the nine machines had each independently found it and worked around it
+locally — three (`rc_rig`, `crawler_th`, `dth_crawler`) by DOUBLING, which is why
+the library fix and the strip-out had to land together. **Eight of the nine
+measure identical overall dimensions before and after, to the millimetre**: each
+compensation exactly cancelled the bug. `tunnel_jumbo` was the one that never
+compensated, and it is the one that actually changed.
 
-It has already bitten twice (`04d8681`, "pd55: fix half-size boxes") and
-`foundation_bg.py` now measures the factor at build time and compensates.
-**That compensation must be removed the moment `rig.py` is fixed**, or those
-two machines become double-size. Nobody fixed `rig.py` because six machines were
-being written against it concurrently; they are all stopped now, so **this is
-the first thing to do when Blender work resumes** — fix `rig.py`, then strip the
-per-machine workarounds, then re-export and re-measure all of them.
+Three things came out of it that are worth more than the fix:
+
+- **`finish()`'s join was silently moving `mount:`/`aim:` nodes.** join() deletes
+  what it eats and the children of a deleted object do not keep their world
+  transform. Measured: a mount parented to a static at x = 6 came back at x = 0,
+  dragging its aim with it — and `env.js` reads both world positions every frame.
+  The export still contained a node called `mount:...`, so the old check ("did
+  the name survive?") passed. The name was never the contract. Latent in the
+  nine shipped machines (none currently hangs a lamp off joined static geometry);
+  it would have bitten the first one that did.
+- **`npm run blender` was only ever building ONE machine of nine.** `build.py`
+  never put `blender/` on `sys.path`, so every import but `pd55` raised
+  ModuleNotFoundError and the un-caught first failure ended the run. Exit code 0.
+- **`tools/glbinfo.mjs` now reports the world-space bounding box** of an exported
+  `.glb`. That is the instrument whose absence let a factor of two live for a
+  week, and the first thing it found was a tunnel jumbo standing 8.2 m tall on
+  tyres that reached 6.4 m below the floor.
+
+Still open, and found by the re-measurement — see the report in `git log`:
+`piling_leader` stands **6.010 m** over its tracks against a printed **4 880 mm
+over 900 mm shoes**; `cfa_rig` measures **6.843 m** wide against a printed
+transport width of **3 000 mm** and an over-tracks range of **3 000–4 500 mm**.
+Neither is a scale bug; both are stance/pose questions in the model.
 
 **The primary action button cannot be pressed by a right thumb.** Identical on
 all five methods: `.actionbtn` centre (334, 795) is HARD for the right hand,
