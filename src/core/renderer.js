@@ -1834,47 +1834,18 @@ export function createRenderer(ctx) {
      doing there: the driver may overlap the work anyway, and it cannot be
      slower than asking for them one at a time. */
 
-  /* ═══════════════════════════════════════════════════════════════════════
-     THE TITLE STAGE — a third, throwaway world, drawn only during boot
-     ═══════════════════════════════════════════════════════════════════════
-
-     The shader warm-up above turned the boot stall from 19 s of BLOCKED main
-     thread into ~12 s of GPU work happening on the driver's own threads. That
-     changes what boot can be: the main thread is now free, at 60 fps, for the
-     whole of it. A guaranteed twelve seconds of the player's attention that
-     currently shows a wordmark and a percentage.
-
-     So there is a third scene. It exists only while the game's own programs
-     compile behind it, and it is deleted the moment they are ready.
-
-     ── WHY IT IS SEPARATE FROM `scene` ──────────────────────────────────
-     Because the entire point is to draw something before the game's shaders
-     exist. Putting the title machine in `scene` and rendering `scene` would
-     block on all 71 programs, which is the stall this is meant to fill.
-     A private scene with its own handful of materials compiles in about a
-     second, and everything else keeps compiling behind it.
-
-     ── AND WHY IT SKIPS THE POST CHAIN ──────────────────────────────────
-     Same reason: the composer's own 13 programs are in the batch being
-     warmed. Rendering to the canvas directly costs the title nothing but a
-     few to-screen program variants of its own — and three.js applies
-     `toneMapping` and `outputColorSpace` automatically when the render target
-     is null, which is exactly the ACES + sRGB the grade pass mirrors. So the
-     title is graded like the game without needing the game's grade pass.
-
-     ── IT MUST NOT LENGTHEN BOOT ────────────────────────────────────────
-     Its model is fetched alongside the machine models during the systems
-     phase (main.js), not on the critical path; its own programs are warmed by
-     the same non-blocking route as everything else; and if any of that is not
-     ready in time the title is simply skipped. A title that delays the game
-     is worse than no title. */
-
+  /* A separate title scene can draw while the game's programs compile.
+   * It uses an already loaded Blender rig, no post chain and no extra fetch.
+   * Only its own to-screen programs are polled, and endTitle cancels that poll.
+   * Devices without a non-blocking readiness query keep the DOM boot screen.
+   */
   const titleScene = new THREE.Scene();
   titleScene.name = 'title';
   const titleCamera = new THREE.PerspectiveCamera(34, 9 / 16, 0.1, 400);
   titleCamera.name = 'titleCamera';
   titleScene.add(titleCamera);
   let titleMode = false;
+  let titleGeneration = 0;
 
   /** Frame the title stage — the WHOLE stage, not one of the two bands. */
   function updateTitleCamera() {
@@ -1907,11 +1878,25 @@ export function createRenderer(ctx) {
   };
 
   /** Programs the driver has finished, out of the ones it has been handed. */
-  function programReadiness() {
-    const ps = gl.info.programs || [];
+  function programReadiness(programs = gl.info.programs || []) {
+    const ps = Array.from(programs);
     let done = 0;
     for (const p of ps) { try { if (p.isReady()) done++; } catch { done++; } }
     return { done, total: ps.length };
+  }
+
+  /** Capture shader objects now: shared materials may be compiled for a
+   * different scene before a later readiness poll. three.js 0.169.0's compile
+   * returns materials and stores each selected program in renderer.properties.
+   */
+  function compilePrograms(root, cam, programs) {
+    const before = new Set(gl.info.programs || []);
+    const materials = gl.compile(root, cam);
+    for (const p of gl.info.programs || []) if (!before.has(p)) programs.add(p);
+    for (const material of materials) {
+      const program = gl.properties.get(material).currentProgram;
+      if (program) programs.add(program);
+    }
   }
 
   const warmQuadCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
@@ -1934,7 +1919,7 @@ export function createRenderer(ctx) {
    * renames one must degrade to warming fewer programs, never to throwing
    * during boot.
    */
-  function warmPost() {
+  function warmPost(programs) {
     if (!composer) return 0;
     let n = 0;
     for (const pass of composer.passes) {
@@ -1947,7 +1932,7 @@ export function createRenderer(ctx) {
       for (const m of (pass.separableBlurMaterials || [])) if (m) mats.push(m);
       for (const m of mats) {
         if (!m) continue;
-        try { quad.material = m; gl.compile(quad._mesh, warmQuadCam); n++; }
+        try { quad.material = m; compilePrograms(quad._mesh, warmQuadCam, programs); n++; }
         catch (e) { warnOnce('a post pass could not be pre-compiled.', e); }
       }
       quad.material = held;
@@ -2058,7 +2043,8 @@ export function createRenderer(ctx) {
      * honest progress while the driver works. See the SHADER WARM-UP note.
      *
      * Call it once, from boot, AFTER every system has built its scene content
-     * and BEFORE the frame loop starts. Calling it twice is harmless — three's
+     * and BEFORE the game scenes render. The title may draw while this waits.
+     * Calling it twice is harmless — three's
      * program cache makes the second pass a no-op — but pointless.
      *
      * @param {(done:number,total:number)=>void} [onProgress] driver-measured
@@ -2067,6 +2053,7 @@ export function createRenderer(ctx) {
     async warmShaders(onProgress) {
       const t0 = performance.now();
       const parallel = hasParallelCompile();
+      const programs = new Set();
       let post = 0;
       try {
         /* Both scenes and the post chain are queued BEFORE anything is
@@ -2078,9 +2065,9 @@ export function createRenderer(ctx) {
            will ask for — see the note there; getting this wrong is not a
            smaller win, it is a larger loss. */
         withWarmTarget(() => {
-          gl.compile(scene, camera);
-          gl.compile(sectionScene, sectionCamera);
-          post = warmPost();
+          compilePrograms(scene, camera, programs);
+          compilePrograms(sectionScene, sectionCamera, programs);
+          post = warmPost(programs);
         });
       } catch (e) {
         warnOnce('shader warm-up could not run — the first frame will pay for it.', e);
@@ -2095,7 +2082,7 @@ export function createRenderer(ctx) {
              programs cost what they always did. */
           const deadline = performance.now() + 60_000;
           const poll = () => {
-            const { done, total } = programReadiness();
+            const { done, total } = programReadiness(programs);
             if (onProgress) { try { onProgress(done, total); } catch { /* non-fatal */ } }
             if (done >= total || performance.now() > deadline) { resolve(); return; }
             setTimeout(poll, 16);
@@ -2105,12 +2092,12 @@ export function createRenderer(ctx) {
       } else if (onProgress) {
         /* No non-blocking query exists, so there is no progress to report.
            Say so with a single honest step rather than animating a fiction. */
-        const { total } = programReadiness();
+        const { total } = programReadiness(programs);
         try { onProgress(total, total); } catch { /* non-fatal */ }
       }
 
       return {
-        programs: (gl.info.programs || []).length,
+        programs: programs.size,
         ms: performance.now() - t0,
         parallel,
         post,
@@ -2232,20 +2219,33 @@ export function createRenderer(ctx) {
      */
     async warmTitle() {
       const t0 = performance.now();
-      try { gl.compile(titleScene, titleCamera); }
-      catch (e) { warnOnce('the title could not be pre-compiled.', e); return { ms: 0 }; }
-      if (hasParallelCompile()) {
-        await new Promise((resolve) => {
-          const deadline = performance.now() + 8000;
-          const poll = () => {
-            const { done, total } = programReadiness();
-            if (done >= total || performance.now() > deadline) { resolve(); return; }
-            setTimeout(poll, 16);
-          };
-          poll();
-        });
+      const generation = titleGeneration;
+      if (!hasParallelCompile()) return { ready: false, reason: 'no-parallel-compile', ms: 0, programs: 0 };
+      const previousTarget = gl.getRenderTarget();
+      const programs = new Set();
+      try {
+        // The output target is part of the shader key. Capture concrete program
+        // objects before warmShaders can change shared materials' currentProgram.
+        gl.setRenderTarget(null);
+        compilePrograms(titleScene, titleCamera, programs);
+      } catch (e) {
+        warnOnce('the title could not be pre-compiled.', e);
+        return { ready: false, reason: 'compile-failed', ms: performance.now() - t0, programs: 0 };
+      } finally {
+        gl.setRenderTarget(previousTarget);
       }
-      return { ms: performance.now() - t0 };
+      const ready = await new Promise((resolve) => {
+        const deadline = performance.now() + 8000;
+        const poll = () => {
+          if (generation !== titleGeneration || performance.now() > deadline) { resolve(false); return; }
+          try {
+            if ([...programs].every((p) => p.isReady())) { resolve(programs.size > 0); return; }
+          } catch { resolve(false); return; }
+          setTimeout(poll, 16);
+        };
+        poll();
+      });
+      return { ready, reason: ready ? 'ready' : 'cancelled-or-timeout', ms: performance.now() - t0, programs: programs.size };
     },
 
     /** Draw the title instead of the game until `endTitle()`. */
@@ -2261,8 +2261,10 @@ export function createRenderer(ctx) {
      */
     endTitle() {
       titleMode = false;
+      titleGeneration++;
+      const disposed = new Set();
       titleScene.traverse((o) => {
-        if (o.isMesh && o.geometry && o !== titleCamera) { try { o.geometry.dispose(); } catch { /* noop */ } }
+        if (o.isMesh && o.geometry && !disposed.has(o.geometry)) { disposed.add(o.geometry); try { o.geometry.dispose(); } catch { /* noop */ } }
       });
       for (let i = titleScene.children.length - 1; i >= 0; i--) {
         const c = titleScene.children[i];
@@ -2311,6 +2313,7 @@ export function createRenderer(ctx) {
     },
 
     dispose() {
+      api.endTitle();
       disposePost();
       normalMaterial.dispose();
       try { gl.dispose(); } catch { /* noop */ }

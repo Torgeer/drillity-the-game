@@ -43,6 +43,7 @@
  *     machine. main.js frames the camera to the space this leaves.
  */
 import { FACTS } from './catalog.js';
+import { DUR } from '../../core/motion.js';
 
 /**
  * WHAT THE CAPTION UNDER THE BAR SAYS — and why it used to be a lie.
@@ -168,6 +169,7 @@ export function createBootScreen(app) {
   let factIdx = Math.floor(Math.random() * FACTS.length);
   let factT = 0;
   let swapping = false;
+  let swapTimer = null;
   /** null until the first check, so the first answer always applies itself. */
   let overTitle = null;
 
@@ -182,7 +184,9 @@ export function createBootScreen(app) {
     let live = false;
     try { live = !!(app.ctx && app.ctx.renderer && app.ctx.renderer.titleActive); }
     catch { live = false; }
-    if (live === overTitle) return;
+    // Keep the title composition through the boot fade. Returning to the flat
+    // layout here jumped the wordmark to the middle before the menu appeared.
+    if (live === overTitle || (overTitle && !live)) return;
     overTitle = live;
 
     const [a, b, c] = live ? LAYOUT_TITLE : LAYOUT_FLAT;
@@ -229,17 +233,22 @@ export function createBootScreen(app) {
     }
     swapping = true;
     factEl.classList.add('is-swap');
-    setTimeout(() => {
+    swapTimer = setTimeout(() => {
+      swapTimer = null;
       factIdx = (factIdx + 1) % FACTS.length;
       factEl.textContent = FACTS[factIdx];
       factEl.classList.remove('is-swap');
       swapping = false;
-    }, 300);
+    }, DUR.d3 * 1000);
   }
 
   return {
     el,
     mount() {
+      clearTimeout(swapTimer);
+      swapTimer = null;
+      swapping = false;
+      factEl.classList.remove('is-swap');
       factIdx = Math.floor(Math.random() * FACTS.length);
       factEl.textContent = FACTS[factIdx];
       factT = 0;
@@ -254,7 +263,13 @@ export function createBootScreen(app) {
     },
     setProgress,
     playOut() { el.classList.add('is-out'); },
-    unmount() { el.classList.remove('is-out'); },
+    unmount() {
+      clearTimeout(swapTimer);
+      swapTimer = null;
+      swapping = false;
+      factEl.classList.remove('is-swap');
+      el.classList.remove('is-out');
+    },
     resize() {},
   };
 }
