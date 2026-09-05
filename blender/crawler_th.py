@@ -270,7 +270,8 @@ def hz(name, size, parent, loc, rot=(0, 0, 0)):
     return bx(name, size, R.MAT_HAZARD, parent, loc, rot, bevel=0.004)
 
 
-def ram(name, parent, base, tip, barrel_r=0.055, rod_r=0.032, mat_b=R.MAT_DARK):
+def ram(name, parent, base, tip, barrel_r=0.055, rod_r=0.032, mat_b=R.MAT_DARK,
+        mat_eye=R.MAT_CAST):
     """A hydraulic cylinder drawn between two points: barrel off the base, bare
     chrome rod out of the gland, a gland nut and two cast eye-ends.  Without
     those three it is just two cylinders.  Cylinder rods are the brightest and
@@ -290,9 +291,9 @@ def ram(name, parent, base, tip, barrel_r=0.055, rod_r=0.032, mat_b=R.MAT_DARK):
         tb(name + '_rod', rod_r, L, R.MAT_CHROME, parent, base, rot, 10),
         tb(name + '_gland', barrel_r * 1.16, 0.055, R.MAT_WORN, parent,
            (bxx + dx * f, byy + dy * f, bzz + dz * f), rot, 12),
-        tb(name + '_eyeA', barrel_r * 1.05, 0.075, R.MAT_CAST, parent, base,
+        tb(name + '_eyeA', barrel_r * 1.05, 0.075, mat_eye, parent, base,
            (rot[0], rot[1] + math.pi / 2, rot[2]), 10),
-        tb(name + '_eyeB', rod_r * 1.7, 0.062, R.MAT_CAST, parent, tip,
+        tb(name + '_eyeB', rod_r * 1.7, 0.062, mat_eye, parent, tip,
            (rot[0], rot[1] + math.pi / 2, rot[2]), 10),
     ]
 
@@ -653,7 +654,8 @@ def build_supports():
     leg = R.empty(R.NODE_SLIDE, 'support-leg-front', None,
                   (0.30, BODY_FRONT - 0.16, DECK_Z - 0.30))
     g = [bx('leg_bracket', (0.42, 0.34, 0.30), R.MAT_DARK, leg, (0, 0.10, 0.06), bevel=0.016)]
-    g += ram('leg_ram', leg, (0, 0, 0.02), (0, 0, -0.62), 0.070, 0.045)
+    g += ram('leg_ram', leg, (0, 0, 0.02), (0, 0, -0.62), 0.070, 0.045,
+             mat_eye=R.MAT_WORN)
     g.append(bx('leg_pad', (0.44, 0.44, 0.06), R.MAT_WORN, leg, (0, 0, -0.66), bevel=0.012))
     g.append(tb('leg_ball', 0.075, 0.09, R.MAT_CAST, leg, (0, 0, -0.72), (0, 0, 0), 10))
     weld(g, 'support-front', leg)
@@ -666,7 +668,7 @@ def build_supports():
         g.append(bx('blade_arm_%d' % s, (0.14, 0.46, 0.16), R.MAT_DARK, blade,
                     (s * 0.52, -0.06, -0.20), (0.6, 0, 0), bevel=0.012))
         g += ram('blade_ram_%d' % s, blade, (s * 0.52, -0.30, 0.10),
-                 (s * 0.52, 0.10, -0.32), 0.060, 0.038)
+                 (s * 0.52, 0.10, -0.32), 0.060, 0.038, mat_eye=R.MAT_WORN)
     weld(g, 'support-rear', blade)
 
 
@@ -868,7 +870,7 @@ def build_feed(tilt):
         p = R.empty(R.NODE_PIVOT, 'feed-sheave-' + tag, slide, (0, BEAM_D * 0.52, z))
         weld([tb('sheave_' + tag, 0.115, 0.075, R.MAT_CAST, p, (-0.037, 0, 0),
                  (0, math.pi / 2, 0), 16),
-              tb('sheavehub_' + tag, 0.045, 0.11, R.MAT_WORN, p, (-0.055, 0, 0),
+              tb('sheavehub_' + tag, 0.045, 0.11, R.MAT_CAST, p, (-0.055, 0, 0),
                  (0, math.pi / 2, 0), 10)], 'sheave-' + tag, p)
         g.append(bx('sheave_block_' + tag, (0.22, 0.20, 0.20), R.MAT_CAST, slide,
                     (0, BEAM_D * 0.52, z), bevel=0.014))
@@ -1033,7 +1035,7 @@ def build_feed(tilt):
     arm = R.empty(R.NODE_PIVOT, 'rod-arm', slide, (0.30, 0.06, BEAM_LEN * 0.50))
     weld([bx('arm_link', (0.44, 0.10, 0.12), R.MAT_PAINT, arm, (0.16, 0, 0), bevel=0.012),
           bx('arm_grip', (0.15, 0.17, 0.20), R.MAT_CAST, arm, (0.38, 0, 0), bevel=0.012),
-          tb('arm_pin', 0.045, 0.20, R.MAT_CHROME, arm, (0, 0, -0.10), (0, 0, 0), 10)],
+          tb('arm_pin', 0.045, 0.20, R.MAT_CAST, arm, (0, 0, -0.10), (0, 0, 0), 10)],
          'rod-arm', arm)
 
     # ── the guard cage ───────────────────────────────────────────────────────
