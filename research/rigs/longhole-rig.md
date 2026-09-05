@@ -446,7 +446,7 @@ Side coverage drawing, feed vertical, machine set up and drilling:
 
 | | Value |
 |---|---|
-| **Maximum height, feed vertical, stinger out** | **7 700 mm** |
+| **Overall height of the coverage drawing** | **7 700 mm** — see the caution below |
 | **Feed extension** (the feed slides bodily out of its cradle) | **900 mm** |
 | **Stinger extension, top (against the back)** | **450 mm** |
 | **Stinger extension, bottom (down to the floor)** | **1 000 mm** |
@@ -455,6 +455,16 @@ Side coverage drawing, feed vertical, machine set up and drilling:
 | Boom articulation angle shown | **55°**, on a **1 250 mm** boom section |
 | **Drilling axis, ahead of the front axle** | **2 605 mm** |
 | Second feed station, offset from the first | **1 250 mm** |
+
+**The 7 700 mm figure must not be built to, and here is why.** It cannot be
+reconstructed from the other printed numbers on the same drawing: feed 3 340 +
+extension 900 + head stinger 450 = 4 690 mm of assembly, which would put the
+feed's foot at 3.01 m — impossible inside the 3 900 × 3 900 mm drift the same
+publisher recommends for this feed. It is a theoretical envelope, in the same
+family as the "W 9 550 mm" trap recorded at the end of §3.3. **Record it, do not
+construct from it.** What DOES close is the drift fit: 150 mm of floor clearance
++ 3 340 of feed + 450 of head stinger = **3 940 mm against a 3 900 mm
+recommended drift**, and that is why the rods are short.
 
 Plan coverage drawing, boom swinging across the drive:
 
