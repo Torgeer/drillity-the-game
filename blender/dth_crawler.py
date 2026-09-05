@@ -134,7 +134,27 @@ def bake(o):
     return o
 
 
+def to_mesh(o):
+    """Convert a CURVE (every hose and rope is one) to a real mesh.
+
+    rig.finish() and join_by_mat both only look at MESH objects, so an
+    unconverted hose exports as its own draw call. Fourteen hoses is fourteen
+    draw calls out of a budget of seventy - converting them first lets them
+    collapse into the single 'rubber' primitive they belong in.
+    """
+    if o.type != 'CURVE':
+        return o
+    bpy.ops.object.select_all(action='DESELECT')
+    o.select_set(True)
+    bpy.context.view_layer.objects.active = o
+    bpy.ops.object.convert(target='MESH')
+    bpy.ops.object.select_all(action='DESELECT')
+    return o
+
+
 def bake_all():
+    for o in list(bpy.context.scene.objects):
+        to_mesh(o)
     for o in list(bpy.context.scene.objects):
         bake(o)
 
@@ -146,6 +166,8 @@ def join_by_mat(parent, label):
     dynamic subassembly would otherwise export one draw call per box. This
     collapses it to one per material, which is the floor.
     """
+    for o in list(parent.children):
+        to_mesh(o)
     kids = [o for o in parent.children if o.type == 'MESH']
     for o in kids:
         bake(o)
