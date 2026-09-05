@@ -39,7 +39,10 @@ const page = await (async () => {
   const c = await b.newContext({ viewport: { width: SIZE + 40, height: SIZE + 40 }, deviceScaleFactor: 2 });
   const p = await c.newPage();
   p.on('console', (m) => { if (m.type() === 'error') console.log('  [console]', m.text().slice(0, 160)); });
-  await p.goto(`http://localhost:${PORT}/`, { waitUntil: 'domcontentloaded' });
+  // `?mute` as well as --mute-audio: the browser flag is one line of
+  // defence and audio.js's own `_silent` is the other. This script loaded
+  // the game on a bare URL and had only the first (audio.js §7).
+  await p.goto(`http://localhost:${PORT}/?mute`, { waitUntil: 'domcontentloaded' });
   return p;
 })();
 
