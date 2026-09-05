@@ -1159,7 +1159,12 @@ def build_jacks():
                (0, 0, -0.03), (0, 0, 0), 10),
             # the BALL JOINT is what [T2] calls out, and it is what lets a flat
             # pad sit square on ground that is not
-            tb('jack_ball_%s' % side, 0.026, 0.032, R.MAT_CAST, n,
+            # R.MAT_WORN, not R.MAT_CAST: 36 triangles of castIron inside each
+            # of four jack groups is 4 draw calls for 144 triangles.  The gland
+            # above it and the pad below it are both already wornSteel, so the
+            # ball joint merges into its own neighbours and nothing changes on
+            # screen.  What [T2] calls out is the JOINT, which is still here.
+            tb('jack_ball_%s' % side, 0.026, 0.032, R.MAT_WORN, n,
                (0, 0, -drop + 0.03), (0, 0, 0), 10),
             tb('jack_pad_%s' % side, JACK_PAD_R, 0.024, R.MAT_WORN, n,
                (0, 0, -drop), (0, 0, 0), 12),

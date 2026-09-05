@@ -306,7 +306,14 @@ def build_axle(parent, name, y):
     on the machine and the reason ground clearance is quoted at 300 mm."""
     tube(name + '-housing', 0.105, WIDTH - 0.34, MAT_DARK, parent,
          loc=(-(WIDTH - 0.34) / 2, y, WHEEL_R), rot=(0, math.pi / 2, 0), sides=10)
-    tube(name + '-diff', 0.185, 0.30, MAT_CAST, parent,
+    # MAT_WORN, not MAT_CAST.  This one call site was the ONLY use of castIron
+    # on the whole machine, and because build_axle() runs once on the
+    # articulated front frame and once on the static rear, it cost TWO draw
+    # calls for 88 triangles total — 44 a call, the worst ratio here.  The
+    # differential nose is a rough dark casting and wornSteel reads the same at
+    # any distance a 370 mm object is visible from.  castIron is now gone from
+    # this machine entirely: -2 draw calls and -1 material.
+    tube(name + '-diff', 0.185, 0.30, MAT_WORN, parent,
          loc=(0, y - 0.15, WHEEL_R), rot=(-math.pi / 2, 0, 0), sides=12)
     box(name + '-guard', (0.52, 0.44, 0.05), MAT_WORN, parent,
         loc=(0, y - 0.05, CLEAR - 0.01), bevel=0.02)

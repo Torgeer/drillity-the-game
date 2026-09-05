@@ -449,7 +449,11 @@ def build(out_path):
         # the published 550 mm, so the game can lift the machine off its tracks.
         parts = [R.tube('jrod', 0.062, 0.42, R.MAT_CHROME, loc=(0, 0, -0.37), sides=10),
                  disc('jpad', JACK_PAD_R, 0.05, R.MAT_WORN, (0, 0, -0.395), 'Z', sides=12),
-                 box('jpin', (0.20, 0.05, 0.05), R.MAT_STEEL, loc=(0, 0, -0.33))]
+                 # R.MAT_WORN, not R.MAT_STEEL.  Twelve triangles — one
+                 # unbevelled box — and because it appears in all four jack
+                 # groups it was FOUR draw calls for 48 triangles, the cheapest
+                 # calls in the fleet.  The pad it pins is already wornSteel.
+                 box('jpin', (0.20, 0.05, 0.05), R.MAT_WORN, loc=(0, 0, -0.33))]
         weld(parts, node, 'jack-' + tag)
 
     # ── 8. WINCHES - two, and they are different [C140] p.6 ─────────────────

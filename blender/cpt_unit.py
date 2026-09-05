@@ -1043,7 +1043,15 @@ def build_jacks():
                    (0, 0, -0.06), (0, 0, 0), 12),
                 # the pin joint and the pad.  A flat pad that cannot follow the
                 # ground is a pad that only ever sits on one edge.
-                tb('jack_knuckle_%s' % side, 0.052, 0.09, R.MAT_CAST, n,
+                # R.MAT_WORN, not R.MAT_CAST.  A MATERIAL COSTS A DRAW CALL PER GROUP IT APPEARS IN.
+                # glTF emits one primitive per material per mesh, and finish()/weld() join
+                # by material WITHIN a dynamic group — so a material used for one small
+                # object in each of four jacks is FOUR draw calls, not one.
+                # This knuckle was 36 triangles of castIron inside each of four
+                # jack groups: 4 draw calls for 144 triangles.  The pin joint
+                # and the pad it sits in are already wornSteel and touch it, so
+                # the merge is invisible and buys the calls back outright.
+                tb('jack_knuckle_%s' % side, 0.052, 0.09, R.MAT_WORN, n,
                    (0, 0, -drop + PAD_T + 0.03), (0, math.pi / 2, 0), 10),
                 tb('jack_pad_%s' % side, 0.185, PAD_T, R.MAT_WORN, n,
                    (0, 0, -drop), (0, 0, 0), 14),

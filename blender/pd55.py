@@ -910,7 +910,17 @@ def build_guide(slew):
        (0, 0, 1.90), bevel=0.025)
     bx('foot-collar', (MAST_W + 0.22, MAST_D + 0.20, 0.30), MAT_PAINT, foot,
        (0, 0, 3.40), bevel=0.02)
-    tb('foot-rod', 0.10, 0.55, MAT_CHROME, foot, (0, 0, 0.14), sides=12)
+    # MAT_WORN, not MAT_CHROME.  This machine ships at 67 draw calls against a
+    # hard budget of 70, the tightest in the fleet, and this rod was 44
+    # triangles carrying a whole call of its own inside the mast-foot group.
+    # It is a 550 mm stub standing in the mud under a 25.7 m rig, permanently
+    # half-buried in the bearing pad it sits on — the one chrome rod on the
+    # machine that never reads as chrome anyway.  The pad it lands on is
+    # already wornSteel, so the merge is exact.  Every other chrome rod here
+    # (kin-ram, mast-carrier, mast-head, carriage, rear-support, the pile
+    # guides) is left alone: they are extended, lit, and moving, which is where
+    # bright rods earn their draw call.
+    tb('foot-rod', 0.10, 0.55, MAT_WORN, foot, (0, 0, 0.14), sides=12)
     tb('foot-pad', 0.46, 0.12, MAT_WORN, foot, (0, 0, 0.02), sides=20)
     bx('foot-brace', (0.14, 1.45, 0.14), MAT_PAINT, foot,
        (0, -0.80, 2.30), (0.62, 0, 0), bevel=0.012)
