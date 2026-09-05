@@ -91,13 +91,11 @@ export function createResultsScreen(app) {
     return `${(s / 3600).toFixed(1)} h`;
   }
   const pct = (v) => `${Math.round(clamp(v, 0, 1) * 100)}%`;
-  /** A breakdown entry is either a rich object or a bare score. */
-  const scoreOf = (x, fallback = 0) => {
-    if (x === null || x === undefined) return fallback;
-    if (typeof x === 'number') return clamp(x, 0, 1);
-    if (typeof x.score === 'number') return clamp(x.score, 0, 1);
-    return fallback;
-  };
+  /* `scoreOf(x, fallback)` used to live here. It is gone deliberately: its
+     whole job was to substitute a locally invented number for a missing one,
+     and every one of its four call sites passed an invention. `publishedScore`
+     in buildSummary() replaces it and returns null instead. Do not reintroduce
+     a helper whose signature has a fallback parameter. */
   const obj = (x) => (x && typeof x === 'object' ? x : null);
   const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
@@ -255,14 +253,33 @@ export function createResultsScreen(app) {
   let timeline = [];
   let clock = 0;
   let summary = null;
+  /* One warning per screen instance, not per hole — a producer sending the
+     wrong payload shape sends it every time, and forty identical lines in the
+     console is how a real one gets scrolled past. */
+  let warnedUnscored = false;
+  let warnedGrade = false;
 
   function at(t, fn) { timeline.push({ t, fn, done: false }); }
 
   /**
    * The settlement progression actually booked for this hole, or null.
-   * `progression.completeHole` runs on the same HOLE_COMPLETE event and is
-   * registered first (main.js loads progression before ui), so by the time this
-   * screen mounts the entry is already at the head of the career ledger.
+   *
+   * ── WHY THE ENTRY IS ALREADY THERE ────────────────────────────────────
+   * NOT because of load order. This comment used to claim progression was
+   * "registered first (main.js loads progression before ui)", and that is
+   * backwards: main.js awaits `ui.init()` at line 196 BEFORE it initialises
+   * the rest, and both systems subscribe inside their own init() — so the
+   * shell's HOLE_COMPLETE listener is registered FIRST and used to mount this
+   * screen before `completeHole()` had written anything. `lastSettlement()`
+   * then read a ledger whose head was the PREVIOUS hole, and neither the
+   * contract-id nor the ±5 % depth guard below can tell two runs of the same
+   * contract apart.
+   *
+   * What makes the entry present is that ui/shell.js now defers the show by
+   * one microtask. bus.emit is synchronous, so every listener — progression
+   * included — has run to completion before this screen mounts, whatever the
+   * subscription order turns out to be. The guards below stay: they are what
+   * catches it if that deferral is ever removed.
    */
   function lastSettlement(contractId, depth) {
     if (!app.ctx.progression) return null;
@@ -324,58 +341,123 @@ export function createResultsScreen(app) {
     const bHaz = obj(bd?.hazards);
     const bRods = obj(bd?.rods);
 
-    const estSpeed = clamp(avgRop / 45, 0, 1);
-    const estStraight = clamp(0.55 + (d.greenBandTime || 0) / 40, 0, 1);
-    const estCare = clamp(1 - (d.wear || 0), 0, 1);
-    const estSafety = clamp(d.stability ?? 1, 0, 1);
+    /* ── THE SIM IS THE ONLY SOURCE. THERE IS NO SECOND ONE. ──────────────
+       Four `est*` expressions used to sit here, manufacturing a score out of
+       state.drill whenever the payload was thin and printing it in the same
+       typeface as the measured numbers with nothing to mark it as invented.
+       The worst was
 
-    const scores = {
-      speed: bd ? scoreOf(bd.time, estSpeed) : estSpeed,
-      straightness: bd ? scoreOf(bd.straightness, estStraight) : estStraight,
-      toolCare: bd ? scoreOf(bd.bit ?? bd.bitLife, estCare) : estCare,
-      safety: bd ? scoreOf(bd.safety, estSafety) : estSafety,
-      groove: bd ? scoreOf(bd.groove, clamp((d.greenBandTime || 0) / Math.max(1, timeSec), 0, 1)) : null,
+           const estSpeed = clamp(avgRop / 45, 0, 1);
+
+       — one hard-coded 45 m/h denominator for every method in the game. On a
+       job whose nominal is 6 m/h (`nominalRop`, game/data.js — e.g.
+       site-investigation and overburden) a player who made 8.3 m/h, well ABOVE
+       nominal, was shown SPEED 18 %. The other three were the same shape:
+       0.55 + greenBandTime/40 for straightness, 1 - wear for tool care,
+       state.drill.stability for safety. Not one of them is the quantity its
+       own label names, and all four survived review because they looked like
+       data.
+
+       Speed is scored on TIME AGAINST PAR — `breakdown.time.score`, with
+       parSec/actualSec published beside it as the evidence — and never on ROP
+       against a constant, so there was never anything here to fall back to
+       even in principle.
+
+       A criterion the sim did not publish is therefore UNMEASURED, is null,
+       and the screen says so. Rubric axis 11: an absent number is honest, a
+       wrong one is not, and the wrong one is the one that gets believed. */
+    const publishedScore = (x) => {
+      if (typeof x === 'number' && Number.isFinite(x)) return clamp(x, 0, 1);
+      if (x && typeof x.score === 'number' && Number.isFinite(x.score)) return clamp(x.score, 0, 1);
+      return null;
     };
 
+    const scores = {
+      speed: publishedScore(bd?.time),
+      straightness: publishedScore(bd?.straightness),
+      toolCare: publishedScore(bd?.bit ?? bd?.bitLife),
+      safety: publishedScore(bd?.safety),
+      groove: publishedScore(bd?.groove),
+    };
+
+    /* One warning naming exactly which criteria arrived unscored, so a producer
+       sending the wrong payload shape is findable from the console instead of
+       from a screenshot two rounds later. */
+    const unscored = ['speed', 'straightness', 'toolCare', 'safety'].filter((k) => scores[k] === null);
+    if (bd && unscored.length && !warnedUnscored) {
+      warnedUnscored = true;
+      console.warn('[ui] results: HOLE_COMPLETE carried a breakdown but no score for '
+        + `${unscored.join(', ')} — those criteria are shown as unmeasured. The sim `
+        + 'publishes breakdown.{time,straightness,bit,safety,groove}.score; a producer '
+        + 'emitting a FLAT breakdown (main.js showResults(), the QA bridge) does not '
+        + 'match that shape and will land here.');
+    }
+
     /* The evidence behind each score, in the units PLATFORM_TRUTH Part C
-       demands. Deviation is carried by the sim in its own arbitrary units, so
-       it is reported as the share of the tolerance it used up rather than as a
-       fabricated angle or offset. */
+       demands, and only ever from what the sim published. Deviation is carried
+       by the sim in its own arbitrary units, so it is reported as the share of
+       the tolerance it used up rather than as a fabricated angle or offset.
+       Where there is no measurement there is no sentence — not a substitute. */
     const evidence = {
-      speed: bTime
-        ? `${fmtSpan(bTime.actualSec)} against ${fmtSpan(bTime.parSec)} par`
-        : (avgRop > 0 ? `${avgRop.toFixed(1)} m/h average` : 'no rate recorded'),
-      straightness: `${pct(1 - scores.straightness)} of the drift tolerance used`,
+      speed: bTime ? `${fmtSpan(bTime.actualSec)} against ${fmtSpan(bTime.parSec)} par` : null,
+      straightness: scores.straightness === null
+        ? null : `${pct(1 - scores.straightness)} of the drift tolerance used`,
       toolCare: bBit
         ? `${Number(bBit.consumed01 ?? 0).toFixed(2)} of a crown${bBit.bitsUsed ? ` · ${plural(bBit.bitsUsed, 'change')}` : ''}`
-        : `${pct(clamp(d.wear || 0, 0, 1))} of the crown consumed`,
+        : null,
       safety: bSafety
         ? ((bSafety.events || bSafety.jams)
           ? `${plural(bSafety.events || 0, 'incident')} · ${plural(bSafety.jams || 0, 'stuck string')}`
           : 'no incidents, no stuck string')
-        : `hole stability ${pct(scores.safety)}`,
+        : null,
     };
 
-    /* The composite. The sim publishes its own weighted total; without it the
-       four criteria are weighted the way GAMEDESIGN §2.4 orders them, and
-       completion scales the result — half a hole is not a graded hole. */
-    const compositeKnown = typeof bd?.total === 'number';
-    const composite = compositeKnown
-      ? clamp(bd.total, 0, 1)
-      : completion * (scores.speed * 0.30 + scores.straightness * 0.28
-        + scores.toolCare * 0.24 + scores.safety * 0.18);
+    /* The composite. Only the sim's own weighted total counts. The local
+       re-derivation that used to stand here — 0.30/0.28/0.24/0.18 over the four
+       criteria, scaled by completion — was a fifth invented number on a screen
+       that already had four, and it is now impossible anyway: with the est*
+       scores gone the operands can be null. No total published, no score shown. */
+    const compositeKnown = typeof bd?.total === 'number' && Number.isFinite(bd.total);
+    const composite = compositeKnown ? clamp(bd.total, 0, 1) : null;
 
-    /* The settlement, when there is one, IS the transaction — and the grade it
-       was paid at outranks anything this screen could derive. */
+    /* The settlement, when there is one, IS the transaction. */
     const settle = lastSettlement(c?.id ?? raw?.id ?? null, depth);
 
-    let grade = r.grade || bd?.grade || settle?.grade;
-    if (!grade) {
-      grade = 'D';
-      for (const [g, thr] of GRADE_BANDS) { if (composite >= thr) { grade = g; break; } }
+    /* ── THE LETTER AND THE SCORE MUST AGREE ──────────────────────────────
+       The screenshot that failed review read `SCORE 51 % · grade B` — and B
+       starts at 62 %, on the very same line. Both numbers were on screen at
+       once and they contradicted each other, because the letter was taken from
+       the payload at face value (`r.grade || bd.grade || settle.grade`) while
+       the percentage came from `breakdown.total`. A producer that sets them
+       independently — main.js showResults() hard-codes `grade: 'B'` next to
+       `total: 0.51` — put a self-refuting frame on screen and nothing noticed.
+
+       So when the composite is known, the letter is DERIVED from it through
+       the same bands the screen quotes to the player ("B starts at 62 %"). The
+       player can then check the arithmetic in the frame and it holds. A stated
+       letter that disagrees is a producer bug, and it is said out loud rather
+       than displayed. */
+    const bandFor = (v) => {
+      for (const [g, thr] of GRADE_BANDS) if (v >= thr) return g;
+      return GRADE_BANDS[GRADE_BANDS.length - 1][0];
+    };
+    const statedGrade = r.grade || bd?.grade || settle?.grade || null;
+    let grade;
+    if (compositeKnown) {
+      grade = bandFor(composite);
+      if (statedGrade && statedGrade !== grade && !warnedGrade) {
+        warnedGrade = true;
+        console.warn(`[ui] results: payload says grade "${statedGrade}" but its own `
+          + `breakdown.total ${composite.toFixed(4)} falls in band "${grade}" `
+          + `(${grade} starts at ${GRADE_BANDS.find(([g]) => g === grade)[1]}). `
+          + 'Showing the band the score is actually in — a letter that contradicts the '
+          + 'percentage printed beside it is a frame that refutes itself. Fix the producer.');
+      }
+    } else {
+      grade = statedGrade;   // may be null: nothing published a verdict at all
     }
     const gradeIdx = Math.max(0, GRADES.indexOf(grade));
-    const nextGrade = gradeIdx < GRADES.length - 1 ? GRADES[gradeIdx + 1] : null;
+    const nextGrade = grade && gradeIdx < GRADES.length - 1 ? GRADES[gradeIdx + 1] : null;
     const nextBand = nextGrade ? GRADE_BANDS.find(([g]) => g === nextGrade) : null;
     const nextAt = nextBand ? nextBand[1] : null;
 
@@ -423,7 +505,10 @@ export function createResultsScreen(app) {
       }
       costs = items.reduce((a, b) => a + b.cost, 0);
       net = payout - costs;
-      xp = Math.round(depth * 6 + composite * 240 + (d.greenBandTime || 0) * 3);
+      /* No settlement — this whole branch is the no-progression build's local
+         estimate. The composite term contributes only when the sim published
+         one; it is never re-derived to keep the formula looking complete. */
+      xp = Math.round(depth * 6 + (composite ?? 0) * 240 + (d.greenBandTime || 0) * 3);
     }
 
     /* ── The bit ──────────────────────────────────────────────────────────
@@ -511,8 +596,10 @@ export function createResultsScreen(app) {
       const S = fast ? 0.02 : 1;
 
       at(0.06 * S, () => {
-        gradeLetter.textContent = sm.grade;
-        gradeEl.setAttribute('aria-label', `Grade ${sm.grade}`);
+        /* Nothing published a verdict — neither a total nor a letter. An
+           em dash is the honest stamp; 'D' would be a sentence nobody passed. */
+        gradeLetter.textContent = sm.grade || '—';
+        gradeEl.setAttribute('aria-label', sm.grade ? `Grade ${sm.grade}` : 'Grade not recorded');
         gradeEl.classList.add('is-stamp');
         if (!fast) { const f = C.h('i.grade__flash'); gradeEl.appendChild(f); setTimeout(() => f.remove(), 1200); }
         app.haptic('heavy');
@@ -524,7 +611,9 @@ export function createResultsScreen(app) {
            came from — quoting a locally re-derived number next to a grade
            awarded elsewhere is how a screen ends up contradicting itself. */
         if (!sm.compositeKnown) {
-          verdictEl.textContent = 'Graded on speed, straightness, tool care and safety';
+          verdictEl.textContent = sm.grade
+            ? 'Graded on speed, straightness, tool care and safety'
+            : 'This run was not scored';
         } else if (sm.nextGrade && sm.nextAt !== null) {
           verdictEl.textContent = `Score ${pct(sm.composite)} · ${sm.nextGrade} starts at ${pct(sm.nextAt)}`;
         } else {
@@ -560,10 +649,23 @@ export function createResultsScreen(app) {
         for (const key of ['speed', 'straightness', 'toolCare', 'safety']) {
           const t = crits[key];
           const v = sm.scores[key];
+          /* A criterion the sim did not publish reads '—' with an empty,
+             neutral bar and says why. It does NOT get a percentage: this
+             screen has no way to compute one, and the last thing it tried
+             (avgRop / 45) is the reason the shot failed review. */
+          if (v === null) {
+            t.v.textContent = '—';
+            t.bar.setValue(0);
+            t.bar.setKind('steel');   // a declared kind; at value 0 only the track shows
+            t.ev.textContent = 'not measured on this run';
+            t.el.classList.add('is-unmeasured');
+            continue;
+          }
+          t.el.classList.remove('is-unmeasured');
           t.v.textContent = pct(v);
           t.bar.setValue(v);
           t.bar.setKind(v >= 0.78 ? 'success' : v >= 0.44 ? 'amber' : 'danger');
-          t.ev.textContent = sm.evidence[key];
+          t.ev.textContent = sm.evidence[key] || '';
         }
 
         scoreList.appendChild(C.SpecRow('Hole completed', `${pct(sm.completion)} of ${sm.target.toFixed(1)} m`));
@@ -614,7 +716,7 @@ export function createResultsScreen(app) {
         consumeList.appendChild(ledgerRow('Running costs', `${sm.items.length} items`, '−' + fmtMoney(sm.costs)));
         consumeList.appendChild(C.h('div.ritem',
           C.h('span.ritem__n', { text: 'Gross payout' }),
-          C.h('span.ritem__q', { text: `grade ${sm.grade}` }),
+          C.h('span.ritem__q', { text: sm.grade ? `grade ${sm.grade}` : 'ungraded' }),
           C.h('span.ritem__c.is-pos', { text: fmtMoney(sm.payout) }),
         ));
         consumeList.appendChild(C.h('div.ritem.ritem--total',

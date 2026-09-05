@@ -98,10 +98,28 @@ export function createMenuScreen(app) {
       Toggle('Reduced motion', !!s.reducedMotion, (v) => { s.reducedMotion = v; }),
     ));
 
+    /* ── The two volume sliders ────────────────────────────────────────────
+       These used to read
+
+         (v) => { s.sfx = v; app.ctx.audio?.setSfxVolume?.(v); }
+
+       and `setSfxVolume` / `setMusicVolume` DO NOT EXIST on audio.js — the
+       `?.()` swallowed both calls, so the sliders were reported as dead
+       controls (HANDOFF §8A). They were not dead: the state write beside the
+       call is the entire mechanism. audio/audio.js `applyBusGains()` reads
+       `ctx.state.settings.sfx` and `.music` on EVERY FRAME from update() and
+       smooths the bus toward them, which is also why dragging one does not
+       zipper. The defaults here (0.85 / 0.5) are the same two numbers as its
+       `busSettings`.
+
+       The dead calls are removed rather than implemented on purpose: adding
+       setSfxVolume() would put a second path in front of the same state and
+       give the mixer two masters to disagree about (HANDOFF §8B). One writer,
+       one reader. */
     body.appendChild(C.h('div',
       C.h('p.label', { text: 'Audio' }),
-      HSlider('Effects', s.sfx ?? 0.85, (v) => { s.sfx = v; app.ctx.audio?.setSfxVolume?.(v); }),
-      HSlider('Music', s.music ?? 0.5, (v) => { s.music = v; app.ctx.audio?.setMusicVolume?.(v); }),
+      HSlider('Effects', s.sfx ?? 0.85, (v) => { s.sfx = v; }),
+      HSlider('Music', s.music ?? 0.5, (v) => { s.music = v; }),
     ));
 
     const stats = state.player?.stats || {};

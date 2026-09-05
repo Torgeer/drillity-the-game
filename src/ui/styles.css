@@ -1338,6 +1338,13 @@ canvas { display: block; }
 .rmetric { text-align: center; padding: var(--s-3) var(--s-2); border-radius: var(--r); background: rgb(var(--rgb-card) / .62); border: 1px solid rgb(var(--rgb-border) / .8); }
 .rmetric__v { font-size: var(--t-lg); font-weight: 850; font-variant-numeric: tabular-nums; letter-spacing: var(--tr-tight); }
 .rmetric__k { font-size: var(--t-2xs); font-weight: 800; letter-spacing: var(--tr-label); text-transform: uppercase; color: var(--c-fg-dim); margin-top: 2px; }
+/* A criterion the sim published no score for. The tile deliberately STAYS on
+   the screen rather than being removed — a missing tile reads as "this run had
+   no safety criterion", which is a different untrue claim. It reads '—', its
+   meter shows only the track, and the tile recedes so it cannot be mistaken
+   for a measurement at a glance. See `publishedScore` in screens/results.js. */
+.rmetric.is-unmeasured { opacity: .48; border-style: dashed; }
+.rmetric.is-unmeasured .rmetric__v { color: var(--c-fg-dim); font-weight: 700; }
 
 .reveal { opacity: 0; transform: translateY(14px); }
 .reveal.is-in { animation: rise var(--dur-5) var(--ease-spring) both; animation-delay: calc(var(--stagger-i, 0) * var(--stagger-step)); }
