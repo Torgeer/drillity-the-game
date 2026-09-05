@@ -1518,6 +1518,28 @@ export function createAssets(ctx = {}) {
          chrome    `hone`   streaks 160 in u   h +-0.05, lum +-0.03
          concrete  `broom`  streaks 160 in v   h +-0.045, albedo untouched
          sand      `grain`  vfbm 145, 2 oct    lum +-0.055, h +-0.06
+         paint     `micro`  vfbm 150, 2 oct    albedo untouched, ro +-0.035,
+                                               h +-0.0008 (see paintedSteel)
+
+       ── THE RULE THE AUDIT ABOVE DID NOT STATE, AND SHOULD HAVE ────────────
+
+       Every clause above is about features TOO SMALL to survive resampling.
+       There is a second failure at the other end and it cost more: a feature
+       LARGE enough to resolve, laid out on a REGULAR LATTICE, reads as woven
+       cloth however carefully its amplitude is tuned. The eye finds a
+       repeating cell at 8-24 screen px and calls it fabric — it does not
+       care that each cell is a plausible dimple.
+
+       So, for any Worley/Voronoi term:
+
+         3. A CELL FIELD IS A LATTICE. If one uv tile covers a whole panel,
+            `worley(u * N, …)` puts a feature every 1/N of that panel on a
+            grid, and the autocorrelation of the finished frame will say so.
+            Before writing `N`, work out what 1/N is IN SCREEN PIXELS on the
+            object the material lands on, and if that falls in 5-30 px the
+            term must either be broken up (domain-warp the lookup, gate cells
+            off individually) or be moved out of the albedo and the height
+            into a channel the eye does not read as pattern.
 
        Everything else that was over the line now sits in the 104-138 band, and
        nothing in this file thresholds a per-texel noise into a feature
@@ -1566,6 +1588,15 @@ export function createAssets(ctx = {}) {
     const BARE = hexRGB('#8E9298');        // freshly exposed steel
     const RUST = hexRGB('#7E4423');
     const RUST2 = hexRGB('#A5673A');
+    /* Steel exposed by a chip on a machine that is IN SERVICE — not the
+       bright cut face `BARE` describes. It picks up an oxide film in days, so
+       it sits between the two, and it is named rather than inlined because a
+       chip core and a scrape core have to agree. */
+    const EXPOSED = [
+      BARE[0] + (RUST[0] - BARE[0]) * 0.45,
+      BARE[1] + (RUST[1] - BARE[1]) * 0.45,
+      BARE[2] + (RUST[2] - BARE[2]) * 0.45,
+    ];
 
     /* Shared by the six new industries. Named rather than inlined because
        several kinds have to agree: the rock dust on a blasted face, on a
@@ -1637,60 +1668,168 @@ export function createAssets(ctx = {}) {
             const down = v;                              // canvas rows: 0 = top after flipY
             const lower = sstep(0.42, 1.0, down);
 
-            // ---- orange peel: shallow cell relief plus micro grain
-            const cell = worley(u * 34, v * 34, 34, 34, s + 3, 0.85);
-            const peel = (_W.f2 - cell) * 0.9 + vfbm(u * 96, v * 96, 96, 96, s + 8, 2) * 0.22;
-            let h = 0.5 + (peel - 0.35) * 0.16;
+            /* ---- THE PAINT FILM ITSELF IS FLAT. ─────────────────────────
+               This was `worley(u * 34, …)`, an F2-F1 dome per cell driving
+               `h` at `(_W.f2 - cell) * 0.9`, sold as orange peel. Measured
+               out of this very program (albedo/height/ORM rendered at the
+               shipping 1024 and pushed through the same normalFromHeight()
+               the bake uses), it was producing surface normals tilted a MEAN
+               of 22.8 degrees, p99 39.6, max 62.7 — and doing it on a regular
+               grid. A shading proxy over that normal put 18.3 % band-limited
+               RMS luminance into the 5-30 screen-px band with the peak
+               autocorrelation at 18.5 px on BOTH axes.
 
-            /* ---- base paint with slow tonal drift + metallic flake
-               Metallic flake is a real feature of vehicle paint and it stays,
-               but it has to survive being resampled. This term was
-               `sstep(0.86, 1.0, valueNoise(260))` driving +0.16 albedo and
-               +0.30 metalness. Two things were wrong with it, and the second
-               matters more than the first:
+               Off the finished frames the same structure measures fleet-wide:
+               19 px vertical on nine of eighteen rig captures, 7.26 % mean
+               band RMS against a 0.4 % sky floor. It is the "woven fabric"
+               finding, and it is one term.
 
-                 FREQUENCY. 260 cycles across a 1024 albedo is one cell every
-                 3.9 texels. Fine on its own.
+               THE ARITHMETIC THAT KILLS IT. u tiles once around a panel, so
+               34 cells span the whole panel. A 2.5 m engine cover at ~600
+               screen px puts one cell at 18 px — and at 74 MILLIMETRES on the
+               real machine. Orange peel is a millimetre-scale ripple in a
+               film about a tenth of a millimetre thick; a 74 mm dimple
+               tilting the normal 23 degrees is hail damage. There is no
+               amplitude for this term that is both visible and correct,
+               because the FEATURE SIZE is wrong by two orders of magnitude,
+               and at 1024 texels per panel the right size is not authorable.
 
-                 BAND WIDTH. A 0.14-wide sstep on a value noise at that
-                 frequency keeps only the very tip of each cell, so the
-                 surviving features are roughly ONE texel across — narrower
-                 than the cell that generated them, and therefore narrower
-                 than anything the mip chain was built to carry. On a mast
-                 ~40 px wide those land as isolated pixels at +0.16 albedo
-                 (which clips amber to white) and +0.30 metalness (which is a
-                 mirror against the sky). That reads as dead pixels or dust on
-                 the lens, not as paint.
+               What replaces it is what actually varies on a painted panel at
+               this distance:
 
-               So: fewer, larger cells at 90, and a 0.34-wide band so the flake
-               is a continuous field with no sub-texel spikes in it — the
-               feature size is now set by the cell, not by the threshold. The
-               deltas come down to +0.05 albedo and +0.10 metalness, which is
-               what flake actually does to a measured paint chip anyway. */
+                 form   the panel's own gentle unflatness — press lines,
+                        stiffeners behind the skin, oil-canning. Low
+                        frequency by nature: fbm at 3 is a 340-texel feature,
+                        ~200 screen px, an order of magnitude clear of the
+                        band. +-0.020 in h = 1.3 degrees of normal.
+                 micro  a whisper of film grain, an order of magnitude below
+                        anything visible, whose real job is DITHER: with the
+                        relief gone, `form` alone moves the packed normal by
+                        only ~6 of 255 levels across 200 px, which quantises
+                        into visible steps in the clearcoat highlight. This
+                        breaks them up. It is also the peel, expressed where
+                        peel actually lives — see `ro` below.
+
+               Everything else that reads as structure on this material is
+               authored downstream and is unchanged: chips, rust, the dirt
+               gradient. Those are features, not a field.
+
+               NOT SOURCED: the millimetre figures for film thickness and
+               peel wavelength are general coatings knowledge, not a cited
+               datasheet. The 74 mm / 23 degree numbers ARE measured, and
+               they are the ones the argument rests on. */
+            const form = fbm(u * 3, v * 3, 3, 3, s + 3, 3) * 0.020;
+            const micro = vfbm(u * 150, v * 150, 150, 150, s + 8, 2);
+            let h = 0.5 + form + (micro - 0.5) * 0.0016;
+
+            /* ---- base paint: tonal drift, gloss variation, NO FLAKE
+               The flake was `sstep(0.60, 0.94, valueNoise(u * 90, …))` at
+               +0.05 albedo and +0.10 metalness. Two rounds had already been
+               spent making it survive resampling — it started at 260 cycles
+               with a 0.14-wide sstep, which kept only the tip of each cell
+               and landed as one-texel mirror-bright specks; it was widened to
+               a 0.34 band at 90 cycles so the feature size came from the cell
+               rather than the threshold. That fixed the sparkle. It did not
+               fix the PERIOD: 90 cells across a panel is 11.4 texels, and on
+               the same 600-px panel as the peel arithmetic above that is a
+               6.8 px cell. It is the "7 px, correlation 0.74" row of the
+               fabric finding — the one at the phone's Nyquist limit — and it
+               measures at h 6-7 px, r 0.42-0.66 on cfa-rig, oil-derrick and
+               piling-leader in the shipped captures.
+
+               It is deleted rather than retuned, because the honest reason to
+               keep it was never strong: metallic flake is a passenger-car
+               finish. Plant enamel is a SOLID colour — which is also why
+               `me` is now a flat 0.03 (paint is a dielectric; the only
+               metalness on this material should be where the paint is GONE,
+               and the chip and rust blocks below still put it there).
+
+               The gloss variation that flake was partly standing in for is
+               real and stays, in the channel it belongs to. `micro` above
+               rides roughness at +-0.035 — a 6.8-texel, ~4 screen-px ripple,
+               BELOW the 5-30 px band by construction, so it averages to a
+               sheen rather than resolving as a pattern. `chalk` is the slow
+               one: gloss dies in patches long before colour does, so an old
+               machine is matt where it has been rained on and polished where
+               it is handled. fbm at 5 = a 200-texel feature, ~120 screen px,
+               clear of the band on the far side.
+
+               THE COLOUR IS NOT TOUCHED. Deleting the flake removes a mean
+               +0.0074 of albedo (measured: mean flake 0.148 x 0.05), which is
+               0.9 % of a paint[0] of 0.851 — three orders below the +0.123
+               saturation correction the BRAND.amberPlant note above is about.
+               Mean roughness moves 0.295 -> 0.309 before the base material's
+               0.34 multiplier, i.e. 0.100 -> 0.105 effective. */
             const drift = fbm(u * 4, v * 4, 4, 4, s + 21, 3) * 0.045;
-            const flake = sstep(0.60, 0.94, valueNoise(u * 90, v * 90, 90, 90, s + 33));
-            let r = paint[0] * (1 + drift) + flake * 0.05;
-            let g = paint[1] * (1 + drift) + flake * 0.05;
-            let b = paint[2] * (1 + drift) + flake * 0.055;
-            let ro = 0.30 - flake * 0.03;
-            let me = 0.03 + flake * 0.10;
+            const chalk = sstep(0.30, 0.92, fbm01(u * 5, v * 5, 5, 5, s + 33, 3)) * wear;
+            let r = paint[0] * (1 + drift);
+            let g = paint[1] * (1 + drift);
+            let b = paint[2] * (1 + drift);
+            let ro = 0.30 + (micro - 0.5) * 0.07 + chalk * 0.12;
+            let me = 0.03;
             let ao = 1;
 
-            // ---- chipping. A wear field concentrates damage where a real rig
-            //      takes it: leading faces, corners, the belly.
+            /* ---- chipping. A wear field concentrates damage where a real rig
+               takes it: leading faces, corners, the belly. That part was
+               always right. Three things about the DISTRIBUTION were not:
+
+               1. A BUG, and it was feeding the fabric. The old line read
+                  `chipEdge = 0.30 + 0.22 * ihash(_W.cx | 0, _W.cy | 0, …)`.
+                  `worleyBlock()` sets `_W.f1`, `_W.f2` and `_W.id` — it does
+                  NOT set `_W.cx`/`_W.cy`. Those were left in the shared
+                  scratch record by the LAST `worley()` call, which was the
+                  34-cell orange peel three lines earlier. So every chip's
+                  size was being drawn from the peel lattice's cell index:
+                  the chips were locked to the same grid as the dimples and
+                  reinforced its period instead of breaking it up. With the
+                  peel gone the same line would have read whatever the
+                  previously-shaded KIND happened to leave behind, which is
+                  worse — a cross-material dependency through a module-level
+                  scratch object. It now uses `_W.id`, which is the cell hash
+                  `worleyBlock` does set.
+
+               2. Every cell chipped. `bias` gates the region, but inside a
+                  region each of the 46 cells got a chip of near-identical
+                  size, which is a lattice of blobs — a checkerboard, not
+                  damage. Cells are now gated INDIVIDUALLY on their own hash,
+                  so a chipped cell has un-chipped neighbours.
+
+               3. The lookup is domain-warped before the Worley, so the cells
+                  themselves are not on a grid. `warp` is built from periodic
+                  fbm, so the texture still tiles in u exactly.
+
+               Relief is down from 0.06 to 0.025: a chip is a step in a film
+               a tenth of a millimetre thick, and at 0.6 screen px per texel
+               its rim is sub-pixel. What sells a chip at ten metres is the
+               PRIMER AND BARE STEEL COLOUR.
+
+               4. And that colour was wrong in a way the fabric was hiding.
+                  `deep` ramps to 1 over the middle 45 % of every chip and
+                  took the pixel to `BARE` (#8E9298) at roughness 0.33 and
+                  metalness 0.95 — a bright, cool, GLOSSY grey. Against amber
+                  that reads as water spots; against `paintedDark`'s chassis
+                  grey (luminance ~0.25 against BARE's ~0.57) it reads as
+                  white paint spatter, which is exactly what the swatches
+                  showed once the weave stopped covering it. Steel exposed on
+                  a working machine is dull and carries an oxide film within
+                  days — so `deep` now lands on BARE blended 45 % into RUST,
+                  at roughness 0.55 rather than 0.33, and only the LARGEST
+                  chips reach it at all: a small chip takes the topcoat and
+                  stops at primer, which is what a small chip does. */
             const wf = fbm01(u * 3, v * 3, 3, 3, s + 41, 4) * 0.6 +
                        sstep(0.55, 1.0, down) * 0.25 + sstep(0.35, 0.0, down) * 0.15;
             const bias = clamp01(wf * (0.35 + wear * 1.5));
-            const chipCell = worleyBlock(u * 46, v * 46, 46, 46, s + 55, 0.92);
-            const chipEdge = 0.30 + 0.22 * ihash(_W.cx | 0, _W.cy | 0, s + 61);
-            const chipT = clamp01((chipEdge - chipCell) * 7) * clamp01((bias - 0.34) * 5.5);
+            const cw = warp(u * 30, v * 30, 30, 30, s + 49, 0.55, 2);
+            const chipCell = worleyBlock(cw.x, cw.y, 30, 30, s + 55, 0.92);
+            const chipRad = 0.30 * clamp01((bias * (0.55 + _W.id * 0.9) - 0.30) * 2.6);
+            const chipT = clamp01((chipRad - chipCell) * 9);
             if (chipT > 0.01) {
-              const deep = clamp01((chipT - 0.55) * 3.2);
+              const deep = clamp01((chipT - 0.55) * 3.2) * sstep(0.15, 0.27, chipRad);
               r = mixv(r, PRIMER[0], chipT); g = mixv(g, PRIMER[1], chipT); b = mixv(b, PRIMER[2], chipT);
-              r = mixv(r, BARE[0], deep); g = mixv(g, BARE[1], deep); b = mixv(b, BARE[2], deep);
-              ro = mixv(ro, 0.68, chipT); ro = mixv(ro, 0.33, deep);
-              me = mixv(me, 0.05, chipT); me = mixv(me, 0.95, deep);
-              h -= chipT * 0.06;
+              r = mixv(r, EXPOSED[0], deep); g = mixv(g, EXPOSED[1], deep); b = mixv(b, EXPOSED[2], deep);
+              ro = mixv(ro, 0.68, chipT); ro = mixv(ro, 0.55, deep);
+              me = mixv(me, 0.05, chipT); me = mixv(me, 0.70, deep);
+              h -= chipT * 0.025;
               ao = 1 - chipT * 0.18;
             }
 
