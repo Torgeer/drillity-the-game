@@ -882,6 +882,12 @@ canvas { display: block; }
 
 .sstrip__cell { display: flex; flex-direction: column; justify-content: center; gap: 3px; min-width: 0; }
 .sstrip__cell--grow { flex: 1 1 auto; }
+/* `display: flex` beats the UA's `[hidden] { display: none }`, so the strip's
+   third cell — hidden on every method whose progress the section band's own
+   ruler already draws — would otherwise stay on screen with the attribute set
+   and nothing to show for it. Its divider goes the same way, or the row ends
+   with two rules against each other. */
+.sstrip__cell[hidden], .sstrip__div[hidden] { display: none; }
 .sstrip__k {
   font-size: var(--t-2xs); line-height: 1; font-weight: 800;
   letter-spacing: var(--tr-label); text-transform: uppercase;

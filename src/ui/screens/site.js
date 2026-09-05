@@ -179,15 +179,18 @@ function progKey(prog) {
   return base;
 }
 
-/* What the DEPTH cell in the status strip is counting. On a method paid for
-   metres it is the depth; on a heading it is the advance into the drive, on a
-   pile it is how far the head has been driven, on a sounding it is how deep
-   the log now reaches. Same cell, same place, honest word. */
-const DEPTH_KEY = {
-  jumbo: 'Advance', bolt: 'Advance', pile: 'Driven',
-  'probe:cpt': 'Sounding', 'probe:spt': 'Borehole',
-  longhole: 'Into hole', rc: 'Hole',
-};
+/* `DEPTH_KEY` stood here — the honest word for the depth the status strip
+   printed, per method: Advance on a heading, Driven on a pile, Sounding on a
+   cone. It is gone with the readout it labelled. world/geology.js draws a
+   ticked depth ruler down the section band with the bit as its cursor, so
+   the strip was stating in words, at the top of the screen, the number the
+   band already draws in place — and the whole point of building the ruler
+   was that the band replaces chrome instead of adding to it.
+
+   The strip's third cell survives only for the PROGRAMME units, which are
+   not depths and which the ruler does not carry: `STATUS_UNIT` below.
+   Nothing referenced this table once the depth branch went, and a lookup
+   nobody reads is a contract nobody signed. */
 
 const pct01 = (v) => `${Math.round(clamp(Number(v) || 0, 0, 1) * 100)}%`;
 const num = (v, dp = 1) => (Number.isFinite(+v) ? (+v).toFixed(dp) : '—');
@@ -598,11 +601,16 @@ export function createSiteScreen(app) {
      reads as part of it. Three characters of quiet label cost less width than
      the border and the padding they replace. */
   const lvlEl = C.h('span.sstrip__lvl', { text: 'LVL 1' });
-  const depthEl = C.h('span.sstrip__v', { text: '0.00', 'aria-live': 'off' });
-  const targetEl = C.h('em', { text: ' / 0 m' });
+  /* Blank, and the cell starts hidden: '0.00' and 'Depth' were the depth
+     readout's opening values, and the frame loop only writes this cell on a
+     method that has a programme unit. Left as they were, every other method
+     flashed "DEPTH 0.00 / 0 m" for one frame before the cell was taken away.
+     `em` for the target — " / 100 m" — went with the depth: a programme unit
+     is "3/12", complete in itself, and there was nothing left to put in it. */
+  const depthEl = C.h('span.sstrip__v', { text: '', 'aria-live': 'off' });
   /* Not always "Depth": a jumbo and a bolter ADVANCE a drive, a pile is
      DRIVEN, a cone is a SOUNDING. Same cell, same place, honest word. */
-  const depthKeyEl = C.h('span.sstrip__k', { text: 'Depth' });
+  const depthKeyEl = C.h('span.sstrip__k', { text: '' });
   const timeEl = C.h('span.sstrip__v', { text: '00:00' });
 
   /* The leave control is a cell of the strip. It used to be a 44px disc
@@ -618,17 +626,36 @@ export function createSiteScreen(app) {
      shifting — is where it belongs. It is confirm-gated as well. */
   const pauseBtn = reach(C.h('button.sstrip__leave', { type: 'button', 'aria-label': 'Pause and leave the hole' }, C.Icon('close', 18)), 'between');
 
+  /* ── THE THIRD CELL, AND WHY IT IS OFTEN NOT THERE ──────────────────────
+     `world/geology.js` now draws a ticked depth ruler down the section band
+     with the BIT ITSELF as the moving cursor, reading the depth against the
+     ground it is in. This cell used to print the same number as words at the
+     top of the screen — "DEPTH 2.38 / 100 m" in the strip against a cursor
+     reading 2.38 on the band, six hundred pixels apart, both live, both the
+     same quantity. Two places stating one thing, which is the failure this
+     project has paid for repeatedly (HANDOFF §8B), and the point of building
+     the ruler was that the band REPLACES chrome rather than adding to it.
+
+     So when the cell would show depth, it is not shown: the band says it,
+     better, in the place the player is already looking.
+
+     It stays for the PROGRAMME units — bags cut, round and hole, bolt of N,
+     blows, sounding rate, test index (`STATUS_UNIT`). Those are not depths
+     and the ruler does not carry them; on those methods this cell is the
+     only place they exist, and the driller's own unit of progress is exactly
+     what a status line is for. `setDepthCell()` in the frame loop decides,
+     from the same `unitFmt` that chooses the wording. */
+  const depthCell = C.h('div.sstrip__cell', { hidden: true }, depthKeyEl, depthEl);
+  const depthDiv = C.h('i.sstrip__div', { hidden: true });
+
   const stripSteady = C.h('div.sstrip__face.sstrip__steady',
     lvlEl,
     C.h('div.sstrip__cell.sstrip__cell--grow',
       C.h('span.sstrip__k', { text: 'Balance' }),
       moneyEl,
     ),
-    C.h('i.sstrip__div'),
-    C.h('div.sstrip__cell',
-      depthKeyEl,
-      C.h('span.sstrip__v', depthEl, targetEl),
-    ),
+    depthDiv,
+    depthCell,
     C.h('i.sstrip__div'),
     C.h('div.sstrip__cell',
       C.h('span.sstrip__k', { text: 'On tools' }),
@@ -2290,16 +2317,20 @@ export function createSiteScreen(app) {
     lvlEl.textContent = 'LVL ' + (p.level || 1);
     const dep = d.depth || 0;
     const unitFmt = prog ? STATUS_UNIT[pkey] : null;
-    let dKey = DEPTH_KEY[pkey] || 'Depth';
-    let dVal = dep.toFixed(dep < 10 ? 2 : 1);
-    let dTail = ` / ${Math.round(d.target || 0)} m`;
-    if (unitFmt) {
+    /* NO PROGRAMME UNIT MEANS THIS CELL WOULD BE THE DEPTH, AND THE SECTION
+       BAND DRAWS THAT — see the cell's construction. The band's ruler carries
+       the bit as its cursor, so printing the same metres up here is the same
+       quantity in two places. Toggled, not rebuilt: a `hidden` flip costs
+       nothing and the strip's own flex reclaims the width for balance and
+       clock. The divider goes with it, or the row ends up with two rules
+       against each other. */
+    const showCell = !!unitFmt;
+    if (depthCell.hidden === showCell) { depthCell.hidden = !showCell; depthDiv.hidden = !showCell; }
+    if (showCell) {
       const pair = unitFmt(prog);
-      dKey = pair[0]; dVal = pair[1]; dTail = '';
+      if (depthKeyEl.textContent !== pair[0]) depthKeyEl.textContent = pair[0];
+      if (depthEl.textContent !== pair[1]) depthEl.textContent = pair[1];
     }
-    if (depthKeyEl.textContent !== dKey) depthKeyEl.textContent = dKey;
-    if (depthEl.textContent !== dVal) depthEl.textContent = dVal;
-    if (targetEl.textContent !== dTail) targetEl.textContent = dTail;
     const mm = Math.floor(elapsed / 60), ssec = Math.floor(elapsed % 60);
     timeEl.textContent = `${String(mm).padStart(2, '0')}:${String(ssec).padStart(2, '0')}`;
     const jobP = clamp(simTel ? (simTel.progress01Overall ?? simTel.progress01 ?? 0)
