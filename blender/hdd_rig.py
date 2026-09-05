@@ -1127,8 +1127,13 @@ def build_carriage(rack):
     # moves this follows it.
     sl['travel_m'] = ROD_LEN                 # 4.60 m — one rod of clear travel
     sl['axis'] = 'y'                         # along the raked beam, not world Z
-    sl['travel_min_m'] = RACK_AFT - 1.15 - ROD_LEN
-    sl['travel_max_m'] = RACK_AFT - 1.15
+    # Blender +Y becomes glTF -Z, including the parent-local rack axis.
+    # Extras are not converted: reverse and negate the bounds explicitly.
+    sl['travel_space'] = 'parent-local'
+    sl['travel_axis'] = 'z'
+    sl['travel_direction'] = 'max'          # toward the nose: Blender -Y
+    sl['travel_min_m'] = -(RACK_AFT - 1.15)
+    sl['travel_max_m'] = -(RACK_AFT - 1.15 - ROD_LEN)
     sl['rate_m_min'] = 55.0                  # [R] §3.8 rapid travel 36-73 m/min
 
     R.box('carriage-frame', (RACK_W + 0.30, 0.94, 0.40), R.MAT_DARK, sl,

@@ -308,23 +308,41 @@ def _check_travel(o, axis, metres, rest, clip_name):
     reported, loudly, once per node, because it is the same missing fact.
     """
     x = o.get('travel_m')
-    lo, hi = o.get('travel_min_m'), o.get('travel_max_m')
-    if x is None and lo is None:
+    limits = R.travel_limits(o)
+    if x is None and limits is None:
         print('ANIM_WARN  %s: %s declares no travel_m — a clip cannot be checked '
               'against a stroke that is not stated, and gltfRig.js cannot publish '
               'this slide as a carriage either (it needs travel_m or it writes NaN).'
               % (clip_name, o.name))
         return
-    if x is not None and abs(metres) - float(x) > 1e-6:
+    if x is not None and (isinstance(x, bool) or not isinstance(x, (int, float))
+                          or not math.isfinite(x)):
+        raise ValueError('%s: %s travel_m must be a finite number' % (clip_name, o.name))
+    if limits is None and x is not None and abs(metres) - abs(float(x)) > 1e-6:
         raise ValueError('%s: %s slides %.3f m and its declared travel_m is %.3f m.'
                          % (clip_name, o.name, abs(metres), float(x)))
-    if lo is not None and hi is not None and axis == 'Z':
-        end = float(rest[2]) + metres
-        if end < float(lo) - 1e-6 or end > float(hi) + 1e-6:
+    if limits is not None:
+        gltf_axis, lo, hi = limits
+        # Animation keys change Blender's location, before its parent inverse.
+        # The exported node translation includes that inverse (CFA uses it).
+        # Then glTF's Y-up conversion is (x, z, -y); extras stay unchanged.
+        def gltf(v):
+            return Vector((v.x, v.z, -v.y))
+        origin = gltf(o.matrix_parent_inverse @ rest)
+        delta = gltf(o.matrix_parent_inverse.to_3x3() @ (_AXIS[axis] * metres))
+        i = 'xyz'.index(gltf_axis)
+        if origin[i] < lo - 1e-5 or origin[i] > hi + 1e-5:
+            raise ValueError('%s: %s rest is outside its declared travel endpoints'
+                             % (clip_name, o.name))
+        if any(abs(delta[j]) > 1e-6 for j in range(3) if j != i):
+            raise ValueError('%s: %s moves outside declared glTF %s travel axis'
+                             % (clip_name, o.name, gltf_axis))
+        end = origin[i] + delta[i]
+        if end < lo - 1e-5 or end > hi + 1e-5:
             raise ValueError(
-                '%s: %s would reach z=%.3f and its declared stroke is %.3f..%.3f '
+                '%s: %s would reach glTF %s=%.3f and its declared stroke is %.3f..%.3f '
                 '(rest %.3f, delta %+.3f).'
-                % (clip_name, o.name, end, float(lo), float(hi), rest[2], metres))
+                % (clip_name, o.name, gltf_axis, end, lo, hi, origin[i], delta[i]))
 
 
 def _ensure_slot(o, action):

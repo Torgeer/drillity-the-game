@@ -1231,6 +1231,10 @@ def build_carriage(fx, z0, z1):
     # also what a longhole ring rig has to have: one rod in, uncouple, next.
     car['travel_m'] = ROD_LEN                # 1.525 m  [S] p.3 feed table
     car['axis'] = 'z'
+    # This authored uphole feeds toward +Blender Z, exported parent-local +Y.
+    car['travel_space'] = 'parent-local'
+    car['travel_axis'] = 'y'
+    car['travel_direction'] = 'max'
     car['travel_min_m'] = z0 + 0.60
     car['travel_max_m'] = z0 + 0.60 + ROD_LEN
     p = []

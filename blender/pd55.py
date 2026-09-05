@@ -1147,6 +1147,10 @@ def build_carriage(mast):
     c = node(NODE_SLIDE, 'carriage', mast, (0, 0, CARR_TOP))
     c['travel_m'] = CARR_TOP - CARR_BOT       # 13.86 m
     c['axis'] = 'z'
+    # Absolute exported-parent Y is Blender parent-local Z.
+    c['travel_space'] = 'parent-local'
+    c['travel_axis'] = 'y'
+    c['travel_direction'] = 'min'
     c['travel_min_m'] = CARR_BOT
     c['travel_max_m'] = CARR_TOP
     # guide shoes gripping the mast rails — this is what makes it a

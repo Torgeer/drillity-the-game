@@ -1299,6 +1299,10 @@ def build_carriage(fx):
     carriage must read as a LUMP, not a sausage [R]S5 #5.
     """
     car = R.empty(R.NODE_SLIDE, 'carriage', fx, (0, 0, CARR_REST))
+    # Exported parent-local Y is Blender Z; extras are not axis-converted.
+    car['travel_space'] = 'parent-local'
+    car['travel_axis'] = 'y'
+    car['travel_direction'] = 'min'
     car['travel_min_m'] = CARR_Z0
     car['travel_max_m'] = CARR_Z1
     car['travel_m'] = FEED_TRAV

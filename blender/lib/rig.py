@@ -54,6 +54,7 @@ ground level, so a rig drops onto terrain at y=0 without a fudge offset.
 
 import bpy
 import bmesh
+import math
 from mathutils import Vector
 
 # ── node-name prefixes the game looks up by string ────────────────────────────
@@ -239,6 +240,59 @@ def worklight(name, parent, loc, aim_dir=(0, 0, -1), cone_deg=54, range_m=26):
     return mount, aim
 
 
+def travel_limits(o):
+    """Validate explicit endpoints in exported glTF parent coordinates.
+
+    Extras are not axis-converted by Blender's glTF exporter. Publishers must
+    therefore declare glTF X/Y/Z (Blender X/Z/-Y), absolute parent coordinates,
+    and the endpoint approached during feed. Legacy travel_m-only nodes keep
+    their signed, rest-relative interpretation.
+    """
+    fields = ('travel_min_m', 'travel_max_m')
+    schema = fields + ('travel_space', 'travel_axis', 'travel_direction')
+    if any(k.startswith('travel_') for k in o.keys()) and not o.name.startswith(NODE_SLIDE):
+        raise ValueError('%s: travel metadata requires a slide: node' % o.name)
+    if 'travel_m' in o:
+        v = o['travel_m']
+        if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v):
+            raise ValueError('%s: travel_m must be a finite number' % o.name)
+    if not any(k in o for k in schema):
+        return None
+    for k in schema:
+        if k not in o:
+            raise ValueError('%s: explicit travel is missing %s' % (o.name, k))
+    if o['travel_space'] != 'parent-local':
+        raise ValueError('%s: travel_space must be parent-local' % o.name)
+    if o['travel_axis'] not in ('x', 'y', 'z'):
+        raise ValueError('%s: travel_axis must be x, y or z in glTF coordinates' % o.name)
+    if o['travel_direction'] not in ('min', 'max'):
+        raise ValueError('%s: travel_direction must be min or max' % o.name)
+    for k in fields + (('travel_m',) if 'travel_m' in o else ()):
+        v = o[k]
+        if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v):
+            raise ValueError('%s: %s must be a finite number' % (o.name, k))
+    lo, hi = (float(o[k]) for k in fields)
+    if lo >= hi or not math.isfinite(hi - lo):
+        raise ValueError('%s: travel endpoints must have a positive finite span' % o.name)
+    if ('travel_m' in o and abs(abs(o['travel_m']) - (hi - lo))
+            > 1e-6 * max(1.0, hi - lo, abs(o['travel_m']))):
+        raise ValueError('%s: abs(travel_m) must equal the endpoint span' % o.name)
+    return o['travel_axis'], lo, hi
+
+
+def framing_excluded(o):
+    """Resolve the inherited, visibility-independent framing declaration."""
+    excluded = False
+    p = o
+    while p is not None:
+        if 'framing' in p:
+            if p['framing'] != 'exclude':
+                raise ValueError('%s: framing must be exclude when declared' % p.name)
+            excluded = True
+        p = p.parent
+    return excluded
+
+
 def finish(out_path, join_by_material=True):
     """Join static meshes by material, then export.
 
@@ -272,6 +326,13 @@ def finish(out_path, join_by_material=True):
     unwelded hose was an uncounted draw call in a machine measured against a
     budget of 70.
     """
+    # Validate even when a motion export skips joins. Materialize inherited
+    # exclusions before any parent can be consumed by join(). Geometry remains
+    # visible; only the runtime's framing measurement ignores this property.
+    for o in list(bpy.context.scene.objects):
+        travel_limits(o)
+        if framing_excluded(o):
+            o['framing'] = 'exclude'
     bpy.ops.object.select_all(action='DESELECT')
 
     def is_dynamic(o):
@@ -293,6 +354,36 @@ def finish(out_path, join_by_material=True):
             bpy.context.view_layer.objects.active = o
             bpy.ops.object.convert(target='MESH')
 
+        # Static geometry may carry a named attachment or other extras. Keep
+        # that identity as an empty anchor before joining its mesh; the active
+        # mesh's extras alone would otherwise survive and all others vanish.
+        bpy.context.view_layer.update()
+        for o in list(bpy.context.scene.objects):
+            if o.type != 'MESH' or is_dynamic(o):
+                continue
+            props = {k: o[k] for k in o.keys() if k != 'framing'}
+            named = o.name.startswith((NODE_MOUNT, NODE_AIM))
+            # Even an unmarked host must retain its frame when a descendant
+            # slide uses parent-local endpoints. Restoring world pose alone
+            # cannot restore that coordinate system after the mesh is eaten.
+            if not props and not named and not o.children:
+                continue
+            name, world, parent = o.name, o.matrix_world.copy(), o.parent
+            children = [(c, c.matrix_world.copy()) for c in o.children]
+            o.name = '__join:' + name
+            anchor = bpy.data.objects.new(name, None)
+            bpy.context.collection.objects.link(anchor)
+            anchor.parent = parent
+            anchor.matrix_world = world
+            for k in list(o.keys()):
+                anchor[k] = o[k]
+                if k != 'framing':
+                    del o[k]
+            for child, child_world in children:
+                child.parent = anchor
+                child.matrix_world = child_world
+        bpy.context.view_layer.update()
+
         # Snapshot every world transform BEFORE the first join. See the note
         # above: join() is what moves named nodes, and it moves them silently.
         bpy.context.view_layer.update()
@@ -306,7 +397,8 @@ def finish(out_path, join_by_material=True):
         for o in list(bpy.context.scene.objects):
             if o.type != 'MESH' or is_dynamic(o):
                 continue
-            key = o.data.materials[0].name if o.data.materials else 'none'
+            material = o.data.materials[0].name if o.data.materials else 'none'
+            key = (material, framing_excluded(o))
             groups.setdefault(key, []).append(o)
         for key, objs in groups.items():
             if len(objs) > 1:
@@ -322,7 +414,13 @@ def finish(out_path, join_by_material=True):
             # is how a reader of the .glb tells joined static geometry from a
             # mesh that escaped the join; when only some of them carried it,
             # the distinction could not be read off the file.
-            target.name = 'static:' + key
+            material, excluded = key
+            world = target.matrix_world.copy()
+            target.parent = None
+            target.matrix_world = world
+            target.name = 'static:' + material + (':framing-exclude' if excluded else '')
+            if excluded:
+                target['framing'] = 'exclude'
 
         # Put the named nodes back. Parents first: `matrix_world` is resolved
         # against whatever the parent is at that moment, so restoring a child

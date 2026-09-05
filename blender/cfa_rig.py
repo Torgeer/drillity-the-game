@@ -1133,6 +1133,10 @@ def build_concrete_line(z_head):
             (0.55, fy + 0.28, 0.60, 1.25, 0.5))):
         objs.append(tube('clinecoupling', 0.108, 0.17, MAT_STEEL,
                          loc=(px, py, pz), rot=(rx, 0, rz), sides=12))
+    # The external pump delivery line stays visible but does not size the rig.
+    # Tag before adding the mast-mounted guide, which belongs to the machine.
+    for o in objs:
+        o['framing'] = 'exclude'
     # a guide shoe on the mast that keeps the line off the flights
     objs.append(box('clineguide', (0.34, 0.30, 0.16), MAT_DARK,
                     loc=(0.20, MAST_CY + 1.15, 5.40), bevel=0.02))
@@ -1229,8 +1233,13 @@ def build(out_path):
     # Absolute limits in the mast's own frame, so nobody has to guess whether
     # the authored pose is the top or the bottom of the stroke.  It is the
     # TOP — DRIVE_Z parks 50 mm under DRIVE_HI_Z.
-    carriage['travel_min_m'] = DRIVE_LO_Z
-    carriage['travel_max_m'] = DRIVE_HI_Z
+    # attach() preserves world placement through a parent inverse. Subtract
+    # the mast origin to publish absolute exported-parent Y (Blender Z).
+    carriage['travel_space'] = 'parent-local'
+    carriage['travel_axis'] = 'y'
+    carriage['travel_direction'] = 'min'
+    carriage['travel_min_m'] = DRIVE_LO_Z - mast_pivot.location.z
+    carriage['travel_max_m'] = DRIVE_HI_Z - mast_pivot.location.z
     attach(carriage, mast_pivot)
     drive_parts, z_head = build_drive(carriage)
     join_by_mat(drive_parts, 'drive', carriage)
@@ -1253,8 +1262,8 @@ def build(out_path):
 
     # where the ground-standing concrete pump and the spoil skip belong: the
     # rig is never alone on a CFA job, and the scene needs the anchor points
-    empty(NODE_MOUNT, 'concretePump', None, (3.90, DRILL_Y + 2.55, 0.10))
-    empty(NODE_MOUNT, 'spoilSkip', None, (-3.40, DRILL_Y + 1.20, 0.10))
+    empty(NODE_MOUNT, 'concretePump', None, (3.90, DRILL_Y + 2.55, 0.10))['framing'] = 'exclude'
+    empty(NODE_MOUNT, 'spoilSkip', None, (-3.40, DRILL_Y + 1.20, 0.10))['framing'] = 'exclude'
     empty(NODE_MOUNT, 'pileAxis', None, (0.0, DRILL_Y, 0.0))
 
     # finish() joins the statics, and join() has the same modifier-stack trap as

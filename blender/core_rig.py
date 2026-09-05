@@ -690,8 +690,12 @@ def build(out_path):
     car = R.empty(R.NODE_SLIDE, 'carriage', mast, (0, 0, car_z))
     car['axis'] = 'z'
     car['travel_m'] = FEED_STROKE      # 3.5 m [CS14] p.2
-    car['travel_min_m'] = MASTL_Z(1.15) - car_z
-    car['travel_max_m'] = MASTL_Z(1.15 + FEED_STROKE) - car_z
+    # glTF parent-local Y is Blender parent-local Z; extras are not converted.
+    car['travel_space'] = 'parent-local'
+    car['travel_axis'] = 'y'
+    car['travel_direction'] = 'min'
+    car['travel_min_m'] = MASTL_Z(1.15)
+    car['travel_max_m'] = MASTL_Z(1.15 + FEED_STROKE)
     car['rod_pull_m'] = ROD_PULL
     cp = []
     cp.append(box('sled', (BEAM_DX + 0.12, 0.16, 0.62), R.MAT_DARK,

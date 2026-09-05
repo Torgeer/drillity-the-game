@@ -993,6 +993,10 @@ def build_head(pv):
     CARR_LO = -1.64                      # carriage-local, bottom of travel
     CARR_HI = 1.55                       # carriage-local, top of travel
     sl['travel_m'] = CARR_HI - CARR_LO   # 3.19 m of stroke
+    # Absolute exported-parent Y is Blender mast-local Z; extras stay literal.
+    sl['travel_space'] = 'parent-local'
+    sl['travel_axis'] = 'y'
+    sl['travel_direction'] = 'min'
     sl['travel_min_m'] = (MAST_LEN - 2.05) + CARR_LO   # absolute, mast frame
     sl['travel_max_m'] = (MAST_LEN - 2.05) + CARR_HI
     hw, hd = MAST_W / 2, MAST_D / 2
@@ -1273,6 +1277,10 @@ def build_sample_train():
     hose therefore has nothing to hang from. Adding the arm is the fix; removing
     the tower is a separate decision." So this model builds both.
     """
+    # This builder creates the external pad equipment, including root-authored
+    # trays and reject chips. Scope classification to these actual objects;
+    # names cannot recover their geometry once the static join has run.
+    existing_objects = set(bpy.context.scene.objects)
     st = bpy.data.objects.new('cyclone-stand', None)
     bpy.context.collection.objects.link(st)
     st.location = (CYC_X, CYC_Y, 0)
@@ -1447,6 +1455,8 @@ def build_sample_train():
             rot=(0, 0.1 * (i % 3), a))   # 14 chips on the dirt — no bevel; a
         # rock chip wants a hard edge anyway, and a 6 mm chamfer on a 90 mm
         # chip cost 96 triangles each to round off the one thing that is sharp.
+    for o in set(bpy.context.scene.objects) - existing_objects:
+        o['framing'] = 'exclude'
     return st
 
 
@@ -1573,9 +1583,9 @@ def build_hoses():
     hose('bull-hose', [(-2.60, 3.20, 0.06), (-1.55, 1.70, 0.07),
                        (-0.90, 0.10, 0.10), (-1.05, -1.60, 0.34),
                        (-0.55, -2.55, DECK_Z - 0.55)],
-         radius=0.040, mat=MAT_RUBBER, sides=8)
+         radius=0.040, mat=MAT_RUBBER, sides=8)['framing'] = 'exclude'
     tube('bull-hose-ferrule', 0.055, 0.14, MAT_STEEL,
-         loc=(-0.56, -2.56, DECK_Z - 0.66), rot=(0.4, 0, 0), sides=10)
+         loc=(-0.56, -2.56, DECK_Z - 0.66), rot=(0.4, 0, 0), sides=10)['framing'] = 'exclude'
 
 
 def build_sample_hose():
@@ -1590,6 +1600,7 @@ def build_sample_hose():
     carry a rib pattern.
     """
     sl = empty(NODE_SLIDE, 'sample-hose', None, (0, 0, 0))
+    sl['framing'] = 'exclude'    # external connection from head to pad cyclone
     sl['axis'] = 'z'
     sl['range_m'] = [0.0, 0.0]     # reserved rigid assembly; no runtime driver yet
     a = (HEAD_OUT[0] + 0.08, HEAD_OUT[1] + 0.02, HEAD_OUT[2] - 0.04)

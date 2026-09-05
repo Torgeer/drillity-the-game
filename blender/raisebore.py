@@ -933,8 +933,12 @@ def build(out_path):
     # ═══════════════════════════════════════════════════════════════════════
     car = R.empty(R.NODE_SLIDE, 'carriage', loc=(0.0, 0.0, DRIVE_LO))
     car['travel_m'] = STROKE
-    car['travel_min_m'] = 0.0
-    car['travel_max_m'] = STROKE
+    # Absolute glTF parent-local Y; pilot drilling feeds down ([L1] A.5.1).
+    car['travel_space'] = 'parent-local'
+    car['travel_axis'] = 'y'
+    car['travel_direction'] = 'min'
+    car['travel_min_m'] = DRIVE_LO
+    car['travel_max_m'] = DRIVE_HI
     D = []                                   # everything welded onto the drive
 
     # guide sleeves, upper and lower, on each column
