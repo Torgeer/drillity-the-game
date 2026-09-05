@@ -1,0 +1,312 @@
+{
+  "tag": "reachfix",
+  "cases": {
+    "rockbolt": {
+      "painted": {
+        "max": 41,
+        "med": 41
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "smallTargets": [],
+      "targetsSeen": [
+        "actionbtn 80x70",
+        "actionbtn 80x73",
+        "railbtn 80x45",
+        "sstrip__leave 45x45",
+        "vsl 80x70",
+        "vsl 80x73"
+      ],
+      "clipped": [],
+      "split": {
+        "surfPct": 53.9,
+        "sectPct": 46.1,
+        "stagePct": 63
+      },
+      "bands": {
+        "surface": {
+          "y": 52,
+          "h": 287
+        },
+        "section": {
+          "y": 339,
+          "h": 245
+        }
+      },
+      "dom": {
+        "screens": 2,
+        "liveNodes": 121,
+        "docNodes": 164,
+        "dockH": 260,
+        "stripH": 52,
+        "dockCount": 1,
+        "hud": {
+          "top": 52,
+          "bottom": 260
+        }
+      }
+    },
+    "driven-pile": {
+      "painted": {
+        "max": 36,
+        "med": 29
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "smallTargets": [],
+      "targetsSeen": [
+        "actionbtn 80x70",
+        "actionbtn 80x73",
+        "actionbtn 80x78.9",
+        "railbtn 80x45",
+        "sstrip__leave 45x45",
+        "vsl 80x70",
+        "vsl 80x73"
+      ],
+      "clipped": [],
+      "split": {
+        "surfPct": 53.9,
+        "sectPct": 46.1,
+        "stagePct": 63
+      },
+      "bands": {
+        "surface": {
+          "y": 52,
+          "h": 287
+        },
+        "section": {
+          "y": 339,
+          "h": 245
+        }
+      },
+      "dom": {
+        "screens": 2,
+        "liveNodes": 121,
+        "docNodes": 164,
+        "dockH": 260,
+        "stripH": 52,
+        "dockCount": 1,
+        "hud": {
+          "top": 52,
+          "bottom": 260
+        }
+      }
+    },
+    "rc": {
+      "painted": {
+        "max": 39,
+        "med": 39
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "smallTargets": [],
+      "targetsSeen": [
+        "actionbtn 80x66",
+        "actionbtn 80x70",
+        "actionbtn 80x73",
+        "railbtn 80x45",
+        "sstrip__leave 45x45",
+        "vsl 80x66",
+        "vsl 80x73"
+      ],
+      "clipped": [],
+      "split": {
+        "surfPct": 53.9,
+        "sectPct": 46.1,
+        "stagePct": 63
+      },
+      "bands": {
+        "surface": {
+          "y": 52,
+          "h": 287
+        },
+        "section": {
+          "y": 339,
+          "h": 245
+        }
+      },
+      "dom": {
+        "screens": 2,
+        "liveNodes": 121,
+        "docNodes": 164,
+        "dockH": 260,
+        "stripH": 52,
+        "dockCount": 1,
+        "hud": {
+          "top": 52,
+          "bottom": 260
+        }
+      }
+    },
+    "dth": {
+      "painted": {
+        "max": 38,
+        "med": 38
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "smallTargets": [],
+      "targetsSeen": [
+        "actionbtn 80x73",
+        "sstrip__leave 45x45",
+        "vsl 80x73"
+      ],
+      "clipped": [],
+      "split": {
+        "surfPct": 54,
+        "sectPct": 46,
+        "stagePct": 67.3
+      },
+      "bands": {
+        "surface": {
+          "y": 52,
+          "h": 307
+        },
+        "section": {
+          "y": 359,
+          "h": 261
+        }
+      },
+      "dom": {
+        "screens": 2,
+        "liveNodes": 121,
+        "docNodes": 164,
+        "dockH": 224,
+        "stripH": 52,
+        "dockCount": 1,
+        "hud": {
+          "top": 52,
+          "bottom": 224
+        }
+      }
+    },
+    "oil-rotary": {
+      "painted": {
+        "max": 42,
+        "med": 42
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "smallTargets": [],
+      "targetsSeen": [
+        "actionbtn 80x70",
+        "railbtn 80x45",
+        "sstrip__leave 45x45",
+        "vsl 80x73"
+      ],
+      "clipped": [],
+      "split": {
+        "surfPct": 53.9,
+        "sectPct": 46.1,
+        "stagePct": 63
+      },
+      "bands": {
+        "surface": {
+          "y": 52,
+          "h": 287
+        },
+        "section": {
+          "y": 339,
+          "h": 245
+        }
+      },
+      "dom": {
+        "screens": 2,
+        "liveNodes": 121,
+        "docNodes": 164,
+        "dockH": 260,
+        "stripH": 52,
+        "dockCount": 1,
+        "hud": {
+          "top": 52,
+          "bottom": 260
+        }
+      }
+    }
+  },
+  "nav": [
+    {
+      "visit": 1,
+      "screens": 4,
+      "liveNodes": 121,
+      "docNodes": 812,
+      "dockH": 224,
+      "stripH": 52,
+      "dockCount": 1,
+      "hud": {
+        "top": 52,
+        "bottom": 224
+      },
+      "overlaps": 0,
+      "painted": 30
+    },
+    {
+      "visit": 2,
+      "screens": 4,
+      "liveNodes": 121,
+      "docNodes": 812,
+      "dockH": 224,
+      "stripH": 52,
+      "dockCount": 1,
+      "hud": {
+        "top": 52,
+        "bottom": 224
+      },
+      "overlaps": 0,
+      "painted": 30
+    },
+    {
+      "visit": 3,
+      "screens": 4,
+      "liveNodes": 121,
+      "docNodes": 812,
+      "dockH": 224,
+      "stripH": 52,
+      "dockCount": 1,
+      "hud": {
+        "top": 52,
+        "bottom": 224
+      },
+      "overlaps": 0,
+      "painted": 30
+    },
+    {
+      "visit": 4,
+      "screens": 4,
+      "liveNodes": 121,
+      "docNodes": 812,
+      "dockH": 224,
+      "stripH": 52,
+      "dockCount": 1,
+      "hud": {
+        "top": 52,
+        "bottom": 224
+      },
+      "overlaps": 0,
+      "painted": 30
+    },
+    {
+      "visit": 5,
+      "screens": 4,
+      "liveNodes": 121,
+      "docNodes": 812,
+      "dockH": 224,
+      "stripH": 52,
+      "dockCount": 1,
+      "hud": {
+        "top": 52,
+        "bottom": 224
+      },
+      "overlaps": 0,
+      "painted": 30
+    }
+  ],
+  "errors": [],
+  "pageErrors": [],
+  "removedSelector": null
+}

@@ -60,6 +60,7 @@
  */
 import { chromium, devices } from 'playwright';
 import { writeFileSync } from 'node:fs';
+import { ensureServer } from './devserver.mjs';
 
 const argv = process.argv.slice(2);
 const PORT = argv.find((a) => /^\d+$/.test(a)) || '5178';
@@ -203,6 +204,14 @@ const GOTO_SITE = (mm) => {
 };
 
 /* ── Run ──────────────────────────────────────────────────────────────────── */
+const say = (s = '') => console.log(s);
+/* ── THE GATE PROVIDES ITS OWN SUBJECT ──────────────────────────────────────
+   This file used to exit 2 with "start the dev server first" whenever the port
+   did not answer, which meant it could not be wired into `npm run check` — and
+   a gate nobody runs is the empty-set problem one level up. It now measures a
+   dev server that is already up, or starts one for the run and stops it after.
+   See ./devserver.mjs. */
+const SERVER = await ensureServer(PORT, say);
 const b = await chromium.launch({ args: ['--mute-audio'], headless: false, channel: 'chrome' });
 const ctx = await b.newContext({
   ...devices['iPhone 13 Pro'],
@@ -211,25 +220,19 @@ const ctx = await b.newContext({
 await ctx.route('**/@vite/client', (r) => r.fulfill({
   status: 200, contentType: 'application/javascript', body: VITE_STUB,
 }));
-const say = (s = '') => console.log(s);
 const p = await ctx.newPage();
-/* ── "CANNOT REACH" MUST MEAN CANNOT REACH ────────────────────────────────
-   This was one `goto` with `waitUntil: 'load'` and a 20 s cap, and EVERY
-   failure of it printed "start the dev server first". On a machine running a
-   dozen agents the dev server answered the first request in 15.8 s and the
-   module graph well after that, so a running server was repeatedly reported
-   as absent — the same confident-false-negative shape this file's own header
-   warns about, pointed at the operator instead of at the layout.
-
-   Two separate things now: reachability, which is a HEAD of the origin and
-   fails fast and honestly; and readiness, which is the app booting and is
-   allowed to take as long as it takes. `domcontentloaded` rather than `load`,
-   because `load` waits on every module, font and texture and is not what
-   "the page exists" means here. */
-const ORIGIN = `http://127.0.0.1:${PORT}`;
+/* Reachability and readiness are separate questions, in that order. Every
+   failure of the single 20 s `goto` this replaced printed "start the dev
+   server first", so a running-but-loaded server was reported as absent —
+   the same confident-false-negative shape this file's own header warns
+   about, aimed at the operator instead of at the layout. `domcontentloaded`,
+   not `load`: `load` waits on every module, font and texture, which is not
+   what "the page exists" means here. */
+const ORIGIN = SERVER.origin;
 try {
   await p.request.fetch(ORIGIN, { method: 'HEAD', timeout: 120000 });
 } catch (e) {
+  SERVER.stop();
   console.error(`Cannot reach ${ORIGIN} — start the dev server first:\n\n    npm run dev\n\n  (${e.message.split('\n')[0]})`);
   await b.close();
   process.exit(2);
@@ -324,6 +327,7 @@ for (const m of CASES) {
 
 await p.screenshot({ path: '.hudqa/reach-last.png' });
 await b.close();
+SERVER.stop();
 
 if (WANT_JSON) writeFileSync('.hudqa/reach-report.json', JSON.stringify(json, null, 2));
 

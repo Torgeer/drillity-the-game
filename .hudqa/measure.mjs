@@ -34,6 +34,22 @@
  *   3. touch targets       every interactive target >= 44 x 44 css px
  *   4. navigation growth   .sitedock height and node counts must not move
  *                          across repeated ordinary visits to the site screen
+ *   5. clipped text        no label cut off by its own container
+ *   6. the 3D's share      the two bands split 54/46 and own >= 60 % of the
+ *                          stage. Rubric axis 7a, and it was measured and
+ *                          PRINTED here for weeks without being gated
+ *   7. chrome agreement    what the screen publishes as ctx.hud is what the
+ *                          chrome actually measures
+ *   8. say it once         no caption and no number-with-a-unit stated twice
+ *
+ * EVERY ONE OF THEM FAILS ON AN EMPTY SET. A state with no painted elements,
+ * no interactive targets, no bands or no dock is a MEASUREMENT FAILURE, not a
+ * clean sheet — `tools/checkreach.mjs` reported zero targets and called it a
+ * pass, three times, for three different reasons.
+ *
+ * AND THE PROCESS EXITS NON-ZERO WHEN ANY OF THEM FAILS. It used to print
+ * `<-- GATE FAIL` and exit 0, so `npm run build` never saw it. A gate that
+ * cannot stop a build is a report.
  */
 import { chromium, devices } from 'playwright';
 import { writeFileSync, mkdirSync } from 'node:fs';
@@ -172,7 +188,65 @@ if (ONLY !== 'nav') {
     const clipped = [...new Set(S.flatMap((s) => s.clipped))];
     const med = S[Math.floor(S.length / 2)];
 
+    /* ── SAY IT ONCE, and MEASURED NOTHING ────────────────────────────────
+       Taken from the MEDIAN sample, not the union of all of them: across 30
+       samples a value legitimately passes through a number a neighbour is
+       also showing at some other instant, and a union would report that as a
+       duplicate. One settled frame is the question the rule is about. */
+    const dup = (rows, keyOf) => {
+      const byKey = new Map();
+      for (const r of rows || []) {
+        const k = keyOf(r);
+        if (!byKey.has(k)) byKey.set(k, new Set());
+        byKey.get(k).add(r.cls);
+      }
+      return [...byKey.entries()].filter(([, set]) => set.size > 1)
+        .map(([k, set]) => `"${k}" on ${[...set].join(' and ')}`);
+    };
+    const saidTwice = [
+      ...dup(med.captions, (r) => r.text),
+      ...dup(med.quantities, (r) => r.key),
+    ];
+    /* A gate over an empty set passes for ever. Each of these is a thing the
+       state MUST have for the gates above to have tested anything. */
+    const nothing = [];
+    if (!med.painted) nothing.push('no painted elements at all');
+    if (!med.targets) nothing.push('no interactive targets — the 44px gate tested nothing');
+    if (!med.split) nothing.push('no .siteband pair — the 3D share and the overlay gate tested nothing');
+    if (!med.dom.dockH) nothing.push('no .sitedock');
+    if (!med.dom.stripH) nothing.push('no .sstrip');
+    if (!med.dom.hud) nothing.push('the screen published no ctx.hud');
+
+    /* The published chrome against the measured chrome. `ctx.hud` is what
+       core/renderer.js insets its scissored bands by, so a disagreement here
+       is band drawn under opaque chrome and thrown away every frame — the
+       exact defect HANDOFF §3 measured at 190-228px of the section. */
+    const hudDrift = [];
+    if (med.dom.hud) {
+      if (Math.abs((med.dom.hud.top ?? -1) - med.dom.stripH) > 1) {
+        hudDrift.push(`ctx.hud.top ${med.dom.hud.top} vs .sstrip ${med.dom.stripH}px`);
+      }
+      if (Math.abs((med.dom.hud.bottom ?? -1) - med.dom.dockH) > 1) {
+        hudDrift.push(`ctx.hud.bottom ${med.dom.hud.bottom} vs .sitedock ${med.dom.dockH}px`);
+      }
+    }
+
+    /* GAMEDESIGN §1: the bands are 54/46 of what is left after the chrome, and
+       the 3D owns the stage. The floor is 60 % against the 63.0 % (67.3 % with
+       no auxiliary row) this layout measures — a budget the instrument cannot
+       report is not a budget (HANDOFF §9.5), so it is stated in the units this
+       harness prints. The baseline that failed review had it at 26 %. */
+    const SPLIT_TOL = 1.5;
+    const STAGE_FLOOR = 60;
+    const splitBad = [];
+    if (med.split) {
+      if (Math.abs(med.split.surfPct - 54) > SPLIT_TOL) splitBad.push(`surface ${med.split.surfPct}% vs 54%`);
+      if (Math.abs(med.split.sectPct - 46) > SPLIT_TOL) splitBad.push(`section ${med.split.sectPct}% vs 46%`);
+      if (med.split.stagePct < STAGE_FLOOR) splitBad.push(`3D is ${med.split.stagePct}% of the stage, floor ${STAGE_FLOOR}%`);
+    }
+
     json.cases[m] = {
+      saidTwice, nothing, hudDrift, splitBad,
       painted: { max: Math.max(...S.map((s) => s.painted)), med: med.painted },
       overlaps: maxOv, overlapList: ovDetails,
       onBand3D: onBand, smallTargets: small, targetsSeen: seen, clipped,
@@ -189,9 +263,19 @@ if (ONLY !== 'nav') {
     /* Named, so a pass earned by a control simply not being on screen is
        visible instead of silent. Hit boxes, from elementFromPoint. */
     say(`  targets     ${seen.length ? seen.join(', ') : 'NONE ON SCREEN — the 44px gate tested nothing'}`);
-    say(`  clipped     ${clipped.length}  ${clipped.slice(0, 4).join(' | ')}`);
-    say(`  split       surface ${med.split?.surfPct} / section ${med.split?.sectPct}   (3D = ${med.split?.stagePct}% of stage)`);
-    say(`  chrome      .sstrip ${med.dom.stripH}px  .sitedock ${med.dom.dockH}px  ctx.hud ${JSON.stringify(med.dom.hud)}`);
+    say(`  clipped     ${clipped.length}${clipped.length ? '  <-- GATE FAIL' : '  ok'}  ${clipped.slice(0, 4).join(' | ')}`);
+    say(`  split       surface ${med.split?.surfPct} / section ${med.split?.sectPct}   (3D = ${med.split?.stagePct}% of stage)`
+      + (splitBad.length ? '  <-- GATE FAIL' : '  ok'));
+    for (const d of splitBad) say(`                ${d}`);
+    say(`  chrome      .sstrip ${med.dom.stripH}px  .sitedock ${med.dom.dockH}px  ctx.hud ${JSON.stringify(med.dom.hud)}`
+      + (hudDrift.length ? '  <-- GATE FAIL' : '  ok'));
+    for (const d of hudDrift) say(`                ${d}`);
+    say(`  said twice  ${saidTwice.length}${saidTwice.length ? '  <-- GATE FAIL' : '  ok'}`);
+    for (const d of saidTwice) say(`                ${d}`);
+    if (nothing.length) {
+      say('  MEASURED NOTHING  <-- GATE FAIL');
+      for (const d of nothing) say(`                ${d}`);
+    }
     await p.screenshot({ path: resolve(HERE, `${TAG}-${m}.png`) });
   }
 }

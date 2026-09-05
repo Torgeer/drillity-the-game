@@ -1672,6 +1672,32 @@ def build(out_path):
     R.empty(R.NODE_MOUNT, 'v-door', None, (0, SUB_Y / 2, z0 + 0.9))
     R.empty(R.NODE_MOUNT, 'marque', None, (-SUB_X / 2 - 0.05, 0, z0 * 0.55))
 
+    # WHERE THE PLAYER SHOULD BE LOOKING, published so a camera can ask.
+    #
+    # The surface hero camera is a hand-solved constant table
+    # (`CAMERA_MODES`, renderer.js:134) and its own comment says what it was
+    # solved against: "the machine is crawler-lite, a 4.2 m mast on a 0.14 m
+    # pivot, ~4.6 m overall". Measured live in the built game, it sits at
+    # y = 3.04 m with a 26.6 deg vertical FOV, 15.2 m out — a 7.2 m tall
+    # window centred near the collar. THIS MACHINE'S WORKING LEVEL IS THE DRILL
+    # FLOOR AT 8.53 m, which is above that window, so the shot is the
+    # substructure and the BOP rather than the rotary and the setback.
+    #
+    # That is NOT a defect this model introduced: the procedural derrick frames
+    # identically (shots/m12-oil-rotary.png), because both put the well collar
+    # at grade like every other rig. And no machine can currently ask for
+    # anything different — `frameRadius` is computed in gltfRig.js from the
+    # FOOTPRINT ONLY (`max(size.x, size.z) * 0.5`, so height does not enter it)
+    # and then, measured by grep across src/, IS NEVER READ BY ANYTHING.
+    #
+    # So this node is the hook a fix would want: the point to look at, with the
+    # distance that frames the working level, stated by the machine that knows.
+    # Nothing reads it yet. See the handover notes.
+    focus = R.empty(R.NODE_MOUNT, 'camera-focus', None, (0, 0, z0 + 2.6))
+    focus['frame_radius_m'] = 26.0     # DERIVED: half the 48 m of derrick a
+                                       # wide shot wants, plus the floor margin
+    focus['look_height_m'] = z0 + 2.6  # the drill floor plus a man's height
+
     build_substructure(None)
     build_wellhead_and_bop(None)
     build_drill_floor(None, rotary)
@@ -1759,31 +1785,80 @@ def build(out_path):
 #      None on this rig, and it works with two manual tongs, a spinner and a
 #      hydraulic makeup machine instead ([S6] §9.I).  Do not "fix" it.
 #
-# 5b. **A DEFECT FOUND HERE THAT IS NOT THIS MACHINE'S — `paintedDark` IS NOT A
-#     MATERIAL.**  `blender/lib/rig.py` declares
+# 5b. **`paintedDark` — FOUND MISSING, FIXED CENTRALLY, AND THE REASON THIS FILE
+#     DID NOT WORK AROUND IT.**  `rig.py` declares
 #
 #         MAT_DARK = 'paintedDark'    # chassis, frames, guarding
 #
-#     under a heading that says these names "MUST match kinds in
-#     src/core/assets.js".  It does not: `grep -c paintedDark src/core/assets.js`
-#     returns **0**.  The KINDS table has paintedSteel, rawSteel, wornSteel,
-#     carbide, castIron, chrome, rubber, hose, plastic, glass, dirt, concrete,
-#     gravel, grass, snow, sand, rockFace, foam, safetyStripe and brandedPanel —
-#     and no paintedDark.
+#     under a heading saying these names "MUST match kinds in assets.js".  While
+#     this machine was being built they did not: `grep -c paintedDark
+#     src/core/assets.js` returned **0**, and gltfRig.js's own guard says what
+#     follows — assets.js substitutes rawSteel, so every chassis, frame and
+#     guard authored as MAT_DARK renders as BRIGHT BARE STEEL.  Nineteen builder
+#     modules use MAT_DARK, so it was the whole fleet.
 #
-#     `gltfRig.js` already knows what happens next and says so at load time:
-#     assets.js "will substitute rawSteel for it", so every chassis, frame and
-#     guard authored as MAT_DARK renders as BRIGHT BARE STEEL.  **Nineteen
-#     builder modules in blender/ use MAT_DARK**, so this is the whole fleet,
-#     not one machine.
+#     **It is fixed.**  Another agent landed `KINDS.paintedDark` at
+#     `src/core/assets.js:3951` in commit 08188f4, "Every machine in the fleet
+#     had bare steel where it should be dark paint" — same defect, found
+#     independently.  Verified live through the running game: `assets._kinds`
+#     now carries 34 kinds including paintedDark, and
+#     `assets.material('paintedDark')` comes back at roughness 0.34 /
+#     metalness 0.04 (painted) rather than rawSteel's metalness 1.0.
 #
-#     This file deliberately keeps using MAT_DARK rather than quietly
-#     substituting its own name.  Diverging would make this machine look right
-#     and the other eighteen wrong, and would plant a second private table of
-#     material names — the exact pattern HANDOFF §8B is about.  **The fix is one
-#     line in assets.js (add the kind) or one line in rig.py (point MAT_DARK at
-#     an existing kind); both files belong to somebody else.**  It is loud, not
-#     silent, so it will be caught the first time anyone reads a load log.
+#     **This is why this file kept using MAT_DARK instead of quietly
+#     substituting castIron or plastic for it.**  A private substitution would
+#     have made one machine look right and eighteen wrong, planted a second
+#     table of material names (HANDOFF §8B), and — the moment the central fix
+#     landed — left this machine the only one in the fleet still not using the
+#     kind that was added for it.  Naming the shared thing and reporting the
+#     defect was the cheaper move, and it cost nothing to be right about.
+#
+#     A note on how this was nearly got wrong, because it is HANDOFF §8C:
+#     the grep that found "0" was real, but a grep aimed at the KINDS object
+#     literal would have missed this kind ANYWAY — `paintedDark` is registered
+#     AFTER that literal as `KINDS.paintedDark = {...}`, derived from
+#     paintedSteel.  The finding was confirmed against the RUNNING GAME
+#     (`assets._kinds`, and the material's actual roughness and metalness)
+#     before it was believed, which is the only reason the correction is in
+#     this file rather than in somebody's next round.
+#
+# 5c. **THE CAMERA NEVER FRAMES THE DRILL FLOOR, AND NO MACHINE CAN ASK IT TO.**
+#     Measured in the built game, not reasoned about: the surface hero camera
+#     sits at **y = 3.04 m**, 15.2 m out, with a **26.6 deg** vertical FOV —
+#     a **7.2 m tall window** centred near the well collar.  This machine's
+#     working level, the drill floor, is at **8.53 m**.  So the shot is the
+#     substructure bracing and the BOP, and the rotary, the tongs, the
+#     drawworks and the 219-stand setback are all above the top of frame.
+#
+#     Three things, in the order they matter:
+#
+#     a. **This model did not cause it.**  `shots/m12-oil-rotary.png` is the
+#        PROCEDURAL derrick and it frames identically — the same under-floor
+#        view of legs, girts and string.  Both put the well collar at grade,
+#        which is right and is what every other rig does.
+#     b. **The camera was solved for a different size of machine, and says so.**
+#        `CAMERA_MODES` at `src/core/renderer.js:134` carries the working:
+#        *"the machine is crawler-lite, a 4.2 m mast on a 0.14 m pivot, ~4.6 m
+#        overall"*.  It is a constant table, re-applied every frame — this was
+#        confirmed by overriding `ctx.camera` at runtime and watching the game
+#        put it straight back.
+#     c. **`frameRadius` is dead data.**  `gltfRig.js:623` computes it as
+#        `max(1, prep.radius * 1.15)` where `prep.radius = max(size.x, size.z)
+#        * 0.5` — the FOOTPRINT, so a machine's HEIGHT never enters it — and
+#        `rigFactory.js:7552` copies it to `root.userData.frameRadius`.
+#        Grepped across `src/`: **nothing reads either one.**  A 68 m derrick
+#        and a 4.6 m crawler are framed by the same constants.
+#
+#     Note the trap in (c), because it caught this model once: shrinking the
+#     catwalk to cut the footprint moved `frameRadius` from 18.6 to 14.3, which
+#     LOOKS like better framing and changes nothing, because nothing reads it.
+#     The catwalk change stands on its own merits (a platform has a pipe deck,
+#     not a land rig's long catwalk); it is not a camera fix.
+#
+#     `mount:camera-focus` is published for whoever fixes this, at the drill
+#     floor plus a man's height, carrying `frame_radius_m` and `look_height_m`.
+#     Nothing reads it yet either — but when a camera does start asking, the
+#     machine that knows where its working level is will have an answer.
 #
 # 6. **THE FLEX HINT.**  `pivot:mast-upper` carries a `flex_scale` extra that
 #    nothing reads.  gltfRig.js's makeDyn() could set `dyn.flexScale` from it in

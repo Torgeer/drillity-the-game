@@ -1,0 +1,442 @@
+{
+  "model": {
+    "W": 390,
+    "H": 844,
+    "PX_PER_MM": 6.09375,
+    "PIVOT_OUT_MM": 10,
+    "PIVOT_DOWN_MM": 16,
+    "R_IN_MM": 34,
+    "arc": {
+      "right": {
+        "p": {
+          "x": 450.9375,
+          "y": 941.5
+        },
+        "easy": 493.36308020183355,
+        "stretch": 736.4167494741089
+      },
+      "left": {
+        "p": {
+          "x": -60.9375,
+          "y": 941.5
+        },
+        "easy": 492.7569166503701,
+        "stretch": 736.3683717447864
+      }
+    }
+  },
+  "cases": {
+    "rockbolt": {
+      "targets": 5,
+      "dock": 4,
+      "hard": [],
+      "rows": [
+        {
+          "cls": "sstrip__leave",
+          "x": 348,
+          "y": 9.5,
+          "w": 30,
+          "h": 30,
+          "drilling": false,
+          "cx": 363,
+          "cy": 25,
+          "right": "hard",
+          "left": "hard",
+          "worst": "hard"
+        },
+        {
+          "cls": "vsl",
+          "x": 12,
+          "y": 716,
+          "w": 84.65625,
+          "h": 72,
+          "drilling": true,
+          "cx": 54,
+          "cy": 752,
+          "right": "easy",
+          "left": "easy",
+          "worst": "easy"
+        },
+        {
+          "cls": "vsl",
+          "x": 104.65625,
+          "y": 716,
+          "w": 84.671875,
+          "h": 72,
+          "drilling": true,
+          "cx": 147,
+          "cy": 752,
+          "right": "easy",
+          "left": "easy",
+          "worst": "easy"
+        },
+        {
+          "cls": "vsl",
+          "x": 197.328125,
+          "y": 716,
+          "w": 84.671875,
+          "h": 72,
+          "drilling": true,
+          "cx": 240,
+          "cy": 752,
+          "right": "easy",
+          "left": "easy",
+          "worst": "easy"
+        },
+        {
+          "cls": "actionbtn",
+          "x": 290,
+          "y": 716,
+          "w": 88,
+          "h": 72,
+          "drilling": true,
+          "cx": 334,
+          "cy": 752,
+          "right": "easy",
+          "left": "easy",
+          "worst": "easy"
+        }
+      ]
+    },
+    "driven-pile": {
+      "targets": 7,
+      "dock": 6,
+      "hard": [],
+      "rows": [
+        {
+          "cls": "sstrip__leave",
+          "x": 348,
+          "y": 9.5,
+          "w": 30,
+          "h": 30,
+          "drilling": false,
+          "cx": 363,
+          "cy": 25,
+          "right": "hard",
+          "left": "hard",
+          "worst": "hard"
+        },
+        {
+          "cls": "railbtn",
+          "x": 122.359375,
+          "y": 680,
+          "w": 121.9375,
+          "h": 32,
+          "drilling": true,
+          "cx": 183,
+          "cy": 696,
+          "right": "easy",
+          "left": "easy",
+          "worst": "easy"
+        },
+        {
+          "cls": "railbtn",
+          "x": 248.296875,
+          "y": 680,
+          "w": 129.703125,
+          "h": 32,
+          "drilling": true,
+          "cx": 313,
+          "cy": 696,
+          "right": "easy",
+          "left": "easy",
+          "worst": "easy"
+        },
+        {
+          "cls": "vsl",
+          "x": 12,
+          "y": 716,
+          "w": 84.65625,
+          "h": 72,
+          "drilling": true,
+          "cx": 54,
+          "cy": 752,
+          "right": "easy",
+          "left": "easy",
+          "worst": "easy"
+        },
+        {
+          "cls": "vsl",
+          "x": 104.65625,
+          "y": 716,
+          "w": 84.671875,
+          "h": 72,
+          "drilling": true,
+          "cx": 147,
+          "cy": 752,
+          "right": "easy",
+          "left": "easy",
+          "worst": "easy"
+        },
+        {
+          "cls": "vsl",
+          "x": 197.328125,
+          "y": 716,
+          "w": 84.671875,
+          "h": 72,
+          "drilling": true,
+          "cx": 240,
+          "cy": 752,
+          "right": "easy",
+          "left": "easy",
+          "worst": "easy"
+        },
+        {
+          "cls": "actionbtn",
+          "x": 290,
+          "y": 716,
+          "w": 88,
+          "h": 72,
+          "drilling": true,
+          "cx": 334,
+          "cy": 752,
+          "right": "easy",
+          "left": "easy",
+          "worst": "easy"
+        }
+      ]
+    },
+    "rc": {
+      "targets": 6,
+      "dock": 5,
+      "hard": [],
+      "rows": [
+        {
+          "cls": "sstrip__leave",
+          "x": 348,
+          "y": 9.5,
+          "w": 30,
+          "h": 30,
+          "drilling": false,
+          "cx": 363,
+          "cy": 25,
+          "right": "hard",
+          "left": "hard",
+          "worst": "hard"
+        },
+        {
+          "cls": "railbtn",
+          "x": 268.046875,
+          "y": 680,
+          "w": 109.953125,
+          "h": 32,
+          "drilling": true,
+          "cx": 323,
+          "cy": 696,
+          "right": "easy",
+          "left": "easy",
+          "worst": "easy"
+        },
+        {
+          "cls": "vsl",
+          "x": 12,
+          "y": 716,
+          "w": 84.65625,
+          "h": 72,
+          "drilling": true,
+          "cx": 54,
+          "cy": 752,
+          "right": "easy",
+          "left": "easy",
+          "worst": "easy"
+        },
+        {
+          "cls": "vsl",
+          "x": 104.65625,
+          "y": 716,
+          "w": 84.671875,
+          "h": 72,
+          "drilling": true,
+          "cx": 147,
+          "cy": 752,
+          "right": "easy",
+          "left": "easy",
+          "worst": "easy"
+        },
+        {
+          "cls": "vsl",
+          "x": 197.328125,
+          "y": 716,
+          "w": 84.671875,
+          "h": 72,
+          "drilling": true,
+          "cx": 240,
+          "cy": 752,
+          "right": "easy",
+          "left": "easy",
+          "worst": "easy"
+        },
+        {
+          "cls": "actionbtn",
+          "x": 290,
+          "y": 716,
+          "w": 88,
+          "h": 72,
+          "drilling": true,
+          "cx": 334,
+          "cy": 752,
+          "right": "easy",
+          "left": "easy",
+          "worst": "easy"
+        }
+      ]
+    },
+    "dth": {
+      "targets": 5,
+      "dock": 4,
+      "hard": [],
+      "rows": [
+        {
+          "cls": "sstrip__leave",
+          "x": 348,
+          "y": 9.5,
+          "w": 30,
+          "h": 30,
+          "drilling": false,
+          "cx": 363,
+          "cy": 25,
+          "right": "hard",
+          "left": "hard",
+          "worst": "hard"
+        },
+        {
+          "cls": "vsl",
+          "x": 12,
+          "y": 716,
+          "w": 84.65625,
+          "h": 72,
+          "drilling": true,
+          "cx": 54,
+          "cy": 752,
+          "right": "easy",
+          "left": "easy",
+          "worst": "easy"
+        },
+        {
+          "cls": "vsl",
+          "x": 104.65625,
+          "y": 716,
+          "w": 84.671875,
+          "h": 72,
+          "drilling": true,
+          "cx": 147,
+          "cy": 752,
+          "right": "easy",
+          "left": "easy",
+          "worst": "easy"
+        },
+        {
+          "cls": "vsl",
+          "x": 197.328125,
+          "y": 716,
+          "w": 84.671875,
+          "h": 72,
+          "drilling": true,
+          "cx": 240,
+          "cy": 752,
+          "right": "easy",
+          "left": "easy",
+          "worst": "easy"
+        },
+        {
+          "cls": "actionbtn",
+          "x": 290,
+          "y": 716,
+          "w": 88,
+          "h": 72,
+          "drilling": true,
+          "cx": 334,
+          "cy": 752,
+          "right": "easy",
+          "left": "easy",
+          "worst": "easy"
+        }
+      ]
+    },
+    "oil-rotary": {
+      "targets": 6,
+      "dock": 5,
+      "hard": [],
+      "rows": [
+        {
+          "cls": "sstrip__leave",
+          "x": 348,
+          "y": 9.5,
+          "w": 30,
+          "h": 30,
+          "drilling": false,
+          "cx": 363,
+          "cy": 25,
+          "right": "hard",
+          "left": "hard",
+          "worst": "hard"
+        },
+        {
+          "cls": "railbtn",
+          "x": 297.75,
+          "y": 680,
+          "w": 80.25,
+          "h": 32,
+          "drilling": true,
+          "cx": 338,
+          "cy": 696,
+          "right": "easy",
+          "left": "easy",
+          "worst": "easy"
+        },
+        {
+          "cls": "vsl",
+          "x": 12,
+          "y": 716,
+          "w": 84.65625,
+          "h": 72,
+          "drilling": true,
+          "cx": 54,
+          "cy": 752,
+          "right": "easy",
+          "left": "easy",
+          "worst": "easy"
+        },
+        {
+          "cls": "vsl",
+          "x": 104.65625,
+          "y": 716,
+          "w": 84.671875,
+          "h": 72,
+          "drilling": true,
+          "cx": 147,
+          "cy": 752,
+          "right": "easy",
+          "left": "easy",
+          "worst": "easy"
+        },
+        {
+          "cls": "vsl",
+          "x": 197.328125,
+          "y": 716,
+          "w": 84.671875,
+          "h": 72,
+          "drilling": true,
+          "cx": 240,
+          "cy": 752,
+          "right": "easy",
+          "left": "easy",
+          "worst": "easy"
+        },
+        {
+          "cls": "actionbtn",
+          "x": 290,
+          "y": 716,
+          "w": 88,
+          "h": 72,
+          "drilling": true,
+          "cx": 334,
+          "cy": 752,
+          "right": "easy",
+          "left": "easy",
+          "worst": "easy"
+        }
+      ]
+    }
+  }
+}

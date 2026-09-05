@@ -317,6 +317,50 @@ export const ENUMERATE = function measureScreen(opts) {
     clipped.push(`${p.cls} "${(el.textContent || '').trim().slice(0, 24)}" ${el.scrollWidth}>${el.clientWidth}`);
   }
 
+  /* ── SAY IT ONCE ────────────────────────────────────────────────────────
+     Rubric axis 7a, third clause: "State any value ONCE." The review that
+     failed this screen found the resin mix on it three times at once — as a
+     slider, a gauge bar and a text card — and torque stated four ways inside
+     one 250x160 block. It was fixed by hand and came back, which is what
+     happens to a rule that lives in a document.
+
+     Two collections, because the rule breaks in two shapes:
+
+       CAPTIONS   the same word labelling two different things. Any painted
+                  element's own text, short enough to be a label and carrying
+                  no digits. This is the shape "TORQUE ... TORQUE" takes.
+       QUANTITIES a number WITH A UNIT. A bare numeral is deliberately not
+                  collected: three sliders reading 60 are three different
+                  quantities that happen to coincide, and gating on that would
+                  teach the next reader to add an exception, which is how an
+                  instrument learns to excuse things.
+
+     Both are element-attributed so a failure names the two places, and both
+     skip elements that contain each other — a value inside its own label is
+     one statement, not two. */
+  const ownText = (el) => {
+    let t = '';
+    for (const n of el.childNodes) if (n.nodeType === 3 && n.nodeValue) t += n.nodeValue;
+    return t.replace(/\s+/g, ' ').trim();
+  };
+  const captions = [];
+  const quantities = [];
+  const UNIT = /(-?\d+(?:[.,]\d+)?)\s*(%|m\/h|kNm|kN|kW|rpm|bar|mm|sg|l\/min|m)(?![A-Za-z])/gi;
+  for (const p of painted) {
+    const t = ownText(p.el);
+    if (!t) continue;
+    if (t.length <= 24 && /[A-Za-z]/.test(t) && !/\d/.test(t)) {
+      captions.push({ cls: p.cls, text: t.toLowerCase().replace(/[.,:;·|]+$/, '') });
+    }
+    let m;
+    UNIT.lastIndex = 0;
+    while ((m = UNIT.exec(t))) {
+      const v = parseFloat(m[1].replace(',', '.'));
+      if (!Number.isFinite(v)) continue;
+      quantities.push({ cls: p.cls, key: `${v.toFixed(2)} ${m[2].toLowerCase()}`, text: m[0] });
+    }
+  }
+
   /* ── DOM census: the growth check ──────────────────────────────────────── */
   const dom = {
     screens: screenNodes.length,
@@ -348,6 +392,7 @@ export const ENUMERATE = function measureScreen(opts) {
        one level up. */
     targetList: targets.map((t) => `${t.cls} ${t.blocked ? 'BLOCKED' : t.w + 'x' + t.h}`),
     clipped: [...new Set(clipped)],
+    captions, quantities,
     dom,
   };
 }.toString();

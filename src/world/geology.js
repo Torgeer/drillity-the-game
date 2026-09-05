@@ -6252,6 +6252,42 @@ export function createGeology(ctx) {
     ruler.top = topDepth;
   }
 
+  /* ── THE TICK LADDER ───────────────────────────────────────────────────────
+     A 9 m pile and a 3,000 m well share this band, and a hard-coded 1 / 5 / 10
+     ladder serves exactly one of them. It served the well: on a 9 m pile the
+     only labelled tick in the whole hole was 0, so the ruler was a scale with
+     nothing on it.
+
+     TWO CONSTRAINTS, AND THEY PULL AGAINST EACH OTHER.
+
+       · The VIEW is always about 20 m tall whatever the hole is, so the minor
+         tick has to stay countable on screen — the eye cannot read a ruler
+         whose ticks are 4 px apart. That sets a floor.
+       · The RUN has to carry enough labelled majors that the player sees a
+         number belonging to their own hole. That pulls the other way on a
+         short hole.
+
+     So the label interval is refined first, down to where the run carries at
+     least ~3 majors, and the minor tick follows it only as far as a hard
+     legibility floor of 6 CSS px allows. On the 45 m reference job this
+     returns 1 / 5 / 10 — exactly the hard-coded ladder it replaces, so the
+     common case cannot regress. On a 9 m pile it returns 0.5 / 1 / 2.
+
+     The ladder is 1-2-5 per decade, which is what makes ×5 and ×10 a fixed
+     index offset rather than a search. */
+  const TICK_LADDER = [0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000];
+  function tickLadder(pxPerMetreCss, runM) {
+    const at = (i) => TICK_LADDER[clamp(i, 0, TICK_LADDER.length - 1) | 0];
+    let i = 0;
+    while (i < TICK_LADDER.length - 4 && at(i) * pxPerMetreCss < 12) i++;   // comfortable
+    let mj = i + 3;
+    while (mj > 2 && runM > 0 && runM < at(mj) * 3) mj--;
+    i = Math.min(i, Math.max(mj - 3, 0));
+    while (i < TICK_LADDER.length - 4 && at(i) * pxPerMetreCss < 6) i++;    // hard floor
+    if (mj < i + 1) mj = i + 1;
+    return { minor: at(i), mid: at(Math.max(i + 1, mj - 1)), major: at(mj) };
+  }
+
   function drawRuler(topDepth) {
     // for a driven pile the depth ruler IS the driving record (research/05 §E5)
     if (pile && pile.driven) { drawDrivingRecord(topDepth); return; }
@@ -6272,37 +6308,82 @@ export function createGeology(ctx) {
     g.fillRect(Math.round(W * 0.20), 0, 1.5, H);
 
     const x0 = Math.round(W * 0.20);
-    const d0 = Math.floor(topDepth);
-    const d1 = Math.ceil(topDepth + span);
+    const runM = Math.max(layout.totalLength || 0, 0);
+    const lad = tickLadder(pxPerM / k, runM);          // in CSS px per metre
+    const labelX = x0 + W * 0.34;
+
+    /* ── THE RUN, DRAWN TO SCALE IN THE RULER'S OWN GUTTER ───────────────────
+       Depth, depth remaining and rate of progress off ONE graphic, and none of
+       them a number: a 4.5 CSS px rail down the left edge of the ruler running
+       from the collar to total depth, solid where the hole exists and hollow
+       where it does not. The cursor sits on the boundary.
+
+       It is not a progress bar with a percentage. It is the hole, at the same
+       1:1 metre-per-unit the ticks beside it use — so how much is left is a
+       LENGTH the player measures against the same scale as everything else in
+       the band, and how fast they are going is how fast the boundary crawls
+       past the ticks. That is what makes the numeric depth readout in the HUD
+       redundant rather than merely duplicated.
+
+       It scrolls with the strip, so on a 3,000 m well the visible rail is the
+       20 m of it in frame and TD is off the bottom until you get near it —
+       which is honest, and is what the TD datum below is for. */
+    const tdTvd = depthForStation(runM);
+    const drilled = depthForStation(depth);
+    if (runM > 0) {
+      const railW = Math.max(1, Math.round(W * 0.09));
+      const yTop = Math.max(0, (0 - topDepth) * pxPerM);
+      const yTd = Math.min(H, (tdTvd - topDepth) * pxPerM);
+      const yBit = clamp((drilled - topDepth) * pxPerM, yTop, Math.max(yTop, yTd));
+      if (yTd > 0 && yTop < H) {
+        g.fillStyle = 'rgba(150,160,174,0.16)';
+        g.fillRect(0, yTop, railW, Math.max(0, yTd - yTop));
+        g.fillStyle = 'rgba(223,181,82,0.62)';
+        g.fillRect(0, yTop, railW, Math.max(0, yBit - yTop));
+      }
+    }
+
     g.textBaseline = 'middle';
     g.textAlign = 'left';
-    for (let d = d0; d <= d1; d++) {
-      if (d < 0) continue;
+    /* Ticks are walked in INTEGER STEPS of the minor interval and multiplied
+       back, never accumulated: a float accumulator over a 3,000 m well drifts
+       off the labels it is supposed to be numbering. */
+    const i0 = Math.floor(topDepth / lad.minor) - 1;
+    const i1 = Math.ceil((topDepth + span) / lad.minor) + 1;
+    const nearInt = (v, q) => Math.abs(v / q - Math.round(v / q)) < 1e-6;
+    for (let i = i0; i <= i1; i++) {
+      const d = i * lad.minor;
+      if (d < -1e-9) continue;
       const y = (d - topDepth) * pxPerM;
       if (y < -8 || y > H + 8) continue;
-      const major = d % 10 === 0;
-      const mid = d % 5 === 0;
+      const major = nearInt(d, lad.major);
+      const mid = !major && nearInt(d, lad.mid);
       const len = major ? W * 0.46 : mid ? W * 0.30 : W * 0.16;
       g.fillStyle = major ? 'rgba(223,181,82,0.80)' : mid ? 'rgba(150,160,174,0.70)' : 'rgba(150,160,174,0.38)';
       g.fillRect(x0, Math.round(y) - (major ? 1 : 0), len, major ? 2 : 1);
-      if (major) {
-        g.fillStyle = 'rgba(250,250,250,0.90)';
-        g.font = `600 ${css(12)}px ${BRAND.fontMono}`;
-        g.fillText(String(d), x0 + W * 0.34, y);
-      } else if (mid) {
-        g.fillStyle = 'rgba(150,160,174,0.60)';
-        g.font = `500 ${css(8.5)}px ${BRAND.fontMono}`;
-        g.fillText(String(d), x0 + W * 0.34, y);
+      if (major || mid) {
+        const txt = lad.major < 1 ? d.toFixed(1) : String(Math.round(d));
+        /* A 3,000 m well prints four digits into a strip authored for two.
+           The size is solved against the room that is actually left rather
+           than asserted, so the deepest hole in the game does not print
+           "2990" over the top of its own tick. */
+        g.fillStyle = major ? 'rgba(250,250,250,0.90)' : 'rgba(150,160,174,0.60)';
+        let sz = major ? 12 : 8.5;
+        for (; sz > 6.5; sz -= 0.5) {
+          g.font = `${major ? 600 : 500} ${css(sz)}px ${BRAND.fontMono}`;
+          if (g.measureText(txt).width <= W - labelX - css(1.5)) break;
+        }
+        g.fillText(txt, labelX, y);
       }
     }
-    // water table datum
+    // water table datum — starts clear of the run rail
     const wy = (waterTableDepth - topDepth) * pxPerM;
     if (wy > -4 && wy < H + 4) {
       g.fillStyle = 'rgba(111,182,199,0.85)';
-      g.fillRect(0, Math.round(wy) - 1, W * 0.18, css(1.2));
+      g.fillRect(Math.round(W * 0.11), Math.round(wy) - 1, W * 0.11, css(1.2));
       g.font = `600 ${css(7)}px ${BRAND.fontSans}`;
       g.textAlign = 'left';
-      g.fillText('GWL', 2, wy - css(6));
+      g.fillText('GWL', Math.round(W * 0.11), wy - css(6));
     }
     /* ── DATUMS THE MODE OWNS ────────────────────────────────────────────────
        A raise is bored between two levels and the section has to show both —
@@ -6321,6 +6402,13 @@ export function createGeology(ctx) {
       g.textAlign = 'left';
       g.fillText(label, 2, y - css(6));
     };
+    /* TOTAL DEPTH — the datum that makes the rail readable as "how much is
+       left". It is the one depth on this axis the player is being paid to
+       reach, and it was the only mode-independent datum the ruler did not
+       carry. Drawn from the mode's own totalLength through depthForStation(),
+       so on an HDD profile it is the TVD at the exit and not the bore length,
+       which is a different number and would be a wrong one on a depth axis. */
+    if (runM > 0) datum(tdTvd, 'TD', 'rgba(223,181,82,0.85)');
     if (raise) {
       datum(0, 'UPPER LVL', 'rgba(223,181,82,0.90)');
       datum(raise.length, 'LOWER LVL', 'rgba(223,181,82,0.90)');
@@ -7416,9 +7504,20 @@ export function createGeology(ctx) {
        not to the ground. */
     const topDepth = layout.depthAtY0 - (camBaseY + halfH - root.position.y);
     const botDepth = layout.depthAtY0 - (camBaseY - halfH - root.position.y);
-    if (ruler && (topDepth < ruler.top + 1.0 || botDepth > ruler.top + ruler.span - 1.0)) {
-      const nt = Math.floor((topDepth - viewMetres * 0.22) * 2) / 2;
+    /* The ruler carries the run rail now, whose filled length IS the hole, so
+       like the log it is a function of the bit as well as of the window. Same
+       0.15 m repaint cadence and the same scalar guard: a still bit costs what
+       it always did. */
+    const rulerStale = ruler
+      && Math.abs(depthForStation(depth) - (ruler.drawnAt ?? -1e9)) > 0.15;
+    const rulerScrolled = ruler
+      && (topDepth < ruler.top + 1.0 || botDepth > ruler.top + ruler.span - 1.0);
+    if (rulerScrolled || rulerStale) {
+      const nt = rulerScrolled
+        ? Math.floor((topDepth - viewMetres * 0.22) * 2) / 2
+        : ruler.top;                                     // repaint in place
       drawRuler(nt);
+      ruler.drawnAt = depthForStation(depth);
       ruler.mesh.position.y = secYForDepth(nt + ruler.span * 0.5);
     }
     /* The log now carries the LOGGED/PROJECTED divider and hides the strength
