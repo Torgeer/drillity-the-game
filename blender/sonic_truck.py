@@ -622,7 +622,7 @@ MIRROR_X   = WIDTH / 2                  # 1.2573.  [FHWA] 658.16 excludes
                       # somebody will file a bug against (ASTRA section 5).  The
                       # mirrors therefore land exactly ON the published width,
                       # and `tools/glbinfo.mjs` should read 2.515.
-CAB_W      = 2.300    # NOT SOURCED.  No US truck maker publishes an exterior
+CAB_W      = 2.200    # NOT SOURCED.  No US truck maker publishes an exterior
 CAB_ROOF   = 3.020    # cab width or a day-cab roof height in anything
 CAB_FLOOR  = RAIL_TOP + 0.240                   # reachable; the search for one
 HOOD_TOP   = 2.020    # came back empty across International, Peterbilt, Mack,
@@ -722,7 +722,11 @@ JACK_X     = 1.040    # [D] SOLVED so the pads and their cribbing do NOT set
                       # back 2.680 wide against a claimed 2.515 - measured, not
                       # reasoned (ASTRA section 5).
 JACK_YR    = 0.560    # [D] right at the tail, behind the tandem, under the mast
-JACK_YF    = 3.900    # [D] ahead of the tandem, under the front of the deck
+JACK_YF    = 4.350    # [D] ahead of the tandem, at the front of the
+                      # sub-frame.  SOLVED against the running gear and the side
+                      # furniture: the jack leg sweeps x 0.971-1.109, which is
+                      # inside the band the fuel tank and the battery box hang
+                      # in, so it has to sit in a y where neither does.
 JACK_PAD_R = 0.190    # NOT SOURCED for a sonic rig.  No sonic brochure
                       # publishes a pad.  [TSI-CT] publishes the CYLINDER
                       # (JACK_BORE x JACK_STROKE) and nothing else.
@@ -811,7 +815,10 @@ def build_chassis():
     n = 9
     for i in range(n):
         y = -0.100 + i * (DECK_Y1 + 0.30) / (n - 1.0)
-        box('sub_bear%d' % i, (BODY_W - 0.12, 0.055, SUBFR_H * 0.60), MAT_DARK,
+        # 2.18 m, not the full body width: the bearers have to finish inboard
+        # of the exhaust stack at x 1.104, which the sweep caught them running
+        # straight through.
+        box('sub_bear%d' % i, (BODY_W - 0.32, 0.055, SUBFR_H * 0.60), MAT_DARK,
             None, (0, y, RAIL_TOP + SUBFR_H * 0.70), bevel=0.0)
     # the mast bolster: the one member the whole machine hangs off
     box('bolster', (BODY_W - 0.10, 0.280, SUBFR_H + 0.16), MAT_PAINT, None,
@@ -923,24 +930,36 @@ def build_cab():
             MAT_GLASS, None,
             (s * (HOOD_W / 2 - 0.16), HOOD_Y1 - 0.010, RAIL_TOP + 0.090),
             bevel=0.006)
-    # exhaust stack and heat shield behind the cab, kerb side
-    pipe('stack', (1.11, CAB_Y0 + 0.16, RAIL_TOP), (1.11, CAB_Y0 + 0.16, 3.46),
-         0.056, MAT_CHROME, None, sides=10)
-    box('stack_hs', (0.145, 0.145, 0.880), MAT_WORN, None,
-        (1.11, CAB_Y0 + 0.16, RAIL_TOP + 0.560), bevel=0.008)
+    # Exhaust stack and heat shield behind the cab, kerb side.  Its x is
+    # SOLVED, not placed: it has to stand outside the cab (1.100) and inside the
+    # published half-width (1.257), which is 157 mm of room for a 112 mm stack.
+    # At CAB_W = 2.300 there was no such x and the stack was measured 93 mm
+    # INSIDE the cab shell - found by an AABB sweep over every static part, not
+    # by looking at it.
+    pipe('stack', (1.160, CAB_Y0 + 0.16, RAIL_TOP),
+         (1.160, CAB_Y0 + 0.16, 3.46), 0.056, MAT_CHROME, None, sides=10)
+    box('stack_hs', (0.140, 0.140, 0.880), MAT_WORN, None,
+        (1.160, CAB_Y0 + 0.16, RAIL_TOP + 0.560), bevel=0.008)
     # the orange rotating beacon - [REF] section 4.5 records it on every one of
     # these machines, and on a road-going rig it is a legal fitting.
     tube('beacon_base', 0.052, 0.070, MAT_DARK, None,
          (-0.52, CAB_Y0 + 0.28, CAB_ROOF), sides=8)
     tube('beacon', 0.060, 0.110, MAT_HAZARD, None,
          (-0.52, CAB_Y0 + 0.28, CAB_ROOF + 0.070), sides=8)
-    # fuel tank and battery box under the cab step
-    tube('fuel_tank', 0.235, 1.020, MAT_CHROME, None,
-         (-0.98, CAB_Y0 - 0.12, RAIL_BOT - 0.020), (math.pi / 2, 0, 0), 14)
+    # ── UNDER-DECK FURNITURE.  THE TANDEM OWNS THE SIDES.
+    # An 11R22.5 dual at a 498 mm loaded radius fills x 0.620-1.242 and
+    # z 0-0.996 over y 1.102-2.098 and y 2.499-3.495.  That leaves exactly three
+    # gaps for anything hung on the side of the frame - y 0-1.10, y 2.10-2.50
+    # and y 3.50-4.48 - and the first layout of this file put the fuel tank, the
+    # air tank, the battery box and a locker straight through the wheels.  Found
+    # by sweeping every static AABB against every other, which is a two-minute
+    # script and caught nine real collisions that reading the code did not.
+    tube('fuel_tank', 0.180, 1.000, MAT_CHROME, None,
+         (-0.78, 1.050, 0.720), (math.pi / 2, 0, 0), 14)
     box('batt_box', (0.340, 0.560, 0.380), MAT_DARK, None,
-        (1.02, CAB_Y0 - 0.55, RAIL_BOT + 0.020), bevel=0.014)
+        (0.780, 0.760, 0.950), bevel=0.014)
     tube('air_tank', 0.128, 0.560, MAT_WORN, None,
-         (1.02, CAB_Y0 - 1.20, RAIL_BOT - 0.060), (math.pi / 2, 0, 0), 10)
+         (1.020, 4.160, 0.730), (math.pi / 2, 0, 0), 10)
 
     # THE MAST REST, on the cab roof.  This is where the folded mast lands - see
     # build_mast()'s docstring for the arithmetic - and a compact truck rig
@@ -1041,30 +1060,36 @@ def build_deck():
     # asserts 168 kW.  So the enclosure is drawn as the hydraulics and the
     # cabinet, which are certainly there, and no engine is claimed.
     box('pack', (1.900, 0.420, 0.900), MAT_PAINT, None,
-        (0, 4.060, DECK_Z + 0.450), bevel=0.024)
+        (0, 4.030, DECK_Z + 0.450), bevel=0.024)
     for i in range(6):
         box('pack_louv%d' % i, (1.600, 0.020, 0.034), MAT_DARK, None,
-            (0, 3.845, DECK_Z + 0.200 + i * 0.100), bevel=0.0)
+            (0, 3.815, DECK_Z + 0.200 + i * 0.100), bevel=0.0)
     tube('pack_stack', 0.044, 0.400, MAT_WORN, None,
-         (0.620, 4.060, DECK_Z + 0.900), sides=8)
+         (0.620, 4.030, DECK_Z + 0.900), sides=8)
 
     # ── water for the swivel, slung under the deck.  SMALL on purpose: sonic is
     # the low-flush method and in many soils uses none at all ([BR] p2; [SLO]).
     # A mud tank on this machine would be a different trade's rig.
-    tube('water_tank', 0.185, 0.900, MAT_PAINT, None,
-         (-1.02, 2.400, RAIL_TOP - 0.030), (-math.pi / 2, 0, 0), 12)
-    box('locker_r', (0.150, 0.900, 0.440), MAT_PAINT, None,
-        (DECK_X - 0.075, 2.850, RAIL_TOP - 0.040), bevel=0.012)
+    # slung TRANSVERSELY between the tandem axles and below the rails - the one
+    # place on this chassis where a tank fits without touching a wheel
+    # Length is SOLVED at 720 mm, not chosen: it has to finish inboard of the
+    # rear spring packs at x 0.377.  About 54 litres, which is small - and
+    # correct.  Sonic is the low-cuttings, low-flush method and in many soils
+    # uses no flush at all ([BR] p2; [SLO]); this is swivel water, not mud.
+    tube('water_tank', 0.155, 0.720, MAT_PAINT, None,
+         (-0.360, 2.300, 0.620), (0, math.pi / 2, 0), 12)
+    # and the toolbox goes in the 0.40 m gap between the two drive axles
+    box('locker_r', (0.150, 0.380, 0.440), MAT_PAINT, None,
+        (DECK_X - 0.075, 2.298, 0.920), bevel=0.012)
     box('locker_hdl', (0.028, 0.110, 0.028), MAT_WORN, None,
-        (DECK_X - 0.014, 2.850, RAIL_TOP - 0.040), bevel=0.0)
+        (DECK_X - 0.014, 2.298, 0.920), bevel=0.0)
     # air reel for the damper line.  [BR] p5, p6: 0.7 MPa on a minimum of
     # 8 l/min, so there is a real air line on this machine.
     tube('reel_hub', 0.070, 0.280, MAT_DARK, None,
-         (-1.05, 3.500, RAIL_TOP + 0.030), (0, math.pi / 2, 0), 8)
+         (-1.050, 3.810, 1.006), (0, math.pi / 2, 0), 8)
     for i in range(2):
         tube('reel_fl%d' % i, 0.210, 0.018, MAT_PAINT, None,
-             (-1.05 + i * 0.262, 3.500, RAIL_TOP + 0.030), (0, math.pi / 2, 0),
-             14)
+             (-1.050 + i * 0.262, 3.810, 1.006), (0, math.pi / 2, 0), 14)
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -1361,14 +1386,20 @@ def build_mast_rams():
     built with `parent=None` for the same reason).  Recorded so nobody
     re-discovers it as a bug.
     """
+    # The base pedestals stand in the CENTRELINE GAP between the two tooling
+    # racks (x -0.371 to +0.420) and lift the trunnion 300 mm above the deck, so
+    # the ram passes OVER the tubes rather than through them.  The first layout
+    # put the trunnions at x 0.635 and the sweep found them inside both racks.
     for s in (-1, 1):
         side = 'l' if s < 0 else 'r'
+        box('ram_ped_%s' % side, (0.160, 0.220, 0.300), MAT_PAINT, None,
+            (s * 0.330, 2.000, DECK_Z + 0.150), bevel=0.012)
         ram('mast_ram_%s' % side,
-            (s * 0.560, 1.900, DECK_Z + 0.130),
-            (s * 0.470, MAST_Y + 0.030, MAST_TILT_Z - 0.500),
+            (s * 0.330, 2.000, DECK_Z + 0.300),
+            (s * 0.395, MAST_Y + 0.030, MAST_TILT_Z - 0.400),
             barrel_r=0.068, rod_r=0.040, ext=0.44)
         tube('ram_trun_%s' % side, 0.048, 0.140, MAT_CAST, None,
-             (s * 0.630, 1.900, DECK_Z + 0.130), (0, -s * math.pi / 2, 0), 10)
+             (s * 0.400, 2.000, DECK_Z + 0.300), (0, -s * math.pi / 2, 0), 10)
         # the static tower the tilt pin lives in
         box('tilt_tower_%s' % side, (0.070, 0.300, MAST_TILT_Z - DECK_Z +
                                      0.140), MAT_PAINT, None,
