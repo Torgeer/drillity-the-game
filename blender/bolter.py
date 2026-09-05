@@ -666,3 +666,216 @@ def build_carrier(root):
             build_wheel(None, 'wheel_%s%d' % (tag, s > 0), s * TRACK_X, y)
             build_mudguard(None, 'guard_%s%d' % (tag, s > 0), s * TRACK_X, y,
                            58 if tag == 'r' else 52, 58)
+
+
+# =============================================================================
+# S4  REAR MODULE - the power pack, and the two reels
+#
+#     [R]S4.0, working off the dedicated-bolter side elevation: "a smooth,
+#     faired, sloping hood, not a boxy engine cover. It has a shallow chamfered
+#     shoulder line running its whole length, a lifting eye on top, and small
+#     hinged service doors let into the flank. It reads as one sculpted volume."
+#     And: "the cable reel is mounted HIGH at the rear, drawn as a large circle
+#     inside the hood outline, and it is the single biggest circular object on
+#     the machine. It sits ABOVE the rear axle, not behind it."
+#
+#     What lives in here, all from [BS]p.5: a 55-72 kW diesel for tramming,
+#     the 66-80 kW electrical package that does the actual drilling, a screw
+#     compressor, a hydraulic water booster pump (12 bar, 66 l/min), a 60 l
+#     fuel tank, 2 x 12 V 70 Ah batteries, a STAINLESS STEEL electrical
+#     enclosure, and the cable and water hose reels. An underground rig is a
+#     plugged-in machine at the face, not a self-powered one ([R]S2) - which is
+#     why the reel, not the exhaust, is the tell.
+# =============================================================================
+
+HOOD_HALF  = 0.900   # hood half-width. Inboard of the 1.0575 machine half so
+                     # the tyres are the widest thing at the rear. NOT SOURCED.
+HOOD_Y1    = -0.300  # hood front face, clear of the articulation [R]S4.1
+CAB_STAIN  = R.MAT_STEEL   # the electrical enclosure is "stainless steel"
+                           # [BS]p.5 - bare, not painted. It is the only
+                           # unpainted flat panel on the machine and [R]S9 W15
+                           # calls it "a free, cheap material-contrast win".
+
+
+def build_hood(parent):
+    """The faired rear hood: one sculpted volume, not a boxy engine cover."""
+    y0, y1 = Y_TAIL, HOOD_Y1
+    L = y1 - y0
+    yc = (y0 + y1) / 2
+    # main body, from the frame rails up to the shoulder
+    box('hood_body', (2 * HOOD_HALF, L, 1.600 - FRAME_Z1), R.MAT_PAINT, parent,
+        (0, yc, (FRAME_Z1 + 1.600) / 2), bevel=0.026)
+    # the chamfered shoulder cap that runs the whole length [R]S4.0
+    box('hood_cap', (2 * HOOD_HALF - 0.150, L - 0.070, HOOD_Z - 1.600),
+        R.MAT_PAINT, parent, (0, yc, (1.600 + HOOD_Z) / 2), bevel=0.034)
+    # a slight fall towards the tail, so the volume is sculpted not extruded
+    box('hood_tailfair', (2 * HOOD_HALF - 0.220, 0.560, 0.170), R.MAT_PAINT,
+        parent, (0, y0 + 0.250, HOOD_Z - 0.130),
+        (math.radians(-13), 0, 0), bevel=0.026)
+    # hinged service doors let into the flank [R]S4.0
+    for s in (-1, 1):
+        for i, dy in enumerate((-2.55, -1.55)):
+            box('hood_door%d_%d' % (s > 0, i), (0.024, 0.860, 0.560),
+                R.MAT_PAINT, parent, (s * (HOOD_HALF + 0.012), dy, 1.180),
+                bevel=0.014)
+            for hz in (1.400, 0.960):     # piano hinge stubs
+                cheapbox('hood_hinge%d_%d_%d' % (s > 0, i, int(hz * 100)),
+                         (0.030, 0.070, 0.036), R.MAT_WORN, parent,
+                         (s * (HOOD_HALF + 0.020), dy - 0.410, hz))
+            cyl('hood_latch%d_%d' % (s > 0, i), 0.026, 0.040, R.MAT_WORN,
+                parent, (s * (HOOD_HALF + 0.024), dy + 0.380, 1.180),
+                (0, math.pi / 2, 0), sides=8)
+    # lifting eye on top [R]S4.0
+    torus_ring('hood_lifteye', 0.075, 0.020, R.MAT_WORN, parent,
+               (0, -1.180, HOOD_Z + 0.062), (math.pi / 2, 0, 0), maj=14, min_=6)
+    cheapbox('hood_liftpad', (0.150, 0.150, 0.030), R.MAT_DARK, parent,
+             (0, -1.180, HOOD_Z + 0.012))
+    # cooler / radiator pack behind the tail face, breathing through louvres
+    box('hood_coolerframe', (2 * HOOD_HALF - 0.120, 0.055, 0.780), R.MAT_DARK,
+        parent, (0, y0 + 0.030, 1.180), bevel=0.010)
+    n = 9
+    for i in range(n):
+        z = 0.810 + (1.550 - 0.810) * (i + 0.5) / n
+        cheapbox('hood_louvre%d' % i, (2 * HOOD_HALF - 0.180, 0.026, 0.062),
+                 R.MAT_DARK, parent, (0, y0 + 0.006, z),
+                 (math.radians(28), 0, 0))
+    # exhaust and its heat shield: a diesel that only trams still has a stack
+    cyl('hood_exhaust', 0.062, 0.520, R.MAT_WORN, parent,
+        (0.560, -0.700, HOOD_Z - 0.040), sides=10)
+    cyl('hood_exhshield', 0.082, 0.300, R.MAT_WORN, parent,
+        (0.560, -0.700, HOOD_Z + 0.060), sides=10)
+    # 60 l fuel tank [BS]p.5, slung between the rails where a tank actually goes
+    box('fuel_tank', (0.480, 0.560, 0.360), R.MAT_DARK, parent,
+        (-0.320, -0.880, FRAME_Z1 + 0.190), bevel=0.030)
+    cyl('fuel_filler', 0.052, 0.070, R.MAT_WORN, parent,
+        (-0.320, -0.880, FRAME_Z1 + 0.370), sides=10)
+    # 2 x 12 V 70 Ah batteries [BS]p.5, in a box on the opposite side
+    box('battery_box', (0.400, 0.480, 0.300), R.MAT_DARK, parent,
+        (0.360, -0.880, FRAME_Z1 + 0.160), bevel=0.020)
+    # fire suppression bottle - ANSUL manual or automatic [BS]p.5
+    cyl('fire_bottle', 0.088, 0.520, R.MAT_HAZARD, parent,
+        (0.560, -3.000, FRAME_Z1 + 0.060), sides=12)
+
+
+def build_electrical_cabinet(parent):
+    """The stainless electrical enclosure - the machine's one bare panel.
+
+    [BS]p.5 "stainless steel electrical enclosure"; 380-1 000 V, soft start,
+    5 kVA transformer, total installed 66-80 kW. [R]S9 W15: modelling it is a
+    free material-contrast win on an otherwise single-colour machine, and it
+    shares MAT_STEEL with the feed rails and the rods, so it is free in
+    draw-call terms too.
+    """
+    x = -(HOOD_HALF + 0.075)
+    box('elec_cabinet', (0.150, 0.960, 0.720), CAB_STAIN, parent,
+        (x, -0.900, 1.240), bevel=0.014)
+    box('elec_door', (0.026, 0.860, 0.620), CAB_STAIN, parent,
+        (x - 0.086, -0.900, 1.240), bevel=0.010)
+    louvres(parent, 'elec_vent', 5, x - 0.100, -1.280, -0.560, 1.360, 1.560,
+            mat=CAB_STAIN, depth=0.022)
+    cyl('elec_handle', 0.018, 0.180, R.MAT_WORN, parent,
+        (x - 0.104, -0.520, 1.150), sides=8)
+    # isolator: the one control that is always on the outside of the cabinet
+    cyl('elec_isolator', 0.048, 0.060, R.MAT_HAZARD, parent,
+        (x - 0.100, -1.360, 1.120), (0, -math.pi / 2, 0), sides=10)
+
+
+def build_cable_reel(parent):
+    """The cable reel: high in the hood, above the rear axle, and the single
+    biggest circular object on the machine.
+
+    [BS]p.5 lists "cable reel with limiting switch" but does not dimension it.
+    [BM]p.6 gives 1 600 mm for the LARGER jumbo, which will not fit under this
+    machine's 1 720 mm hood - so the 1 100 mm drum here is derived from the
+    hood cavity (see REEL_R) and is flagged NOT SOURCED. What IS sourced is
+    where it goes and how big it is relative to everything else, and [R]S5.4
+    makes it one of the six thumbnail tells: "it says 'plugged in', i.e.
+    underground."
+
+    A pivot: node, because it is the one large rotating thing on the carrier
+    and the game may want to reel in. The wrap of cable rides the drum; the
+    trailing run to the wall socket does NOT - it is static, parented to the
+    root, or it would swing with the drum.
+    """
+    drum = R.empty(R.NODE_PIVOT, 'cableReel', parent, (0, REEL_Y, REEL_Z))
+    drum['drum_r_m'] = REEL_R
+    cyl('reel_core', REEL_R * 0.46, REEL_W, R.MAT_DARK, drum,
+        (-REEL_W / 2, 0, 0), (0, math.pi / 2, 0), sides=16)
+    for s in (-1, 1):
+        cyl('reel_flange%d' % (s > 0), REEL_R, 0.028, R.MAT_DARK, drum,
+            (s * REEL_W / 2 - (0.028 if s > 0 else 0), 0, 0),
+            (0, math.pi / 2, 0), sides=24)
+        for i in range(6):          # spokes / stiffeners on the flange
+            a = TAU * i / 6
+            cheapbox('reel_spoke%d_%d' % (s > 0, i),
+                     (0.022, REEL_R * 0.80, 0.050), R.MAT_DARK, drum,
+                     (s * (REEL_W / 2 + 0.020),
+                      math.cos(a) * REEL_R * 0.44, math.sin(a) * REEL_R * 0.44),
+                     (0, 0, a))
+    # the wound cable itself, a fat rubber drum inside the flanges
+    cyl('reel_wrap', REEL_R * 0.86, REEL_W - 0.070, R.MAT_RUBBER, drum,
+        (-(REEL_W - 0.070) / 2, 0, 0), (0, math.pi / 2, 0), sides=20)
+    # slip-ring housing and the limiting switch [BS]p.5
+    cyl('reel_sliprings', 0.090, 0.140, CAB_STAIN, drum,
+        (REEL_W / 2, 0, 0), (0, math.pi / 2, 0), sides=12)
+    cheapbox('reel_limitsw', (0.070, 0.110, 0.090), R.MAT_DARK, parent,
+             (REEL_W / 2 + 0.170, REEL_Y - 0.240, REEL_Z + 0.150))
+    # the fairlead the cable pays out through - "hose/cable guiding at
+    # water/cable reel" is a listed fitting [BM]p.6
+    for s in (-1, 1):
+        cyl('reel_fairlead%d' % (s > 0), 0.036, 0.240, R.MAT_WORN, parent,
+            (s * 0.170, REEL_Y - 0.640, REEL_Z - 0.300), (math.pi / 2, 0, 0),
+            sides=10)
+    return drum
+
+
+def build_water_reel(parent):
+    """The second, smaller reel: water hose [BS]p.5, 1.5 in x 70 m on the
+    larger machine [BM]p.6. Static - it is small, it is never driven, and a
+    second pivot would cost draw calls this machine would rather spend on the
+    bolting unit."""
+    x, y, z = 0.520, -2.950, 1.240
+    cyl('wreel_core', WREEL_R * 0.44, WREEL_W, R.MAT_DARK, parent,
+        (x - WREEL_W / 2, y, z), (0, math.pi / 2, 0), sides=12)
+    for s in (-1, 1):
+        cyl('wreel_flange%d' % (s > 0), WREEL_R, 0.022, R.MAT_DARK, parent,
+            (x + s * WREEL_W / 2 - (0.022 if s > 0 else 0), y, z),
+            (0, math.pi / 2, 0), sides=18)
+    cyl('wreel_wrap', WREEL_R * 0.84, WREEL_W - 0.050, R.MAT_RUBBER, parent,
+        (x - (WREEL_W - 0.050) / 2, y, z), (0, math.pi / 2, 0), sides=16)
+    cyl('wreel_swivel', 0.040, 0.120, R.MAT_WORN, parent,
+        (x + WREEL_W / 2, y, z), (0, math.pi / 2, 0), sides=10)
+
+
+def build_air_water_package(parent):
+    """Compressor, water booster pump and the wash-down kit on the rear deck.
+
+    [BS]p.5: screw compressor; hydraulic water booster pump 12 bar / 66 l/min;
+    minimum water inlet 2 bar; rig washing kit and BOOT washing kit - a bolter
+    carries a wash hose because the operator's boots are in the mud [R]S4.7.
+    Sizes are NOT SOURCED; these are recognisable boxes of the right kind in
+    the right place, which is what [R]S4.7 asks for.
+    """
+    box('compressor', (0.520, 0.700, 0.480), R.MAT_DARK, parent,
+        (-0.300, -1.900, FRAME_Z1 + 0.250), bevel=0.020)
+    cyl('compressor_recv', 0.150, 0.560, R.MAT_DARK, parent,
+        (-0.300, -1.480, FRAME_Z1 + 0.180), (math.pi / 2, 0, 0), sides=14)
+    box('waterpump', (0.360, 0.420, 0.320), R.MAT_DARK, parent,
+        (0.380, -1.700, FRAME_Z1 + 0.170), bevel=0.018)
+    cyl('waterpump_motor', 0.105, 0.300, R.MAT_CAST, parent,
+        (0.380, -1.480, FRAME_Z1 + 0.170), (math.pi / 2, 0, 0), sides=12)
+    # the wash-down hose, coiled on a hook
+    cyl('washhook', 0.022, 0.180, R.MAT_WORN, parent,
+        (HOOD_HALF + 0.020, -2.400, 1.060), (0, math.pi / 2, 0), sides=8)
+    for i in range(5):
+        torus_ring('washcoil%d' % i, 0.135, 0.016, R.MAT_RUBBER, parent,
+                   (HOOD_HALF + 0.115, -2.400, 1.040 - i * 0.028),
+                   (0, math.pi / 2, 0), maj=16, min_=6)
+
+
+def build_rear_module(root):
+    build_hood(None)
+    build_electrical_cabinet(None)
+    build_cable_reel(root)
+    build_water_reel(None)
+    build_air_water_package(None)
