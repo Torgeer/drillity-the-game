@@ -1124,18 +1124,18 @@ def build_carriage(mast):
     # world matrix, and the machine silently vanishes.
     #
     # The stroke is SOLVED from this file's own geometry, not picked:
-    #   top    = MAST_Z0 + MAST_LEN - 5.60 = 17.78, where the sledge is exported
+    #   top    = MAST_Z0 + MAST_LEN - 5.60 = 17.86, where the sledge is exported
     #   bottom = 4.00, the point at which the drive cap sits on grade.  The tool
     #            mount hangs (0.30 - 4.30) = 4.00 m below the carriage origin,
     #            through pivot:sledge-tilt and slide:hammer.
-    # 13.78 m of hammer travel on a 19.48 m leader, and the 7 m sliding mast
+    # 13.86 m of hammer travel on a 19.56 m leader, and the 7 m sliding mast
     # (dim B) makes up the rest of the published dim E, "max pile length
-    # 18.0 m" [P4] — 13.78 + 7.00 = 20.78 of combined reach against an 18.0 m
+    # 18.0 m" [P4] — 13.86 + 7.00 = 20.86 of combined reach against an 18.0 m
     # pile, which is the clearance a leader rig needs and not slack.
-    CARR_TOP = MAST_Z0 + MAST_LEN - 5.60      # 17.78, the exported pose
+    CARR_TOP = MAST_Z0 + MAST_LEN - 5.60      # 17.86, the exported pose
     CARR_BOT = 4.00                           # drive cap on grade
     c = node(NODE_SLIDE, 'carriage', mast, (0, 0, CARR_TOP))
-    c['travel_m'] = CARR_TOP - CARR_BOT       # 13.78 m
+    c['travel_m'] = CARR_TOP - CARR_BOT       # 13.86 m
     c['axis'] = 'z'
     c['travel_min_m'] = CARR_BOT
     c['travel_max_m'] = CARR_TOP
