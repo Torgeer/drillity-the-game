@@ -79,7 +79,7 @@ import rig  # noqa: E402
 from rig import (box, tube, hose, empty, worklight, finish, reset,  # noqa: E402
                  MAT_PAINT, MAT_DARK, MAT_STEEL, MAT_WORN, MAT_CAST,
                  MAT_RUBBER, MAT_CHROME, MAT_HAZARD,
-                 NODE_PIVOT, NODE_SLIDE)
+                 NODE_PIVOT, NODE_SLIDE, NODE_MOUNT)
 
 TAU = math.tau
 D = math.radians
@@ -738,8 +738,22 @@ def build_carriage(feed, nm):
     25 mm across flats, then a button bit. [A 9.5] flags that the game draws the
     rod round. It is not round. Six flats catch a boom light completely
     differently from a cylinder, and that is most of why this reads as tooling."""
-    car = empty(NODE_SLIDE, nm + '-carriage', feed, (0, 0.07, 0))
+    # THE RUNTIME CONTRACT IS SINGLE-CARRIAGE, AND THIS MACHINE HAS TWO BOOMS.
+    # src/core/gltfRig.js makeDyn() looks up the exact strings `slide:carriage`
+    # and `mount:tool`.  Both booms carried the right number under the wrong
+    # names (`slide:boom-l-carriage`, `slide:boom-r-carriage`, travel_m 2.132),
+    # so `dyn.carriage` and `dyn.toolAnchor` were BOTH null: no tool could be
+    # attached to this machine and no feed could be driven.
+    # Until the contract grows a `carriage[]` / `tool[]` form, the LEFT boom is
+    # the canonical one and carries the names the runtime knows; the right boom
+    # keeps its descriptive name and its own travel_m, so nothing is lost and
+    # a later multi-boom runtime can pick both up.
+    CANON = nm.endswith('-l')
+    car = empty(NODE_SLIDE, 'carriage' if CANON else nm + '-carriage',
+                feed, (0, 0.07, 0))
     car['travel_m'] = HOLE_LEN
+    car['axis'] = 'y'
+    car['boom'] = nm[-1]
     # drifter body: a dark oily casting with its side bolts and accumulator
     box(nm + '-drifter', (DRIFTER_W, DRIFTER_LEN, 0.205), MAT_DARK, car,
         loc=(0, DRIFTER_LEN / 2, 0.085), bevel=0.018)
@@ -771,6 +785,12 @@ def build_carriage(feed, nm):
          loc=(0, DRIFTER_LEN + 0.10, 0.085), rot=(-math.pi / 2, 0, 0), sides=6)
     # button bit: 45 mm, 6 gauge + 3 face buttons, 30 deg gauge angle [A 4.11]
     bit_y = DRIFTER_LEN + 0.10 + ROD_LEN
+    # `mount:tool` — where the game hangs the live bit and the rest of the
+    # string.  On the canonical (left) boom only, for the reason given at the
+    # carriage above.  Placed at the shank end of the rod rather than at the
+    # bit, because the runtime grows its own string DOWN from this node.
+    if CANON:
+        empty(NODE_MOUNT, 'tool', car, (0, DRIFTER_LEN + 0.10, 0.085))
     tube(nm + '-bit', BIT_D / 2, 0.062, MAT_WORN, car,
          loc=(0, bit_y, 0.085), rot=(-math.pi / 2, 0, 0), sides=12)
     for i in range(6):
@@ -907,7 +927,18 @@ def collapse_nodes():
             o.select_set(True)
         bpy.context.view_layer.objects.active = objs[0]
         bpy.ops.object.join()
-        bpy.context.active_object.name = '%s|%s' % (pname, mat)
+        # NAME THE JOINED MESH OUT OF THE RESERVED NAMESPACE.
+        # This used to be '%s|%s' % (pname, mat) with pname the FULL node name,
+        # so it produced meshes called `pivot:boom-l-swing|chrome` and
+        # `slide:boom-l-feed|rawSteel`.  src/core/gltfRig.js index() keys its
+        # maps on the PREFIX — `n.startsWith('pivot:')` — so 38 static meshes
+        # on this machine were published as movable parts, got
+        # `userData.dynamic = true`, were exempted from mergeStatic(), and
+        # polluted the pivots/slides maps with keys like 'boom-l-swing|chrome'.
+        # Only this machine did it; the other eight suffix the material onto a
+        # name that does not start with a reserved prefix.  Match them.
+        short = pname.split(':', 1)[-1] if ':' in pname else pname
+        bpy.context.active_object.name = '%s:%s' % (short, mat)
 
 
 def report_extent():
