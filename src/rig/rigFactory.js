@@ -9220,6 +9220,25 @@ export function createRigSystem(ctx) {
       playBeatCycle(dyn);
       stepSeq(dt);
 
+      /* THE CLIP PLAYER, AND THIS LINE'S POSITION IS THE ARBITRATION.
+         Code drives continuous state — rpm, feed, rake — and everything above
+         has just written it. Clips drive choreography: a rod change breaks the
+         joint, retracts the carriage, swings the carousel, indexes a tube,
+         presents it and makes up, several joints in a fixed relationship over
+         a fixed time.
+
+         Running LAST means a clip blends FROM the value the sim just wrote
+         rather than from a stale bind-time snapshot, which is exactly why this
+         is not a three.js AnimationMixer: PropertyMixer binds once and is out
+         of date the moment code writes the same node, and it cannot bind these
+         names at all — three.js strips ':' from track paths, so `pivot:spindle`
+         becomes `pivotspindle`, and `restoreNames()` then puts the colons back
+         and every track points at a node that no longer exists.
+
+         Only glTF machines carry `dyn.anim`; procedural ones have no clips, so
+         this is a null check on every rig the factory builds itself. */
+      if (dyn.anim) dyn.anim.update(dt);
+
       // ── publish the anchors ─────────────────────────────────────────────
       if (dyn.mastUpper) {
         dyn.mastUpper.getWorldPosition(_v);

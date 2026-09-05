@@ -66,6 +66,8 @@ const P_SLIDE = 'slide:';
 const P_MOUNT = 'mount:';
 const P_AIM = 'aim:';
 
+import { readClips, createAnimator } from './gltfAnim.js';
+
 /**
  * Work-light defaults, for the fields `blender/lib/rig.py:worklight()` does
  * not carry. They are the SAME numbers `rigFactory.js addWorkLight()` uses, so
@@ -73,6 +75,12 @@ const P_AIM = 'aim:';
  * model may override any of them by adding the custom property to the mount.
  */
 const LAMP_DEFAULTS = { colourHex: 0xFFE9C0, coneDeg: 52, rangeM: 24, wattHint: 70 };
+
+/* The animation half. `gltfAnim.js` reads glTF animation clips off the parsed
+   file and returns a per-instance animator. It is imported here rather than
+   left to a caller for the reason this codebase keeps relearning: a capability
+   with no call site is invisible, and `builder()` sat with ZERO call sites
+   while thirteen machines were modelled against it. */
 
 /* ═══════════════════════════════════════════════════════════════════════════
    The system
@@ -493,6 +501,7 @@ export function createGltfRigs(ctx) {
     const kinds = swapMaterials(root, id);
     liftNamedOffMeshes(root, id);      // BEFORE indexing: it changes parents
     const nodes = index(root, id);
+    const clips = readClips(T, gltf, id, say);
     const m = measure(root);
 
     // Bounding box, taken off the mesh rather than quoted (HANDOFF §8E).
@@ -515,6 +524,7 @@ export function createGltfRigs(ctx) {
       id,
       root,
       nodes,
+      clips,
       bytes,
       prims: m.prims,
       tris: m.tris,
@@ -590,10 +600,22 @@ export function createGltfRigs(ctx) {
       // where `-0 * undefined` is NaN. A carriage without BOTH of these does
       // not throw — it writes NaN into a world matrix and the machine silently
       // disappears. Both are set here or `carriage` is not published at all.
+      /* [HIGH, LOW] — the order every procedural builder uses.
+         `rigFactory.js` writes `dyn.carriageRange = [mastH - 1.45, 0.55]` and
+         friends: top of stroke FIRST. This published `[y, y + travel]`, which
+         is low-first, so `setCarriage(u)` ran a Blender carriage backwards —
+         it went down as the sim fed down instead of up. Ordering the two ends
+         explicitly fixes it for both signs.
+
+         `travel_m` is also NEGATIVE on some machines (foundation_bg exports
+         -11.5 for a Kelly that telescopes downward), and the old `travel > 0`
+         guard turned that into `[y, y]` — a carriage with no stroke at all,
+         silently. Any non-zero finite travel is a stroke. */
       const travel = carriage.userData.travel_m;
       const y = carriage.position.y;
-      dyn.carriageRange = (typeof travel === 'number' && travel > 0)
-        ? [y, y + travel] : [y, y];
+      const hasTravel = typeof travel === 'number' && Number.isFinite(travel) && travel !== 0;
+      const far = y + (hasTravel ? travel : 0);
+      dyn.carriageRange = hasTravel ? [Math.max(y, far), Math.min(y, far)] : [y, y];
       dyn.mastHeight = prep.size.y;
       if (typeof travel !== 'number') {
         // No stroke declared, so nothing may bend it either.
@@ -603,6 +625,21 @@ export function createGltfRigs(ctx) {
 
     const toolAnchor = nodes.mounts.get('tool') || nodes.slides.get('carriage');
     if (toolAnchor) dyn.toolAnchor = toolAnchor;
+
+    /* THE ROTARY HEAD DID NOT TURN ON ANY BLENDER MACHINE.
+       Every procedural builder sets `dyn.spindle` and `rigFactory.js` drives it
+       with `rotation.y = cur.spin` each frame. This function never set it, so
+       on a glTF machine the head was indexed, flagged dynamic — and driven by
+       nothing. Nineteen machines, no error, a rotary drill whose rotary does
+       not rotate. */
+    const spindle = nodes.pivots.get('spindle');
+    if (spindle) dyn.spindle = spindle;
+
+    /* The clip player. Code drives continuous state (rpm, feed); clips drive
+       choreography (a rod change). They overlap on a small known set and are
+       settled by ordering plus a per-channel blend FROM THE LIVE VALUE, so no
+       driver in rigFactory.js needs a guard. */
+    dyn.anim = createAnimator(T, prep.clips, root, { say });
 
     return dyn;
   }
