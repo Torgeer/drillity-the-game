@@ -235,16 +235,40 @@ identical run was stopped mid-read and produced **zero** files.
 
 ## 6. What was in flight when work stopped
 
-**None of this is finished.** Re-brief a fresh agent per file. Partial edits are
-committed at `d2d5baf`, so `git diff` against `ee8aaa2` shows what moved.
+**Paused 2026-09-05.** Thirteen agents were stopped mid-task and everything on
+disk was committed at `bf56a83` / `395a61c` so nothing was lost. **71 commits
+landed this session**, `05fe94e..395a61c`, all pushed.
 
-| file(s) | task | last position |
+`npm run check` passes on this tree — but that only proves the DATA is sound.
+None of the in-flight source below was reviewed or verified by its own author, so
+**read the diff before trusting any of it**: a stop lands wherever it lands, and
+half of these authors were mid-thought.
+
+| file | task | last position, in the author's own words |
 |---|---|---|
-| `world/geology.js` | borehole badge, bit scale, strata | *"Now the computed exaggeration in applyHoleDiameter()"* |
-| `ui/**`, `.hudqa/` | DOM leak, overlaps, false numbers | *"40 → 38, slider/strip/pit families gone. Two root causes left — the caption's text overflows its 11px row, and hiding the dock rows let the sliders slide up under the card."* |
-| `core/renderer.js` | band inset, seam, fps mystery | **found a real harness bug:** *"`tools/shoot.mjs:899` waits 1.5 s; warm-up takes 60–100 s"* — see §9.4 |
-| `world/terrain.js`, `core/env.js` | archetype review, volumetric beams, deck | just started |
-| `rig/rigFactory.js`, `rig/tools.js`, `core/assets.js` | build from the references | queued behind §5 |
+| `world/geology.js` | drill string **whirl** — circular precession coupled to RPM, bounded by the annulus, replacing the planar `sin(sy*0.9 + uTime*9.0)` wobble | *"Now the CFG constants, geometry, and the per-frame drive"* — a commit `b732f2c` landed first, so the shader is likely in and the driver is not |
+| `core/env.js` | collar alignment, the seam's two suns | *"Baseline measurement first, before touching anything"* — treat any diff here as untested |
+| `sim/vfx.js`, `sim/drilling.js` | jet grouting | **found a real bug at the moment it was stopped:** *"`jetBar` is published during the pre-drill too, so the spoil was drawn on the wrong pass"*. Unclear whether the fix landed |
+| `ui/**` | HUD leak, false results numbers | *"Both remaining failures trace to one cross-file cause"* — the cause is not written down anywhere |
+| `rig/tools.js` | tooling detail from the OEM catalogues | *"make the shop-card framing problem fixable with a one-line change in the file I don't own"* |
+| `core/gltfRig.js` | glTF loader for the Blender pipeline | mid-pass |
+| `research/rigs/tools-bits-carbide.md`, `tools-rods-pipe.md` | +2,545 lines, both mid-write | carbide was *"drafting section 8, then the domain-truth warnings"* |
+
+### The three UX efforts the owner asked for, and where they stand
+
+1. **Look-ahead uncertainty in the section** — ground below the bit must read as
+   uncertain and sharpen as the bit arrives, with `oreConfidence` (already on
+   every contract) buying clarity. **Not started**; blocked on `geology.js`. The
+   hooks are `depthAt(vec2 wp)` and `uDepth` — `depthAt(wp) - uDepth` is the
+   metres-ahead field and is the whole input.
+2. **A depth ruler down the band edge**, bit as a moving cursor, the numeric
+   depth readout deleted once it lands (**not before** — do not leave the player
+   with neither). Plus the bore-exaggeration tag: 152 mm is drawn at 1.086 m,
+   **7.1x**, and it is undeclared. **Not started.** *It cannot start until the
+   collar offset below is fixed* — a ruler measuring from a collar 62 px away
+   from the hole is a precision instrument printing wrong numbers.
+3. **Thumb reach** — **the instrument is done**, `tools/checkreach.mjs`,
+   `npm run check:reach`. The fix is not. See §10.
 
 ---
 
@@ -422,6 +446,56 @@ has a double-weighted domain-truth axis and a measured HUD-restraint gate.
 ---
 
 ## 10. Open defects — nobody is working on these
+
+### Found 2026-09-05, all measured, none fixed
+
+**The primary action button cannot be pressed by a right thumb.** Identical on
+all five methods: `.actionbtn` centre (334, 795) is HARD for the right hand,
+`.vsl` centre (54, 795) is HARD for the left. Both bottom corners. This is not
+the "bottom third is fine" rule failing at the edges — it is that rule being
+wrong. The thumb sweeps an **arc** about the joint at its base, so the corner
+directly *under* the thumb is among the hardest places on the screen. Hoober's
+summary of 1,300+ observed users: *"only a third of the screen is truly
+effortless territory: at the bottom, on the side opposite the thumb."*
+Two-thirds of one-handed grips are the right hand. Gate: `npm run check:reach`
+(needs `npm run dev`). Fix belongs in `ui/screens/site.js` + `styles.css`.
+
+**The two bands do not draw the same hole.** `collarOffsetPx` = **62.44 px** —
+the borehole in the surface band and in the section band are **16.0 % of the
+stage width apart**, which contradicts `GAMEDESIGN.md` §1 in writing.
+`groundAtSeamPx` = **-22.81 px**. Both are renderer-owned and independently
+fixable. **Fix these before the depth ruler**, not after.
+
+**A rod changes size by 2.81x crossing the seam** — 54.58 px/m above against
+19.42 below. Genuinely contested: `geology.js` is authored against 19.4 px/m
+and rejects a camera more than 35 % off it, so the honest fix may be re-framing
+the surface hero camera, which is an art decision. Quantify before touching.
+
+**The seam's brightness step is content, not the shader.** Of a 95–107 luma
+step the seam lip contributes 0.27–0.36 and the vignette is continuous to
+within 0.5–5.4 %. **Do not reopen that shader.** The cause is in `core/env.js`:
+the bands are lit by different suns (**47–71 degrees apart in azimuth**,
+`#ffe0a6` warm above vs `#e8e5dc` neutral below) and `sectionScene.fog` is
+**null** against exp2 fog above it, so there is no aerial perspective below the
+line at all. A cross-section is a diagram and may legitimately be lit
+differently — but 47–71 degrees is drift, not a decision anybody made.
+
+**`m07-core` is over its draw-call budget** — surface 82 against 80. Only
+visible once the harness started grading WARM numbers; every earlier pass was
+reading a cold frame. Real overrun.
+
+**`crawler-lite.glb` is not a GLB.** It is a **1229-byte SPA fallback page** —
+the dev server answers a 404 with `index.html`, the loader parses it, fails, and
+falls silently through to the procedural builder. Nothing looks broken, which is
+exactly why it would have rotted. Fourth instance of this same silent-fallback
+pattern found in the tree this week (`beed9c9`, `36d1b36`, `11b3016`).
+
+**SMAA-everywhere was justified by a metric that measured the wrong thing.**
+The "-68.1 % hard edges" figure was an edge metric reading **global blur**: a
+supersample softens gravel and dust exactly as much as silhouettes. Paired
+re-measurement put every AA difference an order of magnitude inside instrument
+noise. LOW now honours its declared `aa: 'none'`; MEDIUM/HIGH keep SMAA.
+
 
 1. **`ui/`** — the DOM leak, mesh overlays, 12 px touch target, false results
    numbers, dead volume sliders (§3, §8A).
