@@ -380,9 +380,35 @@ function installQABridge() {
 
       const data = ctx.data;
       if (data?.makeContract) {
-        const regionId = region || data.REGIONS?.[0]?.id || 'nordic';
+        /* SEARCH A REGION THAT ACTUALLY OFFERS THE METHOD.
+           This used to take REGIONS[0] and try forty times. A method that is
+           not offered in that one region could never be generated, so five of
+           the six modes a reviewer asks for fell through to the stub below —
+           and the stub was silent. */
+        /* ASK AT A LEVEL WHERE THE METHOD EXISTS.
+           This asked at `max(player.level, 20)`. Measured unlock levels:
+           rockbolt 29, driven-pile 33, tunnel-jumbo 36, hdd 38,
+           raise-boring 52. So `methodsForRegion(id, 20)` excluded all five,
+           the region search found nowhere that offered them, and
+           `makeContract` could never generate one — which is the whole reason
+           five of six reviewed methods reached the stub. The three that DID
+           work are exactly the three at or below 20: dth 10, core 18,
+           cable-tool 3.
+
+           A harness reviewing a method has to ask at a level where the method
+           is playable. */
+        const qaLevel = data.MAX_LEVEL || 60;
+        let regionId = region || data.REGIONS?.[0]?.id || 'nordic';
+        if (method && !region && data.methodsForRegion) {
+          const lvl = qaLevel;
+          const home = (data.REGIONS || []).find((r) => {
+            try { return data.methodsForRegion(r.id, lvl).some((m) => m.id === method); }
+            catch (e) { return false; }
+          });
+          if (home) regionId = home.id;
+        }
         for (let i = 0; i < 40 && !contract; i++) {
-          const c = data.makeContract(regionId, Math.max(ctx.state.player.level, 20), ctx.rand);
+          const c = data.makeContract(regionId, qaLevel, ctx.rand);
           if (!c) break;
           if (method && c.methodId !== method) continue;
           if ((c.targetDepth || 0) < wantTarget) continue;
@@ -391,8 +417,14 @@ function installQABridge() {
         // Nothing generated deep enough for this method — take any contract of
         // the right method and deepen it rather than falling back to a stub.
         if (!contract) {
-          for (let i = 0; i < 40 && !contract; i++) {
-            const c = data.makeContract(regionId, Math.max(ctx.state.player.level, 20), ctx.rand);
+          /* 40 tries was not enough. `makeContract()` picks a method by weight
+             from everything the region offers, so a method competing with
+             twenty others needs far more draws than that to come up — which is
+             why five of six reviewed methods reached the stub. Real contracts
+             beat a stub every time: they carry a true application, archetype,
+             ground column and difficulty. */
+          for (let i = 0; i < 400 && !contract; i++) {
+            const c = data.makeContract(regionId, qaLevel, ctx.rand);
             if (c && (!method || c.methodId === method)) contract = c;
           }
           if (contract) contract.targetDepth = Math.max(contract.targetDepth || 0, wantTarget);
@@ -400,11 +432,51 @@ function installQABridge() {
       }
 
       if (!contract) {
+        /* THE STUB IS THE REVIEW INSTRUMENT LYING TO THE REVIEWER.
+           It hardcoded `holeDia: 152` and `applicationId: 'water-well'` for
+           EVERY method. Measured: that is outside the method's own
+           `holeDiaRange` for raise-boring [600,6000], tunnel-jumbo [32,64],
+           rockbolt [28,64] and driven-pile [200,1000] — so `holeR`, and with
+           it `boreExag`, the annulus, the casing, the pilot and every boulder
+           (sized as a multiple of holeR) were wrong in five of six captures.
+           On a 152 mm "raise" the pilot stem clamps to 228 mm and gets drawn
+           22 % WIDER than the raise it sits inside.
+
+           It also generated a water-well stratigraphy for a tunnel heading,
+           and left `archetype` null so terrain.js logged a missing archetype
+           and dressed the site from a fallback.
+
+           Every number below is now derived from the method's own row, and it
+           SAYS it is a stub. ASTRA.md §8: a silent fallback that works is the
+           most expensive kind of failure — and this one lived inside the
+           instrument used to review everything else. */
+        const mid = method || 'dth';
+        const m = data?.METHODS?.find?.((x) => x.id === mid) || null;
+        const dia = m
+          ? Math.round(m.nominalDia
+            || ((m.holeDiaRange?.[0] || 100) + (m.holeDiaRange?.[1] || 200)) / 2)
+          : 152;
+        const app = m?.applications?.[0] || 'water-well';
+        const rid = region || 'nordic';
+        let arch = null;
+        try { arch = data?.archetypesFor?.(mid, rid, app)?.[0] || m?.archetypes?.[0] || null; }
+        catch (e) { arch = m?.archetypes?.[0] || null; }
+
+        if (typeof console !== 'undefined') {
+          console.warn(`[qa] no generated contract for "${mid}" — using a STUB. `
+            + `Derived from the method row: Ø${dia} mm, application "${app}", `
+            + `archetype "${arch || 'none'}". This is not a contract the board can `
+            + 'deal, so difficulty, payout and ground are not representative.'
+            + (m ? '' : ` And "${mid}" is not in data.js METHODS at all.`));
+        }
+
         contract = {
-          id: 'qa-demo', client: 'QA Harness', regionId: region || 'nordic',
-          methodId: method || 'dth', applicationId: 'water-well',
-          targetDepth: wantTarget, holeDia: 152, holes: 1,
+          id: 'qa-demo', client: 'QA Harness', regionId: rid,
+          methodId: mid, applicationId: app, archetype: arch,
+          sitePlane: arch && data?.getArchetype?.(arch)?.plane || 'surface',
+          targetDepth: wantTarget, holeDia: dia, holes: 1,
           payout: 12000, deadlineHours: 24, difficulty: 2, requiredCerts: [],
+          __stub: true,
         };
       }
 
@@ -420,6 +492,10 @@ function installQABridge() {
         targetDepth: contract.targetDepth,
         seed: 1337,
         difficulty: contract.difficulty ?? 2,
+        // The stub used to omit these, so the strata were generated for a
+        // water well whatever method was being reviewed.
+        methodId: contract.methodId,
+        archetype: contract.archetype || null,
       });
       ctx.rig?.setMethod?.(contract.methodId);
       ctx.sim?.startHole?.(contract);
