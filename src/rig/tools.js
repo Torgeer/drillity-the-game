@@ -3584,23 +3584,96 @@ export function buildCasingShoe(THREE_, ctx, opts) {
   const ro = mm(odMm) * 0.5;
   const ri = ro - mm(wallMm);
   const L = mm(240);
+  const style = opts.style || 'carbide';
+  /* OVERCUT. A shoe has to cut a hole the casing can follow, so it stands
+     proud of the casing OD — and by how much is published. Boart Longyear's
+     Design Z and C carbide shoes: 88.9 -> 95, 114.3 -> 125, 133 -> 145,
+     152.4 -> 165, 177.8 -> 185, 203 -> 210, 219.1 -> 225, 254 -> 265, i.e.
+     +6 to +13 mm on diameter and NOT a constant fraction. A plain drive shoe
+     is a different animal and barely oversize at all: the DCDMA sizes run
+     AW 57.1 -> 59.56, NW 88.9 -> 91.82, HW 114.3 -> 117.48, PW 139.7 ->
+     143.51, i.e. +2.3 to +3.8 mm. This was a flat +2 %, which on a 168 mm
+     casing is 3.4 mm — a carbide shoe cutting a plain shoe's clearance. */
+  // Sourced rows: 88.9, 114.3, 133, 152.4, 177.8, 203, 219.1, 254. The rest
+  // (101.6, 139.7, 168.3, 193.7, 244.5) are interpolated between neighbours —
+  // Boart Longyear does not publish them.
+  const SHOE_OD = [[88.9, 95], [101.6, 110], [114.3, 125], [133, 145], [139.7, 152],
+    [152.4, 165], [168.3, 178], [177.8, 185], [193.7, 202], [203, 210],
+    [219.1, 225], [244.5, 255], [254, 265]];
+  let shoeOd = odMm + (style === 'plain' ? 3.2 : 8);
+  if (style !== 'plain') {
+    for (const r of SHOE_OD) { if (Math.abs(odMm - r[0]) < 3) { shoeOd = r[1]; break; } }
+  } else {
+    shoeOd = odMm + clampv(odMm * 0.028, 2.3, 3.8);
+  }
   const g = new T.Group();
   g.name = 'casing-shoe';
   const steel = wearMaterial(ctx, 'rawSteel', wear * 0.6);
   const worn = material(ctx, 'wornSteel');
+  const btnSeg = low ? 7 : 10;
+
+  /* The carbide cuts, the steel follows — same rule as a bit. The shoe ring is
+     built UNDER the cutting diameter and the inserts stand proud of it, and it
+     is scrapped when they no longer do. */
+  const overMm = style === 'plain' ? 0 : clampv((shoeOd - odMm) * 0.34, 1.5, 4.5);
+  const ringOd = shoeOd - overMm;
+  const ringR = mm(ringOd) * 0.5 - mm(overMm * 0.55) * wear;
+  const cutR = mm(shoeOd - (shoeOd - ringOd) * 1.25 * wear) * 0.5;
+  // Shoe ID is at or inside the casing ID: the shoe is thickened inward, so
+  // nothing coming back up the annulus catches on a step.
+  const shoeIr = ri * (odMm >= 150 ? 0.955 : 0.985);
+  const shoeLen = mm(clampv(odMm * 0.42, 60, 120));
+
   part(T, g, pipeGeometry(T, { od: ro * 2, id: ri * 2, length: L, seg: seg }), steel);
+  // Weld prep: the casing is chamfered 30 degrees onto the shoe's welding
+  // shoulder, with a 2-3 mm root gap — that is the Symmetrix/Elemex procedure
+  // for a shoe welded inside the casing, and the joint every shoe shows.
   part(T, g, G.lathe(T, [
-    [ro * 1.02, -L + mm(70)], [ro * 1.02, -L], [ri * 0.97, -L], [ri * 0.97, -L + mm(70)],
+    [ringR, -L + shoeLen], [ringR, -L], [shoeIr, -L],
+    [shoeIr, -L + shoeLen * 0.55], [ri * 0.995, -L + shoeLen],
   ], seg, true), worn, { name: 'shoe-ring' });
-  studFace(T, ctx, g, ringLayout({
-    count: Math.max(8, Math.round(odMm / 16)), radius: (ro * 1.01 + ri) * 0.5,
-    y: -L - mm(1), tilt: Math.PI, dia: mm(10), kind: 'spherical',
-  }), { wear: wear, seg: low ? 7 : 10 });
-  part(T, g, weldBead(T, ro * 1.004, mm(3.6), low ? 18 : 30), worn, { p: [0, -L + mm(68), 0], cast: false });
+
+  if (style !== 'plain') {
+    /* Two rows, as the Boart Longyear shoes carry them: a gauge row on the OD
+       corner that sets the hole, and a face row across the toe that does the
+       cutting. Insert types offered on the same body are hemispherical,
+       ballistic, octagonal, three-face scraping and blade; the hemispherical
+       is the general-purpose one. Counts per size are NOT published, so these
+       follow the same carbide pitch the ring bits use. */
+    const kind = opts.insert || 'spherical';
+    const gDia = mm(clampv(odMm * 0.075, 8, 16));
+    const fDia = mm(clampv(odMm * 0.065, 7, 14));
+    const gTilt = 62 * DEG;
+    const gWear = clamp01(wear * 1.25);
+    // Include the washout lift, or the shoe measures OVER its quoted cut at
+    // exactly the wear level where it should be measuring under.
+    const gLift = gDia * 0.30 * clamp01((wear - 0.42) / 0.58);
+    const reach = buttonReach(T, { dia: gDia, kind: kind, tilt: gTilt, wear: gWear, seg: btnSeg })
+      + gLift * Math.sin(gTilt);
+    const nG = Math.max(6, Math.round(odMm / 22));
+    const layout = ringLayout({
+      count: nG, radius: cutR - reach, y: -L + gDia * 0.30,
+      tilt: gTilt, dia: gDia, kind: kind, gauge: true, phase: 0.2,
+    }).map((b) => Object.assign(b, { even: true }));
+    layout.push.apply(layout, ringLayout({
+      count: nG, radius: (ringR + shoeIr) * 0.5, y: -L - mm(0.5),
+      tilt: Math.PI, dia: fDia, kind: kind, phase: 0.2 + Math.PI / nG,
+    }));
+    studFace(T, ctx, g, layout, { wear: wear, seg: btnSeg, bodyMat: worn });
+  }
+  // The bead sits on the casing, which is inside the shoe: it must not be the
+  // widest thing on the tool or it, and not the carbide, sets the hole size.
+  part(T, g, weldBead(T, ro * 0.998, mm(2.6), low ? 18 : 30), worn,
+    { p: [0, -L + shoeLen + mm(2), 0], cast: false });
+
   return finalise(T, g, {
     id: 'casing-shoe', family: 'Casing & Overburden Tools / Casing Shoes & Drive Caps',
     name: 'Drillity Casing Shoe ' + odMm + ' mm',
-    odMm: odMm, wallMm: wallMm, lengthMm: 240, material: 'S355J2, carbide-faced',
+    odMm: odMm, wallMm: wallMm, lengthMm: 240, style: style,
+    shoeOdMm: Math.round(shoeOd * 10) / 10,
+    cutDiameterMm: style === 'plain' ? undefined : Math.round(cutR * 2000 * 10) / 10,
+    overcutMm: Math.round((shoeOd - odMm) * 10) / 10,
+    material: 'S355J2, carbide-faced',
     method: 'overburden', priceEur: Math.round(210 + odMm * 2.4),
   }, opts);
 }
@@ -7778,10 +7851,29 @@ export function buildGuideTube(THREE_, ctx, opts) {
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /** Split-tube friction bolt sizes, from over 450 recorded pull tests. */
+/*
+ * Split sets, off the maker's tables.
+ *
+ * `slotMm` is the width of the longitudinal slot in the FORMED tube, and it is
+ * the feature that identifies the bolt: 13 mm (1/2 in) on a 33, 16-17 mm
+ * (5/8 in) on a 39, 20 on a 42, 25 (1 in) on a 47 — a slot/OD ratio climbing
+ * from 0.39 to 0.53. The slot runs the full length at uniform width; it is NOT
+ * wider at the collar. The 46 mm row is interpolated from the 47: the DSI
+ * table's 46 row appears column-shifted and could not be trusted.
+ *
+ * `taperMm` / `tipMm` are the swaged leading end — 60-65 mm long, closing to
+ * 28 / 30 / 38 mm — across which the slot itself pinches to about 2 mm.
+ * `wireMm` is the collar ring, which is a hoop of ROUND WIRE (6 mm up to 42,
+ * 8 mm on 46/47) welded on 3-8 mm back from the tube end, with its own narrow
+ * 5-7 mm gap straddling the much wider tube slot. It is not a flat washer.
+ */
 const FRICTION_BOLT = {
-  33: { minLenM: 0.9, maxLenM: 2.4, avgT: 10.9, minT: 7.3,  bitMm: 33.0, bitIn: '1.30' },
-  39: { minLenM: 0.9, maxLenM: 3.0, avgT: 12.7, minT: 9.1,  bitMm: 38.1, bitIn: '1.50' },
-  46: { minLenM: 0.9, maxLenM: 3.6, avgT: 16.3, minT: 13.6, bitMm: 45.0, bitIn: '1.77' },
+  33: { minLenM: 0.9, maxLenM: 2.4, avgT: 10.9, minT: 7.3,  bitMm: 33.0, bitIn: '1.30',
+    slotMm: 13, wallMm: 2.3, taperMm: 60, tipMm: 28, wireMm: 6, setbackMm: 3 },
+  39: { minLenM: 0.9, maxLenM: 3.0, avgT: 12.7, minT: 9.1,  bitMm: 38.1, bitIn: '1.50',
+    slotMm: 17, wallMm: 2.3, taperMm: 65, tipMm: 30, wireMm: 6, setbackMm: 3 },
+  46: { minLenM: 0.9, maxLenM: 3.6, avgT: 16.3, minT: 13.6, bitMm: 45.0, bitIn: '1.77',
+    slotMm: 24, wallMm: 3.0, taperMm: 65, tipMm: 38, wireMm: 8, setbackMm: 8 },
 };
 
 /**
@@ -7808,12 +7900,16 @@ export function buildFrictionBolt(THREE_, ctx, opts) {
   const steel = wearMaterial(ctx, 'wornSteel', wear);
 
   const ro = mm(odMm) * 0.5;
-  const wall = mm(odMm >= 46 ? 3.0 : 2.3);
+  const wall = mm(fb.wallMm);
   const ri = ro - wall;
-  // The slot narrows as the bolt is driven — a slot closed to about 1.6 mm
-  // means full rock-to-metal contact, and that is what `wear` shows here:
-  // an installed bolt is a bolt whose slot has shut.
-  const slotW = mm(lerp(14, 3.5, wear));
+  /* Slot closure is arithmetic, not a guess: driving an OD into a smaller hole
+     takes pi x (OD - hole) out of the circumference. A 39 into a 38 mm hole
+     closes 17 -> 13.9 mm; into 36 -> 7.6; into 35 -> 4.4. Full rock-to-metal
+     contact is at about 1.6 mm. So the bit size the bolt is sold against sets
+     the driven width, and `wear` here reads as "how far in it is". */
+  const holeMm = opts.holeMm || fb.bitMm;
+  const drivenMm = Math.max(1.6, fb.slotMm - Math.PI * Math.max(0, odMm - holeMm));
+  const slotW = mm(lerp(fb.slotMm, drivenMm, wear));
   const half = Math.asin(clampv(slotW * 0.5 / ro, 0, 0.6));
 
   // ── the slotted barrel ─────────────────────────────────────────────────
@@ -7822,20 +7918,32 @@ export function buildFrictionBolt(THREE_, ctx, opts) {
     rIn: ri, rOut: ro, a0: half, a1: TAU - half, h: barrelL, seg: seg,
   }), galv, { p: [0, -barrelL - mm(110), 0], name: 'barrel' });
 
-  // ── swaged nose: the leading end is tapered so it starts in the hole ────
-  const noseL = mm(110);
+  /* Swaged nose. 60-65 mm long, closing to 28/30/38 mm across the flats, and
+     the slot pinches to about 2 mm over it — the swage squeezes the tube shut
+     as well as down, which is what lets the bolt start in an undersize hole. */
+  const noseL = mm(fb.taperMm);
+  const tipR = mm(fb.tipMm) * 0.5;
+  const tipHalf = Math.asin(clampv(mm(2) * 0.5 / tipR, 0, 0.6));
   part(T, g, arcSector(T, {
-    rIn: ri * 0.72, rOut: ro * 0.80, a0: half * 1.6, a1: TAU - half * 1.6, h: noseL, seg: seg,
+    rIn: tipR - wall, rOut: tipR, a0: tipHalf, a1: TAU - tipHalf, h: mm(18), seg: seg,
   }), galv, { p: [0, -L, 0], name: 'nose' });
   part(T, g, G.lathe(T, [
-    [ri, 0], [ro, 0], [ro * 0.80, -noseL], [ri * 0.72, -noseL],
-  ], seg, true), galv, { p: [0, -L + noseL, 0], name: 'nose-taper', cast: false });
+    [ri, 0], [ro, 0], [tipR, -noseL], [tipR - wall, -noseL],
+  ], seg, true), galv, { p: [0, -L + noseL + mm(18), 0], name: 'nose-taper', cast: false });
 
-  // ── collar: the welded ring flange the plate bears on ──────────────────
-  part(T, g, G.lathe(T, [
-    [ri, 0], [ro * 1.44, 0], [ro * 1.44, -mm(12)], [ro, -mm(20)], [ri, -mm(20)],
-  ], seg, true), galv, { p: [0, -mm(96), 0], name: 'collar-ring' });
-  part(T, g, weldBead(T, ro * 1.05, mm(3.4), low ? 14 : 26), steel, { p: [0, -mm(118), 0], cast: false });
+  /* Collar ring: a hoop of round wire welded on a few millimetres back from
+     the tube end, with its own 5-7 mm gap straddling the tube slot. It is what
+     the plate bears on, and it is NOT a flat flange — the previous lathe
+     collar was a washer that no split set has ever carried. */
+  const wireR = mm(fb.wireMm) * 0.5;
+  const ringGapHalf = Math.asin(clampv(mm(6) * 0.5 / (ro + wireR), 0, 0.5));
+  const ringGeo = G.torus(T, ro + wireR * 0.35, wireR, 6, low ? 16 : 26, TAU - ringGapHalf * 2);
+  ringGeo.rotateX(Math.PI / 2);
+  part(T, g, ringGeo, galv, {
+    p: [0, -mm(fb.setbackMm), 0], r: [0, ringGapHalf, 0], name: 'collar-ring',
+  });
+  part(T, g, weldBead(T, ro * 1.01, mm(2.0), low ? 14 : 26), steel,
+    { p: [0, -mm(fb.setbackMm) - wireR, 0], cast: false });
   // driven end: the tube mushrooms under the drifter, and the galvanising is
   // knocked off it first. That bright ring is how an installed bolt reads.
   part(T, g, arcSector(T, {
@@ -7846,17 +7954,20 @@ export function buildFrictionBolt(THREE_, ctx, opts) {
   ], seg, true), steel, { p: [0, 0, 0], cast: false, name: 'anvil-face' });
 
   // ── the domed plate that comes on the bolt ─────────────────────────────
+  // 150 x 150 x 4 mm domed plate, 0.7 kg — the one that ships with the bolt.
   const plateS = mm(150);
   part(T, g, G.lathe(T, [
-    [ro * 1.02, -mm(20)], [plateS * 0.46, -mm(42)], [plateS * 0.46, -mm(50)], [ro * 1.02, -mm(30)],
+    [ro * 1.02, -mm(20)], [plateS * 0.46, -mm(42)], [plateS * 0.46, -mm(46)], [ro * 1.02, -mm(26)],
   ], low ? 12 : 20, true), galv, { name: 'plate-dome' });
-  part(T, g, G.box(T, plateS, mm(6), plateS), galv, { p: [0, -mm(48), 0], name: 'plate' });
+  part(T, g, G.box(T, plateS, mm(4), plateS), galv, { p: [0, -mm(46), 0], name: 'plate' });
 
   return finalise(T, g, {
     id: 'friction-bolt',
     family: 'Rock Bolts, Soil Nails & Cable Bolts / Friction Bolts',
     name: 'Drillity Boltline Friction Bolt ' + odMm + ' mm x ' + Math.round(L * 1000) + ' mm',
     odMm: odMm, lengthMm: Math.round(L * 1000),
+    slotMm: fb.slotMm, drivenSlotMm: Math.round(drivenMm * 10) / 10,
+    wallMm: fb.wallMm, collarWireMm: fb.wireMm,
     lengthRangeM: fb.minLenM + '-' + fb.maxLenM,
     steelCapacityAvgT: fb.avgT, steelCapacityMinT: fb.minT,
     drillBitMm: fb.bitMm, drillBitIn: fb.bitIn,
