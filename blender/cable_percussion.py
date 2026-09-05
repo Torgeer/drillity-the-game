@@ -300,7 +300,12 @@ SHEAVE_R    = 0.200   # [D] 400 mm - jointly sourced by the pair above; the
                       # drilling literature: it is an OIL-RIG CROWN BLOCK and is
                       # about ten times too large for this machine.)
 SHEAVE_W    = 0.070   # [NS] across the groove cheeks
-HEAD_Z0     = 5.330   # [NS] fabricated head casting, bottom
+HEAD_Z0     = 5.720   # [NS] fabricated head casting, bottom.  IT SITS ABOVE
+                      # THE SHEAVE, not around it: [GA] dimensions the main
+                      # sheave on the casting's FRONT FACE, so the casting is
+                      # where the legs converge and the sheave is bracketed off
+                      # it lower down.  At 5.330 the casting engulfed its own
+                      # sheave, which a render showed in one frame.
 HEAD_Z1     = 6.280   # [NS] and top; the leg ends stand proud above it, which
                       # is what puts [ST]'s 6.650 operating height above the
                       # 5.200 working height under the sheaves.  [GA]: "the head
@@ -752,11 +757,17 @@ def build(out_path):
     # what is certain is that it carries TWO sheaves and a strong-point.
     A(R.box('head', (0.25, 0.34, HEAD_Z1 - HEAD_Z0), R.MAT_CAST,
             loc=(0, 0.085, (HEAD_Z0 + HEAD_Z1) / 2), bevel=0.016))
+    # the hanger that carries the tooling sheave block off the casting's back -
+    # without it that block floated 0.6 m below the head on nothing at all
+    A(R.box('sheave2_hanger', (0.070, 0.075, HEAD_Z0 - SHEAVE2_Z + 0.10),
+            R.MAT_STEEL,
+            loc=(0, SHEAVE2_Y - 0.045, (HEAD_Z0 + SHEAVE2_Z - 0.10) / 2 + 0.05),
+            bevel=0.005))
     for i in range(3):
         p = leg_point(i, 1.0 - (OP_HEIGHT - HEAD_Z1 + 0.10) / OP_HEIGHT)
         A(disc('headpin%d' % i, 0.022, LEG_W + 0.14, R.MAT_STEEL, p,
                'Y' if i == 0 else 'X', sides=6))
-    A(disc('head_cap', 0.17, 0.030, R.MAT_DARK, (0, 0, OP_HEIGHT - 0.015),
+    A(disc('head_cap', 0.105, 0.026, R.MAT_DARK, (0, 0, OP_HEIGHT - 0.013),
            'Z', sides=12))
 
     # THE STRONG-POINT.  [CON], verbatim: "The upper snatch block would be
@@ -784,9 +795,17 @@ def build(out_path):
     A(disc('sheave_axle', 0.026, SHEAVE_W + 0.11, R.MAT_STEEL,
            (0, SHEAVE_R, SHEAVE_Z), 'X', sides=8))
     for s in (-1, 1):
-        A(R.box('sheave_cheek%d' % s, (0.014, 0.40, 0.44), R.MAT_CAST,
-                loc=(s * (SHEAVE_W / 2 + 0.013), SHEAVE_R, SHEAVE_Z - 0.01),
-                bevel=0.005))
+        # the cheeks bracket DOWN from the casting to carry the sheave clear of
+        # it, which is what leaves [ST]'s 5.200 m of clear height underneath
+        # NARROW STRAPS, not plates.  At 0.40 m fore-and-aft the cheeks were as
+        # deep as the sheave is wide and buried it completely - the crown read as
+        # a blank slab with a rope disappearing behind it.  A strap a third of
+        # that leaves the rim showing front and back, which is the whole point
+        # of a sheave: you can see that it is a wheel and that it turns.
+        A(R.box('sheave_cheek%d' % s, (0.014, 0.135, HEAD_Z0 + 0.06 - UNDER_SHEAVE),
+                R.MAT_CAST,
+                loc=(s * (SHEAVE_W / 2 + 0.013), SHEAVE_R,
+                     (HEAD_Z0 + 0.06 + UNDER_SHEAVE) / 2), bevel=0.005))
     A(R.box('sheave_guard', (SHEAVE_W + 0.08, 0.10, 0.030), R.MAT_CAST,
             loc=(0, SHEAVE_R - 0.02, UNDER_SHEAVE + 0.020), bevel=0.005))
 
@@ -811,8 +830,8 @@ def build(out_path):
     # [DUK], not the 16 mm drill line - two ropes of visibly different thickness
     # on one machine.
     for s in (-1, 1):
-        A(R.box('sheave2_cheek%d' % s, (0.012, 0.26, 0.28), R.MAT_CAST,
-                loc=(s * 0.038, SHEAVE2_Y, SHEAVE2_Z), bevel=0.004))
+        A(R.box('sheave2_cheek%d' % s, (0.012, 0.095, 0.30), R.MAT_CAST,
+                loc=(s * 0.038, SHEAVE2_Y, SHEAVE2_Z + 0.02), bevel=0.004))
     sheave2 = R.empty(R.NODE_PIVOT, 'sheave-tooling',
                       loc=(0, SHEAVE2_Y, SHEAVE2_Z))
     weld([disc('sheave2_rim', SHEAVE2_R, 0.046, R.MAT_CAST, (0, 0, 0), 'X',
