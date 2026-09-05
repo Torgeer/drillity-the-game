@@ -24,10 +24,39 @@
  */
 import { FACTS } from './catalog.js';
 
-const SYSTEMS = [
-  'Renderer', 'Materials', 'Environment', 'Geology', 'Terrain',
-  'Rig assembly', 'Drill simulation', 'Particles', 'Progression', 'Audio', 'Interface',
-];
+/**
+ * WHAT THE CAPTION UNDER THE BAR SAYS — and why it used to be a lie.
+ *
+ * This was an array of eleven names indexed by the progress fraction:
+ *
+ *     const idx = Math.floor(p * SYSTEMS.length);
+ *
+ * so the caption was a restatement of the percentage wearing a report's
+ * clothes. At 82 % it read "Audio" whatever was actually happening — and what
+ * was actually happening, for 90 % of boot, was the GPU compiling shaders, a
+ * phase that had no name in that list at all. `ctx.bootPhase`, written by
+ * main.js beside the number, is the real one; these are only its display
+ * spellings, and a phase with no entry here shows its own id rather than
+ * borrowing a neighbour's name.
+ */
+const PHASE_LABEL = {
+  renderer: 'Renderer',
+  assets: 'Materials',
+  gltfRigs: 'Machines',
+  models: 'Machine model',
+  env: 'Environment',
+  geology: 'Geology',
+  terrain: 'Site',
+  rig: 'Rig assembly',
+  sim: 'Drill model',
+  vfx: 'Particles',
+  progression: 'Career',
+  shopPreview: 'Catalogue',
+  audio: 'Audio',
+  ui: 'Interface',
+  shaders: 'Shaders',
+  ready: 'Ready',
+};
 
 const FACT_PERIOD = 4.6;
 
@@ -41,7 +70,10 @@ export function createBootScreen(app) {
     C.h('i.boot__rulefill'),
   );
   const pctEl = C.h('span.boot__pct', { text: '0%' });
-  const sysEl = C.h('span.boot__sys', { text: SYSTEMS[0] });
+  /* Empty until a phase is REPORTED. ui/shell.js self-drives the bar off a
+     clock for the first fraction of a second, before main.js has anything to
+     say; naming a system during that window would be inventing one. */
+  const sysEl = C.h('span.boot__sys', { text: '' });
   const factEl = C.h('p.boot__fact', { text: FACTS[0] });
 
   /** A proportional gap. `flex-basis: 0` so only the grow factor decides. */
@@ -95,16 +127,32 @@ export function createBootScreen(app) {
   let factT = 0;
   let swapping = false;
 
+  /**
+   * The caption for whatever main.js says is happening right now.
+   *
+   * The shader phase carries a count because it is the only phase long enough
+   * for the player to wonder whether anything is happening — and because that
+   * count is a real one: it is how many programs the GPU driver has reported
+   * finished, out of how many it was handed. See core/renderer.js.
+   */
+  function phaseLabel() {
+    const ph = app.ctx && app.ctx.bootPhase;
+    if (!ph || !ph.name) return '';
+    const base = PHASE_LABEL[ph.name] || ph.name;
+    if (ph.total && ph.done != null && ph.done < ph.total) return `${base} ${ph.done}/${ph.total}`;
+    return base;
+  }
+
   function setProgress(v) {
     const c = Math.max(0, Math.min(1, v || 0));
-    if (Math.abs(c - p) < 0.0005) return;
+    const label = phaseLabel();
+    if (Math.abs(c - p) < 0.0005 && label === sysEl.textContent) return;
     p = c;
     rule.style.setProperty('--p', p.toFixed(4));
     const pct = Math.round(p * 100);
     pctEl.textContent = pct + '%';
     rule.setAttribute('aria-valuenow', String(pct));
-    const idx = Math.min(SYSTEMS.length - 1, Math.floor(p * SYSTEMS.length));
-    if (sysEl.textContent !== SYSTEMS[idx]) sysEl.textContent = SYSTEMS[idx];
+    if (sysEl.textContent !== label) sysEl.textContent = label;
   }
 
   function rotateFact() {

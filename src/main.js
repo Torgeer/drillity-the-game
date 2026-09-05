@@ -58,8 +58,74 @@ const ctx = {
   qs: QS,
   clock: { t: 0, dt: 0, frame: 0, fps: 60 },
   systems: [],
+  /**
+   * THE BOOT TIMELINE, MEASURED — see `mark()`.
+   *
+   * Read by `tools/bootprobe.mjs`. This is not debug scaffolding: boot is a
+   * ~28 s stall and until this array existed the project had no way to say
+   * what the 28 s WAS. Three harnesses had already reported confidently on it
+   * after a fixed 1.5–2.2 s wait (ASTRA §8).
+   */
+  bootMarks: [],
 };
 window.__DRILLITY = ctx; // dev/QA handle — used by the screenshot harness
+
+/**
+ * Stamp one phase of boot, with the GL program count at that moment.
+ *
+ * `renderer.info.programs.length` is the number that matters for shader
+ * compilation, and taking it per phase is what lets a stall be attributed to
+ * the system that caused it rather than to the phase it surfaced in.
+ *
+ * @param {string} name  phase id — also the key BOOT_WEIGHTS is written in
+ * @param {number} t0    performance.now() when the phase started
+ * @returns {number} the phase's duration in ms
+ */
+/**
+ * HOW MUCH OF THE BAR THE SYSTEMS PHASE IS ALLOWED TO SPEND.
+ *
+ * Not a taste decision — a measured ratio, and it has to be re-measured
+ * whenever either side moves. `node tools/bootprobe.mjs --dist`, cold profile,
+ * 390x844@2, median of three runs of the shipped single file:
+ *
+ *   modules + every init()      1.90 s
+ *   shader warm-up             ~4.4 s   (was 17.9 s on the first frame)
+ *
+ * 1.90 / 6.3 = 0.30. A bar that gave the systems half of its travel would sit
+ * at 50 % for two thirds of the wait, which is the "90 % for twenty seconds"
+ * failure with different numbers. The shader half is not eased at all: it is
+ * driven by the count of programs the DRIVER reports finished.
+ */
+const SYSTEMS_SHARE = 0.30;
+
+/**
+ * Publish the boot phase, and drive the bar from it.
+ *
+ * `ui.setLoadingProgress(p)` takes only a number — ui/shell.js drops the label
+ * argument main.js has always passed — so the boot screen used to INVENT its
+ * own caption by indexing a hardcoded list of eleven names with the progress
+ * fraction. That caption was therefore a restatement of the percentage, not a
+ * report of what was happening: it read "Audio" while the GPU was compiling
+ * geology's strata shader. `ctx.bootPhase` is the real thing, and
+ * ui/screens/boot.js reads it.
+ *
+ * @param {string} name   the phase id — a system's `__name`, or 'shaders'
+ * @param {number} p      0..1 overall boot progress
+ * @param {number} [done] units finished within this phase, when it has any
+ * @param {number} [total]
+ */
+function setPhase(name, p, done, total) {
+  ctx.bootPhase = { name, p, done: done ?? null, total: total ?? null };
+  try { ctx.ui?.setLoadingProgress?.(p, name); } catch { /* non-fatal */ }
+}
+
+function mark(name, t0) {
+  const ms = performance.now() - t0;
+  let programs = null;
+  try { programs = ctx.renderer?.info?.programs?.length ?? null; } catch { /* pre-renderer */ }
+  ctx.bootMarks.push({ name, ms: +ms.toFixed(1), at: +performance.now().toFixed(1), programs });
+  return ms;
+}
 
 /**
  * System module map.
@@ -86,6 +152,7 @@ const MODULES = {
 };
 
 async function loadSystem(name, factoryName) {
+  const t0 = performance.now();
   try {
     const loader = MODULES[name];
     if (!loader) throw new Error(`no module registered for "${name}"`);
@@ -96,8 +163,10 @@ async function loadSystem(name, factoryName) {
     sys.__name = name;
     ctx.systems.push(sys);
     ctx[name] = sys;
+    mark('load:' + name, t0);
     return sys;
   } catch (e) {
+    mark('load:' + name, t0);
     console.warn(`[boot] system "${name}" unavailable —`, e.message);
     return null;
   }
@@ -271,6 +340,7 @@ async function boot() {
    * left is a playable-looking shell with nothing in it — which is exactly the
    * thing worth saying out loud instead of a console warning nobody reads.
    */
+  const tData = performance.now();
   try {
     ctx.data = await import('./game/data.js');
     // The UI reads the content tables as `ctx.game`; keep both names pointing
@@ -283,6 +353,7 @@ async function boot() {
     ctx.contentError = e;
     showFatalContentError(e);
   }
+  mark('data', tData);
 
   // Order matters: renderer → assets → env → world → rig → sim → vfx → ui → audio
   await loadSystem('renderer', 'createRenderer');
@@ -303,23 +374,64 @@ async function boot() {
   // deliberately initialised first and separately so it can show the boot
   // screen while the heavy systems (textures, geometry) come up behind it.
   const ui = ctx.ui;
-  if (ui?.init) { try { await ui.init(); } catch (e) { console.error('[init] ui', e); } }
+  {
+    const t0 = performance.now();
+    if (ui?.init) { try { await ui.init(); } catch (e) { console.error('[init] ui', e); } }
+    mark('init:ui', t0);
+  }
 
   const rest = ctx.systems.filter((s) => s !== ui);
   for (let i = 0; i < rest.length; i++) {
     const s = rest[i];
-    try { ui?.setLoadingProgress?.(i / rest.length, s.__name); } catch { /* non-fatal */ }
+    setPhase(s.__name, SYSTEMS_SHARE * (i / rest.length));
     // The Blender machines must be in memory BEFORE rigFactory runs, because
     // its build cache is keyed by rig id and the first build of an id wins.
     if (s.__name === 'rig') {
-      try { ui?.setLoadingProgress?.(i / rest.length, 'machine'); } catch { /* non-fatal */ }
+      setPhase('models', SYSTEMS_SHARE * (i / rest.length));
+      const tm = performance.now();
       await warmOwnedModels(true);
+      mark('models', tm);
     }
+    const t0 = performance.now();
     if (s.init) { try { await s.init(); } catch (e) { console.error(`[init] ${s.__name}`, e); } }
+    mark('init:' + s.__name, t0);
     // Yield so the boot screen can actually paint between heavy systems.
     await new Promise((r) => requestAnimationFrame(() => r()));
   }
-  try { ui?.setLoadingProgress?.(1, 'ready'); } catch { /* non-fatal */ }
+  setPhase('shaders', SYSTEMS_SHARE);
+
+  /**
+   * THE 19 SECONDS.
+   *
+   * Everything above is under two seconds; the first rendered frame used to
+   * be seventeen, because ANGLE links a program asynchronously and three.js
+   * then blocks on `getProgramInfoLog` for each one in turn — 66 programs
+   * compiled one at a time. `warmShaders()` hands the driver the whole batch
+   * first and polls a non-blocking completion query, which is both the fix
+   * and the only source of true progress this screen has ever had.
+   * See the SHADER WARM-UP note in core/renderer.js for the measurements.
+   *
+   * Awaited, not fired and forgotten: the point is to finish the compiles
+   * while the boot screen is up rather than during the first frame the player
+   * is looking at. It cannot hang the boot — `warmShaders()` carries its own
+   * deadline, and anything unfinished simply costs what it always did.
+   */
+  {
+    const tw = performance.now();
+    let warm = null;
+    try {
+      warm = await ctx.renderer?.warmShaders?.((done, total) => {
+        setPhase('shaders', SYSTEMS_SHARE + (1 - SYSTEMS_SHARE) * (total ? done / total : 1), done, total);
+      });
+    } catch (e) { console.warn('[boot] shader warm-up failed —', e && e.message); }
+    mark('shaders', tw);
+    if (warm) {
+      ctx.bootWarm = warm;
+      console.info(`[boot] ${warm.programs} shader programs ready in ${Math.round(warm.ms)} ms`
+        + ` (${warm.post} post-chain, parallel-compile ${warm.parallel ? 'yes' : 'NO — this device pays on first use'})`);
+    }
+  }
+  setPhase('ready', 1);
 
   // Audio can only start from a user gesture.
   const unlockAudio = () => { try { ctx.audio?.unlock?.(); } catch { /* ignore */ } };
@@ -579,6 +691,24 @@ function resize() {
 let last = performance.now();
 let fpsAccum = 0, fpsFrames = 0;
 
+/**
+ * PER-SYSTEM COST OF THE FIRST FRAMES — `ctx.bootFrames`.
+ *
+ * The most expensive single event in this game's life is FRAME 1, and no
+ * instrument in the project could see inside it. `tools/bootprobe.mjs`
+ * measured the whole of boot() at 1.7–1.9 s and then one 17.7 s rAF gap
+ * immediately after it, which is where the "27.8 s boot" actually lives. A
+ * per-system table for the first few frames is the only thing that can name
+ * the system responsible, so it is collected — for a bounded number of frames,
+ * then never again.
+ *
+ * `performance.now()` around each system is honest about MAIN-THREAD time; it
+ * cannot see GPU work that lands at the swap. `renderMs` vs `totalMs` is what
+ * separates the two: a frame where they disagree paid outside JS.
+ */
+const BOOT_FRAMES_TRACKED = 8;
+ctx.bootFrames = [];
+
 function frame(now) {
   requestAnimationFrame(frame);
   let dt = (now - last) / 1000;
@@ -593,8 +723,14 @@ function frame(now) {
   fpsAccum += dt; fpsFrames++;
   if (fpsAccum >= 0.5) { ctx.clock.fps = fpsFrames / fpsAccum; fpsAccum = 0; fpsFrames = 0; }
 
+  const tracking = ctx.clock.frame <= BOOT_FRAMES_TRACKED;
+  const row = tracking ? { frame: ctx.clock.frame, at: +now.toFixed(1), systems: {} } : null;
+  const fT0 = tracking ? performance.now() : 0;
+
   for (const s of ctx.systems) {
+    const t0 = tracking ? performance.now() : 0;
     if (s.update) { try { s.update(dt, ctx.state); } catch (e) { console.error(`[update] ${s.__name}`, e); } }
+    if (tracking) row.systems[s.__name] = +(performance.now() - t0).toFixed(1);
   }
 
   // Sim → audio telemetry pump (audio never reaches into the sim itself).
@@ -602,7 +738,14 @@ function frame(now) {
     try { ctx.audio.setDrillState(ctx.sim.getTelemetry()); } catch { /* non-fatal */ }
   }
 
+  const rT0 = tracking ? performance.now() : 0;
   if (ctx.renderer && ctx.renderer.render) ctx.renderer.render(dt);
+  if (tracking) {
+    row.renderMs = +(performance.now() - rT0).toFixed(1);
+    row.totalMs = +(performance.now() - fT0).toFixed(1);
+    try { row.programs = ctx.renderer?.info?.programs?.length ?? null; } catch { /* noop */ }
+    ctx.bootFrames.push(row);
+  }
 }
 
 boot();

@@ -1756,6 +1756,176 @@ export function createRenderer(ctx) {
     }
   }
 
+  /* ═══════════════════════════════════════════════════════════════════════
+     SHADER WARM-UP — the largest single cost in this game's start-up
+     ═══════════════════════════════════════════════════════════════════════
+
+     ── WHAT THE BOOT SCREEN ACTUALLY WAS, MEASURED ──────────────────────
+     `node tools/bootprobe.mjs --dist`, 390x844@2, headed Chrome, a fresh
+     browser profile per run so ANGLE's on-disk shader cache is genuinely
+     cold. Three runs of the SHIPPED dist/index.html:
+
+       navigationStart -> menu interactive           26.37 s (median)
+         page load -> boot()'s first line             0.39 s    1.5 %
+         inside boot(): every module + every init     1.90 s    7.2 %
+         boot() end -> menu interactive              23.90 s   90.7 %
+
+     The whole of boot() — 13 modules, 13 `init()`s, the .glb fetch, ~41
+     procedural texture kinds — is under two seconds. The 24 s is ONE FRAME:
+     the first call to `render()` measured 17,896 ms of a 17,927 ms frame,
+     and by the end of it `info.programs.length` was already 66.
+
+     Wrapping every entry point on WebGL2RenderingContext.prototype — rather
+     than a shortlist, since the shortlist version of that instrument
+     reported `linkProgram` at 1 ms and so proved only that it was looking in
+     the wrong place — named it exactly:
+
+       getProgramInfoLog     n=70    19,067 ms    worst single call 9,474 ms
+       texSubImage2D         n=107      185 ms
+       getShaderInfoLog      n=140       66 ms
+       getProgramParameter   n=210       22 ms
+       linkProgram           n=70         1 ms
+
+     `gl.linkProgram` on ANGLE/D3D is asynchronous — it queues the HLSL
+     translation and the D3DCompile and returns. The bill arrives at the
+     first call that needs the finished program, and three.js's is
+     `getProgramInfoLog` inside `WebGLProgram`'s `onFirstUse`, reached from
+     `getUniforms()` in `setProgram()`. So the shape of the stall is: link
+     one program, immediately block on it, draw, link the next, block on it
+     — 66 programs compiled STRICTLY ONE AT A TIME on the main thread, at
+     ~270 ms each.
+
+     ── THE FIX IS THE ORDER, NOT THE COUNT ──────────────────────────────
+     `renderer.compile(scene, camera)` creates and LINKS every program a
+     scene needs without asking for any of them, so all 66 are in the
+     driver's queue at once and ANGLE compiles them across its own worker
+     threads. `KHR_parallel_shader_compile` then lets us ask "is this one
+     done?" — `getProgramParameter(COMPLETION_STATUS_KHR)` — WITHOUT
+     blocking, which is what `WebGLProgram.isReady()` is. By the time the
+     first frame reaches `getProgramInfoLog`, the link has finished and the
+     call returns immediately.
+
+     ── AND IT IS WHAT MAKES THE BAR HONEST ──────────────────────────────
+     A bar sitting at 90 % for twenty seconds is worse than no bar. Polling
+     `isReady()` gives a count of programs the DRIVER has actually finished,
+     out of a total the driver itself was handed — so what the player is
+     shown during the only long part of boot is a measurement rather than an
+     easing curve. main.js drives the bar from it.
+
+     ── WHAT compile() DOES NOT COVER, SAID OUT LOUD ─────────────────────
+     • Shadow-depth material variants: `compile()` walks `object.material`,
+       and WebGLShadowMap substitutes its own depth materials at render time.
+     • The AO prepass's `MeshNormalMaterial` override, for the same reason.
+     • The post chain, whose passes are FullScreenQuads outside both scenes.
+     The last of those is handled by `warmPost()` below, deliberately as a
+     separate and separately-measured step rather than as a claim. The first
+     two are not, and show up as the residual first-frame cost.
+
+     ── WITHOUT THE EXTENSION ────────────────────────────────────────────
+     `WebGLProgram.isReady()` returns TRUE IMMEDIATELY when
+     KHR_parallel_shader_compile is absent (three.js seeds `programReady`
+     from `rendererExtensionParallelShaderCompile === false`). A poll loop
+     would then report 100 % instantly while the cost landed unchanged on
+     frame 1 — a bar that lies, which is the exact thing this is here to
+     stop. So the result carries `parallel: false` and the caller must not
+     present it as progress. Linking everything up front is still worth
+     doing there: the driver may overlap the work anyway, and it cannot be
+     slower than asking for them one at a time. */
+
+  /** Has the driver got a non-blocking "is it linked yet?" query? */
+  const hasParallelCompile = () => {
+    try { return !!gl.extensions.get('KHR_parallel_shader_compile'); }
+    catch { return false; }
+  };
+
+  /** Programs the driver has finished, out of the ones it has been handed. */
+  function programReadiness() {
+    const ps = gl.info.programs || [];
+    let done = 0;
+    for (const p of ps) { try { if (p.isReady()) done++; } catch { done++; } }
+    return { done, total: ps.length };
+  }
+
+  const warmQuadCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+  /**
+   * Link the post chain's programs too.
+   *
+   * Every pass renders through a `FullScreenQuad`, which is a bare `Mesh`
+   * three.js accepts as a render root — `renderer.render(mesh, camera)` — so
+   * `compile(mesh, camera)` is the identical (root, camera) pair the composer
+   * will later use and the program cache key matches exactly.
+   *
+   * `UnrealBloomPass` is the awkward one: it owns ONE quad and swaps its
+   * material eight times per frame (a high-pass, five separable blurs that
+   * differ by a `KERNEL_RADIUS` define and are therefore five distinct
+   * programs, a composite and a blend). Each is compiled by setting it on the
+   * quad in turn; the pass is left exactly as it was found.
+   *
+   * Field names are read defensively on purpose — a three.js upgrade that
+   * renames one must degrade to warming fewer programs, never to throwing
+   * during boot.
+   */
+  function warmPost() {
+    if (!composer) return 0;
+    let n = 0;
+    for (const pass of composer.passes) {
+      const quad = pass.fsQuad;
+      if (!quad || !quad._mesh) continue;
+      const held = quad.material;
+      const mats = [held];
+      for (const m of [pass.materialHighPassFilter, pass.compositeMaterial,
+        pass.blendMaterial, pass.basic]) if (m) mats.push(m);
+      for (const m of (pass.separableBlurMaterials || [])) if (m) mats.push(m);
+      for (const m of mats) {
+        if (!m) continue;
+        try { quad.material = m; gl.compile(quad._mesh, warmQuadCam); n++; }
+        catch (e) { warnOnce('a post pass could not be pre-compiled.', e); }
+      }
+      quad.material = held;
+    }
+    return n;
+  }
+
+  /**
+   * THE BOUND RENDER TARGET IS PART OF THE PROGRAM CACHE KEY.
+   *
+   * This is the whole reason the first attempt at a warm-up made boot WORSE
+   * — 26.4 s to 40.8 s — and it is worth stating plainly, because the failure
+   * was silent and looked exactly like success:
+   *
+   *   node tools/bootprobe.mjs --dist, before  26.37 s   66 programs
+   *                                    after   40.81 s  120 programs
+   *
+   * 120 = 66 + 54. `renderer.compile()` ran with no render target bound, and
+   * three.js's `getParameters()` reads
+   *
+   *     toneMapping:      currentRenderTarget === null ? this.toneMapping : NoToneMapping
+   *     outputColorSpace: currentRenderTarget === null ? this.outputColorSpace : LinearSRGBColorSpace
+   *
+   * so every program it built was the TO-SCREEN variant — ACES + sRGB encode
+   * baked into the fragment shader. This renderer draws both bands into the
+   * EffectComposer's half-float target and tone-maps in the grade pass, so at
+   * render time `currentRenderTarget` is not null, the key is different, and
+   * all 66 real programs were compiled from scratch on frame 1 exactly as
+   * before. The warm-up bought 54 programs nothing would ever draw, and the
+   * 13.5 s it spent on them was added to boot rather than removed from it.
+   *
+   * `getProgramInfoLog` still measured n=70 afterwards — the same 70 as
+   * before — which is the evidence that the warmed set and the drawn set were
+   * disjoint. A program COUNT going up is not proof of a warm-up working; the
+   * first frame's cost going down is.
+   */
+  function withWarmTarget(fn) {
+    const prev = gl.getRenderTarget();
+    /* The buffer the band pass actually draws into when the post chain is up.
+       Falls back to null — which is then correct, because that is the
+       no-composer path's real destination too. */
+    const target = (postOK && composer) ? (composer.renderTarget1 || null) : null;
+    try { gl.setRenderTarget(target); fn(); }
+    finally { gl.setRenderTarget(prev); }
+  }
+
   /* ── canvas fallback styling (index.html ships no stylesheet) ───────── */
   let styleChecked = false;
   function ensureCanvasStyle() {
@@ -1814,6 +1984,70 @@ export function createRenderer(ctx) {
     getSize: (v) => gl.getSize(v || new THREE.Vector2()),
     getDrawingBufferSize: (v) => gl.getDrawingBufferSize(v || new THREE.Vector2()),
     compile: (s, c) => gl.compile(s || scene, c || camera),
+
+    /**
+     * Link every program the first frame will need, in parallel, and report
+     * honest progress while the driver works. See the SHADER WARM-UP note.
+     *
+     * Call it once, from boot, AFTER every system has built its scene content
+     * and BEFORE the frame loop starts. Calling it twice is harmless — three's
+     * program cache makes the second pass a no-op — but pointless.
+     *
+     * @param {(done:number,total:number)=>void} [onProgress] driver-measured
+     * @returns {Promise<{programs:number,ms:number,parallel:boolean,post:number}>}
+     */
+    async warmShaders(onProgress) {
+      const t0 = performance.now();
+      const parallel = hasParallelCompile();
+      let post = 0;
+      try {
+        /* Both scenes and the post chain are queued BEFORE anything is
+           awaited, so the driver has the whole batch to spread across its
+           threads. Interleaving compile-then-wait would rebuild the serial
+           stall this exists to remove.
+
+           Inside withWarmTarget() so the programs match the ones the frame
+           will ask for — see the note there; getting this wrong is not a
+           smaller win, it is a larger loss. */
+        withWarmTarget(() => {
+          gl.compile(scene, camera);
+          gl.compile(sectionScene, sectionCamera);
+          post = warmPost();
+        });
+      } catch (e) {
+        warnOnce('shader warm-up could not run — the first frame will pay for it.', e);
+        return { programs: (gl.info.programs || []).length, ms: performance.now() - t0, parallel, post };
+      }
+
+      if (parallel) {
+        await new Promise((resolve) => {
+          /* A ceiling, because a poll loop with no exit is how a boot screen
+             becomes permanent. 60 s is far beyond the 19 s this replaces; if
+             it is ever hit the frame loop simply starts and the remaining
+             programs cost what they always did. */
+          const deadline = performance.now() + 60_000;
+          const poll = () => {
+            const { done, total } = programReadiness();
+            if (onProgress) { try { onProgress(done, total); } catch { /* non-fatal */ } }
+            if (done >= total || performance.now() > deadline) { resolve(); return; }
+            setTimeout(poll, 16);
+          };
+          poll();
+        });
+      } else if (onProgress) {
+        /* No non-blocking query exists, so there is no progress to report.
+           Say so with a single honest step rather than animating a fiction. */
+        const { total } = programReadiness();
+        try { onProgress(total, total); } catch { /* non-fatal */ }
+      }
+
+      return {
+        programs: (gl.info.programs || []).length,
+        ms: performance.now() - t0,
+        parallel,
+        post,
+      };
+    },
 
     async init() {
       const q = ctx.quality || QUALITY.MEDIUM;
