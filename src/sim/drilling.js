@@ -328,6 +328,11 @@ export const TUNING = {
       // The second pass of a two-stage method: the reamer stalling on the way
       // up, or the product pipe about to stick on the way back.
       'pull-stall': 1.0,
+      // Jet grouting's lift. The sourced failure is losing control of the
+      // return, and it fails in BOTH directions — nothing coming back, or the
+      // annulus packing off until the ground lifts. Two events, two opposite
+      // correct answers, on two different controls.
+      'return-lost': 0.8, 'ground-heave': 0.9,
     },
     boulder: {
       sec: [3.0, 6.5],        // player seconds to get through, best → worst case
@@ -631,6 +636,29 @@ export const TUNING = {
       sec: 4.0,
       bindAdd: 0.50,          // bind added per second of hauling into a stall
       cutterAdd: 0.05,        // ... and cutter life burned doing it
+    },
+
+    /* ── LOSING CONTROL OF THE JET GROUTING RETURN ────────────────────────
+       research/05 §A12: the KPI is the column achieved WITH THE RETURN
+       MANAGED, and losing it — no return at all, or heave — is the failure.
+       Two events, and the correct answers are NOT the same lever:
+
+         return-lost   the mix is going into a permeable formation instead of
+                       coming back. CUT THE PUMP. Lifting faster helps a
+                       little; jetting harder feeds the loss.
+         ground-heave  the annulus cannot pass what is being made and the
+                       pressure is going into lifting the ground — the one
+                       outcome nobody on an urban plot forgives. GET THE
+                       MONITOR MOVING: lift faster, so less is made per metre.
+
+       Neither answer is "back off everything", and neither is the other's. */
+    jetReturn: {
+      sec: 4.0,
+      workMax: 0.42,          // return-lost: pump at or below this is the answer
+      liftMin: 0.62,          // ground-heave: withdraw at or above this
+      mishandlePerSec: 0.34,  // column penalty banked per second of the wrong answer
+      recoverPerSec: 0.10,    // ... and how slowly it stops costing once fixed
+      colCut: 0.55,           // full penalty, in column index
     },
 
     /* Fallback hazard rates when geology is not emitting them, PER METRE.
@@ -1705,56 +1733,255 @@ export const TUNING = {
       },
     },
 
+    /* ═════════════════════════════════════════════════════════════════
+       JET GROUTING (HDI) — TWO PASSES, AND THE WORK IS ON THE WAY UP.
+
+       This method used to have no entry at all and played as the generic
+       downward rotary rig below. That was not merely generic, it was WRONG:
+       `ui/screens/site.js` resolves it to its `jet` control family and labels
+       the three sliders WITHDRAW / JET / ROTATION, so under a rotary model the
+       slider marked "withdrawal rate" was weight-on-bit pushing DOWN — the
+       opposite direction, on the one control the player uses most.
+
+       ── WHAT IS SOURCED, AND IS THEREFORE MODELLED ──
+       research/05-foundation-piling.md §A12, from the primary documents:
+
+       • THE SEQUENCE. The monitor is drilled to maximum treatment depth
+         FIRST; then the jets are started; then the stem and monitor are
+         ROTATED AND RAISED, eroding the in-situ soil and mixing it with grout
+         on the way out `[KELLER-JET]`. That is a two-pass method whose second
+         pass runs backwards — exactly the `stages[]` machinery `hdd` and
+         `raise-boring` already use, with `actionDepth()` counting back down
+         the hole as the monitor comes up.
+       • THE PRESSURE FLOOR. 25 MPa / 250 bar, EN 12716:2018's own definition
+         `[PANDREA]` §4.2. Below it there is no coherent jet and the work is
+         grouting, not jet grouting. It is the one hard number this method has
+         and it is a live mechanic: metres lifted under it are not a column.
+       • THE PUMP CEILING. 700 bar, 400 l/min `[KLEMM]`. Both endpoints of the
+         WORK axis are therefore sourced, which is the only reason this file
+         is willing to put a `bar` figure on a 0..1 slider at all.
+       • THE LADDER. single < double < triple for a given soil `[KELLER-JET]`.
+       • THE HIDDEN VARIABLE. Soil erodibility: *"plays a major role in
+         predicting geometry, quality, and production"*, and COHESIONLESS
+         SOILS ARE MORE ERODIBLE THAN COHESIVE `[KELLER-JET]`. The same energy
+         makes a fat column in sand and a thin one in stiff clay.
+       • THE KPI. Column diameter achieved at the design UCS, WITH THE RETURN
+         MANAGED. Losing control of the return — no return at all, or heave —
+         is the failure. Spoil comes up the annulus and is pumped away; the rig
+         kit includes suction hose pumps for the backflow `[KLEMM]`.
+
+       ── WHAT IS NOT SOURCED, AND IS THEREFORE NOT CLAIMED ──
+       §A12 marks these UNVERIFIED and says in as many words not to ship a
+       table without a source. Each is carried below as a normalised 0..1
+       tuning constant with `sourced: false` beside it, the same way the ore
+       grades are, and `programmeTelemetry()` publishes `*Known: false` flags
+       so no caption can print one as fact:
+
+         column diameter by soil and system  — genuinely project-specific
+         withdrawal rate                     — no sourced figure in any unit
+         monitor rotation speed              — no sourced rpm anywhere
+
+       A normalised constant with no unit printed beside it is not a claim; a
+       millimetre or a metre-per-minute would be. PLATFORM_TRUTH Part C rule 7
+       is "say less", not "round off", and DOMAIN's rule is that NOT SOURCED is
+       always acceptable and a plausible invented number never is.
+
+       (`game/data.js`'s shop copy for this method prints "400 bar". That sits
+       inside the sourced 250–700 envelope but is not itself cited — a note for
+       whoever owns that file, not something this one can fix.)
+       ═════════════════════════════════════════════════════════════════ */
+    'jet-grouting': {
+      /* 3.0 m is what game/data.js says and what tools/checkdata.mjs checks
+         against; [EMDE-AN] gives useable HDI rod lengths of 500–3 000 mm. */
+      name: 'Jet grouting', kind: 'rotary', rodLength: 3.0, ropMax: 26,
+      /* The pre-drill is a monitor threaded down a small-diameter hole in
+         SOIL — clay, silt, sand, gravel, till, marl (data.js `validGround`) —
+         on a 3-wing bit with a flushing bore [EMDE-AN]. It is the easy half of
+         the job and the model says so: low weight, modest rotation, and a
+         `ucsFloor` that keeps a 0.1 MPa sand from returning an absurd rate. */
+      K: 62, wobExp: 0.60, rpmExp: 0.35, ucsExp: 0.55, ucsFloor: 1.2,
+      softFloorUcs: 0, softEffMin: 1,
+      optWob: 0.34, optRpm: 0.50, optFlush: 0.62,
+      torque: { base: 0.08, wob: 0.34, cut: 0.45, abr: 0.22, depth: 0.055, wear: 0.10 },
+      wearMul: 0.55, heatMul: 0.45, flushK: 1.05, erodeK: 1.0,
+      bandMul: 1.0, driftMul: 0.9, casing: false, impact: 'grind',
+      bitKinds: ['drag', 'tricone'],
+      /* ── WHAT THE JOB IS JUDGED ON ────────────────────────────────────
+         The sourced KPI is the COLUMN, not the metre: "column diameter
+         achieved at the design UCS, with the return managed". The metres are
+         drilled twice and paid once; what the client buys is a continuous
+         treated column, and a break in it is the failure whatever the clock
+         said. So the method's own axis carries most of the grade, the same
+         way RC's bag and a pile's set do — and `straight` carries nothing,
+         because a jet grouting column's geometry is the column's, not the
+         pre-drill's, and the pass that makes it travels back along a hole
+         that already exists and cannot bend it.
+         (game/data.js says `scoredOn: 'metres drilled'` for this method. That
+         is the wrong axis and it is not this file's field to change.) */
+      score: { weights: { time: 0.10, groove: 0.12, bit: 0.08, straight: 0.00,
+                          hazard: 0.10, safety: 0.10, quality: 0.50 } },
+      /* The run is over when the monitor is back at the collar, not when the
+         contract's metre count is reached — the same as both other two-pass
+         methods. `stepTwoStage` owns the transition. */
+      completeOnProgramme: true,
+      stages: [
+        /* Stage 0. Drill the monitor down. Nothing is jetted; the pumps are
+           not running; this is an ordinary small rotary hole in soil. */
+        { id: 'predrill', name: 'Monitor to depth', reverse: false },
+        /* Stage 1. THE JOB. Rotate and raise while jetting. */
+        { id: 'jet-lift', name: 'Jet & lift', reverse: true,
+          /* ── THE THREE CONTROLS, AND WHICH IS WHICH ──────────────────
+             GAMEDESIGN §7 publishes this row and site.js already prints it:
+                ADVANCE (wob)   = WITHDRAWAL RATE
+                WORK    (rpm)   = JET PRESSURE
+                PROTECT (flush) = ROTATION SPEED
+             Under the old rotary fallback ADVANCE pushed the string DOWN. It
+             now lifts it, and `liftMaxMh` is what makes that true: the rate on
+             this pass is the withdrawal the operator COMMANDS, capped by the
+             machine, not a rate of penetration into rock the monitor is not
+             touching. Same shape as the CPT push, which is also commanded. */
+          liftMaxMh: 21,
+          liftRateSourced: false,   // ← no withdrawal rate is sourced in any unit
+          armOnEnter: true,         // the jets are started BEFORE the lift begins
+          /* THE PUMP IS THE CIRCULATION, NOT THE THIRD SLIDER. On this pass
+             PROTECT is rotation; what keeps the annulus open and carries the
+             spoil out is 400 l/min off the WORK axis. See circulationNow(). */
+          flushFromWork: true,
+          /* …and the same argument one level up: this pass computes what is
+             coming back over the collar, so the generic "wet and loose bed =
+             no returns" test does not get to answer the question a second
+             time. See section 4 of step(). */
+          ownsReturns: true,
+          gauge: { axis: 'return', label: 'RETURN', unit: '', max: 1.25 },
+          flushOff: false,          // the annulus is carrying spoil, not nothing
+          optWob: 0.45,             // a lift, not a thrust
+          optRpm: 0.62,             // ≈ 434 bar — inside the sourced envelope
+          optFlush: 0.55,           // rotation
+          /* The monitor is not cutting rock and 400 l/min is going past it.
+             It is not the heat-limited object a bit in a dry hole is. */
+          heatMul: 0.05,
+          /* The nozzles ARE the consumable. data.js's own copy — "one blocked
+             nozzle ruins the whole panel" — is the mechanic: a worn nozzle
+             throws an incoherent jet and the column narrows with it
+             (`colPerWear` below). And unlike a raise borer's cutters it CANNOT
+             be changed from below: changing a nozzle means tripping the
+             monitor out of a column that is half made. No `cutterChangeSec`,
+             so the re-cutter action is never offered on this pass. */
+          wearMul: 1.15,
+          loadDrain: 0.26,          // spoil leaves up the annulus, it does not pack
+          jet: {
+            /* ── SOURCED, BOTH ENDS ─────────────────────────────────────
+               floorBar: EN 12716:2018 §4.2 — below 25 MPa it is not jet
+               grouting. maxBar / maxLmin: [KLEMM] HP injection pumps, max
+               700 bar and max 400 l/min. The WORK slider is a fraction of the
+               pump, so bar = maxBar × slider is a real number on a real
+               machine limit, and the 250 bar floor lands at 0.357 of travel —
+               a threshold the player can feel for. */
+            floorBar: 250, maxBar: 700, maxLmin: 400,
+            sourcedPressure: true,
+
+            /* ── EVERYTHING BELOW IS NORMALISED GAME TUNING ─────────────
+               Not one of these prints beside a unit. `sourced: false` is
+               carried through to telemetry so nothing can quote them. */
+            sourced: false,
+
+            /* Energy per metre of lift. Slower withdrawal = more dwell at each
+               station = a bigger column. The SHAPE is sourced (that is what
+               "rotated and raised" means); the constant is not. */
+            dwellRef: 0.45,
+            /* Rotation spreads the jet round the axis. Too slow and the jet
+               cuts a slot rather than a column; too fast and no radius is held
+               long enough. A bell, because both ends are wrong — and its
+               centre is NOT an rpm, because no rpm is sourced. */
+            optRot: 0.55, rotSigma: 0.26, rotFloor: 0.22,
+            /* Column index. 1.0 is "the design column for this contract" and
+               it is DIMENSIONLESS — never a diameter, because column diameter
+               by soil is exactly what §A12 refuses to table. Calibrated so a
+               competent operator in mid-erodibility ground sits at 1.0. */
+            colGain: 7.2, colPerWear: 0.45,
+            /* SOIL ERODIBILITY. Only the ORDERING is sourced — cohesionless
+               above cohesive — and that is all this encodes: the two clean
+               granular beds at the top, the cohesive ones below, the rock a
+               jet has no business in at the floor. Restricted to the beds
+               data.js lists in `validGround`, plus the two a hole can stray
+               into. No diameter is derived from it; it scales the column
+               INDEX, which is a score, not a measurement. */
+            erodibility: {
+              sand: 1.00, gravel: 0.92, topsoil: 0.78, silt: 0.68,
+              clay: 0.50, marl: 0.42, till: 0.34, chalk: 0.30,
+              _default: 0.26,       // anything the method should not have met
+            },
+
+            /* ── THE RETURN, WHICH IS THE SOURCED KPI ───────────────────
+               "Losing control of the return — either no return at all, or
+               heave — is the failure." So the gauge on this pass is the
+               RETURN at the collar, and it fails at BOTH ends:
+                 0.00  nothing coming back — the mix is going into the ground
+                 0.50  a healthy return, pumped away by the backflow pumps
+                 1.00+ the annulus is packing off and the ground is lifting
+               A permeable, cohesionless bed eats the return; a tight cohesive
+               one backs it up. Same erodibility number, opposite failure. */
+            /* ── MEASURED, AND THE BAND HAS TO BE REACHABLE ─────────────
+               The band centre has to sit where a competent operator's own
+               optimum puts the needle, or it is telling them to do the wrong
+               thing — the same lesson raise-boring's centre already carries.
+               The first cut of these constants put a good lift in silt on
+               0.28 against an ideal of 0.50: outside the band for the whole
+               pass, with no setting that could reach it. These land it on
+               0.50 exactly.
+
+               `retPerSupply` also had to grow. At 0.78 the return barely
+               moved with the pump — silt at 630 bar returned 0.54 against
+               0.46 at 434, so over-jetting was free and the gauge said
+               nothing. At 1.60 the same pair reads 0.50 → 0.76: still safe,
+               visibly climbing, and the operator can see where it is going. */
+            retIdeal: 0.50, retTol: 0.16, retLambda: 1.6,
+            retBase: 0.256, retPerSupply: 1.60,
+            /* ESCAPE DOES NOT DEPEND ON DWELL AND SUPPLY DOES, which is the
+               whole reason the two failures land on opposite ends of the
+               ADVANCE control. Lift fast through clean sand at full pump and
+               you are pumping into a permeable formation faster than a return
+               path can establish: measured 0.07, the return is gone. Lift
+               slowly through the same sand and it comes back. */
+            retPerEscape: 0.95,      // permeable ground takes it away
+            retPerPack: 0.55,        // a tight annulus will not pass it
+            /* 1.00 was unreachable: the worst case a player can actually set
+               up — slowest lift, hardest pump, tight cohesive ground —
+               measured 0.94 and heave never fired once. 0.88 fires on exactly
+               that case and leaves 0.22 of clear air above the band. */
+            lostAt: 0.13, heaveAt: 0.88,
+            /* While the return is gone the grout is not building a column at
+               that station, and while the ground is heaving the job is being
+               lost rather than the metre. */
+            lostColMul: 0.45, heaveColMul: 0.80,
+          },
+        },
+      ],
+    },
+
     /* any method without its own entry falls back to this generic rotary rig */
 
     /* ═════════════════════════════════════════════════════════════════
-       ONE METHOD IS FALLING BACK TO IT, AND IT IS NOT DELIBERATE.
+       WHAT THIS FALLBACK IS FOR, NOW THAT NOTHING IS STUCK IN IT.
 
-       `jet-grouting` (game/data.js, unlock 47) has no entry above, so it
-       plays as this generic downward rotary rig — and `tools/checkdata.mjs`
-       has been warning about it for that reason. It is the last such method,
-       and the fallback is not a decision anyone made; it is the entry nobody
-       has written yet. Recorded here so the next agent does not have to
-       re-derive the shape of it.
+       `jet-grouting` was the last method living down here, and living here was
+       not a decision anyone made — it was the entry nobody had written. It has
+       one now (above), so as of this commit EVERY method in game/data.js has
+       its own model and `tools/checkdata.mjs`'s "no sim tuning at all for"
+       warning is empty.
 
-       WHY IT IS WRONG RATHER THAN MERELY GENERIC. Jet grouting drills a
-       monitor down and then does the actual work COMING BACK UP, rotating and
-       lifting while the jets cut the soil apart and rebuild it as a column.
-       `ui/screens/site.js` already knows that — it resolves the method to its
-       `jet` control family off data.js (`flushMedium: 'mud'` plus the
-       `soil-stabilisation` application) and labels the three controls
-       WITHDRAW / JET / ROTATION, which GAMEDESIGN §7 also publishes. Under
-       this fallback the slider labelled "Withdrawal rate" is weight-on-bit
-       pushing DOWN. The HUD is not generic about it; it is wrong about it.
-       `audio/audio.js` is in the same position with a `shaftHz` of [0.1, 0.7]
-       authored for a monitor and an rpm curve coming from `optRpm: 0.55`.
+       That makes this entry what it should always have been: the model a
+       method gets while it is being written, and nothing else. If a shipped
+       method reaches it again, that is a bug and checkdata will say so.
 
-       WHAT AN ENTRY MAY CLAIM. The sequence — drill to full depth first, then
-       rotate and raise while jetting — is sourced (research/05 §A12), and so
-       is the pressure floor (25 MPa / 250 bar, EN 12716, below which it is not
-       jet grouting), the 700 bar / 400 l/min pump ceiling, the single < double
-       < triple system ladder, and the hidden variable being soil erodibility:
-       cohesionless erodes more than cohesive. That is enough for a two-stage
-       model on exactly the machinery `hdd` and `raise-boring` already use —
-       `stages: [pre-drill, jet-and-lift]` with `reverse: true` on the second.
-
-       WHAT IT MAY NOT. research/05 §A12 marks column diameter by soil and
-       system UNVERIFIED and says in as many words not to ship a table without
-       a source; there is no sourced withdrawal rate in any unit and no sourced
-       monitor rpm anywhere in the pack; and the 400 bar the shop copy prints
-       is inside the sourced envelope but is not itself cited. Under
-       PLATFORM_TRUTH Part C rule 7 those are "say less", not "round off". The
-       normalised 0..1 tuning constants below are not claims — no unit is ever
-       printed beside them — but any NUMBER this method puts in front of a
-       player has to come from the pack first.
-
-       NOT BUILT HERE ON PURPOSE. Building it well needs two files this agent
-       does not own: `ui/screens/site.js` renders a two-stage strip whose
-       labels are hardcoded 'Pilot' / 'Ream', which are the wrong words for a
-       pre-drill and a lift, and `rig/rigFactory.js` fits jet-grouting a plain
-       drag bit and a flushing swivel with no monitor and no nozzle. Adding
-       `stages` here without those two would trade a wrong control label for a
-       wrong stage label and a rig that still cannot show what it is doing.
+       ONE THING IT STILL CANNOT DO, so nobody re-learns it the expensive way:
+       a fallback model is generic, but a fallback model under a HUD that has
+       already committed to a vocabulary is WRONG. site.js derives its control
+       labels from data.js — not from this table — so a method can arrive here
+       with its sliders already labelled for a machine this entry does not
+       simulate. Jet grouting spent its whole life doing exactly that, with
+       "Withdrawal rate" wired to weight-on-bit pushing down. Check what the
+       HUD is already promising before leaving anything on this row.
        ═════════════════════════════════════════════════════════════════ */
     _default: {
       name: 'Rotary', kind: 'rotary', rodLength: 3, ropMax: 45,
@@ -2261,6 +2488,26 @@ export function ropModel(m, bit, ground, inp, env) {
     };
   }
 
+  /* ── a pass that is LIFTED, not driven ────────────────────────────────
+     A jet grouting monitor coming back up a hole that already exists has no
+     rate of penetration: it has a WITHDRAWAL RATE, which is whatever the
+     operator commands off the ADVANCE control, capped by the machine. Running
+     it through the rotary model below would make the rate a function of rock
+     the monitor is not touching — and would make the ADVANCE control push the
+     string DOWN, which is the whole defect this method was carrying.
+
+     Same shape as the CPT push above, and the same reason: some passes are
+     commanded rather than cut. `env.stageLiftMaxMh` is set only by a stage
+     that declares `liftMaxMh`, so nothing else can reach this branch. */
+  if (nz(env.stageLiftMaxMh) > 0) {
+    const cmd = clamp(inp.wob);
+    const rop = cmd * env.stageLiftMaxMh;
+    return {
+      rop, potential: env.stageLiftMaxMh, isVoid: false,
+      terms: { base: rop, lift: 1, commanded: cmd },
+    };
+  }
+
   // Free-fall through a void: the bit is not cutting anything.
   if (ucs <= T.rock.voidUcs) {
     const fall = T.rop.freeFallMh * (0.25 + 0.75 * clamp(inp.wob));
@@ -2711,6 +2958,10 @@ export function createDrillSim(ctx = {}) {
       // The way back is not the way down: a reamer head is a far larger face
       // than the pilot bit that made the hole for it.
       stageRopMul: (() => { const st = activeStage(); return st ? nz(st.ropMul, 1) : 1; })(),
+      // …and a pass that is LIFTED rather than cut has no rate of penetration
+      // at all: the rate is the withdrawal the operator commands. Only a stage
+      // that declares `liftMaxMh` ever sets this.
+      stageLiftMaxMh: (() => { const st = activeStage(); return st ? nz(st.liftMaxMh, 0) : 0; })(),
       ...extra,
     };
   }
@@ -3272,6 +3523,12 @@ export function createDrillSim(ctx = {}) {
     const axis = (g0 && g0.axis) || 'torque';
     // The way back is measured in PULL, not in torque and not in metres.
     if (axis === 'pull') return clamp(S.prog ? nz(S.prog.pull) : 0, 0, T.torque.displayMax);
+    /* …and on a jet grouting lift it is measured in RETURN. The sourced KPI is
+       the column achieved WITH THE RETURN MANAGED, and the failure is losing
+       control of it in either direction — nothing coming back, or the annulus
+       packing off until the ground heaves. It is the only gauge in this file
+       that is wrong at BOTH ends of its travel. */
+    if (axis === 'return') return clamp(S.prog?.jet ? nz(S.prog.jet.return01) : 0, 0, T.torque.displayMax);
     if (axis === 'set') {
       const mm = S.prog ? S.prog.measuredSetMm : 0;
       return clamp(Math.pow(clamp(mm / m.pile.setGaugeMaxMm), m.pile.gaugeExp));
@@ -3313,6 +3570,16 @@ export function createDrillSim(ctx = {}) {
                       free, which is the one thing it must not be. */
                    0.08, 0.95);
     }
+    /* A managed return. Not a maximum and not a minimum: a jet grouting crew
+       wants spoil coming steadily over the collar and pumped away, and both
+       "none" and "too much to pass" are the same failure with opposite signs.
+       This is a written target rather than a moving sweet spot, so it does not
+       drift and it does not narrow with a dull nozzle — `bandDrift` is left
+       alone for the pre-drill and the fixed half-width below owns the pass. */
+    if (axis === 'return') {
+      const st = activeStage();
+      return clamp(nz(st && st.jet && st.jet.retIdeal, 0.5), 0.1, 0.95);
+    }
     if (axis === 'set') {
       const d = S.prog ? S.prog.designSetMm : 5;
       return clamp(Math.pow(clamp(d / m.pile.setGaugeMaxMm), m.pile.gaugeExp));
@@ -3338,6 +3605,10 @@ export function createDrillSim(ctx = {}) {
     const g0 = currentGauge();
     const axis = (g0 && g0.axis) || 'torque';
     if (axis === 'push-rate') return m.probe.cpt.rateTolMmS / m.probe.cpt.rateMaxMmS;
+    if (axis === 'return') {
+      const st = activeStage();
+      return Math.max(TUNING.groove.minHalfWidth, nz(st && st.jet && st.jet.retTol, 0.16));
+    }
     if (axis === 'set') {
       const p0 = m.pile;
       const d = S.prog ? S.prog.designSetMm : 5;
@@ -4005,6 +4276,36 @@ export function createDrillSim(ctx = {}) {
         continue;
       }
 
+      /* ── the jet grouting return, in both directions ──────────────────
+         The same object fails two opposite ways and each has its own answer,
+         which is the whole character of the pass: there is no single "safe"
+         setting, because the ground decides which way it will go wrong.
+
+         NO RETURN — the grout is going into the formation. Cut the pump: at
+         low pressure the mix stops being driven out into the ground and the
+         annulus can re-establish. Jetting harder feeds the loss, which is
+         exactly the instinct the gauge provokes when it reads low.
+
+         HEAVE — the annulus will not pass what is being made. Get the monitor
+         moving: a faster withdrawal makes less per metre, so the pressure has
+         somewhere to go other than into lifting whatever is standing on top of
+         it. Cutting the pump also helps and is not required. */
+      if (h.kind === 'return-lost' || h.kind === 'ground-heave') {
+        const jr = T.hazard.jetReturn;
+        const J = S.prog && S.prog.jet;
+        const right = h.kind === 'return-lost'
+          ? S.act.rpm <= jr.workMax
+          : S.act.wob >= jr.liftMin;
+        if (right) h.goodTime += dt;
+        else {
+          h.badTime += dt;
+          // The cost is not the event, it is the column being built through it.
+          if (J) J.mishandled = clamp(nz(J.mishandled) + jr.mishandlePerSec * dt);
+        }
+        if (h.t >= jr.sec) finishHazard(h, h.goodTime > h.badTime);
+        continue;
+      }
+
       /* ── bit critical / rod fatigue: pure warnings, resolved elsewhere ── */
       if (h.t > 8) finishHazard(h, true);
     }
@@ -4208,6 +4509,31 @@ export function createDrillSim(ctx = {}) {
   function onReversePass() { const st = activeStage(); return !!(st && st.reverse); }
 
   /**
+   * WHAT IS ACTUALLY CIRCULATING, which is not always the PROTECT control.
+   *
+   * Three models read "flush" as the thing keeping the annulus open, cooling
+   * the tool and carrying the cuttings out: hole cleaning, heat, and the bind
+   * relief term. On nearly every method that is the third slider and the
+   * mapping is invisible.
+   *
+   * IT IS NOT INVISIBLE ON A JET GROUTING LIFT. There the third slider is
+   * ROTATION (GAMEDESIGN §7), and the circulation is the pump — 400 l/min of
+   * grout going down the monitor and spoil coming back up the annulus, which
+   * is the WORK control. Reading rotation as flow there is not a cosmetic
+   * mislabel: measured, it collapsed the bind relief term to its floor and
+   * stuck the string 9 m into the lift on the first three seeds tried, in a
+   * hole that has 400 l/min going through it. A stage says so with
+   * `flushFromWork`, and `flushOff` still means nothing is circulating at all
+   * (a raise, mucked by gravity).
+   */
+  function circulationNow() {
+    const st = activeStage();
+    if (st && st.flushOff) return 0;
+    if (st && st.flushFromWork) return clamp(S.act.rpm);
+    return clamp(S.act.flush);
+  }
+
+  /**
    * WHERE THE BIT OR THE HEAD ACTUALLY IS, in measured length along the hole.
    *
    * On the way down that is the depth. On the way back it is the far end minus
@@ -4246,6 +4572,15 @@ export function createDrillSim(ctx = {}) {
     const inp = optimalInputs(S.m, ground, depth, S.bit);
     const st = activeStage();
     if (st && st.optWob != null) inp.wob = st.optWob;
+    /* A REVERSE PASS MAY MOVE ALL THREE CONTROLS, NOT JUST THE FIRST.
+       Only `optWob` used to be overridable, which was enough while both
+       reverse passes in the game were pull-force problems whose other two
+       levers barely moved. Jet grouting's are not: WORK becomes jet pressure
+       and PROTECT becomes rotation, and the operator holds neither of them
+       where the pre-drill did. Without these two the green band would tell a
+       jet grouting operator to run the pump at the pre-drill's rotation. */
+    if (st && st.optRpm != null) inp.rpm = st.optRpm;
+    if (st && st.optFlush != null) inp.flush = st.optFlush;
     if (st && st.flushOff) inp.flush = 0;
     if (st && st.reverse) return inp;      // the pull axis has its own model
 
@@ -5792,6 +6127,7 @@ export function createDrillSim(ctx = {}) {
      ═════════════════════════════════════════════════════════════════════ */
 
   function startTwoStage() {
+    const st = S.m.stages && S.m.stages[1];
     return {
       kind: 'twoStage',
       passM: 0,                 // metres of the SECOND pass completed
@@ -5799,6 +6135,21 @@ export function createDrillSim(ctx = {}) {
       cutterWear: 0, cutterChanges: 0,
       pilotDeviation: 0, quality01: 1,
       startedPass: false,
+      /* Only a stage that declares `jet` carries this, so `p.jet` being null
+         is the test for "this reverse pass is a pull problem, not a jetting
+         one" everywhere below. */
+      jet: st && st.jet ? {
+        bar: 0,               // live jet pressure — the ONE figure with a source
+        belowFloor: false,    // …and whether it is under EN 12716's 250 bar
+        column01: 0,          // the column being built right here, right now
+        worst01: 1,           // the NECK. A column is as good as its thinnest section.
+        meanSum: 0, shortSum: 0, belowFloorM: 0,
+        return01: 0.5,        // spoil at the collar: 0 = none, 1+ = packing off
+        lostM: 0, heaveM: 0,  // metres lifted with the return out of control
+        lostEvents: 0, heaveEvents: 0,
+        mishandled: 0,        // a return event answered wrongly, still costing column
+        erodibility: 0,       // the ground's, right now — ordering only, never a size
+      } : null,
     };
   }
 
@@ -5812,6 +6163,21 @@ export function createDrillSim(ctx = {}) {
     S.depth = S.target;
     S.holeDepth = 0;
     S.greenBandTime = 0;
+    /* THE JETS ARE STARTED BEFORE THE STEM IS RAISED.
+       The sourced sequence is three steps, not two: drill to depth, START THE
+       JETS, then rotate and raise. A stage that says `armOnEnter` opens with
+       the pump and the rotation already at the pass's own optimum instead of
+       ramping up through the first metres from whatever the pre-drill left on
+       the sliders — which on a jetting pass is not a soft start, it is the
+       bottom of the column built under the EN 12716 floor and scored as a
+       break in it. The two pull-force passes do not declare it and are
+       unchanged: on those, carrying the pilot's settings into the pullback is
+       the player's problem to notice, and costs a metre rather than the job. */
+    if (st.armOnEnter) {
+      const inp = optimalNow();
+      S.cmd = { ...inp };
+      S.act = { ...inp };
+    }
     // The reamer head goes on from the lower level, or the product pipe is
     // made up on the reamer. Either way the string is turned round and the
     // gauge the operator is watching changes with it.
@@ -5847,6 +6213,13 @@ export function createDrillSim(ctx = {}) {
        and there is nothing to circulate at all. */
     S.load = clamp(S.load - nz(st.loadDrain, 0.22) * dt);
     if (st.flushOff) S.load = clamp(S.load - 0.60 * dt);
+
+    /* ── the pass that is JETTING rather than reaming ────────────────────
+       Two of this game's three reverse passes haul a head into rock and are
+       played on pull force. The third does not touch the ground at all: it
+       lifts a monitor through a hole that already exists while jets take the
+       soil apart around it. It has its own model, and it ends here. */
+    if (st.jet) return stepJetLift(dt, dBore, st);
 
     // PULL FORCE. Not a rate: how hard the head is being hauled into the rock
     // it is breaking, plus whatever has not fallen away behind it.
@@ -5893,6 +6266,159 @@ export function createDrillSim(ctx = {}) {
       complete();
     }
     return 0;                    // the contract depth does not grow on the way back
+  }
+
+  /**
+   * THE JET LIFT — jet grouting's second pass, and the whole of the job.
+   *
+   * The monitor is already at depth. Nothing below it is being drilled: the
+   * jets are cutting the soil apart radially while the stem is ROTATED AND
+   * RAISED, and what is left behind is a column of soil remixed with grout.
+   * The three controls are the ones site.js already prints —
+   *
+   *   ADVANCE  withdrawal rate   how fast the column is left behind
+   *   WORK     jet pressure      how hard the soil is being taken apart
+   *   PROTECT  rotation          whether it is a column or a slot
+   *
+   * — and the score is COLUMN CONTINUITY, weighted on the worst section,
+   * because a column with one neck in it is a column that did not work.
+   *
+   * TWO SOURCED THINGS DECIDE IT. The EN 12716 pressure floor, below which the
+   * jet does not erode and the metre is not jet grouting at all; and soil
+   * erodibility, cohesionless above cohesive, which is why the same settings
+   * make a fat column in sand and a thin one in clay. Everything else here is
+   * a normalised tuning constant that never prints beside a unit — no
+   * diameter, no withdrawal rate, no rpm. See the method entry in TUNING.
+   */
+  function stepJetLift(dt, dLift, st) {
+    const p = S.prog, j = st.jet, J = p.jet;
+    if (!J) return 0;
+
+    const lift01 = clamp(S.act.wob);      // ADVANCE — withdrawal rate
+    const work01 = clamp(S.act.rpm);      // WORK    — jet pressure
+    const rot01 = clamp(S.act.flush);     // PROTECT — rotation
+
+    /* THE ONE FIGURE ON THIS PASS WITH A SOURCE AT BOTH ENDS. The WORK control
+       commands a fraction of the pump, the pump's ceiling is 700 bar [KLEMM],
+       and 250 bar is EN 12716's own dividing line. So this is a real pressure
+       on a real machine limit, and the floor lands at 0.357 of slider travel —
+       close enough to the bottom that a player can find it, far enough up that
+       they cannot sit under it by accident. */
+    J.bar = j.maxBar * work01;
+    J.belowFloor = J.bar < j.floorBar;
+    const power01 = J.belowFloor ? 0 : clamp((J.bar - j.floorBar) / (j.maxBar - j.floorBar));
+
+    /* Dwell. The slower the stem comes up, the longer the jet works each
+       station and the further out it reaches. This is the shape the sourced
+       sequence implies; the constant is game tuning and prints nowhere. */
+    const dwell = j.dwellRef / (j.dwellRef + lift01);
+
+    /* Rotation. Too slow and the jet cuts a SLOT rather than sweeping a
+       column; too fast and no radius is held long enough to be eroded. Both
+       ends are wrong, so it is a bell — and its centre is deliberately not an
+       rpm, because no monitor rpm is sourced anywhere in the pack. */
+    const spread = Math.max(j.rotFloor, bell(rot01, j.optRot, j.rotSigma));
+
+    /* SOIL ERODIBILITY — the hidden variable, and the only part of the ground
+       model here that is sourced. Ordering only: cohesionless erodes more than
+       cohesive. It scales the column INDEX, which is a score. No diameter is
+       derived from it, in this file or any other. */
+    const erod = nz(j.erodibility[S.ground.id], j.erodibility._default);
+    J.erodibility = erod;
+
+    /* A worn nozzle throws an incoherent jet, and it cannot be changed without
+       tripping the monitor out of a half-built column. This is the mechanic
+       behind data.js's own line about one blocked nozzle ruining the panel. */
+    const nozzle = clamp(1 - j.colPerWear * clamp(S.wear), 0.15, 1);
+
+    const supply = power01 * dwell * spread;
+    let col = j.colGain * supply * erod * nozzle;
+
+    /* ── THE RETURN, WHICH IS THE FAILURE MODE THE SOURCE NAMES ──────────
+       Spoil rises up the annulus and is pumped away. Two ways to lose it, and
+       the ground decides which one is waiting: a permeable cohesionless bed
+       takes the mix away into the formation and nothing comes back; a tight
+       cohesive one will not pass what the jet is making and the pressure goes
+       into lifting the ground instead. Same erodibility number, opposite
+       failure, which is why one gauge can carry both. */
+    const water = clamp(nz(S.ground.water, 0.4));
+    const escape = clamp(erod * water * power01);
+    const pack = clamp((1 - erod) * supply);
+    const want = j.retBase + j.retPerSupply * supply
+               - j.retPerEscape * escape
+               + j.retPerPack * pack;
+    J.return01 = clamp(damp(J.return01, clamp(want, 0, 1.25), j.retLambda, dt), 0, 1.25);
+
+    const hz = T.hazard.jetReturn;
+    if (J.return01 <= j.lostAt) {
+      col *= j.lostColMul;
+      J.lostM += dLift;
+      if (!liveHazard('return-lost')
+          && queueHazard('return-lost', { depth: actionDepth(), severity: 0.8 })) J.lostEvents++;
+    } else if (J.return01 >= j.heaveAt) {
+      col *= j.heaveColMul;
+      J.heaveM += dLift;
+      if (!liveHazard('ground-heave')
+          && queueHazard('ground-heave', { depth: actionDepth(), severity: clamp(J.return01) })) J.heaveEvents++;
+    }
+    /* Mishandling either one costs the column where it is standing, so the
+       hazard is not a light — it is metres of neck. It also recovers, slowly:
+       getting the return back does not un-neck what is already behind you, but
+       it does stop making more of it. */
+    J.mishandled = clamp(nz(J.mishandled) - hz.recoverPerSec * dt);
+    col = Math.max(0, col - J.mishandled * hz.colCut);
+
+    J.column01 = col;
+
+    /* ── CONTINUITY ──────────────────────────────────────────────────────
+       Sampled per metre LIFTED, so a monitor parked at the collar accumulates
+       nothing and a slow lift is scored on every metre it actually makes. */
+    if (dLift > 0) {
+      const c01 = clamp(col);
+      J.meanSum += c01 * dLift;
+      J.shortSum += Math.max(0, 1 - c01) * dLift;
+      if (c01 < J.worst01) J.worst01 = c01;
+      // Metres lifted under EN 12716's floor are not a column at all. They are
+      // counted separately because they are a different failure from a thin
+      // one: nothing was jetted there, whatever the gauge said.
+      if (J.belowFloor) J.belowFloorM += dLift;
+    }
+
+    if (p.passM >= S.target - 1e-6) {
+      p.quality01 = jetQuality();
+      complete();
+    }
+    return 0;                    // the contract depth does not grow on the way up
+  }
+
+  /**
+   * COLUMN CONTINUITY, which is what jet grouting is scored on.
+   *
+   * The KPI in the source is "column diameter achieved at the design UCS, with
+   * the return managed", and the failure is a break in it. So the mean column
+   * is only part of the mark and the WORST SECTION carries nearly as much:
+   * a treatment block is only as good as the thinnest place in it, and a
+   * player who jets a beautiful 55 m and necks the last 3 has not made a
+   * column, they have made two.
+   */
+  function jetQuality() {
+    const p = S.prog, J = p && p.jet;
+    if (!J) return 1;
+    const m = Math.max(1e-3, p.passM);
+    const mean = clamp(J.meanSum / m);
+    const shortFrac = clamp(J.shortSum / m);
+    return clamp(
+      0.40 * mean
+      + 0.34 * clamp(J.worst01)          // the neck
+      + 0.26 * (1 - shortFrac)
+      // Under the floor there is no jet, so these metres are not thin column —
+      // they are no column, and they are charged as such.
+      - 0.80 * clamp(J.belowFloorM / m)
+      - 0.30 * clamp(J.lostM / m)
+      // Heave loses the JOB, not the metre: jet grouting is sold under things
+      // that are still standing, and lifting them is the one outcome no client
+      // forgives. data.js puts this method on urban plots for that reason.
+      - 0.45 * clamp(J.heaveM / m));
   }
 
   /* ═════════════════════════════════════════════════════════════════════
@@ -5992,12 +6518,51 @@ export function createDrillSim(ctx = {}) {
             log: p.log.slice(-10),
           } };
       }
-      case 'twoStage':
-        return { score: clamp(p.quality01), label: S.stage === 0 ? 'PILOT' : 'REAM',
+      case 'twoStage': {
+        /* THE AXIS NAME IS WHAT IS BEING SCORED, and on a jetting lift that is
+           not a pass, it is the COLUMN. 'PILOT'/'REAM' stay exactly as they
+           were for the two pull-force passes — `results.js` prints this string
+           and it is a short caption, so it is not the place to widen.
+           (The stage's own NAME is published separately, on both
+           `state.drill.stageName` and telemetry, and that is what a stage strip
+           should read. `ui/screens/site.js:220` still hardcodes 'Pilot'/'Ream'
+           there — reported, not owned here.) */
+        const label = S.stage === 0 ? 'PILOT' : 'REAM';
+        const J = p.jet;
+        const js = S.m.stages[1] && S.m.stages[1].jet;
+        if (J && js) {
+          const mm = Math.max(1e-3, p.passM);
+          return { score: clamp(p.quality01), label: S.stage === 0 ? 'PRE-DRILL' : 'COLUMN',
+            detail: {
+              stage: S.stage, passM: +p.passM.toFixed(2),
+              /* CONTINUITY, and the neck that decides it. Both are indices,
+                 both are dimensionless, and neither is ever a diameter —
+                 column diameter by soil is UNVERIFIED (research/05 §A12) and
+                 `columnDiaKnown` below is what any caption must gate on. */
+              columnMean01: +clamp(J.meanSum / mm).toFixed(3),
+              columnWorst01: +clamp(J.worst01).toFixed(3),
+              continuity01: +clamp(1 - J.shortSum / mm).toFixed(3),
+              // The one figure here with a source at both ends.
+              jetPressureBar: Math.round(J.bar),
+              pressureFloorBar: js.floorBar,
+              metresBelowFloor: +J.belowFloorM.toFixed(2),
+              // The sourced KPI: was the return managed?
+              returnLostM: +J.lostM.toFixed(2), heaveM: +J.heaveM.toFixed(2),
+              returnEvents: J.lostEvents + J.heaveEvents,
+              nozzleWear01: +clamp(S.wear).toFixed(3),
+              // ── never print what is not sourced ──
+              columnDiaKnown: false,
+              withdrawRateKnown: false,
+              rotationSpeedKnown: false,
+              needs: 'column diameter by soil, withdrawal rate and monitor rpm are UNVERIFIED (research/05 §A12)',
+            } };
+        }
+        return { score: clamp(p.quality01), label,
           detail: { stage: S.stage, passM: +p.passM.toFixed(2),
                     stalls: p.stalls, cutterWear01: +p.cutterWear.toFixed(3),
                     cutterChanges: p.cutterChanges,
                     pilotDeviation: +p.pilotDeviation.toFixed(2) } };
+      }
       case 'probe': {
         const score = clamp(0.5 * p.quality01 + 0.5 * p.fidelity01);
         return { score, label: p.mode === 'cpt' ? 'SOUNDING' : 'LOG',
@@ -6067,9 +6632,33 @@ export function createDrillSim(ctx = {}) {
        no annulus and a cone push has no fluid, so reporting "no returns" at
        them is not conservative — it is a false instrument reading, and this
        sim's whole argument is that the instruments have to be honest. */
+    const rst = activeStage();
     if (m.dryMethod) {
       S.lostCirc = 0;
       S.returns = 1;
+    } else if (rst && rst.ownsReturns && S.prog && S.prog.jet) {
+      /* ── A PASS THAT MEASURES ITS OWN RETURN OWNS IT ─────────────────
+         The generic model below asks two questions of the BED — is it wet,
+         is it loose — and calls the returns lost if both are true. That is
+         the right instrument for a water bore and the wrong one for a jetting
+         lift, where the whole pass is a return model already: what comes back
+         over the collar is computed from the pump, the withdrawal rate, the
+         soil's erodibility and the annulus, and it is the gauge the player is
+         holding.
+
+         Running both meant the same physical fact was charged twice through
+         two systems, and the crude one won. MEASURED: a lift with a perfectly
+         managed return (0.50, mid-band) crossing a clean sand bed had
+         `S.returns` cut to 0.05 by the bed alone, which collapsed the bind
+         relief term to 0.12 and stuck the string — in a hole with 400 l/min
+         going through it and spoil coming over the collar.
+
+         So on this pass the annulus is as open as the return says it is, and
+         no more. Lose the return and the hole does start to bind, which is
+         correct and is the mechanic biting twice for the right reason. */
+      const ideal = Math.max(0.05, nz(rst.jet && rst.jet.retIdeal, 0.5));
+      S.lostCirc = clamp(1 - S.prog.jet.return01 / ideal);
+      S.returns = clamp(S.prog.jet.return01 / ideal, T.cuttings.lostReturns, 1);
     } else {
       const lc = T.hazard.lostCirc;
       const losing = (S.ground.water >= lc.waterMin && S.ground.stability <= lc.stabMax)
@@ -6143,7 +6732,8 @@ export function createDrillSim(ctx = {}) {
       // a 60 m water bore and a 2,000 m well do not share an annulus.
       const annulus = 1 / (1 + S.stringDepth / (m.annulusRef || cu.annulusRef));
       const lift = m.flushIsSpoil ? cu.augerLift * S.act.rpm : 0;
-      const clearRate = cu.clear * (m.flushK || 1) * (S.act.flush + lift) * S.returns * annulus;
+      // circulationNow(), not act.flush: see the note on that function.
+      const clearRate = cu.clear * (m.flushK || 1) * (circulationNow() + lift) * S.returns * annulus;
       const gen = cu.gen * (ropEff / cu.ropRef) * (1 - cu.packing * S.load);
       S.load = clamp(S.load + (gen - clearRate * S.load - cu.bleed) * dt);
 
@@ -6165,7 +6755,7 @@ export function createDrillSim(ctx = {}) {
       rub = S.ropPotential > 0.01 && ropEff < S.ropPotential * T.wear.rubRopFrac ? 1 : 0;
       const heatGen = ht.gen * (m.heatMul || 1) * stageHeatMul * S.act.rpm
                     * (ht.wobFloor + (1 - ht.wobFloor) * S.act.wob) * hard * (1 + 0.5 * rub);
-      const cool = ht.cool * (ht.ambient + S.act.flush * S.returns);
+      const cool = ht.cool * (ht.ambient + circulationNow() * S.returns);
       S.heat = clamp(S.heat + (heatGen - cool * S.heat) * dt);
     }
 
@@ -6199,10 +6789,17 @@ export function createDrillSim(ctx = {}) {
     }
 
     /* ── 16. safety log ── */
-    // On the way back the string is in TENSION: the limit that matters is the
-    // pull against the head's stall, not a rotary torque nothing is applying.
-    const overLimit = onReversePass()
-      ? nz(S.prog && S.prog.pull) > nz(activeStage().stallAt, 1)
+    /* On the way back the string is in TENSION: the limit that matters is the
+       pull against the head's stall, not a rotary torque nothing is applying.
+       And on a jetting lift there is no tension either — the string is being
+       raised through its own hole. What is unsafe there is the ground going up
+       with it, so the limit is the RETURN packing off, which is the same
+       number the gauge is showing. */
+    const revSt = onReversePass() ? activeStage() : null;
+    const overLimit = revSt
+      ? (revSt.jet
+          ? nz(S.prog && S.prog.jet && S.prog.jet.return01) >= nz(revSt.jet.heaveAt, 1)
+          : nz(S.prog && S.prog.pull) > nz(revSt.stallAt, 1))
       : (!m.noOverTorque && S.torque > T.torque.safetyLimit);
     if (overLimit) {
       S.overSec += dt;
@@ -6507,8 +7104,10 @@ export function createDrillSim(ctx = {}) {
     pressure += j.dragK * S.drag;
     pressure += j.stabK * Math.max(0, j.stabThresh - S.stability);
 
+    // What is circulating, not what the third slider happens to be labelled —
+    // on a jetting lift that slider is rotation and the pump is the WORK axis.
     const relief = j.reliefFloor
-                 + j.relief * S.act.flush * S.returns
+                 + j.relief * circulationNow() * S.returns
                  + j.reliefLowWob * Math.max(0, 0.35 - S.act.wob) / 0.35;
 
     S.bind = clamp(S.bind + (pressure - relief * (S.bind > 0 ? 1 : 0)) * dt, 0, j.bindMax);
@@ -6543,10 +7142,11 @@ export function createDrillSim(ctx = {}) {
     S.stuckSec += dt;
     advanceRescue(dt);
     S.torque = torqueModel(S.m, S.bit, S.ground, S.act, env());
-    S.heat = clamp(S.heat - T.heat.cool * 0.5 * S.act.flush * dt);
-    // Backing the feed off and keeping flow up always relieves something.
+    S.heat = clamp(S.heat - T.heat.cool * 0.5 * circulationNow() * dt);
+    // Backing the feed off and keeping flow up always relieves something —
+    // and what "flow" is depends on the pass, not on the slider's caption.
     const relief = T.jam.stuckReliefFloor
-                 + T.jam.stuckReliefFlush * S.act.flush * S.returns
+                 + T.jam.stuckReliefFlush * circulationNow() * S.returns
                  + T.jam.stuckReliefLowWob * Math.max(0, 0.35 - S.act.wob) / 0.35;
     S.bind = clamp(S.bind - relief * dt, 0, T.jam.bindMax);
     S.drag = Math.max(0, S.drag - T.stability.dragDecay * dt);
@@ -7705,6 +8305,27 @@ export function createDrillSim(ctx = {}) {
         // be tripped at all, so this is not the string-trip number.
         d.cutterChangeSec = st.cutterChangeSec == null ? null : st.cutterChangeSec;
         d.mucksByGravity = !!st.flushOff;
+        /* THE JETTING LIFT'S OWN THREE NUMBERS. Same argument as the block
+           above: these are what the pass is actually played on, so they belong
+           on the state the HUD reads and not only on telemetry. `jetBar` is
+           the only one with a unit, and it has one because both ends of it are
+           sourced (EN 12716's 250 bar floor, [KLEMM]'s 700 bar pump). The
+           column index deliberately has none. */
+        // The constants live on the JETTING stage, which is not the stage that
+        // is running during the pre-drill — read them off stages[1], never off
+        // whichever stage happens to be active.
+        const js = S.m.stages[1] && S.m.stages[1].jet;
+        if (p.jet && js) {
+          d.jetBar = Math.round(p.jet.bar);
+          d.jetFloorBar = js.floorBar;
+          d.jetBelowFloor = !!p.jet.belowFloor;
+          d.column01 = clamp(p.jet.column01);
+          d.columnWorst01 = clamp(p.jet.worst01);
+          d.return01 = clamp(p.jet.return01, 0, 1.25);
+          d.returnIdeal01 = js.retIdeal;
+          // Column DIAMETER is not published, in any unit, at any confidence.
+          d.columnDiaKnown = false;
+        }
         break;
       }
       default: d.programme = null; break;
@@ -7811,6 +8432,11 @@ export function createDrillSim(ctx = {}) {
     const g0 = currentGauge();
     const axis = (g0 && g0.axis) || 'torque';
     if (axis === 'pull') return S.prog ? +nz(S.prog.pull).toFixed(3) : 0;
+    /* Normalised, and it stays normalised. A spoil return in l/min would be a
+       fine caption and there is no sourced figure for it — the pack gives the
+       PUMP's 400 l/min, not what comes back over the collar, and those are not
+       the same number. */
+    if (axis === 'return') return S.prog?.jet ? +nz(S.prog.jet.return01).toFixed(3) : 0;
     if (axis === 'set') return S.prog ? +S.prog.measuredSetMm.toFixed(2) : 0;
     if (axis === 'push-rate') return +(S.rop / 3.6).toFixed(1);
     return +S.torque.toFixed(3);
@@ -7996,6 +8622,29 @@ export function createDrillSim(ctx = {}) {
           cutterChangeSec: st.cutterChangeSec == null ? null : st.cutterChangeSec,
           mucksByGravity: !!st.flushOff,
           pilotDeviation: +p.pilotDeviation.toFixed(2),
+          /* A jetting lift is a different pass from a reaming one and says so,
+             so a consumer can tell them apart without a method-id table. */
+          jet: p.jet && S.m.stages[1] && S.m.stages[1].jet ? {
+            bar: Math.round(p.jet.bar),
+            floorBar: S.m.stages[1].jet.floorBar,
+            maxBar: S.m.stages[1].jet.maxBar,
+            belowFloor: !!p.jet.belowFloor,
+            column01: +clamp(p.jet.column01).toFixed(3),
+            worst01: +clamp(p.jet.worst01).toFixed(3),
+            return01: +clamp(p.jet.return01, 0, 1.25).toFixed(3),
+            returnIdeal01: S.m.stages[1].jet.retIdeal,
+            erodibility01: +p.jet.erodibility.toFixed(2),
+            belowFloorM: +p.jet.belowFloorM.toFixed(2),
+            lostM: +p.jet.lostM.toFixed(2), heaveM: +p.jet.heaveM.toFixed(2),
+            /* THE GATE. Column diameter by soil and system, withdrawal rate
+               and monitor rpm are all UNVERIFIED in research/05 §A12, which
+               says in as many words not to ship a table without a source. The
+               shapes above are real; these three numbers do not exist here and
+               nothing may print one. */
+            columnDiaKnown: false,
+            withdrawRateKnown: false,
+            rotationSpeedKnown: false,
+          } : null,
         };
       }
       case 'probe': {
@@ -8491,6 +9140,9 @@ const HINTS = {
   'cone-desaturation': 'u2 LOSING SATURATION — EASE THROUGH, THEN DISSIPATE',
   'push-stalled': 'NO PUSH — THE CONE ONLY GOES DOWN IF YOU PUSH IT',
   'pull-stall': 'HEAD STALLING — EASE THE PULL, KEEP THE HOLE OPEN',
+  // Jet grouting. One object, two opposite failures, two different levers.
+  'return-lost': 'NO SPOIL AT THE COLLAR — CUT THE JET PRESSURE',
+  'ground-heave': 'GROUND LIFTING — WITHDRAW FASTER NOW',
 };
 
 export default createDrillSim;
