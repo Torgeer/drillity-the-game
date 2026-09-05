@@ -407,12 +407,18 @@ export function createCareerScreen(app) {
     wrap.appendChild(ladder);
 
     const p = state.player || {};
-    const need = app.xpForLevel(lvl) || 1;
-    const bar = C.Bar({ kind: 'amber', value: need ? (p.xp || 0) / need : 0 });
+    /* `p.xp / app.xpForLevel(lvl)` used to draw this bar, and it divides a
+       CUMULATIVE lifetime XP total by ONE level's increment — the ratio passes
+       1 during level 2 and the bar is pinned full for the rest of the game,
+       while the caption read "48,210 / 640 XP". `app.xpProgress` asks the
+       curve in game/data.js the question this bar is actually about. */
+    const xpp = app.xpProgress(p.xp, lvl);
+    const bar = C.Bar({ kind: 'amber', value: xpp.frac });
     bar.el.classList.add('bar--tall', 'bar--smooth');
     wrap.appendChild(C.SectionTitle('Progress'));
     wrap.appendChild(C.h('div.panel.panel--pad', C.h('div.panel__body',
-      C.h('div.rxp__head', C.h('span.label', { text: `LVL ${lvl}` }), C.h('span.label', { text: `${Math.round(p.xp || 0)} / ${need} XP` })),
+      C.h('div.rxp__head', C.h('span.label', { text: `LVL ${lvl}` }),
+        C.h('span.label', { text: `${Math.round(xpp.into)} / ${Math.round(xpp.need)} XP` })),
       bar.el,
       C.h('dl.specs', { style: { 'margin-top': '12px' } },
         C.SpecRow('Metres drilled', Math.round(p.stats?.metresDrilled || 0).toLocaleString('en-US') + ' m'),

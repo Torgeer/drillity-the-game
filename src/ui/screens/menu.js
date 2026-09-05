@@ -191,8 +191,9 @@ export function createMenuScreen(app) {
     const role = roleAt(lvl);
     roleEl.textContent = role?.title || 'Content unavailable';
     lvlLabel.firstChild.textContent = String(lvl);
-    const need = app.xpForLevel(lvl);
-    ring.setValue(need ? (p.xp || 0) / need : 0);
+    /* Progress INSIDE the level, not lifetime XP over one level's increment —
+       that ratio held this ring at a full circle from level 2 onward. */
+    ring.setValue(app.xpProgress(p.xp, lvl).frac);
     moneyRoll.to(p.money || 0);
 
     const rig = state.garage?.rigId;

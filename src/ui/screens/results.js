@@ -110,8 +110,23 @@ export function createResultsScreen(app) {
 
   const mDepth = metric('0.0 m', 'Drilled');
   const mTime = metric('00:00', 'On tools');
-  const mAvg = metric('0 m/h', 'Avg ROP');
-  const metricsEl = C.h('div.rmetrics.reveal', mDepth.el, mTime.el, mAvg.el);
+  /* `metric('0 m/h', 'Avg ROP')` used to be the third tile here, and it was
+     the last invented number left on this screen after 75e2f27.
+
+     It read `depth / (timeSec / 3600)`. `timeSec` is the PLAYER's clock and
+     the sim runs the hole at `timeCompression: 48`, so the quotient was ~48x
+     the rate the player had just spent the whole run watching in the HUD —
+     which meant it hit the `clamp(..., 0, 200)` written to guard it and
+     printed a flat `200.0 m/h` on essentially every hole. The `/45` was taken
+     out of the Speed tile and the same shape survived one row above it.
+
+     Nothing in HOLE_COMPLETE is an average rate: `S.rop` is instantaneous and
+     downhole, `timeSec` is the player's, and no downhole clock is published.
+     There is therefore nothing to print, and a hero stat is the worst place
+     on the screen to guess. CROSS-FILE: for this tile to come back,
+     sim/drilling.js has to publish the run's own average — hole metres over
+     downhole hours — on the payload. Until it does, two tiles. */
+  const metricsEl = C.h('div.rmetrics.reveal', mDepth.el, mTime.el);
 
   const moneyNum = C.h('div.rmoney__v', { text: '€0' });
   const moneyRoll = C.NumberRoll(moneyNum, { value: 0, duration: 0.8, format: (v) => fmtMoney(v) });
@@ -171,15 +186,19 @@ export function createResultsScreen(app) {
   // reports one line per consumable, which is the honest answer to "what did
   // this hole eat".
   const wearList = C.h('dl.specs', { style: { 'margin-top': 'var(--s-3)' } });
+  /* Named, because it is hidden outright when no before/after was recorded:
+     two bars at zero under the words "Before" and "After" is a measurement
+     claim of its own. */
+  const wearCmp = C.h('div.wearcmp', { style: { 'margin-top': '10px' } },
+    C.h('div.wearcmp__col', C.h('p.wearcmp__k', { text: 'Before' }), wearBefore.el, wearBeforeV),
+    C.h('span.wearcmp__arrow', C.Icon('chevron', 18)),
+    C.h('div.wearcmp__col', C.h('p.wearcmp__k', { text: 'After' }), wearAfter.el, wearAfterV),
+  );
   const wearEl = C.h('div.reveal', { style: FULL },
     C.SectionTitle('Tooling condition'),
     C.h('div.panel.panel--pad', C.h('div.panel__body',
       wearBitName,
-      C.h('div.wearcmp', { style: { 'margin-top': '10px' } },
-        C.h('div.wearcmp__col', C.h('p.wearcmp__k', { text: 'Before' }), wearBefore.el, wearBeforeV),
-        C.h('span.wearcmp__arrow', C.Icon('chevron', 18)),
-        C.h('div.wearcmp__col', C.h('p.wearcmp__k', { text: 'After' }), wearAfter.el, wearAfterV),
-      ),
+      wearCmp,
       wearNote,
       wearList,
     )),
@@ -306,25 +325,20 @@ export function createResultsScreen(app) {
     const d = state.drill || {};
 
     const depth = r.depth ?? d.depth ?? 0;
-    const target = d.target || c?.target || depth || 1;
 
-    /* HOLE_COMPLETE carries timeSec; sim/drilling.js also mirrors its run clock
-       onto state.drill.timeSec, which is the fallback when the payload is thin.
-       Deriving it from depth/ROP is the last resort — anything is better than
-       claiming 28.1 m were drilled in 00:00. */
-    let timeSec = r.timeSec ?? r.time ?? d.timeSec ?? d.elapsed ?? 0;
-    if (!(timeSec > 0) && depth > 0 && (d.rop || 0) > 0) timeSec = (depth / d.rop) * 3600;
+    /* HOLE_COMPLETE carries timeSec, and sim/drilling.js mirrors the same run
+       clock onto state.drill.timeSec. Those are the only two places the run's
+       duration exists.
 
-    const completion = clamp(depth / Math.max(0.001, target), 0, 1);
-
-    /* Guard the view independently of the sim. A near-zero clock (the QA
-       harness seeks depth without elapsing time; a crash could do the same)
-       divides 28 m by 0.0007 h and prints 38,588.9 m/h in a hero stat.
-       PLATFORM_TRUTH Part C rule 3 makes unit-correctness a requirement, not
-       polish — so this is clamped to a physically possible range. */
-    const avgRop = timeSec > 30
-      ? clamp(depth / (timeSec / 3600), 0, 200)
-      : clamp(d.rop || 0, 0, 200);
+       `?? r.time ?? d.elapsed` used to stand between them: NEITHER FIELD IS
+       WRITTEN BY ANYTHING IN THIS REPOSITORY. And below them sat
+       `timeSec = (depth / d.rop) * 3600` — a run clock synthesised from a
+       LIVE, INSTANTANEOUS rate read after the run had ended, dressed as a
+       measurement in `00:00` form. `null` now, and the screen prints a dash:
+       a run whose clock nobody recorded did not take 00:00 either. */
+    const timeSec = Number.isFinite(r.timeSec) ? Math.max(0, r.timeSec)
+      : Number.isFinite(d.timeSec) ? Math.max(0, d.timeSec)
+        : null;
 
     /* ── The four criteria ────────────────────────────────────────────────
        The sim's breakdown is the authority. Its `time`, `straightness`, `bit`
@@ -398,18 +412,41 @@ export function createResultsScreen(app) {
        by the sim in its own arbitrary units, so it is reported as the share of
        the tolerance it used up rather than as a fabricated angle or offset.
        Where there is no measurement there is no sentence — not a substitute. */
+    /* `?? 0` and `|| 0` are `scoreOf`'s deleted `fallback` parameter spelled
+       with an operator: they substitute a number nobody measured and print it
+       in the same typeface as one that was. Every line below therefore reads
+       its inputs as NUMBERS OR NOTHING — `num()` — and a missing input costs
+       the sentence, not its meaning. */
+    const num = (x) => (typeof x === 'number' && Number.isFinite(x) ? x : null);
+    const bDev = num(bStraight?.deviation);
+    const bTol = num(bStraight?.maxDeviation ?? bStraight?.tolerance);
+    const bConsumed = num(bBit?.consumed01);
+    const evEvents = num(bSafety?.events);
+    const evJams = num(bSafety?.jams);
     const evidence = {
-      speed: bTime ? `${fmtSpan(bTime.actualSec)} against ${fmtSpan(bTime.parSec)} par` : null,
-      straightness: scores.straightness === null
-        ? null : `${pct(1 - scores.straightness)} of the drift tolerance used`,
-      toolCare: bBit
-        ? `${Number(bBit.consumed01 ?? 0).toFixed(2)} of a crown${bBit.bitsUsed ? ` · ${plural(bBit.bitsUsed, 'change')}` : ''}`
-        : null,
-      safety: bSafety
-        ? ((bSafety.events || bSafety.jams)
-          ? `${plural(bSafety.events || 0, 'incident')} · ${plural(bSafety.jams || 0, 'stuck string')}`
-          : 'no incidents, no stuck string')
-        : null,
+      speed: bTime && num(bTime.actualSec) !== null && num(bTime.parSec) !== null
+        ? `${fmtSpan(bTime.actualSec)} against ${fmtSpan(bTime.parSec)} par` : null,
+      /* `pct(1 - scores.straightness)` used to stand here, and it is not the
+         quantity its own sentence names. The score is `clamp(1 - deviation /
+         maxDev)`, so inverting it recovers the deviation ONLY while the clamp
+         is inactive: a hole that used three times its tolerance clamps to a
+         score of 0 and this line then said, precisely, "100 % of the drift
+         tolerance used". The sim publishes `straightness.deviation` and has
+         never published the tolerance it was measured against, so there is no
+         honest ratio to print. CROSS-FILE: sim/drilling.js should publish the
+         tolerance beside the deviation; until it does there is no sentence. */
+      straightness: (bDev !== null && bTol !== null && bTol > 0)
+        ? `${pct(bDev / bTol)} of the drift tolerance used` : null,
+      toolCare: bConsumed === null ? null
+        : `${bConsumed.toFixed(2)} of a crown${bBit.bitsUsed ? ` · ${plural(bBit.bitsUsed, 'change')}` : ''}`,
+      /* "no incidents, no stuck string" is a POSITIVE CLAIM. It used to be
+         printed whenever both counters were absent or zero — so a payload
+         that published neither had the screen vouch for the run's safety on
+         no evidence at all. Both must be present numbers to say either. */
+      safety: (evEvents === null || evJams === null) ? null
+        : ((evEvents || evJams)
+          ? `${plural(evEvents, 'incident')} · ${plural(evJams, 'stuck string')}`
+          : 'no incidents, no stuck string'),
     };
 
     /* The composite. Only the sim's own weighted total counts. The local
@@ -462,72 +499,92 @@ export function createResultsScreen(app) {
     const nextAt = nextBand ? nextBand[1] : null;
 
     /* ── Money ──────────────────────────────────────────────────────────── */
-    let payout = 0;
-    let costs = 0;
-    let net = 0;
-    let xp = 0;
+    let payout = null;
+    let costs = null;
+    let net = null;
+    let xp = null;
     const items = [];
-    let hours = timeSec / 3600;
+    let hours = null;
 
     if (settle) {
       payout = Math.round(settle.revenue || 0);
       costs = Math.round(settle.costs?.total || 0);
       net = Math.round(settle.net ?? (payout - costs));
       xp = Math.round(settle.xp || 0);
-      hours = settle.hours || hours;
+      hours = Number.isFinite(settle.hours) ? settle.hours : null;
+      /* Each line is rounded on its own and any line rounding to zero is
+         dropped, so the visible rows can sum to less than the subtotal under
+         them. The dropped remainder is carried as one honest line rather than
+         left to the reader to notice. */
+      let shown = 0;
       for (const [key, name, note] of COST_LINES) {
         const v = settle.costs?.[key];
-        if (!v || Math.round(v) <= 0) continue;
+        if (!Number.isFinite(v) || Math.round(v) <= 0) continue;
         items.push({ name, qty: note, cost: Math.round(v) });
+        shown += Math.round(v);
       }
-    } else {
-      // No progression system: keep the loop whole with a transparent estimate.
-      const bonus = { D: 0, C: 0.05, B: 0.12, A: 0.22, S: 0.4 }[grade] ?? 0;
-      const base = (c?.payout || Math.round(depth * 180)) * completion;
-      payout = Math.round(base * (1 + bonus));
-
-      const estBitId = state.garage?.loadout?.bit;
-      const estBit = estBitId ? app.itemById(estBitId) : null;
-      const wearDelta = clamp(d.wear || 0, 0, 1);
-      if (estBit) {
-        items.push({
-          name: estBit.name,
-          qty: `${Math.round(wearDelta * 100)}% of life`,
-          cost: Math.round((estBit.price || 0) * wearDelta),
-        });
-      }
-      items.push({ name: 'Drill rods handled', qty: `${d.rods || 1} × 3 m`, cost: Math.round((d.rods || 1) * 4) });
-      items.push({ name: 'Flushing medium', qty: `${Math.round(depth * 12)} l`, cost: Math.round(depth * 1.6) });
-      // A €0 fuel line for a 0.0 h run is worse than no line at all: it claims
-      // the rig ran on nothing. Only bill hours that were actually elapsed.
-      if (timeSec > 0) {
-        items.push({ name: 'Fuel & air', qty: fmtSpan(timeSec), cost: Math.max(1, Math.round((timeSec / 3600) * 62)) });
-      }
-      costs = items.reduce((a, b) => a + b.cost, 0);
-      net = payout - costs;
-      /* No settlement — this whole branch is the no-progression build's local
-         estimate. The composite term contributes only when the sim published
-         one; it is never re-derived to keep the formula looking complete. */
-      xp = Math.round(depth * 6 + (composite ?? 0) * 240 + (d.greenBandTime || 0) * 3);
+      const rest = costs - shown;
+      if (rest > 0) items.push({ name: 'Other running costs', qty: 'lines under €1 each', cost: rest });
     }
+    /* THE ELSE BRANCH IS GONE, AND IT WAS THE LARGEST FALSEHOOD ON THIS
+       SCREEN. It read, in full: a grade bonus table {D:0, C:.05, B:.12,
+       A:.22, S:.4}; `depth * 180` for a payout; `rods x 3 m`, `x 4` each;
+       `depth * 12` litres of flush at `depth * 1.6`; `hours * 62` of fuel;
+       and `depth * 6 + composite * 240 + greenBandTime * 3` XP. Nine invented
+       constants, itemised down a ledger, in the same typeface as a settled
+       one, under the heading "Net paid".
+
+       It was not confined to a build without progression either. It is what
+       renders whenever `lastSettlement()` finds nothing — which is exactly
+       what happens when progression DECLINED to settle the hole (no contract
+       anywhere; it says so in the console). So the shipping game could pay
+       the player nothing and print a full invoice for it.
+
+       No settlement, no money: every figure stays null and the screen says
+       the run was not settled. */
 
     /* ── The bit ──────────────────────────────────────────────────────────
-       progression.applyWear records the real before/after condition of every
-       fitted consumable; that is the truth, not a guess from state.drill.wear. */
+       `progression.applyWear` records the real before/after condition of every
+       fitted consumable, AND IT IS THE ONE THAT CHANGED THE PLAYER'S KIT — the
+       garage will show exactly these numbers next time it is opened. That is
+       what makes it the traceable source rather than the sim's own `S.wear`,
+       which is a second wear model over the same run.
+
+       The fallback that used to stand beside it is deleted:
+
+           1 - Math.max(0, endWear - consumed)
+
+       `consumed01` counts WHOLE CROWNS SPENT, so on any hole where a bit was
+       changed `endWear - consumed` goes negative, `Math.max(0, ...)` pins it,
+       and the screen drew a "before" bar at 100 % — claiming a fresh crown
+       went into a hole that had already eaten one. The sim publishes no start
+       wear at all, so there is nothing to draw. Unsettled: no bar. */
     const bitId = state.garage?.loadout?.bit;
     const bit = bitId ? app.itemById(bitId) : null;
     const wornBit = Array.isArray(settle?.worn) ? settle.worn.find((w) => w.slot === 'bit') : null;
-    const endWear = clamp(bBit && typeof bBit.endWear === 'number' ? bBit.endWear : (d.wear || 0), 0, 1);
-    const consumed = clamp(bBit && typeof bBit.consumed01 === 'number' ? bBit.consumed01 : endWear, 0, 1);
+    const wearFrom = wornBit && Number.isFinite(wornBit.from) ? clamp(wornBit.from, 0, 1) : null;
+    const wearTo = wornBit && Number.isFinite(wornBit.to) ? clamp(wornBit.to, 0, 1) : null;
+    /* `from - to` is NOT the consumption when spares were pulled in:
+       applyWear() loops `while (after <= 0) { consumed += 1; after += 1 }`, so
+       a hole that ate a whole crown ends with `to` ABOVE `from` and the old
+       `Math.max(0, from - to)` printed "0 % of the crown consumed". The real
+       figure is published beside them as `w.wear`. */
+    const wearUsed = wornBit && Number.isFinite(wornBit.wear)
+      ? Math.max(0, wornBit.wear)
+      : (wearFrom !== null && wearTo !== null && wearTo <= wearFrom ? wearFrom - wearTo : null);
 
     return {
-      contract: c, depth, target, timeSec, avgRop, completion, hours,
+      contract: c, depth, timeSec, hours,
       grade, composite, compositeKnown, nextGrade, nextAt,
+      /* The letter the MONEY was priced at. `settleRun` used the payload's
+         own grade; the stamp above shows the band the composite falls in. A
+         producer that disagrees with itself put a "grade C" caption on a
+         payout that was paid at B, and this row is where that showed. */
+      paidGrade: settle && settle.grade ? String(settle.grade) : null,
       payout, costs, net, xp, items, settled: !!settle,
-      wearBefore: wornBit ? clamp(wornBit.from, 0, 1) : clamp(1 - Math.max(0, endWear - consumed), 0, 1),
-      wearAfter: wornBit ? clamp(wornBit.to, 0, 1) : clamp(1 - endWear, 0, 1),
-      bitsChanged: bBit?.bitsUsed || 0,
-      bitName: wornBit?.name || (bit ? bit.name : 'No bit fitted'),
+      wearFrom, wearTo, wearUsed,
+      bitsChanged: Number.isFinite(bBit?.bitsUsed) ? bBit.bitsUsed : null,
+      bitName: wornBit?.name || (bit ? bit.name : null),
       wornOther: Array.isArray(settle?.worn) ? settle.worn.filter((w) => w.slot !== 'bit') : [],
       scores, evidence,
       parKnown: !!bTime,
@@ -535,25 +592,24 @@ export function createResultsScreen(app) {
     };
   }
 
+  /**
+   * Book what this screen can honestly book when progression is not mounted.
+   *
+   * It used to pay `sm.net` and `sm.xp` — both from the invented ledger that
+   * `buildSummary` no longer builds — and level the player up on the proceeds.
+   * A view is a poor place to run an economy, and it is an indefensible place
+   * to run an INVENTED one. What survives is the part that is measured: the
+   * hole was drilled and it is counted. Money and XP come from
+   * game/progression.js or from nowhere.
+   */
   function applyRewards(sm) {
-    // Progression owns the economy when it exists; otherwise keep the loop whole.
     if (app.ctx.progression) return;
     const p = state.player;
     if (!p) return;
-    p.money = (p.money || 0) + sm.net;
-    p.xp = (p.xp || 0) + sm.xp;
     p.stats = p.stats || {};
     p.stats.metresDrilled = (p.stats.metresDrilled || 0) + sm.depth;
     p.stats.holesDone = (p.stats.holesDone || 0) + 1;
     if (sm.grade === 'S') p.stats.perfectRuns = (p.stats.perfectRuns || 0) + 1;
-    let need = app.xpForLevel(p.level || 1);
-    while (p.xp >= need) {
-      p.xp -= need;
-      p.level = (p.level || 1) + 1;
-      p.skillPoints = (p.skillPoints || 0) + 1;
-      sm.leveled = p.level;
-      need = app.xpForLevel(p.level);
-    }
   }
 
   return {
@@ -562,6 +618,10 @@ export function createResultsScreen(app) {
     mount(params) {
       summary = buildSummary(params);
       const sm = summary;
+      /* Handed in by ui/shell.js, which holds it across the settlement
+         microtask. There is no way to recover it from state at mount time —
+         see the level-up block below. */
+      const levelUp = (params && params.levelUp) || null;
       const c = sm.contract;
       const fast = app.reducedMotion;
 
@@ -589,10 +649,15 @@ export function createResultsScreen(app) {
       }
       scroll.scrollTop = 0;
 
-      const lvlBefore = state.player?.level || 1;
-      const xpBefore = state.player?.xp || 0;
+      /* The player's level AS IT IS NOW — which is after the settlement, and
+         is the only level this screen can actually observe. It used to be
+         called `lvlBefore` and captioned as the level the run started at;
+         progression.completeHole() had already run by then (ui/shell.js mounts
+         this screen from a microtask precisely so that it has), so the caption
+         named one level and printed another. `xpBefore` and `need0` went with
+         it — see the XP bar. */
+      const lvlNow = state.player?.level || 1;
       applyRewards(sm);
-      const need0 = app.xpForLevel(lvlBefore);
 
       timeline = [];
       clock = 0;
@@ -626,23 +691,39 @@ export function createResultsScreen(app) {
 
       at(0.34 * S, () => {
         mDepth.v.textContent = `${sm.depth.toFixed(1)} m`;
-        mTime.v.textContent = fmtClock(sm.timeSec);
-        mAvg.v.textContent = `${sm.avgRop.toFixed(1)} m/h`;
+        mTime.v.textContent = sm.timeSec === null ? '—' : fmtClock(sm.timeSec);
         metricsEl.classList.add('is-in');
       });
 
       at(0.50 * S, () => {
-        moneyKey.textContent = sm.settled ? 'Net paid' : 'Payout';
         moneyEl.classList.add('is-in');
-        moneyRoll.to(sm.net);
-        app.haptic('success');
+        if (sm.settled) {
+          moneyKey.textContent = 'Net paid';
+          moneyRoll.to(sm.net);
+          app.haptic('success');
+        } else {
+          /* Nothing was booked, so nothing was paid. The headline used to
+             carry an estimate here under the word "Payout"; a dash and the
+             reason are what the player can act on. */
+          moneyNum.textContent = '—';
+          moneyKey.textContent = 'This run was not settled';
+        }
       });
 
       at(0.68 * S, () => {
         xpEl.classList.add('is-in');
-        xpFrom.textContent = roleLabel(lvlBefore, `LVL ${lvlBefore}`, ' · ');
-        xpGain.textContent = `+${sm.xp} XP`;
-        xpBar.setValue(need0 ? clamp((xpBefore + sm.xp) / need0, 0, 1) : 1);
+        xpFrom.textContent = roleLabel(lvlNow, `LVL ${lvlNow}`, ' · ');
+        xpGain.textContent = sm.xp === null ? '' : `+${sm.xp} XP`;
+        /* `clamp((xpBefore + sm.xp) / app.xpForLevel(level))` used to stand
+           here and it was wrong three ways at once: `state.player.xp` is
+           CUMULATIVE lifetime XP while `xpForLevel` is one level's increment,
+           so the ratio passes 1 during level 2 and the bar is pinned full for
+           the rest of the game; the settlement's XP was already inside
+           `state.player.xp` and was added a second time; and `xpBefore` was
+           read at mount, by which point progression had already booked it, so
+           it was never "before" anything. One call to the curve's own
+           function, on the value the player actually holds. */
+        xpBar.setValue(clamp(app.xpProgress(state.player?.xp, lvlNow).frac, 0, 1));
       });
 
       // GAMEDESIGN §2.4 grades on speed, straightness, tool care and safety.
@@ -671,55 +752,84 @@ export function createResultsScreen(app) {
           t.ev.textContent = sm.evidence[key] || '';
         }
 
-        scoreList.appendChild(C.SpecRow('Hole completed', `${pct(sm.completion)} of ${sm.target.toFixed(1)} m`));
-        if (sm.groove) {
-          const combo = Number(sm.groove.bestCombo || 0);
+        /* `Hole completed — 100% of 72.0 m` used to head this list, and it
+           was a row that could only ever read 100 %: sim/drilling.js's
+           `complete()` sets `S.depth = S.target` before it emits, and the
+           screen's own `target` fell back to `|| depth || 1`, which forces the
+           ratio to 1 from the other side as well. A number with one possible
+           value is not a measurement. CROSS-FILE: a partial hole would need
+           the sim to publish the target it was aiming at beside the depth it
+           reached. */
+        const fin = (x) => (typeof x === 'number' && Number.isFinite(x) ? x : null);
+        const gUp = fin(sm.groove?.uptime01);
+        if (gUp !== null) {
+          const combo = fin(sm.groove.bestCombo);
           scoreList.appendChild(C.SpecRow('Groove uptime',
-            `${pct(sm.groove.uptime01 ?? sm.scores.groove ?? 0)} in the band`
-            + (combo > 1 ? ` · best ×${combo.toFixed(2)}` : '')));
-        } else if (typeof sm.scores.groove === 'number') {
-          scoreList.appendChild(C.SpecRow('Groove uptime', `${pct(sm.scores.groove)} in the band`));
+            `${pct(gUp)} in the band`
+            + (combo !== null && combo > 1 ? ` · best ×${combo.toFixed(2)}` : '')));
         }
-        if (sm.hazards) {
-          const seen = sm.hazards.seen || 0;
+        const hSeen = fin(sm.hazards?.seen);
+        const hClean = fin(sm.hazards?.clean);
+        if (hSeen !== null) {
           scoreList.appendChild(C.SpecRow('Hazards',
-            seen ? `${sm.hazards.clean || 0} of ${seen} handled clean` : 'none met'));
+            hSeen === 0 ? 'none met'
+              : hClean === null ? `${plural(hSeen, 'hazard')} met` : `${hClean} of ${hSeen} handled clean`));
         }
-        if (sm.rods) {
+        const rAdd = fin(sm.rods?.added);
+        const rOk = fin(sm.rods?.perfect);
+        if (rAdd !== null) {
           scoreList.appendChild(C.SpecRow('Rod handling',
-            `${sm.rods.added || 0} added · ${sm.rods.perfect || 0} on the beat`));
+            `${plural(rAdd, 'rod')} added${rOk === null ? '' : ` · ${rOk} on the beat`}`));
         }
         // Only worth a row when the sim did not supply par time — otherwise the
         // Speed tile already carries the clock, and so does the hero metric.
-        if (!sm.parKnown) scoreList.appendChild(C.SpecRow('Time on tools', fmtSpan(sm.timeSec)));
+        if (!sm.parKnown && sm.timeSec !== null) {
+          scoreList.appendChild(C.SpecRow('Time on tools', fmtSpan(sm.timeSec)));
+        }
         scoreEl.classList.add('is-in');
       });
 
       at(0.94 * S, () => {
-        if (sm.leveled) {
-          levelUpSlot.appendChild(C.h('div.rlevelup',
-            C.Icon('star', 18),
-            C.h('span', { text: roleLabel(sm.leveled, `Level ${sm.leveled}`) }),
-          ));
-          app.haptic('success');
-        } else if ((state.player?.level || 1) > lvlBefore) {
-          const lvl = state.player.level;
-          levelUpSlot.appendChild(C.h('div.rlevelup', C.Icon('star', 18),
-            C.h('span', { text: roleLabel(lvl, `Level ${lvl}`) })));
-        }
+        /* The level-up comes from the LEVEL_UP event, carried across the
+           settlement microtask by ui/shell.js and handed in with the result.
+
+           It used to be `state.player.level > lvlBefore`, with BOTH sides read
+           at mount — by which point progression.completeHole() had already
+           levelled the player, so the comparison was `n > n` and the block
+           never rendered. shell.js was suppressing the toast on this screen
+           at the same time, on the grounds that "the screen owns it", so a
+           level-up was announced in neither place. */
+        if (!levelUp) return;
+        const lvl = levelUp.level ?? state.player?.level;
+        if (!lvl) return;
+        levelUpSlot.appendChild(C.h('div.rlevelup',
+          C.Icon('star', 18),
+          C.h('span', { text: roleLabel(lvl, `Level ${lvl}`) }),
+        ));
+        app.haptic('success');
       });
 
       at(1.02 * S, () => {
+        /* No settlement, no ledger. The invoice this used to draw from nine
+           invented constants is documented where it was deleted. */
+        if (!sm.settled) { consumeEl.classList.add('is-in'); return; }
         for (const it of sm.items) {
           consumeList.appendChild(ledgerRow(it.name, it.qty, '−' + fmtMoney(it.cost), '.ritem--sub'));
         }
         // The running-costs subtotal used to arrive as a toast on top of the
         // grade medallion. It belongs here, above the payout, so the headline
         // number is unambiguously net.
-        consumeList.appendChild(ledgerRow('Running costs', `${sm.items.length} items`, '−' + fmtMoney(sm.costs)));
+        consumeList.appendChild(ledgerRow('Running costs', plural(sm.items.length, 'line'), '−' + fmtMoney(sm.costs)));
         consumeList.appendChild(C.h('div.ritem',
           C.h('span.ritem__n', { text: 'Gross payout' }),
-          C.h('span.ritem__q', { text: sm.grade ? `grade ${sm.grade}` : 'ungraded' }),
+          /* THE GRADE THE MONEY WAS PRICED AT, which is the settlement's, not
+             the stamp's. 75e2f27 made the stamp the band the composite falls
+             in — correctly, so the letter and the percentage beside it agree —
+             but this caption sits on a figure `economy.settleRun()` computed
+             from the payload's own letter. On a producer whose two disagree
+             (main.js showResults(): grade 'B', total 0.51) the row read
+             "grade C" against money paid at B. */
+          C.h('span.ritem__q', { text: sm.paidGrade ? `grade ${sm.paidGrade}` : 'ungraded' }),
           C.h('span.ritem__c.is-pos', { text: fmtMoney(sm.payout) }),
         ));
         consumeList.appendChild(C.h('div.ritem.ritem--total',
@@ -731,16 +841,29 @@ export function createResultsScreen(app) {
       });
 
       at(1.12 * S, () => {
-        wearBitName.textContent = sm.bitName;
-        wearBefore.setValue(sm.wearBefore);
-        wearAfter.setValue(sm.wearAfter);
-        wearBeforeV.textContent = `${Math.round(sm.wearBefore * 100)}% life`;
-        wearAfterV.textContent = `${Math.round(sm.wearAfter * 100)}% life`;
-        const used = Math.max(0, sm.wearBefore - sm.wearAfter);
-        wearNote.textContent = sm.bitsChanged
-          ? `${plural(sm.bitsChanged, 'crown')} changed downhole · ${pct(used)} of this one consumed over ${sm.depth.toFixed(1)} m.`
-          : `${pct(used)} of the crown consumed over ${sm.depth.toFixed(1)} m.`;
+        /* The two bars are drawn ONLY from the condition progression actually
+           recorded against the fitted item. With nothing recorded they stay at
+           zero and say so, rather than reconstructing a "before" out of two
+           quantities that do not subtract (see buildSummary). */
+        const measured = sm.wearFrom !== null && sm.wearTo !== null;
+        wearBitName.textContent = sm.bitName || 'No bit fitted';
+        wearCmp.hidden = !measured;
+        if (measured) {
+          wearBefore.setValue(sm.wearFrom);
+          wearAfter.setValue(sm.wearTo);
+          wearBeforeV.textContent = `${Math.round(sm.wearFrom * 100)}% life`;
+          wearAfterV.textContent = `${Math.round(sm.wearTo * 100)}% life`;
+        }
+        /* No "over N m": the wear was computed over HOLE metres
+           (`progression.holeMetresFor`), and `sm.depth` is the contract's own
+           unit — bolts, piles, tunnel advance — which on a bolter differs by
+           two orders of magnitude. Two quantities, one preposition. */
+        const changed = sm.bitsChanged ? plural(sm.bitsChanged, 'crown') + ' changed downhole' : null;
+        const used = sm.wearUsed === null ? null : `${pct(sm.wearUsed)} of the crown consumed`;
+        wearNote.textContent = [changed, used].filter(Boolean).join(' · ')
+          || (measured ? '' : 'Wear on this run was not recorded.');
         for (const w of sm.wornOther) {
+          if (!Number.isFinite(w.from) || !Number.isFinite(w.to)) continue;
           wearList.appendChild(C.SpecRow(w.name,
             `${Math.round(clamp(w.from, 0, 1) * 100)}% → ${Math.round(clamp(w.to, 0, 1) * 100)}%`));
         }

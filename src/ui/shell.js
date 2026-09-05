@@ -129,6 +129,10 @@ export function createUI(ctx) {
   let bootElapsed = 0;
   let externalProgress = null;    // set by setLoadingProgress
   let disposed = false;
+  /* The window between HOLE_COMPLETE and the results mount, and whatever the
+     settlement announced inside it. See the LEVEL_UP handler in wire(). */
+  let holeSettling = false;
+  let pendingLevelUp = null;
   const unsubs = [];
   const toasts = [];              // { el, life }
   let overlayStack = [];
@@ -463,6 +467,34 @@ export function createUI(ctx) {
       ?? ctx.game?.xpToNext?.(lvl)
       ?? Math.round(120 * Math.pow(lvl, 1.35)),
 
+    /**
+     * Progress INSIDE the current level — `{ into, need, frac }` — for every
+     * XP bar and ring in the UI.
+     *
+     * ── WHY THIS EXISTS ──────────────────────────────────────────────────
+     * Three screens drew `state.player.xp / app.xpForLevel(level)`: results
+     * (the payoff bar), career (the ladder bar) and menu (the level ring).
+     * With progression mounted, `state.player.xp` is CUMULATIVE LIFETIME xp
+     * (game/data.js `LEVELS.cumulative`) while `xpForLevel(l)` is ONE level's
+     * increment. That ratio divides a lifetime by a level: it passes 1 during
+     * level 2 and every bar in the game is pinned full from then on, for ever.
+     * data.js already answers the real question — `xpProgress(xp)` — and
+     * nothing was calling it.
+     *
+     * The two XP semantics in this codebase are why this takes the level as
+     * well: WITHOUT progression, results.js `applyRewards()` subtracts the
+     * requirement on level-up, so `state.player.xp` is xp INTO the level and
+     * the cumulative curve would be the wrong lookup. Progression mounted is
+     * the shipping case and is the first branch.
+     */
+    xpProgress(xp, lvl) {
+      const v = Math.max(0, Number(xp) || 0);
+      const f = ctx.game?.xpProgress;
+      if (ctx.progression && typeof f === 'function') return f(v);
+      const need = app.xpForLevel(lvl || 1) || 1;
+      return { level: lvl || 1, into: v, need, frac: Math.min(1, v / need) };
+    },
+
     /** Target depth, whatever the data source calls it. */
     targetOf,
 
@@ -600,12 +632,27 @@ export function createUI(ctx) {
     on(EVENTS.LEVEL_UP, (p) => {
       haptic('success');
       const lvl = p?.level ?? state.player?.level ?? 1;
-      // One key for every level-up: two levels in one settlement collapse to
-      // the level the player actually ended on.
-      // RESULTS renders its own level-up block inside the XP bar, and a toast
-      // here lands squarely on `.results__actions` — the only way off the
-      // screen. Let the screen own it there.
-      if (current?.id !== SCENES.RESULTS) {
+      /* One key for every level-up: two levels in one settlement collapse to
+         the level the player actually ended on.
+
+         ── WHY THIS IS HANDED ON RATHER THAN JUST SUPPRESSED ────────────────
+         The toast was skipped when RESULTS was already current, because a
+         toast lands squarely on `.results__actions` — the only way off that
+         screen — and the comment said "the screen owns it there". The screen
+         did not: a settlement's LEVEL_UP is emitted DURING
+         progression.completeHole(), which runs after this file's
+         HOLE_COMPLETE handler and before the microtask that mounts RESULTS.
+         So `current` was still the SITE screen, the toast fired over a screen
+         that was one microtask from being replaced, and the results screen —
+         whose own level-up block reads `state.player.level > lvlBefore`, both
+         read AFTER progression had already levelled the player — could never
+         satisfy it. A level-up was announced nowhere the player could read it.
+
+         It is now carried across that microtask and mounted WITH the results,
+         which is what "the screen owns it" was supposed to mean. */
+      if (holeSettling || current?.id === SCENES.RESULTS) {
+        pendingLevelUp = p || { level: lvl };
+      } else {
         const role = CAT.roleAt(lvl);
         toast(role ? `Level ${lvl} — ${role.title}` : `Level ${lvl}`, 'amber', { key: 'levelup' });
       }
@@ -677,8 +724,20 @@ export function createUI(ctx) {
          this drains, every listener — progression included — has run to
          completion and the ledger head is this hole. Deliberately a
          microtask and not a frame: the screen must still change in the same
-         turn, so nothing paints in between. */
-      queueMicrotask(() => show(SCENES.RESULTS, { result: p }));
+         turn, so nothing paints in between.
+
+         `holeSettling` marks that window for the LEVEL_UP handler above: a
+         level-up emitted inside it belongs to THIS settlement and is handed
+         to the results screen instead of being toasted over a screen that is
+         about to be replaced. */
+      holeSettling = true;
+      pendingLevelUp = null;
+      queueMicrotask(() => {
+        const levelUp = pendingLevelUp;
+        pendingLevelUp = null;
+        holeSettling = false;
+        show(SCENES.RESULTS, { result: p, levelUp });
+      });
     });
 
     on(EVENTS.QUALITY_CHANGE, (p) => current?.inst.onQuality?.(p));
