@@ -1821,12 +1821,48 @@ function simOpenRegions(sim) {
 /**
  * Play a whole career and report where the curve bends.
  *
- * @param {number} hours            in-game hours to simulate
- * @param {{seed?:number, grade?:string, verbose?:boolean, startMoney?:number}} [opts]
+ * ⚠ `grade` AND `verbose` WERE DOCUMENTED HERE AND NEVER READ. The destructure
+ * took `seed` and `startMoney` and nothing else, so `simulateCareer(600, {
+ * grade: 'D' })` — the natural thing to write, and exactly what a "can the
+ * player go broke?" measurement wants — silently reported the DEFAULT career
+ * and looked like an answer. That is the same defect
+ * `auditMethodProfitability` carries a warning about forty lines below, in the
+ * same file, after it cost two agents a balance decision each. A JSDoc line is
+ * a promise; an unread one is a trap with a comment on it.
+ *
+ * `grade` is now honoured, and `policy` is the option the measurement actually
+ * needed: the simulated player's own competence is the thing under test.
+ *
+ * @param {number} hours  in-game hours to simulate
+ * @param {{seed?:number, startMoney?:number, grade?:string,
+ *          policy?:'per-hour'|'payout'|'first'}} [opts]
+ *        `grade` pins every job to one letter instead of the drifting roll —
+ *          use 'D' for a player who never does good work.
+ *        `policy` is HOW THE PLAYER CHOOSES, and it is the whole question in
+ *          "is the best move ever non-obvious":
+ *            'per-hour' (default) the best net per hour on the board — a
+ *                       contractor who values their time. The original, and
+ *                       the only behaviour this function used to have.
+ *            'payout'   the highest number on the card. What the board
+ *                       actually invites, and what an unadvised player does.
+ *            'first'    the first runnable card. A player who is not choosing
+ *                       at all, which is the floor the other two are worth
+ *                       measuring against.
  * @returns {Object} balance report
  */
 export function simulateCareer(hours = 600, opts = {}) {
-  const { seed = 20260903, startMoney = 4500 } = opts;
+  const {
+    seed = 20260903, startMoney = 4500, grade: gradeOverride = null,
+    policy = 'per-hour',
+  } = opts;
+  if (opts.verbose !== undefined) {
+    warnOnce('[economy] simulateCareer: `verbose` is not implemented and never '
+      + 'was. The report is the return value; nothing is printed.');
+  }
+  if (!['per-hour', 'payout', 'first'].includes(policy)) {
+    warnOnce(`[economy] simulateCareer: unknown policy "${policy}" — falling `
+      + 'back to "per-hour". Known: per-hour, payout, first.', policy);
+  }
   const rand = makeRandom(seed);
 
   const sim = {
@@ -1846,20 +1882,25 @@ export function simulateCareer(hours = 600, opts = {}) {
 
   let guard = 0;
   while (sim.hours < hours && guard++ < 20000) {
-    // Grade drifts upward as the player gets better at the game.
+    // Grade drifts upward as the player gets better at the game — unless the
+    // caller pinned it, which is how a deliberately bad player is measured.
     const skillish = clamp((sim.level - 1) / 40, 0, 1);
     const roll = rand.f();
-    const grade = roll < 0.08 + skillish * 0.28 ? 'S'
+    const grade = gradeOverride || (roll < 0.08 + skillish * 0.28 ? 'S'
       : roll < 0.3 + skillish * 0.35 ? 'A'
       : roll < 0.72 ? 'B'
-      : roll < 0.94 ? 'C' : 'D';
+      : roll < 0.94 ? 'C' : 'D');
 
     const open = simOpenRegions(sim);
     const region = open.length
       ? open.slice().sort((a, b) => b.payMult - a.payMult)[rand.f() < 0.7 ? 0 : Math.min(1, open.length - 1)]
       : REGIONS[0];
 
-    // Look at a small board and take the best net-per-hour job that is runnable.
+    /* Look at a small board and pick by `policy`. The three rankings are
+       measurably different boards: `checkcareer`'s BOARD probe finds the
+       highest-paying card is also the best euro-per-hour card on under a
+       quarter of draws, so 'payout' is not a worse version of 'per-hour' — it
+       is a different player. */
     let best = null;
     for (let i = 0; i < 5; i++) {
       const c = makeContract(region.id, sim.level, rand);
@@ -1874,7 +1915,13 @@ export function simulateCareer(hours = 600, opts = {}) {
         rigCondition: (sim.rigCondition || {})[rig.id] ?? 1,
       });
       const perHour = probe.net / Math.max(0.5, probe.hours);
-      if (!best || perHour > best.perHour) best = { contract: c, rig, loadout, probe, perHour };
+      const cand = { contract: c, rig, loadout, probe, perHour };
+      if (!best) { best = cand; if (policy === 'first') break; continue; }
+      if (policy === 'first') break;
+      const better = policy === 'payout'
+        ? c.payout > best.contract.payout
+        : perHour > best.perHour;
+      if (better) best = cand;
     }
 
     // Nothing runnable, or the wallet is empty: take the call-out job.
@@ -1967,6 +2014,10 @@ export function simulateCareer(hours = 600, opts = {}) {
   }
 
   return {
+    /* WHAT WAS ACTUALLY MEASURED, echoed back. A report that does not say
+       which player it played is the thing that made the unread `grade`
+       survivable for as long as it did. */
+    policy, grade: gradeOverride ?? 'drifting', seed, startMoney,
     simulatedHours: +sim.hours.toFixed(1),
     contracts: sim.contracts,
     emergencyContracts: sim.emergencies,
