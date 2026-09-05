@@ -24,6 +24,35 @@ constant below is tagged with the source it came from:
        on-board compressor, FOPS/ROPS cab, dust collection with primary
        separator, 9 working lights, hose reel with 3660 mm drill steel,
        EN 16228 safety cage for the feed.
+  [S5] Epiroc "PowerROC T35 MkII" brochure 9868 0035 01e (added 2026-09-05).
+       https://www.epiroc.com/content/dam/epiroc/surface-and-exploration/
+       1-surface-drill-rigs/3-powerroc/brochures/powerroc-t35/
+       9868%200035%2001e%20PowerROC%20T35%20MKII%20brochure%20English-LR.pdf
+       PDF p.4 carries a dimensioned GA — side views labelled L1, L2, H1, H2,
+       h2, l1, l2 and a PLAN view labelled W1 — beside the table those letters
+       belong to.  It is the only sheet found where length, width, height,
+       feed height, cab height, track dimensions and weight all come off ONE
+       labelled table on ONE page:
+         L1 8 900 / L2 9 030 mm · W1 2 430 mm · H1 3 126 / H2 2 986 mm ·
+         feed height h1 7 820 mm · cab height h2 2 925 mm ·
+         track l1 3 175 / l2 4 750 mm · weight 14 000 kg (Tier 3) ·
+         CAT C7.1 168 kW at 2 200 rpm · compressor 9.3 bar, FAD 130 l/s ·
+         feed total 7 820, travel 4 400, extension 1 500 mm, force 21 kN ·
+         hole 64-115 mm, T38/T45/T51 · single-pass rod 4 270 x1, extension
+         3 660 x6 to 25 m · BOOM extension 800 mm, lift +55 / -20 deg,
+         swing 43 deg right / 15 deg left.
+       WHY IT IS HERE: [S1]'s 2.45 m was the only published WIDTH this file
+       had, and ASTRA.md §7.5 still lists this machine as "100 % NOT SOURCED
+       on dimensions".  Both are out of date.  2.45 m is now corroborated
+       across five model lines — Sandvik Ranger DX600/DX700/DX800/DX800i/DX900i
+       all 2.45 m, PowerROC T35 2.430, FlexiROC T35 2.490 (plan callout),
+       PowerROC T25 DC 2.350, FlexiROC T30 R 2.410 — and nothing in the class
+       exceeds ~2.5 m, because road transport caps it.  WIDTH = 2.45 stands.
+       [S5] is also the source for the boom angles, which no other sheet gives.
+       A trap worth recording: a widely-circulated snippet claims the T35 R is
+       "3 200 mm wide".  3 200 is H1, the HEIGHT.  Neither T35 brochure
+       publishes a width row at all.
+
   [S2] Epiroc "FlexiROC T35 and T40" brochure 9868 0058 01a, 2019-04, Orebro.
        Weight 15 500 kg · transport H1 3 200 / L1 11 600 mm and H2 3 500 /
        L2 11 000 mm · engine 168 kW at 2 200 rpm · feed extension 1 400 mm,
@@ -82,7 +111,31 @@ D2R = math.pi / 180.0
 C = bpy.context
 
 # ── CARRIER ───────────────────────────────────────────────────────────────────
-WIDTH      = 2.45      # [S1] published machine width
+WIDTH      = 2.45      # [S1] published machine width, corroborated 4x by [S5]
+                       #
+                       # WHAT `glbinfo` REPORTS, AND WHY IT IS NOT 2.45.
+                       # The model measured 2.765 m — 13 % over its own master
+                       # dimension, with SHOE_W and GAUGE both derived from it.
+                       # Three faults are now fixed (a wing mirror at -1.460, a
+                       # final drive built outboard to +1.305, and the cab 30 mm
+                       # too far left) and every STATIC on the machine now lies
+                       # inside +/-1.231 — the 6 mm is one track guard's bevel.
+                       #
+                       # The tool still reports 2.603, and that number is
+                       # CORRECT AND MUST NOT BE "FIXED".  The whole of the
+                       # excess is one object: `boom-fold`'s chrome fold-ram
+                       # rod, at x = -1.373, because the machine is exported
+                       # with the boom SWUNG AND FOLDED into its working pose.
+                       # crawler-th.md §3 calls that overhang "the single most
+                       # characteristic proportion of the class" — the boom
+                       # carries the feed forward and to one side so the hole is
+                       # clear of the undercarriage.  A top-hammer crawler whose
+                       # boom sits inside its own track width is a top-hammer
+                       # crawler that cannot drill.
+                       # ASTRA.md §5: the overall bound of a model is not its
+                       # width.  Before touching this constant, run
+                       #   node tools/glbinfo.mjs --parts public/models/crawler-th.glb
+                       # and find which subtree reaches the extreme.
 SHOE_W     = 0.55      # derived: WIDTH = track gauge + one shoe width
 GAUGE      = WIDTH - SHOE_W                     # 1.90 m centre to centre
 TRACK_LEN  = 3.75      # DERIVED, not published.  [S4] shows the track visibly
@@ -104,7 +157,14 @@ BODY_REAR  = 2.16
 # ── SUPERSTRUCTURE ────────────────────────────────────────────────────────────
 ENC_Y0, ENC_Y1 = 0.10, 2.10      # engine + compressor enclosure, fore and aft
 ENC_H      = 1.35                # roof at DECK_Z + ENC_H = 2.34 m
-CAB_X      = -0.66               # cab forward and LEFT of the boom [S4]
+CAB_X      = -(WIDTH / 2 - 0.595)  # -0.630.  Cab forward and LEFT of the boom
+                       # [S4], and its X is now DERIVED FROM WIDTH rather than
+                       # set by eye.  0.595 is how far the outermost cab
+                       # furniture (the door guard bars) stands from CAB_X, so
+                       # this places those bars exactly ON the published
+                       # machine width and nothing on the cab passes it.
+                       # Was -0.66, which put them at -1.255 — 30 mm outside
+                       # the one dimension every other constant here hangs off.
 CAB_W, CAB_D, CAB_H = 1.08, 1.34, 1.79
 
 # ── BOOM ──────────────────────────────────────────────────────────────────────
@@ -403,8 +463,15 @@ def build_undercarriage():
             y = -a * 0.42 + (a * 0.84) * i
             clone(roller, (cx - SHOE_W * 0.21, y, ax_z + 0.30), (0, math.pi / 2, 0),
                   name='croller_%d_%d' % (side, i))
+        # Final drive on the INBOARD face of the track frame, which is where
+        # it lives on every excavator-type crawler — the sprocket end has to be
+        # protected and the shoe is the outermost thing on the machine.
+        # It used to be built with rot=(0, side*pi/2, 0), and tube() extends
+        # along its local +Z, so BOTH sides pushed the housing outboard: 0.300 m
+        # of it, ending at x = 1.305 against a WIDTH/2 of 1.225. It was the
+        # widest static on the right-hand side of the machine.
         tb('finaldrive_%d' % side, 0.20, 0.30, R.MAT_CAST, None,
-           (cx + SHOE_W * 0.10, a, ax_z), (0, side * math.pi / 2, 0), 12)
+           (cx - side * SHOE_W * 0.10, a, ax_z), (0, -side * math.pi / 2, 0), 12)
 
     # [S2] hydraulic track oscillation — so there is a real transverse pivot
     bx('undercarriage_beam', (GAUGE + 0.10, 0.62, 0.34), R.MAT_DARK,
@@ -600,10 +667,19 @@ def build_superstructure():
        (-math.pi / 2, 0, 0), 8)
     bx('wiper', (0.016, 0.016, 0.52), R.MAT_DARK,
        loc=(CAB_X + 0.16, cy - CAB_D / 2 - 0.06, cz + 0.02), rot=(0.5, 0, 0), bevel=0.003)
-    bx('mirror', (0.20, 0.05, 0.15), R.MAT_DARK,
-       loc=(CAB_X - CAB_W / 2 - 0.16, cy - CAB_D * 0.34, cz + 0.55), bevel=0.01)
-    tb('mirror_arm', 0.016, 0.20, R.MAT_DARK, None,
-       (CAB_X - CAB_W / 2 - 0.02, cy - CAB_D * 0.34, cz + 0.60), (0, -math.pi / 2, 0), 8)
+    # THE MIRROR WAS THE WIDEST THING ON THE MACHINE.  A 0.20 m head on a
+    # 0.20 m arm reached x = -1.460 against WIDTH/2 = 1.225 — 235 mm of
+    # unsourced decoration setting the overall bound of a machine whose width
+    # is the one published dimension it has ([S1], corroborated three more
+    # times by [S5]).  ASTRA.md §5 in miniature: the bound was a MIRROR.
+    # Rebuilt as what this class actually carries — a flat convex plate on a
+    # stub bracket, mounted edge-on against the door pillar — and positioned
+    # FROM WIDTH so it can never drift out again.
+    MIRROR_X = -(WIDTH / 2 - 0.025)               # outer face lands on 1.225
+    bx('mirror', (0.05, 0.20, 0.15), R.MAT_DARK,
+       loc=(MIRROR_X, cy - CAB_D * 0.34, cz + 0.55), bevel=0.01)
+    tb('mirror_arm', 0.016, 0.03, R.MAT_DARK, None,
+       (CAB_X - CAB_W / 2 + 0.03, cy - CAB_D * 0.34, cz + 0.60), (0, -math.pi / 2, 0), 8)
 
     # ── walkway, kick plate, handrails, ladder ───────────────────────────────
     bx('walkway', (BODY_W - 0.06, 0.92, 0.05), R.MAT_WORN,
@@ -709,6 +785,19 @@ def build_boom():
 
     swing = R.empty(R.NODE_PIVOT, 'boom-swing', None, (KING_X, KING_Y, KING_Z),
                     (0, 0, BOOM_SWING))
+    # THE BOOM IS THE FEATURE, AND IT DECLARED NOTHING.
+    # Eleven of this machine's thirteen named nodes shipped with no `extras` at
+    # all, these four among them — so the folding articulated boom, the single
+    # thing that separates this class from a DTH crawler and from a piling rig,
+    # published no range and the game had nothing to drive it with.
+    # Angles are [S5], PowerROC T35 brochure p.4, "Boom" block, verbatim:
+    # "Boom swing 43 deg right / 15 deg left", "Boom lift +55 deg / -20 deg",
+    # "Boom extension 800 mm".  Left/right are given from the operator's seat;
+    # this file's +X is the operator's RIGHT, and the pose is swung to the LEFT
+    # (BOOM_SWING = -6 deg), so the published pair maps to [-15, +43].
+    swing['range_deg'] = [-15.0, 43.0]
+    swing['axis'] = 'z'
+    swing['rest_deg'] = BOOM_SWING / D2R
     sg = [bx('kingpost', (0.46, 0.46, 0.60), R.MAT_DARK, swing, (0, 0, -0.06), bevel=0.02),
           tb('kingpin', 0.085, 0.72, R.MAT_CHROME, swing, (0, 0, -0.34), (0, 0, 0), 12),
           bx('swing_yoke', (0.52, 0.36, 0.34), R.MAT_CAST, swing, (0, -0.08, 0.22),
@@ -719,6 +808,9 @@ def build_boom():
     weld(sg, 'boom-swing', swing)
 
     lift = R.empty(R.NODE_PIVOT, 'boom-lift', swing, (0, -0.10, 0.24), (BOOM_LIFT, 0, 0))
+    lift['range_deg'] = [-20.0, 55.0]        # [S5] p.4 "Boom lift +55 / -20"
+    lift['axis'] = 'x'
+    lift['rest_deg'] = BOOM_LIFT / D2R
     lg = [bx('boom1', (0.34, BOOM1_LEN, 0.42), R.MAT_PAINT, lift,
              (0, -BOOM1_LEN / 2, 0), bevel=0.024),
           bx('boom1_taper', (0.28, BOOM1_LEN * 0.34, 0.30), R.MAT_PAINT, lift,
@@ -745,6 +837,14 @@ def build_boom():
     weld(lg, 'boom-lift', lift)
 
     fold = R.empty(R.NODE_PIVOT, 'boom-fold', lift, (0, -BOOM1_LEN, 0.04), (BOOM_FOLD, 0, 0))
+    # NOT SOURCED as an angle: no sheet in [S1]-[S5] publishes the knuckle's
+    # own travel.  What IS sourced is that the pair must fold the feed down for
+    # tramming ([S2] transport height H1 3 200 mm with the feed dumped) and
+    # raise it past vertical in work, so the range is stated as the span the
+    # posed geometry needs and is flagged rather than dressed up as published.
+    fold['range_deg'] = [0.0, 110.0]         # NOT SOURCED — see note above
+    fold['axis'] = 'x'
+    fold['rest_deg'] = BOOM_FOLD / D2R
     fg = [bx('boom2', (0.30, BOOM2_LEN, 0.34), R.MAT_PAINT, fold,
              (0, -BOOM2_LEN / 2, 0), bevel=0.022),
           bx('boom2_knuckle', (0.40, 0.34, 0.40), R.MAT_CAST, fold, (0, 0.02, 0), bevel=0.02),
@@ -789,6 +889,13 @@ def build_cradle(fold):
     # end up raked FEED_RAKE off vertical, so the joint takes the difference.
     tilt = R.empty(R.NODE_PIVOT, 'feed-tilt', fold, (0, -BOOM2_LEN, 0),
                    (-FEED_RAKE - BOOM_LIFT - BOOM_FOLD, 0, 0))
+    # crawler-th.md §4 quotes the source on the feed roll/tilt cylinder
+    # "swinging the beam from vertical through to past horizontal", which is
+    # the range published here.  The rest pose is the one field configuration
+    # [R2] gives: 20 m holes at 15 deg off vertical, in granite.
+    tilt['range_deg'] = [-95.0, 5.0]
+    tilt['axis'] = 'x'
+    tilt['rest_deg'] = -FEED_RAKE / D2R
     cg = [tb('rotator', 0.17, 0.34, R.MAT_CAST, tilt, (-0.17, 0.16, 0),
              (0, math.pi / 2, 0), 14),
           bx('cradle', (0.52, 0.46, 0.90), R.MAT_PAINT, tilt, (0, BEAM_FWD + 0.33, 0),
@@ -861,6 +968,8 @@ def build_feed(tilt):
     """
     # local frame: origin at the BEAM FOOT, +Z up the beam, +Y toward the cradle
     slide = R.empty(R.NODE_SLIDE, 'feed-extend', tilt, (0, BEAM_FWD, -CRADLE_UP))
+    slide['travel_m'] = FEED_EXT             # [S2] feed extension 1 400 mm
+    slide['axis'] = 'z'
     g = [bx('beam', (BEAM_W, BEAM_D, BEAM_LEN), R.MAT_STEEL, slide,
             (0, 0, BEAM_LEN / 2), bevel=0.010)]
     # the two machined rails the carriage runs on, standing proud of the section
@@ -930,7 +1039,12 @@ def build_feed(tilt):
            tb('coupling', ROD_DIA * 0.72, 0.15, R.MAT_STEEL, carr, (0, ax, -1.06),
               (0, 0, 0), 10)]
     # where the game hangs the live bit and the rest of the string
-    R.empty(R.NODE_MOUNT, 'tool-anchor', carr, (0, ax, -0.98))
+    # `mount:tool`, NOT `mount:tool-anchor`.  src/core/gltfRig.js makeDyn()
+    # does `nodes.mounts.get('tool') || nodes.slides.get('carriage')` — with the
+    # old name the lookup missed and fell through to the carriage, so a tool did
+    # attach, silently, at the carriage origin instead of at the chuck, 0.98 m
+    # up the drifter. A working fallback that hides the fault: ASTRA.md §8.
+    R.empty(R.NODE_MOUNT, 'tool', carr, (0, ax, -0.98))
     # the drifter's own hoses, which MUST move with it
     for i, xo in enumerate((-0.11, -0.04, 0.04, 0.11)):
         cg.append(curve_to_mesh(R.hose(
