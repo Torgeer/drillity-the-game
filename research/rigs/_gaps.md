@@ -13,9 +13,9 @@ by how embarrassing it would be to a working driller.**
 
 ## 0. Contents
 
-- **§1 The tooling unlock** — three capabilities the library was written without,
-  two of which had been recorded as permanently impossible. Read this first; it
-  changes what a follow-up run can do.
+- **§1 The tooling unlock** — four capabilities the library was largely written
+  without, one of which had been recorded as permanently impossible. Read this
+  first; it changes what a follow-up run can do.
 - **§2 References ranked by how weak they are**
 - **§3 Catalogues nobody has read** — the explicit list
 - **§4 The photo library, and where it runs out**
@@ -69,7 +69,30 @@ errors='replace')` fixes it.
   was reconstructed from — were converted into scratchpad and the method noted in
   `_photos.md` so the next reader does not hit the same wall.
 
-### 1.2 The session's WebSearch budget is exhausted
+### 1.2 There are native CAD models in `Downloads`, and they can be opened
+
+`C:\Users\henri\Downloads` contains **Autodesk Inventor assemblies and parts**,
+not only PDFs — `1524,4 CC sm carb comp\`, `88,9 ff sm carb comp\`,
+`Aarsleff Outerbit\` and `lost bit 178 x 190\` each hold `.iam` / `.ipt` files
+for overburden tooling. An **Inventor bridge is available in this environment**,
+and they can be opened **read-only** to pull a **BOM** and **mass properties**.
+
+This is the strongest form of evidence in the whole library. On
+`tools-overburden` the BOM independently confirmed the printed catalogue to three
+decimals (**20 × HM10 buttons plus 6 stud pins on the crown; 24 × HM10 on the
+head**), and a bounding-box measurement settled the carbide-exposure question
+outright — **crown body 170.001 mm → assembly 175.000 mm, so exactly 5.0 mm of
+projection**. **Where a CAD model exists, measure it rather than reading a number
+off a page.**
+
+**Discipline that was followed and should be repeated:** open read-only, never
+save, close every document afterwards, and close with `skip_save` anything a
+query has marked dirty. Inventor was left with zero open documents.
+
+**Nobody has checked whether CAD models exist for any other tool family.** That
+is worth ten minutes and it could be the cheapest accuracy win available.
+
+### 1.3 The session's WebSearch budget is exhausted
 
 **200 of 200 calls used.** From that point, only direct `WebFetch` on a guessed
 URL was possible. For `raisebore`, whose local sourcing is almost nil, three of
@@ -95,8 +118,19 @@ are long precisely because they spend their length being honest about gaps.
 | 5 | **`tools-core-dth`** | Confident on the geometry it covers, but **fourteen further catalogues on the same subject went unread**, including **five water-powered DTH hammer datasheets** — a genuinely different machine that **nothing in the library covers at all**. |
 | 6 | **`tools-kelly-foundation`** | Two excellent primaries, one of which had never been opened. **Ten single-product datasheets were left unread** and several almost certainly carry the dimensioned drawing of an individual tool that the document could not find. Tooth and tooth-holder dimensions are named but never dimensioned anywhere. |
 
-*(Rows for `hdd-rig`, `tools-overburden`, `tools-bits-carbide`, `tools-rods-pipe`
-and `tools-anchors-sda` are appended when those documents land.)*
+**At the other end of the scale — the strongest document in the library is
+`tools-overburden`**, and it should be the template for what "well sourced"
+means here. It rests on the owner's own manufacturing drawings, a 63-page casing
+drawing set, four native CAD models measured directly (§1.3), and a published
+table that pins the eccentric expanded/retracted relationship across 46 rows and
+four system families. Its one real gap is stated plainly: **the eccentric reamer
+itself has no drawing anywhere in the folder**, so its arm length, plate
+thickness, hinge-pin diameter, hinge offset, cutting-flank shape and swing
+mechanism are all `NOT SOURCED`. The diameters constrain that mechanism; they do
+not describe it.
+
+*(Rows for `hdd-rig`, `tools-bits-carbide`, `tools-rods-pipe` and
+`tools-anchors-sda` are appended when those documents land.)*
 
 The **fourteen references written before this run** (`foundation-bg`, `cfa-rig`,
 `piling-leader`, `tunnel-jumbo`, `bolter`, `longhole-rig`, `core-rig`, `rc-rig`,
@@ -220,19 +254,312 @@ architecture for a boom jumbo.
 
 ## 5. Domain-truth warnings, deduplicated and ranked
 
-*Filled in below once the last documents land.*
+**Ranked by how embarrassing it would be to a working driller**, not by how hard
+it is to fix. Tier A items are ones where the object as modelled **could not
+exist or could not do its job** — a driller does not need to measure anything to
+see them. Tier D items are proportion errors that only a specialist would catch.
+
+Each entry names the reference that carries the full argument. **None of these
+were fixed by this work — `research/rigs/` is documentation only, and nothing
+under `src/` was touched.**
+
+### Tier A — the geometry contradicts itself
+
+These are the ones that get laughed at. Note that `HANDOFF.md` §8E already names
+this exact failure class from a previous round — *"an Odex eccentric that could
+not have come out of its own hole… a ring bit advertised as cutting 0.146 mm… a
+belling tool whose arms crossed the centreline"* — and its instruction stands:
+**read the figure off the mesh.**
+
+**A1. Three of the game's five DTH hammers are wider than the smallest hole their
+own size class is specified to drill.** `tools-core-dth.md` §9.2. The
+manufacturer's rule is explicit that the hammer's outside diameter is the
+limiting factor on hole size. Game 5″ hammer OD **133 mm** against a minimum
+recommended hole of **130 mm**; 6″ **159** against **152**; 8″ **210** against
+**200**. The hammer cannot enter its own hole. Real ODs are 117 / 138 / 181 mm.
+
+**A2. The raise borer's hold-down could not hold it down.** `raisebore.md` §9.2.
+The machine is grouted and rock-bolted to a concrete floor to react its pull into
+the rock; the game holds it with **four chrome rods 28 mm in diameter** against
+its own claimed **4 500 kN of pull** — roughly **1 830 N/mm²**, far beyond any
+structural steel. They also read as hydraulic rods, which is the opposite of what
+they are.
+
+**A3. A production platform is drawn with a moonpool.** `oil-derrick.md` §9.B,
+and open defect #7 in `HANDOFF.md`. A moonpool is a hull opening; a fixed
+platform bolted to the seabed has no hull. `data.js` states in its own comment
+that the archetype is a fixed installation, and `terrain.js` draws the hull
+opening anyway. The correct geometry — a **well-slot grid with a skidding drill
+floor**, conductors standing in rows — is now sourced.
+
+**A4. A bored-pile casing joint must not intrude into the bore.**
+`tools-kelly-foundation.md` §9.3. Casings are **double-walled specifically so the
+string has a continuous flush bore** and a bucket coming up cannot snag on a
+coupling. Any casing mesh with a proud coupling inside the bore describes a tool
+that would jam on its first trip. This is A1 and the historic Odex error in a
+third family.
+
+**A5. The concentric string does not line up, so the pilot could not be
+retrieved.** `tools-overburden.md`. The sourced ladder closes exactly — **casing
+bore Ø128 = crown bore Ø128 > pilot head Ø125**, three millimetres of diametral
+clearance the whole length of the hole — and *that continuity is the reason the
+pilot can come back up inside its own casing*. The game **necks the crown bore
+4–5 % under the casing bore**, worst case `ringId = ro * 0.70` in
+`buildRingBitSystem`. A pilot that cannot be withdrawn is the same class of error
+as A1 and A4.
+
+**A6. The wing bit is under gauge before its buttons are fitted.**
+`tools-overburden.md`. The authored arm geometry puts the open tip at about
+**137 mm on a Ø139.7 mm casing** — i.e. the tool as modelled cuts a hole
+*narrower than the casing it is supposed to clear a path for*, and it
+contradicts its own docstring while doing it.
+
+### Tier B — a number a specialist knows by heart, wrong by a lot
+
+**B1. Vibratory hammer frequency is 35–56 % too high.**
+`tools-piling-hammers.md` §9.4. Every normal-frequency machine in the source
+table runs **1 400–1 700 rpm**, falling as the machine grows. The game presets
+are **2 500 rpm at 1 500 kN** (real ≈ 1 600) and **2 300 rpm at 700 kN** (real
+1 700). Frequency is the number a vibro operator knows without looking, and it
+drives both the audio and the shake amplitude.
+
+**B2. Raise-bore cutter counts are wrong at every published diameter, and the
+error is visible.** `raisebore.md` §9.1. Published: 4 / 10 / 14 / 16 / 32 cutters
+at 1 060 / 1 829 / 2 440 / 3 094 / 5 876 mm. The game's `Math.max(6, dia/260)`
+gives **+50 %** on the smallest and **−25 to −36 %** on every larger one. The
+1 800 mm head parked on the floor in every raise-boring scene gets **7 cutters
+where the published count is 10** — and a viewer can count them.
+
+**B3. The offshore racking board holds 14 % of the pipe the rig's own depth
+capacity requires.** `oil-derrick.md`. Sourced: 20 000 ft of 5″ pipe — **219
+trebles or 328 doubles**. The game holds **18 stands** against its own declared
+`depthCapacity: 2400`. It is already an `InstancedMesh`, so this is nearly free
+to fix, and it transforms the silhouette.
+
+**B4. A BOP is a block, not a column — and it nearly fills the substructure.**
+`oil-derrick.md`. A 13⅝″ 10K double ram is 1.69 m tall but **2.90 m long**,
+growing to **4.39 m with the bonnets open**. Annular plus single plus double is
+**4.13 m of body and 19.3 t** under **6.40 m** of clear height. Two independent
+documents cross-validate: the three preventer weights sum to within 2 % of the
+same rig's own BOP-hoist SWL.
+
+**B5. Impact hammer masses run 25–32 % heavy in the middle of the range.**
+`tools-piling-hammers.md` §9.3. At 9 t of ram the game says **17 800 kg** against
+a real **13 500**; at 16 t, **30 500** against **23 200–24 400**. The check is the
+hammer-mass ÷ ram-mass ratio: real is **1.45–1.60**, the game is **1.91–1.98**.
+
+**B6. The cable-tool chisel mass formula is linear where it should be roughly
+quadratic** — producing a **799 kg bit** when the entire sourced tool string
+weighs **544–907 kg**. `cable-percussion.md`. And the **jars default to a 500 mm
+stroke** when new jars are sourced at **102–127 mm** and are *retired* at
+305–356 mm.
+
+**B7. Every DTH hammer is oversized in both diameter and length**, by **+8 to
++16 %**. `tools-core-dth.md` §9.2. The redeeming detail: the **length-to-diameter
+ratios are close to correct**, so the shape is right and both dimensions are
+simply scaled together — multiplying the whole table by about **0.88** would put
+it on the sourced numbers and preserve the proportions.
+
+**B8. Two `IMPACT_HAMMER` rows are cross-bred from two different real machines.**
+`tools-piling-hammers.md` §9.2. The 30 t row takes energy, stroke and blow rate
+from one hammer and length and weight from a **different** one with a different
+stroke. This is `HANDOFF.md` §8B's *"two tables describing one thing"* appearing
+**inside a single table**.
+
+**B9. Percussive casing wall is modelled at little more than half thickness.**
+`tools-overburden.md`. Sourced wall is **~12–13 mm on every size from Ø88.9 to
+Ø152.4**; the game defaults to **7–8 mm**. Two consequences, and the second is
+the serious one: it **looks like water-well casing** rather than percussive
+casing, and it **silently relaxes the retraction constraint by 14 %** on the
+Ø114.3 eccentric — so a tool that would not really come home appears to.
+
+**B10. The eccentric reamer's expansion sits below every published row.**
+`tools-overburden.md`. `reamR = ro * 1.06` is on the bottom edge of the sourced
+band and **below every entry in the eccentric shoe table**. The sourced range is
+**Expanded ≈ 1.06–1.13 × casing OD**; **1.10–1.14 lands inside both sources.**
+
+### Tier C — a missing feature a driller looks for first
+
+**C1. A Kelly bar has six drive keys and lock recesses between them.**
+`tools-kelly-foundation.md` §9.1–9.2. Published: **six per section**, welded flat
+strips standing only **17–18 mm proud** in 30 mm and 70 mm widths — a low rail,
+not a fin and not a machined spline. **The gaps between the strips are the lock
+recesses**, they are the brightest steel on the tool, and they are the only
+visual difference between a locking bar and a friction bar. A continuous
+unbroken rail is the wrong geometry. **The Kelly is the part a rotary-rig
+operator looks at all day.**
+
+**C2. A drilling bucket needs a hinged bottom and a vent pipe.**
+`tools-kelly-foundation.md` §9.4. Both are catalogue fitment on every bucket.
+Without the vent, a full bucket lifting out of a wet hole is a piston pulling a
+vacuum under itself. **A bucket with a solid bottom is not a bucket.**
+
+**C3. The wireline core barrel is missing half its named components.**
+`tools-core-dth.md` §9.4. The manufacturer's own walkthrough names ten parts; the
+game builds three. Missing, in order of visual value: the **locking coupling with
+its stabilizing pads** (worn flat in service, and the only external feature on
+that coupling), the **landing ring**, the **inner-tube stabilizer**, the **core
+lifter case and core lifter**, and the **reaming shell** — which is not optional,
+because it is the diameter the game's own hole sizes are derived from.
+
+**C4. The cable-tool drilling line must be LEFT lay.** `cable-percussion.md`. It
+turns the tools right, keeping the joints tight, and its untwist on the drop is
+what makes the hole round. **It should be the only left-lay rope in the game.**
+
+**C5. The RC hammer has no shroud.** `tools-core-dth.md` §9.6. The shroud is a
+separate, **larger-diameter** sleeve over the hammer body and it is the visible
+difference between an RC hammer and a DTH hammer. Sourced at five sizes from
+84.1 to 100 mm over an 81 mm body.
+
+**C6. Reaming heads are segmented, and the split lines are free to model.**
+`raisebore.md` §9.4. Base head plus two removable segments (or four to six on the
+extendable type), bolted together at the collar. The split lines and their bolted
+flanges are **lines and bolt circles on a disc that already exists**, and they
+tell the entire story of how a 7-tonne head got into an underground chamber.
+
+**C7. Every auger and every bucket carries a fishtail pilot.**
+`tools-kelly-foundation.md` §9.8. Standard fitment on both. Small, always there,
+and the part that touches the ground first.
+
+**C8. A vibratory hammer has an inverted-U suspension yoke.**
+`tools-piling-hammers.md` §9.4. It is the machine's most recognisable feature and
+the game does not have it. The game also puts the hose manifold on the wrong face
+— at the back near the top, with three hoses, where the reference has a
+**six-coupling plate on the side at mid-height** — and draws the eccentric
+housings as **cylinders protruding through the case** where the real case has
+**flush machined oval pockets in a staggered two-row array**.
+
+**C9. The game's rod threads are single-start; the one rod actually measured is
+3-start.** `tools-rods-pipe.md` §1.1. A three-start thread shows **three helices
+running side by side**, visually three times as coarse as the pitch alone
+suggests. The same drawing shows a **plain guide nose** ahead of the thread that
+stabs and aligns before any thread engages — **no rod in the game has one**.
+
+### Tier D — proportion and scaling errors
+
+**D1. The offshore derrick is 22 % too squat and does not taper enough.**
+`oil-derrick.md` §9.A. Sourced height : base = **5.33 : 1** with crown : base =
+**0.267** (160 ft on a 30 ft base tapering to 8 ft). The game is **4.13 : 1** and
+**0.42** — losing three-fifths of its width where it should lose three-quarters.
+Two one-line fixes.
+
+**D2. The impact-hammer length curve is too steep.**
+`tools-piling-hammers.md` §9.1. Real: a **10× increase in ram mass buys only
+1.62× the length** (exponent ≈ 0.21). The game's exponent is **0.285**, which
+makes its 30 t hammer **2.0 m too long** — nearly 10 % of a 21 m leader.
+
+**D3. A vibratory hammer is a slab, not a box.** `tools-piling-hammers.md` §9.4.
+Sourced L : H : W ≈ **7.3 : 5.9 : 1**; the game builds **1.7 : 1.9 : 1** and makes
+the machine taller than it is long, where every real one is longer than it is
+tall.
+
+**D4. An RC hammer is markedly more slender than a DTH hammer.**
+`tools-core-dth.md` §9.5. Sourced **14.1 diameters long** against **8.1–9.9** for
+a conventional DTH. If the game builds RC on the DTH body proportion it is too
+stubby by about 40 %.
+
+**D5. The reaming shell must be a barely-proud band, not a step.**
+`tools-core-dth.md` §9.7. It runs **0.15–0.32 mm larger on radius** than the bit
+— essentially flush. It does not ream a bigger hole; it holds gauge.
+
+**D6. The raise borer's cutter rings are stepped where the source says the
+profile is flat.** `raisebore.md` §9.3. *"All heads have a flat cutting profile,
+for smooth rotation and low torque demand"* is the one explicit shape statement
+available; the game steps its two cutter rings **120 mm** apart. Flagged as
+unverified rather than wrong — but if the step reads in silhouette it contradicts
+the only thing the source actually says about the shape.
+
+### Tier E — unsourced numbers printed as fact
+
+`PLATFORM_TRUTH.md` Part C rule 7 requires these to carry `sourced: false` and
+never print as fact.
+
+- **`crownHeightMm: 12`** and **`matrixSeries: 'Series 6 (medium-hard)'`** on the
+  core bit — neither supported by anything read (`tools-core-dth.md` §9.8).
+- **The raise borer's entire envelope** — 26 t, 250 kW, 120 kNm, 2 800 kN thrust,
+  4 500 kN pull, 4.6 m column. Not one of these is supported or refuted by any
+  source found (`raisebore.md` §8).
+- **`weightKg: 9400`** on the cable-percussion rig (`cable-percussion.md` §3d).
+- **Every `priceEur` formula.** Game-economy numbers, which is fine — but they
+  should not be presented to the player as specifications.
 
 ---
 
-## 6. Things the game already gets RIGHT
+## 6. Things the game already gets RIGHT — do not "fix" these
 
-*Filled in below once the last documents land.*
+Every round of review costs more when someone "corrects" something that was
+already right. These were checked against primary sources on this run and
+**confirmed**.
+
+**Verified against a source, and subtle:**
+
+- **The `WIRELINE` table is right, and right for a non-obvious reason.**
+  `tools-core-dth.md` §9.1. Every core diameter lands dead centre of its
+  tolerance band, and **every hole diameter lands inside the *reaming shell*
+  band, not the bit band** — which is correct, because the reaming shell is the
+  largest diameter in the string and it is what sizes the hole. **Someone
+  "correcting" these to the bit OD would make the table worse.**
+- **The `piling-leader` hammer spec block is an exact match to a real 9 t
+  hammer** — ram 9 000 kg, 106 kNm, 1 200 mm stroke, 40–100 blows/min, four for
+  four (`tools-piling-hammers.md` §9).
+- **The DTH thread mapping is four for four** — 4″→API 2⅜, 5″→API 3½, 6″→API 3½,
+  8″→API 4½ (`tools-core-dth.md` §9.3).
+- **The 200 mm Kelly box** is confirmed by **two independent catalogues**
+  (`tools-kelly-foundation.md` §9.9).
+- **The raise borer's `pullKn` > `thrustKn`** — correct, and correct for the
+  right reason: reaming is a pulling operation. Its **1.5 m pipe**, **254 mm
+  stem**, **bolted flange** and **sealed-bearing tricone pilot** are all sourced
+  (`raisebore.md` §9.8).
+- **The RC bit's drop-centre face and hemispherical carbide** match the source
+  exactly (`tools-core-dth.md` §9.5).
+
+**Well-observed modelling that should be left alone:**
+
+- **The precast pile is octagonal, not square**, with a chamfer *"on every real
+  pile"*, close-pitched links at **both** ends, and **mould seams down two
+  opposite faces**. A genuinely well-observed model.
+- **The pile helmet comment** — *"the helmet must NOT be a tight fit on the pile
+  head — it has to let the pile rotate when it hits an obstruction"* — is exactly
+  right and is the kind of thing a driller checks.
+- **The vibro clamp's serrated grip teeth** (*"a smooth jaw would drop the
+  pile"*), `alsoExtracts: true`, and the granular-soils application note.
+- **`ramModular: true`** — the ram block really is modular, with 1 t and 2 t
+  extension blocks on one frame.
+- **The impact hammer's bolted side plates with eleven bolts a side** — a hammer
+  is a bolted assembly and it looks like one.
+- **The raise borer's `noMastRaise`** and fixed pivot — it is a reaction frame,
+  not a mast, and it correctly cannot rake.
+- **The raise borer's scattered "pack"** — power pack, control stand and stem
+  rack as separate floor objects joined by hoses. That is the hardest thing about
+  this machine to get right and it is already right.
+- **The parked-reamer comment** in `buildRaisebore` — that on the ream pass the
+  head is climbing on the bottom of the string and must not be merged into the
+  pad — is correct method and a real bug fix.
 
 ---
 
 ## 7. Ratios that must not be scaled
 
-*Filled in below once the last documents land.*
+Several dimensions in this domain are **constant** or **shrink** with size.
+Parameterising them proportionally is the most common way a generated model goes
+wrong, and it goes wrong worst on the biggest, most visible tools.
+
+| ratio | the rule | source |
+|---|---|---|
+| **Auger and bucket head allowance** | **A constant ~615 mm** above the flight or barrel, on every diameter and every length. It is the Kelly box, the spine plate and the lifting eye. **It does not scale.** Scale it and a 2.5 m bucket grows a head four times too tall. | `tools-kelly-foundation.md` §9.5 |
+| **Tooth projection on foundation tools** | **50 mm per side up to Ø900**, rising only to **85 mm at Ø1830** — so as a fraction of diameter it **falls from 19 % to 9 %**. Scale it and large tools look like circular saws. | `tools-kelly-foundation.md` §9.6 |
+| **Impact hammer length** | Grows as **ram^0.21**. A 30 t hammer is barely longer than a 9 t one; it is much fatter and much heavier. **Scale the section, barely the length.** | `tools-piling-hammers.md` §3 |
+| **DTH hammer slenderness** | **Falls** with size: 9.9 diameters at 4″, 8.1 at 8″. Big hammers are relatively stubbier. | `tools-core-dth.md` §3 |
+| **Raise-bore cutter spacing** | **Not** a single line through the origin. About **one cutter per 184 mm of diameter above 1.8 m**, but **265 mm per cutter at 1.06 m** — small heads are deliberately sparser. | `raisebore.md` §3 |
+| **Raise-bore head weight** | Scales as **D^1.4–1.5**, not D². Big heads are **lightened structures with webs and gullets**, not solid plates — the weight figure is a modelling instruction. | `raisebore.md` §3 |
+| **Kelly drive key projection** | **17–18 mm** on tubes from Ø254 to Ø559 — i.e. **7 % of diameter on the smallest bar and 3 % on the largest**. A low rail, and relatively lower as the bar grows. | `tools-kelly-foundation.md` §3 |
+| **Auger weight** | Scales with **diameter, not diameter squared** — a flight is a surface, not a volume. A 2.9× diameter increase buys only 2.0× the weight. | `tools-kelly-foundation.md` §3 |
+| **Hammer total weight ÷ ram weight** | **Falls** with size: 2.00 at 3 t, 1.50 at 9 t, 1.45 at 16 t. | `tools-piling-hammers.md` §3 |
+| **Reaming shell over bit** | A fixed **+0.30 to +0.63 mm on diameter** across the whole size range — it does not scale at all. | `tools-core-dth.md` §3 |
+| **Carbide button exposure** | **Exactly 5.0 mm, on every bit in the overburden family.** A Ø10 × 15 mm button seated 10 mm deep with a spherical R5.0 crown is a true hemisphere, so **the tip never projects further than its own radius.** Confirmed twice — stated in the spec, and measured as a bounding-box difference on the CAD model. | `tools-overburden.md` |
+| **Percussive casing wall** | **Near-constant at ~12–13 mm** from Ø88.9 to Ø152.4, so bore/OD *rises* from 0.72 to 0.84 as the casing grows. **Not proportional.** | `tools-overburden.md` |
+| **Eccentric expanded / retracted** | **Retracted Ø < casing I.D. < casing O.D. < Expanded Ø**, without exception across 46 rows and four system families. Expanded ≈ **1.06–1.13 × casing OD**; Retracted ≈ **0.88–0.93 × casing I.D.**; Expanded ≈ **1.27–1.37 × Retracted**. **This is the checkable rule that would have caught the historic Odex error.** | `tools-overburden.md` |
+| **Ring-bit over-cut** | **6–18 mm on diameter** (3–9 mm of annulus on radius) — never a fraction of a millimetre. The historic "0.146 mm" claim was wrong by two orders of magnitude. | `tools-overburden.md` |
 
 ---
 
@@ -270,7 +597,18 @@ This is exactly the failure mode `HANDOFF.md` §8D describes — *"research that
 fails against its own sources"* — and it was found by re-opening the primary
 document rather than trusting the pack's own voice.
 
-### 8.3 One trap quarantined rather than used
+### 8.3 A second source-vs-source discrepancy, recorded rather than smoothed over
+
+The lost-bit catalogue prints **115.8** as the height of the Ø178 size. The
+release drawing dimensions the same part at **177.37**, and the native CAD model
+measures **177.373**. The catalogue row has transcribed an **intermediate step
+height**, not the overall height. **Model 177.4.**
+
+Two independent confirmations against one printed table is exactly the standard
+`HANDOFF.md` §8D asks for, and it is only possible because the CAD models were
+opened (§1.3).
+
+### 8.4 One trap quarantined rather than used
 
 The same offshore handbook gives a **fully sourced square slot grid at 8–14 ft**
 — but it is a **spar centrewell**, spaced by buoyancy-can diameter, not a jacket
