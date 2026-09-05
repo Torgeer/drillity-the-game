@@ -125,6 +125,81 @@ if (noSim.length) {
   warn.push(`no sim tuning at all for: ${noSim.join(', ')} — these fall back to a default model.`);
 }
 
+/* 5b. hasDrillString — the same class as rodLength, and NOT the same problem.
+ *
+ * This one is a BOOLEAN FACT about the method, it carries no second meaning on
+ * either side, and DOMAIN.md §1a states it in prose: cable-tool and driven-pile
+ * have no drill string. So there is no exemption to carry and it FAILS.
+ *
+ * It has already been wrong once. The sim's table carried the flag on
+ * cable-tool and not on driven-pile, and `getTelemetry()` reads it as
+ * `!== false` — undefined is not false — so a pile published
+ * `hasDrillString: true` and `rods: 1`, and `ui/screens/site.js` keys its beat
+ * caption straight off that field. Nothing looked broken, because the pile's
+ * mechanics happen to be correct by a different route (`rodLength: 0`,
+ * `noJam`). A fact can be wrong while the behaviour is right, and that is the
+ * expensive kind.
+ */
+for (const m of data.METHODS) {
+  const t = simMethods[m.id];
+  if (!t) continue;
+  const a = m.hasDrillString !== false;
+  const b = t.hasDrillString !== false;
+  if (a !== b) {
+    fail.push(`method "${m.id}" hasDrillString: data.js ${a}, sim ${b} — `
+      + `the sim publishes its own answer on telemetry and the HUD reads it.`);
+  }
+}
+
+/* 5c. validGround vs the sim's rockCeilingUcs — the same class again, at the
+ * other end: two tables describing WHAT GROUND THIS METHOD CAN DRILL.
+ *
+ * `data.js` lists the beds a contract may be written in; `sim/drilling.js`
+ * carries a UCS ceiling per method, and above it `ropModel()` rolls the rock
+ * efficiency down to 0.02 and `currentWarning()` raises `method-limit` —
+ * "GROUND TOO HARD FOR THIS METHOD — ABANDON THE HOLE".
+ *
+ * MEASURED, headlessly, one bed of the method's own validGround under 3 m of
+ * clay, competent inputs, 900 s:
+ *
+ *   auger in chalk (12 MPa, ceiling 8)              3.4 m of 20, 0.16 m/h
+ *   site-investigation in sandstone (70, ceiling 60) 2.9 m of 20, 0.08 m/h
+ *   site-investigation in limestone (90, ceiling 60) 2.7 m of 20, 0.06 m/h
+ *   cased-cfa in boulder (140, ceiling 14)           1.5 m of 20, 0.02 m/h
+ *   auger in clay (control)                         20.0 m of 20, 33.6 m/h
+ *
+ * WARN, not FAIL, and deliberately so — neither number can be moved from here:
+ *
+ *   - It is LATENT in the shipped generator today. 6,400 sampled contracts
+ *     across all 8 regions produce no groundSpec that crosses a ceiling.
+ *   - But groundSpec is NOT the column the player drills. `startHole()` takes
+ *     ground from `ctx.geology`, and `world/geology.js` `generateProfile()`
+ *     builds it from REGION RECIPES that consult neither validGround nor any
+ *     sim constant. checkbeds.mjs checks data.js against itself and never asks
+ *     the sim, so nothing in the tree covers this pairing.
+ *   - `boulder` in a validGround list may well mean "copes with boulders in the
+ *     ground" rather than "may bottom in a boulder bed" — a rodLength-shaped
+ *     semantic collision, and resolving it is a content decision.
+ *
+ * Moving a ceiling to silence this would be inventing a drilling fact. Say it
+ * every run instead, and let whoever owns validGround decide.
+ */
+{
+  const { GROUND } = await load('src/core/contract.js');
+  for (const m of data.METHODS) {
+    const t = simMethods[m.id];
+    if (!t || t.rockCeilingUcs == null) continue;
+    const over = (m.validGround || [])
+      .filter((g) => GROUND[g] && GROUND[g].ucs > t.rockCeilingUcs)
+      .map((g) => `${g} ${GROUND[g].ucs} MPa`);
+    if (over.length) {
+      warn.push(`method "${m.id}" validGround contains ground above its own sim `
+        + `rockCeilingUcs ${t.rockCeilingUcs}: ${over.join(', ')} — the sim raises `
+        + `"method-limit — ABANDON THE HOLE" in ground data.js calls valid.`);
+    }
+  }
+}
+
 /* data.js's own self-check -------------------------------------------------
    `validateData()` is ~200 lines of invariants written alongside the tables it
    guards — the underground rule, the depth windows, the payout/cost trap, the
