@@ -105,7 +105,7 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lib'))
 
 import bpy                                    # noqa: E402
-from mathutils import Vector, Matrix          # noqa: E402
+from mathutils import Vector, Matrix, Euler   # noqa: E402
 import rig as R                               # noqa: E402
 
 
@@ -377,6 +377,11 @@ def _apply_mods(o):
 
 def weld_all():
     """Collapse every bin to one mesh. This is the draw-call budget."""
+    # The templates must go FIRST. They are real mesh objects at the origin and
+    # rig.finish() joins every static mesh by material, so a surviving template
+    # would be silently welded into the machine as a stray plate at the well
+    # centre. The stamps hold the mesh DATA, so the geometry is unaffected.
+    _drop_templates()
     for key in _order:
         objs = [o for o in _bins[key] if o.name in bpy.data.objects]
         if not objs:
@@ -407,16 +412,83 @@ def weld_all():
         bpy.context.active_object.name = name
 
 
-def bx(name, size, mat, owner, parent, loc=(0, 0, 0), rot=(0, 0, 0), bevel=0.010,
-       seg=1):
-    o = R.box(name, size, mat, parent, loc, rot, bevel)
-    if bevel > 0 and 'bev' in o.modifiers:
-        o.modifiers['bev'].segments = seg
+# ── TEMPLATE AND STAMP: why this file does not call bpy.ops per part ─────────
+#
+# Every `bpy.ops.mesh.primitive_*_add` triggers a depsgraph update over the
+# WHOLE scene, so the cost of adding the nth object grows with n.  On a lattice
+# derrick with a 219-stand setback that is quadratic and it bites hard:
+# MEASURED at 855 s to build this machine when every part was an ops call.
+#
+# So each distinct (shape, size, material) is built through rig.py's helpers
+# exactly ONCE, as a hidden template, and every instance after that is a
+# `bpy.data.objects.new()` sharing the template's mesh data with its own
+# matrix.  bpy.data.objects.new does not touch the depsgraph, so instancing is
+# flat.  The templates are deleted before the weld, and because the stamps
+# reference the mesh DATA rather than the object, the geometry survives.
+#
+# This changes no dimension.  It is the same geometry, built a different way.
+_templates = {}      # key -> mesh data
+_tpl_objs = []       # the throwaway template objects
+
+
+def _tpl(key, make):
+    if key not in _templates:
+        o = make()
+        _apply_mods(o)
+        _templates[key] = o.data
+        _tpl_objs.append(o)
+    return _templates[key]
+
+
+def stamp(key, name, M, owner, mat, parent, make):
+    """Instance a template into a weld bin.
+
+    THE KEY IS SCOPED BY OWNER, and that is not tidiness. `bpy.ops.object.join()`
+    appends the other objects' geometry INTO THE ACTIVE OBJECT'S MESH DATA. If
+    two weld bins shared one template's data, joining the first bin would
+    rewrite the second bin's mesh underneath it. The lamp housings hit this
+    exactly: the same box, the same material, once on the static root and once
+    on slide:carriage. Sharing inside a single bin is safe - those objects are
+    all about to become one mesh anyway.
+    """
+    o = bpy.data.objects.new(name, _tpl(((owner.name if owner is not None else ''),) + key, make))
+    bpy.context.collection.objects.link(o)
+    o.matrix_basis = M
+    if parent is not None:
+        o.parent = parent
     return B(o, owner, mat)
 
 
+def _drop_templates():
+    for o in _tpl_objs:
+        if o.name in bpy.data.objects:
+            bpy.data.objects.remove(o, do_unlink=True)
+    del _tpl_objs[:]
+
+
+def _xform(loc, rot):
+    return Matrix.Translation(loc) @ Euler(rot, 'XYZ').to_matrix().to_4x4()
+
+
+def bx(name, size, mat, owner, parent, loc=(0, 0, 0), rot=(0, 0, 0), bevel=0.010,
+       seg=1):
+    key = ('box', round(size[0], 5), round(size[1], 5), round(size[2], 5), mat,
+           round(bevel, 5), seg)
+
+    def make():
+        o = R.box('__tpl', size, mat, None, (0, 0, 0), (0, 0, 0), bevel)
+        if bevel > 0 and 'bev' in o.modifiers:
+            o.modifiers['bev'].segments = seg
+        return o
+    return stamp(key, name, _xform(loc, rot), owner, mat, parent, make)
+
+
 def tb(name, r, l, mat, owner, parent, loc=(0, 0, 0), rot=(0, 0, 0), sides=12):
-    return B(R.tube(name, r, l, mat, parent, loc, rot, sides), owner, mat)
+    key = ('tube', round(r, 5), round(l, 5), mat, sides)
+
+    def make():
+        return R.tube('__tpl', r, l, mat, None, (0, 0, 0), (0, 0, 0), sides)
+    return stamp(key, name, _xform(loc, rot), owner, mat, parent, make)
 
 
 def hs(name, pts, r, mat, owner, parent, taut=False, sides=6):
@@ -455,11 +527,15 @@ def _frame(p0, p1, xhint):
     return M, L
 
 
-def _place(o, M, off):
-    """Put an already-built primitive into a frame.  R.box() applies its scale,
-    so matrix_basis carries no scale and can simply be overwritten."""
-    o.matrix_basis = M @ Matrix.Translation(off)
-    return o
+def _plate(name, size, mat, owner, parent, M, off):
+    """One stamped plate, placed by a frame and a local offset.  R.box() applies
+    its scale, so matrix_basis carries none and can simply be overwritten."""
+    key = ('box', round(size[0], 5), round(size[1], 5), round(size[2], 5), mat,
+           0.0, 1)
+
+    def make():
+        return R.box('__tpl', size, mat, None, (0, 0, 0), (0, 0, 0), 0.0)
+    return stamp(key, name, M @ Matrix.Translation(off), owner, mat, parent, make)
 
 
 def wf(name, p0, p1, depth, bf, mat, owner, parent, xhint=(1, 0, 0), tw=None, tf=None):
@@ -475,8 +551,7 @@ def wf(name, p0, p1, depth, bf, mat, owner, parent, xhint=(1, 0, 0), tw=None, tf
             ((tw, depth - 2 * tf, L), (0, 0, L / 2)),
             ((bf, tf, L), (0,  (depth - tf) / 2, L / 2)),
             ((bf, tf, L), (0, -(depth - tf) / 2, L / 2)))):
-        o = R.box('%s-%d' % (name, i), sz, mat, parent, (0, 0, 0), (0, 0, 0), 0.0)
-        B(_place(o, M, off), owner, mat)
+        _plate('%s-%d' % (name, i), sz, mat, owner, parent, M, off)
 
 
 def ang(name, p0, p1, leg, t, mat, owner, parent, xhint=(1, 0, 0)):
@@ -486,19 +561,24 @@ def ang(name, p0, p1, leg, t, mat, owner, parent, xhint=(1, 0, 0)):
     for i, (sz, off) in enumerate((
             ((leg, t, L), ((leg - t) / 2, 0, L / 2)),
             ((t, leg, L), (0, (leg - t) / 2, L / 2)))):
-        o = R.box('%s-%d' % (name, i), sz, mat, parent, (0, 0, 0), (0, 0, 0), 0.0)
-        B(_place(o, M, off), owner, mat)
+        _plate('%s-%d' % (name, i), sz, mat, owner, parent, M, off)
 
 
 def bar(name, p0, p1, r, mat, owner, parent, sides=8, square=False, xhint=(1, 0, 0)):
     """A plain round or square member between two points: rails, rods, pins,
-    ladder stringers, handrail stanchions."""
+    ladder stringers, handrail stanchions, racked pipe.
+
+    Stamped, keyed on (radius, LENGTH, section, material) - so the 159 identical
+    ladder rungs and the 219 identical stands each cost one real primitive and
+    the rest are matrices."""
     M, L = _frame(p0, p1, xhint)
     if square:
-        o = R.box(name, (r * 2, r * 2, L), mat, parent, (0, 0, 0), (0, 0, 0), 0.0)
-        return B(_place(o, M, (0, 0, L / 2)), owner, mat)
-    o = R.tube(name, r, L, mat, parent, (0, 0, 0), (0, 0, 0), sides)
-    return B(_place(o, M, (0, 0, 0)), owner, mat)
+        return _plate(name, (r * 2, r * 2, L), mat, owner, parent, M, (0, 0, L / 2))
+    key = ('tube', round(r, 5), round(L, 5), mat, sides)
+
+    def make():
+        return R.tube('__tpl', r, L, mat, None, (0, 0, 0), (0, 0, 0), sides)
+    return stamp(key, name, M, owner, mat, parent, make)
 
 
 def railing(name, pts, owner, parent, h=RAIL_H, post=0.9, kick=True, mat=None):
@@ -917,17 +997,30 @@ def build_drill_floor(root, rotary):
            (sx * vw, hy - 0.30, z + 2.5), bevel=0.02)
     bx('vdoor-head', (vw * 2 + 0.26, 0.30, 0.46), R.MAT_HAZARD, root, None,
        (0, hy - 0.30, z + 5.05), bevel=0.02)
-    # the ramp down to the pipe deck, and two joints lying on it
-    ramp_y1, ramp_z1 = hy + 9.5, z - 4.2
+    # The ramp down to the pipe deck, with two joints lying on it.
+    #
+    # KEPT SHORT ON PURPOSE.  A land rig runs a long catwalk out to a pipe rack;
+    # a platform does not - the pipe deck is right there and tubulars arrive by
+    # crane ([S6] §2.1, §3.10 upper/lower pipe racks on the deck).  It also
+    # matters to the camera: gltfRig.js sets frameRadius from
+    # max(size.x, size.z) * 0.5 * 1.15, so every metre of catwalk pushes the
+    # game camera back and shrinks the drill floor, which is the one thing the
+    # player is supposed to be looking at.  A 15 m catwalk measured a 32.4 m
+    # footprint and a frameRadius of 18.6; this is the same feature, read at
+    # platform length.
+    ramp_y1, ramp_z1 = hy + 4.6, z - 2.6
     for sx in (-1, 1):
         bar('pipe-ramp-rail', (sx * 0.95, hy - 0.1, z - 0.15),
             (sx * 0.95, ramp_y1, ramp_z1), 0.10, R.MAT_WORN, root, None,
             square=True)
-    for sx in (-1, 1):
         bar('catwalk-pipe', (sx * 0.45, hy + 0.4, z - 0.55),
-            (sx * 0.45, ramp_y1 - 0.6, ramp_z1 + 0.45), DP_OD / 2,
+            (sx * 0.45, ramp_y1 - 0.5, ramp_z1 + 0.45), DP_OD / 2,
             R.MAT_STEEL, root, None, sides=8)
-    grate('catwalk', -1.5, 1.5, hy + 8.2, hy + 15.0, ramp_z1 + 0.30, root, None)
+    grate('catwalk', -1.6, 1.6, hy + 3.9, hy + 7.4, ramp_z1 + 0.28, root, None)
+    railing('catwalk-rail', [(-1.6, hy + 3.9, ramp_z1 + 0.28),
+                             (-1.6, hy + 7.4, ramp_z1 + 0.28)], root, None)
+    railing('catwalk-rail-p', [(1.6, hy + 3.9, ramp_z1 + 0.28),
+                               (1.6, hy + 7.4, ramp_z1 + 0.28)], root, None)
 
     # ── handrails round the floor, broken at the V-door and the stair head ──
     railing('floor-rail-x-neg', [(-hx, -hy + 0.1, z), (-hx, hy - 0.1, z)], root, None)
@@ -1150,9 +1243,13 @@ def build_racking(root):
         bar('board-ladder-rung', (bxx + 0.20, -y_span / 2 - 0.35, zz),
             (bxx + 0.64, -y_span / 2 - 0.35, zz), 0.013, R.MAT_WORN, root, None,
             sides=4)
+    # The escape line runs steeply to an anchor just off the substructure
+    # rather than far across the deck, for the same camera reason as the
+    # catwalk: it is one thin curve and it was setting the model's whole
+    # bounding box.
     hs('escape-line', [(bxx + 0.4, y_span / 2 + 0.5, bz + 0.9),
-                       (DER_BASE * 0.9, y_span / 2 + 5.5, bz * 0.62),
-                       (SUB_X / 2 + 7.5, y_span / 2 + 12.0, FLOOR_Z * 0.35)],
+                       (DER_BASE * 0.8, y_span / 2 + 3.2, bz * 0.55),
+                       (SUB_X / 2 + 1.6, y_span / 2 + 6.2, 0.9)],
        0.013, R.MAT_STEEL, root, None, taut=True, sides=5)
 
     # ── the casing stabbing board, on the face OPPOSITE the monkey board,
@@ -1549,16 +1646,26 @@ def build(out_path):
 #  HANDOVER NOTES
 # ═══════════════════════════════════════════════════════════════════════════
 #
-# 1. **rig.box() AND THIS FILE.**  This module assumes `box()` returns a box of
-#    the size asked for.  It contains NO compensation factor and must never
-#    grow one.  At the time of writing `box()` was still returning HALF size
-#    (`primitive_cube_add(size=1)` makes a cube of EDGE 1, then `scale = size/2`);
-#    measured in Blender 5.2.1, `box((4, 2, 10))` came out (2.000, 1.000, 5.000)
-#    while `tube()` was correct.  `foundation_bg.py` carries a measured runtime
-#    correction (`BOX_K`) for exactly that bug and that correction MUST be
-#    removed when rig.py is fixed or that machine doubles.  This one needs no
-#    change either way - it is written against the contract, not the defect.
-#    Before trusting an export, run the box probe first.
+# 1. **rig.box() AND THIS FILE.**  This module contains NO compensation factor
+#    for the half-size `box()` bug and must never grow one.
+#
+#    History, because it cost this project weeks: when this file was started
+#    `box()` still returned HALF the size asked for - `primitive_cube_add(size=1)`
+#    makes a cube of EDGE 1 and the next line set `scale = size/2`.  Measured
+#    in Blender 5.2.1 at the time: `box((4, 2, 10))` came out
+#    (2.000, 1.000, 5.000) while `tube()` was correct.  This file was written
+#    against the CONTRACT rather than the defect, and verified through a
+#    throwaway harness that patched `box()` to its correct behaviour.
+#
+#    `box()` was fixed centrally in commit b656f60 while this machine was being
+#    built.  The proof that no workaround leaked in: the export produced
+#    through the patched harness and the export produced against the fixed
+#    rig.py are BYTE-IDENTICAL - 3,289,700 bytes, 19 meshes, 50,280 triangles,
+#    19.192 x 24.798 x 68.496 m, both times.
+#
+#    `foundation_bg.py` carries a measured runtime correction (`BOX_K`) for the
+#    same bug.  That one MUST now be removed or that machine comes out DOUBLE
+#    size; it is not this file's to touch.
 #
 # 2. **WHAT IS SOURCED AND WHAT IS NOT.**  Every constant at the top of this
 #    file carries its citation, a DERIVED note with the working, or the words
