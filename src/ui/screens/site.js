@@ -29,6 +29,7 @@
  *   • every DOM reference is cached at build time; no innerHTML after mount.
  */
 import { SCENES, EVENTS, GROUND, clamp, damp } from '../../core/contract.js';
+import { ease, DUR } from '../../core/motion.js';
 import { SITE_ACTIONS, strataFromProfile, methodInfo } from './catalog.js';
 
 /* Fallback ground profile so the screen reviews standalone. */
@@ -179,18 +180,9 @@ function progKey(prog) {
   return base;
 }
 
-/* `DEPTH_KEY` stood here — the honest word for the depth the status strip
-   printed, per method: Advance on a heading, Driven on a pile, Sounding on a
-   cone. It is gone with the readout it labelled. world/geology.js draws a
-   ticked depth ruler down the section band with the bit as its cursor, so
-   the strip was stating in words, at the top of the screen, the number the
-   band already draws in place — and the whole point of building the ruler
-   was that the band replaces chrome instead of adding to it.
-
-   The strip's third cell survives only for the PROGRAMME units, which are
-   not depths and which the ruler does not carry: `STATUS_UNIT` below.
-   Nothing referenced this table once the depth branch went, and a lookup
-   nobody reads is a contract nobody signed. */
+/* Keep a numeric depth/target until the section ruler's actual rendered
+   readability is verified (ASTRA §8.7). Programme units retain their own
+   progress wording below. */
 
 const pct01 = (v) => `${Math.round(clamp(Number(v) || 0, 0, 1) * 100)}%`;
 const num = (v, dp = 1) => (Number.isFinite(+v) ? (+v).toFixed(dp) : '—');
@@ -557,11 +549,10 @@ export function createSiteScreen(app) {
        'drilling'  touched WITH THE HOLE RUNNING, one-handed, while the other
                    hand is on something else. It must fall inside the thumb's
                    arc for BOTH hands — `tools/checkreach.mjs` gates it.
-       'between'   touched between jobs, or once a run, with the option of
-                   two hands. It may sit outside the arc, and sometimes it
-                   SHOULD: `.sstrip__leave` abandons a contract and forfeits
-                   the payout, so a thumb finding it by accident is the
-                   failure, not a thumb having to stretch for it.
+       'between'   touched between jobs, with the option of two hands.
+
+     Leaving an active hole is navigation needed during drilling. It belongs
+     within both thumbs' reach; confirmation prevents accidental abandonment.
 
      Declared here, in the screen, rather than inferred by the harness from
      `el.closest('.sitedock')` — which is what it did before. That proxy has
@@ -601,52 +592,26 @@ export function createSiteScreen(app) {
      reads as part of it. Three characters of quiet label cost less width than
      the border and the padding they replace. */
   const lvlEl = C.h('span.sstrip__lvl', { text: 'LVL 1' });
-  /* Blank, and the cell starts hidden: '0.00' and 'Depth' were the depth
-     readout's opening values, and the frame loop only writes this cell on a
-     method that has a programme unit. Left as they were, every other method
-     flashed "DEPTH 0.00 / 0 m" for one frame before the cell was taken away.
-     `em` for the target — " / 100 m" — went with the depth: a programme unit
-     is "3/12", complete in itself, and there was nothing left to put in it. */
+  // The first telemetry update supplies the method's actual progress value.
   const depthEl = C.h('span.sstrip__v', { text: '', 'aria-live': 'off' });
   /* Not always "Depth": a jumbo and a bolter ADVANCE a drive, a pile is
      DRIVEN, a cone is a SOUNDING. Same cell, same place, honest word. */
   const depthKeyEl = C.h('span.sstrip__k', { text: '' });
   const timeEl = C.h('span.sstrip__v', { text: '00:00' });
 
-  /* The leave control is a cell of the strip. It used to be a 44px disc
-     floating on its own over the surface band — a whole extra region over the
-     3D, permanently, for a control that is pressed once a run.
+  /* A labelled, real 44px target in the dock's reserved centre footer.
+     Opening the leave confirmation must be possible with the drilling hand.
+     The confirmation, not an unreachable corner, protects the contract. */
+  const pauseBtn = reach(C.h('button.site__leave', {
+    type: 'button', 'aria-label': 'Leave this hole',
+  }, C.Icon('back', 16), C.h('span', { text: 'Leave hole' })), 'drilling');
 
-     'between', and OUT OF THE THUMB'S ARC ON PURPOSE. It is measured hard for
-     both hands at (363, 25) and that is the correct answer, not a defect:
-     pressing it abandons the contract and forfeits the payout and the metres
-     already drilled. For a control like that the failure mode is a thumb
-     finding it BY ACCIDENT while the hole is running, so the far top corner
-     — the one place a one-handed grip cannot get to without deliberately
-     shifting — is where it belongs. It is confirm-gated as well. */
-  const pauseBtn = reach(C.h('button.sstrip__leave', { type: 'button', 'aria-label': 'Pause and leave the hole' }, C.Icon('close', 18)), 'between');
-
-  /* ── THE THIRD CELL, AND WHY IT IS OFTEN NOT THERE ──────────────────────
-     `world/geology.js` now draws a ticked depth ruler down the section band
-     with the BIT ITSELF as the moving cursor, reading the depth against the
-     ground it is in. This cell used to print the same number as words at the
-     top of the screen — "DEPTH 2.38 / 100 m" in the strip against a cursor
-     reading 2.38 on the band, six hundred pixels apart, both live, both the
-     same quantity. Two places stating one thing, which is the failure this
-     project has paid for repeatedly (HANDOFF §8B), and the point of building
-     the ruler was that the band REPLACES chrome rather than adding to it.
-
-     So when the cell would show depth, it is not shown: the band says it,
-     better, in the place the player is already looking.
-
-     It stays for the PROGRAMME units — bags cut, round and hole, bolt of N,
-     blows, sounding rate, test index (`STATUS_UNIT`). Those are not depths
-     and the ruler does not carry them; on those methods this cell is the
-     only place they exist, and the driller's own unit of progress is exactly
-     what a status line is for. `setDepthCell()` in the frame loop decides,
-     from the same `unitFmt` that chooses the wording. */
+  // Numeric depth stays available while the new ruler is under verification.
+  // Its target replaces the elapsed-time cell on these methods to fit phones.
   const depthCell = C.h('div.sstrip__cell', { hidden: true }, depthKeyEl, depthEl);
   const depthDiv = C.h('i.sstrip__div', { hidden: true });
+  const timeDiv = C.h('i.sstrip__div');
+  const timeCell = C.h('div.sstrip__cell', C.h('span.sstrip__k', { text: 'On tools' }), timeEl);
 
   const stripSteady = C.h('div.sstrip__face.sstrip__steady',
     lvlEl,
@@ -656,11 +621,8 @@ export function createSiteScreen(app) {
     ),
     depthDiv,
     depthCell,
-    C.h('i.sstrip__div'),
-    C.h('div.sstrip__cell',
-      C.h('span.sstrip__k', { text: 'On tools' }),
-      timeEl,
-    ),
+    timeDiv,
+    timeCell,
   );
 
   const alertIco = C.h('span.sstrip__ico', C.Icon('alert', 20));
@@ -675,11 +637,8 @@ export function createSiteScreen(app) {
      other telegraph in the game. */
   const teleRule = C.h('i.sstrip__tele', { hidden: true });
 
-  /* The leave control is not part of either face: it is the one thing in the
-     strip that is in the same place in every state, and it stays reachable
-     through an alert. */
   const sstrip = C.h('div.sstrip',
-    stripSteady, stripAlert, pauseBtn, C.h('i.sstrip__prog'), teleRule);
+    stripSteady, stripAlert, C.h('i.sstrip__prog'), teleRule);
 
   C.tap(pauseBtn, async () => {
     const ok = await app.confirm({
@@ -988,11 +947,11 @@ export function createSiteScreen(app) {
   const ropVal = C.h('span.rop__v', { text: '0.0' }, C.h('span.rop__u', { text: 'm/h' }));
   const spark = C.Sparkline({ capacity: 72 });
   spark.el.classList.add('rop__spark');
-  // The sparkline behind the value is the trend; the separate ±% chip said the
-  // same thing a second time in the same 200px.
+  const trend = C.h('div.rop__trend', spark.el);
+  // Label and trend share a row, with separate bounds. A full-width 30px
+  // sparkline above the label made the compact rate stack overrun the controls.
   const ropBox = C.h('div.rop',
-    spark.el,
-    C.h('span.rop__k', { text: 'ROP' }),
+    C.h('div.rop__line', C.h('span.rop__k', { text: 'ROP' }), trend),
     ropVal,
     grooveChip,
   );
@@ -1407,6 +1366,7 @@ export function createSiteScreen(app) {
       C.h('div.controls__sliders', feedSl.el, rotSl.el, flushSl.el),
       actionBtn,
     ),
+    C.h('div.dock__footer', pauseBtn),
   );
 
   const el = C.h('div.site',
@@ -1928,7 +1888,7 @@ export function createSiteScreen(app) {
   let pendingContact = null;
   let lastLoggedDepth = 0;
   let lastJobP = '';
-  const moneyRoll = C.NumberRoll(moneyEl, { value: 0, duration: 0.6, format: (v) => fmtMoney(v) });
+  const moneyRoll = C.NumberRoll(moneyEl, { value: 0, duration: DUR.d3, easing: (t) => ease('count', t), format: (v) => fmtMoney(v) });
 
   /* ═══ The unit card ════════════════════════════════════════════════════
      Fires on a unit boundary — a bag cut, a round fired, a bolt in, a set
@@ -2313,24 +2273,18 @@ export function createSiteScreen(app) {
        pile, metres on everything paid by the metre. Same cell, same place,
        honest word — and it is the ONLY place the programme appears while the
        player is drilling. `--p` is the job-progress rule along its foot. */
+    if (app.reducedMotion && moneyRoll.value !== (state.player?.money || 0)) {
+      moneyRoll.to(state.player?.money || 0, { instant: true });
+    }
     moneyRoll.step(dt);
     lvlEl.textContent = 'LVL ' + (p.level || 1);
     const dep = d.depth || 0;
     const unitFmt = prog ? STATUS_UNIT[pkey] : null;
-    /* NO PROGRAMME UNIT MEANS THIS CELL WOULD BE THE DEPTH, AND THE SECTION
-       BAND DRAWS THAT — see the cell's construction. The band's ruler carries
-       the bit as its cursor, so printing the same metres up here is the same
-       quantity in two places. Toggled, not rebuilt: a `hidden` flip costs
-       nothing and the strip's own flex reclaims the width for balance and
-       clock. The divider goes with it, or the row ends up with two rules
-       against each other. */
-    const showCell = !!unitFmt;
-    if (depthCell.hidden === showCell) { depthCell.hidden = !showCell; depthDiv.hidden = !showCell; }
-    if (showCell) {
-      const pair = unitFmt(prog);
-      if (depthKeyEl.textContent !== pair[0]) depthKeyEl.textContent = pair[0];
-      if (depthEl.textContent !== pair[1]) depthEl.textContent = pair[1];
-    }
+    const pair = unitFmt ? unitFmt(prog) : ['Depth / target', `${num(dep)} / ${num(d.target, 0)} m`];
+    depthCell.hidden = depthDiv.hidden = false;
+    timeCell.hidden = timeDiv.hidden = !unitFmt;
+    if (depthKeyEl.textContent !== pair[0]) depthKeyEl.textContent = pair[0];
+    if (depthEl.textContent !== pair[1]) depthEl.textContent = pair[1];
     const mm = Math.floor(elapsed / 60), ssec = Math.floor(elapsed % 60);
     timeEl.textContent = `${String(mm).padStart(2, '0')}:${String(ssec).padStart(2, '0')}`;
     const jobP = clamp(simTel ? (simTel.progress01Overall ?? simTel.progress01 ?? 0)
@@ -2668,14 +2622,14 @@ export function createSiteScreen(app) {
       log(state.drill?.depth, 'Bit failure', 'bad');
       const st = state.player?.stats; if (st) st.bitsBurned = (st.bitsBurned || 0) + 1;
     },
-    onMoney() { moneyRoll.to(state.player?.money || 0); },
+    onMoney() { moneyRoll.to(state.player?.money || 0, { instant: app.reducedMotion }); },
     onDrillStop() { setAction('idle'); },
 
     destroy() { feedSl.dispose(); rotSl.dispose(); flushSl.dispose(); },
   };
 
   function sizeSpark() {
-    const r = ropBox.getBoundingClientRect();
-    spark.resize(Math.max(40, r.width - 2), 30, app.viewport.dpr);
+    const r = trend.getBoundingClientRect();
+    spark.resize(r.width, r.height, app.viewport.dpr);
   }
 }

@@ -14,6 +14,7 @@ import {
   SCENES, EVENTS, GROUND, fmtMoney, fmtDepth, clamp,
 } from '../core/contract.js';
 import * as C from './components.js';
+import { DUR, dur } from '../core/motion.js';
 import * as CAT from './screens/catalog.js';
 
 import { createBootScreen }      from './screens/boot.js';
@@ -48,7 +49,6 @@ const PARENT = {
   [SCENES.SITE]:      SCENES.CONTRACTS,
 };
 
-const TRANSITION_MS = 460;
 const BOOT_MIN_SEC = 1.9;
 
 /**
@@ -298,14 +298,19 @@ export function createUI(ctx) {
     if (i < 0) return;
     toasts.splice(i, 1);
     rec.el.classList.add('is-out');
-    setTimeout(() => rec.el.remove(), reduced ? 10 : 320);
+    setTimeout(() => rec.el.remove(), dur(DUR.d3, reduced) * 1000 + 1000 / 60);
   }
 
   function closeOverlay(o) {
     const i = overlayStack.indexOf(o);
     if (i >= 0) overlayStack.splice(i, 1);
     o.el.classList.add('is-out');
-    setTimeout(() => o.el.remove(), reduced ? 10 : 320);
+    setTimeout(() => {
+      o.el.remove();
+      const screen = o.returnFocus?.closest('.screen');
+      const screenLeaving = screen && (screen.hidden || screen.classList.contains('is-leaving') || screen.classList.contains('is-leaving--back'));
+      if (!overlayStack.length && !screenLeaving && o.returnFocus?.isConnected) o.returnFocus.focus();
+    }, dur(DUR.d3, reduced) * 1000 + 1000 / 60);
     o.onClose && o.onClose();
   }
 
@@ -342,10 +347,11 @@ export function createUI(ctx) {
    */
   function confirm(o = {}) {
     return new Promise((resolve) => {
+      const returnFocus = document.activeElement;
       let settled = false;
       const done = (v) => { if (settled) return; settled = true; closeOverlay(rec); resolve(v); };
       const scrim = C.h('div.modal__scrim');
-      const box = C.h('div.modal__box', { role: 'alertdialog', 'aria-modal': 'true' },
+      const box = C.h('div.modal__box', { role: 'alertdialog', 'aria-modal': 'true', 'aria-label': o.title || 'Are you sure?' },
         C.h('h2.modal__t', { text: o.title || 'Are you sure?' }),
         o.message ? C.h('p.modal__m', { text: o.message }) : null,
         C.h('div.modal__a',
@@ -354,11 +360,15 @@ export function createUI(ctx) {
         ),
       );
       const el = C.h('div.modal', scrim, box);
-      const rec = { el, onClose: () => { if (!settled) { settled = true; resolve(false); } } };
+      const rec = { el, returnFocus, onClose: () => {
+        if (!settled) { settled = true; resolve(false); }
+      } };
       C.tap(scrim, () => done(false));
       overlayEl.appendChild(el);
       overlayStack.push(rec);
-      requestAnimationFrame(() => box.querySelector('.btn--amber, .btn--danger')?.focus());
+      requestAnimationFrame(() => {
+        if (overlayStack.at(-1) === rec) box.querySelector('.btn--quiet')?.focus();
+      });
     });
   }
 
@@ -567,7 +577,7 @@ export function createUI(ctx) {
       const prev = current;
       prev.inst.el.classList.remove('is-entering', 'is-entering--back');
       prev.inst.el.classList.add(goingBack ? 'is-leaving--back' : 'is-leaving');
-      leaving = { inst: prev.inst, timer: setTimeout(finishLeave, reduced ? 20 : TRANSITION_MS) };
+      leaving = { inst: prev.inst, timer: setTimeout(finishLeave, dur(DUR.d3, reduced) * 1000 + 1000 / 60) };
       try { prev.inst.unmount?.(); } catch (e) { console.error('[ui] unmount', e); }
     }
 
@@ -633,7 +643,7 @@ export function createUI(ctx) {
       drop();
     };
     el.addEventListener('animationend', onEnd);
-    settling = { el, onEnd, timer: setTimeout(drop, reduced ? 20 : TRANSITION_MS + 120) };
+    settling = { el, onEnd, timer: setTimeout(drop, dur(DUR.d4, reduced) * 1000 + DUR.d1 * 1000) };
   }
 
   function finishLeave() {
@@ -657,7 +667,7 @@ export function createUI(ctx) {
     pendingScene = null;
     const bootInst = screens.get(SCENES.BOOT);
     bootInst?.playOut?.();
-    setTimeout(() => show(next.sceneId, next.params), reduced ? 10 : 420);
+    setTimeout(() => show(next.sceneId, next.params), dur(DUR.d5, reduced) * 1000 + 1000 / 60);
   }
 
   function bootProgress() {

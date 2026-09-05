@@ -2,12 +2,13 @@
 /**
  * checkreach — can the player's THUMB get to the controls?
  *
- *   node tools/checkreach.mjs                 # needs `npm run dev` on 5178
+ *   node tools/checkreach.mjs                 # uses/starts the dev server on 5178
  *   node tools/checkreach.mjs 5178 --json
+ *   node tools/checkreach.mjs --self-test     # verdict fixtures, no browser
  *
  * ── WHY SIZE IS ONLY HALF THE QUESTION ─────────────────────────────────────
- * `.hudqa/measure.mjs` already gates on 44 x 44 css px and on overlap, and
- * both pass. Neither says anything about WHERE a control is, and on a portrait
+ * `.hudqa/measure.mjs` gates on 44 x 44 css px and on overlap. This gate also
+ * enforces that touch floor and measures WHERE a control is. On a portrait
  * phone that is the other half of whether it can be used at all: a perfectly
  * sized 44 px button in the top-left corner of a 390 x 844 screen cannot be
  * pressed one-handed without shifting grip.
@@ -54,8 +55,9 @@
  * Controls the player touches WHILE DRILLING must be reachable; controls
  * touched between jobs need not be, and some of them should not be — moving
  * the shop out of the thumb arc is a legitimate design choice, leaving the
- * feed control there is not, and putting ABANDON CONTRACT under a resting
- * thumb would be a defect in the opposite direction.
+ * feed control there is not. Leaving a hole is needed during drilling too:
+ * its button must be reachable, with abandonment protected by confirmation
+ * in the UI rather than by making the exit inaccessible.
  *
  * That sort is the design decision and the layout follows from it, so the
  * screen states it and this file reads it: `site.js` writes
@@ -70,12 +72,13 @@
  * element nobody sorted is an element nobody thought about.
  *
  * Exits 0 clean, 1 on any drilling control outside the arc for either hand,
- * on any undeclared target, and on any screen where the gate found nothing
- * to measure.
+ * on any unknown/undeclared or undersized target, on a missing/unreachable
+ * Leave hole button, and on any screen where the gate found nothing to measure.
  */
 import { chromium, devices } from 'playwright';
 import { writeFileSync } from 'node:fs';
 import { ensureServer } from './devserver.mjs';
+import assert from 'node:assert/strict';
 
 const argv = process.argv.slice(2);
 const PORT = argv.find((a) => /^\d+$/.test(a)) || '5178';
@@ -90,6 +93,7 @@ const CASES = ['rockbolt', 'driven-pile', 'rc', 'dth', 'oil-rotary'];
    and a PHYSICAL SCREEN rather than about a number of pixels. */
 const W = 390, H = 844;
 const PX_PER_MM = W / 64.0;
+const MIN_TARGET_PX = 44; // Existing project touch floor: ASTRA.md §8.1, .hudqa/measure.mjs.
 
 const PIVOT_OUT_MM = 10;    // assumed: how far outside the screen edge the joint sits
 const PIVOT_DOWN_MM = 16;   // assumed: how far below the bottom edge
@@ -158,6 +162,66 @@ function zoneOf(x, y, hand) {
   return 'hard';
 }
 
+function assessTargets(targets) {
+  const rows = targets.map((t) => {
+    const cx = t.x + t.w / 2, cy = t.y + t.h / 2;
+    const right = zoneOf(cx, cy, 'right'), left = zoneOf(cx, cy, 'left');
+    const worst = [right, left].includes('hard') ? 'hard'
+      : [right, left].includes('stretch') ? 'stretch' : 'easy';
+    return { ...t, cx: Math.round(cx), cy: Math.round(cy), right, left, worst };
+  });
+  const drilling = rows.filter((r) => r.reach === 'drilling');
+  const between = rows.filter((r) => r.reach === 'between');
+  // A typo is unsorted too; any nonempty string used to escape both classes.
+  const unsorted = rows.filter((r) => !['drilling', 'between'].includes(r.reach));
+  const small = rows.filter((r) => r.w < MIN_TARGET_PX || r.h < MIN_TARGET_PX);
+  const bad = drilling.filter((r) => r.worst === 'hard');
+  const leaves = rows.filter((r) => r.isLeave);
+  const failures = [];
+  if (!rows.length) failures.push('the page had NO interactive targets — the harness measured nothing');
+  if (!drilling.length) failures.push('no control declares data-reach="drilling" — the arc gate tested nothing');
+  for (const r of unsorted) failures.push(`.${r.cls} declares invalid data-reach=${JSON.stringify(r.reach)}`);
+  for (const r of small) failures.push(`.${r.cls} target ${r.w.toFixed(2)} x ${r.h.toFixed(2)} is below ${MIN_TARGET_PX} x ${MIN_TARGET_PX}px`);
+  for (const r of bad) failures.push(`.${r.cls} at (${r.cx},${r.cy}) is outside the thumb arc: right=${r.right}, left=${r.left}`);
+  // The exit is required even if all remaining controls are valid. It cannot
+  // be removed, disabled, or classified "between" to make the gate green.
+  if (leaves.length !== 1) failures.push(`expected one interactive .site__leave button, found ${leaves.length}`);
+  for (const r of leaves) {
+    if (r.tag !== 'BUTTON') failures.push('.site__leave must remain a DOM <button>');
+    if (r.reach !== 'drilling') failures.push('.site__leave must declare data-reach="drilling"');
+    if (r.x < 0 || r.y < 0 || r.x + r.w > W || r.y + r.h > H) {
+      failures.push('.site__leave is not entirely inside the viewport');
+    }
+  }
+  return { rows, drilling, between, unsorted, small, bad, leaves, failures };
+}
+
+if (argv.includes('--self-test')) {
+  const leave = { cls: 'site__leave', isLeave: true, tag: 'BUTTON', x: 131, y: 760, w: 128, h: 44, reach: 'drilling', inDock: true };
+  const feed = { cls: 'feed', isLeave: false, tag: 'BUTTON', x: 173, y: 630, w: 44, h: 44, reach: 'drilling', inDock: true };
+  const verdict = (targets) => assessTargets(targets).failures;
+  assert.deepEqual(verdict([leave, feed]), [], 'reachable controls at the exact 44px floor must pass');
+  const fixtures = [
+    ['empty screen', [], /NO interactive/],
+    ['missing exit', [feed], /expected one/],
+    ['duplicate exit', [leave, leave, feed], /found 2/],
+    ['old corner exit', [{ ...leave, x: 363, y: 24.5, w: 30, h: 30 }, feed], /outside the thumb arc/],
+    ['exit width', [{ ...leave, w: 43.99 }, feed], /below 44/],
+    ['exit height', [{ ...leave, h: 43.99 }, feed], /below 44/],
+    ['another undersized target', [leave, { ...feed, w: 30 }], /below 44/],
+    ['unsorted exit', [{ ...leave, reach: null }, feed], /invalid data-reach/],
+    ['unknown sort', [leave, { ...feed, reach: 'driling' }], /invalid data-reach/],
+    ['exit exempted as between', [{ ...leave, reach: 'between' }, feed], /must declare/],
+    ['nonbutton exit', [{ ...leave, tag: 'DIV' }, feed], /DOM <button>/],
+    ['partially offscreen exit', [{ ...leave, y: H - 20 }, feed], /inside the viewport/],
+  ];
+  for (const [name, targets, expected] of fixtures) {
+    assert.ok(verdict(targets).some((f) => expected.test(f)), `${name} must fail: ${verdict(targets).join('; ')}`);
+  }
+  console.log(`checkreach verdict fixtures PASS: 1 valid layout, ${fixtures.length} rejected regressions; no browser launched`);
+  process.exit(0);
+}
+
 /* ── In-page: every interactive target, with its box ──────────────────────
    The selector and the disabled/pointer-events rules are taken verbatim from
    `.hudqa/enumerate.js`, deliberately: two harnesses that disagree about what
@@ -196,6 +260,8 @@ const COLLECT = () => {
     const decl = el.closest('[data-reach]')?.dataset.reach || null;
     out.push({
       cls,
+      tag: el.tagName,
+      isLeave: el.matches('.site__leave'),
       x: r.x, y: r.y, w: r.width, h: r.height,
       reach: decl,
       drilling: decl === 'drilling',
@@ -299,35 +365,15 @@ for (const m of CASES) {
      wait therefore measures a screen mid-animation, which is how the first
      draft of this file came to report zero targets and call it a pass.
      `.hudqa/measure.mjs` dodges the same trap by sampling for 12 s; do the
-     same and take the last sample that actually found something. */
+     same and grade the final sample, including an empty one: retaining an
+     earlier nonempty sample would hide controls that disappeared. */
   let targets = [];
   for (let t = 0; t < 12000; t += 400) {
     await p.waitForTimeout(400);
-    const shot = await p.evaluate(COLLECT);
-    if (shot.length) targets = shot;
+    targets = await p.evaluate(COLLECT);
   }
 
-  const rows = targets.map((t) => {
-    const cx = t.x + t.w / 2;
-    const cy = t.y + t.h / 2;
-    const right = zoneOf(cx, cy, 'right');
-    const left = zoneOf(cx, cy, 'left');
-    // A control is only as reachable as its WORSE hand. A left-handed player is
-    // a third of one-handed users; designing for the right thumb alone quietly
-    // makes the game harder for them and nobody ever files it as a bug.
-    const worst = [right, left].includes('hard') ? 'hard'
-      : [right, left].includes('stretch') ? 'stretch' : 'easy';
-    return { ...t, cx: Math.round(cx), cy: Math.round(cy), right, left, worst };
-  });
-
-  const drilling = rows.filter((r) => r.reach === 'drilling');
-  const between = rows.filter((r) => r.reach === 'between');
-  /* AN UNDECLARED TARGET IS A FAILURE, NOT A PASS. An element nobody sorted
-     is an element nobody thought about, and under the old container proxy it
-     would simply have been scored as "not a drilling control" and waved
-     through — the empty-set problem wearing a different hat. */
-  const unsorted = rows.filter((r) => !r.reach);
-  const bad = drilling.filter((r) => r.worst === 'hard');
+  const { rows, drilling, between, unsorted, small, bad, leaves, failures } = assessTargets(targets);
   const stretched = drilling.filter((r) => r.worst === 'stretch');
   const betweenHard = between.filter((r) => r.worst === 'hard');
   /* Declared 'drilling' but not in the dock, or in the dock but not declared
@@ -338,27 +384,25 @@ for (const m of CASES) {
 
   json.cases[m] = {
     targets: rows.length, drilling: drilling.length, between: between.length,
-    hard: bad.map((r) => r.cls), unsorted: unsorted.map((r) => r.cls), rows,
+    hard: bad.map((r) => r.cls), unsorted: unsorted.map((r) => r.cls),
+    small: small.map((r) => r.cls), leaveButtons: leaves.length, failures, rows,
   };
-  if (bad.length) fails.push(...bad.map((r) => `${m}: .${r.cls} at (${r.cx},${r.cy})`));
-  if (unsorted.length) {
-    fails.push(...unsorted.map((r) => `${m}: .${r.cls} at (${r.cx},${r.cy}) declares no data-reach`));
-  }
+  fails.push(...failures.map((f) => `${m}: ${f}`));
 
   say(`\n${m}`);
-  say(`  targets      ${rows.length}   drilling ${drilling.length}   between ${between.length}   undeclared ${unsorted.length}`);
+  say(`  targets      ${rows.length}   drilling ${drilling.length}   between ${between.length}   invalid sort ${unsorted.length}`);
+  say(`  targets<44   ${small.length}${small.length ? '  <-- GATE FAIL' : '  ok'}`);
+  say(`  leave button ${leaves.length} interactive target(s)`);
   if (!rows.length) {
     // A harness that sees nothing and says "ok" is worse than no harness: it
     // produces a confident false negative and the project stops looking. This
     // file did exactly that on its first run, against the boot screen.
-    fails.push(`${m}: the page had NO interactive targets at all — the harness measured nothing`);
     say('  NOTHING      no interactive targets on the page  <-- GATE FAIL');
   } else if (!drilling.length) {
     /* Not "no .sitedock" any more: the question is whether anything on this
        screen is declared as touched while drilling. A site screen with no
        drilling control is a screen that cannot be played, and it is also a
        gate with nothing left to test. */
-    fails.push(`${m}: nothing on the screen declares data-reach="drilling" — the arc gate tested nothing`);
     say('  NO SUBJECT   no control is declared as touched while drilling  <-- GATE FAIL');
   } else {
     const easy = drilling.length - bad.length - stretched.length;
@@ -368,7 +412,7 @@ for (const m of CASES) {
     for (const r of stretched) say(`     stretch   .${r.cls}  centre (${r.cx},${r.cy})  right=${r.right} left=${r.left}`);
   }
   for (const r of unsorted) {
-    say(`  UNDECLARED   .${r.cls}  centre (${r.cx},${r.cy})  — sort it in site.js  <-- GATE FAIL`);
+    say(`  INVALID SORT .${r.cls}  data-reach=${JSON.stringify(r.reach)}  — sort it in site.js  <-- GATE FAIL`);
   }
   if (betweenHard.length) {
     say('  between jobs, outside the arc (reported — for some of these that is the point): '
@@ -388,9 +432,9 @@ if (WANT_JSON) writeFileSync('.hudqa/reach-report.json', JSON.stringify(json, nu
 
 say('\n=== GATE ===');
 if (fails.length) {
-  say('  drilling controls in the thumb arc .... FAIL');
+  say('  touch size, declared reach, reachable exit .... FAIL');
   for (const f of fails) say(`    ${f}`);
-  console.error(`\n${fails.length} control(s) the player uses while drilling cannot be reached one-handed.`);
+  console.error(`\n${fails.length} touch-target/reach requirement(s) failed.`);
   process.exit(1);
 }
-say('  drilling controls in the thumb arc .... PASS');
+say('  touch size, declared reach, reachable exit .... PASS');

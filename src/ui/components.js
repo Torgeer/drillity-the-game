@@ -1041,6 +1041,7 @@ export function VSlider(o = {}) {
 export function NumberRoll(node, o = {}) {
   let cur = o.value ?? 0, target = cur, t = 1, from = cur;
   const dur = o.duration ?? 0.9;
+  const easing = o.easing || easeOutCubic;
   const fmt = o.format || ((v) => String(Math.round(v)));
   let instant = !!o.instant;
   node.textContent = fmt(cur);
@@ -1053,7 +1054,7 @@ export function NumberRoll(node, o = {}) {
     step(dt) {
       if (t >= 1) return false;
       t = Math.min(1, t + dt / dur);
-      cur = from + (target - from) * easeOutCubic(t);
+      cur = from + (target - from) * easing(t);
       node.textContent = fmt(cur);
       return true;
     },
