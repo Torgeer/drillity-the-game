@@ -2036,7 +2036,8 @@ export function createAssets(ctx = {}) {
       /* ── hydraulic cylinder rods ──────────────────────────────────────── */
       chrome: {
         cls: 'fine', variants: 2, prio: 3, normalStrength: 0.35, normalOut: 0.5,
-        defaults: (p) => ({ color: p.color || '#EEF1F4', seed: (p.seed === undefined ? 31 : p.seed) | 0, wear: clamp01(p.wear || 0.12) }),
+        defaults: (p) => ({ color: p.color || '#EEF1F4', seed: (p.seed === undefined ? 31 : p.seed) | 0,
+          wear: clamp01(p.wear === undefined ? 0.12 : p.wear) }),
         setKey: (d) => `${qc(d.color)}~${q2(d.wear)}~${d.seed & 3}`,
         fallback: (d) => ({ albedo: hexRGB(d.color), rough: 0.045, metal: 1, ao: 1 }),
         base: () => new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.045, metalness: 1.0, envMapIntensity: 1.55 }),
@@ -2195,7 +2196,9 @@ export function createAssets(ctx = {}) {
           const m = new THREE.MeshPhysicalMaterial({
             color: new THREE.Color(d.color),
             roughness: 0.06, metalness: 0.0,
-            transmission: 0.92, thickness: 0.012, ior: 1.52,
+            // ASTRA §1.6: one transmissive pane re-renders the opaque list.
+            // Keep this safe at its source, including callers outside gltfRig.
+            transmission: 0, thickness: 0, ior: 1.52,
             transparent: true, opacity: 1.0,
             envMapIntensity: 1.25, clearcoat: 0.45, clearcoatRoughness: 0.06,
             side: THREE.DoubleSide,
@@ -2205,7 +2208,7 @@ export function createAssets(ctx = {}) {
           return m;
         },
         normalOut: 0.35,
-        // Keep map (grime tints both the diffuse and the transmitted light)
+        // Keep map (grime tints the pane)
         // and roughnessMap; drop AO and metalness, which are meaningless here.
         apply: (m) => { m.aoMap = null; m.metalnessMap = null; },
         shade: (d) => {
@@ -2544,8 +2547,7 @@ export function createAssets(ctx = {}) {
            therefore have put the whole opaque list through a second render.
            Foam is a dense bubble raft: 0.22 transmission was buying a barely
            visible wash, so the sheen and a hair of blend carry it instead.
-           A caller that really wants it back can now pass
-           `{ transmission: 0.22, thickness: 0.06 }` and own the cost. */
+           material() rejects positive transmission for every kind. */
         base: (d) => new THREE.MeshPhysicalMaterial({
           color: 0xffffff, roughness: 0.30, metalness: 0.0,
           transmission: 0, thickness: 0, ior: 1.34,
@@ -4094,9 +4096,8 @@ export function createAssets(ctx = {}) {
 
        It is derived from `paintedSteel` rather than written afresh because
        that is what it physically IS: the same rolled steel, the same panel
-       mapping, the same dirt gradient down the lower half, the same flake — a
-       different albedo. 134 lines of authored surface behaviour that would
-       otherwise be copied and then drift.
+       mapping, the same dirt gradient down the lower half, the same chips — a
+       different albedo. Sharing the pixel program avoids two copies drifting.
 
        Two deliberate differences from bodywork:
          - `wear` is higher. The undercarriage is where the machine touches the
@@ -4110,7 +4111,7 @@ export function createAssets(ctx = {}) {
       defaults: (p) => ({
         ...KINDS.paintedSteel.defaults(p),
         color: BRAND.plantDark,
-        wear: 0.46,
+        wear: clamp01(p.wear === undefined ? 0.46 : p.wear),
       }),
     };
 
@@ -4190,6 +4191,12 @@ export function createAssets(ctx = {}) {
     }
 
     function material(kind, params = {}) {
+      // Reject at the API boundary, before allocating a texture or caching a
+      // material. This is a measured render-budget contract (ASTRA §1.6), not
+      // a per-caller glazing preference. Opacity remains the supported blend.
+      if (params.transmission !== undefined && params.transmission !== 0) {
+        throw new RangeError('[assets] transmission must be 0; use opacity for blended surfaces.');
+      }
       /* `drillCore` is a kind by name and by contract — other modules ask for
          it through material() like anything else — but it is not a baked set:
          its lithology comes out of the stratum machinery, so it routes to the
@@ -4222,25 +4229,9 @@ export function createAssets(ctx = {}) {
       if (params.side !== undefined) mat.side = params.side;
       if (params.transparent !== undefined) mat.transparent = params.transparent;
       if (params.opacity !== undefined) { mat.opacity = params.opacity; mat.transparent = mat.transparent || params.opacity < 1; }
-      /* TRANSMISSION IS A PARAMETER, NOT SOMETHING A CALLER REACHES IN AND
-         SETS AFTERWARDS.  three.js collects every material with
-         `transmission > 0` onto a separate list and runs
-         renderTransmissionPass() for it, which re-renders the WHOLE opaque
-         list into a transmission target before the main pass. One such
-         material anywhere in the visible set therefore doubles the scene's
-         draw calls — that is what a single cab window was doing to the rig
-         band. Both earlier fixes (rigFactory.js:128 for cab glazing,
-         terrain.js:2197 for truck windows) had to assign `m.transmission = 0`
-         after the call because there was no way to say it here. There is now:
-         a caller that wants a tinted, opacity-blended pane asks for
-         `{ transmission: 0, opacity: 0.34 }` and gets it in one call.
-         It participates in the cache key like every other param — key() is
-         `kind + '|' + stable(params)` — so a transmissive and a
-         non-transmissive request can never collide on one material. */
-      if (params.transmission !== undefined && 'transmission' in mat) {
-        mat.transmission = params.transmission;
-        if (params.transmission > 0) mat.transparent = true;
-      }
+      // All physical kinds obey the same ceiling, even if a future base()
+      // accidentally changes its default. checkmaterials also tests each base.
+      if ('transmission' in mat) mat.transmission = 0;
       if (params.envMapIntensity !== undefined) mat.envMapIntensity = params.envMapIntensity;
       if (params.normalScale !== undefined && mat.normalScale) mat.normalScale.setScalar(params.normalScale);
 
