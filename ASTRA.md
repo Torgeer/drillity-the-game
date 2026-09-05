@@ -392,26 +392,40 @@ follows. The model and its three assumed constants are documented in
 `tools/checkreach.mjs`'s header; if you think the model is wrong, **argue with
 numbers and change the gate**.
 
-### 7.4 — Look-ahead uncertainty in the section (not started)
+### 7.4 — Look-ahead uncertainty — **SHIPPED**, and this entry was wrong
 
-The single highest-value gameplay change left. Today strata below the bit are
-drawn exactly like strata already drilled, so **the section tells the player
-nothing they do not already know.** Ground the bit has not reached should read
-as uncertain and sharpen as the bit arrives.
+**This section used to say "not started". It landed in `de59d4d` / `26c5db7`
+and the API described here was wrong too** — it is `uSurvey` + `uLook`, not the
+`uSurveyConfidence` / `depthAt(wp) - uDepth` this file invented.
 
-Every hook exists in `geology.js`: `depthAt(vec2 wp)`, `uDepth`, `uDepth0`, and
-the `drilledOut = step(-uDepth - 0.02, wp.y)` pattern. **`depthAt(wp) - uDepth`
-is the metres-ahead field and that is the whole input.**
+What shipped: `lookUnc()` is a saturating exponential in metres-ahead, with
+`oreConfidence` setting **both** the asymptote and the decay length. It
+modulates colour, contact sharpness, pattern, sparkle, boundary wander, joints
+and boulders. It is **not an overlay** — no new mesh, material or draw call —
+and `max(ahead, 0)` makes it exactly zero behind the bit.
 
-The physical truth to render is a **geologist's interpretation between
-boreholes**: a bed's *existence* is fairly well known, its *depth and thickness*
-are interpolated. That asymmetry is the honest thing to draw — not a fog
-overlay, which reads as a graphics effect rather than as knowledge.
+**Two things remain, and they are the ones that matter:**
 
-**Confidence must be buyable, because that is the gameplay.** `data.js` already
-carries `oreConfidence` (0..1) and `oreStage` on every contract. Drive a
-`uSurveyConfidence` from it. **The look-ahead must never lie** — once drilled,
-the section must match what the sim resolved.
+1. **`geology.setSurveyConfidence()` has no caller anywhere in the repo.** The
+   economy hook — the part that makes confidence something a player *buys* —
+   is the gameplay, and it is the eighth declared-contract-with-no-consumer
+   found in this codebase (see §8).
+2. **The amplitude is below perception.** Measured, same contract same frame,
+   confidence 0.55 → 1.00: **whole-band mean difference 6.74 / 255, with only
+   5.4 % of pixels differing by more than 24.** For scale, `tunnel-jumbo` and
+   `rockbolt` — two pictures a reviewer judged *identical* — differ by
+   **12.66, twice as much**. An ×6 amplified diff shows the mechanism working
+   correctly. At 1× no player will see it. The knobs are `CFG.surveyWander`
+   (1.8) and `controlNear` / `controlFar` (1.4 / 18.0).
+
+A real §7.4 violation was found and fixed on the way: **the drill log forgot
+ground it had already logged.** Its LOGGED/PROJECTED frontier came from the
+bit's *current* TVD, which falls on a trip-out and on the second half of every
+HDD shot — so printed strengths were deleted and beds un-logged themselves. It
+now uses a monotone `logFrontier()`. Still open in the same area:
+`applySurvey()`'s vertical branch re-softens ground a tripped-out string has
+already drilled, and the heading mode's log has **no ahead axis at all**, so it
+claims perfect knowledge of ground above the crown.
 
 ### 7.5 — Open defects, measured, nobody working on them
 

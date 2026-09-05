@@ -587,7 +587,21 @@ export function createGltfRigs(ctx) {
 
     // ── the pivots and slides the runtime already knows how to drive ────────
     const mastPivot = nodes.pivots.get('mast');
-    if (mastPivot) dyn.mastPivot = mastPivot;
+    if (mastPivot) {
+      dyn.mastPivot = mastPivot;
+      /* A MODEL MAY DECLARE ITS OWN TRANSPORT RAKE, and until now it could not.
+         `ensureBuild()` falls back to a flat -1.32 rad for every machine that
+         does not set `dyn.transportTilt`, and nothing read it off the glTF — so
+         a Blender machine could carry a measured transport pose in its own file
+         and the game would still fold it to the same generic angle.
+
+         The sonic truck is the case that found it: its transport pose measures
+         2.515 x 8.090 x 3.912 m against a published 8'3" x 23' x 13' — width
+         exact, height 50 mm under. That is a real number and the machine could
+         not tell anyone. */
+      const rake = mastPivot.userData && mastPivot.userData.transport_tilt_rad;
+      if (typeof rake === 'number' && Number.isFinite(rake)) dyn.transportTilt = rake;
+    }
     const mastBeam = nodes.pivots.get('mast-upper') || mastPivot;
     if (mastBeam) { dyn.mastLower = mastBeam; dyn.mastUpper = mastBeam; }
 

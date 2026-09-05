@@ -21,16 +21,40 @@ def clear():
 
 
 def bounds():
+    """World-space bounds, from every VERTEX.
+
+    This used to walk `o.bound_box` — the eight corners of each object's LOCAL
+    axis-aligned box, pushed through its world matrix. That is a strict
+    OVER-estimate for any rotated object whose mesh does not fill its own box,
+    which is most of a machine.
+
+    It is the same approximation that produced four false findings in one hour
+    and got a whole tool deleted for it (ASTRA.md 5): pd55 read 26.218 m tall
+    against a true 25.790, rc-rig was reported "2.598 m below ground — usually
+    a runaway array" when the truth is -0.014, and a test stub measured 95 km.
+    A machine module using this to self-check printed 10.170 m of length for a
+    machine that measures 7.630.
+
+    Framing is cosmetic, so this was never wrong on screen — but a number that
+    is quotable must be right, because somebody will quote it.
+    """
     lo = Vector((1e9, 1e9, 1e9))
     hi = Vector((-1e9, -1e9, -1e9))
+    dg = bpy.context.evaluated_depsgraph_get()
     for o in bpy.context.scene.objects:
         if o.type != 'MESH':
             continue
-        for c in o.bound_box:
-            w = o.matrix_world @ Vector(c)
+        ev = o.evaluated_get(dg)          # modifiers applied — bevels, arrays, screws
+        me = ev.to_mesh()
+        if me is None:
+            continue
+        mw = o.matrix_world
+        for v in me.vertices:
+            w = mw @ v.co
             for i in range(3):
                 lo[i] = min(lo[i], w[i])
                 hi[i] = max(hi[i], w[i])
+        ev.to_mesh_clear()
     return lo, hi
 
 
