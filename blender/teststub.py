@@ -63,10 +63,14 @@ def build(out_path):
 
     # ── lamps ─────────────────────────────────────────────────────────────────
     # One on a static (the join must not eat it), one on the mast (it must sweep).
-    R.worklight('cab-left', None, (-1.5, 0.1, 2.9),
-                aim_dir=(-0.3, 1.0, -0.4), cone_deg=54, range_m=26)
-    R.worklight('mast-head', mast_pivot, (0, -0.35, 5.4),
+    # The names are the ones core/env.js looks for by string (env.js ~509-535).
+    # boom-1 rides the mast pivot, so it MUST sweep when the mast turns — that
+    # is the whole reason the named-node contract exists. boom-2 is bolted to
+    # the deck and must not move.
+    R.worklight('boom-1-work-light', mast_pivot, (0, -0.35, 5.4),
                 aim_dir=(0, -0.2, -1.0), cone_deg=38, range_m=34)
+    R.worklight('boom-2-work-light', None, (-1.5, 0.1, 2.9),
+                aim_dir=(-0.3, 1.0, -0.4), cone_deg=54, range_m=26)
 
     return R.finish(out_path)
 

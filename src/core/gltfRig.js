@@ -226,6 +226,65 @@ export function createGltfRigs(ctx) {
      NAMED NODES — contract 1
      ═════════════════════════════════════════════════════════════════════════ */
 
+  /**
+   * PUT THE COLONS BACK.
+   *
+   * three.js's GLTFLoader runs every node name through
+   * `PropertyBinding.sanitizeNodeName()`, which DELETES the characters
+   * `[ ] . : /` because they are reserved in animation track paths. So
+   * `pivot:mast` arrives in the browser as `pivotmast` and
+   * `mount:boom-1-work-light` as `mountboom-1-work-light`.
+   *
+   * The whole named-node contract is a string lookup — `blender/lib/rig.py`
+   * says so in its first paragraph and `rigFactory.js` does exactly that — so
+   * this is not cosmetic: unrepaired, EVERY pivot, slide and lamp in every
+   * machine is invisible to the game, and nothing anywhere throws. The first
+   * run of `tools/glbverify.mjs` reported "0 pivots, 0 slides, 0 lamps" on a
+   * file that `tools/glbinfo.mjs` could see all six of, because glbinfo reads
+   * the file and three.js reads it through the sanitiser.
+   *
+   * The authored name is still recoverable: `parser.associations` maps each
+   * Object3D back to its glTF node index, and the raw JSON is right there. So
+   * the names are restored from the file before anything looks at them, and
+   * the count is then CHECKED against the file — if three.js ever changes how
+   * it mangles a name, this says so instead of quietly losing the machine's
+   * moving parts.
+   *
+   * (There is no animation in these files — `finish()` exports none — so
+   * restoring the reserved characters costs nothing.)
+   */
+  function restoreNames(gltf, id) {
+    const parser = gltf.parser;
+    const json = parser && parser.json;
+    const assoc = parser && parser.associations;
+    if (!json || !assoc) {
+      throw new Error(`"${id}": GLTFLoader gave no parser associations — cannot `
+        + 'recover the authored node names, and every named node would be lost.');
+    }
+    let restored = 0;
+    for (const [obj, ref] of assoc) {
+      if (!ref || ref.nodes === undefined || !obj || !obj.isObject3D) continue;
+      const authored = (json.nodes[ref.nodes] || {}).name;
+      if (authored && obj.name !== authored) { obj.name = authored; restored++; }
+    }
+
+    // The file's own count of prefixed nodes, versus what survived into the
+    // scene graph. These must agree.
+    const prefixes = [P_PIVOT, P_SLIDE, P_MOUNT, P_AIM];
+    const inFile = (json.nodes || []).filter(
+      (n) => n.name && prefixes.some((p) => n.name.startsWith(p))).length;
+    let inScene = 0;
+    gltf.scene.traverse((o) => {
+      if (o.name && prefixes.some((p) => o.name.startsWith(p))) inScene++;
+    });
+    if (inScene !== inFile) {
+      throw new Error(`"${id}": the .glb declares ${inFile} named nodes but only ${inScene} `
+        + 'reached the scene graph. The pivot:/slide:/mount:/aim: contract is broken — '
+        + 'refusing to load a machine whose moving parts the game cannot find.');
+    }
+    return { restored, named: inFile };
+  }
+
   /** Does this node sit under something the game moves? Decides lamp `moves`. */
   function underDynamic(node) {
     for (let p = node.parent; p; p = p.parent) {
@@ -355,6 +414,9 @@ export function createGltfRigs(ctx) {
     const gltf = await loader.parseAsync(buf, '');
     const t2 = (typeof performance !== 'undefined' ? performance.now() : Date.now());
 
+    // BEFORE anything reads a name. See restoreNames().
+    const names = restoreNames(gltf, id);
+
     const root = gltf.scene;
     root.name = 'rig:' + id;
     // The exporter already wrote Y-up (`export_yup=True`), and the machine's
@@ -371,7 +433,8 @@ export function createGltfRigs(ctx) {
 
     say('info', `"${id}" ${(bytes / 1024).toFixed(1)} kB · ${m.prims} primitives `
       + `(draw-call floor) · ${m.tris} tris · ${nodes.pivots.size} pivots, `
-      + `${nodes.slides.size} slides, ${nodes.lights.length} lamps · `
+      + `${nodes.slides.size} slides, ${nodes.lights.length} lamps `
+      + `(${names.named} named nodes, ${names.restored} names un-sanitised) · `
       + `materials: ${kinds.join(', ')} · fetch ${(t1 - t0).toFixed(0)} ms, `
       + `parse ${(t2 - t1).toFixed(0)} ms`);
 
