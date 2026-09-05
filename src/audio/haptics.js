@@ -482,6 +482,9 @@ export const EVENT_SHAPE = {
   'misfire':            'rampDown',
   'ground-heave':       'rampDown',
   'precarious':         'rampDown',
+  // The resin is gelling: rotation must stop. Share the established stop
+  // signature, not the completion cue reserved for a successfully set bolt.
+  'gel-clock':          'rampDown',
 
   /* it finished */
   'hole-complete':      'rampUp',

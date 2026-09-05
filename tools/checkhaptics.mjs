@@ -45,6 +45,7 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { parseAst } from 'vite';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 
@@ -88,6 +89,7 @@ const REQUIRED = {
   'cavity':            'void_',
   'bit-change':        'twin',
   'premature-refusal': 'rampDown',
+  'gel-clock':         'rampDown',
   'hole-complete':     'rampUp',
 };
 
@@ -118,8 +120,47 @@ if (shapeFor('no-such-event-at-all') !== null) {
 // than transcribed, so this gate notices when the sim grows a new one.
 const simSrc = readFileSync(join(ROOT, 'src/sim/drilling.js'), 'utf8');
 const simKinds = new Set();
-for (const m of simSrc.matchAll(/case '([a-z][a-z0-9-]+)':\s*(?:\/\/[^\n]*\n\s*)*[^\n]*haptic\(/g)) simKinds.add(m[1]);
-for (const m of simSrc.matchAll(/queueHazard\('([a-z][a-z0-9-]+)'/g)) simKinds.add(m[1]);
+const forwarded = new Set();
+let kindArgSites = 0;
+const walkAst = (node, visit) => {
+  if (!node || typeof node !== 'object') return;
+  if (Array.isArray(node)) { for (const child of node) walkAst(child, visit); return; }
+  if (typeof node.type !== 'string') return;
+  visit(node);
+  for (const value of Object.values(node)) walkAst(value, visit);
+};
+const calls = (node, name) => node.type === 'CallExpression'
+  && node.callee.type === 'Identifier' && node.callee.name === name;
+const hasKind = (node) => calls(node, 'haptic') && node.arguments.length >= 3
+  && !(node.arguments[2].type === 'Literal' && node.arguments[2].value === null)
+  && !(node.arguments[2].type === 'Identifier' && node.arguments[2].name === 'undefined');
+const hazardName = (node) => node?.type === 'Literal' && typeof node.value === 'string'
+  && /^[a-z][a-z0-9-]+$/.test(node.value) ? node.value : null;
+// Parse actual JavaScript. Four existing multiline cases were invisible to
+// the old same-line regex, and merely wrapping a call could hide a lost mapping.
+walkAst(parseAst(simSrc), (node) => {
+  if (calls(node, 'queueHazard')) {
+    const kind = hazardName(node.arguments[0]);
+    if (kind) simKinds.add(kind);
+  }
+  if (hasKind(node)) kindArgSites++;
+  if (node.type !== 'SwitchStatement') return;
+  for (let i = 0; i < node.cases.length; i++) {
+    const kind = hazardName(node.cases[i].test);
+    if (!kind) continue;
+    // A case may share the following case's handler through fall-through.
+    // Direct break/return/throw ends that path; conditional exits conservatively
+    // retain any handler the case can reach.
+    for (let j = i; j < node.cases.length; j++) {
+      const body = node.cases[j].consequent;
+      walkAst(body, (child) => {
+        if (calls(child, 'haptic')) simKinds.add(kind);
+        if (hasKind(child)) forwarded.add(kind);
+      });
+      if (body.some((statement) => ['BreakStatement', 'ReturnStatement', 'ThrowStatement'].includes(statement.type))) break;
+    }
+  }
+});
 const unmapped = [...simKinds].filter((k) => !EVENT_SHAPE[k]).sort();
 if (simKinds.size < 20) fail(`mapping: only ${simKinds.size} hazard kinds parsed out of drilling.js — the scrape has broken, and a gate over an empty set passes forever`);
 // WHETHER THE SIM FORWARDS ITS KIND IS MEASURED, NOT ASSERTED.
@@ -131,12 +172,6 @@ if (simKinds.size < 20) fail(`mapping: only ${simKinds.size} hazard kinds parsed
 // with no consumer in ASTRA section 8 - and it inverted the meaning of the
 // note under it: an unmapped kind that IS forwarded is a live gap reaching a
 // player now, not a mapping held in reserve for later.
-const forwarded = new Set();
-for (const m of simSrc.matchAll(/case '([a-z][a-z0-9-]+)':[^\n]*haptic\([^)]*,[^)]*,[^)]*\)/g)) {
-  forwarded.add(m[1]);
-}
-const kindArgSites =
-  [...simSrc.matchAll(/\bhaptic\([^;)]{0,160}?,[^;)]{0,80}?,[^;)]{0,80}?\)\s*;/g)].length;
 if (unmapped.length) {
   const live = unmapped.filter((k) => forwarded.has(k));
   const later = unmapped.filter((k) => !forwarded.has(k));
@@ -144,8 +179,8 @@ if (unmapped.length) {
   note(`  ${unmapped.join(', ')}`);
   note(`  drilling.js forwards h.kind at ${kindArgSites} haptic() call sites, covering ${forwarded.size} kinds.`);
   if (live.length) {
-    note(`  REACHING A PLAYER NOW - forwarded, but with no signature of its own:`);
-    note(`    ${live.join(', ')}`);
+    fail(`mapping: forwarded hazards have no signature: ${live.join(', ')}. `
+      + `These reach the player as a generic UI tick.`);
   }
   if (later.length) {
     note(`  Not yet forwarded, so they still arrive as legacy intensity names (see LEGACY):`);
