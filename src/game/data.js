@@ -1099,6 +1099,7 @@ export const METHODS = deepFreeze([
  * @property {number} price           EUR
  * @property {number} unlockLevel
  * @property {string[]} methods
+ * @property {Object.<string, number|null>} [methodDepthCapacity] metres by configured method; null means not sourced
  * @property {{power:number,torque:number,feedForce:number,depthCapacity:number,rodHandling:number,mobility:number,comfort:number}} stats
  * @property {number} upkeepPerHour   EUR/h — service, wear parts, tyres/tracks
  * @property {number} fuelPerHour     EUR/h — diesel at load
@@ -1181,7 +1182,17 @@ export const RIGS = deepFreeze([
     id: 'foundation-bg', name: 'Torvald KR-46 Kellyline', maker: 'Torvald',
     price: 1050000, unlockLevel: 23,
     methods: ['rotary-kelly', 'cfa', 'cased-cfa'],
-    stats: { power: 315, torque: 178, feedForce: 260, depthCapacity: 78, rodHandling: 0.85, mobility: 0.35, comfort: 0.9 },
+    // BG36H BS95, 12/2020, pp.17/18/20: separate configured limits, not
+    // interchangeable ratings. The authored Kelly A15.3/B49.8 is the /4/48.
+    // CFA/CCFA ratings require their conversion attachments; this patch does
+    // not provide those rendered setups. See research/rigs/method-capacity-verification-2026-09-06.md.
+    // https://www.ecanet.com/uploads/files/Resources/BG_36_H_BS_95_Rotary_Drilling_Rig_EN_905_868_2.pdf
+    methodDepthCapacity: {
+      'rotary-kelly': 48, // p.17: /4/48 bar, 1.9 m tool, minimum mast reach.
+      cfa: 15.2,         // p.18: basic CFA conversion, no Kelly extension.
+      'cased-cfa': 17,   // p.20: BTM400 conversion, 1,000 mm configuration.
+    },
+    stats: { power: 315, torque: 178, feedForce: 260, depthCapacity: 48, rodHandling: 0.85, mobility: 0.35, comfort: 0.9 },
     upkeepPerHour: 96, fuelPerHour: 84, transportTons: 118,
     description: 'A 118-tonne rotary foundation rig with a four-stage interlocking Kelly and 178 kNm at the drive head. It arrives on three trailers and a crane, and it turns a 1200 mm pile like the ground owes it money.',
     family: CAT.rigFoundation,
@@ -1195,6 +1206,12 @@ export const RIGS = deepFreeze([
     // Sunward S-series, printed p.24 (PDF p.25), configuration table:
     // https://sunward.eu/wp-content/uploads/2023/08/SUNWARD_DRILLING-RIGS_S-SERIES_EN.pdf
     // See research/rigs/cfa-capacity-verification-2026-09-06.md for the model audit.
+    methodDepthCapacity: {
+      cfa: 15,
+      'cased-cfa': null,   // NOT SOURCED for this rig's conversion.
+      auger: null,         // NOT SOURCED: short-auger work is not a CFA rating.
+      'rotary-kelly': null, // NOT SOURCED: no Kelly configuration established.
+    },
     stats: { power: 261, torque: 132, feedForce: 190, depthCapacity: 15, rodHandling: 0.7, mobility: 0.4, comfort: 0.85 },
     upkeepPerHour: 74, fuelPerHour: 69, transportTons: 82,
     description: 'A 15 m fixed-mast CFA setup with concrete-pressure and auger-rotation logging on the cab screen. Add the counter-rotating casing drive and it becomes a double-rotary machine without leaving the yard.',
@@ -4890,18 +4907,23 @@ const DEPTH_BY_METHOD_APPLICATION = Object.freeze({
  * drilled by a rig rated for nothing like 400 m of hole.
  */
 const _fleetDepth = new Map();
-function fleetDepthFor(methodId) {
-  if (_fleetDepth.has(methodId)) return _fleetDepth.get(methodId);
+export function fleetDepthFor(methodId, rigs = RIGS) {
+  // Only the immutable complete fleet is cached. A caller may assess a subset
+  // without poisoning the contract generator's capacity for everybody else.
+  const completeFleet = rigs === RIGS;
+  if (completeFleet && _fleetDepth.has(methodId)) return _fleetDepth.get(methodId);
   let deepest = Infinity;
   if (DEPTH_IS_VERTICAL.includes(methodId)) {
-    const able = RIGS.filter((r) => r.methods.includes(methodId));
-    // No rig runs it at all is checkdata.mjs's problem, not this function's —
-    // it must not silently narrow a window to nothing on the way past.
-    deepest = able.length
-      ? able.reduce((a, r) => Math.max(a, r.stats.depthCapacity || 0), 0)
-      : Infinity;
+    const able = rigs.filter((r) => r.methods.includes(methodId));
+    // A Kelly rating cannot authorize CFA depth on the same carrier. An
+    // unsourced conversion contributes no rating, rather than borrowing the
+    // catalogue's base capacity. Do not generate zero-depth or unlimited work
+    // if every advertised configuration is unknown.
+    const rated = able.map((r) => rigDepthCapacity(r, methodId)).filter((d) => d !== null);
+    if (!rated.length) throw new RangeError(`No rated rig depth capacity for ${methodId}`);
+    deepest = Math.max(...rated);
   }
-  _fleetDepth.set(methodId, deepest);
+  if (completeFleet) _fleetDepth.set(methodId, deepest);
   return deepest;
 }
 
@@ -6111,6 +6133,34 @@ const SLOT_MAP = byId(SLOTS);
 
 export const getMethod = (id) => METHOD_MAP.get(id) || null;
 export const getRig = (id) => RIG_MAP.get(id) || null;
+
+/**
+ * Rated depth in metres for the requested configured method, or null when the
+ * rig/method is absent or its rating is not sourced. Accepts an id or a Rig.
+ *
+ * A method map is authoritative: null AND an omitted key mean unknown; neither
+ * may fall back to another configuration. Legacy rigs without a map retain
+ * their existing stats rating until researched. Invalid declarations throw.
+ * This checks depth only, not ownership, fitted attachments or bore diameter.
+ */
+export function rigDepthCapacity(rigOrId, methodId) {
+  const rig = typeof rigOrId === 'string' ? getRig(rigOrId) : rigOrId;
+  if (!rig || !Array.isArray(rig.methods) || !rig.methods.includes(methodId)) return null;
+  const explicit = Object.hasOwn(rig, 'methodDepthCapacity');
+  const map = rig.methodDepthCapacity;
+  if (explicit && (!map || typeof map !== 'object'
+      || ![Object.prototype, null].includes(Object.getPrototypeOf(map)))) {
+    throw new TypeError(`Rig ${rig.id}: methodDepthCapacity must be an object`);
+  }
+  if (explicit && !Object.hasOwn(map, methodId)) return null;
+  const depth = explicit ? map[methodId] : rig.stats?.depthCapacity;
+  if (depth === null || (!explicit && depth === undefined)) return null;
+  if (typeof depth !== 'number' || !Number.isFinite(depth) || depth <= 0) {
+    throw new RangeError(`Rig ${rig.id}: invalid depth capacity for ${methodId}`);
+  }
+  return depth;
+}
+
 export const getItem = (id) => ITEM_MAP.get(id) || null;
 export const getRegion = (id) => REGION_MAP.get(id) || null;
 export const getCert = (id) => CERT_MAP.get(id) || null;
