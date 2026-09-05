@@ -237,7 +237,9 @@ const DEFAULT_REGION = 'nordic';
 /* ═══════════════════════════════════════════════════════════════════════════
    UNDERGROUND — a MODE, not a ninth region.
    ═══════════════════════════════════════════════════════════════════════════
-   `tunnel-jumbo`, `longhole` and `rockbolt` happen inside rock. Every input the
+   `tunnel-jumbo`, `longhole`, `rockbolt` and `raise-boring` happen inside rock —
+   the same four ids `data.js` freezes as UNDERGROUND_METHODS, and the same four
+   whose only archetype is `underground-drive`. Every input the
    eight recipes above are built out of — sun elevation and azimuth, turbidity,
    rayleigh, mie, cloud coverage, a sky-derived PMREM, a horizon-matched fog —
    describes light arriving from a sky. Underground there is none, so a ninth
@@ -277,8 +279,29 @@ const DEFAULT_REGION = 'nordic';
      longhole      5.0 x 5.0 m. research/03 §C: "a development drive might be
                    4-5 m high and 4-5 m wide".
      rockbolt      5.6 x 5.4 m — the same class of drive, one size up.
+     raise-boring  12.0 x 6.8 m, and it is NOT a drive — see below. Its size is
+                   the one number in this table with no published source; it is
+                   DERIVED from the machine, and the arithmetic is on the entry.
    `contour` is the half-barrel spacing: research/04 §7.4 caps contour hole
    spacing at 0.7 m. `round` is the round length, 4.5 m (research/04 §7.5).
+
+   THREE OF THESE ARE TUBES AND ONE IS A ROOM. A jumbo, a longhole rig and a
+   bolter all drive along a corridor and work at one end of it. A raise borer
+   does not drive anywhere at all: research/rigs/raisebore.md §2 — "it is a
+   stationary machine that is trucked or caged in pieces into a small
+   purpose-excavated chamber on an UPPER mine level, set on a prepared concrete
+   floor, and grouted and rock-bolted down… It has no tracks, no wheels, no cab
+   and no boom." It bores a pilot DOWNWARD until it breaks through into the
+   level below, then bolts on a reaming head and pulls it back up.
+
+   So `faceZ` for that entry is a blind end wall and not a face, `hasFace` is
+   false, and the surface the machine is working on is not ahead of it — it is
+   the collar in the floor directly under it. terrain.js sweeps ONE horseshoe
+   profile down z whatever this file says, so the chamber is authored as the
+   widest, lowest, shortest member of that family rather than as a shape it
+   cannot build. The hole in the floor is geometry and belongs to terrain.js;
+   it is NOT declared here, because a field with no consumer is the failure
+   this project has already paid for five times (ASTRA §8).
    ═══════════════════════════════════════════════════════════════════════════ */
 export const DRIVE_YAW = 0.73787;          // rad; see above — do not retune alone
 
@@ -294,7 +317,7 @@ export const DRIVE_YAW = 0.73787;          // rad; see above — do not retune a
  *
  * ── `work` IS THE ONE NUMBER THE WHOLE RIG IS SOLVED AGAINST ────────────────
  *
- * The three drives differ in size by 3.4x on a side, and 1/d^2 turns that into
+ * The four sites differ in size by 3.4x on a side, and 1/d^2 turns that into
  * an 11x difference in the irradiance a fixed candela delivers. The rig used to
  * carry ONE candela table solved for the 12.6 m heading and then reused
  * unchanged in a 5.0 m drive, and that single fact is what the round-1
@@ -304,9 +327,10 @@ export const DRIVE_YAW = 0.73787;          // rad; see above — do not retune a
  *     longhole       mean 148    0.0 % below L16 — a flat, evenly-lit corridor
  *     rockbolt       mean  84    a blown white sheet of medium over the machine
  *
- * One solver, three answers. `work` is the metres from the machine's own lamp
+ * One solver, four answers. `work` is the metres from the machine's own lamp
  * to the surface it is working on — the FACE for a jumbo, the collar of the
- * ring for a longhole cradle, the BACK overhead for a bolter feed — and every
+ * ring for a longhole cradle, the BACK overhead for a bolter feed, and the
+ * COLLAR IN ITS OWN FLOOR for a raise borer — and every
  * light is now solved from it through `cd()` below. It is deliberately NOT the
  * drive length: the drive behind goes dark on its own, because 1/d^2 does it
  * for free, and a light solved against the length would have to be 25x the key
@@ -386,6 +410,177 @@ export const UNDERGROUND = {
     dust: { base: 0.052, face: 0.9, sigma: 0.062 },
     fog: 0.0270, ambient: 0.038, hemi: 0.028, env: 0.15,
   },
+  /* ── THE RAISE-BORE CHAMBER ───────────────────────────────────────────────
+     The machine has been modelled, exported and drilling since before this
+     entry existed; what did not exist was anywhere for it to stand, so
+     `UNDERGROUND['raise-boring']` was undefined, terrain.js's
+     `UNDERGROUND[methodId]` came back null, `api.setUnderground()` refused the
+     id, and the whole SURFACE pipeline ran instead. Measured, not assumed —
+     `node tools/shoot.mjs --headed m21-raise-boring` before this entry
+     photographed a raise borer standing on SAND under a Sahara sky with dunes
+     behind it, surface band mean L 109.6 with 8.1 % of it below L16, at
+     surface 49 / rig 25 draw calls and 62.6 MB of sky and terrain texture.
+     The machine was right and the world around it was the wrong world.
+
+     ── SIZE — the only NOT SOURCED number in this table ──────────────────────
+     research/rigs/raisebore.md §8-NEW.3 is explicit: "Raise-bore chamber
+     dimensions. Nothing quantitative anywhere." The one usable qualitative
+     statement is that "raise borers often require higher than normal overhead
+     space", and that the chamber is drilled and blasted for them. So this is
+     DERIVED from the machine, and the arithmetic is here rather than in a
+     commit message:
+
+       node tools/glbinfo.mjs --parts public/models/raisebore.glb
+         W 10.050 x H 5.450 x L 6.410   x -5.060..4.990  y -0.350..5.100
+
+     but that is the machine's OWN plan, and the machine does not stand square
+     to this frame. rigFactory.js only TRANSLATES the rig to
+     terrain.collarPosition (grep DRIVE_YAW: terrain.js is the only consumer,
+     and it yaws the tube, not the machine), so the machine stands at
+     DRIVE_YAW = 42.28 deg across its own chamber. Every vertex transformed and
+     then rotated into drive-local — not the eight corners of the AABB, which
+     ASTRA §5 records as a strict over-estimate that produced four false
+     findings — gives the footprint that actually has to fit:
+
+         lx -5.554 .. 5.524   (11.077 m across the chamber)
+         lz -5.681 .. 5.691   (11.372 m along it)
+         y  -0.350 .. 5.100   (the -0.350 is the string hanging into the raise,
+                               which is correct and is why ASTRA §7.5 lists this
+                               machine as one whose sub-zero reach is FINE)
+
+     width 12.0 is 11.077 + 0.46 m of clearance to each rib. height 6.8 is
+     5.100 + 1.70 m of clear back over the head frame, which is the "higher
+     than normal overhead space" and the only part of the size that any source
+     speaks to at all. 1.03 m of that width is the 42.28 deg yaw alone
+     (11.077 drive-local against the machine's own 10.050 on plan) and comes
+     back the day a rig is yawed with its drive — see the NEEDS note at the
+     bottom of this file, and do not shrink this below 11.0 before that lands.
+
+     A LOWER BOUND, not a target: research says "a small purpose-excavated
+     chamber… a low back — a cuddy, not a hall", and 12.0 m is not small. It is
+     the smallest room this machine, laid out as blender/raisebore.py lays it
+     out (PACK_X -4.150, PUMP_X +4.150, both [NS]), can be put in.
+
+     ── WHERE THIS LANDS, MEASURED ────────────────────────────────────────────
+     Surface band, 780x1688, quality high, WARM, hero camera — the same three
+     statistics every round above is argued from:
+
+       state              mean L   below L16   above L160
+       raise-boring        109.6      8.1 %      20.3 %   BEFORE: a Sahara well
+                                                          pad, because no
+                                                          chamber existed
+       raise-boring         59.1     35.5 %      17.3 %   this entry
+       tunnel-jumbo         51.8     27.3 %       5.3 %
+       longhole             58.3     25.4 %       9.9 %
+       rockbolt             32.6     49.0 %       2.7 %
+
+     The surround arrives: 8 % of the band was genuinely dark before and 35.5 %
+     is now, which is better than the jumbo heading and the longhole drive.
+
+     `above L160` is DELIBERATELY LEFT at roughly twice the other three, and
+     the cause is albedo, not exposure. `cd()` solves every light for what it
+     puts on ROCK at 0.095, and this is the only variant whose work surface is
+     not rock: what the key lands on is ten metres of safety-yellow machine at
+     an albedo near 0.5 — five times brighter for the same irradiance — filling
+     more of the frame than any machine in the game, because the camera is
+     13.75 m from a stationary 10.05 m object in a room with nothing else in
+     it. Cutting the key to bring that number down would under-light the rock
+     five-fold to flatter the paint, which is the exact trade the SUN_RAMP note
+     below records REFUSING on the surface: the fix went into the pigment, not
+     into the light. Nothing clips — the top two histogram bins (L224-255) hold
+     0.4 % of the band between them.
+
+     Harness noise, for whoever reads those numbers next: `rockbolt` is
+     byte-for-byte unaffected by this commit and still moved 36.5 -> 32.6 mean
+     and 43.2 -> 49.0 % below L16 between two runs, because the harness drives
+     the sim live and photographs a moving boom. Treat +/-4 of mean and +/-6
+     points of either tail as noise. The longhole drive's 38.8 -> 25.4 is
+     outside it and is its key arriving on the work; the jumbo's 29.7 -> 27.3
+     is not. */
+  'raise-boring': {
+    id: 'raise-boring', name: 'Raise-bore chamber',
+    width: 12.0, height: 6.8, wallH: 3.4,
+    /* Blind end 9 m ahead of the collar — 3.3 m clear beyond the machine's own
+       lz -5.681. `hasFace` FALSE: there is no face here and nothing is being
+       drilled at that wall, so terrain.js draws its flat 'drive-end' and the
+       medium's face plume (dust.face) stays out of a corner where nothing is
+       happening. backZ 34 ends the tube 20 m behind the eye at z +13.75, deep
+       inside the black — a third of the jumbo's 62, because the chamber is a
+       cuddy off an access drive and every extra ring is shell it never shows. */
+    faceZ: -9.0, backZ: 34, hasFace: false,
+    /* THE WORK IS UNDER THE MACHINE, NOT AHEAD OF IT, and this is the machine's
+       own statement about it rather than a number picked to look right.
+       mount:table-work-light sits at (1.950, 1.620, 1.250) and blender's
+       raisebore.py puts the worktable the string passes through at
+       TABLE_TOP = 0.850 on the axis: hypot(1.950, 0.770, 1.250) = 2.441 m.
+       (The other lamp, mount:feed-work-light on slide:carriage, is 1.174 m off
+       the same collar; it is the SECOND key below, not the solver's distance —
+       solving the whole rig against 1.17 m puts the fill at 20 cd and it stops
+       reaching anything.) */
+    work: 2.44,
+    round: 4.0, contour: 0.70, halfBarrel: 0.60,
+    /* Lined almost throughout, and that is the one place this chamber differs
+       from the three drives in kind rather than in degree. A heading and a
+       production drive are lined BEHIND the work and raw in front of it,
+       because the lining chases the excavation and the boundary is the player's
+       own progress. A raise-bore chamber was excavated, supported and floored
+       before the machine was ever caged down to it — research/rigs/raisebore.md
+       §4c: "Prepared floor, rock or shotcrete walls, mesh and bolts, a light
+       string, hoses across the floor, water underfoot". 3 leaves one short band
+       of raw rock at the blind end and takes `lined` to 0.847 — against the
+       jumbo's 0.586, the bolter's 0.441 and the longhole drive's 0.150, i.e.
+       the highest in the table by a wide margin and just under the 0.85 ceiling
+       the clamp puts on it. That is the honest reason this is the brightest
+       bounce underground: grey-white shotcrete on every wall and a cast floor. */
+    shotcreteFrom: 3, ditch: 1,
+    /* The duct hugs the arch, as the jumbo's does: at x -4.26 the ellipse is at
+       y 5.79, so a 0.55 m duct centred at 5.80 is half-buried in the crown,
+       which is where a duct is hung. */
+    vent: { r: 0.55, x: -4.26, y: 5.80, hang: 5.0 },
+    services: { x: 5.25, y: 2.30 },
+    /* festoonZ(u,i) = -9 + 6 + 6i = -3, 3, 9, 15, 21, 27, 33 — the last bulb
+       lands 1 m short of backZ instead of hanging in the rock past the end of
+       the tube, which is what a spacing carried over from a 62 m heading does
+       in a 43 m room. */
+    festoon: { x: 5.55, y: 3.90, spacing: 6.0, n: 7 },
+    /* ZERO, and it is the whole point of the room. Every other underground
+       floor in this game is blasted muck. This one is a poured concrete pad
+       with the machine grouted down to it (research/03 §C.2.5, [W-SANDVIK-RB]),
+       and on the ream pass the cuttings "simply fall by gravity into the LOWER
+       chamber and are mucked out with an LHD" — they never arrive on this
+       level at all. terrain.js still scatters its `nScale` spillage down the
+       whole invert, so the floor is not surgically clean; it just has no muck
+       pile, because there is nothing to make one. */
+    muck: 0,
+    mesh: 1,                        // "mesh and bolts" — research/rigs §4c
+    /* THE LEAST DUSTY PLACE UNDERGROUND, and for two sourced reasons: the pilot
+       pass is WATER flushed (METHODS['raise-boring'].flushMedium: 'water'), and
+       on the ream pass "there is no flush… nothing is pumped, nothing sprays;
+       the material just falls" (research/rigs/raisebore.md §4d). What is in the
+       air is water mist off the collar and a permanently ventilated room, not
+       blast fume. `face` is cut to 0.30 because uFaceZ here is a blind wall
+       20 m from anything: the other three park their plume on the work, and
+       this one would park it in an empty corner. */
+    dust: { base: 0.034, face: 0.30, sigma: 0.045 },
+    /* THE MACHINE'S DENSE CORE, authored rather than derived. The default
+       min(2.3, width*0.23) x min(2.7, height*0.36) box, applied to a 12 m room,
+       is 4.6 x 2.3 x 14.0 m — a slab wider than the derrick, shorter than it,
+       and ten metres longer than it, which is the "occluder larger than the
+       thing it stands for" failure named in solveUnderground(). A raise borer
+       is the opposite shape to a carrier: FRAME_W 1.950 x FRAME_D 2.000 on
+       plan and COL_TOP 5.100 tall (blender/raisebore.py), i.e. a slim tower.
+       At 42.28 deg a 1.95 x 2.00 plan reaches 1.49 in drive-local, so 1.5. */
+    occ: { x: 1.5, z0: -1.6, z1: 1.6, y: 5.1 },
+    /* `ambient` is a radiance on rock and `lined` (0.847 here) is the
+       multiplier, so the two are not independent: 0.024 x 33.07 x
+       (0.55 + 0.9 x 0.847) = 1.04, against the jumbo's 0.028 x 33.07 x 1.077 =
+       1.00. Within 4 %, and deliberately so: the two rooms are within 0.6 m of
+       the same width, and the inter-reflection a wall 6 m away returns does
+       not care which method is
+       standing between them. It is NOT the two 5 m tubes' 0.038: those bounce
+       harder because their walls are 2.5 m apart and face each other. */
+    fog: 0.0200, ambient: 0.024, hemi: 0.018, env: 0.17,
+  },
 };
 
 /**
@@ -441,7 +636,7 @@ const UG_TARGET = {
 
 /**
  * The light rig, per variant, built from the drive's own dimensions AND its
- * `work` distance, so the three drives share one authored intent rather than
+ * `work` distance, so the four sites share one authored intent rather than
  * one authored brightness.
  *
  * Colour temperature is deliberately MIXED, because that is what underground
@@ -459,6 +654,40 @@ const UG_TARGET = {
  * working on. `followAt` is the ordinal fallback for when the machine on the
  * pad is a STAND-IN with differently named lamps - which the harness currently
  * produces for `rockbolt`, where data.js hands back `tunnel-jumbo`.
+ *
+ * ── THE NAMES WERE WRONG, AND THE ORDINAL FALLBACK HID IT ───────────────────
+ *
+ * A name binding is only better than an index if the name EXISTS. Three of the
+ * four names this table shipped with were never published by any machine in the
+ * fleet, and the `followAt` fallback silently caught every one of them — ASTRA
+ * §8's "a silent fallback that works is the most expensive kind of failure",
+ * for the sixth time in this codebase.
+ *
+ * Measured off the exported .glb files themselves (mount:/aim: pairs in scene
+ * traversal order, i.e. exactly the order `followAt` indexes):
+ *
+ *   asked for               machine        published?   fell through to
+ *   boom-1-work-light       tunnel-jumbo   NO           [0] tram-f-00
+ *   boom-2-work-light       tunnel-jumbo   NO           [1] tram-f-01
+ *   cradle-work-light       longhole-rig   NO           [0] tram-r-0
+ *   feed-work-light         bolter         YES  [9]     —
+ *
+ * So on two of the three drives the key and the second key were riding TRAMMING
+ * LAMPS. The jumbo's are four lamps in a row across the carrier nose, 0.4 m
+ * apart, hung on `pivot:articulation` — the frame-steer joint — so "the jumbo's
+ * boom-1 lamp travels 0.70 m walking the pattern", written two hundred lines
+ * below, was describing a lamp nothing was bound to. The longhole rig's [0] is
+ * worse: `tram-r-0` is `moves: false`, on the static rear of the carrier,
+ * pointing back down the drive. The one light in the whole rig that is supposed
+ * to sweep with the boom sat still, aimed the wrong way, for every underground
+ * frame this project has shot.
+ *
+ * The names below are now the ones the models actually export. `followAt` stays
+ * — a stand-in machine is a real case — but a MISS IS NOW LOUD: see the
+ * binding loop in updateUnderground(), which names what it asked for and what
+ * the machine published instead. Re-check with:
+ *
+ *     node tools/glbinfo.mjs --parts public/models/<rigId>.glb
  */
 /**
  * Where terrain.js hangs festoon bulb `i`. ONE definition, called by both
@@ -498,7 +727,39 @@ function undergroundRig(u, tier) {
     ? [0.35, H, -1.2]                       // a bolter drills the BACK, overhead
     : u.id === 'longhole'
       ? [W, H * 0.62, -2.0]                 // a longhole cradle drills the ring
-      : faceTarget;                         // a jumbo drills the face
+      : u.id === 'raise-boring'
+        /* a raise borer bores DOWNWARD through its own floor. The work is the
+           collar in the worktable at blender/raisebore.py's TABLE_TOP = 0.850,
+           on the axis — the only variant where the key points at the floor. */
+        ? [0, 0.85, 0]
+        : faceTarget;                       // a jumbo drills the face
+
+  /* Which of the machine's own lamps each key rides. Names verified against the
+     exported models — see the block above; do not edit one without re-running
+     `node tools/glbinfo.mjs --parts public/models/<rigId>.glb`. */
+  const keyLamp = u.id === 'tunnel-jumbo' ? 'boom-l-lamp-0'
+    : u.id === 'longhole' ? 'feed-head'
+      : u.id === 'raise-boring' ? 'table-work-light'
+        : 'feed-work-light';
+  /* The second key. Only the two-lamp-on-the-work machines have one to ride:
+     the jumbo's other boom, and the raise borer's carriage lamp — which is the
+     one that MOVES on that machine (slide:carriage, travel_m 1.71, one full
+     stroke per 1.5 m pipe) while the table lamp is bolted to the frame. */
+  const key2Lamp = u.id === 'tunnel-jumbo' ? 'boom-r-lamp-0'
+    : u.id === 'raise-boring' ? 'feed-work-light'
+      : null;
+  const twoKey = u.id === 'tunnel-jumbo' || u.id === 'raise-boring';
+  /* The second key's OWN working distance, when it is not the key's.
+     `cd(L, d)` answers "what power puts radiance L on rock d metres away", so a
+     lamp solved at the wrong d is wrong by the SQUARE of the ratio. On a jumbo
+     the two boom lamps stand off the face together and one d serves both. On a
+     raise borer they do not: mount:table-work-light is 2.441 m from the collar
+     and mount:feed-work-light, riding slide:carriage, is 1.174 m from it.
+     Solving the second at 2.441 put (2.441/1.174)^2 = 4.3x the intended
+     irradiance on the one square metre the player is looking at — measured on
+     the first capture of this chamber as 18.4 % of the band over L160, against
+     the jumbo's 7.0 % and the longhole drive's 9.8 %. */
+  const d2 = u.id === 'raise-boring' ? 1.174 : d;
 
   const L = [
     /* THE KEY - the machine's own boom / feed / cradle lamp. rigFactory.js
@@ -509,30 +770,34 @@ function undergroundRig(u, tier) {
     { name: 'ugFloodL', kind: 'spot', pos: [-W * 0.42, H * 0.55, 1.6], target: keyTarget,
       color: '#FFE9C0', power: cd(UG_TARGET.key, d), dist: Math.max(18, d * 3.4),
       angle: 0.47, penumbra: 0.52, media: 1.9, shadow: 1,
-      follow: u.id === 'tunnel-jumbo' ? 'boom-1-work-light'
-        : u.id === 'longhole' ? 'cradle-work-light' : 'feed-work-light',
-      followAt: 0 },
-    /* The second key. On a jumbo it is the second boom's lamp and really is a
-       second machine light; on the one-lamp machines there is nothing to
-       follow, so it becomes the carrier's platform light washing the far side
-       of the work - which is what stops the key reading as one flat lamp. */
+      follow: keyLamp, followAt: 0 },
+    /* The second key. On a jumbo it is the second boom's lamp and on a raise
+       borer the carriage lamp, and both really are a second machine light; on
+       the one-lamp machines there is nothing to follow, so it becomes the
+       carrier's platform light washing the far side of the work - which is what
+       stops the key reading as one flat lamp. */
     { name: 'ugFloodR', kind: 'spot',
-      pos: u.id === 'tunnel-jumbo' ? [W * 0.40, H * 0.52, 2.4] : [W * 0.55, H * 0.42, 4.2],
+      pos: twoKey ? [W * 0.40, H * 0.52, 2.4] : [W * 0.55, H * 0.42, 4.2],
       /* Down the drive, not across it. Aimed at [-W*0.30, H*0.55, -1.5] this
          light raked the near-left rib 1-3 m from the eye and made a foreground
          wall the brightest thing in the frame; the work is 12 m away and this
          is the only lamp on it that does not swing with the boom. */
-      target: u.id === 'tunnel-jumbo' ? [W * 0.22, H * 0.30, u.faceZ] : [-W * 0.12, H * 0.50, -5.0],
-      color: u.id === 'tunnel-jumbo' ? '#FFE4B8' : '#CFE0FF',
-      /* On the jumbo this is a real second boom lamp and a ratio to the key is
-         the right authoring. On the one-lamp machines it is the carrier's
-         platform light and it is the ONLY light on the work that does not
-         swing away with the boom, so it carries more. */
-      power: cd(u.id === 'tunnel-jumbo' ? UG_TARGET.fill : UG_TARGET.fill * 1.45, d),
-      dist: Math.max(16, d * 3.0),
+      target: u.id === 'tunnel-jumbo' ? [W * 0.22, H * 0.30, u.faceZ]
+        : u.id === 'raise-boring' ? [0, 0.85, 0]
+          : [-W * 0.12, H * 0.50, -5.0],
+      /* Warm on the machines where this is a real machine lamp (it will be
+         overwritten from the lamp's own colour_hex anyway), cold LED where it
+         stands in for the carrier's platform light. */
+      color: twoKey ? '#FFE4B8' : '#CFE0FF',
+      /* On the jumbo and the raise borer this is a real second machine lamp and
+         a ratio to the key is the right authoring. On the one-lamp machines it
+         is the carrier's platform light and it is the ONLY light on the work
+         that does not swing away with the boom, so it carries more. */
+      power: cd(twoKey ? UG_TARGET.fill : UG_TARGET.fill * 1.45, d2),
+      dist: Math.max(16, d2 * 3.0),
       angle: 0.56, penumbra: 0.62, media: 1.9, shadow: 0,
-      follow: u.id === 'tunnel-jumbo' ? 'boom-2-work-light' : null,
-      followAt: u.id === 'tunnel-jumbo' ? 1 : null },
+      follow: key2Lamp,
+      followAt: key2Lamp ? 1 : null },
     /* THE WASH - the carrier's own tramming and platform lights, wide and weak,
        thrown forward and down over the invert. This is the light that makes the
        tube read as a tube. Without it the near walls of a 12.6 m heading sit at
@@ -623,10 +888,21 @@ function undergroundRig(u, tier) {
       angle: 0.34, penumbra: 0.5, media: 2.4, shadow: 0, cap: 1 },
     /* The canopy beacon. rigFactory.js draws the amber emissive dome for it and
        gates that on quality > LOW - so this light is gated the same way, or LOW
-       would carry an orange pool of light with nothing making it. */
-    { name: 'ugBeacon', kind: 'point', pos: [0, Math.min(3.4, H * 0.44), 3.2],
+       would carry an orange pool of light with nothing making it.
+
+       NOT ON A RAISE BORER, and this one is a positive fact rather than an
+       absence: research/rigs/raisebore.md §5.1 — "It has no tracks, no wheels,
+       no cab and no boom. Alone in the whole fleet. If a viewer can see how it
+       got there, it is wrong." A rotating amber beacon is what a machine that
+       TRAMS carries so it is seen coming; this one is caged in in pieces and
+       grouted to the floor, and blender/raisebore.py accordingly models none.
+       An amber pool sweeping a chamber with nothing in it making the sweep is
+       the same failure as a housing with no beam, from the other end. */
+    ...(u.id === 'raise-boring' ? [] : [{
+      name: 'ugBeacon', kind: 'point', pos: [0, Math.min(3.4, H * 0.44), 3.2],
       color: '#F0B319', power: cd(UG_TARGET.beacon, 1.8), dist: 11, media: 0.6, shadow: 0, beacon: 1,
-      inMedia: false },
+      inMedia: false,
+    }]),
   ];
   // LOW keeps the key, the wash, the shaft and one sodium bulb: four lights,
   // and no beacon, because the machine that would be making it has none at LOW.
@@ -639,7 +915,7 @@ function undergroundRig(u, tier) {
  * The following lights ride the machine and rigFactory.js draws their housings;
  * these are the ones bolted to the carrier deck or the drive itself, and
  * terrain.js used to carry a hardcoded pair of coordinates that had already
- * drifted off two of the three variants. ONE definition, read by both sides.
+ * drifted off two of the variants. ONE definition, read by both sides.
  */
 export function driveFixtures(methodId, tier) {
   const u = UNDERGROUND[methodId];
@@ -649,9 +925,21 @@ export function driveFixtures(methodId, tier) {
     .map((s) => ({ name: s.name, pos: s.pos.slice(), target: s.target.slice() }));
 }
 /* NOTE, and it is the point of the filter above: right now this returns NOTHING
-   for all three variants, because every light in the rig except the festoon is
-   carried by the MACHINE and rigFactory.js draws those housings. terrain.js
-   used to hang two boxes at [-W*0.42, H*0.55, 1.6] and [W*0.40, H*0.52, 2.4] —
+   for any of the four variants, because every light in the rig except the
+   festoon is carried by the MACHINE and rigFactory.js draws those housings.
+
+   `raise-boring` is the first variant where that is not quite true — a raise
+   borer has no carrier to hang a wash or a rear flood on, so those two really
+   are the CHAMBER's own fixed floods. They are still not marked `housing: 1`,
+   deliberately: terrain.js draws a fixture as a wall bracket with a 0.34 m
+   stalk hanging BELOW it, which reads on a rib and reads as a floating box on
+   the centreline, and `ugWash` has to stay near the centreline or its 1/d^2
+   solve blows out whichever rib it is moved to (the festoon note above is the
+   same failure, measured). The coordinates a rib bracket would want are in the
+   NEEDS note at the foot of this file.
+
+   terrain.js used to hang two boxes at [-W*0.42, H*0.55, 1.6] and
+   [W*0.40, H*0.52, 2.4] —
    coordinates that belong to the machine's boom lamps — and they rendered as
    two lamp housings floating unsupported in the middle of the drive, visible in
    every underground frame this project has shot. A fixture bolted to the rock
@@ -1599,6 +1887,23 @@ export function createEnvironment(ctx) {
   let workLights = null;           // ctx.rig.getWorkLights(), re-read on demand
   let mediaIdx = [];               // ugLights indices the raymarch integrates
 
+  /* A declared `follow` name the machine on the pad does not publish, said out
+     loud exactly once per (light, name, machine). NOT through warnOnce(): that
+     helper carries ONE module-wide `warned` flag, so a PMREM failure anywhere
+     would silence this for the rest of the session — which is the same class of
+     bug it is here to report. Cleared on RIG_CHANGE so a new machine gets its
+     own hearing. */
+  const lampWarned = new Set();
+  function warnLamp(lightName, want, wl) {
+    const key = lightName + '<' + want;
+    if (lampWarned.has(key)) return;
+    lampWarned.add(key);
+    console.warn(`[env] ${lightName}: no work light named "${want}" on this machine. `
+      + `It publishes [${wl.map((k) => k && k.name).join(', ')}]. `
+      + `Falling back to the ordinal — the beam is on SOME lamp, not the right one. `
+      + 'Fix the name in undergroundRig(), or the model.');
+  }
+
   const YC = Math.cos(DRIVE_YAW), YS = Math.sin(DRIVE_YAW);
   /** drive-local metres → world */
   const toWorld = (lx, ly, lz, out) =>
@@ -1648,7 +1953,7 @@ export function createEnvironment(ctx) {
 
   /**
    * `ugBuiltFor` is the variant the CURRENT rig was built for, and it is the
-   * difference between three drives and one drive wearing three names.
+   * difference between four sites and one drive wearing four names.
    *
    * `if (ugGroup) return` was silently correct only while every variant shared
    * one candela table: going tunnel-jumbo -> longhole -> rockbolt in a single
@@ -1872,9 +2177,19 @@ export function createEnvironment(ctx) {
        its bounding box. An occluder larger than the thing it stands for hides
        dust that should be there, and every metre of it that misses the
        silhouette is a metre of visible edge in the haze. */
-    const mw = Math.min(2.3, ug.width * 0.23), mh = Math.min(2.7, ug.height * 0.36);
-    mediaUniforms.uOccMin.value.set(-mw, 0, ug.faceZ + 1.2);
-    mediaUniforms.uOccMax.value.set(mw, mh, 6.2);
+    /* `occ` overrides the formula for a machine the formula cannot describe.
+       The default is a CARRIER: something roughly as wide as a fifth of the
+       drive, about a third of it tall, running from just short of the face to
+       6.2 m back. A raise borer is the opposite shape — a 1.95 x 2.00 m frame
+       5.100 m tall standing still over a hole — and in a 12 m room the formula
+       hands it a 4.6 x 2.3 x 14.0 m slab, i.e. exactly the "occluder larger
+       than the thing it stands for" this block warns about, in all three axes
+       at once. When an entry states its own core, use it. */
+    const o = ug.occ;
+    const mw = o ? o.x : Math.min(2.3, ug.width * 0.23);
+    const mh = o ? o.y : Math.min(2.7, ug.height * 0.36);
+    mediaUniforms.uOccMin.value.set(-mw, 0, o ? o.z0 : ug.faceZ + 1.2);
+    mediaUniforms.uOccMax.value.set(mw, mh, o ? o.z1 : 6.2);
 
     /* no sky-derived PMREM. A dark, rock-coloured environment so that painted
        steel and chrome have SOMETHING to reflect — a clearcoat with no
@@ -1970,11 +2285,30 @@ export function createEnvironment(ctx) {
        is env.js's — but it does publish the lamp housings as live nodes, each
        with an `aim` empty one metre down its own +Z. Riding them is what makes
        the beam leave the housing instead of empty air, and because the nodes
-       hang off a boom or a cradle the beam SWEEPS as the machine works: the
-       jumbo's boom-1 lamp travels 0.70 m walking the pattern, the longhole
-       cradle's 1.37 m round a ring. That motion is most of why underground
-       footage looks the way it does, so it is read every frame rather than
-       sampled once. */
+       hang off a boom, a feed or a carriage the beam SWEEPS as the machine
+       works. That motion is most of why underground footage looks the way it
+       does, so it is read every frame rather than sampled once.
+
+       What each key is bound to, and what carries it — taken off the exported
+       models, not off the intent:
+
+         tunnel-jumbo   boom-l-lamp-0 / boom-r-lamp-0
+                        under slide:boom-?-feed, six joints down from the
+                        carrier: it slews, lifts, telescopes, rolls, swings and
+                        feeds, which is the whole pattern
+         longhole       feed-head
+                        under slide:feed-extend on the boom, i.e. the lamp that
+                        rides the ring
+         rockbolt       feed-work-light
+                        under slide:feedExtend on the bolter's mast
+         raise-boring   table-work-light (key, on the frame at the collar) and
+                        feed-work-light (second key, under slide:carriage,
+                        travel_m 1.71 — one stroke per 1.5 m pipe)
+
+       Every one of those names was verified present with
+       `node tools/glbinfo.mjs --parts public/models/<rigId>.glb`. Three of the
+       four names that stood here before were not, and the fallback below ate
+       the miss without a word — see the block above undergroundRig(). */
     if (workLights === null && ctx.rig && typeof ctx.rig.getWorkLights === 'function') {
       try { workLights = ctx.rig.getWorkLights() || []; } catch (e) { workLights = []; }
     }
@@ -1984,14 +2318,23 @@ export function createEnvironment(ctx) {
     for (let i = 0; i < n; i++) {
       const e = ugLights[i];
       const l = e.light;
-      /* Bind by NAME, fall back to the ordinal. A jumbo publishes
-         `boom-1-work-light` and `boom-2-work-light`; a longhole rig publishes
-         one `cradle-work-light`; a bolter one `feed-work-light`. When the
-         machine standing in the drive is a stand-in for another (data.js hands
-         `rockbolt` a `tunnel-jumbo` today) the name misses and the ordinal
-         still puts the beam on a real boom rather than in empty air. */
+      /* Bind by NAME, fall back to the ordinal, AND SAY SO WHEN IT FALLS BACK.
+         The ordinal exists because `rockbolt` legitimately accepts three
+         different machines (data.js `rigIds: ['bolter', 'longhole-rig',
+         'tunnel-jumbo']`), and a stand-in's lamps are named for its own
+         geometry: better a beam on a real lamp than a beam in empty air.
+
+         But a fallback that never says anything is how three wrong names
+         survived every review this file has had. The ordinal on a machine that
+         does not publish the wanted name usually resolves to a TRAMMING lamp —
+         they are built first and traverse first on every machine measured — so
+         the failure mode is not "slightly the wrong lamp", it is "the key light
+         is on the front bumper". One line per (light, name) pair, once. */
       let src = null;
-      if (e.spec.follow) src = wl.find((k) => k && k.name === e.spec.follow) || null;
+      if (e.spec.follow) {
+        src = wl.find((k) => k && k.name === e.spec.follow) || null;
+        if (!src && wl.length) warnLamp(e.spec.name, e.spec.follow, wl);
+      }
       if (!src && e.spec.followAt != null) src = wl[e.spec.followAt] || null;
       if (src && src.node && src.aim) {
         src.node.getWorldPosition(l.position);
@@ -2580,7 +2923,7 @@ export function createEnvironment(ctx) {
       // the work-light array identity is per rig build, so drop the cache on a
       // rig change and re-read it lazily. This handler must NOT switch mode —
       // see the single-writer note above.
-      ctx.bus.on(EVENTS.RIG_CHANGE, () => { workLights = null; });
+      ctx.bus.on(EVENTS.RIG_CHANGE, () => { workLights = null; lampWarned.clear(); });
       const s0 = ctx.state && ctx.state.world && ctx.state.world.site;
       const m0 = (ctx.state && ctx.state.contract && ctx.state.contract.methodId)
         || (s0 && s0.methodId) || null;
@@ -2709,7 +3052,7 @@ export function createEnvironment(ctx) {
     },
 
     /* ── underground ────────────────────────────────────────────────── */
-    /** `tunnel-jumbo` | `longhole` | `rockbolt`, or null for the surface. */
+    /** `tunnel-jumbo` | `longhole` | `rockbolt` | `raise-boring`, or null. */
     setUnderground(methodId) {
       const next = UNDERGROUND[methodId] ? methodId : null;
       if (next === ugId) return;
@@ -2798,3 +3141,83 @@ export function createEnvironment(ctx) {
 }
 
 export default createEnvironment;
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   NEEDS — measured here, fixable only in a file this agent does not own.
+   ═══════════════════════════════════════════════════════════════════════════
+
+   1. world/terrain.js — THE HOLE IN THE RAISE-BORE FLOOR.
+      A raise borer straddles a hole and bores DOWNWARD through it; the chamber
+      now exists but its floor is unbroken. The collar is at drive-local
+      (0, 0, 0) — the same point terrain.collarPosition already puts the rig on
+      — and data.js METHODS['raise-boring'].holeDiaRange is [600, 6000] mm, the
+      pilot being 311 mm (blender/raisebore.py PILOT_D). blender's pad is
+      PAD_W 3.400 x PAD_D 3.600 x PAD_T 0.150 with BEAM_H 0.400 of base beams
+      over it, and the source says why the beams exist: "Beams to allow hole
+      break through." So the floor wants a cast pad and a dark opening in it.
+      No field for it is declared in UNDERGROUND above ON PURPOSE — ASTRA §8:
+      this project has shipped five contracts with no consumer, and a sixth
+      would be worse than a paragraph.
+
+   2. rig/rigFactory.js — EVERY UNDERGROUND MACHINE STANDS AT 42.28 deg TO ITS
+      OWN DRIVE, and this is the largest single finding of this pass.
+      `update()` does `group.position.set(col.x, col.y, col.z - driveOffset)`
+      and never touches `group.rotation`; DRIVE_YAW has exactly one consumer in
+      the whole tree (terrain.js, `driveGroup.rotation.y`). So the tube is
+      rotated onto the hero camera's bearing and the machine is not. Measured,
+      every vertex transformed into drive-local — not the eight corners of the
+      AABB, for the reason ASTRA §5 gives:
+
+        machine        drive half-width   machine reaches   through the rib by
+        tunnel-jumbo         6.30              6.14             — (0.16 clear)
+        longhole-rig         2.50              3.83             1.33 m
+        bolter               2.80              4.76             1.96 m
+        raisebore            6.00              5.55             — (0.45 clear)
+
+      Two of the four are buried in their own ribs on both sides, and the jumbo
+      — 2.26 m wide, 15.75 m long — lies diagonally across a heading it would
+      fit down four times over. It is in every underground frame this project
+      has shot — reproduce with `node tools/shoot.mjs --headed m16-tunnel-jumbo`
+      and look at where the carrier leaves frame against where the drive
+      recedes; they are 42 degrees apart. The
+      fix is one line — yaw the rig group by env.driveYaw while
+      env.undergroundId is set — and the raise-bore chamber authored above can
+      come down from 12.0 m to 11.0 m the day it lands.
+
+   3. rig/rigFactory.js and blender/ — NO UNDERGROUND MACHINE MAKES ITS BEACON.
+      `ugBeacon` exists because rigFactory.js draws an amber rotating dome and
+      this file has to light it. rigFactory.js draws that dome only on the
+      PROCEDURAL builders, and all four underground machines are .glb now:
+      `grep -l beacon blender/*.py` returns cpt_unit, crawler_th, dth_crawler,
+      hdd_rig, pd55, piling_leader and sonic_truck — none of the four. So on
+      tunnel-jumbo, longhole and rockbolt the beacon is an amber pool sweeping
+      the drive with nothing in frame making it: a housing with no beam, from
+      the other end. Dropped for `raise-boring` here (a machine that never
+      trams carries no beacon — a positive fact, research/rigs §5.1) and left
+      alone on the other three rather than silently moving three measured,
+      graded looks. Either those models grow a beacon or this light goes.
+
+   4. core/gltfRig.js — `mount:hole` ON rc-rig IS PUBLISHED AS A WORK LIGHT.
+      gltfRig.js separates lamps from plain attachment points by "does it have
+      an `aim:`", which is right and is argued at length in that file.
+      rc-rig.glb carries both `mount:hole` and `aim:hole`, so `hole` — the node
+      rc_rig.py's own header describes as "published as the node `mount:hole`
+      so nothing has to guess it" — arrives here as a lamp. It is the ONLY lamp
+      in the fleet declaring neither `cone_deg` nor `range_m` (the other 112 all
+      declare both), so it takes LAMP_DEFAULTS and would light whatever it
+      happens to point at, and it sits at ordinal 2, inside the range
+      `followAt` reaches. Harmless today only because `rc` is a surface method.
+      A gate on "a published lamp that declares no cone" would have caught it.
+
+   5. THE LAMP CONTRACT IS CONSUMED, BUT ONLY WHERE A LIGHT FOLLOWS.
+      For the record, since it has been reported as done more than once: this
+      file DOES read `cone_deg`, `range_m`, `colour_hex` and `watt_hint` off
+      the glTF extras — in the binding loop in updateUnderground(), as
+      l.angle, l.distance, l.color and e.watt. It reads them for the one or two
+      lights that carry a `follow`, and for no others, because the other lights
+      in the rig are the drive's and not the machine's. The fleet publishes 113
+      lamps across 19 models (`mount:` with a matching `aim:`); at most two are
+      consumed in any frame, by design. "All 55 lamps correctly paired" was
+      describing the models, not this file, and the two numbers were never the
+      same measurement.
+   ═══════════════════════════════════════════════════════════════════════════ */
