@@ -119,11 +119,51 @@ await c.route('**/@vite/client', (r) => r.fulfill({ status: 200, contentType: 'a
 const p = await c.newPage();
 const warns = [];
 p.on('console', (m) => { if (m.type() === 'warning' || m.type() === 'error') warns.push(m.text().slice(0, 200)); });
-await p.goto(`http://localhost:${PORT}/?quality=low&shot`, { waitUntil: 'load' });
-await p.waitForFunction(() => window.__DRILLITY?.ui?.show && window.__DRILLITY?.sim, null, { timeout: 60000 });
-await p.waitForTimeout(2200);
+/* The dev server is shared with whoever else is working, and their saves fire
+   HMR page reloads that abort a navigation in flight — five modules were being
+   saved a minute while this was being written.
 
-/** Run the staged reveal to the end, then read. */
+   `waitUntil: 'commit'` rather than 'load' on purpose: this probe does not care
+   when the last sub-resource arrives, it cares that the game is ready, and the
+   two readiness waits below ask that question directly. Waiting for 'load' only
+   added a second thing that could be interrupted. Retries cover the reloads
+   that land mid-navigation. */
+for (let attempt = 1; ; attempt++) {
+  try {
+    await p.goto(`http://localhost:${PORT}/?quality=low&shot`, { waitUntil: 'commit', timeout: 45000 });
+    break;
+  } catch (e) {
+    if (attempt >= 6) throw e;
+    console.log(`  (navigation interrupted — attempt ${attempt}, retrying)`);
+    await p.waitForTimeout(2000);
+  }
+}
+await p.waitForFunction(() => window.__DRILLITY?.ui?.show && window.__DRILLITY?.sim, null, { timeout: 60000 });
+/* WAIT FOR BOOT TO LET GO, do not sleep past it.
+   ui/shell.js holds every `show()` while the boot screen is up and replays the
+   last one from `releaseBoot()` on a 420 ms timer — and if nothing was
+   requested it replays the MENU. Driving the game during that window meant the
+   results screen appeared and was then thrown back to the menu 400 ms later
+   (`is-entering--back`, which is what gave it away), so the probe read an empty
+   screen and scored it "no criterion carries a number" — a PASS on check 2, by
+   accident. The boot node going hidden is the real signal that the shell is
+   taking instructions. */
+await p.waitForFunction(() => {
+  const boot = document.querySelector('.screen--boot');
+  return !!boot && boot.hidden;
+}, null, { timeout: 45000 });
+await p.waitForTimeout(1200);
+
+/**
+ * Run the staged reveal to the end, then read.
+ *
+ * WAITS FOR THE SCREEN, does not sleep at it. A fixed 4.2 s pause read an
+ * empty screen whenever the machine was busy, and an empty read scores as
+ * "no criterion carries a number" — which is what a PASS looks like on check
+ * 2. A timing flake that fakes a pass is the whole failure mode this project
+ * keeps paying for, so the wait is on the thing itself: the results screen
+ * live, and its stamp filled in by the timeline.
+ */
 async function render(payload, tag) {
   await p.evaluate(() => window.__DRILLITY.ui.show('menu'));
   await p.waitForTimeout(500);
@@ -134,7 +174,15 @@ async function render(payload, tag) {
   } else {
     await p.evaluate(() => window.__DRILLITY.__qa.showResults());
   }
-  await p.waitForTimeout(4200);          // the reveal timeline runs ~3.4 s
+  await p.waitForFunction(() => {
+    const live = [...document.querySelectorAll('.screens > .screen')]
+      .find((n) => !n.hidden && !n.classList.contains('is-leaving'));
+    if (!live || !live.classList.contains('screen--results')) return false;
+    const stamp = live.querySelector('.grade__l');
+    return !!(stamp && (stamp.textContent || '').trim())
+      && live.querySelectorAll('.rmetric').length > 0;
+  }, null, { timeout: 20000 });
+  await p.waitForTimeout(3600);          // let the reveal timeline finish
   const read = await p.evaluate(READ);
   await p.screenshot({ path: resolve(HERE, `results-${tag}.png`) });
   return read;
@@ -147,6 +195,7 @@ say('  .time/.straightness/.bit/.safety objects at all. Nothing is published,');
 say('  so nothing may be scored — and its hard-coded grade "B" sits beside its');
 say('  own total of 0.51, which is band C.');
 const qa = await render(null, 'qabridge');
+say(`  live screen ${qa.screen}`);
 say(`  stamp       ${qa.grade}`);
 say(`  verdict     ${qa.verdict || '(none)'}`);
 for (const k of ['speed', 'straightness', 'tool care', 'safety']) {
@@ -178,6 +227,7 @@ if (m && qa.grade && qa.grade !== '—') {
 say('\n=== a real sim-shaped payload — every criterion published ===');
 say(`  breakdown.total ${REAL.breakdown.total} is band ${bandFor(REAL.breakdown.total)}`);
 const real = await render(REAL, 'realpayload');
+say(`  live screen ${real.screen}`);
 say(`  stamp       ${real.grade}`);
 say(`  verdict     ${real.verdict || '(none)'}`);
 for (const k of ['speed', 'straightness', 'tool care', 'safety']) {
