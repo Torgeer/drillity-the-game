@@ -1046,6 +1046,18 @@ def build(out_path):
     #  maintenance costs".  This is the node the game TURNS.
     # ═══════════════════════════════════════════════════════════════════════
     spin = R.empty(R.NODE_PIVOT, 'spindle', parent=car, loc=(0.0, 0.0, 0.0))
+    # THIS IS WHY THE MODEL SITS 0.350 m BELOW y = 0, AND IT IS CORRECT.
+    # `glbinfo` flags any machine more than 250 mm under the ground plane and
+    # ASTRA.md §7.5 lists this one at -0.350.  A per-primitive sweep puts every
+    # millimetre of it under this node: the top joint of the drill string,
+    # hanging through the collar.  The next deepest things are a small castIron
+    # static at -0.110 and the rubber mat edge at -0.060 — the machine itself
+    # is ON its floor.
+    # A raise borer is DEFINED by having a string below its own base: it drills
+    # a pilot hole downward to hole through into the level beneath, then pulls
+    # a reamer back up.  The whole method is what is under the floor.  Cutting
+    # the string off at y = 0 would draw a raise borer that has not started.
+    # DO NOT lift this to zero the ground metric.
     S = []
     S.append(R.tube('float-box', FLOAT_D / 2, FLOAT_H, R.MAT_CAST, parent=spin,
                     loc=(0, 0, -FLOAT_H), sides=20))
