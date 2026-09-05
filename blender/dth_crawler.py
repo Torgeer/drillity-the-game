@@ -513,7 +513,7 @@ def build_canopy(root):
 
     # vertical exhaust stack behind the cab, with a rain cap. Heat-discoloured
     # near the top [R]S4.4 / S6.2 - a WORN, unpainted part.
-    sx, sy = CAB_X - 0.10, CAB_Y - CAB_D / 2 - 0.34
+    sx, sy = CAB_X - 0.62, CAB_Y - CAB_D / 2 - 0.24
     o.append(cyl('exh_lag', 0.115, 0.42, R.MAT_DARK, root, (sx, sy, CANOPY_Z - 0.30), sides=12))
     o.append(cyl('exh_stack', 0.082, 0.84, R.MAT_WORN, root, (sx, sy, CANOPY_Z + 0.10), sides=12))
     o.append(cyl('exh_cap', 0.108, 0.055, R.MAT_WORN, root, (sx, sy, CANOPY_Z + 0.93), sides=12))
@@ -671,6 +671,39 @@ def build_cab(root):
                  (x1 - 0.02, y1 - 0.10, z1 - 0.06), (0, math.radians(58), 0), sides=6))
     o.append(box('mirror', (0.030, 0.130, 0.190), R.MAT_STEEL, root,
                    (x1 + 0.26, y1 - 0.10, z1 + 0.06), bevel=0.008))
+    # interior. The cab is more glass than steel on this machine, so what is
+    # inside it is visible from outside and its absence reads as a vitrine.
+    # Fittings from the brochure list [R]S4.6: adjustable seat, foot rest,
+    # 6 kg dry-powder extinguisher, 24 V outlet.
+    o.append(box('seatbase', (0.480, 0.460, 0.120), R.MAT_DARK, root,
+                 (CAB_X - 0.06, CAB_Y - 0.14, z0 + 0.500), bevel=0.020))
+    o.append(box('seatpan', (0.500, 0.480, 0.110), R.MAT_RUBBER, root,
+                 (CAB_X - 0.06, CAB_Y - 0.14, z0 + 0.590), bevel=0.026))
+    o.append(box('seatback', (0.500, 0.150, 0.620), R.MAT_RUBBER, root,
+                 (CAB_X - 0.06, CAB_Y - 0.36, z0 + 0.940), (0.16, 0, 0),
+                 bevel=0.026))
+    o.append(box('seatpost', (0.140, 0.180, 0.380), R.MAT_DARK, root,
+                 (CAB_X - 0.06, CAB_Y - 0.14, z0 + 0.230), bevel=0.010))
+    for sx in (-1, 1):                    # armrest consoles with the levers
+        o.append(box('console%d' % sx, (0.150, 0.380, 0.130), R.MAT_DARK, root,
+                     (CAB_X - 0.06 + sx * 0.320, CAB_Y - 0.06, z0 + 0.700),
+                     bevel=0.016))
+        o.append(cyl('joystick%d' % sx, 0.022, 0.180, R.MAT_RUBBER, root,
+                     (CAB_X - 0.06 + sx * 0.320, CAB_Y + 0.06, z0 + 0.760),
+                     (-0.20, 0, 0), sides=8))
+    # control screen on a stalk, angled to the operator
+    o.append(box('screen', (0.300, 0.040, 0.220), R.MAT_DARK, root,
+                 (CAB_X + 0.26, CAB_Y + 0.44, z0 + 1.180), (0.30, 0, -0.35),
+                 bevel=0.010))
+    o.append(box('screenface', (0.250, 0.018, 0.170), R.MAT_GLASS, root,
+                 (CAB_X + 0.26, CAB_Y + 0.42, z0 + 1.180), (0.30, 0, -0.35),
+                 bevel=0.004))
+    o.append(box('footrest', (0.420, 0.260, 0.045), R.MAT_STEEL, root,
+                 (CAB_X - 0.06, CAB_Y + 0.32, z0 + 0.130), (0.22, 0, 0),
+                 bevel=0.006))
+    o.append(cyl('cabextinguisher', 0.060, 0.300, R.MAT_HAZARD, root,
+                 (CAB_X - 0.44, CAB_Y - 0.44, z0 + 0.100), sides=10))
+
     # door shut line, hinges and the step - a cab is a door plus glass, and
     # without the door it reads as a vitrine
     o.append(box('cabdoorframe', (0.026, CAB_D - 0.24, CAB_H - 0.30),
