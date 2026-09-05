@@ -321,30 +321,117 @@ export function createGltfRigs(ctx) {
    * to be standing when it was built. Nothing throws.
    *
    * So every pivot:, slide: and mount: that hangs off a mesh is lifted to its
-   * nearest non-mesh ancestor first. `attach()` preserves the world transform,
-   * so the lamp does not move a millimetre — it just stops being cargo.
+   * safe non-mesh ancestor first, retaining the authored local parent frame.
+   * Both the world pose and local animation/travel coordinates stay intact.
    * (`aim:` rides its mount and needs no lift of its own.)
    */
   function liftNamedOffMeshes(root, id) {
     const PRE = [P_PIVOT, P_SLIDE, P_MOUNT];
+    // index() has not yet marked authored pivots/slides dynamic. A mesh
+    // carrying either identity is still a moving parent, never a static join
+    // victim; lifting its children away would disconnect them from its motion.
+    const willMerge = (node) => node.isMesh && !node.userData.dynamic
+      && ![P_PIVOT, P_SLIDE, P_MOUNT, P_AIM].some((prefix) => node.name.startsWith(prefix));
     const victims = [];
     root.updateMatrixWorld(true);
     root.traverse((o) => {
       if (!o.name || !PRE.some((p) => o.name.startsWith(p))) return;
       for (let p = o.parent; p && p !== root; p = p.parent) {
-        if (p.isMesh) { victims.push(o); return; }
+        if (willMerge(p)) { victims.push(o); return; }
       }
     });
+    let lifted = 0;
     for (const o of victims) {
-      let host = o.parent;
-      while (host && host !== root && host.isMesh) host = host.parent;
-      (host || root).attach(o);
+      // A previous ancestor lift may already have made this node safe.
+      let outerMesh = null;
+      for (let p = o.parent; p && p !== root; p = p.parent) {
+        if (willMerge(p)) outerMesh = p;
+      }
+      if (!outerMesh) continue;
+      const host = outerMesh.parent || root;
+      // Keep the authored parent frame, not just today's world position.
+      // attach(o) changes local coordinates and invalidates absolute slide
+      // endpoints and animation keys. A fixed non-mesh frame preserves both;
+      // its exact matrix also retains non-uniform-scale/rotation shear.
+      const frame = new T.Group();
+      frame.name = 'frame:' + o.name;
+      frame.userData.dynamic = true; // mergeStatic must retain the fixed matrix
+      if (o.userData.framing === 'exclude') frame.userData.framing = 'exclude';
+      frame.matrixAutoUpdate = false;
+      frame.matrix.copy(host.matrixWorld).invert().multiply(o.parent.matrixWorld);
+      host.add(frame);
+      frame.add(o);
+      frame.updateMatrixWorld(true);
+      lifted++;
     }
-    if (victims.length) {
-      say('info', `"${id}": lifted ${victims.length} named node(s) off static meshes `
+    if (lifted) {
+      say('info', `"${id}": lifted ${lifted} named node(s) off static meshes `
         + '— mergeStatic() would otherwise have carried them out of the scene.');
     }
-    return victims.length;
+    return lifted;
+  }
+
+  /** Explicit travel is in exported glTF parent coordinates, never guessed
+   * from a machine id or the older Blender-axis `axis` property. */
+  function travelContract(node, id) {
+    const x = node.userData || {};
+    const has = (key) => Object.prototype.hasOwnProperty.call(x, key);
+    const fail = (message) => {
+      throw new Error(`"${id}": ${node.name} ${message}`);
+    };
+    const fields = ['travel_min_m', 'travel_max_m', 'travel_space', 'travel_axis', 'travel_direction'];
+    if (has('travel_m') && (typeof x.travel_m !== 'number' || !Number.isFinite(x.travel_m))) {
+      fail('travel_m must be a finite number');
+    }
+    if (!fields.some(has)) {
+      const y = node.position.y;
+      const far = y + (has('travel_m') ? x.travel_m : 0);
+      if (!Number.isFinite(y) || !Number.isFinite(far)) fail('travel_m/rest must produce finite endpoints');
+      return { axis: 'y', range: [Math.max(y, far), Math.min(y, far)],
+        stationary: y === far };
+    }
+    for (const key of fields) if (!has(key)) fail(`explicit travel is missing ${key}`);
+    if (x.travel_space !== 'parent-local') fail('travel_space must be parent-local');
+    if (!['x', 'y', 'z'].includes(x.travel_axis)) fail('travel_axis must be x, y or z in glTF coordinates');
+    if (!['min', 'max'].includes(x.travel_direction)) fail('travel_direction must be min or max');
+    for (const key of ['travel_min_m', 'travel_max_m']) {
+      if (typeof x[key] !== 'number' || !Number.isFinite(x[key])) fail(`${key} must be a finite number`);
+    }
+    const lo = x.travel_min_m, hi = x.travel_max_m;
+    if (!(lo < hi)) fail('travel_min_m must be less than travel_max_m');
+    const span = hi - lo;
+    if (!Number.isFinite(span)) fail('travel_min_m/travel_max_m must have a finite span');
+    if (has('travel_m') && Math.abs(Math.abs(x.travel_m) - span)
+      > 1e-6 * Math.max(1, span, Math.abs(x.travel_m))) {
+      fail('abs(travel_m) must equal the travel_min_m/travel_max_m span');
+    }
+    // Exported transforms use float32; metadata JSON retains double precision.
+    const rest = node.position[x.travel_axis];
+    if (!Number.isFinite(rest) || rest < lo - 1e-5 || rest > hi + 1e-5) {
+      fail('authored rest must lie within travel_min_m/travel_max_m');
+    }
+    return { axis: x.travel_axis, range: x.travel_direction === 'min' ? [hi, lo] : [lo, hi],
+      stationary: false };
+  }
+
+  function validateMetadata(root, id) {
+    const walk = (node, excluded) => {
+      const x = node.userData || {};
+      if (Object.prototype.hasOwnProperty.call(x, 'framing')) {
+        if (x.framing !== 'exclude') {
+          throw new Error(`"${id}": ${node.name} framing must be exclude when declared`);
+        }
+        excluded = true;
+      }
+      // Materialize inheritance before lifting can change the parent chain.
+      if (excluded) node.userData.framing = 'exclude';
+      if (node.name.startsWith(P_SLIDE)) travelContract(node, id);
+      else if (Object.keys(x).some((key) => key.startsWith('travel_'))) {
+        throw new Error(`"${id}": ${node.name} publishes travel metadata but is not a slide: node`);
+      }
+      for (const child of node.children) walk(child, excluded);
+    };
+    walk(root, false);
   }
 
   /** Does this node sit under something the game moves? Decides lamp `moves`. */
@@ -375,8 +462,15 @@ export function createGltfRigs(ctx) {
       const n = o.name || '';
       if (n.startsWith(P_PIVOT)) { o.userData.dynamic = true; pivots.set(n.slice(P_PIVOT.length), o); }
       else if (n.startsWith(P_SLIDE)) { o.userData.dynamic = true; slides.set(n.slice(P_SLIDE.length), o); }
-      else if (n.startsWith(P_MOUNT)) mounts.set(n.slice(P_MOUNT.length), o);
-      else if (n.startsWith(P_AIM)) aims.set(n.slice(P_AIM.length), o);
+      else if (n.startsWith(P_MOUNT)) {
+        // A named attachment may itself carry geometry. Keep its identity
+        // through mergeStatic just as an empty attachment would survive.
+        if (o.isMesh) o.userData.dynamic = true;
+        mounts.set(n.slice(P_MOUNT.length), o);
+      } else if (n.startsWith(P_AIM)) {
+        if (o.isMesh) o.userData.dynamic = true;
+        aims.set(n.slice(P_AIM.length), o);
+      }
     });
 
     /* NOT EVERY MOUNT IS A LAMP.
@@ -426,20 +520,41 @@ export function createGltfRigs(ctx) {
      MEASUREMENT — the numbers this pipeline is judged on, taken off the file
      ═════════════════════════════════════════════════════════════════════════ */
 
-  function measure(root) {
+  function measure(root, id) {
     let prims = 0;
     let tris = 0;
     let verts = 0;
+    let includedVerts = 0;
+    const box = new T.Box3();
+    const point = new T.Vector3();
+    root.updateMatrixWorld(true);
     root.traverse((o) => {
       if (!o.isMesh || !o.geometry) return;
       prims += Array.isArray(o.material) ? o.material.length : 1;
       const g = o.geometry;
       const pos = g.attributes && g.attributes.position;
-      if (!pos) return;
+      if (!pos || pos.itemSize !== 3 || !pos.count) {
+        throw new Error(`"${id}": ${o.name} has no measurable POSITION vertices`);
+      }
       verts += pos.count;
       tris += (g.index ? g.index.count : pos.count) / 3;
+      // The same actual-vertex rule as the sole CLI ruler, glbinfo.mjs.
+      // Rotating eight AABB corners invents unoccupied corners on raked rigs.
+      for (let i = 0; i < pos.count; i++) {
+        o.getVertexPosition(i, point).applyMatrix4(o.matrixWorld);
+        if (!Number.isFinite(point.x) || !Number.isFinite(point.y) || !Number.isFinite(point.z)) {
+          throw new Error(`"${id}": ${o.name} has a nonfinite POSITION/world transform`);
+        }
+        if (o.userData.framing !== 'exclude') {
+          box.expandByPoint(point);
+          includedVerts++;
+        }
+      }
     });
-    return { prims, tris: Math.round(tris), verts };
+    if (!includedVerts || box.isEmpty()) {
+      throw new Error(`"${id}": framing includes no measurable geometry`);
+    }
+    return { prims, tris: Math.round(tris), verts, box };
   }
 
   /* ═════════════════════════════════════════════════════════════════════════
@@ -498,15 +613,34 @@ export function createGltfRigs(ctx) {
     // origin is its slew centre at ground level, so there is no fudge here on
     // purpose. If a machine lands in the wrong place, fix the Blender script.
 
+    let nodes, clips, m;
+    try {
+      validateMetadata(root, id);
+      liftNamedOffMeshes(root, id);      // BEFORE indexing: it changes parents
+      nodes = index(root, id);
+      clips = readClips(T, gltf, id, say);
+      m = measure(root, id);
+    } catch (error) {
+      // Invalid declarations must not keep a parsed master alive outside the
+      // prepared cache. These are still imported resources: material swapping
+      // happens only after validation, so shared assets cannot be freed here.
+      const geometries = new Set(), materials = new Set(), textures = new Set();
+      root.traverse((o) => {
+        if (o.geometry) geometries.add(o.geometry);
+        for (const material of Array.isArray(o.material) ? o.material : [o.material]) {
+          if (!material) continue;
+          materials.add(material);
+          for (const value of Object.values(material)) if (value && value.isTexture) textures.add(value);
+        }
+      });
+      for (const geometry of geometries) geometry.dispose();
+      for (const texture of textures) texture.dispose();
+      for (const material of materials) material.dispose();
+      throw error;
+    }
     const kinds = swapMaterials(root, id);
-    liftNamedOffMeshes(root, id);      // BEFORE indexing: it changes parents
-    const nodes = index(root, id);
-    const clips = readClips(T, gltf, id, say);
-    const m = measure(root);
 
-    // Bounding box, taken off the mesh rather than quoted (HANDOFF §8E).
-    const box = new T.Box3().setFromObject(root);
-    const size = box.getSize(new T.Vector3());
+    const size = m.box.getSize(new T.Vector3());
 
     say('info', `"${id}" ${(bytes / 1024).toFixed(1)} kB · ${m.prims} primitives `
       + `(draw-call floor) · ${m.tris} tris · ${nodes.pivots.size} pivots, `
@@ -532,6 +666,8 @@ export function createGltfRigs(ctx) {
       fetchMs: t1 - t0,
       parseMs: t2 - t1,
       size: { x: size.x, y: size.y, z: size.z },
+      bounds: { min: m.box.min.toArray(), max: m.box.max.toArray(),
+        center: m.box.getCenter(new T.Vector3()).toArray() },
       radius: Math.max(size.x, size.z) * 0.5,
       kinds,
     };
@@ -614,25 +750,14 @@ export function createGltfRigs(ctx) {
       // where `-0 * undefined` is NaN. A carriage without BOTH of these does
       // not throw — it writes NaN into a world matrix and the machine silently
       // disappears. Both are set here or `carriage` is not published at all.
-      /* [HIGH, LOW] — the order every procedural builder uses.
-         `rigFactory.js` writes `dyn.carriageRange = [mastH - 1.45, 0.55]` and
-         friends: top of stroke FIRST. This published `[y, y + travel]`, which
-         is low-first, so `setCarriage(u)` ran a Blender carriage backwards —
-         it went down as the sim fed down instead of up. Ordering the two ends
-         explicitly fixes it for both signs.
-
-         `travel_m` is also NEGATIVE on some machines (foundation_bg exports
-         -11.5 for a Kelly that telescopes downward), and the old `travel > 0`
-         guard turned that into `[y, y]` — a carriage with no stroke at all,
-         silently. Any non-zero finite travel is a stroke. */
-      const travel = carriage.userData.travel_m;
-      const y = carriage.position.y;
-      const hasTravel = typeof travel === 'number' && Number.isFinite(travel) && travel !== 0;
-      const far = y + (hasTravel ? travel : 0);
-      dyn.carriageRange = hasTravel ? [Math.max(y, far), Math.min(y, far)] : [y, y];
+      const travel = travelContract(carriage, prep.id);
+      dyn.carriageAxis = travel.axis;
+      dyn.carriageRest = carriage.position.clone();
+      dyn.carriageRange = travel.range;
       dyn.mastHeight = prep.size.y;
-      if (typeof travel !== 'number') {
-        // No stroke declared, so nothing may bend it either.
+      if (travel.stationary || travel.axis !== 'y') {
+        // The existing flex driver bends a Y feed into Z. It must not erase
+        // horizontal travel; another flex axis requires an authored contract.
         dyn.carriageNoFlex = true;
       }
     }
@@ -658,6 +783,14 @@ export function createGltfRigs(ctx) {
     return dyn;
   }
 
+  /** One measured framing record, copied at the API boundary so a preview or
+   * renderer cannot mutate the next instance's geometry facts. Coordinates
+   * precede game placement: the authored rig-local glTF Y-up rest pose. */
+  function framingOf(prep) {
+    return { space: 'rig-local', min: prep.bounds.min.slice(),
+      max: prep.bounds.max.slice(), center: prep.bounds.center.slice() };
+  }
+
   function makeSpec(prep) {
     // Stats belong to `game/data.js`, which is the content authority; geometry
     // belongs to the model. Neither is invented here, and nothing is copied
@@ -676,6 +809,7 @@ export function createGltfRigs(ctx) {
       glb: {
         bytes: prep.bytes, prims: prep.prims, tris: prep.tris,
         fetchMs: +prep.fetchMs.toFixed(1), parseMs: +prep.parseMs.toFixed(1),
+        framing: framingOf(prep),
       },
     };
   }
@@ -775,7 +909,8 @@ export function createGltfRigs(ctx) {
       if (!p) return null;
       return {
         id, bytes: p.bytes, prims: p.prims, tris: p.tris, verts: p.verts,
-        fetchMs: p.fetchMs, parseMs: p.parseMs, size: p.size,
+        fetchMs: p.fetchMs, parseMs: p.parseMs, size: { ...p.size },
+        framing: framingOf(p),
         pivots: Array.from(p.nodes.pivots.keys()),
         slides: Array.from(p.nodes.slides.keys()),
         lights: p.nodes.lights.map((l) => ({

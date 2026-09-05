@@ -7790,15 +7790,18 @@ export function createRigSystem(ctx) {
     if (!dyn || !dyn.carriage) return;
     const r = dyn.carriageRange;
     const k = clamp01(u);
-    dyn.carriage.position.y = lerp(r[0], r[1], k);
+    const axis = dyn.carriageAxis || 'y';
+    if (dyn.carriageRest) dyn.carriage.position.copy(dyn.carriageRest);
+    dyn.carriage.position[axis] = lerp(r[0], r[1], k);
     // A travelling block hangs off the drilling line: it stays plumb whatever
     // the derrick does. Everything else is bolted to the mast and follows it.
-    if (dyn.carriageNoFlex) return;
+    if (dyn.carriageNoFlex || axis !== 'y') return;
     // keep the carriage glued to the bent mast
     const flexA = dyn.mastUpper ? dyn.mastUpper.rotation.x : 0;
     const frac = 1 - k;
     dyn.carriage.rotation.x = flexA * frac;
-    dyn.carriage.position.z = -flexA * dyn.mastHeight * 0.5 * frac * frac;
+    dyn.carriage.position.z = (dyn.carriageRest ? dyn.carriageRest.z : 0)
+      - flexA * dyn.mastHeight * 0.5 * frac * frac;
   }
 
   function updateString() {
@@ -9690,7 +9693,7 @@ export function createRigSystem(ctx) {
   function setCarriageGet(dyn) {
     if (!dyn.carriage) return 0;
     const r = dyn.carriageRange;
-    return clamp01((dyn.carriage.position.y - r[0]) / (r[1] - r[0] || 1));
+    return clamp01((dyn.carriage.position[dyn.carriageAxis || 'y'] - r[0]) / (r[1] - r[0] || 1));
   }
 
   return api;
