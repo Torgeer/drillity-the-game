@@ -1,0 +1,106 @@
+{
+  "rows": [
+    {
+      "askedMm": 38,
+      "holeDiaMm": 38,
+      "holeRadius": 0.3608,
+      "boreExaggeration": 18.989473684210527,
+      "derived": 18.989473684210527,
+      "plateExists": true,
+      "plateNdc": {
+        "x0": -1,
+        "y0": -0.991,
+        "x1": 1,
+        "y1": -0.845
+      },
+      "inkTop": 407,
+      "inkBot": 107
+    },
+    {
+      "askedMm": 152,
+      "holeDiaMm": 152,
+      "holeRadius": 0.5432,
+      "boreExaggeration": 7.147368421052632,
+      "derived": 7.147368421052632,
+      "plateExists": true,
+      "plateNdc": {
+        "x0": -1,
+        "y0": -0.991,
+        "x1": 1,
+        "y1": -0.845
+      },
+      "inkTop": 373,
+      "inkBot": 130
+    },
+    {
+      "askedMm": 305,
+      "holeDiaMm": 305,
+      "holeRadius": 0.788,
+      "boreExaggeration": 5.167213114754099,
+      "derived": 5.167213114754099,
+      "plateExists": true,
+      "plateNdc": {
+        "x0": -1,
+        "y0": -0.991,
+        "x1": 1,
+        "y1": -0.845
+      },
+      "inkTop": 377,
+      "inkBot": 133
+    },
+    {
+      "askedMm": 600,
+      "holeDiaMm": 600,
+      "holeRadius": 1.26,
+      "boreExaggeration": 4.2,
+      "derived": 4.2,
+      "plateExists": true,
+      "plateNdc": {
+        "x0": -1,
+        "y0": -0.991,
+        "x1": 1,
+        "y1": -0.845
+      },
+      "inkTop": 378,
+      "inkBot": 142
+    },
+    {
+      "askedMm": 1200,
+      "holeDiaMm": 1200,
+      "holeRadius": 1.6,
+      "boreExaggeration": 2.666666666666667,
+      "derived": 2.666666666666667,
+      "plateExists": true,
+      "plateNdc": {
+        "x0": -1,
+        "y0": -0.991,
+        "x1": 1,
+        "y1": -0.845
+      },
+      "inkTop": 371,
+      "inkBot": 142
+    },
+    {
+      "askedMm": 6000,
+      "holeDiaMm": 6000,
+      "holeRadius": 1.6,
+      "boreExaggeration": 0.5333333333333333,
+      "derived": 0.5333333333333333,
+      "plateExists": true,
+      "plateNdc": {
+        "x0": -1,
+        "y0": -0.991,
+        "x1": 1,
+        "y1": -0.845
+      },
+      "inkTop": 382,
+      "inkBot": 148
+    }
+  ],
+  "mode": "vertical",
+  "stationRulerNdc": null,
+  "errors": [
+    "[gltfRig] \"crawler-lite\" did NOT load. http://localhost:5241/models/crawler-lite.glb is not a GLB — the server answered with something else (1213 bytes). This is usually an SPA fallback page, not a mo",
+    "[gltfRig] \"crawler-lite\" falls through to the PROCEDURAL builder for the same rig id. That is the same machine drawn the old way, not a substitute machine — but the Blender model you asked for is NOT "
+  ]
+}

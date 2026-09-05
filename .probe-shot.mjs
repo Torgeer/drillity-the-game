@@ -14,7 +14,7 @@ await p.evaluate((d)=>{ const D=window.__DRILLITY; window.__PD=d; D.state.drill.
   const tick=()=>{ D.state.drill.depth = window.__PD; Object.assign(D.state.drill,{active:true,rpm:0.75,torque:0.5,jam:0}); requestAnimationFrame(tick); }; tick(); }, DEPTH);
 await p.waitForTimeout(4000);
 // hide the DOM HUD so the band is clean
-await p.addStyleTag({content:'.screen,.sitedock,.sstrip,.hud,[class*="gltf"],[class*="modelerr"],[class*="banner"]{opacity:0 !important}'});
+await p.addStyleTag({content:'.screen,.sitedock,.sstrip,.hud,#model-error{opacity:0 !important}'});
 await p.waitForTimeout(600);
 for (let i=0;i<4;i++){ await p.screenshot({path:`shots/${TAG}-${i}.png`}); await p.waitForTimeout(180); }
 // and a jammed frame

@@ -5553,8 +5553,27 @@ export function createGeology(ctx) {
      the curve as tighter than it is."
 
      So: the depth ruler on the right is untouched, and this is the second one,
-     across the bottom, in the mode's own length word (BORE / CHAINAGE). It
-     exists only in the two long-section modes. */
+     across the bottom, in the mode's own length word (BORE / CHAINAGE).
+
+     IT NOW EXISTS IN EVERY MODE, and this is the fix for the bore. A vertical
+     section has only one length axis, so it never got a scale strip and never
+     declared anything — while drawing the borehole ~7x over gauge against a
+     depth ruler that is 1:1 (see CFG holeR* and applyHoleDiameter). A frame
+     stating two scales and admitting to neither is what the critic measured
+     and reported as "the tool is 9-17x oversize against the ruler drawn beside
+     it". HANDOFF §9.3: "Make the badge a property of the section, computed
+     from the actual transform, and show it whenever it is not 1:1."
+
+     So there is now ONE strip that states every scale the section is using,
+     and it is the only place in the file allowed to state them:
+
+       vertical / raise / pile   DEPTH 1:1 · BORE n:1        1.15 units tall
+       profile / heading         + the chainage ticks, V.E.  2.35 units tall
+
+     The bore number is boreExag, derived in applyHoleDiameter() from the two
+     diameters — never asserted, so it cannot drift from what is drawn. Below
+     1.0 it is drawn UNDER gauge (a 6 m raise bore hits the ceiling at 0.53x)
+     and the badge says so rather than staying silent. */
   function killStationRuler() {
     if (!xRuler) return;
     root.remove(xRuler.mesh);
@@ -5642,26 +5661,157 @@ export function createGeology(ctx) {
       }
     }
 
-    /* The two scales, side by side, and the V.E. badge — the whole point of
-       the strip. Horizontal metres per CSS px against vertical metres per CSS
-       px, so the reader can see that the curve is drawn six times steeper than
-       it is cut. */
-    g.textAlign = 'left';
-    g.fillStyle = 'rgba(150,160,174,0.62)';
-    g.font = `600 ${css(8)}px ${BRAND.fontSans}`;
-    g.fillText(`${mode.lengthWord} m`, css(3), css(1.5));
-    const ve = layout.ve;
-    g.textAlign = 'right';
-    g.fillStyle = ve > 1.05 ? 'rgba(223,181,82,0.88)' : 'rgba(150,160,174,0.55)';
-    g.font = `700 ${css(9)}px ${BRAND.fontMono}`;
-    g.fillText(ve > 1.05 ? `V.E. ${ve.toFixed(1)}:1` : 'V.E. 1:1', W - css(3), css(1.5));
-    g.fillStyle = 'rgba(150,160,174,0.50)';
-    g.font = `500 ${css(7.5)}px ${BRAND.fontMono}`;
-    g.fillText(`H 1 u = ${mpx.toFixed(mpx < 10 ? 1 : 0)} m   V 1 u = 1 m`,
-               W - css(3), css(11));
+    /* The scale statement that used to live here — `${lengthWord} m` on the
+       left and the V.E. badge on the right — has moved to the scale plate
+       below, and the reason is arithmetic. This strip is 1.7x the band wide
+       so it can scroll without a repaint every frame, and it is drawn from
+       `nl = floor((camX - halfW - halfW * 0.32) * 2) / 2`. Its own edges are
+       therefore 3.46 units OFF SCREEN to the left and 10.59 units — 53 % of a
+       band width — off screen to the RIGHT. Anything anchored to the canvas
+       edge is anchored somewhere the player cannot see, and that is where the
+       V.E. badge has been all along. HANDOFF §9.3 says "profile badges its
+       factor and the others do not"; in fact profile badges its factor into
+       the void. A badge that cannot be read is not a declaration. */
 
     tex.needsUpdate = true;
     xRuler.left = leftUnits;
+  }
+
+  /* ── THE SCALE PLATE — where the section admits what it is doing ──────────
+     A title block. It states every scale the drawing is using, it is anchored
+     to the FRUSTUM rather than to a scrolling texture, and it exists in every
+     mode.
+
+     This is HANDOFF §9.3 and §4. The depth axis is true metres while the bore
+     is drawn ~7x over gauge (CFG holeR*, applyHoleDiameter) so that a 152 mm
+     hole is not 1.3 px of nothing — a necessary exaggeration, and an
+     undeclared one. A frame carrying a 1:1 ruler beside a 7x bore states two
+     scales and admits to neither, which is exactly what the critic measured
+     and wrote up as "the tool is 9-17x oversize against the ruler drawn beside
+     it". research/07 §F1: "each labelled with its own scale, plus a small V.E.
+     badge. This is not decoration — it is the thing that stops a player
+     misreading the curve as tighter than it is."
+
+     Every number on it is DERIVED from the transform actually in force —
+     boreExag from the two diameters, layout.ve from metresPerUnitX — so it
+     cannot drift from what is drawn. Amber when a scale is not 1:1, grey when
+     it is, so an exaggeration is what the eye lands on. */
+  const PLATE_H = 1.45;                 // units — 28 CSS px on the reference band
+  let scalePlate = null;
+
+  function killScalePlate() {
+    if (!scalePlate) return;
+    root.remove(scalePlate.mesh);
+    scalePlate.mesh.geometry.dispose();
+    scalePlate.mesh.material.dispose();
+    scalePlate.tex.dispose();
+    const i = disposables.indexOf(scalePlate.tex); if (i >= 0) disposables.splice(i, 1);
+    const j = disposables.indexOf(scalePlate.mesh.material); if (j >= 0) disposables.splice(j, 1);
+    scalePlate = null;
+  }
+
+  function buildScalePlate() {
+    killScalePlate();
+    if (!scene) return;
+    /* Exactly the band's width, so the canvas edges ARE the frustum edges and
+       right-aligned text lands on the right-hand edge of the picture. */
+    const spanU = halfW * 2;
+    const cssK = stripSuper();
+    const canvasW = Math.round(clamp(spanU * pxPerMetre * cssK * 0.5, 256, 1024));
+    const canvas = document.createElement('canvas');
+    canvas.width = canvasW;
+    canvas.height = Math.max(8, Math.round((canvasW * PLATE_H) / spanU));
+    const tex = track(new T.CanvasTexture(canvas));
+    tex.colorSpace = T.SRGBColorSpace;
+    tex.minFilter = T.LinearFilter;
+    tex.magFilter = T.LinearFilter;
+    tex.generateMipmaps = false;
+    const mat = track(new T.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false }));
+    const mesh = new T.Mesh(new T.PlaneGeometry(spanU, PLATE_H, 1, 1), mat);
+    mesh.renderOrder = 20;
+    mesh.frustumCulled = false;
+    mesh.name = 'scale-plate';
+    root.add(mesh);
+    scalePlate = {
+      mesh, canvas, tex, spanU,
+      ctx2d: canvas.getContext('2d'),
+      k: canvasW / Math.max(spanU * pxPerMetre, 1e-3),
+      exag: -1, ve: -1, mm: -1,
+    };
+  }
+
+  function drawScalePlate() {
+    if (!scalePlate) return;
+    const { canvas, ctx2d: g, tex, k } = scalePlate;
+    const W = canvas.width, H = canvas.height;
+    const css = (v) => Math.max(1, Math.round(v * k));
+    const ex = boreExag;
+    const ve = layout.ve;
+    const mm = Math.round(Number(spec.holeDiaMm) || CFG.holeDiaDefault);
+    g.clearRect(0, 0, W, H);
+
+    /* The same machined faceplate as the rest of the instrument furniture, but
+       held OPAQUE behind the type and feathered only across the top eighth.
+       The renderer darkens the foot of the section band by up to 28 %
+       (renderer.js uSectionVignette, quadratic in depth into the cut) on top
+       of the global vignette, so a plate that fades out exactly where its text
+       sits puts small grey type on dark rock at reduced exposure. Measured:
+       that is what made the first version's second line invisible. */
+    const grad = g.createLinearGradient(0, H, 0, 0);
+    grad.addColorStop(0, 'rgba(9,12,17,0.94)');
+    grad.addColorStop(0.86, 'rgba(11,15,21,0.90)');
+    grad.addColorStop(1, 'rgba(15,20,28,0.0)');
+    g.fillStyle = grad;
+    g.fillRect(0, 0, W, H);
+    // a hairline top edge, so the plate reads as a plate and not as a fog bank
+    g.fillStyle = 'rgba(150,160,174,0.20)';
+    g.fillRect(0, Math.round(H * 0.14), W, Math.max(1, css(0.8)));
+
+    const GREY = 'rgba(166,176,190,0.74)';
+    const AMBER = 'rgba(232,192,94,0.96)';
+    /* Inset to the DRAWING area, not to the canvas. The depth ruler owns the
+       right CFG.rulerWidth units and the drill log the left CFG.logWidth, and
+       the plate draws in front of both (z 2.05 against their 2.0), so text run
+       to the canvas edge lands on top of a ruler numeral. */
+    const pxPerUnit = W / scalePlate.spanU;
+    const padL = Math.round(CFG.logWidth * pxPerUnit) + css(4);
+    const padR = W - Math.round(CFG.rulerWidth * pxPerUnit) - css(4);
+    g.textBaseline = 'top';
+
+    /* LEFT: the axis that is true. Saying "1:1" out loud is the half of the
+       statement that gives the exaggeration something to be measured against. */
+    g.textAlign = 'left';
+    g.fillStyle = GREY;
+    g.font = `700 ${css(8.5)}px ${BRAND.fontMono}`;
+    g.fillText(mode.horizontal ? `${mode.lengthWord} 1 u = ${Math.max(layout.metresPerUnitX, 1e-6).toFixed(layout.metresPerUnitX < 10 ? 1 : 0)} m`
+                               : 'DEPTH 1:1', padL, css(3.5));
+
+    /* RIGHT: every scale that is NOT 1:1. Below 1.0 the bore is drawn UNDER
+       gauge — a 6 m raise bore hits holeRMax at 0.53x — and the plate says so
+       rather than staying silent, which is the same discipline as printing
+       `sourced: false` instead of rounding a number off and hoping. */
+    const badge = (txt, on, x) => {
+      g.fillStyle = on ? AMBER : GREY;
+      g.font = `700 ${css(9.5)}px ${BRAND.fontMono}`;
+      g.textAlign = 'right';
+      g.fillText(txt, x, css(3.0));
+      return x - g.measureText(txt).width - css(9);
+    };
+    let rx = padR;
+    rx = badge(ex >= 1.05 ? `BORE ${ex.toFixed(1)}:1`
+             : ex <= 0.95 ? `BORE 1:${(1 / Math.max(ex, 1e-6)).toFixed(1)}`
+             : 'BORE 1:1', ex >= 1.05 || ex <= 0.95, rx);
+    if (mode.horizontal) badge(ve > 1.05 ? `V.E. ${ve.toFixed(1)}:1` : 'V.E. 1:1', ve > 1.05, rx);
+
+    /* The arithmetic behind the badge, under it, so the ratio is checkable
+       against the ruler in the same frame rather than merely asserted. */
+    g.fillStyle = 'rgba(150,160,174,0.66)';
+    g.font = `500 ${css(8)}px ${BRAND.fontMono}`;
+    g.textAlign = 'right';
+    g.fillText(`Ø ${mm} mm DRAWN ${Math.round(2 * holeR * 1000)} mm`, padR, css(13.5));
+
+    tex.needsUpdate = true;
+    scalePlate.exag = ex; scalePlate.ve = ve; scalePlate.mm = mm;
   }
 
   /* ── THE DRIVING RECORD ───────────────────────────────────────────────────
@@ -6225,6 +6375,7 @@ export function createGeology(ctx) {
     buildWaterLine();
     buildModeFurniture();
     buildStationRuler();
+    buildScalePlate();
     applyModeVisibility();
     if (ruler) ruler.top = -1e9;
     if (logStrip) logStrip.top = -1e9;
@@ -6803,6 +6954,27 @@ export function createGeology(ctx) {
       U.uGeoX.value.set(camX - halfW + CFG.logWidth, camX + halfW - CFG.rulerWidth);
     }
 
+    /* ── the scale plate: what the section admits it is doing ──
+       Anchored to the camera, in every mode, so the declaration is on screen
+       whatever the drawing is doing underneath it. Repainted only when a
+       stated number changes — the bore exaggeration moves with the contract's
+       diameter, and a plate that went on asserting the previous job's number
+       would be worse than no plate, because it would be believed. */
+    if (scalePlate) {
+      if (Math.abs(scalePlate.exag - boreExag) > 5e-3
+          || Math.abs(scalePlate.ve - layout.ve) > 5e-3
+          || scalePlate.mm !== Math.round(Number(spec.holeDiaMm) || CFG.holeDiaDefault)) {
+        drawScalePlate();
+      }
+      scalePlate.mesh.position.x = camX;
+      /* Above the station ruler where there is one, on the floor of the band
+         where there is not. */
+      scalePlate.mesh.position.y = camBaseY - halfH - root.position.y
+                                 + (xRuler ? xRuler.heightUnits : 0)
+                                 + PLATE_H * 0.5 + 0.10;
+      scalePlate.mesh.position.z = 2.05;
+    }
+
     /* ── the station ruler: the second scale a long-section must carry ── */
     if (xRuler) {
       const leftX = camX - halfW;
@@ -6866,6 +7038,7 @@ export function createGeology(ctx) {
        computeView() has just re-solved from the new band width. */
     buildModeFurniture();
     buildStationRuler();
+    buildScalePlate();
     applyModeVisibility();
     if (ownsCamera && camera) {
       camera.left = -halfW; camera.right = halfW;
@@ -6884,6 +7057,7 @@ export function createGeology(ctx) {
         buildStrips();
         buildModeFurniture();
         buildStationRuler();
+        buildScalePlate();
         applyModeVisibility();
       }
     }
@@ -6892,6 +7066,7 @@ export function createGeology(ctx) {
   function dispose() {
     killModeMeshes();
     killStationRuler();
+    killScalePlate();
     root.traverse((o) => {
       if (o.geometry) o.geometry.dispose?.();
     });
