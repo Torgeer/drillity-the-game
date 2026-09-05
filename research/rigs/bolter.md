@@ -525,3 +525,177 @@ idler, no track rollers and no track shoes.** If anything in the shared rig help
 track geometry to this machine it is wrong for the species — this is a four-wheel, rubber-tyred,
 centre-articulated machine and the wheels are the identity.
 
+
+---
+
+## 10. Gap-fill, 2026-09-05 — written while building `blender/bolter.py`
+
+Everything below was found AFTER §1–§9 were written, by a fresh sweep of the manufacturers' own
+specification PDFs and one patent. **It closes six of the eleven items §8 listed as NOT SOURCED and
+corrects one figure §3 got structurally wrong.** §1–§9 are left as they stand; this section is the
+delta. Same naming rule as the header: real names are dimensional evidence, never a badge.
+
+### 10.1 THE BOOM IS FULLY SPECIFIED, and §3.1 was reading one of its numbers wrong
+
+The Boltec S sheet publishes a **BUT 32** boom table that §3.1 did not transcribe:
+
+| Boom figure | Value | Note |
+|---|---|---|
+| **Boom extension** | **1 250 mm** | the telescope |
+| **Feed extension** | **0 – 400 mm** | **NOT metres, and not hole depth** — see below |
+| **Feed roll-over** | **240°** (Boltec S) / **360°** (current S10) | one boom bolts the back AND both walls |
+| **Max lifting angle** | **+70° / −30°** | |
+| **Max swinging angle** | **±45°** | pairs with §3.1's "2 m either side of rig centre" |
+| **Boom weight** | **2 550 kg** | on a 13 700 kg machine — 19 % of it is boom |
+
+> **The correction that matters.** *Feed extension* is a **400 mm POSITIONING stroke** — it presses
+> the feed's front foot onto the rock to hold the collar. It contributes **nothing** to hole depth.
+> The metre-scale number in the boom table is the **boom** telescope. Anyone sizing a feed from
+> "feed extension" will put a metre of drilling stroke into this machine that does not exist.
+
+**A closure worth keeping.** The boom length is still unpublished, but it is now over-determined.
+Solve §3.1's own folded arithmetic — tramming 10 020 less the 6 457 carrier chain gives 3 563 mm of
+boom + feed ahead of the nose — for the boom, with the feed cradled at 0.40 of its length, and it
+gives **1 514 mm**. Independently: 1 514 + 1 250 of extension = 2 764 mm, and at the printed ±45°
+swing that is **2 764 × sin 45° = 1 954 mm** of lateral reach against the printed **2 000 mm**
+coverage. **Two figures from different tables on the same page agree to 46 mm.** Neither is a
+measurement of the boom; together they are strong evidence.
+
+### 10.2 The rock drill is dimensioned — the only fully dimensioned part of the working end
+
+The drill named in §3.1 has its own published brochure (doc 9865 0007 01, 2018-05):
+
+- **length without shank adapter 735 mm** · **width including connectors 290 mm** ·
+  **height 194 mm** · **height over drill centre 77 mm** · **weight 81 kg**
+- **hole range 33–51 mm** · impact power max **11 kW at 100 Hz** · hydraulic max **210 bar** ·
+  percussion flow 65 l/min · rotation 0–500 rpm / 330 Nm (80 cc) or 0–320 rpm / 550 Nm (125 cc)
+- flushing water max **25 bar**, 25–100 l/min · shank adapters SR28H, R32, R32E, R32F · dual damping
+
+**The 77 mm is the useful one for a modeller:** the drill axis sits 77 mm below the top of a 194 mm
+body, so the drill hangs *below* its own centreline. That is why a bolting unit can be as slim as it
+is, and it sizes the carriage and the beam section, which nobody publishes.
+
+The larger machines in the family take a heavier drill for bigger friction-bolt holes; the competitor
+class runs 14 kW at 110 Hz, 33–43 mm bolting holes, **571 mm** long, 122 kg.
+
+### 10.3 THE BOLTING MECHANISM — §8's biggest gap, now closed from a patent
+
+§8 could not say "whether it indexes about the feed axis or beside it". It is neither: **the whole
+feeder rotates.**
+
+Source: patent **US9856733B2**, *"Method and rock bolting rig for installation of a rock bolt"*,
+Epiroc Rock Drills AB (formerly Atlas Copco Rock Drills AB), inventors Jan Olsson and Rene Deutsch,
+priority 2012-07-09 — <https://patents.google.com/patent/US9856733B2/en>
+
+- the feeder unit (104) carries the drilling machine (105), displaced along it by **a slide (122)**,
+  the drive unit (129) mounted **on the slide**, not at the rear of the feed;
+- **"the feeder unit is rotatable about an axis (A)"** between two end positions — position one has
+  *"the drilling machine coaxial with the drilling axis"*, position two has *"the center of the bolt
+  of said rock bolt ... coaxial with said drilling axis"*;
+- the bolt is held by a **rear bolt holder (123) fixed to the slide** and a **front bolt holder
+  (125)**;
+- cycle: drill → **rotate the feeder** → drive the slide forward to insert the bolt → **rotate back**
+  to the drilling position for the final set through the bolt adapter.
+
+Confirmed on the manufacturer's own sheets: *"Automated bolting tool retraction and **indexing over
+to drilling mode** at completion of bolting"* (Boltec M spec 9869 0097 01d p.2), and the legacy
+Boltec 235 sheet's *"MBU bolting unit **on a single feed system**"*.
+
+**Modelling consequence.** Axis A sits **midway** between the drill centreline and the bolt
+centreline, so 180° about it exchanges them. A magazine bolted rigidly beside a drill, both aimed at
+different rock, is the classic photograph-only mistake and it is now demonstrably wrong.
+
+### 10.4 The magazine's FORM, from product photography of the unit itself
+
+Capacity was already sourced (**10 bolts**). The arrangement is now described rather than guessed:
+bolts stand **parallel to the feed, arranged in a circle**, retained by **two perforated circular
+guide discs** at top and bottom, rotating about an **axis parallel to and offset from the drill
+axis**, with the feed beam running up the middle of the assembly. The drum diameter is **still not
+published** — but with 10 bolts on 150 × 150 mm plates the circle cannot be smaller than
+10 × 0.165 = 1.65 m of circumference, i.e. **r ≥ 263 mm**, which is an arithmetic floor rather than
+a guess.
+
+The competitor publishes its carousel differently and it is worth having as a cross-check:
+**8 bolts with 200 × 200 mm plates** standard, **10 with a 200 mm square plate**, **12 with a
+150 mm square plate**. Same order, and it confirms that plate size, not bolt diameter, is what
+limits the count.
+
+Also newly sourced, and it explains the "loaded in the vertical position" note on p.2: the current
+generation offers **Auto Bolt Reload** — a **carrier magazine of 44 bolts** on a swing arm that
+lowers to ground level behind the front jacks, a **feed magazine of 8**, and a separate transfer
+boom moving four bolts at a time. Not fitted to this machine, but it settles that the feed magazine
+is meant to be reloaded from the machine's own deck.
+
+### 10.5 What the printed 700 mm tick on the side elevation actually is
+
+§3.1 transcribed the dimension chain **1 470 | 637 | 1 400 | 1 400 | 700 | 850** without being able
+to say what the ticks mark. The current small model's sheet labels its equivalents:
+
+- **B: hinge to front axle = 1 400 mm** — confirms §3.1's reading that the articulation pin is at
+  mid-wheelbase.
+- **C: front axle to front jack leg = 700 mm** — **so the 700 tick is the FRONT JACK.** By symmetry
+  the 637 tick behind the rear axle is the rear jack station, which agrees with §4.8's "one behind
+  the rear wheel and one just ahead of the front wheel".
+
+That sheet also gives, for the same 10 020 mm machine: width **2 100**, roof down/up
+**2 139 / 2 839**, cabin **2 800**, lowered cabin **2 655**, ground clearance **367**, weight
+**13 800 kg (boom 10 300 / engine 3 500)**, turning **5 200 / 2 780**, tyres **9.00-20**,
+articulation **40°**, compressor **LE10, max 15.7 l/s at 7 bar**, water booster **66 l/min at
+12 bar**, installed **60 kW / main motor 55 kW**. **Coverage with 2.4 m bolts: 2 m from rig centre
+on each wall, 4 m roof height** — the same figures §3.1 read off the older sheet's diagram.
+
+**And it prices the mesh handling arm**, which §8 could not: fitted, it adds **500 mm** of tramming
+length (10 020 → 10 520), moves the hinge-to-front-axle from 1 400 to **1 650**, takes the turning
+radius from 5 200 / 2 780 to **5 630 / 2 930**, and stands **2 718 mm** tall. So a mesh arm is a real
+option on this size of machine — but fitting one silently makes every other dimension in §3.1 wrong.
+
+### 10.6 The trailing cable, which §8 listed as unsourced
+
+The drum is still not dimensioned anywhere, for any machine in this class — only the cable is.
+For the Boltec S: **380–525 V → Ø37 mm × 110 m**; **550–575 V → Ø32 mm × 150 m**;
+**660–1 000 V → Ø28 mm × 200 m**. (The larger machine runs Ø56 mm × 90 m at 400 V down to
+Ø32 mm × 200 m at 1 000 V.) So the cable lying on the floor of the drive is **28–37 mm**, not the
+50 mm-plus a modeller would reach for, and there is **100–200 m** of it — the machine is tethered a
+long way back down the drive, which is worth knowing for any scene that shows where it goes.
+
+### 10.7 A feed length, at last — from the competitor, who publishes it
+
+Nobody publishes a Boltec feed length; §8 says so and it is still true. But the competitor publishes
+**bolting-head length** on every sheet, and the heads are directly comparable — same job, same bolt
+range:
+
+- **BH30** (1.5–3.0 m bolts): **max 4 142 mm**, 1 720 kg
+- the same table's **BH24** takes 1.5–2.4 m bolts
+- the biggest, **BH60**: **7 535 mm**, 2 174 kg, minimum operating height 7 620 mm
+
+A head differs from its neighbour by the bolt it holds, so a 2.4 m head is a 3.0 m head less
+600 mm: **≈ 3 540 mm**. Build the same number up from the parts and it agrees: carriage stroke must
+equal the hole, which is the bolt plus the 50 mm the game's own rule demands (2.450), plus the
+735 mm drill, leaves **355 mm** for shank, chuck and dead length in a 3 540 mm unit — and p.2
+advertises a **short dead length** as a feature of this exact unit. **Two roads, same answer.**
+
+That table also answers "what drive does it fit", which §3 could only give as "from 3 × 3 m":
+minimum operating height by head, on the competitor's machines — BH15 **2 700**, BH18 **3 100**,
+BH22 **3 600**, BH24 **3 800**, BH27 **4 000**, BH30 **4 300 mm**. A 2.4 m bolting head needs
+**3.8 m of headroom**, which is why the 4 m roof coverage figure and the "drives from 3 × 3 m"
+claim are not in conflict: at 3 m you are bolting at an angle, not straight up.
+
+### 10.8 Still NOT SOURCED after this pass
+
+- **Cable-reel drum diameter**, for any machine in this class. Only cable gauge and length.
+- **Canopy plate size and post spacing.** Only the roof's *mounting* height adjustment is published,
+  for every manufacturer checked.
+- **Feed and boom cross-sections.**
+- **Bolt pattern and row spacing in a real drive.**
+- **Roof jack / vertical stinger** — still no source putting one on a bolter. (The low-profile
+  variant of this same machine *does* carry a hydraulic stinger, 400 mm up / 600 mm down, max 80 kN —
+  but that is a different machine with a 1 300 mm carrier, and it is a boom stinger, not a roof jack.)
+- **Colour.** Unchanged from §8: the palette is the game's own.
+
+### 10.9 What the model built from this does with it
+
+`blender/bolter.py`, exported and measured: **width 2.115 m against the published 2 115 mm**,
+59 draw calls against a budget of 70, 37.7 k triangles, eight materials by name, **no textures and
+no glazing**. `pivot:boltIndex` is §10.3's axis A; `slide:feedExtend` carries 400 mm and is labelled
+`purpose: position` so nobody mistakes it for stroke again; `slide:roof` carries the −741 mm the
+protective roof drops to tram, which §9 W14b recorded as missing from the game entirely.
