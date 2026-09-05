@@ -580,74 +580,97 @@ def build_body():
     box('battery-box', (0.26, 0.46, 0.30), MAT_DARK,
         loc=(-BODY_W / 2 + 0.04, 1.95, 1.02), bevel=0.02)
 
-    px, py, pw, pd, ph = -0.42, 0.15, 1.60, 2.20, 1.16
-    box('powerpack', (pw, pd, ph), MAT_PAINT, loc=(px, py, DECK_Z + ph / 2),
-        bevel=0.035)
-    box('powerpack-roof', (pw + 0.06, pd + 0.06, 0.05), MAT_DARK,
+    # ── DECK LAYOUT ─────────────────────────────────────────────────────────
+    # The deck is 2.42 m wide and it has to hold the power/air pack, the rod
+    # rack, the operator station and a walkway. A first attempt put a separate
+    # engine box and air box SIDE BY SIDE and then laid the rod rack on top of
+    # the air box — the rods were inside the enclosure and invisible. So the
+    # deck is zoned along its length instead, which is also what the reference
+    # photograph shows:
+    #   left,  full length : one power-and-air enclosure (diesel + screw
+    #                        compressor in a single louvred box, which is what
+    #                        [R16 §A.8]'s "on-board compressor of roughly
+    #                        1000 cfm at 500 psi" physically is on this class)
+    #   right, full length : the rod rack, rods lying horizontally [MET p.22]
+    #   front left         : the operator's control stand and canopy
+    #   front right        : the sample-hose reel
+    #   rear               : the cooler pack and the access stair
+    px, py, pw, pd, ph = -0.58, 0.62, 1.26, 3.45, 1.14
+    box('power-air-pack', (pw, pd, ph), MAT_PAINT,
+        loc=(px, py, DECK_Z + ph / 2), bevel=0.035)
+    box('power-air-pack-roof', (pw + 0.06, pd + 0.06, 0.05), MAT_DARK,
         loc=(px, py, DECK_Z + ph + 0.02), bevel=0.012)
-    for s in (-1, 1):
-        for grp in (-0.55, 0.55):
-            lv = box('pp-louvre', (0.024, 0.72, 0.030), MAT_DARK,
-                     loc=(px + s * (pw / 2 + 0.004), py + grp, DECK_Z + 0.30),
-                     rot=(0.42, 0, 0), bevel=0.004)
-            arrayed(lv, 8, (0, 0, 0.062))
-    box('pp-badge-panel', (0.52, 0.02, 0.20), MAT_DARK,
-        loc=(px, py - pd / 2 - 0.02, DECK_Z + 0.92), bevel=0.006)
-    tube('exhaust', 0.055, 0.85, MAT_WORN,
-         loc=(px + 0.62, py - 0.85, DECK_Z + ph))
-    cone('exhaust-cap', 0.085, 0.03, 0.09, MAT_WORN,
-         loc=(px + 0.62, py - 0.85, DECK_Z + ph + 0.85), sides=10)
-    box('cooler', (pw - 0.16, 0.30, ph - 0.30), MAT_DARK,
-        loc=(px, py + pd / 2 + 0.16, DECK_Z + ph / 2), bevel=0.02)
-    fin = box('cooler-fin', (pw - 0.24, 0.02, 0.018), MAT_WORN,
-              loc=(px, py + pd / 2 + 0.30, DECK_Z + 0.22))
-    arrayed(fin, 22, (0, 0, 0.038))
-
-    # air package on the deck, right side
-    ax, ay = 0.86, 0.55
-    box('air-package', (1.35, 1.95, 1.10), MAT_PAINT,
-        loc=(ax, ay, DECK_Z + 0.55), bevel=0.035)
-    for s in (-1, 1):
-        lv = box('air-louvre', (0.024, 1.40, 0.032), MAT_DARK,
-                 loc=(ax + s * 0.678, ay, DECK_Z + 0.26), rot=(0.42, 0, 0),
-                 bevel=0.004)
+    # louvres in GROUPS, not one continuous band [MET p.22, rc-rig.md §4.7]
+    for grp in (-1.05, 0.30, 1.62):
+        lv = box('pp-louvre', (0.024, 0.86, 0.030), MAT_DARK,
+                 loc=(px - pw / 2 - 0.004, py + grp, DECK_Z + 0.26),
+                 rot=(0.42, 0, 0), bevel=0.004)
         arrayed(lv, 9, (0, 0, 0.064))
-    tube('air-receiver', 0.25, 1.55, MAT_PAINT,
-         loc=(ax, ay - 0.78, DECK_Z + 1.34), rot=(-math.pi / 2, 0, 0), sides=18)
+    for grp in (-0.70, 1.20):
+        lv = box('pp-louvre', (0.024, 0.72, 0.030), MAT_DARK,
+                 loc=(px + pw / 2 + 0.004, py + grp, DECK_Z + 0.26),
+                 rot=(0.42, 0, 0), bevel=0.004)
+        arrayed(lv, 9, (0, 0, 0.064))
+    # a separate darker panel where the maker's badge goes. Deliberately blank:
+    # DOMAIN.md §10, and rc-rig.md §4.7 says "do not reproduce the badge".
+    box('pp-badge-panel', (0.52, 0.024, 0.20), MAT_DARK,
+        loc=(px, py - pd / 2 - 0.014, DECK_Z + 0.90), bevel=0.006)
+    for i, dy in enumerate((-1.30, 0.10, 1.45)):     # access door handles
+        box('pp-door-handle', (0.05, 0.03, 0.16), MAT_CHROME,
+            loc=(px - pw / 2 - 0.03, py + dy, DECK_Z + 0.72), bevel=0.006)
+    tube('exhaust', 0.058, 0.92, MAT_WORN,
+         loc=(px + 0.46, py - 1.35, DECK_Z + ph))
+    cone('exhaust-cap', 0.088, 0.03, 0.09, MAT_WORN,
+         loc=(px + 0.46, py - 1.35, DECK_Z + ph + 0.92), sides=10)
+    # cooler pack across the rear face, with real fins
+    box('cooler', (pw - 0.10, 0.30, ph - 0.26), MAT_DARK,
+        loc=(px, py + pd / 2 + 0.16, DECK_Z + ph / 2), bevel=0.02)
+    fin = box('cooler-fin', (pw - 0.22, 0.02, 0.018), MAT_WORN,
+              loc=(px, py + pd / 2 + 0.30, DECK_Z + 0.20))
+    arrayed(fin, 24, (0, 0, 0.038))
+
+    # air receiver / wet tank lying along the top of the pack, dished ends,
+    # relief valve and a drain — this is the "air" half of the package made
+    # visible, and it is the biggest single object on the deck.
+    rz = DECK_Z + ph + 0.32
+    tube('air-receiver', 0.26, 1.90, MAT_PAINT, loc=(px, py - 0.95, rz),
+         rot=(-math.pi / 2, 0, 0), sides=18)
     for s in (-1, 1):
-        cone('receiver-end', 0.25, 0.10, 0.11, MAT_PAINT,
-             loc=(ax, ay + s * 0.775, DECK_Z + 1.34),
-             rot=(-s * math.pi / 2, 0, 0), sides=18)
-    tube('relief-valve', 0.045, 0.26, MAT_CHROME,
-         loc=(ax - 0.16, ay + 0.42, DECK_Z + 1.56))
-    tube('air-cooler-drum', 0.20, 0.55, MAT_DARK,
-         loc=(ax + 0.30 - 0.275, ay - 1.20, DECK_Z + 0.85),
+        cone('receiver-end', 0.26, 0.10, 0.12, MAT_PAINT,
+             loc=(px, py + s * 0.95, rz), rot=(-s * math.pi / 2, 0, 0), sides=18)
+    tube('relief-valve', 0.046, 0.26, MAT_CHROME,
+         loc=(px - 0.15, py + 0.60, rz + 0.22))
+    tube('receiver-drain', 0.030, 0.22, MAT_WORN,
+         loc=(px + 0.12, py - 0.80, rz - 0.46), rot=(math.pi, 0, 0))
+    for s in (-1, 1):                       # receiver saddles
+        box('receiver-saddle', (0.34, 0.09, 0.22), MAT_PAINT,
+            loc=(px, py + s * 0.70, DECK_Z + ph + 0.13), bevel=0.014)
+    tube('aftercooler-drum', 0.19, 0.52, MAT_DARK,
+         loc=(px + pw / 2 - 0.02, py + 1.45, DECK_Z + 0.80),
          rot=(0, math.pi / 2, 0), sides=14)
 
     # tank fillers and sight gauges standing proud of the house, left side
     tube('tank-filler', 0.075, 0.13, MAT_WORN,
-         loc=(-BODY_W / 2 + 0.30, -1.05, DECK_Z + 0.02))
-    tube('tank-filler', 0.075, 0.13, MAT_WORN,
-         loc=(-BODY_W / 2 + 0.30, 1.62, DECK_Z + 0.02))
+         loc=(-BODY_W / 2 + 0.16, -1.95, DECK_Z + 0.02))
     box('sight-gauge', (0.06, 0.05, 0.34), MAT_CHROME,
-        loc=(-BODY_W / 2 - 0.01, 1.62, 1.62), bevel=0.006)
+        loc=(-BODY_W / 2 - 0.01, 0.30, 1.62), bevel=0.006)
 
     # sample-hose reel: the reel takes the hose up as the head travels, and it
     # is a named catalogue item on this class of machine [MIN p.12, §4.3 item 6]
     tube('hose-reel-drum', 0.24, 0.46, MAT_PAINT,
-         loc=(BODY_W / 2 - 0.32, -1.98, DECK_Z + 0.52),
+         loc=(BODY_W / 2 - 0.30, -2.02, DECK_Z + 0.52),
          rot=(0, math.pi / 2, 0), sides=16)
     for s in (0, 1):
         tube('hose-reel-flange', 0.36, 0.035, MAT_PAINT,
-             loc=(BODY_W / 2 - 0.32 + s * 0.46, -1.98, DECK_Z + 0.52),
+             loc=(BODY_W / 2 - 0.30 + s * 0.46, -2.02, DECK_Z + 0.52),
              rot=(0, math.pi / 2, 0), sides=18)
     for s in (-1, 1):
-        strut('hose-reel-stand', (BODY_W / 2 - 0.09 + s * 0.28, -1.98, DECK_Z),
-              (BODY_W / 2 - 0.09 + s * 0.28, -1.98, DECK_Z + 0.52), 0.07,
+        strut('hose-reel-stand', (BODY_W / 2 - 0.07 + s * 0.28, -2.02, DECK_Z),
+              (BODY_W / 2 - 0.07 + s * 0.28, -2.02, DECK_Z + 0.52), 0.07,
               MAT_PAINT)
 
     # control stand + FOPS canopy
-    sx, sy = -0.55, -1.58
+    sx, sy = -0.55, -1.72
     box('control-console', (0.72, 0.42, 0.30), MAT_PAINT,
         loc=(sx, sy, DECK_Z + 0.92), rot=(-0.35, 0, 0), bevel=0.02)
     box('console-pedestal', (0.34, 0.30, 0.78), MAT_DARK,
@@ -970,14 +993,14 @@ def build_rod_handling(pv):
     5 rods). The arm is also the better animation: it is big, it crosses the
     silhouette, and it is unmistakably this class.
     """
-    rx = 1.02
-    ry0 = -1.55
+    rx = 0.66
+    ry0 = -1.35
     for y in (ry0, ry0 + 1.45, ry0 + 2.85):
         for sx in (-1, 1):
-            box('rack-stanchion', (0.06, 0.06, 0.52), MAT_DARK,
-                loc=(rx + sx * 0.34, y, DECK_Z + 0.26), bevel=0.006)
-        for z in (DECK_Z + 0.10, DECK_Z + 0.28):
-            box('rack-cradle', (0.80, 0.08, 0.06), MAT_DARK, loc=(rx, y, z),
+            box('rack-stanchion', (0.07, 0.07, 0.56), MAT_DARK,
+                loc=(rx + sx * 0.40, y, DECK_Z + 0.28), bevel=0.007)
+        for z in (DECK_Z + 0.10, DECK_Z + 0.30):
+            box('rack-cradle', (0.90, 0.08, 0.06), MAT_DARK, loc=(rx, y, z),
                 bevel=0.008)
     for layer, z in enumerate((DECK_Z + 0.17, DECK_Z + 0.35)):
         n = 5 if layer == 0 else 4
@@ -988,7 +1011,7 @@ def build_rod_handling(pv):
             tube('rod-box-end', ROD_OD / 2 + 0.013, 0.17, MAT_STEEL,
                  loc=(xo, ry0 - 0.15, z), rot=(-math.pi / 2, 0, 0), sides=10)
 
-    arm = empty(NODE_PIVOT, 'rod-arm', pv, (MAST_W / 2 + 0.10, 0.10, 1.60))
+    arm = empty(NODE_PIVOT, 'rod-arm', pv, (MAST_W / 2 + 0.14, 0.16, 1.70))
     arm['axis'] = 'z'
     arm['range_deg'] = [0.0, 155.0]
     box('rod-arm-boss', (0.20, 0.20, 0.34), MAT_PAINT, arm, (0, 0, 0), bevel=0.02)
