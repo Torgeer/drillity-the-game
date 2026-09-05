@@ -1174,3 +1174,71 @@ actually for. Every one was opened.
   reading 387 g and nothing else. No geometry.
 - `Downloads\bwh-datenblatt-tm-14-17.pdf` and its three siblings — **piling-rig
   datasheets, no carbide content whatsoever.** See §1.
+
+---
+
+## Appendix — tricone findings recovered at the pause, 2026-09-05
+
+Recorded here because the agent that found them was stopped before it could
+file them, and they existed only in a session transcript.
+
+### The one tricone in the corpus with a stated diameter, thread and mass
+
+`C:\Users\henri\Downloads\TZACHO-katalog.pdf` **p. 195** (Danish; BETEK BTB09
+Tricone Bit, *"Tekniske produkt informationer"*), verbatim:
+
+| field | value |
+|---|---|
+| Borehulsdiameter — hole diameter | **5 ¾" (146 mm)** |
+| Tilslutningsgevind — connection thread | **2-7/8" - 5 API standard tilspidsning** (2-7/8", 5 TPI, API standard taper) |
+| Max. tilspændingskraft | 30 000 N |
+| Vægt — weight | **12.23 kg** |
+
+**The thread caveat matters.** The page prints *"2-7/8"-5 API standard taper"*
+and does **not** print the word REG. 2-7/8" at 5 TPI with API taper matches the
+API Regular form, but that pairing is a reading, not the catalogue's wording —
+so **treat "2 7/8 REG" as likely, not cited**.
+
+This is the **only mass figure anywhere in the corpus**: 12.23 kg for a 146 mm
+tricone. It is worth having as a density and wall-thickness sanity check on any
+model, because a bit modelled solid at that diameter will not weigh 12 kg.
+
+### A tricone's three cones are three DIFFERENT parts
+
+Same page, *"BETEK Tricone Bit værktøjsskifte system"*, with an exploded
+diagram. The bit is modular:
+
+| # | part | number |
+|---|---|---|
+| 1 | Værktøjsholder — tool holder, carries the API pin | **BTB01** |
+| 2 | Låsetap — locking pin, one per cone | **ISO 8752 – 10 × 60** (Ø10 × 60 mm roll pin) |
+| 3 | tool-change element 1 | **BTB06** |
+| 4 | tool-change element 2 | **BTB04** |
+| 5 | tool-change element 3 | **BTB08** |
+
+**The load-bearing point for Blender: do not model one leg-and-cone and instance
+it three times at 120°.** The three cone cartridges carry three different part
+numbers, and the cutting structures genuinely differ from one another — which is
+exactly what lets the inner rows intergear (`Wittig_Drilling_intro-part_I.pdf`
+p. 82). On this modular design each cartridge drops into the holder and is
+retained by a roll pin through the leg.
+
+### Sources opened and found useless — do not re-open these
+
+- `Katalog new Drillity 17 04 26.pdf` (319 pp), `Katalog new Drillity.pdf`
+  (113 pp), `Katalog_Drillity_edited_photos_compressed.pdf` (427 pp) — **no text
+  layer at all.** Zero hits for tricone / PDC / IADC / REG. Image-only or
+  outlined text; extraction returns nothing searchable. **859 pages of nothing**,
+  which is worth knowing before somebody spends a day on them.
+- `TOPHIGH-矿山工具画册（2026版）转曲.pdf` (18 pp), `Zhuzhou Riseen__catalogue.pdf`
+  (10 pp) — no hits.
+- `SED_Reference book_EN_L.pdf` (104 pp) — mentions tricone only in passing prose
+  (*"tricone roller type fitted with tungsten carbide buttons"*). No geometry.
+
+### STILL NOT SOURCED, anywhere in the owner's library
+
+There is still **no diameter-to-connection table for tricones** — only the single
+146 mm → 2-7/8" pairing above. Also absent: overall bit length, journal angle,
+linear cone offset, milled-tooth dimensions, PDC rake angles, PDC blade counts,
+and PDC cutter sizes 16 / 19 mm. **These need the web or a real catalogue; do not
+invent them.**
