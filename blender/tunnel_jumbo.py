@@ -252,8 +252,27 @@ def build_wheel(parent, name, x, y):
     side = 1 if x > 0 else -1
     tube(name + '-tyre', WHEEL_R, WHEEL_W, MAT_RUBBER, piv,
          loc=(-WHEEL_W / 2, 0, 0), rot=(0, math.pi / 2, 0), sides=20)
-    lug = box(name + '-lug', (WHEEL_W * 0.94, 0.105, 0.05), MAT_RUBBER, piv,
-              loc=(0, 0, WHEEL_R - 0.010), rot=(0.38, 0, 0))
+    # THE TREAD LUGS. An object-offset ARRAY applies
+    #     inv(arrayed_object.matrix_world) @ offset_object.matrix_world
+    # once per step. That is a pure rotation ONLY if the arrayed object's own
+    # origin sits on the axis of rotation. This used to build the lug at
+    # loc=(0, 0, WHEEL_R - 0.010) - out at the tread - so each step carried a
+    # 0.45 m translation as well as the 20 deg turn, and eighteen of them
+    # walked the tread off the machine. Measured off the exported .glb: every
+    # tyre had a vertical extent of 7.383 m and reached 6.433 m BELOW the
+    # floor, on a machine whose sourced ground clearance is 260 mm.
+    #
+    # It is the same failure the wheel-nut loop below describes and avoided;
+    # nobody looked six lines up. It survived because a jumbo is drawn small
+    # and dark, and because until now nothing in the pipeline read a dimension
+    # back out of a .glb.
+    #
+    # Fix: keep the lug's ORIGIN on the wheel axis and bake its radius and its
+    # tilt into the MESH instead. inv(lug) @ off is then exactly RotX(20 deg).
+    Matrix = __import__('mathutils').Matrix
+    lug = box(name + '-lug', (WHEEL_W * 0.94, 0.105, 0.05), MAT_RUBBER, piv)
+    lug.data.transform(Matrix.Translation((0, 0, WHEEL_R - 0.010))
+                       @ Matrix.Rotation(0.38, 4, 'X'))
     a = lug.modifiers.new('arr', 'ARRAY')
     a.count = 18
     a.use_relative_offset = False
