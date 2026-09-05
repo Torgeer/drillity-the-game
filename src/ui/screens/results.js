@@ -319,7 +319,16 @@ export function createResultsScreen(app) {
     if (!Array.isArray(ledger) || !ledger.length) return null;
     const s = ledger[0];
     if (!s || typeof s.net !== 'number') return null;
-    if (contractId && s.contractId && s.contractId !== contractId) return null;
+    /* `if (contractId && s.contractId && ...)` — TWO SHORT-CIRCUITS THAT MEAN
+       "SKIP THE CHECK". A payload that names no contract, with no
+       `state.contract` behind it either, passed straight through this line
+       with nothing between it and the previous hole's money but the ±5 %
+       depth test below. Any two holes of similar depth would then settle each
+       other. The identity of the run is not optional here: if this screen
+       cannot say WHICH contract it is showing, it cannot claim a settlement
+       belongs to it. */
+    if (!contractId) return null;
+    if (s.contractId && s.contractId !== contractId) return null;
     /* A stale entry from an earlier hole would misreport this one. With
        `depth` now null rather than 0 when nothing published one, this check
        cannot run — and a check that cannot run has not passed, so the
@@ -951,7 +960,16 @@ export function createResultsScreen(app) {
            invented constants is documented where it was deleted. */
         if (!sm.settled) { consumeEl.classList.add('is-in'); return; }
         for (const it of sm.items) {
-          consumeList.appendChild(ledgerRow(it.name, it.qty, '−' + fmtMoney(it.cost), '.ritem--sub'));
+          /* THE SIGN IS PART OF THE NUMBER, so it cannot be a prefix.
+             Every cost row was `'−' + fmtMoney(cost)`, which is right until a
+             row is negative — and one is: the "Other running costs" remainder
+             carries the accumulated rounding drift of eleven independently
+             rounded lines and drifts BOTH ways. A remainder of −1 rendered as
+             `−€-1`, a cost line claiming the hole earned a euro. Caught by
+             `.hudqa/results.mjs` on a settled run within minutes of that
+             remainder being allowed to go negative at all. */
+          const signed = it.cost < 0 ? '+' + fmtMoney(-it.cost) : '−' + fmtMoney(it.cost);
+          consumeList.appendChild(ledgerRow(it.name, it.qty, signed, '.ritem--sub'));
         }
         // The running-costs subtotal used to arrive as a toast on top of the
         // grade medallion. It belongs here, above the payout, so the headline

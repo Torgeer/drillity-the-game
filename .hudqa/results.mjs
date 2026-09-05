@@ -236,8 +236,17 @@ const READ = async () => {
          further row rather than leaving the reader to notice. Reproduce it
          from the settlement so the row COUNT and the row VALUES both check. */
       const rest = totalCost - shown;
-      const subCosts = lines.map((v) => '−' + fmtMoney(v));
-      if (rest !== 0) subCosts.push('−' + fmtMoney(rest));
+      /* THE SIGN IS PART OF THE NUMBER, not a prefix on it — the screen was
+         fixed to render it that way and this expectation has to agree, or the
+         gate reports a defect that has been repaired. `'−' + fmtMoney(-1)`
+         yields "−€-1", which is what the screen used to print and what this
+         used to demand of it. The eleven cost lines are rounded
+         independently, so the "Other running costs" remainder carries their
+         accumulated drift and goes both ways; a negative remainder is money
+         coming BACK and prints with a plus. */
+      const signed = (v) => (v < 0 ? '+' + fmtMoney(-v) : '−' + fmtMoney(v));
+      const subCosts = lines.map(signed);
+      if (rest !== 0) subCosts.push(signed(rest));
       expect = {
         contractId: led.contractId ?? null,
         grade: led.grade ?? null,
@@ -596,13 +605,15 @@ function checkMoney(r, tag, wantContractId) {
       say(`  itemised    ${got.length} row(s), every one equal to its settled cost   ok`);
     }
     for (const row of M.subRows) {
-      /* A COST LINE THAT READS AS INCOME. ui/screens/results.js prints each
-         row as `'−' + fmtMoney(cost)`, so a NEGATIVE cost comes out as
-         "−€-1" — a cost row claiming the hole earned a euro. */
-      if (/€\s*-/.test(row.c || '')) {
-        F.ledger.push(`${tag}: cost row "${row.n}" prints ${row.c} — a negative cost, i.e. income stated on a cost line`);
+      /* A NUMBER WITH TWO SIGNS ON IT. This caught the real thing: the screen
+         printed each row as `'−' + fmtMoney(cost)`, so a negative cost came
+         out as "−€-1". The screen now carries the sign inside the number, so
+         what must never appear again is a minus glued to a signed figure —
+         not a leading plus, which is how money coming back is stated. */
+      if (/[−-]\s*€\s*-/.test(row.c || '')) {
+        F.ledger.push(`${tag}: cost row "${row.n}" prints ${row.c} — two signs on one number`);
       }
-      if (/^−?€0$/.test((row.c || '').trim())) {
+      if (/^[+−]?€0$/.test((row.c || '').trim())) {
         F.ledger.push(`${tag}: cost row "${row.n}" prints ${row.c} — a line item that cost nothing is not a line item`);
       }
     }
