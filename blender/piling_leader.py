@@ -1086,9 +1086,22 @@ def build(out_path):
     # The hammer is centred on the PILE AXIS, 500 mm forward of the leader's
     # front face [GA] — it hangs clear in front of the leader and grips the
     # rails with its jaws, rather than lying against the leader box.
-    ham = empty(NODE_SLIDE, 'hammer-carriage', root, (0, 0.0, HAMMER_BOT))
+    # THE NODE IS CALLED `carriage`, AND IT HAS TO BE.
+    # This file's contract discipline is the best in the fleet — all 13 slides
+    # and all 10 pivots carry extras, the only machine to manage it — and it
+    # still missed the only two names the runtime actually reads.  It published
+    # `slide:hammer-carriage` with `travel_lo_m` / `travel_hi_m`: a THIRD
+    # convention for stroke in this pipeline, after `travel_m` and `range_m`.
+    # src/core/gltfRig.js makeDyn() does `slides.get('carriage')` and reads
+    # `travel_m`.  It found neither, so `dyn.carriage` was null and the hammer
+    # could not fall — on a machine whose whole row says "it lifts a pile, sets
+    # it plumb and hits it".
+    # The descriptive lo/hi pair is KEPT, because it says something travel_m
+    # cannot: which end of the stroke the machine is exported at.
+    ham = empty(NODE_SLIDE, 'carriage', root, (0, 0.0, HAMMER_BOT))
     ham['travel_lo_m'] = 1.40 - HAMMER_BOT
     ham['travel_hi_m'] = (LEADER_TOP - 2.60) - HAMMER_L - HAMMER_BOT
+    ham['travel_m'] = ham['travel_hi_m'] - ham['travel_lo_m']   # 15.12 m
     ham['axis'] = 'z'
     build_hammer(ham)
     # the ram: 1 200 mm of visible travel inside the frame, 40-100 blows/min
@@ -1136,8 +1149,21 @@ def build(out_path):
     # ARRISES, cast-in lifting points, plain cast face [REF s6]. It rides the
     # same leader guides as the hammer and STAYS IN THE GROUND when the hammer
     # lifts, so it is its own node and not welded into the carriage.
+    # THIS IS WHY THE MODEL SITS 0.830 m BELOW y = 0, AND IT IS CORRECT.
+    # `glbinfo` flags the machine at -0.830 and ASTRA.md §7.5 lists it.  A
+    # per-primitive sweep puts every millimetre of it in ONE object: this pile.
+    # PILE_TOP 13.60 less PILE_LEN 14.00 puts the pile's own foot at -0.400,
+    # and the driving shoe below it (`piletip`, 460 mm on a 200 mm overlap)
+    # reaches -0.830.  Everything else on the machine stops at the track belts,
+    # -0.175, and the track gear at -0.035 — i.e. ON grade, where a 78 t
+    # crawler belongs.
+    # A driven pile that does not go into the ground is not being driven.  The
+    # pose is the machine's whole purpose: hammer down on the cap, pile
+    # collared, driving.  DO NOT lift this to get the ground metric to zero —
+    # it would put a piling rig on a site with its pile balanced on the grass.
     pile = empty(NODE_SLIDE, 'pile', root, (0, 0, PILE_TOP))
     pile['axis'] = 'z'
+    pile['embed_m'] = 0.830          # how far the tip is in, in the exported pose
     pl = [box('pile', (PILE_SIDE, PILE_SIDE, PILE_LEN), MAT_WORN, None,
               (0, 0, -PILE_LEN / 2), bevel=0.020),
           box('piletip', (PILE_SIDE * 0.5, PILE_SIDE * 0.5, 0.46), MAT_WORN, None,
@@ -1252,7 +1278,12 @@ def build(out_path):
     empty(NODE_MOUNT, 'marque', slew, (0, REAR_Y + 0.02, DECK_Z + 0.70))
     empty(NODE_MOUNT, 'operator', slew, (CAB_X, (CAB_Y0 + CAB_Y1) / 2,
                                          CAB_FLOOR + 1.20))
-    empty(NODE_MOUNT, 'pile-head', root, (0, 0, PILE_TOP))
+    # `mount:tool`, not `mount:pile-head`.  makeDyn() looks up the string
+    # 'tool' and nothing else; the old name meant `dyn.toolAnchor` fell back to
+    # the carriage, so the pile could not be held at its head.  The name is the
+    # contract (ASTRA.md §4) — a good name the runtime has never heard of is
+    # the same as no name.
+    empty(NODE_MOUNT, 'tool', root, (0, 0, PILE_TOP))
 
     # apply everything still carrying a modifier: finish()'s join keeps only
     # the ACTIVE object's modifier stack and would silently drop the rest
