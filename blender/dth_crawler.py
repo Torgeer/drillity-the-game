@@ -915,13 +915,22 @@ def build_boom(root):
     for s in (-1, 1):                  # lug the lift ram pulls on
         box('boomlug%d' % s, (0.032, 0.240, 0.190), R.MAT_DARK, lift,
               (s * 0.115, lugp[1], lugp[2]), (BOOM_RISE, 0, 0), bevel=0.008)
-    cyl('boomlugpin', 0.052, 0.330, R.MAT_STEEL, lift, (-0.165, lugp[1], lugp[2]),
+    # R.MAT_DARK, not R.MAT_STEEL.  A MATERIAL COSTS A DRAW CALL PER DYNAMIC
+    # GROUP IT APPEARS IN — rig.finish() leaves a pivot:/slide: subtree out of
+    # the global join and join_by_mat() then welds that subtree on its own — and
+    # this pin was the ONLY rawSteel anywhere under pivot:boomLift: 36 triangles
+    # buying a whole draw call for a 104 mm pin pressed through the two
+    # paintedDark lugs either side of it.
+    cyl('boomlugpin', 0.052, 0.330, R.MAT_DARK, lift, (-0.165, lugp[1], lugp[2]),
         (0, math.radians(90), 0), sides=10)
 
     # ---- hose deflection shoe and tray on the boom top ---------------------
     # [H] calls it a Schlauchumlenkung: a roller that sets the bend radius
     # where the hose package leaves the carrier.
-    cyl('hosedeflect', 0.085, 0.400, R.MAT_WORN, lift,
+    # R.MAT_DARK, not R.MAT_WORN: the only wornSteel under pivot:boomLift, 44
+    # triangles for a 170 mm roller lying on the paintedDark hose tray, on the
+    # paintedDark top face of the boom, under the hose package it deflects.
+    cyl('hosedeflect', 0.085, 0.400, R.MAT_DARK, lift,
         (-0.20, UY * 0.70, UZ * 0.70 + BD / 2 + 0.06),
         (0, math.radians(90), 0), sides=12)
     box('hosetray', (0.360, 1.60, 0.030), R.MAT_DARK, lift,
@@ -970,8 +979,14 @@ def build_boom(root):
                    ram_v.to_track_quat('Z', 'Y').to_euler())
     L = ram_v.length
     cyl('ram_barrel', 0.105, L * 0.58, R.MAT_DARK, ramp, (0, 0, 0), sides=14)
-    cyl('ram_gland', 0.088, 0.085, R.MAT_CAST, ramp, (0, 0, L * 0.58), sides=14)
-    cyl('ram_eye', 0.075, 0.230, R.MAT_CAST, ramp, (-0.115, 0, 0.03),
+    # R.MAT_DARK, not R.MAT_CAST, on both.  They were the whole of castIron
+    # inside pivot:boomRam — 96 triangles, one draw call — for the collar on the
+    # end of the barrel and the eye on its foot, both bolted to that same
+    # paintedDark barrel and painted with it on a real machine.  The ROD is
+    # untouched: it is the long, extended, moving bright thing on this boom and
+    # it keeps its chrome and its own node.
+    cyl('ram_gland', 0.088, 0.085, R.MAT_DARK, ramp, (0, 0, L * 0.58), sides=14)
+    cyl('ram_eye', 0.075, 0.230, R.MAT_DARK, ramp, (-0.115, 0, 0.03),
         (0, math.radians(90), 0), sides=12)
     for i, z in enumerate((0.12, L * 0.46)):
         R.hose('ramhose%d' % i, [(0.10, 0.0, z), (0.17, 0.05, z + 0.20),
@@ -1266,7 +1281,10 @@ def build_carousel(fx):
           bevel=0.010)
     torus_ring('rodgrip', TUBE_OD / 2 + 0.048, 0.036, R.MAT_DARK, arm,
                (-0.680, 0, 0), (math.radians(90), 0, 0))
-    cyl('rodarmpin', 0.055, 0.180, R.MAT_CAST, arm, (0, -0.090, 0),
+    # R.MAT_DARK, not R.MAT_CAST: the only castIron under pivot:rodArm, 36
+    # triangles for a 110 mm pin boss on the end of a paintedDark arm whose only
+    # other two objects are both paintedDark.
+    cyl('rodarmpin', 0.055, 0.180, R.MAT_DARK, arm, (0, -0.090, 0),
         (math.radians(-90), 0, 0), sides=10)
     join_by_mat(arm, 'rodarm')
 
@@ -1353,7 +1371,13 @@ def build_dust_hood(fx):
         box('skirt%d' % i, (0.130, 0.030, 0.170), R.MAT_RUBBER, hood,
               (0.330 * math.cos(a), 0.330 * math.sin(a), -0.060), (0, 0, -a),
               bevel=0.004)
-    cyl('hoodport', SUCT_D / 2 + 0.018, 0.220, R.MAT_DARK, hood,
+    # R.MAT_WORN, not R.MAT_DARK: the only paintedDark under slide:dustHood, 44
+    # triangles for the duct stub the suction hose clamps onto.  wornSteel, not
+    # the hood's paintedSteel — it keeps the port reading as a dark fitting
+    # against the light hood body rather than turning it body-colour, and
+    # `hoodguide` in the same group is already wornSteel.  The hood is described
+    # two lines up as one of the filthiest parts of the machine.
+    cyl('hoodport', SUCT_D / 2 + 0.018, 0.220, R.MAT_WORN, hood,
         (-0.180, -0.060, 0.230), (math.radians(-64), 0, math.radians(-30)),
         sides=12)
     # the guide bushing the drill tube actually passes through
@@ -1467,8 +1491,18 @@ def build_support_leg(root):
     # drops it on slide:supportLeg when the rig sets up on a hole.
     leg = R.empty(R.NODE_SLIDE, 'supportLeg', root, (lx, ly, 0.360))
     leg['stroke_m'] = 0.560
-    cyl('legrod', 0.070, 0.300, R.MAT_CHROME, leg, (0, 0, -0.300), sides=12)
-    cyl('legpivot', 0.082, 0.190, R.MAT_CAST, leg, (-0.095, 0, -0.300),
+    # R.MAT_WORN on both, and this is the one place on the machine where chrome
+    # is given up.  Commit 43e6c57 set the standard: a bright rod earns a draw
+    # call when it is long, extended, lit and MOVING.  This is a 300 mm jack rod
+    # under the tail of the carrier, and the comment three lines above states
+    # the rest pose — RETRACTED, the foot just clear of grade — so for most of
+    # the game it is a stub half inside the barrel above it.  The foot it lands
+    # on is already wornSteel, so rod and pivot together take slide:supportLeg
+    # from four draw calls to two.  Every other chrome rod on this machine is
+    # left alone: the boom ram rod (its own slide: node, long and moving), the
+    # feed extension rod and the two beam-out rams.
+    cyl('legrod', 0.070, 0.300, R.MAT_WORN, leg, (0, 0, -0.300), sides=12)
+    cyl('legpivot', 0.082, 0.190, R.MAT_WORN, leg, (-0.095, 0, -0.300),
         (0, math.radians(90), 0), sides=10)
     box('legfoot', (0.500, 0.500, 0.075), R.MAT_WORN, leg, (0, 0, -0.340),
           bevel=0.012)
