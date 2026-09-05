@@ -94,9 +94,25 @@ const c = await b.newContext({
 });
 await c.route('**/@vite/client', (r) => r.fulfill({ status: 200, contentType: 'application/javascript', body: VITE_STUB }));
 const p = await c.newPage();
+/* Both channels are collected, and they are NOT the same finding.
+
+   `pageerror` is an exception nobody caught: the module that threw it stopped
+   where it stood, so whatever it was building does not exist and cannot be
+   measured. Every count in this run is then a floor.
+
+   A console error is what the code chose to say. In this project that is
+   usually a deliberate loud failure (HANDOFF §8A asks for exactly those) and
+   the caller may well have recovered — but it can equally be a caught abort,
+   which is how the geology ReferenceError surfaced: main.js catches init
+   failures and logs them, and the whole section band was missing behind it.
+
+   The channel therefore cannot decide the question on its own. Both fail the
+   gate; the run prints them apart and says what each one obliges the reader to
+   check, rather than guessing and being confidently wrong in a new way. */
 const errs = [];
+const pageErrs = [];
 p.on('console', (m) => { if (m.type() === 'error') errs.push(m.text().slice(0, 180)); });
-p.on('pageerror', (e) => errs.push('PAGEERROR ' + String(e).slice(0, 180)));
+p.on('pageerror', (e) => pageErrs.push(String(e).slice(0, 180)));
 await p.goto(`http://localhost:${PORT}/?quality=low&shot`, { waitUntil: 'load' });
 await p.waitForFunction(() => window.__DRILLITY?.ui?.show && window.__DRILLITY?.sim, null, { timeout: 60000 });
 await p.waitForTimeout(2200);
@@ -219,9 +235,12 @@ const anyOv = Object.values(json.cases).reduce((a, v) => a + v.overlaps, 0);
 const anyBand = Object.values(json.cases).reduce((a, v) => a + v.onBand3D.length, 0);
 const anySmall = [...new Set(Object.values(json.cases).flatMap((v) => v.smallTargets))];
 const uniqErrs = [...new Set(errs)];
+const uniqPage = [...new Set(pageErrs)];
 json.errors = uniqErrs;
+json.pageErrors = uniqPage;
+const nErr = uniqErrs.length + uniqPage.length;
 say('\n=== GATES ===');
-say(`  build is clean ........... ${uniqErrs.length === 0 ? 'PASS' : 'FAIL (' + uniqErrs.length + ')'}`);
+say(`  build is clean ........... ${nErr === 0 ? 'PASS' : 'FAIL (' + nErr + ')'}`);
 say(`  overlaps (enumerated) .... ${anyOv === 0 ? 'PASS' : 'FAIL (' + anyOv + ')'}`);
 say(`  nothing over the 3D ...... ${anyBand === 0 ? 'PASS' : 'FAIL (' + anyBand + ')'}`);
 say(`  touch targets >= 44px .... ${anySmall.length === 0 ? 'PASS' : 'FAIL (' + anySmall.join(', ') + ')'}`);
@@ -235,14 +254,30 @@ say(`  no navigation growth ..... ${grew.length === 0 ? 'PASS' : 'FAIL'}`);
    that was never created cannot be measured, and an instrument that scores it
    as absent is reporting a pass it did not earn.
 
-   So a console error is a gate of its own, and it is stated FIRST and LAST. */
-if (uniqErrs.length) {
+   So an error is a gate of its own, and it is stated FIRST and LAST.
+
+   The two channels are reported apart because they oblige different checks,
+   and saying "a module threw" over a recovered asset warning would be a new
+   way of being confidently wrong. Neither is excused: both fail the gate. */
+if (uniqPage.length) {
   say('\n!!  MEASUREMENT NOT VALID  !!');
-  say('    A module threw during this run. Elements it owns were never built, so');
-  say('    every count above is a floor, not a measurement. Fix these, then re-run:');
+  say('    An exception went uncaught. The module that threw it stopped where it');
+  say('    stood, so whatever it was building does not exist and was not measured.');
+  say('    Every count above is a floor. Fix these and re-run before believing any');
+  say('    number in this report:');
+  for (const e of uniqPage.slice(0, 10)) say('      ' + e.replace(/\n\s*/g, ' ').slice(0, 150));
+}
+if (uniqErrs.length) {
+  say('\n!!  ERRORS WERE LOGGED — ACCOUNT FOR EACH ONE  !!');
+  say('    These were caught and printed, so the caller MAY have recovered — a');
+  say('    deliberate loud failure (HANDOFF §8A) reads exactly like this. It may');
+  say('    equally be a caught abort: `[init] geology ReferenceError` was logged');
+  say('    this way while the entire section band was missing behind it. The');
+  say('    counts above stand only for the parts you have confirmed still built:');
   for (const e of uniqErrs.slice(0, 10)) say('      ' + e.replace(/\n\s*/g, ' ').slice(0, 150));
-} else {
-  say('\nno console errors — the counts above are measurements, not floors');
+}
+if (!uniqErrs.length && !uniqPage.length) {
+  say('\nno errors on either channel — the counts above are measurements, not floors');
 }
 
 writeFileSync(resolve(HERE, `${TAG}-report.txt`), out.join('\n'), 'utf8');
