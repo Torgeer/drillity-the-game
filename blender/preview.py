@@ -136,8 +136,16 @@ def shoot(lo, hi, az, el, out, res=(900, 1400), ortho=False, fit=1.06):
 
 def main():
     argv = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
-    glb = argv[0] if argv else 'public/models/pd55.glb'
-    stem = argv[1] if len(argv) > 1 else 'shots/preview'
+    # RESOLVE RELATIVE PATHS AGAINST THE REPO, NOT BLENDER'S CWD.
+    # Blender does not inherit the shell's working directory the way a normal
+    # program does, so `-- public/models/x.glb shots/fleet/x` wrote a whole
+    # fleet of renders to C:\shotsleet\ at the drive root and left the repo
+    # directory empty. Both arguments are documented as repo-relative in the
+    # docstring above, so make that true.
+    ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    rel = lambda p: p if os.path.isabs(p) else os.path.join(ROOT, p)
+    glb = rel(argv[0] if argv else 'public/models/pd55.glb')
+    stem = rel(argv[1] if len(argv) > 1 else 'shots/preview')
     os.makedirs(os.path.dirname(os.path.abspath(stem)), exist_ok=True)
 
     clear()
