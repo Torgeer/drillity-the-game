@@ -54,18 +54,11 @@ const data = await import(pathToFileURL(join(ROOT, 'src/game/data.js')).href);
  * and it is how the pipeline was verified end to end before any real model
  * existed. It must never be a rig.
  *
- * `pd55` is the RM 20-class leader rig documented in
- * `research/rigs/rm20-leader.md`. It is a real machine that is MODELLED but
- * NOT YET REGISTERED in `data.js` — 49.5 t, dual-configuration piling and DTH,
- * which sits between the light crawlers and the 118 t foundation rig. Adding it
- * to `RIGS` needs a builder in `rigFactory.js` and agreement between
- * `RIGS[].methods` and `METHODS[].rigIds`, which `checkdata.mjs` enforces. Until
- * somebody does that, it is a model with nowhere to go — which is worth being
- * reminded of, so it is listed as a NOTE rather than being silently tolerated.
+ * That is the only one. `pd55` used to be listed here as a machine that was
+ * modelled but not registered; it is a real rig now, so the exemption is gone.
  */
 const NOT_A_RIG = new Map([
   ['teststub', 'the pipeline proof — must never be a rig'],
-  ['pd55', 'RM 20-class leader: modelled, NOT YET registered in data.js'],
 ]);
 
 const rigIds = new Set(data.RIGS.map((r) => r.id));

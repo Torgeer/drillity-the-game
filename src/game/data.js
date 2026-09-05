@@ -660,7 +660,7 @@ export const METHODS = deepFreeze([
     // turn a DTH string any more than a DTH rig can strike a shank adapter —
     // the same argument that took top hammer off 'dth-crawler'. The RC rig is
     // a DTH machine with dual-wall pipe and runs conventional DTH happily.
-    icon: '⬇', rigIds: ['dth-crawler', 'rc-rig'],
+    icon: '⬇', rigIds: ['dth-crawler', 'rc-rig', 'pd55'],
     validGround: ['boulder', 'limestone', 'sandstone', 'shale', 'schist', 'gneiss', 'granite', 'basalt', 'quartzite', 'permafrost', 'concrete'],
     toolSlots: ['bit', 'rod', 'hammer', 'compressor'], flushMedium: 'air',
     depthRange: [20, 300], holeDiaRange: [85, 254],
@@ -896,7 +896,7 @@ export const METHODS = deepFreeze([
        bearing stratum tells the truth. research/05-foundation-piling.md §1.4. */
     id: 'driven-pile', name: 'Driven Piling', shortName: 'Driven Pile', unlockLevel: 33,
     description: 'A nine-tonne ram on a telescopic leader, and a pile that is finished when it stops moving. Watch the set and distrust it: a toe that is crushing itself reads as perfect refusal right up until the pile is scrap.',
-    icon: '⇊', rigIds: ['piling-leader'],
+    icon: '⇊', rigIds: ['piling-leader', 'pd55'],
     validGround: ['topsoil', 'clay', 'silt', 'sand', 'gravel', 'till', 'boulder', 'marl', 'chalk', 'sandstone', 'shale'],
     // Nothing turns and nothing circulates. ADVANCE is hammer energy, WORK is
     // blow rate, PROTECT is alignment and rake (GAMEDESIGN §7), and energy and
@@ -1286,6 +1286,50 @@ export const RIGS = deepFreeze([
     stats: { power: 280, torque: 0, feedForce: 0, depthCapacity: 25, rodHandling: 0.8, mobility: 0.28, comfort: 0.82 },
     upkeepPerHour: 122, fuelPerHour: 96, transportTons: 78,
     description: 'Leader-mounted impact piling rig: a 21 m telescopic leader, a 9,000 kg ram giving 106 kNm over a 1,200 mm stroke at forty to a hundred blows a minute, and a movable counterweight that slides back as the leader rakes. Nothing on this machine rotates and nothing circulates — it lifts a pile, sets it plumb and hits it.',
+    family: CAT.rigFoundation,
+  },
+  {
+    /* THE DUAL-CONFIGURATION LEADER — the machine that was modelled before it
+       existed in the game.
+
+       `blender/pd55.py` and `public/models/pd55.glb` (4.56 MB) were built from
+       a manufacturer datasheet and then had nowhere to go: there was no RIGS
+       row, so `checkmodels.mjs` had to carry it in a NOT_A_RIG list to stop
+       itself failing. This row is that list entry's replacement.
+
+       Every figure below marked [DS] comes from the datasheet transcribed in
+       `research/rigs/rm20-leader.md`, which cites page numbers against
+       `research/rigs/source/RTG_RM20_official_905_836_1_2.pdf`. The rig id
+       stays `pd55` because the exported filename must equal the rig id
+       verbatim (ASTRA.md §4) and the Blender module is another agent's file;
+       renaming both together is a tidy-up for later, not a correctness fix.
+
+       WHY IT EARNS A PLACE. It is the only machine in the fleet that is TWO
+       configurations of one carrier: an impact hammer on the mast for driven
+       piling, or a rotary head on a tiltable sledge for DTH. At 49.5 t it also
+       fills a real gap — between the light crawlers and the 118 t foundation
+       rig — and the game models its two jobs as two separate methods. */
+    id: 'pd55', name: 'Ulvestad DL-50 Duoleader', maker: 'Ulvestad',
+    // Balance, not datasheet: it does two jobs for less mass than the
+    // single-purpose leader, so it costs more and unlocks later.
+    price: 1050000, unlockLevel: 36,
+    methods: ['driven-pile', 'dth'],
+    // `rigFactory.js` has no builder for this machine — it is Blender-authored
+    // only. The .glb is what actually draws; this names the stand-in for the
+    // procedural path, and checkdata warns to delete the line the day a real
+    // builder exists.
+    renderRigId: 'piling-leader',
+    stats: {
+      power: 201,          // [DS p.9] Cummins QSB 6.7, 201 kW @ 2000 rpm
+      torque: 150,         // [DS p.7] admissible torque, DTH configuration
+      feedForce: 200,      // [DS p.7] sledge pretensioning, 200 kN push / pull
+      depthCapacity: 20,   // [DS p.7] max casing length; 18.0 m max pile [p.4]
+      rodHandling: 0.72, mobility: 0.38, comfort: 0.8,
+    },
+    // Balance figures, scaled from the 78 t leader by mass. NOT SOURCED.
+    upkeepPerHour: 78, fuelPerHour: 61,
+    transportTons: 49.5,   // [DS p.10] 49.5 t HDP / 51.5 t DTH, no counterweight
+    description: 'One carrier, two machines. Hang the hydraulic hammer on the mast and it drives pile; swap in the rotary head on its tiltable sledge and it drills cased DTH holes at 150 kNm. The mast slides seven metres through its own guide for underfloor work, rakes 45° back, and the counterweight comes off in stacked discs so it can travel.',
     family: CAT.rigFoundation,
   },
   {
