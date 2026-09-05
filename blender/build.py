@@ -27,7 +27,7 @@ sys.path.insert(0, HERE)          # ...and the builders themselves
 OUT = os.path.abspath(os.path.join(HERE, '..', 'public', 'models'))
 os.makedirs(OUT, exist_ok=True)
 
-MACHINES = ['pd55', 'crawler_th', 'core_rig', 'tunnel_jumbo', 'dth_crawler', 'cfa_rig', 'piling_leader', 'foundation_bg', 'rc_rig', 'cable_percussion']          # add ids here as they are built
+MACHINES = ['pd55', 'crawler_th', 'core_rig', 'tunnel_jumbo', 'dth_crawler', 'cfa_rig', 'piling_leader', 'foundation_bg', 'rc_rig', 'cable_percussion', 'oil_derrick', 'hdd_rig']          # add ids here as they are built
 
 failed = []
 for mid in MACHINES:
