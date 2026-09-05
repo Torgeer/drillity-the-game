@@ -430,11 +430,22 @@ def build_track(side, parent):
                     (0, 0, WHEEL_R + 0.10), bevel=0.03))
     # [DS25] options list "extra toolboxes on track beams (2 pcs)" — real
     # hardware, and it breaks up an otherwise plain beam
+    # NOTHING MAY SIT OUTBOARD OF THE SHOES. [DS25]'s option list sources the
+    # toolboxes — "extra toolboxes on track beams (2 pcs)" — but not which face
+    # of the beam they hang on, and at side*0.32 the box reached 530 mm and its
+    # latch 565 mm from the track centre against a 450 mm shoe half-width. The
+    # machine's widest point was a toolbox, 115 mm proud of the track it is
+    # bolted to, which is the first thing torn off against a trench wall.
+    # Inboard is not available: at this height the box would foul the
+    # expanding-gauge cross-carriers. So it stays on the outer face, tucked
+    # inside the shoe line — the latch's outer face lands at 445 mm, 5 mm shy.
+    TBOX_W, TBOXL_W = 0.42, 0.05
     for yy in (-1.35, 1.05):
-        dark.append(box('tbox', (0.42, 0.62, 0.36), MAT_DARK, None,
-                        (side * 0.32, yy, WHEEL_R + 0.42), bevel=0.02))
-        steel.append(box('tboxl', (0.05, 0.10, 0.06), MAT_STEEL, None,
-                         (side * 0.54, yy - 0.24, WHEEL_R + 0.42)))
+        dark.append(box('tbox', (TBOX_W, 0.62, 0.36), MAT_DARK, None,
+                        (side * (SHOE_W / 2 - TBOX_W / 2), yy, WHEEL_R + 0.42), bevel=0.02))
+        steel.append(box('tboxl', (TBOXL_W, 0.10, 0.06), MAT_STEEL, None,
+                         (side * (SHOE_W / 2 - TBOXL_W / 2 - 0.005), yy - 0.24,
+                          WHEEL_R + 0.42)))
 
     worn.append(box('bl', (SHOE_W, SPR_IDLER, 0.10), MAT_WORN, None, (0, 0, 0.05)))
     worn.append(box('bu', (SHOE_W, SPR_IDLER, 0.10), MAT_WORN, None,
@@ -597,9 +608,23 @@ def build(out_path):
     # upperstructure and the track frames [RTG][REF s4.1]. Real, visible,
     # greasy structure — never hidden. 1 500 mm of gauge change lives here.
     for yy in (-1.60, 1.60):
-        car.append(box('xcar', (4.60, 0.66, 0.54), MAT_DARK, None,
+        # BOTH SPANS ARE DERIVED FROM THE TWO SOURCED GAUGES, not written down.
+        # They were 4.60 and 5.70 literals, and 5.70 put the machine's widest
+        # point 410 mm OUTBOARD OF ITS OWN SHOES — a cross-carrier sticking out
+        # past the tracks, which on a real machine is the first thing destroyed.
+        # (5.70 is also CRAWLER_L's value, the crawler LENGTH and this file's
+        # master scale bar, used here as a width. Whether that was a copy or a
+        # coincidence, it was never sourced as a width.)
+        #
+        # The geometry that makes 1 500 mm of gauge change work:
+        #   the SLIDING member reaches the track centre at the WORKING gauge,
+        #   the FIXED sleeve reaches it at the TRAVELLING gauge — so at narrow
+        #   gauge the beam is fully home inside its sleeve.
+        # Both gauges are over-shoes figures, so each loses one shoe width to
+        # become a centre-to-centre span.
+        car.append(box('xcar', (GAUGE_NARROW - SHOE_W, 0.66, 0.54), MAT_DARK, None,
                        (0, yy, WHEEL_R + 0.10), bevel=0.035))
-        car.append(box('xcarR', (5.70, 0.36, 0.28), MAT_STEEL, None,
+        car.append(box('xcarR', (GAUGE_WIDE - SHOE_W, 0.36, 0.28), MAT_STEEL, None,
                        (0, yy, WHEEL_R + 0.10)))
         for sx in (-1, 1):
             car.append(tube('xspr', 0.08, 0.90, MAT_CHROME, None,
@@ -623,7 +648,19 @@ def build(out_path):
         # rest position is the WORKING gauge: the squat, nearly-square working
         # stance (4 880 : 5 700 = 0.86 : 1 in plan) IS the silhouette [REF s5.5].
         # Retracts 750 mm per side to the 3 380 mm travelling gauge.
-        n = empty(NODE_SLIDE, nm, None, (sgn * GAUGE_WIDE / 2, 0, 0))
+        # OVER SHOES IS AN OUTER-TO-OUTER WIDTH, NOT A CENTRE-TO-CENTRE ONE.
+        # [DS11][DS25] print 3 380 / 4 880 mm "over 900 mm shoes", so the
+        # OUTER FACES of the shoes are that far apart and the track CENTRES are
+        # one shoe width closer. Placing the node at GAUGE_WIDE/2 measured
+        # 6.010 m outer-to-outer against a printed 4 880 — a whole shoe width
+        # plus frame overhang too wide, on the dimension the plan silhouette is
+        # judged by. research/rigs/cfa-rig.md derives centre-to-centre the same
+        # way, and blender/pd55.py already reads it correctly, which is why it
+        # measures 4.700 exactly against its own datasheet.
+        #
+        # `travel_m` is unaffected: both gauges are over-shoes figures, so the
+        # 750 mm per-side retraction between them is the same either way.
+        n = empty(NODE_SLIDE, nm, None, (sgn * (GAUGE_WIDE - SHOE_W) / 2, 0, 0))
         n['travel_m'] = -(GAUGE_WIDE - GAUGE_NARROW) / 2.0
         n['axis'] = 'x'
         build_track(sgn, n)
