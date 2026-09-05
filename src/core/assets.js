@@ -2614,9 +2614,17 @@ export function createAssets(ctx = {}) {
             const isAmber = band > 0.5 ? 1 : 0;
             const edgeSoft = Math.min(sstep(0, edge * 1.6, Math.abs(ph - 0.5)), sstep(0, edge * 1.6, Math.min(ph, 1 - ph)));
 
-            const peel = worley(u * 30, v * 30, 30, 30, s + 5, 0.85);
+            /* Same correction as paintedSteel — see the long note there. The
+               30-cell F2-F1 "peel" was a lattice at panel scale, and `micro`
+               at 104 was carrying +-0.025 of HEIGHT on a 4.9-texel cell,
+               which is a 21-degree normal on a 5-px feature: relief the mip
+               chain cannot carry, so it aliases rather than shades. Height is
+               now panel form plus dither; `micro` keeps its roughness job
+               below, where a 5-px ripple reads as sheen. The tape edge is a
+               real step and stays. */
+            const form = fbm(u * 3, v * 3, 3, 3, s + 5, 3) * 0.020;
             const micro = vfbm(u * 104, v * 104, 104, 104, s + 9, 2);
-            let h = 0.5 + (_W.f2 - peel - 0.32) * 0.09 + (micro - 0.5) * 0.05;
+            let h = 0.5 + form + (micro - 0.5) * 0.0020;
             h += (1 - edgeSoft) * 0.05 * isAmber;   // amber laid over the black
 
             const t = isAmber ? 1 : 0;
@@ -2690,12 +2698,13 @@ export function createAssets(ctx = {}) {
           const paint = hexRGB(d.color);
           const s = d.seed * 1039 + 7;
           return (u, v, o) => {
-            const cell = worley(u * 30, v * 30, 30, 30, s + 3, 0.85);
-            const peel = (_W.f2 - cell);
+            // Peel lattice removed, height is panel form plus dither — see
+            // paintedSteel. `micro` keeps its albedo and roughness jobs.
+            const form = fbm(u * 3, v * 3, 3, 3, s + 3, 3) * 0.016;
             const micro = vfbm(u * 110, v * 110, 110, 110, s + 7, 2);
             const drift = fbm(u * 3, v * 3, 3, 3, s + 11, 3) * 0.035;
             const scuff = scratches(u * 5, v * 80, 5, 80, s + 13, 0.95) * d.wear;
-            o.h = 0.5 + (peel - 0.35) * 0.12 + (micro - 0.5) * 0.05 - scuff * 0.05;
+            o.h = 0.5 + form + (micro - 0.5) * 0.0015 - scuff * 0.03;
             const lum = 1 + drift + (micro - 0.5) * 0.05;
             o.r = mixv(paint[0] * lum, BARE[0], scuff * 0.7);
             o.g = mixv(paint[1] * lum, BARE[1], scuff * 0.7);
@@ -3919,30 +3928,38 @@ export function createAssets(ctx = {}) {
           }
           return (u, v, o) => {
             const low = sstep(0.35, 1.0, v);
-            const cell = worley(u * 30, v * 30, 30, 30, s + 3, 0.85);
-            const peel = (_W.f2 - cell);
+            // Peel lattice removed, height is panel form plus dither — see
+            // paintedSteel. This is the OUTSIDE of the cyclone: it is painted
+            // pressure vessel, and it had the same 30-cell weave as the rest
+            // of the fleet. The INSIDE branch above is scoured steel, where a
+            // cell field is what the surface genuinely is, and is untouched.
+            const form = fbm(u * 3, v * 3, 3, 3, s + 3, 3) * 0.016;
             const micro = vfbm(u * 108, v * 108, 108, 108, s + 7, 2);
             const drift = fbm(u * 4, v * 4, 4, 4, s + 11, 3) * 0.045;
 
-            let h = 0.5 + (peel - 0.34) * 0.12 + (micro - 0.5) * 0.05;
+            let h = 0.5 + form + (micro - 0.5) * 0.0014;
             let r = paint[0] * (1 + drift), g = paint[1] * (1 + drift), b = paint[2] * (1 + drift);
             let ro = 0.44 + (1 - micro) * 0.08;
             let me = 0.06;
             let ao = 1;
 
-            // paint knocked off around the clamp bands and the spigot
-            worleyBlock(u * 24, v * 24, 24, 24, s + 17, 0.92);
+            // paint knocked off around the clamp bands and the spigot.
+            // Warped and gated per cell for the same reason as paintedSteel:
+            // an ungated Worley puts a chip in EVERY cell of a 24-cell grid,
+            // which is a checkerboard rather than damage.
+            const cw = warp(u * 24, v * 24, 24, 24, s + 15, 0.55, 2);
+            worleyBlock(cw.x, cw.y, 24, 24, s + 17, 0.92);
             const chip = blob(_W.f1, 0.28, 0.55) *
-              clamp01((d.wear * (0.4 + low * 0.9) - 0.22) * 2.4);
+              clamp01((d.wear * (0.4 + low * 0.9) * (0.55 + _W.id * 0.9) - 0.22) * 2.4);
             if (chip > 0.005) {
               // Softer than paintedSteel's identical term (which ramps at 3.2)
               // because this is a `std` set at half the hero authoring size,
               // so the same edge would land on half as many texels.
               const deep = clamp01((chip - 0.58) * 1.8);
               r = mixv(r, PRIMER[0], chip); g = mixv(g, PRIMER[1], chip); b = mixv(b, PRIMER[2], chip);
-              r = mixv(r, BARE[0], deep); g = mixv(g, BARE[1], deep); b = mixv(b, BARE[2], deep);
-              ro = mixv(ro, 0.62, chip); me = mixv(me, 0.9, deep);
-              h -= chip * 0.06; ao = 1 - chip * 0.16;
+              r = mixv(r, EXPOSED[0], deep); g = mixv(g, EXPOSED[1], deep); b = mixv(b, EXPOSED[2], deep);
+              ro = mixv(ro, 0.62, chip); me = mixv(me, 0.7, deep);
+              h -= chip * 0.03; ao = 1 - chip * 0.16;
             }
             // sample dust caked on, thickest around the outlet
             const dm = clamp01(d.dust * (0.30 + 0.70 * low) *
