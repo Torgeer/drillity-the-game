@@ -583,6 +583,9 @@ export function createResultsScreen(app) {
         crits[k].bar.setValue(0);
         crits[k].v.textContent = '—';
         crits[k].ev.textContent = '';
+        /* The screen instance is cached and re-mounted, so an unmeasured
+           marker left from the previous hole would dress a measured one. */
+        crits[k].el.classList.remove('is-unmeasured');
       }
       scroll.scrollTop = 0;
 
