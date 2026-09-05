@@ -746,7 +746,7 @@ CRIB_W     = 0.520    # [D] two timber baulks under each pad, [BR] p3
 
 
 def ram(name, a, b, parent=None, barrel_r=0.055, rod_r=0.032, ext=0.58,
-        mat_b=MAT_DARK):
+        mat_b=MAT_DARK, mat_r=MAT_CHROME):
     """A hydraulic cylinder drawn between two points: barrel, bare chrome rod,
     gland nut.
 
@@ -754,11 +754,17 @@ def ram(name, a, b, parent=None, barrel_r=0.055, rod_r=0.032, ext=0.58,
     shows is the stroke that is actually out.  [REF] section 4.5: a jack sitting
     fully closed and a jack sitting fully open both read as wrong - a levelled
     machine has the rod out roughly half to two-thirds.
-    """
+
+    `mat_r` exists because a material costs a DRAW CALL PER MOVING GROUP it
+    appears in, not per machine: `finish()` and `join_under()` both join by
+    material WITHIN one pivot:/slide: subtree, so a rod that is the only chrome
+    inside each of four `slide:jack-*` nodes is four draw calls, not one.  It
+    defaults to chrome and the mast rams keep it - see the note at the jack
+    call site for the one place that does not."""
     a, b = Vector(a), Vector(b)
     mid = a + (b - a) * ext
     return [
-        pipe(name + '_rod', a, b, rod_r, MAT_CHROME, parent, sides=8),
+        pipe(name + '_rod', a, b, rod_r, mat_r, parent, sides=8),
         pipe(name + '_barrel', a, mid, barrel_r, mat_b, parent, sides=10),
         pipe(name + '_gland', mid, mid + (b - a).normalized() * 0.045,
              barrel_r * 1.14, MAT_WORN, parent, sides=10),
@@ -1480,9 +1486,21 @@ def build_carriage(dump):
     spin['torque_nm'] = OSC_NM
     empty(NODE_MOUNT, 'tool', spin, (0, 0, 0))
     # the darker adapter sub and the pipe stub that turn with the string
+    # ALL THREE ARE MAT_DARK, and that is a draw-call decision, not a colour
+    # one.  `pivot:spindle` is its own moving group, so every material inside it
+    # is a draw call of its own: sub (paintedDark, 44 tris), sub_flats
+    # (wornSteel, 20) and collar (castIron, 52) were THREE calls carrying 116
+    # triangles between them, on a 210 mm boss - the worst ratio on this
+    # machine.  Merged into paintedDark, which is the largest of the three and
+    # the one [BR] p2 actually names: reading down the render it is neck,
+    # COLLAR FLANGE, then a DARKER ADAPTER SUB, then the pipe.  Keeping
+    # paintedDark keeps that light-to-dark break; the only change is that the
+    # break now falls at the top of the collar instead of the bottom of it, 62
+    # mm higher on a part that is 300 mm tall in total.  Merging the other way,
+    # into the head's castIron, would have erased the break altogether.
     tube('sub', 0.075, 0.230, MAT_DARK, spin, (0, 0, 0.010), sides=12)
-    tube('sub_flats', 0.086, 0.070, MAT_WORN, spin, (0, 0, 0.050), sides=6)
-    tube('collar', 0.105, 0.062, MAT_CAST, spin, (0, 0, 0.240), sides=14)
+    tube('sub_flats', 0.086, 0.070, MAT_DARK, spin, (0, 0, 0.050), sides=6)
+    tube('collar', 0.105, 0.062, MAT_DARK, spin, (0, 0, 0.240), sides=14)
     # the trapezoid taper: full housing width down to the neck.  THIS is the
     # part [REF] section 9.6 says is missing today.
     cone('osc_taper', 0.098, HEAD_W / 2, 0.235, MAT_CAST, carr, (0, 0, 0.300),
@@ -1607,9 +1625,24 @@ def build_jacks():
             # it would really be sprayed in and the ball joint takes the same
             # worn steel as the gland and the pad it sits between: 12 calls, no
             # visible difference, and 8 back in the budget.
+            # `mat_r=MAT_WORN`, NOT chrome, and it is worth four draw calls.
+            # A material is a draw-call partition PER MOVING GROUP, so one
+            # 28-triangle chrome rod inside each of the four `slide:jack-*`
+            # nodes cost FOUR calls for 112 triangles - the cheapest calls on
+            # the machine.  The standard this repo already set (commit 43e6c57,
+            # pd55 `foot-rod`): a bright rod earns its call when it is long,
+            # extended, lit and moving.  This one is none of those.  It points
+            # DOWN into the mud under a truck deck, in the shadow of the
+            # chassis rail, between the tyre and its own timber cribbing, and
+            # it never moves while the machine is drilling because the jacks
+            # are set before the mast comes up.  The gland immediately above it
+            # and the ball and pad immediately below it are ALREADY wornSteel,
+            # so the merge is exact and nothing on screen moves.  The mast rams
+            # keep their chrome: those are extended, lit, and they sweep with
+            # the mast every time it rakes.
             ram('jack_%s' % tag, (0, 0, 0), (0, 0, pad_z - top + 0.055), n,
                 barrel_r=JACK_BORE * 0.78, rod_r=JACK_BORE / 2, ext=0.44,
-                mat_b=MAT_PAINT)
+                mat_b=MAT_PAINT, mat_r=MAT_WORN)
             tube('jack_ball_%s' % tag, JACK_BORE * 0.60, 0.055, MAT_WORN, n,
                  (0, 0, pad_z - top), sides=10)
             tube('jack_pad_%s' % tag, JACK_PAD_R, 0.030, MAT_WORN, n,
