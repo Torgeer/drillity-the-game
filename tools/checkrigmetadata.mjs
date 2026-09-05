@@ -15,6 +15,8 @@ import { readFileSync } from 'node:fs';
 import * as THREE from 'three';
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
 import { createGltfRigs } from '../src/core/gltfRig.js';
+import { createRigSystem } from '../src/rig/rigFactory.js';
+import { createBus } from '../src/core/contract.js';
 import { mergeStatic } from '../src/rig/tools.js';
 import { RIGS } from '../src/game/data.js';
 
@@ -81,7 +83,7 @@ function rangeNear(actual, expected) {
 }
 
 function assertCleanFraming(runtime, id, built) {
-  const { size, framing } = runtime.info(id);
+  const { size, framing, feedFraming } = runtime.info(id);
   near(size.x, 2, 'included machine framing width');
   near(size.y, 4, 'included machine framing height');
   near(size.z, 2, 'included machine framing length');
@@ -91,6 +93,28 @@ function assertCleanFraming(runtime, id, built) {
   assert.deepEqual(framing, { space: 'rig-local', min: [-1, 0, -1], max: [1, 4, 1], center: [0, 2, 0] },
     'exact measured bounds are published in unplaced rig coordinates');
   assert.deepEqual(built.spec.glb.framing, framing, 'camera and placement share one measured box');
+  assert.deepEqual(feedFraming, { ...framing, scope: 'carriage-feed' },
+    'a carriage without geometry cannot invent a larger feed envelope');
+  assert.deepEqual(built.spec.glb.feedFraming, feedFraming, 'feed framing is shared at API boundaries');
+}
+
+function assertInsideFeed(root, framing, label) {
+  assert.equal(framing.space, 'rig-local');
+  assert.equal(framing.scope, 'carriage-feed');
+  const point = new THREE.Vector3();
+  let count = 0;
+  root.updateMatrixWorld(true);
+  root.traverse(node => {
+    if (!node.isMesh || node.userData.framing === 'exclude') return;
+    for (let i = 0; i < node.geometry.attributes.position.count; i++) {
+      node.getVertexPosition(i, point).applyMatrix4(node.matrixWorld);
+      for (const [axis, value] of point.toArray().entries()) assert.ok(
+        value >= framing.min[axis] - 1e-5 && value <= framing.max[axis] + 1e-5,
+        `${label}/${node.name}: vertex ${value} is outside feed framing [${framing.min[axis]}, ${framing.max[axis]}] on axis ${axis}`);
+      count++;
+    }
+  });
+  assert.ok(count > 0, 'feed containment must inspect included geometry');
 }
 
 function disposeFixture(root) {
@@ -147,7 +171,8 @@ async function withRig(root, inspect, mode = 'strict', source = null) {
       clones.push(built.root);
       return built;
     };
-    await inspect({ runtime, id, build, diagnostics, events });
+    await inspect({ runtime, id, build, diagnostics, events,
+      assets: { material: () => liveMaterial } });
   } finally {
     runtime?.dispose();
     for (const clone of clones) disposeFixture(clone);
@@ -374,11 +399,13 @@ for (const [axis, direction] of [['x', 'min'], ['y', 'max'], ['z', 'max']]) {
     const scene = fixture({ travel_min_m: -3, travel_max_m: 3,
       travel_axis: axis, travel_direction: direction });
     scene.carriage.position.set(0.3, 1.1, -0.7);
+    scene.carriage.rotation.set(0.2, -0.3, 0.4);
     await withRig(scene.root, async ({ runtime, id, build }) => {
       await runtime.load(id);
       const { dyn } = build();
       assert.equal(dyn.carriageAxis, axis);
       const rest = dyn.carriageRest.clone();
+      const rotation = dyn.carriageRestRotation.clone();
       const control = drivers(dyn);
       const expected = direction === 'min' ? [3, -3] : [-3, 3];
       rangeNear(dyn.carriageRange, expected);
@@ -386,6 +413,8 @@ for (const [axis, direction] of [['x', 'min'], ['y', 'max'], ['z', 'max']]) {
         control.set(k);
         near(dyn.carriage.position[axis], expected[0] + (expected[1] - expected[0]) * k, 'actual feed position');
         near(control.get(), k, 'actual feed getter');
+        assert.deepEqual(dyn.carriage.rotation.toArray(), rotation.toArray(),
+          'zero-flex feed preserves every authored carriage rotation');
         for (const other of ['x', 'y', 'z'].filter((value) => value !== axis)) {
           near(dyn.carriage.position[other], rest[other], `retained ${other} coordinate`);
         }
@@ -488,10 +517,110 @@ await test('framing API copies cannot corrupt later instances or source facts', 
     reported.framing.min[0] = -999;
     reported.framing.max[1] = 999;
     first.spec.glb.framing.center[0] = 999;
+    reported.feedFraming.min[0] = -999;
+    reported.feedFraming.max[1] = 999;
+    first.spec.glb.feedFraming.center[0] = 999;
     first.root.position.set(99, 99, 99);
     const second = build();
     assertCleanFraming(runtime, id, second);
     assert.deepEqual(second.root.position.toArray(), [0, 0, 0], 'one game placement cannot alter the next root');
+  });
+});
+
+for (const [name, extras, expectedMin, expectedMax] of [
+  ['positive legacy stroke', { travel_m: 6 }, [-1, 0, -1], [1, 8, 1]],
+  ['negative legacy stroke', { travel_m: -4 }, [-1, -4, -1], [1, 4, 1]],
+  ['stationary legacy carriage', { travel_m: 0 }, [-1, 0, -1], [1, 4, 1]],
+  ['explicit Y feed', { travel_min_m: -2, travel_max_m: 6 }, [-1, -3, -1], [1, 7, 1]],
+  ['explicit X feed', { travel_axis: 'x', travel_direction: 'max', travel_min_m: -3, travel_max_m: 6 },
+    [-4, 0, -1], [7, 4, 1]],
+  ['explicit Z feed', { travel_axis: 'z', travel_direction: 'max', travel_min_m: -3, travel_max_m: 6 },
+    [-1, 0, -4], [1, 4, 7]],
+]) {
+  await test(`feed framing measures ${name} and restores authored rest`, async () => {
+    const scene = fixture(extras);
+    mesh('moving-head', new THREE.BoxGeometry(2, 2, 2), scene.carriage);
+    const excluded = group('external-carriage-hose', scene.carriage);
+    excluded.userData.framing = 'exclude';
+    mesh('distant-hose', new THREE.BoxGeometry(50, 50, 50), excluded).position.set(100, 100, 100);
+    await withRig(scene.root, async ({ runtime, id, build, events }) => {
+      await runtime.load(id);
+      const built = build(), info = runtime.info(id), feed = info.feedFraming;
+      assert.deepEqual(info.framing, { space: 'rig-local', min: [-1, 0, -1], max: [1, 4, 1], center: [0, 2, 0] },
+        'rest framing stays independent of the feed envelope');
+      assert.equal(feed.space, 'rig-local');
+      assert.equal(feed.scope, 'carriage-feed');
+      assert.deepEqual(feed.min, expectedMin);
+      assert.deepEqual(feed.max, expectedMax);
+      assert.deepEqual(feed.center, expectedMin.map((lo, axis) => (lo + expectedMax[axis]) / 2));
+      assert.deepEqual(built.spec.glb.feedFraming, feed);
+      assert.deepEqual(events[0].payload.spec.glb.feedFraming, feed, 'ready event includes feed framing');
+      for (const copy of [built, build()]) {
+        assert.deepEqual(copy.dyn.carriage.position.toArray(), [0, 1, 0], 'measurement restores source local rest');
+        assert.deepEqual(copy.dyn.carriageRest.toArray(), [0, 1, 0], 'runtime reset is based on authored rest');
+        assert.deepEqual(copy.dyn.carriage.getWorldPosition(new THREE.Vector3()).toArray(), [0, 1, 0],
+          'measurement restores source world matrices');
+      }
+      assert.ok(built.root.getObjectByName('distant-hose'), 'excluded moving geometry remains present');
+    });
+  });
+}
+
+await test('feed framing measures rotated actual vertices and preserves parent transforms', async () => {
+  const scene = fixture({ travel_axis: 'x', travel_direction: 'max', travel_min_m: -2, travel_max_m: 2 }, 0);
+  // Three actual triangle points; transforming its AABB corners would add
+  // unoccupied extrema. The quarter-turn parent also tests glTF parent axes.
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0, 4, 0, 0, 0, 2, 0], 3));
+  mesh('moving-triangle', geometry, scene.carriage).rotation.z = Math.PI / 4;
+  scene.mast.position.set(3, 2, 1);
+  scene.mast.rotation.z = Math.PI / 2;
+  await withRig(scene.root, async ({ runtime, id, build }) => {
+    await runtime.load(id);
+    const built = build(), feed = runtime.info(id).feedFraming;
+    const root = built.root;
+    const pose = built.dyn.carriage.position.clone();
+    const rotation = built.dyn.mastPivot.quaternion.clone();
+    // Mast occupies X[-1,3], Y[1,3]. Triangle's rotated Y envelope is
+    // [-sqrt(2)-2, sqrt(8)+2] relative to the translated parent.
+    near(feed.min[0], -1, 'measured minimum X');
+    near(feed.max[0], 3, 'measured maximum X');
+    near(feed.min[1], -Math.sqrt(2), 'actual triangle minimum Y');
+    near(feed.max[1], 4 + Math.sqrt(8), 'actual triangle maximum Y');
+    root.updateMatrixWorld(true);
+    assert.deepEqual(built.dyn.carriage.position.toArray(), pose.toArray());
+    assert.deepEqual(built.dyn.mastPivot.quaternion.toArray(), rotation.toArray());
+  });
+});
+
+await test('real rig activation and update preserve authored rake without creating carriage flex', async () => {
+  const scene = fixture({ travel_min_m: 0, travel_max_m: 2 });
+  scene.mast.rotation.x = -0.6;
+  scene.carriage.rotation.x = 0.2;
+  mesh('moving-head', new THREE.BoxGeometry(0.2, 0.2, 0.2), scene.carriage);
+  await withRig(scene.root, async ({ runtime, id, build, assets }) => {
+    await runtime.load(id);
+    let built;
+    const system = createRigSystem({ THREE, assets, scene: new THREE.Scene(),
+      sectionScene: new THREE.Scene(), bus: createBus(), quality: { id: 'low' },
+      state: { garage: { rigId: id }, settings: {} },
+      data: { RIGS: [{ id, name: 'Synthetic NOT SOURCED mast fixture', methods: ['cfa'] }] },
+      qs: new URLSearchParams('glb=strict'),
+      gltfRigs: { ...runtime, builder: () => () => { built = build(); return built; } } });
+    try {
+      system.setMethod('cfa');
+      await system.init();
+      assert.equal(system.getSpec().source, 'glb');
+      near(built.dyn.mastPivot.rotation.x, -0.6, 'activation preserves authored work rake');
+      for (const depth of [0, 1.5, 2.999]) {
+        system.update(1 / 60, { drill: { active: true, depth, actionDepth: depth,
+          rpm: 0, torque: 0.7, wob: 0.7, wear: 0, phase: 'drill' } });
+        near(built.dyn.mastPivot.rotation.x, -0.6, 'update preserves deployment rake');
+        near(built.dyn.carriageFlexAngle, 0, 'a deployment pivot alone is not a flex segment');
+        near(built.dyn.carriage.rotation.x, 0.2, 'actual update retains carriage mounting angle');
+        near(built.dyn.carriage.position.z, built.dyn.carriageRest.z, 'actual update stays on the feed rail');
+      }
+    } finally { system.dispose(); }
   });
 });
 
@@ -562,6 +691,12 @@ if (!process.argv.includes('--fixtures-only')) {
         assert.ok(Object.values(runtime.info(id).size).every(Number.isFinite), 'framing must be finite');
         const built = build();
         const dyn = built.dyn;
+        const feedFraming = runtime.info(id).feedFraming;
+        assert.deepEqual(built.spec.glb.feedFraming, feedFraming);
+        assertInsideFeed(built.root, feedFraming, `${id}/rest`);
+        // This envelope covers authored carriage translations. The runtime's
+        // separate mast/flex driver is not part of that declared scope.
+        const feedPose = build();
         if (dyn.carriage) {
           const extras = dyn.carriage.userData;
           if (Object.prototype.hasOwnProperty.call(extras, 'travel_min_m')) {
@@ -579,6 +714,10 @@ if (!process.argv.includes('--fixtures-only')) {
             built.root.updateMatrixWorld(true);
             built.root.traverse((node) => assert.ok(node.matrixWorld.elements.every(Number.isFinite),
               `${id}/${node.name} must retain a finite world matrix at feed ${k}`));
+            assertInsideFeed(built.root, feedFraming, `${id}/actual-driver-${k}`);
+            feedPose.dyn.carriage.position[feedPose.dyn.carriageAxis] =
+              feedPose.dyn.carriageRange[0] + (feedPose.dyn.carriageRange[1] - feedPose.dyn.carriageRange[0]) * k;
+            assertInsideFeed(feedPose.root, feedFraming, `${id}/feed-${k}`);
           }
         }
         assert.deepEqual(events.map((event) => event.name), ['rig:model-ready']);

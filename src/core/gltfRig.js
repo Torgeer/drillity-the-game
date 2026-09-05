@@ -557,6 +557,42 @@ export function createGltfRigs(ctx) {
     return { prims, tris: Math.round(tris), verts, box };
   }
 
+  /** Measured carriage feed poses in the same unplaced coordinates as rest.
+   * Preserve authored pivot rotations and non-feed coordinates. This covers
+   * carriage translation only, not mast folding, flex or clip choreography. */
+  function measureFeed(root, nodes, id, restBox) {
+    const box = restBox.clone();
+    const carriages = Array.from(nodes.slides, ([name, node]) => ({ name, node }))
+      .filter(({ name }) => name.startsWith('carriage'))
+      .map(({ node }) => ({ node, rest: node.position.clone(), ...travelContract(node, id) }));
+    const restore = () => {
+      for (const { node, rest } of carriages) node.position.copy(rest);
+    };
+    const sample = () => box.union(measure(root, id).box);
+    try {
+      // Sample each carriage independently, then their shared feed states.
+      // The fleet currently has one carriage per rig; this also keeps sibling
+      // carriage nodes inside the measured box without moving unrelated slides.
+      for (const carriage of carriages) {
+        if (carriage.stationary) continue;
+        for (const endpoint of carriage.range) {
+          carriage.node.position[carriage.axis] = endpoint;
+          sample();
+        }
+        restore();
+      }
+      if (carriages.length > 1) for (const k of [0, 1]) {
+        for (const { node, axis, range } of carriages) node.position[axis] = range[k];
+        sample();
+      }
+    } finally {
+      restore();
+      root.updateMatrixWorld(true);
+    }
+    return { min: box.min.toArray(), max: box.max.toArray(),
+      center: box.getCenter(new T.Vector3()).toArray() };
+  }
+
   /* ═════════════════════════════════════════════════════════════════════════
      LOAD
      ═════════════════════════════════════════════════════════════════════════ */
@@ -613,13 +649,14 @@ export function createGltfRigs(ctx) {
     // origin is its slew centre at ground level, so there is no fudge here on
     // purpose. If a machine lands in the wrong place, fix the Blender script.
 
-    let nodes, clips, m;
+    let nodes, clips, m, feedBounds;
     try {
       validateMetadata(root, id);
       liftNamedOffMeshes(root, id);      // BEFORE indexing: it changes parents
       nodes = index(root, id);
       clips = readClips(T, gltf, id, say);
       m = measure(root, id);
+      feedBounds = measureFeed(root, nodes, id, m.box);
     } catch (error) {
       // Invalid declarations must not keep a parsed master alive outside the
       // prepared cache. These are still imported resources: material swapping
@@ -668,6 +705,7 @@ export function createGltfRigs(ctx) {
       size: { x: size.x, y: size.y, z: size.z },
       bounds: { min: m.box.min.toArray(), max: m.box.max.toArray(),
         center: m.box.getCenter(new T.Vector3()).toArray() },
+      feedBounds,
       radius: Math.max(size.x, size.z) * 0.5,
       kinds,
     };
@@ -725,6 +763,7 @@ export function createGltfRigs(ctx) {
     const mastPivot = nodes.pivots.get('mast');
     if (mastPivot) {
       dyn.mastPivot = mastPivot;
+      dyn.workTilt = mastPivot.rotation.x;
       /* A MODEL MAY DECLARE ITS OWN TRANSPORT RAKE, and until now it could not.
          `ensureBuild()` falls back to a flat -1.32 rad for every machine that
          does not set `dyn.transportTilt`, and nothing read it off the glTF — so
@@ -739,7 +778,14 @@ export function createGltfRigs(ctx) {
       if (typeof rake === 'number' && Number.isFinite(rake)) dyn.transportTilt = rake;
     }
     const mastBeam = nodes.pivots.get('mast-upper') || mastPivot;
-    if (mastBeam) { dyn.mastLower = mastBeam; dyn.mastUpper = mastBeam; }
+    if (mastBeam) {
+      dyn.mastLower = mastBeam; dyn.mastUpper = mastBeam;
+      dyn.mastLowerRestX = mastBeam.rotation.x;
+      dyn.mastUpperRestX = mastBeam.rotation.x;
+    }
+    // Deployment rake is not flex. An authored mast with no separate upper
+    // joint cannot use that rake to displace its carriage off the feed rail.
+    dyn.carriageFlexAngle = 0;
 
     const carriage = nodes.slides.get('carriage');
     if (carriage) {
@@ -753,6 +799,7 @@ export function createGltfRigs(ctx) {
       const travel = travelContract(carriage, prep.id);
       dyn.carriageAxis = travel.axis;
       dyn.carriageRest = carriage.position.clone();
+      dyn.carriageRestRotation = carriage.rotation.clone();
       dyn.carriageRange = travel.range;
       dyn.mastHeight = prep.size.y;
       if (travel.stationary || travel.axis !== 'y') {
@@ -791,6 +838,11 @@ export function createGltfRigs(ctx) {
       max: prep.bounds.max.slice(), center: prep.bounds.center.slice() };
   }
 
+  function feedFramingOf(prep) {
+    return { space: 'rig-local', scope: 'carriage-feed', min: prep.feedBounds.min.slice(),
+      max: prep.feedBounds.max.slice(), center: prep.feedBounds.center.slice() };
+  }
+
   function makeSpec(prep) {
     // Stats belong to `game/data.js`, which is the content authority; geometry
     // belongs to the model. Neither is invented here, and nothing is copied
@@ -810,6 +862,7 @@ export function createGltfRigs(ctx) {
         bytes: prep.bytes, prims: prep.prims, tris: prep.tris,
         fetchMs: +prep.fetchMs.toFixed(1), parseMs: +prep.parseMs.toFixed(1),
         framing: framingOf(prep),
+        feedFraming: feedFramingOf(prep),
       },
     };
   }
@@ -911,6 +964,7 @@ export function createGltfRigs(ctx) {
         id, bytes: p.bytes, prims: p.prims, tris: p.tris, verts: p.verts,
         fetchMs: p.fetchMs, parseMs: p.parseMs, size: { ...p.size },
         framing: framingOf(p),
+        feedFraming: feedFramingOf(p),
         pivots: Array.from(p.nodes.pivots.keys()),
         slides: Array.from(p.nodes.slides.keys()),
         lights: p.nodes.lights.map((l) => ({

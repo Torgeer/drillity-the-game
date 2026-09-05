@@ -7792,14 +7792,16 @@ export function createRigSystem(ctx) {
     const k = clamp01(u);
     const axis = dyn.carriageAxis || 'y';
     if (dyn.carriageRest) dyn.carriage.position.copy(dyn.carriageRest);
+    if (dyn.carriageRestRotation) dyn.carriage.rotation.copy(dyn.carriageRestRotation);
     dyn.carriage.position[axis] = lerp(r[0], r[1], k);
     // A travelling block hangs off the drilling line: it stays plumb whatever
     // the derrick does. Everything else is bolted to the mast and follows it.
     if (dyn.carriageNoFlex || axis !== 'y') return;
     // keep the carriage glued to the bent mast
-    const flexA = dyn.mastUpper ? dyn.mastUpper.rotation.x : 0;
+    const flexA = dyn.carriageFlexAngle === undefined
+      ? (dyn.mastUpper ? dyn.mastUpper.rotation.x : 0) : dyn.carriageFlexAngle;
     const frac = 1 - k;
-    dyn.carriage.rotation.x = flexA * frac;
+    dyn.carriage.rotation.x = (dyn.carriageRestRotation ? dyn.carriageRestRotation.x : 0) + flexA * frac;
     dyn.carriage.position.z = (dyn.carriageRest ? dyn.carriageRest.z : 0)
       - flexA * dyn.mastHeight * 0.5 * frac * frac;
   }
@@ -9126,8 +9128,20 @@ export function createRigSystem(ctx) {
       const reverse = !!(d && d.stageCount > 1 && d.stage > 0);
       const flexSign = reverse ? -1 : 1;
       const flex = -flexSign * (cur.load * 1.1 + cur.feed * 0.7) * DEG * work * flexK;
-      if (dyn.mastLower) dyn.mastLower.rotation.x = flex + Math.sin(t * 33.0) * 0.0016 * vib;
-      if (dyn.mastUpper) dyn.mastUpper.rotation.x = flex + Math.sin(t * 27.0) * 0.0020 * vib;
+      const lowerFlex = flex + Math.sin(t * 33.0) * 0.0016 * vib;
+      const upperFlex = flex + Math.sin(t * 27.0) * 0.0020 * vib;
+      if (dyn.carriageFlexAngle !== undefined) {
+        // GLB deployment pivots retain the authored working rake. Apply bend
+        // only to a separate mast joint, relative to that joint's rest pose.
+        if (dyn.mastLower && dyn.mastLower !== dyn.mastPivot)
+          dyn.mastLower.rotation.x = dyn.mastLowerRestX + lowerFlex;
+        if (dyn.mastUpper && dyn.mastUpper !== dyn.mastPivot)
+          dyn.mastUpper.rotation.x = dyn.mastUpperRestX + upperFlex;
+        dyn.carriageFlexAngle = dyn.mastUpper && dyn.mastUpper !== dyn.mastPivot ? upperFlex : 0;
+      } else {
+        if (dyn.mastLower) dyn.mastLower.rotation.x = lowerFlex;
+        if (dyn.mastUpper) dyn.mastUpper.rotation.x = upperFlex;
+      }
       if (dyn.mastPivot && !seq) {
         dyn.mastPivot.rotation.x = lerp(dyn.transportTilt, dyn.workTilt, mastAnim);
       }
