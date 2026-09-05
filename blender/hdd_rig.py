@@ -642,6 +642,24 @@ def build_powerpack():
         R.tube('hood-latch-%d' % i, 0.022, 0.03, R.MAT_STEEL, None,
                (0.18 + (BODY_W - 0.36) / 2 + 0.03, HOOD_Y0 + 0.35 + i * 0.52,
                 DECK_Z + 0.42), (0, math.pi / 2, 0), sides=8)
+    # Panel lines and a skirt rail. Without them a 2.25 x 1.94 m hood is a
+    # blank slab at any distance — and a slab is what REVIEW_RUBRIC axis 4
+    # fails a model for. All the same material, so they cost triangles only.
+    for s in (-1, 1):
+        R.box('hood-skirt-%d' % s, (0.03, hl, 0.09), R.MAT_PAINT, None,
+              (0.18 + s * (BODY_W - 0.36) / 2, hy, DECK_Z + 0.20), bevel=0.012)
+        R.box('hood-shoulder-%d' % s, (0.03, hl, 0.05), R.MAT_PAINT, None,
+              (0.18 + s * (BODY_W - 0.36) / 2, hy, HOOD_TOP - 0.24),
+              bevel=0.010)
+    R.box('hood-roof-rib-f', (BODY_W - 0.42, 0.06, 0.035), R.MAT_PAINT, None,
+          (0.18, HOOD_Y0 + 0.42, HOOD_TOP - 0.04), bevel=0.008)
+    R.box('hood-roof-rib-r', (BODY_W - 0.42, 0.06, 0.035), R.MAT_PAINT, None,
+          (0.18, HOOD_Y1 - 0.42, HOOD_TOP - 0.04), bevel=0.008)
+    # a filler cap and a breather, the things that put scale on a plain roof
+    R.tube('fuel-filler', 0.055, 0.05, R.MAT_WORN, None,
+           (-0.34, HOOD_Y0 + 0.60, HOOD_TOP - 0.04), sides=10)
+    R.tube('hyd-filler', 0.048, 0.05, R.MAT_WORN, None,
+           (-0.34, HOOD_Y0 + 0.94, HOOD_TOP - 0.04), sides=10)
 
     # radiator grille facing rearward
     R.box('rad-grille', (BODY_W - 0.52, 0.03, HOOD_TOP - DECK_Z - 0.50),
@@ -740,26 +758,41 @@ def build_crane():
     """[18ACS] callout 04 / [JCS130E] callout 08: "Hydraulic loading crane for
     self-sufficient handling of optional stacking boxes, drilling rods and
     attachments."  Modelled folded, which is how it travels and how it sits
-    while the machine is drilling.  [R] §4.7 notes fitting one raises transport
-    height, which is why it is an option — so it is kept low over the rod box.
+    while the machine is drilling.
+
+    IT HAS TO CLEAR THE ROD BOX.  A first pass pivoted the booms at deck + 1 m
+    and folded them forward, which put both of them straight THROUGH the
+    magazine and its rods — invisible in a wireframe, obvious the moment the
+    side elevation was rendered.  The column is therefore tall enough to stand
+    the knuckle above the magazine roof, and the booms fold over the top of it,
+    which is also where a crane that loads stacking boxes has to reach.
+
+    That does make the crane the tallest thing on the machine, and that is
+    correct rather than a compromise: [R] §4.7 records that fitting the
+    optional crane takes one published machine's transport height from 2.98 m
+    to 3.56 m, which is precisely why it is an option.  Here it is kept to the
+    hood line so the machine still reads low.
     """
-    bx, by = 0.95, 2.36
-    R.tube('crane-pedestal', 0.16, 0.52, R.MAT_PAINT, None,
+    bx, by = 0.95, 2.30
+    top = MAG_Z0 + (MAG_ROWS * ROD_PITCH + 0.06) + 0.38     # clear of the box AND the stack-up box on it
+    R.tube('crane-pedestal', 0.16, 0.44, R.MAT_PAINT, None,
            (bx, by, DECK_Z + 0.02), sides=14)
-    col = R.tube('crane-column', 0.13, 0.46, R.MAT_PAINT, None,
-                 (bx, by, DECK_Z + 0.54), sides=14)
-    # first boom, folded forward and low over the magazine
-    R.box('crane-boom-1', (0.20, 1.70, 0.24), R.MAT_PAINT, None,
-          (bx, by - 0.88, DECK_Z + 1.02), (0.14, 0, 0), bevel=0.02)
+    col = R.tube('crane-column', 0.13, top - DECK_Z - 0.46, R.MAT_PAINT, None,
+                 (bx, by, DECK_Z + 0.46), sides=14)
+    R.tube('crane-slew-ring', 0.185, 0.10, R.MAT_CAST, None,
+           (bx, by, DECK_Z + 0.40), sides=16)
+    # first boom, folded forward OVER the magazine roof
+    R.box('crane-boom-1', (0.20, 1.60, 0.24), R.MAT_PAINT, None,
+          (bx, by - 0.84, top + 0.02), (0.10, 0, 0), bevel=0.02)
     # knuckle, folded back on itself — the signature of a loader crane
-    R.box('crane-boom-2', (0.16, 1.30, 0.19), R.MAT_PAINT, None,
-          (bx - 0.02, by - 1.20, DECK_Z + 1.32), (-0.10, 0, 0), bevel=0.02)
+    R.box('crane-boom-2', (0.16, 1.22, 0.19), R.MAT_PAINT, None,
+          (bx - 0.02, by - 1.14, top + 0.26), (-0.08, 0, 0), bevel=0.02)
     R.tube('crane-knuckle-pin', 0.055, 0.26, R.MAT_STEEL, None,
-           (bx - 0.13, by - 1.74, DECK_Z + 1.14), (0, math.pi / 2, 0), sides=12)
-    R.tube('crane-ram', 0.048, 0.72, R.MAT_CHROME, None,
-           (bx + 0.16, by - 0.40, DECK_Z + 0.86), (1.30, 0, 0), sides=10)
+           (bx - 0.13, by - 1.64, top + 0.12), (0, math.pi / 2, 0), sides=12)
+    R.tube('crane-ram', 0.048, 0.66, R.MAT_CHROME, None,
+           (bx + 0.16, by - 0.34, top - 0.20), (1.30, 0, 0), sides=10)
     R.box('crane-hook-block', (0.10, 0.12, 0.22), R.MAT_WORN, None,
-          (bx - 0.02, by - 1.76, DECK_Z + 1.02), bevel=0.02)
+          (bx - 0.02, by - 1.68, top + 0.12), bevel=0.02)
     return col
 
 
@@ -788,21 +821,51 @@ def build_magazine():
     ln = MAG_Y1 - MAG_Y0
     cy = (MAG_Y0 + MAG_Y1) / 2
 
-    # frame: floor, outer wall, and column dividers open at the ends
+    # the floor the bottom row sits on — the only solid face
     R.box('mag-floor', (w, ln, 0.04), R.MAT_DARK, None,
           (MAG_X, cy, MAG_Z0 - 0.02), bevel=0.008)
-    R.box('mag-outer-wall', (0.035, ln, h), R.MAT_DARK, None,
-          (MAG_X + w / 2, cy, MAG_Z0 + h / 2), bevel=0.008)
-    R.box('mag-inner-wall', (0.035, ln, h), R.MAT_DARK, None,
-          (MAG_X - w / 2, cy, MAG_Z0 + h / 2), bevel=0.008)
-    for c in range(1, MAG_COLS):
-        R.box('mag-divider-%d' % c, (0.016, ln - 0.30, h - 0.05), R.MAT_WORN,
-              None, (MAG_X - w / 2 + 0.03 + c * ROD_PITCH, cy,
-                     MAG_Z0 + h / 2))
-    # end stops — chipped, because rods drop in against them ([R] §6.3)
+
+    # ── AN OPEN CAGE, NOT A CONTAINER ────────────────────────────────────────
+    # A first pass built the two long faces as solid plates. It measured
+    # correctly and looked completely wrong: from the side the magazine read as
+    # a shipping container bolted to the deck, and the rods — the whole point
+    # of the object — were invisible.
+    #
+    # [R] §5 signature 3 says what it has to read as: "a striped rectangular
+    # block — dozens of parallel circles or lines", and "you can see the rod
+    # ends". A rod box is a rack, and racks are open. So the long faces are
+    # transverse frames on bays, with longitudinal rails between them and the
+    # column combs only at each frame station.
+    N_BAY = 6
+    for i in range(N_BAY):
+        yy = MAG_Y0 + 0.22 + i * (ln - 0.44) / (N_BAY - 1.0)
+        for s in (-1, 1):
+            R.box('mag-post-%d-%d' % (i, s), (0.045, 0.075, h), R.MAT_DARK,
+                  None, (MAG_X + s * w / 2, yy, MAG_Z0 + h / 2), bevel=0.006)
+        R.box('mag-yoke-%d' % i, (w + 0.09, 0.075, 0.05), R.MAT_DARK, None,
+              (MAG_X, yy, MAG_Z0 + h + 0.02), bevel=0.006)
+        # the column comb — [P-MAG]'s "outer walls and inner walls form the
+        # individual column compartments", but only where the frame is
+        for c in range(1, MAG_COLS):
+            R.box('mag-comb-%d-%d' % (i, c), (0.014, 0.075, h - 0.05),
+                  R.MAT_WORN, None,
+                  (MAG_X - w / 2 + 0.03 + c * ROD_PITCH, yy, MAG_Z0 + h / 2))
+    # longitudinal rails tying the bays together
+    for s in (-1, 1):
+        for zz in (0.16, h * 0.52, h - 0.08):
+            R.box('mag-rail-%d-%d' % (s, int(zz * 100)),
+                  (0.030, ln - 0.10, 0.045), R.MAT_DARK, None,
+                  (MAG_X + s * (w / 2 + 0.015), cy, MAG_Z0 + zz), bevel=0.005)
+
+    # End stops — kept LOW, so the rod ends stay visible over them. They are
+    # chipped, because rods drop in against them ([R] §6.3).
     for tag, yy in (('f', MAG_Y0), ('r', MAG_Y1)):
-        R.box('mag-endstop-%s' % tag, (w, 0.04, h * 0.55), R.MAT_WORN, None,
-              (MAG_X, yy, MAG_Z0 + h * 0.30), bevel=0.008)
+        R.box('mag-endstop-%s' % tag, (w, 0.04, 0.14), R.MAT_WORN, None,
+              (MAG_X, yy, MAG_Z0 + 0.07), bevel=0.008)
+        for s in (-1, 1):
+            R.box('mag-endpost-%s-%d' % (tag, s), (0.05, 0.05, h), R.MAT_DARK,
+                  None, (MAG_X + s * w / 2, yy, MAG_Z0 + h / 2), bevel=0.006)
+
     # a light external frame carrying it off the deck
     for i in range(4):
         yy = MAG_Y0 + 0.45 + i * (ln - 0.90) / 3.0
