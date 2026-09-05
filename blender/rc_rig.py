@@ -143,17 +143,16 @@ TAU = math.pi * 2
 # metres; only the doubling is gone.
 
 # ── PRINCIPAL DIMENSIONS ──────────────────────────────────────────────────────
-# rc-rig.md §8 is blunt: there is no dimensioned GA of any RC rig anywhere in the
-# owner's library, and none of the manufacturers of this class publish one either
-# (checked: the Explorac-class brochures give depth capacity, feed force and air
-# demand, never a general arrangement). So the SHAPE is sourced — ratios measured
-# off [MET p.22] — and the SCALE hangs off one decision that IS sourced: the rod.
+# Dimensioned GAs are now available: [E100 pp.6-7] and [E235 p.7] above.
+# The existing model combines their size classes, so the absolute machine
+# dimensions below remain NOT SOURCED unless a source is stated beside them.
+# Photo ratios [MET p.22] establish shape, not a dimensioned specification.
 #
-# Decision: 3.05 m dual-wall rods. [R02 §A2, citing BL-RC p.6] lists dual-wall
-# pipe in 1.5 / 3 / 6 m lengths; 3 m is the exploration standard and is what the
-# game's own builder already uses (rigFactory.js rodLen 3.05). Everything
-# vertical follows from a mast that has to swallow one.
-ROD_LEN = 3.05
+# [R02 §A2, citing BL-RC p.6] lists 1.5 / 3 / 6 m dual-wall pipe. The existing
+# game's 3.05 m choice is NOT SOURCED as an exact length; it must not be quoted
+# as the catalogue's 3 m dimension. Preserved pending the size-class decision
+# recorded in this module's header.
+ROD_LEN = 3.05         # NOT SOURCED — existing game rod length
 ROD_OD = 0.1143        # 4-1/2" dual-wall OD, top of the sourced 3.5/4/4.5" range
 HOLE_DIA = 0.124       # 124 mm, one of the two standard RC hole sizes [R02 §A2]
 
@@ -179,12 +178,11 @@ DRILL_FLOOR = 1.50     # the lower working floor at the mast foot, reached from
 # gives a mast too short to swallow a 3.05 m rod, and rc-rig.md §9.F anticipates
 # precisely this: "either the mast is long for its rods, or the deck is low, or
 # the reference is a smaller machine... whoever changes it should decide the rod
-# length first and let the mast follow." So the rod wins, because the rod length
-# is sourced and the ratio is measured off a foreshortened studio photograph of a
-# machine whose absolute size is unknown (§8).
-# Result: at the reference 19 deg rake this model stands 6.30 m to the crown with
-# a ratio of 1.74 : 1 against the photograph's 1.61 : 1 — about 8 % taller in the
-# mast. Declared, not hidden.
+# length first and let the mast follow." The current model preserves the game's
+# chosen rod length; the exact 3.05 m value is NOT SOURCED. The ratios come from
+# a foreshortened photograph and do not verify absolute machine dimensions.
+# Measure current working-pose geometry with tools/glbinfo.mjs, rather than
+# repeating earlier height estimates from before the mast telescope was built.
 # Web cross-check, and it is the first absolute scale anyone has had for this
 # class: a published crawler RC rig of the same capability (JCDrill JRC1200,
 # 90-400 mm holes, 13 t) gives shipping 7550 x 2260 x 2700 mm, 300 mm ground
@@ -1158,9 +1156,10 @@ def build_rod_handling(pv):
     grp['axis'] = 'z'
     box('gripper-body', (0.22, 0.20, 0.22), MAT_PAINT, grp, (0, 0, 0), bevel=0.018)
     for sy in (-1, 1):
-        # MAT_PAINT to join the gripper body: two jaws are the whole of
-        # pivot:rod-gripper's second material, 216 triangles for a draw call.
-        box('gripper-jaw', (0.09, 0.20, 0.16), MAT_PAINT, grp,
+        # Exposed gripping faces keep worn steel [rc-rig.md §6, contact wear].
+        # A separate material costs one primitive; do not paint contact faces
+        # merely to save it while the rig remains inside its measured budget.
+        box('gripper-jaw', (0.09, 0.20, 0.16), MAT_WORN, grp,
             (0.13, sy * 0.10, 0), rot=(0, 0, sy * 0.35), bevel=0.01)
     return arm, grp
 
@@ -1504,6 +1503,25 @@ def _bez4_tan(a, b, c, d, t):
                  + 3 * t * t * (d[i] - c[i]) for i in range(3))
 
 
+def _hose_frame(curve, t):
+    """Sample the actual Blender spline used by the hose core.
+
+    rig.hose() makes AUTO-handled Bezier segments through its waypoints.
+    Treating those waypoints as the handles of one cubic instead produces a
+    different curve: the corrugations then float beside the rubber core.
+    Reading the core's handles keeps both surfaces on the same centreline.
+    """
+    points = curve.data.splines[0].bezier_points
+    u = max(0.0, min(1.0, t)) * (len(points) - 1)
+    segment = min(int(u), len(points) - 2)
+    local_t = u - segment
+    a, b = points[segment], points[segment + 1]
+    controls = (a.co, a.handle_right, b.handle_left, b.co)
+    p = _bez4(*controls, local_t)
+    tangent = Vector(_bez4_tan(*controls, local_t)).normalized()
+    return p, tangent
+
+
 def build_hoses():
     """Three hose populations that must not be confused [rc-rig.md §4.10]:
 
@@ -1563,16 +1581,17 @@ def build_hoses():
 def build_sample_hose():
     """The fat corrugated sample hose, on its own node.
 
-    It is DYNAMIC — the game regenerates the curve as the head travels — so it
-    is parented to slide:sample-hose, which keeps finish() from folding it into
-    the static rubber bucket. The corrugation is real geometry (a smooth core
+    slide:sample-hose keeps finish() from folding it into the static rubber
+    bucket. Runtime deformation is NOT IMPLEMENTED in gltfRig.js; keeping this
+    separate assembly and its attachment nodes makes that work possible without
+    claiming that the hose already follows the head. Corrugation is real geometry (a smooth core
     with arrayed ribs on the curve), not a hoped-for normal map, because the
     material is generated procedurally at runtime and cannot be relied on to
     carry a rib pattern.
     """
     sl = empty(NODE_SLIDE, 'sample-hose', None, (0, 0, 0))
     sl['axis'] = 'z'
-    sl['range_m'] = [0.0, 0.0]     # not translated; the game rebuilds the curve
+    sl['range_m'] = [0.0, 0.0]     # reserved rigid assembly; no runtime driver yet
     a = (HEAD_OUT[0] + 0.08, HEAD_OUT[1] + 0.02, HEAD_OUT[2] - 0.04)
     b = (1.42, HOLE_Y + 0.20, MAST_FOOT + 1.28)     # the lazy sag
     c = (ARM_TIP[0] - 0.06, ARM_TIP[1] + 0.02, ARM_TIP[2] + 0.10)  # arm saddle
@@ -1581,11 +1600,11 @@ def build_sample_hose():
              parent=sl, sides=10)
     h.data.bevel_resolution = 4
     h.data.resolution_u = 10
+    bpy.context.view_layer.update()  # resolve AUTO handles before sampling them
     ribs = 36
     for i in range(ribs):
         t = (i + 0.5) / ribs
-        p = _bez4(a, b, c, d, t)
-        tg = Vector(_bez4_tan(a, b, c, d, t)).normalized()
+        p, tg = _hose_frame(h, t)
         r = torus('sample-hose-rib', 0.0705, 0.0135, MAT_RUBBER, sl, p,
                   mseg=10, nseg=5)
         r.rotation_mode = 'QUATERNION'
@@ -1643,4 +1662,4 @@ def build(out_path):
 
 if __name__ == '__main__':
     build(os.path.abspath(os.path.join(HERE, '..', 'public', 'models',
-                                       'rc_rig.glb')))
+                                       'rc-rig.glb')))
