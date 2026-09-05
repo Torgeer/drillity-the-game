@@ -2366,10 +2366,25 @@ export function createSiteScreen(app) {
       }
       if (!d.target) d.target = 72;
       if (d.depth === undefined) d.depth = 0;
+      /* The durable descriptor. progression.js publishes it on accept and
+         never clears it (HANDOFF §12), so unlike `state.contract` it still
+         names the method while a settled job is on screen. It is consulted
+         before any fallback, here and below. */
+      const site = state.world?.site || null;
       const sim = ctx.sim;
       if (sim && typeof sim.startHole === 'function') {
         // sim/drilling.js owns the run and mirrors it into state.drill.
         if (!sim.active) {
+          /* Passing `undefined` is not a shrug — sim/drilling.js
+             `resolveMethodId()` has its own chain (rig, state.contract,
+             state.world.site) and warns at every link. What it cannot do is
+             know that the SITE SCREEN was mounted with nothing at all, which
+             is a UI-side mistake and is said here, once. */
+          if (!c && !state.contract) {
+            C.mustResolve(null, 'site screen mounted with no contract', 'sim resolution',
+              'The run is starting from whatever sim/drilling.js can still infer; '
+              + 'watch for its own [sim] warning naming the method it settled on.');
+          }
           try { sim.startHole(c || state.contract || undefined); }
           catch (e) { console.error('[ui] startHole', e); }
         }
@@ -2379,7 +2394,16 @@ export function createSiteScreen(app) {
         d.heat = 0; d.stability = 1; d.jam = 0; d.rods = 1;
         d.greenBandTime = 0; d.score = 0; d.stratumIndex = 0;
         d.wob = 0.5; d.rpm = 0.5; d.flush = 0.5;
-        app.bus.emit(EVENTS.DRILL_START, { methodId: c ? (c.methodId ?? c.method) : 'auger', contract: c || null });
+        /* core/env.js AND world/terrain.js both seed themselves from this one
+           event, so a wrong id here does not mis-label a caption — it builds
+           the wrong site and the wrong sky and keeps them for the session
+           (HANDOFF §8A). The site descriptor is asked before we invent. */
+        const startMethod = C.mustResolve(
+          (c ? (c.methodId ?? c.method) : null) ?? site?.methodId,
+          'DRILL_START methodId (no sim)', 'auger',
+          'core/env.js and world/terrain.js both seed from this event — the whole '
+          + 'session will build and light itself as a surface auger.');
+        app.bus.emit(EVENTS.DRILL_START, { methodId: startMethod, contract: c || null });
       }
       if (typeof d.wob !== 'number') d.wob = 0.5;
       if (typeof d.rpm !== 'number') d.rpm = 0.5;
@@ -2396,7 +2420,14 @@ export function createSiteScreen(app) {
          method. paint() re-resolves from the sim as soon as it has telemetry,
          which knows the method kind and whether the well has a mud column. */
       ctlMethodId = undefined; ctlKind = undefined; ctlWell = false; ctlProg = undefined;
-      const mid = c ? (c.methodId || c.method) : (state.world?.methodId || null);
+      /* `state.world.methodId` DOES NOT EXIST — nothing in the repo ever writes
+         it, so this read was always undefined and the contract-less mount got
+         unlabelled controls rather than the site's own method. The descriptor
+         progression.js publishes is `state.world.site`, and its `.methodId` is
+         the one that is still correct after settlement (HANDOFF §12). No
+         fallback here on purpose: syncControlLabels(null) shows the generic
+         labels, which is honest, where inventing a method would not be. */
+      const mid = (c ? (c.methodId || c.method) : null) ?? site?.methodId ?? null;
       syncControlLabels(mid || null, null, false, '');
       setSliderLock(feedSl, feedName, false, '');
       setSliderLock(rotSl, rotName, false, '');
