@@ -770,6 +770,16 @@ def build_push_frame():
                  (0.28, 0.0, -0.06), bevel=0.010))
     weld(cg, 'push-head', carr)
 
+    # `mount:tool` — the one name src/core/gltfRig.js binds for a tool anchor.
+    # It was missing, so makeDyn()'s
+    #     nodes.mounts.get('tool') || nodes.slides.get('carriage')
+    # fell through to the carriage ORIGIN: a cone would have hung at the bottom
+    # of the moving cylinder set instead of on the rod axis under the
+    # crosshead.  It worked, which is exactly why nobody saw it (ASTRA.md §8).
+    # Placed on the rod axis at the underside of the crosshead, which is where
+    # a CPT string physically leaves the machine.
+    R.empty(R.NODE_MOUNT, 'tool', carr, (0, 0, -0.14))
+
     # ── the hose package ─────────────────────────────────────────────────────
     # [R1] §4.7 / §9.6, from the Bauer hose catalogue: hoses on this class of
     # machine are not loose individual snakes, they run as NAMED PACKAGES

@@ -59,6 +59,19 @@ def build(out_path):
           loc=(0, 0, 3.0), bevel=0.02)
 
     carriage = R.empty(R.NODE_SLIDE, 'carriage', parent=mast_pivot, loc=(0, -0.4, 1.0))
+    # A STUB THAT DEMONSTRATES THE CONTRACT HAS TO OBEY IT.
+    # This node shipped bare, and `slide:carriage` without `travel_m` is the
+    # one shape of broken this pipeline cannot see: src/core/gltfRig.js
+    # setCarriage() evaluates `-0 * undefined`, writes NaN into a world matrix,
+    # and the machine silently disappears instead of throwing.  The fleet-wide
+    # audit that found it in six real machines found it here too — and a
+    # reference stub carrying the very fault it is meant to guard against is
+    # how the fault spreads.
+    carriage['travel_m'] = 1.20
+    carriage['axis'] = 'z'
+    # ...and the tool anchor, so `mounts.get('tool')` resolves rather than
+    # falling back to the carriage origin.
+    R.empty(R.NODE_MOUNT, 'tool', parent=carriage, loc=(0, 0, -0.3))
     R.box('carriage-plate', (0.7, 0.35, 0.6), R.MAT_STEEL, parent=carriage)
 
     # ── lamps ─────────────────────────────────────────────────────────────────
