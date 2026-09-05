@@ -1441,6 +1441,36 @@ export function createEnvironment(ctx) {
   sectionScene.add(secFill);
   sectionScene.add(secFill.target);
 
+  /* ═════ WHICH SIDE OF THE FRAME EACH BAND IS LIT FROM ═══════════════════
+     The two aims above are authored, and they stay authored — what follows
+     only ever MIRRORS them. `aimFor()` freezes each light's frontal share and
+     its in-screen magnitude, so `aimSectionLight()` can put it on either side
+     of screen-up at exactly the angle it was drawn at. See the block above
+     `updateSectionLights()` for the measurement that made this necessary. */
+  const aimFor = (x, y, z) => {
+    const v = new THREE.Vector3(x, y, z).normalize();
+    return { x0: v.x, z: v.z, h: Math.hypot(v.x, v.y) };
+  };
+  const secKeyAim = aimFor(0.42, 1.0, 0.75);    // screen az +22.8 deg
+  const secFillAim = aimFor(-0.85, 0.15, 1.0);  // screen az -80.0 deg
+  /** Below this much horizontal lean in the SURFACE frame, ease through
+      centre rather than commit to a side — otherwise a sun crossing the
+      camera's own axis would flip the cut's key in a single frame. sin 25. */
+  const SEC_SIDE_KNEE = Math.sin(THREE.MathUtils.degToRad(25));
+  let secAimU = 1;                              // +1 = the authored right side
+
+  /**
+   * u = +1 restores the authored aim exactly; u = -1 is its mirror about
+   * screen-up. Only the SIDE moves: the frontal share and the angle from
+   * screen-up are the authored ones at both ends, and y takes the positive
+   * root because both authored aims are above the horizon.
+   */
+  function aimSectionLight(light, aim, u) {
+    const x = aim.x0 * u;
+    const y = Math.sqrt(Math.max(aim.h * aim.h - x * x, 0));
+    light.position.set(x, y, aim.z).multiplyScalar(40);
+  }
+
   const secHemi = new THREE.HemisphereLight(0x8EA2B4, 0x2A241C, 0.60 * SECTION_GAIN);
   secHemi.name = 'sectionHemi';
   sectionScene.add(secHemi);
@@ -2334,8 +2364,111 @@ export function createEnvironment(ctx) {
     if (w) w[key] = value;
   }
 
+  /* ═══════════════════════════════════════════════════════════════════════
+     THE SEAM IS CONTENT, AND THE CONTENT IS HERE — three findings, one fix
+     ═══════════════════════════════════════════════════════════════════════
+
+     core/renderer.js proved by A/B that its grade pass contributes 0.27-0.36
+     luma of a 95-107 luma step across the seam and that its vignette is
+     continuous to within 0.5-5.4 %. Nobody should reopen that shader. The
+     step is content, and it is this file's. Three candidates were named.
+     Here is what each turned out to be.
+
+     ── 1. THE TWO SUNS — DRIFT, AND FIXED BELOW ─────────────────────────
+     The figure on record is "47-71 deg apart in azimuth ... projected into
+     each band's own screen space". Half of that is true. The surface figure
+     (79.9-103.9) IS a screen azimuth; the section figure (150.8) is
+     `sectionKey`'s WORLD azimuth, measured against a camera that points
+     somewhere else entirely. Two different quantities, subtracted. HANDOFF
+     §8C — the instrument that lies — for the fourth time.
+
+     Measured correctly, off the live page (`.qa-collar.mjs`, `lights`), the
+     section key sits at screen azimuth 22.8 and the surface key at 76.3 in
+     nordic: 53.5 deg apart and BOTH FROM THE RIGHT. So the honest version of
+     the complaint is much smaller than it looked — and, in one respect,
+     much worse. `.probe-suns.mjs` runs env's own sun solve over all eight
+     recipes across the day:
+
+         14 of 32 sampled hours light the SURFACE from the opposite side of
+         frame to the section. Worst screen-azimuth gap 108.7 deg.
+
+     andes, patagonia, outback and arctic are lit from the LEFT for most of
+     their day while the cut is lit from the right in every region, at every
+     hour, because its key is a constant. Nobody decided that in Patagonia
+     the machine is lit from one side and the rock 20 cm under it from the
+     other. THAT is the drift, and it is the one thing changed here: the two
+     section lights now MIRROR to whichever side the sun is on, at exactly
+     the angle they were authored at. `u = +1` is the file as it shipped.
+
+     What is deliberately NOT changed, and is correct on purpose:
+
+     ── 2. THE 33-35 deg OF ELEVATION — CORRECT ON PURPOSE ───────────────
+     The cut keeps its own steepness (22.8 deg off screen-up against the
+     surface's 76.3) and its own near-neutral colour. A cross-section is a
+     DIAGRAM. Its subject is horizontal bedding, and a bedding contact is a
+     near-horizontal ledge: it is lit by the y component of the key and by
+     nothing else. Raking the cut's key down to the surface's 13 deg sun
+     would take the key's y from 0.758 to 0.199 and put out every contact in
+     the band — the one thing the section exists to show. The SIDE is a
+     continuity cue and must agree; the PITCH is a legibility instrument and
+     must not. Do not "finish the job" by matching it.
+
+     ── 3. `sectionScene.fog` NULL — CORRECT ON PURPOSE ──────────────────
+     Recorded as "no aerial perspective below the line at all", which is
+     true and is the right answer. Two measurements say so. First, an
+     orthographic projection has no perspective to add haze to; aerial
+     perspective in a section drawing is a convention, not a physical
+     effect. Second, the section scene has no depth to fog: `.qa-collar.mjs`
+     puts every visible mesh between z -9 and z +2.2 apart from the backdrop
+     parked at -60. Over that 11.2 m an exp2 fog at the surface's own
+     density (0.0052) reaches 1-exp(-(11.2*0.0052)^2) = 0.33 % — invisible.
+     A density high enough to read across 11 m is ~10x the surface's, i.e. a
+     different scene's number, and it would wash the one thing that IS the
+     cut's depth cue: `sectionBackdrop`'s authored gradient and its down-hole
+     glow, which `updateSectionLights()` drives from the bit below. Adding
+     fog here trades a tuned depth cue for a physical one that cannot fire.
+
+     ── 4. BAND EXPOSURE 1.03-1.61 — CORRECT ON PURPOSE ──────────────────
+     `SECTION_GAIN` above already states the intent and the amount ("a
+     readability surface, not a mood surface ... minus ~0.28 stops so the cut
+     still sits a touch under the sunlit surface band"), and the key's COLOUR
+     is already coupled to the surface every solve. The two open-air methods
+     measure 1.03 (dth) and 1.20 (cfa) — that is the author's target, met.
+     The 1.54 / 1.61 on auger and rockbolt are the SURFACE band moving, not
+     the cut: rockbolt's surface is a tunnel drive at envIntensity 0.15
+     against the cut's 0.56. Chasing those two would dim the cut inside a
+     mine, which is where it is needed most.
+
+     What is worth writing down rather than changing: the section rig's
+     INTENSITY tracks neither `dayFactor` nor `weather.sun`, so at dusk or
+     under rain the surface falls away and the cut does not. That is the
+     readability floor doing its job, and it is a deliberate limit on the
+     coupling — not an omission somebody forgot.
+     ═══════════════════════════════════════════════════════════════════════ */
   function updateSectionLights(dt, state) {
     const d = (state && state.drill) || {};
+
+    /* Which side of the SURFACE frame is the key on? Read off the camera's
+       own basis (matrixWorld columns 0 and 1) rather than matrixWorldInverse,
+       so this does not depend on whether the renderer has updated first.
+       Held at the authored side underground, where there is no sun and the
+       surface band is lit by the machine's own lamps. */
+    const heroCam = ctx.camera;
+    let wantU = 1;
+    if (heroCam && !ugId) {
+      const e = heroCam.matrixWorld.elements;
+      const sx = sunDir.x * e[0] + sunDir.y * e[1] + sunDir.z * e[2];   // camera right
+      const sy = sunDir.x * e[4] + sunDir.y * e[5] + sunDir.z * e[6];   // camera up
+      const h = Math.hypot(sx, sy);
+      if (h > 1e-4) wantU = clamp(sx / h / SEC_SIDE_KNEE, -1, 1);
+    }
+    /* Damped: a region change is a hard cut in `recipe.azimuth`, and the cut's
+       key swinging across in one frame would read as a light being switched. */
+    secAimU = damp(secAimU, wantU, 3, dt);
+    aimSectionLight(secKey, secKeyAim, secAimU);
+    aimSectionLight(secFill, secFillAim, secAimU);
+    secKey.target.updateMatrixWorld();
+    secFill.target.updateMatrixWorld();
     const depth = d.depth || 0;
 
     /* Where the bit actually IS in section-world space.

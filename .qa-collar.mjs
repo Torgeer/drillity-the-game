@@ -2,6 +2,7 @@
  * COLLAR / BAND-REGISTRATION measurement rig.
  *
  *   node .qa-collar.mjs [--tag t] [--methods a,b,c] [--quality high]
+ *                       [--region andes] [--port 5178]
  *
  * `.qa-seam.mjs` already reports the three continuity NUMBERS (collarOffsetPx,
  * groundAtSeamPx, scaleRatio). It does not report the thing you need in order
@@ -20,12 +21,31 @@
  *   room       clearance from the rig rect to every obstruction: the band top,
  *              the seam, and the live DOM rects of .sstrip / .sitedock / the
  *              status card
- *   sectionZ   the section scene's world Z extent, per named child. An
+ *   sectionZ   the section scene's world Z and X extent, per named child. An
  *              orthographic camera 30 units back makes an exp2 fog density
  *              meaningless unless you know the depth range it has to work
- *              across; this is that range.
+ *              across; this is that range. (It is 11.2 m, which is why
+ *              `sectionScene.fog` is correctly null — see core/env.js.)
  *   lens       camera.view (setViewOffset) state, so a shifted frame can be
  *              told apart from an unshifted one in the report itself.
+ *
+ * Added 2026-09-05, because the four numbers above could not adjudicate what
+ * they were being asked to:
+ *
+ *   collar.sectionGroundAtSeamPx   where the CUT puts depth 0, against the
+ *              seam. `groundAtSeamPx` is the SURFACE band's ground line and
+ *              says nothing about the cut's own datum — and a depth ruler
+ *              zeroed anywhere else is a precision instrument with the wrong
+ *              origin. It is depth-dependent: the cut scrolls, the surface
+ *              does not.
+ *   rig.groundRect  the rig's four y=0 corners on their own. The full AABB
+ *              dips below grade (track pads, and the string already in the
+ *              hole), so its projected bottom cannot tell you what the seam
+ *              clips off the MACHINE, which is the question.
+ *   lights     each band's key, in THAT BAND'S OWN screen space. Comparing a
+ *              screen azimuth against a world azimuth is what put "47-71 deg
+ *              apart" on the record; measured properly the gap is 53.5 deg
+ *              and both are from the right. HANDOFF §8C.
  *
  * Same launch recipe as .qa-seam.mjs: real Chrome, HEADED, because headless
  * cannot bind the discrete GPU on this machine, and the same programs-stable
@@ -40,6 +60,12 @@ const TAG = flag('tag', 'collar');
 const QUALITY = flag('quality', 'high');
 const PORT = flag('port', '5178');
 const METHODS = (flag('methods', 'dth,cfa,auger')).split(',');
+/* `--region andes` pins the sky recipe. The two bands' key lights must agree
+   on which SIDE of frame they come from, and four of the eight recipes light
+   the surface from the LEFT — a default run only ever samples nordic and
+   alpine, both of which are right-lit, so it cannot see the case that
+   mattered. See .probe-suns.mjs. */
+const REGION = flag('region', null);
 
 const PHONE = {
   ...devices['iPhone 13 Pro'],
@@ -63,7 +89,7 @@ await page.waitForFunction(() => window.__DRILLITY && window.__DRILLITY.__qa, { 
 await page.waitForFunction(() => document.body.classList.contains('booted'), { timeout: 60000 }).catch(() => {});
 await sleep(2500);
 
-const report = { when: new Date().toISOString(), quality: QUALITY, methods: {}, errors };
+const report = { when: new Date().toISOString(), quality: QUALITY, region: REGION, methods: {}, errors };
 const flush = () => writeFileSync(`shots/${TAG}-collar.json`, JSON.stringify(report, null, 2));
 
 /* the same warm gate as .qa-seam.mjs — HANDOFF §9.4 */
@@ -101,17 +127,21 @@ report.sessionWarm = await warmUp({ label: 'session' });
 
 for (const mid of METHODS) {
  try {
-  await page.evaluate(async (M) => {
+  await page.evaluate(async ([M, PIN]) => {
     const c = window.__DRILLITY;
     const d = c.data;
     const regions = (d.REGIONS || []).filter((rg) => d.methodsForRegion
       && d.methodsForRegion(rg.id, d.MAX_LEVEL || 60).some((m) => m.id === M));
-    const region = regions[0] ? regions[0].id : undefined;
+    const region = PIN || (regions[0] ? regions[0].id : undefined);
     let k = null;
     try { k = await c.__qa.startDemoContract({ method: M, region, depth: 8 }); }
     catch (e) { k = c.state.contract; }
     try { c.sim.debug.setDepth(Math.max(0.5, ((k && k.targetDepth) || 10) * 0.35)); } catch (e) { void e; }
-  }, mid);
+    /* A method/region pair the generator will not issue still has to be
+       measurable: env mirrors state.world.regionId every frame, so writing it
+       there is what actually moves the sky, and it survives update(). */
+    if (PIN && c.state && c.state.world) c.state.world.regionId = PIN;
+  }, [mid, REGION]);
 
   const live = await page.waitForFunction(() => {
     const c = window.__DRILLITY;
