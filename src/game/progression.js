@@ -24,6 +24,7 @@ import {
   getMethod, getRig, getItem, getRegion, getCert, getSkill,
   levelForXP, xpProgress, xpToNext, unlockedAt, roleForLevel, nextRole, canEquip,
   defaultLoadoutFor, makeContractBoard, SKILL_BRANCHES, estimateHours,
+  rigDepthCapacity, DEPTH_IS_VERTICAL,
 } from './data.js';
 import {
   settleRun, priceWithMarkup, resaleValue, travelCost, certCost,
@@ -244,6 +245,18 @@ export function createProgression(ctx) {
    * was the null itself, which is not a guard, it is a side effect.
    */
   const settledContracts = new Set();
+  // A completion is payable only when completeHole accepted this exact event.
+  // Snapshot its identity: callers may reuse/mutate payload objects later.
+  const completionReceipts = new WeakMap();
+
+  function settlementForCompletion(payload) {
+    if (!payload || typeof payload !== 'object') return null;
+    const receipt = completionReceipts.get(payload);
+    if (!receipt || payload.runId !== receipt.runId
+      || payload.attemptId !== receipt.attemptId
+      || payload.contract?.id !== receipt.contractId) return null;
+    return career().ledger.includes(receipt.settlement) ? receipt.settlement : null;
+  }
 
   /**
    * Publish the site the world is to render. Called on accept and on the
@@ -782,9 +795,24 @@ export function createProgression(ctx) {
     if (missing.length) {
       return { ok: false, reason: `Needs ${missing.map((c) => getCert(c)?.name || c).join(', ')}` };
     }
-    const able = RIGS.filter((r) => state.unlocked.rigs.includes(r.id) && r.methods.includes(contract.methodId));
+    const compatible = RIGS.filter((r) => state.unlocked.rigs.includes(r.id) && r.methods.includes(contract.methodId));
+    if (!compatible.length) return { ok: false, reason: `No owned rig runs ${method.shortName}` };
+    let able = compatible;
+    // The same depth semantics as contract generation: HDD bore length,
+    // jumbo chainage, bolting drive metres and longhole ring totals are not
+    // vertical depth ratings. For vertical jobs a carrier's unrelated method
+    // rating must never authorize an unknown conversion or an over-depth job.
+    if (DEPTH_IS_VERTICAL.includes(contract.methodId)) {
+      const rated = compatible.map((rig) => ({ rig, depth: rigDepthCapacity(rig, contract.methodId) }))
+        .filter(({ depth }) => depth !== null);
+      if (!rated.length) return { ok: false, reason: `No owned rig has a verified ${method.shortName} depth rating` };
+      able = rated.filter(({ depth }) => depth >= contract.targetDepth).map(({ rig }) => rig);
+      if (!able.length) {
+        const maxDepth = Math.max(...rated.map(({ depth }) => depth));
+        return { ok: false, reason: `${method.shortName} needs ${contract.targetDepth} m; owned rigs are rated to ${maxDepth} m` };
+      }
+    }
     const rig = able.find((r) => r.id === state.garage.rigId) || able[0];
-    if (!rig) return { ok: false, reason: `No owned rig runs ${method.shortName}` };
     const from = currentCareer?.lastRegionId || state.world.regionId;
     const mobilisation = travelCost(from, contract.regionId, { rigId: rig.id, skills: skills() });
     if (!canAfford(mobilisation)) return { ok: false, reason: `Mobilisation costs ${mobilisation}` };
@@ -939,7 +967,8 @@ export function createProgression(ctx) {
    * @param {{depth:number, timeSec:number, grade:string, hazardsHit?:number,
    *          safetyIncidents?:number, wob?:number, rpm?:number, flush?:number}} payload
    */
-  function completeHole(payload = {}) {
+  function completeHole(payload = null) {
+    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return null;
     if (changingContract) return null;
     // An event is evidence about an active job, never authority to reopen a
     // paid/abandoned job. The sim retains its contract on the results screen.
@@ -1077,6 +1106,8 @@ export function createProgression(ctx) {
 
     const settlement = {
       contractId: contract.id,
+      runId: run.runId,
+      attemptId: run.attemptId,
       hole: run.holesDone,
       of: contract.holes,
       depth,
@@ -1092,7 +1123,11 @@ export function createProgression(ctx) {
     };
 
     pushLedger(settlement);
-    if (settlement.complete) finishContract(settlement);
+    completionReceipts.set(payload, Object.freeze({
+      settlement, runId: payload.runId, attemptId: payload.attemptId,
+      contractId: payload.contract?.id,
+    }));
+    if (settlement.complete) finishContract(settlement, payload);
     markDirty();
     return settlement;
   }
@@ -1212,7 +1247,7 @@ export function createProgression(ctx) {
   }
 
   /** Contract finished: pay reputation, clear the run, announce it. */
-  function finishContract(lastSettlement) {
+  function finishContract(lastSettlement, payload) {
     const c = career();
     const contract = run.contract;
     c.contractsDone += 1;
@@ -1243,7 +1278,9 @@ export function createProgression(ctx) {
        therefore stays, marked dead. See THE SITE, WHICH OUTLIVES THE CONTRACT. */
     releaseContract('settled');
     markDirty();
-    emit(EVENTS.SCENE_CHANGE, { scene: ctx.SCENES?.RESULTS ?? 'results', summary });
+    emit(EVENTS.SCENE_CHANGE, {
+      scene: ctx.SCENES?.RESULTS ?? 'results', summary, params: { result: payload },
+    });
     return summary;
   }
 
@@ -1752,7 +1789,7 @@ export function createProgression(ctx) {
     load();
     reconcileUnlocks();
 
-    unsubs.push(bus.on(EVENTS.HOLE_COMPLETE, (payload) => { completeHole(payload || {}); }));
+    unsubs.push(bus.on(EVENTS.HOLE_COMPLETE, (payload) => { completeHole(payload); }));
     // CONTRACT_ACCEPT is a notification emitted by acceptContract, not an
     // alternate command that bypasses ownership, mobilisation and persistence.
     unsubs.push(bus.on(EVENTS.DRILL_START, (p) => {
@@ -1830,6 +1867,7 @@ export function createProgression(ctx) {
 
     // contracts
     acceptContract, beginHole, abandonContract, completeHole, rescueContract, isBroke,
+    settlementForCompletion,
 
     // world
     travelTo, addReputation, reputationFor, reputationTotal,

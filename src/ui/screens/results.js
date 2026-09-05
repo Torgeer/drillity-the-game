@@ -293,61 +293,18 @@ export function createResultsScreen(app) {
 
   function at(t, fn) { timeline.push({ t, fn, done: false }); }
 
-  /**
-   * The settlement progression actually booked for this hole, or null.
-   *
-   * ── WHY THE ENTRY IS ALREADY THERE ────────────────────────────────────
-   * NOT because of load order. This comment used to claim progression was
-   * "registered first (main.js loads progression before ui)", and that is
-   * backwards: main.js awaits `ui.init()` at line 196 BEFORE it initialises
-   * the rest, and both systems subscribe inside their own init() — so the
-   * shell's HOLE_COMPLETE listener is registered FIRST and used to mount this
-   * screen before `completeHole()` had written anything. `lastSettlement()`
-   * then read a ledger whose head was the PREVIOUS hole, and neither the
-   * contract-id nor the ±5 % depth guard below can tell two runs of the same
-   * contract apart.
-   *
-   * What makes the entry present is that ui/shell.js now defers the show by
-   * one microtask. bus.emit is synchronous, so every listener — progression
-   * included — has run to completion before this screen mounts, whatever the
-   * subscription order turns out to be. The guards below stay: they are what
-   * catches it if that deferral is ever removed.
+  /** Only progression's receipt for this exact completion may supply money.
+   * Contract/depth similarity cannot identify an attempt, and a QA preview
+   * must never borrow a previous hole's ledger entry.
    */
-  function lastSettlement(contractId, depth) {
-    if (!app.ctx.progression) return null;
-    const ledger = state.player?.career?.ledger;
-    if (!Array.isArray(ledger) || !ledger.length) return null;
-    const s = ledger[0];
-    if (!s || typeof s.net !== 'number') return null;
-    /* `if (contractId && s.contractId && ...)` — TWO SHORT-CIRCUITS THAT MEAN
-       "SKIP THE CHECK". A payload that names no contract, with no
-       `state.contract` behind it either, passed straight through this line
-       with nothing between it and the previous hole's money but the ±5 %
-       depth test below. Any two holes of similar depth would then settle each
-       other. The identity of the run is not optional here: if this screen
-       cannot say WHICH contract it is showing, it cannot claim a settlement
-       belongs to it. */
-    if (!contractId) return null;
-    if (s.contractId && s.contractId !== contractId) return null;
-    /* A stale entry from an earlier hole would misreport this one. With
-       `depth` now null rather than 0 when nothing published one, this check
-       cannot run — and a check that cannot run has not passed, so the
-       settlement is refused instead of accepted unverified. That is the
-       whole point of the guard: it exists for the case where the deferral in
-       shell.js is removed, and that is exactly the case where the payload is
-       incomplete. */
-    if (depth === null) return null;
-    if (depth > 0 && typeof s.depth === 'number'
-      && Math.abs(s.depth - depth) > Math.max(1, depth * 0.05)) return null;
-    return s;
+  function lastSettlement(result, preview = false) {
+    if (preview) return null;
+    return app.ctx.progression?.settlementForCompletion?.(result) || null;
   }
 
   function buildSummary(params) {
-    /* The payload reaches this screen two ways: wrapped by ui/shell.js as
-       `{ result }` on the HOLE_COMPLETE bridge, and flat from the QA bridge in
-       main.js. Reading only the wrapped shape is why the harness screenshot
-       showed 00:02 on tools — `timeSec: 412` was sitting one level up and was
-       never read. */
+    // Live completions and explicit QA previews both use { result }. Legacy
+    // flat review payloads remain readable, but need a receipt to show money.
     const r = (params && (params.result || params)) || {};
     const raw = r.contract || state.contract || null;
     const c = raw ? app.normalizeContract(raw) : null;
@@ -498,7 +455,7 @@ export function createResultsScreen(app) {
     const composite = compositeKnown ? clamp(bd.total, 0, 1) : null;
 
     /* The settlement, when there is one, IS the transaction. */
-    const settle = lastSettlement(c?.id ?? raw?.id ?? null, depth);
+    const settle = lastSettlement(r, params?.preview === true);
 
     /* ── THE LETTER AND THE SCORE MUST AGREE ──────────────────────────────
        The screenshot that failed review read `SCORE 51 % · grade B` — and B
@@ -742,7 +699,7 @@ export function createResultsScreen(app) {
          level nothing had recorded. Level 1 is a real level a real player can
          be at, which is what makes the default undetectable. */
       const lvlNow = Number.isFinite(state.player?.level) ? state.player.level : null;
-      applyRewards(sm);
+      if (params?.preview !== true) applyRewards(sm);
 
       timeline = [];
       clock = 0;

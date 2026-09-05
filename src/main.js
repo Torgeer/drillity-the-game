@@ -813,8 +813,8 @@ function installQABridge() {
           rodsAdded: 9, total: 0.51,
         },
       };
-      ctx.bus.emit(EVENTS.HOLE_COMPLETE, result);
-      ctx.ui?.show?.(SCENES.RESULTS, { result });
+      // A review fixture is an unpaid preview, never a career completion.
+      ctx.ui?.show?.(SCENES.RESULTS, { result, preview: true });
     },
 
     setScene(id) { ctx.ui?.show?.(id); },

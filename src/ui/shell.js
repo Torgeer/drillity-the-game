@@ -132,6 +132,7 @@ export function createUI(ctx) {
   /* The window between HOLE_COMPLETE and the results mount, and whatever the
      settlement announced inside it. See the LEVEL_UP handler in wire(). */
   let holeSettling = false;
+  let completionCallbacks = 0;
   let pendingLevelUp = null;
   const unsubs = [];
   const toasts = [];              // { el, life }
@@ -682,6 +683,17 @@ export function createUI(ctx) {
 
     on(EVENTS.SCENE_CHANGE, (p) => {
       if (!p || p.from === 'ui') return;
+      if (p.scene === SCENES.RESULTS && p.summary?.lastSettlement) {
+        // The completion bridge carries the level-up after all listeners run.
+        // Direct progression callers still get an authenticated results view.
+        if (holeSettling) return;
+        const progression = ctx.progression;
+        const settlement = progression?.settlementForCompletion?.(p.params?.result);
+        if (!settlement || settlement !== p.summary.lastSettlement
+          || state.player?.career?.ledger?.[0] !== settlement) return;
+        const run = progression.run;
+        if (run && (run.runId !== settlement.runId || run.attemptId !== settlement.attemptId)) return;
+      }
       show(p.scene, p.params);
     });
 
@@ -781,35 +793,29 @@ export function createUI(ctx) {
     on(EVENTS.BIT_BROKEN,    (p) => current?.inst.onBitBroken?.(p));
 
     on(EVENTS.HOLE_COMPLETE, (p) => {
-      /* The payoff screen owns the summary; hand it everything we know — but
-         NOT until every other listener on this event has finished.
-
-         main.js awaits `ui.init()` (which is what calls wire(), so this
-         subscription is made here) BEFORE it initialises the rest, and
-         progression.js subscribes inside its own init(). This handler
-         therefore runs FIRST, ahead of `progression.completeHole()`. Calling
-         show() synchronously mounted the results screen before the settlement
-         was booked, so `lastSettlement()` in screens/results.js read a ledger
-         whose head was still the PREVIOUS hole — and its contract-id and ±5%
-         depth guard cannot tell two runs of the same contract apart, so a
-         repeat of the same job showed the earlier run's money and XP.
-
-         A microtask is the whole fix: bus.emit is synchronous, so by the time
-         this drains, every listener — progression included — has run to
-         completion and the ledger head is this hole. Deliberately a
-         microtask and not a frame: the screen must still change in the same
-         turn, so nothing paints in between.
-
-         `holeSettling` marks that window for the LEVEL_UP handler above: a
-         level-up emitted inside it belongs to THIS settlement and is handed
-         to the results screen instead of being toasted over a screen that is
-         about to be replaced. */
+      // UI subscribes before progression. Wait for its authoritative receipt;
+      // a delayed/rejected completion must never navigate or borrow old money.
+      const progression = ctx.progression;
+      if (!p) return;
+      const previousReceipt = progression?.settlementForCompletion?.(p);
+      const runId = p.runId, attemptId = p.attemptId, contractId = p.contract?.id;
+      const scene = state.scene;
+      if (!holeSettling) pendingLevelUp = null;
       holeSettling = true;
-      pendingLevelUp = null;
+      completionCallbacks += 1;
       queueMicrotask(() => {
         const levelUp = pendingLevelUp;
-        pendingLevelUp = null;
-        holeSettling = false;
+        if (--completionCallbacks === 0) {
+          pendingLevelUp = null;
+          holeSettling = false;
+        }
+        if (disposed || ctx.progression !== progression || state.scene !== scene
+          || p.runId !== runId || p.attemptId !== attemptId || p.contract?.id !== contractId) return;
+        const settlement = progression?.settlementForCompletion?.(p);
+        if (!settlement || settlement === previousReceipt
+          || state.player?.career?.ledger?.[0] !== settlement) return;
+        const run = progression.run;
+        if (run && (run.runId !== settlement.runId || run.attemptId !== settlement.attemptId)) return;
         show(SCENES.RESULTS, { result: p, levelUp });
       });
     });
