@@ -184,6 +184,15 @@ SKID_SPAN   = 40 * FT       # 12.192  [S5 p.312] "Most GoM platform rigs supplie
 SKID_D      = 0.90          # NOT SOURCED.  [S6] §8: the skid beam SPACING is
                             # sourced, "what is still missing is the beam depth
                             # and the travel".
+SKID_LO_H   = 0.48          # NOT SOURCED, as above — lower (Y-running) layer
+SKID_HI_H   = 0.62          # NOT SOURCED, as above — upper rails the sub skids on
+SKID_TOP_Z  = SKID_LO_H + SKID_HI_H     # 1.10 — top of the skid stack
+SHOE_H      = 0.34          # substructure base pad thickness
+SUB_BASE_Z  = SKID_TOP_Z + SHOE_H       # 1.44 — underside of the columns.
+                            # DERIVED, and it is the number that keeps z = 0
+                            # meaning the MAIN DECK: everything the rig stands
+                            # on is now above grade and FLOOR_Z is still the
+                            # sourced 28 ft above the deck, not above a beam.
 ROT_OPEN    = 37.5 * IN     # 0.9525  [S1 §B.4.1] rotary table maximum opening
 ROT_OD      = 1.86          # NOT SOURCED.  Derived from the opening: a 37-1/2 in
                             # table carries a 650 short ton rating on a beam
@@ -662,11 +671,15 @@ def build_substructure(root):
     for sx in (-1, 1):
         for sy in (-1, 1):
             x, y = sx * (hx - c), sy * (hy - c)
-            bx('sub-col', (SUB_COL, SUB_COL, FLOOR_Z), R.MAT_PAINT, root, None,
-               (x, y, FLOOR_Z / 2), bevel=0.03)
-            # base pad on the skid beam
-            bx('sub-shoe', (1.30, 1.30, 0.34), R.MAT_DARK, root, None,
-               (x, y, 0.17), bevel=0.02)
+            # The column runs from the top of the shoe to the drill floor, so
+            # FLOOR_Z stays exactly the sourced 28 ft above the MAIN DECK
+            # (z = 0) no matter how deep the skid stack under it is.
+            bx('sub-col', (SUB_COL, SUB_COL, FLOOR_Z - SUB_BASE_Z), R.MAT_PAINT,
+               root, None, (x, y, SUB_BASE_Z + (FLOOR_Z - SUB_BASE_Z) / 2),
+               bevel=0.03)
+            # base pad, ON the upper skid beam rather than on the deck
+            bx('sub-shoe', (1.30, 1.30, SHOE_H), R.MAT_DARK, root, None,
+               (x, y, SKID_TOP_Z + SHOE_H / 2), bevel=0.02)
 
     # ── X-bracing on all four faces.  The cellar face at +Y is left OPEN: the
     #    BOP is skidded in and out through it and there are two hoists over it
@@ -674,7 +687,9 @@ def build_substructure(root):
     for (ax, s) in (('x', -1), ('x', 1), ('y', -1), ('y', 1)):
         if ax == 'y' and s == 1:
             continue                        # the open BOP face
-        for lo, hi in ((0.35, beam_z * 0.55), (beam_z * 0.55, beam_z)):
+        # the lower brace panel starts at the substructure base, which is now
+        # the top of the shoe rather than the deck
+        for lo, hi in ((SUB_BASE_Z + 0.35, beam_z * 0.55), (beam_z * 0.55, beam_z)):
             if ax == 'x':
                 p = [(s * (hx - c), -(hy - c), lo), (s * (hx - c), (hy - c), hi)]
                 q = [(s * (hx - c), (hy - c), lo), (s * (hx - c), -(hy - c), hi)]
@@ -712,13 +727,31 @@ def build_substructure(root):
     # ── SKID BEAMS.  [S5 p.312]: 40 ft apart, deck legs directly under them,
     #    and the substructure skids over them in two perpendicular directions
     #    ([S6] §3.9, verified verbatim in two sources).  This is the geometry
-    #    that says "fixed platform" instead of "moonpool" - HANDOFF §10 #7. ──
-    for sx in (-1, 1):
-        bx('skid-beam-x', (SKID_D, SUB_Y + 7.0, 0.62), R.MAT_WORN, root, None,
-           (sx * SKID_SPAN / 2, 0, -0.31), bevel=0.02)
-    for sy in (-1, 1):
-        bx('skid-beam-y', (SKID_SPAN + 7.0, SKID_D, 0.48), R.MAT_WORN, root, None,
-           (0, sy * SKID_SPAN / 2, -0.85), bevel=0.02)
+    #    that says "fixed platform" instead of "moonpool" - HANDOFF §10 #7.
+    #
+    #    THEY SIT ON THE DECK.  THEY USED TO SIT UNDER IT.
+    #    This was the whole of the machine's -1.090 m (ASTRA.md §7.5): the
+    #    lower beam layer ran -1.09 .. -0.61 and the upper -0.62 .. 0.00, so
+    #    the model's only sub-grade geometry was the two things the rig STANDS
+    #    ON.  It came from the file using z = 0 for two different datums at
+    #    once: FLOOR_Z is sourced as "drill floor height above MAIN DECK"
+    #    [S1 §B.1.5] and measured from z = 0, which makes z = 0 the main deck —
+    #    while `sub-shoe`, "base pad on the skid beam", also sat at z = 0,
+    #    which makes z = 0 the TOP of the beams.  Both cannot be true, and the
+    #    game drops this rig on terrain at y = 0, so the beams were buried and
+    #    the derrick stood in the deck.
+    #    Resolved in favour of the sourced number: z = 0 IS the main deck, the
+    #    beams stand on it, and the substructure starts on top of them.  The
+    #    beam depths (0.62 / 0.48) are NOT SOURCED — [S6] §8 says so in as many
+    #    words, "what is still missing is the beam depth and the travel" — so
+    #    the unsourced dimension is the one that moves, and the 28 ft floor
+    #    height above the deck is preserved exactly.
+    for sy in (-1, 1):                        # LOWER layer, on the deck
+        bx('skid-beam-y', (SKID_SPAN + 7.0, SKID_D, SKID_LO_H), R.MAT_WORN,
+           root, None, (0, sy * SKID_SPAN / 2, SKID_LO_H / 2), bevel=0.02)
+    for sx in (-1, 1):                        # UPPER layer, the rails it skids on
+        bx('skid-beam-x', (SKID_D, SUB_Y + 7.0, SKID_HI_H), R.MAT_WORN, root,
+           None, (sx * SKID_SPAN / 2, 0, SKID_LO_H + SKID_HI_H / 2), bevel=0.02)
 
     # ── stair tower from the cellar deck up to the drill floor.  Offshore uses
     #    stair towers between levels and caged ladders on the structure
@@ -747,7 +780,19 @@ def build_wellhead_and_bop(root):
     body is 2.9 m long and 1.7 m tall - a squat block, never a cylinder.
     """
     z = 0.0
-    # conductor and casing head at the well centre
+    # conductor and casing head at the well centre.
+    # THE MODEL'S REMAINING -0.300 IS THIS, AND IT IS CORRECT.
+    # After the skid beams were lifted onto the deck (see build_substructure),
+    # the only geometry left below y = 0 is the well conductor passing THROUGH
+    # the deck. That is not the rig sinking into the ground — it is the well,
+    # and every platform rig has one: the conductor is run from the deck down
+    # through the water column and into the seabed, and the casing head lands
+    # on top of it. 300 mm of it is modelled below the deck plate so the pipe
+    # reads as entering rather than as standing on the surface, which is the
+    # same call made on hdd-rig's string entry.
+    # `glbinfo` will keep listing this machine in its below-y=0 report. That is
+    # the tool doing its job on a 50 mm margin, not a defect. Do not shorten
+    # the conductor to get under the threshold.
     tb('conductor', 0.330, 0.55, R.MAT_WORN, root, None, (0, 0, -0.30), sides=16)
     tb('casing-head', WELLHEAD_OD / 2 + 0.10, 0.62, R.MAT_CAST, root, None,
        (0, 0, 0.10), sides=16)
