@@ -923,6 +923,26 @@ const MATERIALS_COVERS_SLOTS = Object.freeze({
  * comes back out of the hole.
  * @returns {{total:number, perMetre:number, what:string}}
  */
+/**
+ * The slots this method's MATERIALS row already pays for, or `null`.
+ *
+ * ⚠ EXPORTED BECAUSE THE TABLE HAD A SECOND READER AND NOBODY TOLD IT.
+ * `settleRun` passes `MATERIALS_COVERS_SLOTS` into `consumableCostForRun` and
+ * the money is right. `progression.applyWear()` runs the SAME wear model over
+ * the SAME loadout to write the condition the garage screen shows, and it did
+ * not skip anything — so the two halves of one mechanic disagreed about which
+ * bays exist, and the half that was fixed was not the half the player reads.
+ *
+ * ASTRA §5, in one line: two tables describing one thing will drift, and the
+ * one that is wrong will be believed. There is now one table and two readers.
+ *
+ * @param {string} methodId
+ * @returns {?Set<string>}
+ */
+export function materialsCoveredSlots(methodId) {
+  return MATERIALS_COVERS_SLOTS[methodId] || null;
+}
+
 export function materialsCostForRun(methodId, metres, holeDiaMm, skills = {}, regionId = null) {
   const method = getMethod(methodId);
   const spec = MATERIALS[methodId];

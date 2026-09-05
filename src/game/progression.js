@@ -29,6 +29,7 @@ import {
   settleRun, priceWithMarkup, resaleValue, travelCost, certCost,
   resolveSkills, emergencyContract, wearFromRun, rigServiceCost, rigWearPerHour,
   PAY_UNITS, BOLTS_PER_DRIVE_METRE, ropBasisFactor, holeMetresFor,
+  materialsCoveredSlots,
 } from './economy.js';
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -1039,7 +1040,27 @@ export function createProgression(ctx) {
        the shop reporting a fresh crown after a fortnight at the face. */
     const holeMetres = holeMetresFor(contract.methodId, metres);
 
+    /* ── THE BAY THAT IS PAID FOR SOMEWHERE ELSE ─────────────────────────
+       `settleRun` skips these slots because `economy.MATERIALS` already prices
+       what is in them, in its own units, on the materials line. THIS LOOP DID
+       NOT SKIP THEM, so one mechanic ran on two different tables and the money
+       half was the half that got fixed.
+
+       MEASURED, on the default loadout the game itself fits:
+       `defaultLoadoutFor('tunnel-jumbo')` puts `detonator-reel-500` in the
+       `service` bay, and its `life: 1` is a COUNT, not a length. A 20 m heading
+       is 3,111 metres of blasthole, so `wearFromRun` returns 3,111.1 and the
+       `while` below spun 3,112 times and added 3,112 to `st.bitsBurned` — a
+       lifetime career statistic the player reads on the profile screen. Twenty
+       headings read as sixty-two thousand bits. `rockbolt` does the same with
+       `bolt-plate-150` and `bolt-nut-m24`, both `life: 1`, at 123 per drive.
+
+       economy.js names this exact item as "a live landmine" and disarms it on
+       the cost side. This is the other side of it. */
+    const paidAsMaterials = materialsCoveredSlots(contract.methodId);
+
     for (const slot of Object.keys(state.garage.loadout)) {
+      if (paidAsMaterials && paidAsMaterials.has(slot)) continue;
       const id = state.garage.loadout[slot];
       const item = getItem(id);
       if (!item || !item.consumable || !item.stats.life) continue;
@@ -1056,7 +1077,22 @@ export function createProgression(ctx) {
       });
       const before = state.garage.condition[id] ?? 1;
       let after = before - wear;
-      while (after <= 0) { consumed += 1; after += 1; }   // spares taken from stock
+      /* THERE IS NO STOCK, AND THE OLD COMMENT HERE SAID THERE WAS.
+         Nothing counts spares, nothing decrements them and nothing refuses to
+         fit a bit the player does not own — the tool simply comes back fresh
+         and the RUN is billed for it, by the metre, in
+         `economy.consumableCostForRun`, whose `wear` is deliberately not
+         clamped to 1 for exactly this reason. So the money is right and the
+         inventory does not exist.
+
+         That is a real property of the game and worth stating rather than
+         implying: a player can never be stopped by not owning a bit, only by
+         the bill for having worn one out. It is one of the reasons the wallet
+         has a floor and not a stake (tools/checkcareer.mjs, RUIN).
+
+         `consumed` is therefore a COUNT OF TOOLS DESTROYED, which is what
+         `st.bitsBurned` wants, and nothing else reads it. */
+      while (after <= 0) { consumed += 1; after += 1; }
       after = clamp(after, 0, 1);
       state.garage.condition[id] = after;
       lines.push({ itemId: id, slot, name: item.name, from: +before.toFixed(3), to: +after.toFixed(3), wear: +wear.toFixed(3) });
