@@ -95,6 +95,50 @@ function roleOrBase(roleId, where) {
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Tunables. One place, so balancing is one diff.
+
+   ⚠ NOT SOURCED — EVERY RATE BELOW, AND THAT IS THE POINT OF THIS BLOCK.
+
+   Sixteen precise-looking constants, each with a confident one-line
+   description and, until now, no provenance at all. Read together they look
+   exactly like a cost model somebody researched. They are not: nothing in
+   `research/` carries a figure for plant depreciation, plant insurance, hire
+   rates, contractor overhead, resale fractions or liquidated damages, and a
+   sweep of all eighteen packs for them returns nothing. `CREW_HOURLY_BASE`
+   further down is the counter-example — Eurostat 2025, cited, and the only
+   money rate in this file that is.
+
+   A drilling contractor is the imagined player and RATES ARE THE FIRST THING
+   THEY CHECK. So rather than leave sixteen bare fractions, each is restated
+   below in the unit a contractor would actually check it in — which is the
+   whole value of the exercise, because it turns "is 0.000111 right?" into
+   "is nine thousand hours right?", a question with a published answer that
+   somebody can close in one line.
+
+     depreciationPerHour   the machine is written off over 9,009 OPERATING
+                           HOURS. This is the largest of the sixteen by effect
+                           — on foundation-bg it is a bigger line than fuel —
+                           and the most checkable
+     insurancePerHour      0.80 % of list per YEAR at 2,000 operating hours
+     rentalDurablePerDay   6.6 % of list per 30 days, before the long-hire
+                           discount tiers
+     rentalToolPerDay      36.0 % of list per 30 days
+     overheadRate*         5 % of turnover at level 1 rising to 30 % at 60
+     latePenalty*          4 % of the base per hour late, capped at 35 %, so
+                           the cap is reached 8.8 hours past the deadline
+     resaleDurable         45 % of list for a durable in perfect condition
+     resaleConsumable      16 % of list for a part-worn consumable
+     regionMarkupMax       +18 % on the shelf price in the remotest region
+     urgentSurcharge       +35 % for same-day delivery to a running job
+
+   NONE OF THESE IS A SOURCED FIGURE. They are game-balance judgement at what
+   is believed to be a defensible order of magnitude, and no screen may present
+   one as a market cost. If you have a source for any of them, the direction of
+   travel is source -> code, and the line above becomes a citation.
+
+   `markupBase`, `reputationCap`, `reputationBonusMax`, `emergencyContractFloor`
+   and `brokeBelow` are deliberately NOT in that list: they are game mechanics
+   with no real-world referent, and marking them NOT SOURCED would imply there
+   is something out there to source them against.
    ═══════════════════════════════════════════════════════════════════════════ */
 export const ECON = Object.freeze({
   /** iMarket margin over the notional list price. */
@@ -280,7 +324,29 @@ export function resaleValue(itemOrId, condition = 1, skills = {}) {
 
 /**
  * Rental rate. Renting is the answer to a one-week peak; owning is the answer
- * to a year of average. The crossover sits near 90 days by design.
+ * to a year of average.
+ *
+ * ⚠ THIS DOCSTRING USED TO CLAIM "the crossover sits near 90 days by design",
+ * AND THERE IS NO CROSSOVER. Measured against `upkeepFor`'s own capital lines
+ * on a `dth-crawler` at 8 h/day, hiring costs this multiple of owning it
+ * (depreciation + insurance) for the same window:
+ *
+ *     1 d  2.39x   ·   7 d  2.15x   ·   30 d  1.96x
+ *    90 d  1.72x   ·  180 d  1.72x  ·  365 d  1.72x
+ *
+ * It falls, it flattens at 90 days — which is where the last discount tier
+ * lands, and is presumably what the "90 days" was remembering — and it never
+ * reaches 1. It cannot: a hire company has to cover the same depreciation plus
+ * finance, margin and the days the machine sits on its yard, so hiring is
+ * dearer per day at every duration and that is commercially correct.
+ *
+ * The numbers are therefore left alone and the CLAIM is corrected. Inventing a
+ * discount curve that crosses at 90 days to make an unsourced sentence true
+ * would be a coefficient chosen to satisfy a comment, which is the thing this
+ * file is least allowed to do. What actually decides rent-or-buy for a
+ * contractor is the full cost of ownership — finance, insurance, standing time
+ * and utilisation — and the game models none of the last three.
+ *
  * @param {Object|string} thing  an ITEM id/object or a RIG id/object
  */
 export function rentalRate(thing, days = 1, opts = {}) {
@@ -1241,6 +1307,33 @@ export function upkeepFor(rigId, hours, opts = {}) {
 
   const upkeep = rig.upkeepPerHour * h * sk.m('upkeep.cost') * roleDiscount
     * conditionUpkeepPenalty(condition) * regionCost;
+  /* ── THE FUEL LINE, CHECKED AGAINST THE ONE SOURCED FIGURE THERE IS ────
+     `rig.fuelPerHour` is EUR/h, not litres, so it hides a diesel price nobody
+     ever wrote down. There is exactly one field fuel measurement in all
+     eighteen research packs — research/03-mining.md §"Field comparison"
+     [`L-TH`]: on the same granite bench, drilling the same 20 m holes, a top
+     hammer rig burned 42 L/h against 78 L/h for a high-pressure DTH rig.
+
+     Divide the game's rows by it:
+
+       crawler-th   (top hammer)   EUR 31/h / 42 L/h  ->  EUR 0.738 / litre
+       dth-crawler  (DTH)          EUR 58/h / 78 L/h  ->  EUR 0.744 / litre
+
+     TWO THINGS FOLLOW, and they point in opposite directions.
+
+     The SHAPE is right, and demonstrably not by accident: the game's DTH-to-
+     top-hammer fuel ratio is 1.871 against the sourced 1.857 — 0.7 % apart —
+     and the two rows imply the same litre price to within 1 %. That table was
+     built off a consistent per-litre model, whatever it was.
+
+     The SCALE rests on EUR 0.74/litre, and THAT number is nowhere: no pack
+     carries a diesel price, bulk or pump, duty-paid or ex-duty. It is the
+     single figure a contractor would check first and the one thing this file
+     cannot defend. Stated rather than quietly corrected, because `fuelPerHour`
+     lives in data.js and the fix is a sourced diesel price, not a guess here.
+
+     ⚠ And it is only two machines. The other seventeen rows have nothing to
+     be checked against at all. */
   const fuel = rig.fuelPerHour * h * sk.m('fuel.cost') * regionCost;
   const insurance = rig.price * ECON.insurancePerHour * h;
   // Depreciation. A rig is written down over roughly 9,000 operating hours,
