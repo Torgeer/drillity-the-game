@@ -100,9 +100,14 @@ import {
  * fixed number of pixels no matter what view scale the renderer hands us.
  */
 const CFG = {
-  viewMetres: 20,        // vertical extent of the section band, in metres.
-                         // Must agree with core/renderer.js `sectionViewH`;
-                         // ensureSection() adopts the renderer's value.
+  viewMetres: 20,        // the section's SCALE ANCHOR, in metres — NOT its
+                         // height. core/renderer.js `updateSectionFrustum()`
+                         // anchors the cut's WIDTH at this times the reference
+                         // aspect and lets the height follow the band, so the
+                         // band is ~13.4 m tall on the shipping layout while
+                         // this stays 20. The height you can see is `viewH`,
+                         // measured off the camera. Reading this as a height
+                         // is the bug that cost CFG.headroom its sign.
   bitScreenFrac: 0.28,   // bit sits 28% down the band == mid of the visible strip
   headroom: 1.6,         // metres of "air" visible above the ground line
   slabOverscan: 1.55,    // face slab height = viewMetres * this
@@ -2953,10 +2958,36 @@ export function createGeology(ctx) {
   let stageProgress = 0;     // metres of the second pass
   let casingDepth = 0;
   let time = 0;
-  let halfH = CFG.viewMetres * 0.5;
-  let halfW = halfH;
+  /* ── TWO NUMBERS THAT ARE NOT THE SAME NUMBER ─────────────────────────────
+     They were one variable, and this pair exists to make writing that again
+     impossible. Measured on the shipping layout at 390x844, warm:
+
+         viewMetres  19.988          halfH * 2  13.437
+
+     `viewMetres` is the section's AUTHORED SCALE ANCHOR, and it is what
+     core/renderer.js reads back off ctx.sectionView. renderer.js
+     `updateSectionFrustum()` fixes the cut's WIDTH at `sectionViewH * refAspect`
+     — deliberately, so that 19.4 CSS px per metre holds whatever the HUD
+     chrome does to the band's height — and lets the height follow. So
+     `viewMetres` is a statement about SCALE. It is not a height, and this band
+     has not been 20 m tall since the chrome inset landed.
+
+     `halfH` / `halfW` / `viewH` are the frustum the player is actually looking
+     at, adopted from the camera in adoptCameraScale(). Everything PLACED comes
+     from these: the headroom clamp, the strip re-centring window, the scale
+     plate, the station ruler, the readout.
+
+     Publishing halfH*2 back as viewMetres would be a runaway — renderer.js
+     re-derives the width from whatever we publish, so each frame would shrink
+     the band by refAspect/aspect (0.72 here) until it hit the clamp at 3 m.
+     ctx.sectionView.viewMetres therefore carries the ANCHOR and never the
+     measurement; ctx.sectionView.visibleMetres carries the measurement. */
+  let viewMetres = CFG.viewMetres;   // authored anchor — published, never measured
+  let halfH = CFG.viewMetres * 0.5;  // TRUE visible half-height, from the camera
+  let halfW = halfH;                 // TRUE visible half-width, from the camera
+  let viewH = CFG.viewMetres;        // == halfH * 2, named so placements read right
   let camBaseY = 0;
-  let viewMetres = CFG.viewMetres;
+  let lastFrustumSolve = -1e9;       // update()'s re-solve rate limit, in seconds
 
   /** VISUAL borehole radius, in section units. Derived — never a constant. */
   let holeR = CFG.holeRadius;
@@ -4652,15 +4683,29 @@ export function createGeology(ctx) {
    * fixed size on screen no matter what view scale the renderer hands us.
    */
   function computeView(w, h) {
-    const bandH = Math.max(1, h * (LAYOUT.sectionHeight || 0.46));
-    const aspect = Math.max(0.25, w / bandH);
-    halfH = viewMetres * 0.5;
-    halfW = halfH * aspect;
+    /* THE FRUSTUM COMES FROM THE CAMERA, NOT FROM A FRACTION OF THE VIEWPORT.
+       adoptCameraScale() writes halfW / halfH / viewH when it can prove the
+       camera belongs to this band, and says why when it cannot. Only the
+       fallback derives them, and then band and frustum are derived from the
+       SAME assumption so pxPerMetre below stays exactly what it always was. */
+    const adopted = adoptCameraScale();
+    const band = adopted ? bandRect()
+                         : { w, h: Math.max(1, h * (LAYOUT.sectionHeight || 0.46)) };
+    const bandH = Math.max(1, band.h);
+    if (!adopted) {
+      halfH = viewMetres * 0.5;
+      halfW = halfH * Math.max(0.25, band.w / bandH);
+      viewH = halfH * 2;
+    }
     U.uHalfW.value = halfW;
     U.uGeoX.value.set(-halfW + CFG.logWidth, halfW - CFG.rulerWidth);
 
-    // 388 CSS px / 20 m = 19.4 px per metre on the reference device
-    pxPerMetre = bandH / Math.max(viewMetres, 1e-3);
+    /* 261 CSS px / 13.44 m = 19.4 px per metre on the reference device — and
+       19.4 is the number renderer.js `updateSectionFrustum()` deliberately
+       holds constant across every chrome height, by anchoring the cut's WIDTH.
+       Taking both terms from the same source is what stops this becoming a
+       second opinion about it (ASTRA §5). */
+    pxPerMetre = bandH / Math.max(viewH, 1e-3);
     U.uEdgeShade.value = CFG.edgeMetres;
     U.uEdgeGeo.value = CFG.edgeGeoMetres;
     U.uEdgeRange.value = CFG.edgeRangeMetres;
@@ -4678,9 +4723,17 @@ export function createGeology(ctx) {
       ), 1, 3,
     );
     const nyq = clamp((pxPerMetre / CFG.detailPx) * clamp(dpr / 2, 0.8, 1.4), 2.4, 18);
-    // keep the published contract current: core/renderer.js reads this back and
-    // matches its own sectionViewH to it, so the two can never disagree again
-    if (ctx?.sectionView) ctx.sectionView.viewMetres = viewMetres;
+    /* Keep the published contract current. `viewMetres` is the ANCHOR and is
+       what core/renderer.js reads back into its own `sectionViewH`; publishing
+       the measured height here instead would feed the renderer's own output
+       back into its input and collapse the band to the 3 m clamp in about ten
+       frames. `visibleMetres` is the measurement, published beside it so that
+       nothing downstream ever has to guess which one it is holding. */
+    if (ctx?.sectionView) {
+      ctx.sectionView.viewMetres = viewMetres;
+      ctx.sectionView.visibleMetres = viewH;
+      ctx.sectionView.pxPerMetre = pxPerMetre;
+    }
     U.uNyq.value = nyq;
     U.uNyq2.value = nyq * 0.5;    // base cap for a 2-octave fbm
     U.uNyq4.value = nyq * 0.25;   // base cap for a 3/4-octave fbm
@@ -4695,7 +4748,12 @@ export function createGeology(ctx) {
   function buildFace() {
     if (faceMesh) { root.remove(faceMesh); faceGeo?.dispose(); }
     const segY = Math.max(48, Math.min(192, ctx?.quality?.strataSegments || 96));
-    const slabH = viewMetres * CFG.slabOverscan;
+    /* The slab has to COVER the visible band, so it is sized against whichever
+       of the two heights is larger. Chrome can only ever shrink the band
+       (viewH <= viewMetres), so on every shipping layout this is the authored
+       31 m exactly as before — the max is here to state the requirement, not
+       to change the number. */
+    const slabH = Math.max(viewMetres, viewH) * CFG.slabOverscan;
     const slabW = halfW * 2 * 1.02;
     const segX = Math.max(32, Math.round(segY * (slabW / slabH)));
     faceGeo = new T.PlaneGeometry(slabW, slabH, segX, segY);
@@ -4724,7 +4782,7 @@ export function createGeology(ctx) {
 
   function buildBackdrop() {
     if (backMesh) { scene?.remove(backMesh); backMesh.geometry.dispose(); }
-    const g = new T.PlaneGeometry(halfW * 2.6, viewMetres * 1.3, 1, 1);
+    const g = new T.PlaneGeometry(halfW * 2.6, Math.max(viewMetres, viewH) * 1.3, 1, 1);
     if (!backMat) {
       backMat = new T.ShaderMaterial({
         uniforms: {
@@ -5815,8 +5873,23 @@ export function createGeology(ctx) {
     return clamp(dpr * 1.25, 2, 3.2);
   }
 
+  /* ── WHERE THE VISIBLE WINDOW SITS INSIDE A STRIP ─────────────────────────
+     A strip is drawn `stripSpanM()` metres tall and re-centred only when the
+     window leaves it, with the window `stripLead()` metres down from the
+     strip's top edge. THREE places need that lead and they must never
+     disagree: update() when it re-centres, drawLog() when it decides which
+     part of a bed the player can see, and drawRuler() when it puts a header
+     on screen — a header drawn at the strip's own top edge is 4.4 m above the
+     band and has never once been visible.
+
+     span is Math.max()'d for the same reason the face slab is: it must COVER
+     the visible band. Chrome only ever shrinks the band, so on every shipping
+     layout this is the authored 31 m exactly as before. */
+  const stripSpanM = () => Math.max(viewMetres, viewH) * 1.55;
+  const stripLead = () => viewMetres * 0.22;
+
   function makeStrip(name, widthUnits, xPos) {
-    const span = viewMetres * 1.55;
+    const span = stripSpanM();
     const cssK = stripSuper();                                // canvas px per CSS px
     const canvasW = Math.round(clamp(widthUnits * pxPerMetre * cssK, 96, 384));
     const canvas = document.createElement('canvas');
@@ -6669,11 +6742,12 @@ export function createGeology(ctx) {
            viewport, clamped back inside the bed so it still can never cross
            the contact below it (which was the round-2 fix and stays).
 
-           The strip is drawn span metres tall and re-centred only when the
-           window leaves it; update() places the viewport viewMetres * 0.22
-           into that span, so this is where the visible window sits. */
-        const viewTop = viewMetres * 0.22 * pxPerM;
-        const viewBot = viewTop + viewMetres * pxPerM;
+           stripLead() is where update() puts the window inside the span, and
+           the window is viewH tall — the MEASURED band, not the authored
+           anchor. It used to be `viewMetres` here, which claimed a 20 m window
+           on a 13.4 m band and pulled every label 3.3 m low. */
+        const viewTop = stripLead() * pxPerM;
+        const viewBot = viewTop + viewH * pxPerM;
         const v0 = Math.max(y0, viewTop);
         const v1 = Math.min(y1, viewBot);
         const mid = v1 > v0 ? (v0 + v1) * 0.5 : (y0 + y1) * 0.5;
@@ -6881,25 +6955,107 @@ export function createGeology(ctx) {
   }
 
   /**
-   * Adopt the renderer's section scale — but only once core/renderer.js has
-   * actually laid its camera out for this band. Before its first resize the
-   * camera still carries its constructor default (14 m at a 0.57 aspect, where
-   * the band is ~1.0), and adopting that silently overrides CFG.viewMetres.
-   * That is exactly how every layout constant in this file ended up tuned for
-   * a view three times the one being drawn. If the camera is not yet sized we
-   * keep CFG.viewMetres and publish it on ctx.sectionView, which the renderer
-   * adopts in turn — so the two agree on 20 whichever initialises first.
+   * The band's pixel rectangle. `ctx.bands.section` is core/renderer.js's own
+   * scissor rect and is therefore the MEASURED answer; the LAYOUT fraction is
+   * a derivation of it and disagrees by however much HUD chrome is on screen
+   * (388 px derived against 261 px measured at 390x844). `measured` is
+   * returned rather than inferred, because a caller that cannot tell the two
+   * apart is exactly how the wrong one gets believed.
+   */
+  function bandRect() {
+    const b = ctx?.bands?.section;
+    if (b && b.w > 1 && b.h > 1) return { w: b.w, h: b.h, measured: true };
+    const v = vp();
+    return { w: v.w, h: Math.max(1, v.h * (LAYOUT.sectionHeight || 0.46)), measured: false };
+  }
+
+  /* One line per distinct reason, not one per frame. */
+  const saidOnce = new Set();
+  function sayOnce(key, msg) {
+    if (saidOnce.has(key)) return;
+    saidOnce.add(key);
+    console.warn(msg);
+  }
+
+  /**
+   * ADOPT THE FRUSTUM THE PLAYER IS ACTUALLY LOOKING AT.
+   *
+   * This used to adopt a HEIGHT into `viewMetres` and guard it by comparing
+   * the camera's aspect against `LAYOUT.sectionHeight`. Both halves were
+   * wrong on the shipping layout:
+   *
+   *   · the guard compared the camera against a band that is not the band.
+   *     With HUD chrome the section is 390x261, aspect 1.408; the LAYOUT
+   *     fraction says 390x388, aspect 1.005. That is 39 % apart against a
+   *     35 % tolerance, so it REJECTED the only camera that was ever going to
+   *     be correct, and returned without saying anything.
+   *   · so `halfH` stayed at the authored 10 m against a true 6.72, and
+   *     everything placed from it — CFG.headroom above all — was out by that
+   *     ratio. Measured consequence: `CFG.headroom` asks for 1.6 m of air
+   *     above the collar and delivered MINUS 1.26 m, i.e. the cut's own
+   *     depth 0 was 24.5 CSS px off the top of its own band and the first row
+   *     of ground the player could see was already 1.26 m deep.
+   *
+   * The guard is now the right one: SQUARE PIXELS. The camera is correct for
+   * this band exactly when its aspect equals the band's own pixel aspect, and
+   * that test costs nothing and passes whatever the chrome is doing. It can
+   * only be run against a MEASURED band — with the derived one there is
+   * nothing to check against, and the constructor default (8 x 14, aspect
+   * 0.571) has to keep being rejected — so an unmeasured band does not adopt.
+   *
+   * And it is no longer silent. A silent fallback that works is the most
+   * expensive failure in this codebase (ASTRA §8): this one removed its own
+   * symptom and kept its cause for the whole of a session.
+   *
+   * @returns {boolean} true if halfW/halfH now describe the real frustum.
    */
   function adoptCameraScale() {
-    if (!camera || !camera.isOrthographicCamera) return;
+    /* Never adopt from a camera we built ourselves: that camera was framed
+       FROM halfW/halfH, so reading it back is not a measurement, it is an
+       echo — and an echo would freeze the scale at whatever it was when the
+       camera was constructed. Standalone (no renderer) derives instead. */
+    if (ownsCamera) return false;
+    if (!camera || !camera.isOrthographicCamera) {
+      sayOnce('nocam', '[geology] section camera is not orthographic — '
+        + `halfH stays at the authored ${(viewMetres * 0.5).toFixed(2)} m.`);
+      return false;
+    }
     const zoom = camera.zoom || 1;
-    const h = (camera.top - camera.bottom) / zoom;
-    const w = (camera.right - camera.left) / zoom;
-    if (!(h > 4) || !(w > 0)) return;
-    const v = vp();
-    const bandAspect = Math.max(0.25, v.w / Math.max(1, v.h * (LAYOUT.sectionHeight || 0.46)));
-    if (Math.abs(w / h - bandAspect) > 0.35 * bandAspect) return;   // not sized yet
-    viewMetres = clamp(h, 12, 160);
+    const hh = (camera.top - camera.bottom) * 0.5 / zoom;
+    const hw = (camera.right - camera.left) * 0.5 / zoom;
+    if (!(hh > 2) || !(hw > 0)) {
+      sayOnce('degen', `[geology] section camera frustum is degenerate (${hw.toFixed(2)} x `
+        + `${hh.toFixed(2)} half-extents) — halfH stays at the authored `
+        + `${(viewMetres * 0.5).toFixed(2)} m and every placement from it is out by that ratio.`);
+      return false;
+    }
+    const band = bandRect();
+    if (!band.measured) {
+      /* Not a fault: on the first frame core/renderer.js may not have run its
+         own layout yet. It becomes one if it never resolves, so it is still
+         said — once — with the reason. */
+      sayOnce('noband', '[geology] ctx.bands.section is not published yet — the section camera '
+        + 'cannot be validated against a real band, so halfH stays at the authored '
+        + `${(viewMetres * 0.5).toFixed(2)} m until it is.`);
+      return false;
+    }
+    const camAspect = hw / hh;
+    const bandAspect = band.w / band.h;
+    const off = Math.abs(camAspect / bandAspect - 1);
+    if (off > 0.06) {
+      sayOnce(`aspect:${camAspect.toFixed(3)}:${bandAspect.toFixed(3)}`,
+        `[geology] section camera NOT adopted: its aspect ${camAspect.toFixed(3)} is `
+        + `${(off * 100).toFixed(1)} % off the band's own ${bandAspect.toFixed(3)} `
+        + `(${Math.round(band.w)}x${Math.round(band.h)} px), so the cut would not have square `
+        + `pixels. halfH stays at the authored ${(viewMetres * 0.5).toFixed(2)} m against a `
+        + `measured ${hh.toFixed(2)} m, and the headroom, the strip window, the scale plate `
+        + 'and the ruler are all out by that ratio.');
+      return false;
+    }
+    halfW = hw;
+    halfH = hh;
+    viewH = hh * 2;
+    return true;
   }
 
   function ensureSection() {
@@ -6928,7 +7084,13 @@ export function createGeology(ctx) {
     if (ctx) {
       ctx.sectionView = {
         unitsPerMetre: 1,
+        /* THE ANCHOR, not the height. core/renderer.js reads this back into
+           its own `sectionViewH` and derives the cut's WIDTH from it; the
+           height the player can actually see is `visibleMetres`, and the two
+           differ by however much HUD chrome is on screen. */
         viewMetres,
+        visibleMetres: viewH,
+        pxPerMetre,
         holeX: 0,
         holeRadius: holeR,
         rodRadius: annulus.innerR,
@@ -7333,6 +7495,33 @@ export function createGeology(ctx) {
 
     if (!scene || !faceMesh) return;
 
+    /* ── THE BAND CHANGES HEIGHT WITHOUT A WINDOW RESIZE ────────────────────
+       HUD chrome is carved off the stage BEFORE the two bands split what is
+       left, so entering the site screen shortens the section from 388 to 261
+       CSS px and core/renderer.js re-solves its own frustum — and no resize
+       event fires anywhere. resize() was the only other caller of
+       computeView(), so geology laid itself out once, against a band with no
+       dock under it, and then kept those numbers for the whole run. Fixing
+       adoptCameraScale() alone changed nothing measurable for exactly this
+       reason: it was never called again after the band moved.
+
+       Re-solving is cheap and allocates nothing. renderer.js anchors the
+       cut's WIDTH, so halfW and pxPerMetre come out identical across a chrome
+       change and only halfH moves — but that is a property of renderer.js, not
+       a law, so if either of them DOES move the full rebuild still runs. */
+    if (!ownsCamera && camera?.isOrthographicCamera && (time - lastFrustumSolve) > 0.25) {
+      const hh = (camera.top - camera.bottom) * 0.5 / (camera.zoom || 1);
+      if (Math.abs(hh - halfH) > 0.02) {
+        lastFrustumSolve = time;
+        const v = vp();
+        const hw0 = halfW, ppm0 = pxPerMetre;
+        computeView(v.w, v.h);
+        if (Math.abs(halfW - hw0) > 0.02 || Math.abs(pxPerMetre - ppm0) > 0.05) {
+          resize(v.w, v.h);
+        }
+      }
+    }
+
     smoothDepth = damp(smoothDepth, depth, 9, dt);
     U.uDepth.value = layout.id === 'profile' || layout.id === 'heading'
       ? depthForStation(smoothDepth) : smoothDepth;
@@ -7514,8 +7703,15 @@ export function createGeology(ctx) {
       && (topDepth < ruler.top + 1.0 || botDepth > ruler.top + ruler.span - 1.0);
     if (rulerScrolled || rulerStale) {
       const nt = rulerScrolled
-        ? Math.floor((topDepth - viewMetres * 0.22) * 2) / 2
+        ? Math.floor((topDepth - stripLead()) * 2) / 2
         : ruler.top;                                     // repaint in place
+      /* Where the band's top edge falls INSIDE the strip about to be drawn.
+         The strip is taller than the band and starts above it, so anything the
+         ruler wants ON SCREEN — its unit header, its bore-scale gauge — has to
+         be drawn from here and not from the canvas edge. The lead is re-derived
+         per repaint because `nt` is floored to 0.5 m and drifts from
+         stripLead() by up to half a metre. */
+      ruler.windowTop = topDepth - nt;
       drawRuler(nt);
       ruler.drawnAt = depthForStation(depth);
       ruler.mesh.position.y = secYForDepth(nt + ruler.span * 0.5);
@@ -7535,7 +7731,7 @@ export function createGeology(ctx) {
       const nt = logStale && !(topDepth < logStrip.top + 1.0
                                || botDepth > logStrip.top + logStrip.span - 1.0)
         ? logStrip.top                                   // repaint in place
-        : Math.floor((topDepth - viewMetres * 0.22) * 2) / 2;
+        : Math.floor((topDepth - stripLead()) * 2) / 2;
       drawLog(nt);
       logStrip.loggedAt = loggedNow;
       logStrip.mesh.position.y = secYForDepth(nt + logStrip.span * 0.5);
@@ -7624,6 +7820,11 @@ export function createGeology(ctx) {
      PUBLIC
      ═════════════════════════════════════════════════════════════════════════ */
   function resize(w, h) {
+    /* This used to lay everything out, THEN adopt the camera, then discover
+       the scale had moved and lay it all out a second time. computeView()
+       adopts as its first statement now, so the layout is built from the real
+       frustum the first time and the second pass is gone. */
+    if (camera?.isOrthographicCamera && !ownsCamera) camBaseY = camera.position.y;
     computeView(w, h);
     if (!scene) return;
     buildFace();
@@ -7640,22 +7841,6 @@ export function createGeology(ctx) {
       camera.left = -halfW; camera.right = halfW;
       camera.top = halfH; camera.bottom = -halfH;
       camera.updateProjectionMatrix();
-    } else if (camera?.isOrthographicCamera) {
-      camBaseY = camera.position.y;
-      const before = viewMetres;
-      adoptCameraScale();
-      if (Math.abs(before - viewMetres) > 1e-3) {
-        // the renderer changed the section scale under us — redo the layout
-        computeView(w, h);
-        buildFace();
-        buildBackdrop();
-        buildWaterLine();
-        buildStrips();
-        buildModeFurniture();
-        buildStationRuler();
-        buildScalePlate();
-        applyModeVisibility();
-      }
     }
   }
 
@@ -7831,6 +8016,11 @@ export function createGeology(ctx) {
     /* view */
     setViewMetres(m) { viewMetres = clamp(+m || CFG.viewMetres, 12, 160); const v = vp(); resize(v.w, v.h); },
     get viewMetres() { return viewMetres; },
+    /** Metres of section the player can actually SEE — the measured frustum,
+     *  which is `viewMetres` only when no HUD chrome is inset. Anything asking
+     *  "how much is on screen" wants this one. */
+    get visibleMetres() { return viewH; },
+    get pxPerMetre() { return pxPerMetre; },
     get camera() { return camera; },
     get scene() { return scene; },
   };
