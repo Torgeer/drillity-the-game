@@ -207,8 +207,82 @@ h('5. PILE FAMILY  (a precast, a tube, an H and a sheet pair are not each other)
   }
 }
 
-/* ══ 6. NOTHING GAINED A DRAW CALL IT DID NOT EARN ════════════════════════ */
-h('6. DRAW-CALL BUDGET  (every id, high LOD, three wear levels)');
+/* ══ 6. THE CARBIDE CUTS THE HOLE — every percussive bit, every wear level ═
+   The defect this catches, found across the whole button-bit and DTH-bit
+   family: an 89 mm bit whose gauge row swept 95.5 mm and a 127 mm one that
+   swept 136.3, because the steel body was built ON gauge and the buttons were
+   then planted on top of it. A bit like that cannot re-enter its own hole —
+   the same failure AUDIT_ACCURACY.md records on the Odex eccentric.
+
+   Three things have to hold together, and all three are read off the mesh:
+     · the carbide sweeps the diameter the spec quotes, at EVERY wear level
+     · new, the carbide stands PROUD of the steel — Halco's build tolerance is
+       0.80 mm on diameter, and Rockmore and Epiroc both state that a bit
+       leaves the works 0.5-2.5 mm over its catalogue size
+     · worn out, it does not — Boart Longyear's scrap rule is that a bit is
+       finished "when the diameter across the gauge is less than or equal to
+       the diameter of the bit body", because past that point it binds.       */
+h('6. PERCUSSIVE GAUGE  (the buttons cut the hole; the body must not)');
+{
+  const carbide = (o) => /carbide/.test((o.material && o.material.name) || '');
+  const sweepIf = (root, pred) => {
+    root.updateWorldMatrix(true, true);
+    const v = new THREE.Vector3();
+    let r = 0;
+    root.traverse((o) => {
+      if (!o.isMesh || !o.geometry || !o.geometry.attributes.position) return;
+      if (o.isInstancedMesh || (pred && !pred(o))) return;
+      const p = o.geometry.attributes.position;
+      for (let i = 0; i < p.count; i++) {
+        v.fromBufferAttribute(p, i).applyMatrix4(o.matrixWorld);
+        const q = Math.hypot(v.x, v.z);
+        if (q > r) r = q;
+      }
+    });
+    return r * 2000;
+  };
+  const ids = listTools().filter((id) => {
+    const t = buildTool(THREE, ctx, id, { wear: 0, lod: 'low' });
+    const has = !!(t.userData.spec && t.userData.spec.cutDiameterMm !== undefined);
+    t.userData.dispose();
+    return has;
+  });
+  let offQuote = 0, notProud = 0, notOut = 0, worst = 0, worstId = '';
+  for (const id of ids) {
+    for (const wear of [0, 0.35, 0.7, 1]) {
+      const t = buildTool(THREE, ctx, id, { wear, lod: 'high' });
+      const sp = t.userData.spec;
+      const c = sweepIf(t, carbide);
+      const all = sweepIf(t, null);
+      const d = c - sp.cutDiameterMm;
+      if (Math.abs(d) > Math.abs(worst)) { worst = d; worstId = id + ' @wear ' + wear; }
+      if (Math.abs(d) > 0.25) {
+        offQuote++;
+        console.log('        OFF QUOTE  ' + id + ' wear ' + wear + ': quoted '
+          + sp.cutDiameterMm + ', carbide sweeps ' + c.toFixed(2));
+      }
+      if (wear === 0 && c <= all - 0.02) {
+        notProud++;
+        console.log('        NOT PROUD  ' + id + ': body ' + all.toFixed(2) + ' >= carbide ' + c.toFixed(2));
+      }
+      if (wear === 1 && c > all + 0.02) {
+        notOut++;
+        console.log('        STILL ON GAUGE  ' + id + ' at wear 1: carbide '
+          + c.toFixed(2) + ' > body ' + all.toFixed(2));
+      }
+      t.userData.dispose();
+    }
+  }
+  ok(ids.length >= 20, 'the percussive bit families declare a cut diameter', ids.length + ' ids');
+  ok(offQuote === 0, 'carbide sweeps the quoted cut diameter at every wear level',
+    'worst ' + worst.toFixed(2) + ' mm on ' + worstId);
+  ok(notProud === 0, 'new, the gauge row stands proud of the body', 'Halco build tolerance');
+  ok(notOut === 0, 'worn out, the body has caught the gauge — the bit is gauged out',
+    'Boart Longyear scrap rule');
+}
+
+/* ══ 7. NOTHING GAINED A DRAW CALL IT DID NOT EARN ════════════════════════ */
+h('7. DRAW-CALL BUDGET  (every id, high LOD, three wear levels)');
 {
   const ids = listTools();
   let worstDraw = 0, worstId = '', fails = 0, totalDraw = 0;

@@ -450,6 +450,38 @@ export function group(T, parent, name, o) {
   return g;
 }
 
+/**
+ * HARD EDGES ON A SOLID OF REVOLUTION.
+ *
+ * `computeVertexNormals()` averages the normals of every face meeting at a
+ * vertex, so a lathe profile with a 90-degree corner in it comes back as a
+ * smooth blend across that corner. On a drill bit that is fatal: the gauge
+ * chamfer, the shoulder the chuck lands on, the relief behind the skirt and
+ * the rim of a button's wear flat are ALL corners, and smoothing them turns a
+ * machined part into a bar of soap. Duplicating the profile point at each
+ * crease gives the surfaces either side their own vertices, and therefore
+ * their own normals.
+ *
+ * Returns a new [r,y] list; a duplicated point costs one extra ring of
+ * triangles and never an extra draw call.
+ */
+export function creaseRows(pairs, deg) {
+  const lim = Math.cos((deg === undefined ? 34 : deg) * DEG);
+  if (pairs.length < 3 || lim >= 1) return pairs;
+  const out = [pairs[0]];
+  for (let i = 1; i < pairs.length - 1; i++) {
+    const a = pairs[i - 1], b = pairs[i], c = pairs[i + 1];
+    let ax = b[0] - a[0], ay = b[1] - a[1];
+    let cx = c[0] - b[0], cy = c[1] - b[1];
+    const la = Math.hypot(ax, ay), lc = Math.hypot(cx, cy);
+    out.push(b);
+    if (la < 1e-9 || lc < 1e-9) continue;
+    if ((ax * cx + ay * cy) / (la * lc) < lim) out.push([b[0], b[1]]);
+  }
+  out.push(pairs[pairs.length - 1]);
+  return out;
+}
+
 export const G = {
   box: (T, w, h, d) => new T.BoxGeometry(w, h, d),
   cyl: (T, rt, rb, h, seg, open) => new T.CylinderGeometry(rt, rb, h, seg || 16, 1, !!open),
@@ -459,10 +491,21 @@ export const G = {
   plane: (T, w, h) => new T.PlaneGeometry(w, h),
   ring: (T, ri, ro, seg) => new T.RingGeometry(ri, ro, seg || 24),
   capsule: (T, r, len, seg) => new T.CapsuleGeometry(r, len, Math.max(3, (seg || 10) >> 1), seg || 10),
-  /** Solid of revolution from [r,y] pairs, ordered bottom → top. */
-  lathe: (T, pairs, seg, closed) => {
+  /**
+   * Solid of revolution from [r,y] pairs, ordered bottom → top.
+   *
+   * `creaseDeg` (default 34) splits the surface wherever the profile turns
+   * harder than that. Without it `computeVertexNormals` averages across every
+   * corner in the profile, and a bit head — which is nothing BUT corners: the
+   * gauge chamfer, the shoulder under the chuck, the rim of a wear flat —
+   * renders as one smooth barrel with the whole silhouette washed out. Pass 0
+   * to keep a profile fully smooth. Costs one duplicated ring per crease and
+   * no draw call.
+   */
+  lathe: (T, pairs, seg, closed, creaseDeg) => {
+    const src = creaseRows(pairs, creaseDeg === undefined ? 34 : creaseDeg);
     const pts = [];
-    for (let i = 0; i < pairs.length; i++) pts.push(new T.Vector2(Math.max(1e-5, pairs[i][0]), pairs[i][1]));
+    for (let i = 0; i < src.length; i++) pts.push(new T.Vector2(Math.max(1e-5, src[i][0]), src[i][1]));
     if (closed !== false) {
       const a = pts[0], b = pts[pts.length - 1];
       if (a.x !== b.x || a.y !== b.y) pts.push(a.clone());
@@ -669,23 +712,39 @@ export function flightGeometry(T, o) {
    ═══════════════════════════════════════════════════════════════════════════ */
 /**
  * How far a button of each shape stands out of the steel, as a multiple of its
- * own RADIUS. A driller reads a bit face by the button silhouette before
- * anything else, so these are the numbers that decide whether the render is a
- * bit or a colander.
+ * own RADIUS, and how much of that height is the profiled head rather than the
+ * plain cylinder under it.
  *
- * A spherical button is set so that a full hemisphere is exposed — protrusion
- * ≈ its own radius, i.e. 0.5 × diameter. A ballistic is a long ogive standing
- * roughly a diameter clear. The previous values (0.62 r spherical, 1.35 r
- * ballistic) were both about half of that, and at shop-card size the buttons
- * disappeared into the face steel entirely.
+ * THE ONE HARD NUMBER. Rockmore's *Carbide Sharpening Guide for Button Bits*
+ * states it twice, as a floor and a ceiling: "at least 1/2 of the carbide
+ * diameter should protrude" and "carbides should not protrude more than 3/4 of
+ * the carbide diameter — removing excessive steel body will result in carbide
+ * failure". Halco puts the same rule in millimetres (grind so carbide stands
+ * no more than 9 mm proud in abrasive ground). So protrusion is 0.50-0.75 × d,
+ * i.e. 1.00-1.50 × r, and nothing may sit outside that band.
+ *
+ * `head` is the height of the shaped crown above the cylindrical shank, from
+ * BETEK's tungsten-carbide catalogue (pp. 20-21, the D / H / h1 columns):
+ * hemispherical h1/D 0.33-0.43, semi-ballistic 0.46-0.53, ballistic 0.66-0.70,
+ * conical 0.45-0.57. The difference between `stick` and `head` is the band of
+ * bare cylinder that shows between the steel and the dome on a real button —
+ * a small thing that is nonetheless the difference between carbide set into a
+ * bit and beads glued onto one.
+ *
+ * The previous values (0.62 r spherical, 1.35 r ballistic) were under the
+ * sourced floor; a first correction overshot to 2.15 r, above the ceiling.
  */
 export const BUTTON_STICKOUT = {
-  spherical: 0.95,
-  semiballistic: 1.45,
-  ballistic: 2.15,
-  conical: 2.0,
+  spherical: 1.00,
+  semiballistic: 1.22,
+  ballistic: 1.50,
+  conical: 1.34,
   chisel: 1.25,
   flat: 0.34,
+};
+const BUTTON_HEAD = {
+  spherical: 0.80, semiballistic: 1.00, ballistic: 1.36,
+  conical: 1.04, chisel: 1.05, flat: 0.34,
 };
 
 /**
@@ -707,40 +766,50 @@ export function buttonGeometry(T, o) {
   const r = d * 0.5;
   const kind = o.kind || 'spherical';
   const wear = clamp01(o.wear || 0);
-  const stick = (o.protrusion !== undefined ? o.protrusion
-    : (BUTTON_STICKOUT[kind] !== undefined ? BUTTON_STICKOUT[kind] : BUTTON_STICKOUT.spherical)) * r;
+  const kStick = BUTTON_STICKOUT[kind] !== undefined ? BUTTON_STICKOUT[kind] : BUTTON_STICKOUT.spherical;
+  const stick = (o.protrusion !== undefined ? o.protrusion : kStick) * r;
   const seg = o.seg || 10;
-  const bury = o.bury !== undefined ? o.bury : r * 0.9;
-  const pts = [[0, -bury], [r, -bury], [r, 0]];
+  // BETEK's H column: a button is 1.3-1.8 diameters long overall, so about two
+  // thirds of it is down in the steel. That matters here only because the steel
+  // washes away and exposes it — see studFace — so the shank must be long
+  // enough to still be shank at the end of the bit's life.
+  const bury = o.bury !== undefined ? o.bury : r * 1.3;
+  // The exposed band of plain cylinder below the crown.
+  const kHead = BUTTON_HEAD[kind] !== undefined ? BUTTON_HEAD[kind] : BUTTON_HEAD.spherical;
+  const shank = clampv(stick - kHead * r * (o.protrusion !== undefined ? o.protrusion / kStick : 1), 0, stick * 0.5);
+  const pts = [[0, -bury], [r, -bury], [r, shank]];
+  const base = shank;
   if (kind === 'ballistic' || kind === 'semiballistic') {
     // A ballistic wears from the point back: the ogive is truncated and the
     // truncation opens into a flat, so the tip radius grows fast while the
     // height falls slowly. That is why a half-worn ballistic reads as a
     // *stubbier* ballistic rather than as a sphere.
     const h = stick * (1 - wear * 0.34);
+    const yy = (f) => base + (h - base) * f;
     const tipR = lerp(r * 0.13, r * 0.66, Math.pow(wear, 0.8));
-    pts.push([r * 0.99, h * 0.16]);
-    pts.push([r * 0.93, h * 0.36]);
-    pts.push([r * 0.80, h * 0.56]);
-    pts.push([r * 0.62, h * 0.74]);
-    pts.push([lerp(r * 0.38, r * 0.72, wear), h * 0.88]);
+    pts.push([r * 0.99, yy(0.16)]);
+    pts.push([r * 0.93, yy(0.36)]);
+    pts.push([r * 0.80, yy(0.56)]);
+    pts.push([r * 0.62, yy(0.74)]);
+    pts.push([lerp(r * 0.38, r * 0.72, wear), yy(0.88)]);
     if (wear > 0.14) {
-      pts.push([tipR * 1.04, h * 0.985]);   // the rim of the wear flat
+      pts.push([tipR * 1.04, yy(0.985)]);   // the rim of the wear flat
       pts.push([tipR, h]);
       pts.push([tipR * 0.45, h - r * 0.035 * wear]);  // dished centre
       pts.push([0, h - r * 0.04 * wear]);
     } else {
-      pts.push([tipR, h * 0.96]);
+      pts.push([tipR, yy(0.96)]);
       pts.push([tipR * 0.5, h]);
       pts.push([0, h]);
     }
   } else if (kind === 'conical') {
     const h = stick * (1 - wear * 0.44);
+    const yy = (f) => base + (h - base) * f;
     const tipR = lerp(r * 0.10, r * 0.58, Math.pow(wear, 0.8));
-    pts.push([r * 0.94, h * 0.26]);
-    pts.push([r * 0.66, h * 0.66]);
-    if (wear > 0.14) { pts.push([tipR * 1.05, h * 0.98]); pts.push([tipR, h]); pts.push([0, h - r * 0.03 * wear]); }
-    else { pts.push([tipR, h * 0.94]); pts.push([0, h]); }
+    pts.push([r * 0.94, yy(0.26)]);
+    pts.push([r * 0.66, yy(0.66)]);
+    if (wear > 0.14) { pts.push([tipR * 1.05, yy(0.98)]); pts.push([tipR, h]); pts.push([0, h - r * 0.03 * wear]); }
+    else { pts.push([tipR, yy(0.94)]); pts.push([0, h]); }
   } else if (kind === 'flat') {
     // A flat-top insert (and a PDC cutter, which borrows this) is a right
     // cylinder with a chamfered rim, not a dome. It wears by losing that rim
@@ -750,8 +819,9 @@ export function buttonGeometry(T, o) {
     pts.push([r, h - ch]); pts.push([r - ch * 0.8, h]); pts.push([0, h]);
   } else if (kind === 'chisel') {
     const h = stick * (1 - wear * 0.4);
-    pts.push([r * 0.94, h * 0.34]);
-    pts.push([r * 0.72, h * 0.68]);
+    const yy = (f) => base + (h - base) * f;
+    pts.push([r * 0.94, yy(0.34)]);
+    pts.push([r * 0.72, yy(0.68)]);
     pts.push([lerp(r * 0.10, r * 0.58, wear), h]);
     pts.push([0, h]);
   } else {
@@ -759,23 +829,30 @@ export function buttonGeometry(T, o) {
     // its crown taken off square. The rim between dome and flat is built
     // explicitly — that hard edge is what makes a worn button read as worn
     // instead of as a smaller button.
+    //
+    // The flat grows to 0.68 of the button DIAMETER at wear 1. Rockmore's four
+    // stages are: no wear / slight, under 1/6 Ø / normal, under 1/3 Ø — "best
+    // results if sharpening occurs before this point" / very worn, over 1/3 /
+    // worn flat, over 2/3. Wear 1 in this game is a bit that should have come
+    // out of the hole two shifts ago, so it sits at the top of that scale.
     const h = stick * (1 - wear * 0.42);
-    const flat = lerp(0.0, 0.72, Math.pow(wear, 0.75));
+    const flat = lerp(0.0, 0.68, Math.pow(wear, 0.75));
     const steps = 6;
     for (let i = 1; i <= steps; i++) {
       const a = (i / steps) * (Math.PI * 0.5);
       const rr = r * Math.cos(a);
+      const yv = base + (h - base) * Math.sin(a);
       if (rr < r * flat * 1.02) break;
-      pts.push([rr, h * Math.sin(a)]);
+      pts.push([rr, yv]);
     }
     if (flat > 0.02) {
       const fr = r * flat;
-      pts.push([fr * 1.03, h * 0.992]);
+      pts.push([fr * 1.03, base + (h - base) * 0.992]);
       pts.push([fr, h]);
       pts.push([fr * 0.45, h - r * 0.03 * wear]);
       pts.push([0, h - r * 0.035 * wear]);
     } else {
-      pts.push([Math.max(1e-4, r * 0.12), h * 0.995]);
+      pts.push([Math.max(1e-4, r * 0.12), base + (h - base) * 0.995]);
       pts.push([0, h]);
     }
   }
@@ -786,14 +863,52 @@ export function buttonGeometry(T, o) {
   return g;
 }
 
-/** A snapped-out button: the empty socket with a chipped crater lip. */
+/**
+ * How far a seated button reaches past its own seat centre, measured off the
+ * geometry that will actually ship.
+ *
+ * THE BIT DIAMETER IS THE CARBIDE, NOT THE STEEL. A bit body is deliberately
+ * built under gauge and the gauge row cuts the hole; get the seat radius wrong
+ * and you have quoted an 89 mm bit that sweeps 95.5 mm — a bit that could not
+ * re-enter its own hole, which is the same defect AUDIT_ACCURACY.md found on
+ * the Odex eccentric. Deriving the reach by hand needs a different formula per
+ * button shape (a hemisphere reaches its own radius; a ballistic reaches most
+ * of its stickout once tilted), so instead this builds the button, rotates it
+ * by the seat tilt and reads the largest radial offset off the vertices.
+ *
+ * Seat the ring at `targetRadius - buttonReach(...)` and the outermost carbide
+ * lands exactly on gauge, by construction.
+ */
+export function buttonReach(T, o) {
+  const geo = buttonGeometry(T, o);
+  const tilt = o.tilt || 0;
+  const ct = Math.cos(tilt);
+  const st = Math.sin(tilt);
+  const p = geo.attributes.position;
+  let m = 0;
+  for (let i = 0; i < p.count; i++) {
+    const v = Math.hypot(p.getX(i), p.getZ(i)) * ct + p.getY(i) * st;
+    if (v > m) m = v;
+  }
+  try { geo.dispose(); } catch (e) { /* noop */ }
+  return m;
+}
+
+/**
+ * A snapped-out button: the empty socket with a chipped crater lip.
+ *
+ * The lip is deliberately kept INSIDE the diameter the button reached. A
+ * socket that flared wider than its own button made the bit measure over gauge
+ * at the very wear level where it should be measuring under — a lost button
+ * cannot cut, so it must not set the cutting diameter either.
+ */
 export function socketGeometry(T, o) {
   o = o || {};
   const d = o.dia !== undefined ? o.dia : mm(11);
   const r = d * 0.5;
   return G.lathe(T, [
     [0, -r * 1.15], [r * 0.94, -r * 1.0], [r * 0.98, -r * 0.15],
-    [r * 1.22, 0], [r * 1.30, r * 0.12], [r * 1.05, r * 0.16], [0, r * 0.16],
+    [r * 1.04, -r * 0.02], [r * 1.00, r * 0.06], [r * 0.86, r * 0.09], [0, r * 0.09],
   ], o.seg || 9, false);
 }
 
@@ -843,8 +958,12 @@ export function studFace(T, ctx, parent, layout, o) {
     const quat = new T.Quaternion().setFromUnitVectors(up, dir);
     // Every slot wears at its own rate. A face where all thirty buttons are
     // identically blunt is a render; a real one has a couple that took the
-    // punishment and a couple that were shielded.
-    const bw = clamp01(wear * (b.gauge ? 1.25 : 1) * lerp(0.72, 1.22, h2));
+    // punishment and a couple that were shielded. A gauge button is the
+    // exception — every one of them tracks the same hole wall, they wear
+    // together, and the row is what the bit's diameter is measured across, so
+    // it is left even and predictable.
+    const jit = b.even ? 1 : lerp(0.72, 1.22, h2);
+    const bw = clamp01(wear * (b.gauge ? 1.25 : 1) * jit);
     const geo = lost
       ? (o.lostGeo ? o.lostGeo(b, i) : socketGeometry(T, { dia: b.dia, seg: Math.max(7, seg - 2) }))
       : buttonGeometry(T, {
@@ -853,13 +972,18 @@ export function studFace(T, ctx, parent, layout, o) {
       });
     // Recess a lost socket into the eroded face, and stand a survivor on the
     // pedestal the scour has left it.
-    const lift = wash > 0.02 ? b.dia * (b.gauge ? 0.30 : 0.20) * wash * lerp(0.6, 1.3, h2) : 0;
+    const lift = wash > 0.02
+      ? b.dia * (b.gauge ? 0.30 : 0.20) * wash * (b.even ? 1 : lerp(0.6, 1.3, h2)) : 0;
     const p = [b.x + dir.x * lift, b.y + dir.y * lift, b.z + dir.z * lift];
     out.push(part(T, parent, geo, lost ? matS : matC, { p: p, q: quat, recv: false }));
     if (lift > 1e-5 && !lost && o.bodyMat) {
+      // The pedestal never grows wider than the button it carries. Steel that
+      // stood proud of the carbide would be steel rubbing the hole wall, which
+      // is the binding failure the gauge relief exists to prevent — and it
+      // would silently set the bit's measured diameter.
       const pr = b.dia * 0.5;
       out.push(part(T, parent, G.lathe(T, [
-        [pr * 1.34, -lift * 1.25], [pr * 1.24, -lift * 0.35], [pr * 1.02, lift * 0.06], [0, lift * 0.06],
+        [pr * 1.08, -lift * 1.25], [pr * 1.05, -lift * 0.35], [pr * 1.00, lift * 0.06], [0, lift * 0.06],
       ], Math.max(6, seg - 3), false), o.bodyMat, { p: p, q: quat, recv: false, cast: false }));
     }
   }
@@ -1081,7 +1205,8 @@ export function profiledLathe(T, pairs, o) {
   const cols = Math.max(6, o.segments || 24);
   const fn = o.radiusFn;
   const yfn = o.yFn;
-  const pts = pairs.map((p) => [Math.max(1e-5, p[0]), p[1]]);
+  const pts = creaseRows(pairs, o.creaseDeg === undefined ? 34 : o.creaseDeg)
+    .map((p) => [Math.max(1e-5, p[0]), p[1]]);
   if (o.closedProfile !== false) {
     const a = pts[0], b = pts[pts.length - 1];
     if (a[0] !== b[0] || a[1] !== b[1]) pts.push([a[0], a[1]]);
@@ -1328,6 +1453,42 @@ const BIT_DIA_FOR_THREAD = {
   T38: 76, T45: 89, T51: 102, T60: 127, GT60: 127, T76: 152, H90: 178,
 };
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   BUTTON POPULATIONS — off the catalogue tables, not off a curve fit.
+   ═══════════════════════════════════════════════════════════════════════════
+   How many buttons a bit carries, and how big they are, is published per
+   diameter and it does NOT follow a smooth law: makers step the carbide size
+   and jump the count at particular sizes. `round(diaMm / 12)` gave a 45 mm bit
+   four gauge buttons where every catalogue says six, and a 127 mm bit eleven
+   where they all say nine.
+
+   Rows are [maxDiaMm, gaugeCount, gaugeButtonMm, faceCount, faceButtonMm].
+
+   TOP HAMMER — Sandvik top-hammer brochure (front/gauge button tables, T38 to
+   T51, 64-127 mm) and Epiroc's tophammer catalogue (centre/gauge split, 33-76
+   mm); `Top_Hammer_Tools.pdf` for the 45-57 mm drifting sizes.
+
+   DTH — Epiroc DTH product catalogue (Outer/Inner/Front columns, 70-254 mm),
+   cross-checked against Rockmore's 2025 DTH section 2 (85-150 mm), which
+   agrees within one button and one carbide step throughout. */
+export const TH_BUTTONS = [
+  [36, 5, 8, 2, 7], [43, 6, 9, 3, 8], [48, 6, 9, 3, 9], [57, 6, 10, 3, 10],
+  [64, 6, 11, 4, 11], [70, 8, 11, 5, 10], [76, 8, 12, 5, 11], [89, 8, 13, 5, 12],
+  [102, 9, 13, 9, 11], [115, 9, 14, 10, 12], [127, 9, 14, 10, 13],
+  [152, 12, 13, 8, 13], [178, 12, 16, 10, 14],
+];
+export const DTH_BUTTONS = [
+  [70, 6, 10, 5, 10], [80, 6, 12, 5, 10], [89, 6, 12, 5, 10],
+  [100, 8, 12.7, 7, 11], [110, 8, 14.5, 7, 12.7], [125, 8, 14.5, 8, 12.7],
+  [130, 8, 15.8, 8, 14.5], [152, 8, 16, 9, 16], [165, 10, 16, 10, 16],
+  [203, 12, 19, 9, 19], [270, 12, 19, 11, 19],
+];
+/** Pick the catalogue row for a diameter; the last row covers everything over. */
+export function bitButtonRow(table, diaMm) {
+  for (let i = 0; i < table.length; i++) if (diaMm <= table[i][0]) return table[i];
+  return table[table.length - 1];
+}
+
 /**
  * Top-hammer button bit. Drop-centre face, gauge row, face rows, four flushing
  * flutes, two face flushing holes, female rope thread up the bore.
@@ -1347,7 +1508,6 @@ export function buildButtonBit(THREE_, ctx, opts) {
   const flutes = opts.flutes === undefined ? 4 : opts.flutes;
 
   const R = mm(diaMm) * 0.5;
-  const Rw = R - mm(2.6) * wear;                 // gauge wears undersize
   const headLen = mm(Math.max(72, diaMm * 0.82));
   const faceY = -headLen;
   const boreR = mm(ts.majorMm) * 0.5 + mm(1.2);
@@ -1357,65 +1517,177 @@ export function buildButtonBit(THREE_, ctx, opts) {
   const steel = bitBodyMaterial(ctx, wear * 0.85);
   const worn = material(ctx, 'wornSteel');
 
-  const domeAt = (r) => faceY + mm(6) * (1 - Math.pow(Math.min(1, r / (Rw * 0.92)), 2));
+  /* ── GAUGE: THE CARBIDE CUTS THE HOLE, THE STEEL DOES NOT ────────────────
+     A bit body is deliberately built UNDER gauge and the gauge row stands proud
+     of it, so that the buttons meet the rock and the steel never binds. Halco
+     states the build tolerance directly — "the drill head diameter across
+     buttons should be 0.80 mm greater than gauge diameter" — and Rockmore and
+     Epiroc both state the other half: a button bit leaves the factory 0.5-2.5 mm
+     OVER its catalogue size, because it loses that in the first few metres.
 
-  const profile = [
-    [0.0001, faceY + mm(6)],
-    [Rw * 0.42, faceY + mm(4.7)],
-    [Rw * 0.78, faceY + mm(1.6)],
-    [Rw * 0.94, faceY + mm(0.5)],
-    [Rw, faceY + mm(8)],
-    [Rw, faceY + mm(18)],
-    [R * 0.985, faceY + mm(32)],
-    [R * 0.985, -mm(16)],
-    [R * 0.94, -mm(5)],
-    [R * 0.94, 0],
+     Boart Longyear gives the scrap rule, and it closes the envelope: the bit is
+     finished when "the diameter across the gauge is less than or equal to the
+     diameter of the bit body", because at that point it binds. So wear 0 is
+     nominal + oversize across the carbide, wear 1 is carbide back level with a
+     body that has itself worn in, and the whole usable travel is about 2 mm on
+     diameter.
+
+     The steel loses it as a TAPER, not as a smaller cylinder — hardest scrub is
+     at the corner that meets uncut rock — and that cone is why a worn bit has
+     to be reamed into its own last hole. `steelR(y)` is the only place body
+     radius is decided, so silhouette and button ring cannot disagree. */
+  const overMm = clampv(diaMm * 0.010, 0.6, 2.5);     // factory oversize
+  const underMm = clampv(diaMm * 0.009, 0.5, 2.0);    // body under gauge, new
+  const bodyR = mm(diaMm - underMm) * 0.5;
+  const cutR = mm(diaMm + overMm - (overMm + underMm * 1.7) * wear) * 0.5;
+  const steelNose = bodyR - mm(underMm * 0.7) * wear;
+  const skirtTop = faceY + mm(34);
+  const steelR = (y) => bodyR - (bodyR - steelNose) * clamp01((skirtTop - y) / (skirtTop - faceY));
+  const Rw = steelNose;
+
+  /* The face. A top-hammer bit under about 64 mm is flat or lightly convex —
+     one flushing hole, and the whole face cuts. Above that it is DROP-CENTRE:
+     the middle is sunk below the gauge row so the outer ring bites first and
+     the bit steers itself straight instead of walking. `drop` is the depth of
+     that centre relative to the gauge corner. */
+  const style = opts.face || (diaMm >= 64 ? 'drop' : 'flat');
+  const drop = style === 'drop' ? mm(clampv(diaMm * 0.085, 4.5, 14))
+    : (style === 'convex' ? -mm(clampv(diaMm * 0.055, 3, 8)) : mm(1.2));
+  /* Profile of the face from centre out: sunk centre, a straight ramp out to
+     the shoulder, then the gauge corner chamfer. */
+  const faceAt = (r) => {
+    const u = clamp01(r / (Rw * 0.90));
+    return faceY + drop * (1 - Math.pow(u, 1.7)) + mm(0.6) * u;
+  };
+
+  // Four waterways, running from the blow holes across the face, over the
+  // gauge corner and up the skirt as flushing grooves.
+  const gr = grooveField({ count: flutes || 1, phase: 0.35, widthFrac: 0.40 });
+  const grooveY = mm(clampv(diaMm * 0.075, 3.5, 11));
+  const grooveR = clampv(diaMm * 0.0016, 0.10, 0.17);   // fraction of radius
+
+  const faceRows = [];
+  for (let i = 0; i <= 5; i++) {
+    const rr = Rw * 0.92 * (i / 5);
+    faceRows.push([Math.max(0.0001, rr), faceAt(rr)]);
+  }
+  const cornerY = faceY + mm(clampv(diaMm * 0.10, 6, 16));
+  const profile = faceRows.concat([
+    [Rw * 0.965, faceAt(Rw * 0.965)],        // shoulder before the corner
+    [Rw, cornerY],                           // gauge corner chamfer
+    [steelR(faceY + mm(24)), faceY + mm(24)],
+    [steelR(skirtTop), skirtTop],
+    [bodyR * 0.985, faceY + mm(44)],
+    [bodyR * 0.985, -mm(16)],
+    [bodyR * 0.94, -mm(5)],                  // relief behind the skirt
+    [bodyR * 0.94, 0],
     [boreR, 0],
     [boreR, faceY + mm(30)],
     [boreR * 0.5, faceY + mm(35)],
     [0.0001, faceY + mm(35)],
-  ];
+  ]);
+  // Row indices shift when profiledLathe splits creases, so every gate below
+  // is geometric. `outside` separates the skin from the bore, which is the one
+  // distinction a radius alone cannot make on a small bit, where the thread
+  // bore is most of the diameter.
+  const outside = (r) => r > boreR * 1.05;
   const body = profiledLathe(T, profile, {
     segments: seg,
+    // The skirt flute: deep, and it runs from the gauge corner up past the
+    // shoulder, because the cuttings have to keep moving after they leave the
+    // face. Shallower right at the corner so the gauge row keeps its steel.
     radiusFn: (th, r, y) => {
-      if (!flutes || r < Rw * 0.6 || y < faceY + mm(3)) return 1;
-      const a = ((th * flutes) % TAU + TAU) % TAU;
-      const d = Math.min(a, TAU - a) / Math.PI;
-      const k = Math.max(0, 1 - d * 3.4);
-      return 1 - 0.105 * k * k;
+      if (!outside(r)) return 1;
+      // Wrench flats up at the back, where the crew breaks the bit off the rod.
+      if (y > -mm(17) && y < -mm(3.5)) {
+        const a = ((th * 4 + 0.6) % TAU + TAU) % TAU;
+        const d = Math.min(a, TAU - a) / Math.PI;
+        return d < 0.30 ? 1 - 0.048 * (1 - d / 0.30) : 1;
+      }
+      if (!flutes || y < cornerY) return 1;
+      const t = clamp01((y - cornerY) / mm(26));
+      return 1 - grooveR * gr.depthAt(th) * lerp(0.45, 1, t);
+    },
+    // The face waterway: an axial cut, deepest across the middle of the face
+    // and running out over the corner chamfer.
+    yFn: (th, r, y) => {
+      if (!flutes || y > cornerY + 1e-6) return 0;
+      const w = r <= Rw * 0.97 ? 1 : 0.62;
+      return grooveY * gr.depthAt(th) * w * clamp01(0.30 + r / (Rw * 0.55));
     },
   });
   part(T, g, body, steel, { name: 'head' });
 
   // ── carbide ──────────────────────────────────────────────────────────────
-  const gaugeCount = Math.max(4, Math.round(diaMm / 12));
-  const gaugeDia = mm(clampv(diaMm * 0.125, 8, 16));
-  const faceDia = mm(clampv(diaMm * 0.115, 7, 14));
-  const layout = ringLayout({
-    count: gaugeCount, radius: Rw - gaugeDia * 0.62, y: faceY + mm(6.5),
-    tilt: 42 * DEG, dia: gaugeDia, kind: kind, gauge: true, phase: 0.3,
+  const row = bitButtonRow(TH_BUTTONS, diaMm);
+  const gaugeCount = opts.gaugeButtons || row[1];
+  const gaugeDia = mm(row[2]);
+  const faceCount = opts.faceButtons || row[3];
+  const faceDia = mm(row[4]);
+  const onLand = (ring) => ring.map((b) => {
+    const a = gr.clearOf(b.a);
+    const st = Math.sin(b.tiltR || 0);
+    return Object.assign({}, b, {
+      x: Math.cos(a) * b.r, z: Math.sin(a) * b.r,
+      nx: Math.cos(a) * st, nz: Math.sin(a) * st, a: a,
+    });
   });
-  const rOuter = Rw * 0.66;
-  layout.push.apply(layout, ringLayout({
-    count: Math.max(3, Math.round(diaMm / 17)), radius: rOuter,
-    y: domeAt(rOuter), tilt: 10 * DEG, dia: faceDia, kind: kind, phase: 0.9,
-  }));
-  const rInner = Rw * 0.3;
-  layout.push.apply(layout, ringLayout({
-    count: 3, radius: rInner, y: domeAt(rInner), tilt: 4 * DEG,
+  /* GAUGE ROW. 35 degrees is the industry default — Epiroc lists it on every
+     flat-front and concave DTH row from 70 to 254 mm, and `Top_Hammer_Tools`
+     codes the three available angles as L/M/H = 30/35/40. The seat radius is
+     then SOLVED, not chosen: buttonReach() measures how far this exact button
+     at this exact tilt and wear stands out from its own seat, and the ring is
+     placed so the outermost carbide lands on the cutting diameter. That is the
+     only way the quoted figure can be read off the mesh at every wear level. */
+  const gaugeTilt = (opts.gaugeAngle || 35) * DEG;
+  const gaugeWear = clamp01(wear * 1.25);
+  const gaugeLift = gaugeDia * 0.30 * clamp01((wear - 0.42) / 0.58);
+  const reach = buttonReach(T, {
+    dia: gaugeDia, kind: kind, tilt: gaugeTilt, wear: gaugeWear, seg: btnSeg,
+  }) + gaugeLift * Math.sin(gaugeTilt);
+  const layout = ringLayout({
+    count: gaugeCount, radius: cutR - reach, y: faceY + mm(clampv(diaMm * 0.055, 3.2, 8)),
+    tilt: gaugeTilt, dia: gaugeDia, kind: kind, gauge: true, phase: 0.3,
+  }).map((b) => Object.assign(b, { tiltR: gaugeTilt, even: true }));
+  /* Face rows. Epiroc publishes an explicit *Indexing* column: the front row is
+     rotated off the gauge row so the two do not track the same groove in the
+     rock. Inner rows run at 20 degrees, centre buttons close to axial. */
+  const outerN = Math.max(2, Math.round(faceCount * 0.62));
+  const innerN = Math.max(1, faceCount - outerN - (style !== 'drop' && diaMm >= 76 ? 1 : 0));
+  const rOuter = Rw * 0.62;
+  layout.push.apply(layout, onLand(ringLayout({
+    count: outerN, radius: rOuter,
+    y: faceAt(rOuter), tilt: 20 * DEG, dia: faceDia, kind: kind,
+    phase: 0.3 + Math.PI / gaugeCount,
+  }).map((b) => Object.assign(b, { tiltR: 20 * DEG }))));
+  const rInner = Rw * 0.28;
+  layout.push.apply(layout, onLand(ringLayout({
+    count: innerN, radius: rInner, y: faceAt(rInner), tilt: 6 * DEG,
     dia: faceDia * 0.94, kind: kind, phase: 1.7,
-  }));
-  if (diaMm >= 89) layout.push({ x: 0, y: domeAt(0), z: 0, dia: faceDia * 0.9, kind: kind });
-  studFace(T, ctx, g, layout, { wear: wear, seg: btnSeg });
+  }).map((b) => Object.assign(b, { tiltR: 6 * DEG }))));
+  // A drop-centre face is drop-centre precisely so that nothing sits in the
+  // middle; a flat face carries a centre button, and on a bit this size it is
+  // the first one to go.
+  if (style !== 'drop' && diaMm >= 76) layout.push({ x: 0, y: faceAt(0), z: 0, dia: faceDia * 0.9, kind: kind });
+  studFace(T, ctx, g, layout, { wear: wear, seg: btnSeg, bodyMat: steel });
 
-  // ── flushing ─────────────────────────────────────────────────────────────
-  for (let i = 0; i < 2; i++) {
-    const a = 1.35 + i * Math.PI;
-    const r = Rw * 0.46;
+  /* ── FLUSHING ────────────────────────────────────────────────────────────
+     Sandvik lists 3-4 front holes of 8-14 mm across the 64-127 mm top-hammer
+     range (T38 64 mm = 3 × 8, T45 89 mm = 4 × 9, T51 115 mm = 3 × 14), and
+     Sandvik's own patent EP2902583 states the placement rule: the apertures sit
+     "radially between front buttons and gauge buttons". They open into the
+     FLOOR of a waterway — a hole discharging onto a land has nowhere to send
+     the chips. Small drifting bits additionally carry one side hole through the
+     skirt, which `Top_Hammer_Tools` codes as flushing style W. */
+  const holes = opts.flushHoles || (diaMm >= 100 ? 3 : (diaMm >= 56 ? 4 : 3));
+  const holeR = mm(clampv(diaMm * 0.105, 8, 14)) * 0.5;
+  const rHole = Rw * 0.46;
+  for (let i = 0; i < holes; i++) {
+    const a = gr.phase + (i / holes) * TAU;
     flushHole(T, ctx, g, {
-      x: Math.cos(a) * r, y: domeAt(r) - mm(0.4), z: Math.sin(a) * r,
-      r: mm(clampv(diaMm * 0.055, 3.5, 7)), dir: [0, -1, 0], seg: low ? 8 : 11,
-      chamferMat: worn,
+      x: Math.cos(a) * rHole, y: faceAt(rHole) + grooveY * gr.depthAt(a) * 0.85 - mm(0.4),
+      z: Math.sin(a) * rHole,
+      r: holeR, dir: [0, -1, 0], seg: low ? 8 : 11, chamferMat: worn,
     });
   }
 
@@ -1430,6 +1702,11 @@ export function buildButtonBit(THREE_, ctx, opts) {
     name: 'Drillity ' + thread + ' Button Bit ' + diaMm + ' mm',
     thread: thread, diameterMm: diaMm, lengthMm: Math.round(headLen * 1000),
     buttons: layout.length, buttonKind: kind, gaugeButtons: gaugeCount,
+    gaugeButtonMm: row[2], faceButtonMm: row[4], gaugeAngleDeg: Math.round(gaugeTilt / DEG),
+    face: style, flutes: flutes, flushHoles: holes,
+    // A button bit leaves the works over-size and is scrapped under it: the
+    // carbide sweeps this, and it is measured off the mesh by .qa-dimensions.
+    cutDiameterMm: Math.round(cutR * 2000 * 10) / 10,
     material: 'Carbide grade DP55 / body 42CrMo4(V)',
     method: 'top-hammer', priceEur: Math.round(120 + diaMm * 3.4),
   }, opts);
@@ -1437,16 +1714,30 @@ export function buildButtonBit(THREE_, ctx, opts) {
 
 /**
  * DTH bit — splined shank (DHD/QL-style), retaining-ring groove, wear-sleeve
- * shoulder, drop-centre face with ballistic gauge and two blow holes.
- * opts: { shank:'DHD3'|'DHD35'|'QL5'|'QL6'|'MISSION4', diameterMm, wear }
+ * shoulder, flat front with a gauge row on the corner and two blow holes.
+ * opts: { shank:'DHD3'|'DHD35'|'QL5'|'QL6'|'MISSION4', diameterMm, wear,
+ *         face:'flat'|'concave'|'convex'|'drop' }
+ *
+ * The default face is FLAT FRONT, which is what Epiroc's catalogue carries on
+ * every size from 70 to 165 mm and describes as "hard and abrasive formations,
+ * all round" with "strong gauge rows with large spherical buttons which are
+ * easy to regrind". Convex fronts are ballistic and for soft non-abrasive rock;
+ * concave fronts carry cone buttons at −20°. A DTH bit is a hard-rock tool by
+ * definition, so the flat front is the honest default and the previous
+ * dome-fronted spherical face was the exception dressed as the rule.
  */
 export function buildDTHBit(THREE_, ctx, opts) {
   const T = THREE_ || THREE; ctx = ctx || {}; opts = opts || {};
   const shank = String(opts.shank || 'QL5').toUpperCase();
+  /* `len` is the OVERALL bit length for that shank family, off the Epiroc DTH
+     catalogue's shank drawings: DHD 3.5 = 180.9 · DHD 340A/TD 40 = 209 ·
+     QL 50 = 239.6 · QL 60 = 253.3 mm. It gives L/D ≈ 1.6-2.0, which is what
+     the catalogue weights corroborate. The previous code derived length from
+     bit diameter alone (2.4 D) and made every bit half a head too long. */
   const SH = {
-    DHD3: { dia: 76, splines: 6 }, DHD35: { dia: 89, splines: 6 },
-    QL5: { dia: 102, splines: 6 }, QL6: { dia: 127, splines: 6 },
-    MISSION4: { dia: 89, splines: 6 }, NUMA4: { dia: 89, splines: 6 },
+    DHD3: { dia: 76, splines: 6, len: 165 }, DHD35: { dia: 89, splines: 6, len: 180.9 },
+    QL5: { dia: 102, splines: 6, len: 239.6 }, QL6: { dia: 127, splines: 6, len: 253.3 },
+    MISSION4: { dia: 89, splines: 6, len: 209 }, NUMA4: { dia: 89, splines: 6, len: 209 },
   };
   const sh = SH[shank] || SH.QL5;
   const diaMm = opts.diameterMm || Math.round(sh.dia * 1.45);
@@ -1456,97 +1747,174 @@ export function buildDTHBit(THREE_, ctx, opts) {
   const btnSeg = low ? 7 : 10;
 
   const R = mm(diaMm) * 0.5;
-  const Rw = R - mm(3.2) * wear;
-  const shankR = mm(sh.dia) * 0.5;
-  const headLen = mm(diaMm * 1.05);
-  const shankLen = mm(diaMm * 1.35);
-  const faceY = -(headLen + shankLen);
+  // Same sourced gauge envelope as the top-hammer bit: built over-size across
+  // the carbide, under-size across the steel, scrapped when the two meet.
+  const overMm = clampv(diaMm * 0.010, 0.6, 2.5);
+  const underMm = clampv(diaMm * 0.009, 0.5, 2.0);
+  const bodyR = mm(diaMm - underMm) * 0.5;
+  const cutR = mm(diaMm + overMm - (overMm + underMm * 1.7) * wear) * 0.5;
+  /* The shank cannot be fatter than the bit it is cut into. `ith-bit-89` asks
+     for a DHD 3.5 shank — nominally 89 mm — on an 89 mm bit, and built
+     literally that gave a bit whose drive collar swept 90.8 mm while its
+     carbide swept 89.9: a bit that could not pass through the hole it had just
+     drilled. In the real catalogue a DHD 3.5 starts at 90 mm and the 89 mm
+     hole is a DHD 3 job, so the clamp both fixes the mesh and picks the right
+     hammer. The shoulder under the chuck sits at 0.86 of the body, and the
+     collar above the shank is 1.02 of the shank, so 0.84 is the ceiling. */
+  const shankR = Math.min(mm(sh.dia) * 0.5, bodyR * 0.84);
+  const totalLen = mm(Math.max(sh.len, diaMm * 1.55));
+  const headLen = totalLen * 0.42;
+  const shankLen = totalLen - headLen;
+  const faceY = -totalLen;
+  const noseR = bodyR - mm(underMm * 0.7) * wear;
+  const skirtTop = faceY + headLen * 0.55;
+  const steelR = (y) => bodyR - (bodyR - noseR) * clamp01((skirtTop - y) / (skirtTop - faceY));
+  const Rw = noseR;
   const g = new T.Group();
   g.name = 'dth-bit';
   const steel = bitBodyMaterial(ctx, wear * 0.85);
   const worn = material(ctx, 'wornSteel');
-  const domeAt = (r) => faceY + mm(7) * (1 - Math.pow(Math.min(1, r / (Rw * 0.92)), 2));
 
-  const profile = [
-    [0.0001, faceY + mm(7)],
-    [Rw * 0.44, faceY + mm(5.4)],
-    [Rw * 0.80, faceY + mm(1.8)],
-    [Rw * 0.95, faceY + mm(0.6)],
-    [Rw, faceY + mm(9)],
-    [Rw, faceY + mm(22)],
-    [R * 0.99, faceY + headLen * 0.55],
-    [R * 0.99, faceY + headLen * 0.86],
-    [R * 0.86, faceY + headLen],                 // shoulder under the chuck
-    [shankR * 1.02, faceY + headLen + mm(6)],
-    [shankR, faceY + headLen + mm(16)],
-    [shankR * 0.90, faceY + headLen + mm(26)],   // retaining-ring groove
-    [shankR * 0.90, faceY + headLen + mm(40)],
-    [shankR, faceY + headLen + mm(50)],
+  const style = opts.face || 'flat';
+  const drop = style === 'concave' ? mm(clampv(diaMm * 0.06, 4, 12))
+    : (style === 'convex' ? -mm(clampv(diaMm * 0.05, 3, 9))
+      : (style === 'drop' ? mm(clampv(diaMm * 0.075, 4, 12)) : mm(1.5)));
+  const faceAt = (r) => {
+    const u = clamp01(r / (Rw * 0.90));
+    return faceY + drop * (1 - Math.pow(u, style === 'concave' ? 2.4 : 1.7)) + mm(0.6) * u;
+  };
+
+  /* Waterways. Sandvik's EP2902583 describes a percussive bit with three
+     flushing passageways and three grooves, and gauge buttons grouped two per
+     collar segment BETWEEN them — the grooves interrupt the gauge row, which is
+     the silhouette fact. It also gives the groove's own shape: about 55 degrees
+     to the axis across the face, easing to about 15 up the gauge, and "a depth
+     … increases generally from the front face towards the shank". */
+  const flutes = opts.flutes === undefined ? 4 : opts.flutes;
+  const gr = grooveField({ count: flutes || 1, phase: 0.25, widthFrac: 0.40 });
+  const grooveY = mm(clampv(diaMm * 0.07, 4, 13));
+  const grooveR = clampv(diaMm * 0.0014, 0.09, 0.16);
+
+  const faceRows = [];
+  for (let i = 0; i <= 5; i++) {
+    const rr = Rw * 0.92 * (i / 5);
+    faceRows.push([Math.max(0.0001, rr), faceAt(rr)]);
+  }
+  const cornerY = faceY + mm(clampv(diaMm * 0.085, 6, 18));
+  const headTop = faceY + headLen;
+  const profile = faceRows.concat([
+    [Rw * 0.965, faceAt(Rw * 0.965)],
+    [Rw, cornerY],
+    [steelR(faceY + mm(24)), faceY + mm(24)],
+    [steelR(skirtTop), skirtTop],
+    [bodyR * 0.99, headTop - mm(8)],
+    [bodyR * 0.86, headTop],                     // shoulder under the chuck
+    [shankR * 1.02, headTop + mm(6)],
+    [shankR, headTop + mm(16)],
+    [shankR * 0.90, headTop + mm(26)],           // retaining-ring groove
+    [shankR * 0.90, headTop + mm(40)],
+    [shankR, headTop + mm(50)],
     [shankR, -mm(6)],
     [shankR * 0.88, 0],
     [mm(11), 0],
-    [mm(11), faceY + headLen + mm(24)],          // foot-valve bore
-    [0.0001, faceY + headLen + mm(30)],
-  ];
+    [mm(11), headTop + mm(24)],                  // foot-valve bore
+    [0.0001, headTop + mm(30)],
+  ]);
   const splines = sh.splines;
+  const outside = (r) => r > mm(11) * 1.4;
   const body = profiledLathe(T, profile, {
     segments: seg,
     radiusFn: (th, r, y) => {
-      const headTop = faceY + headLen;
+      if (!outside(r)) return 1;
       if (y > headTop + mm(4) && r > shankR * 0.7) {
         // external drive splines on the shank
         const a = ((th * splines) % TAU + TAU) % TAU;
         const d = Math.min(a, TAU - a) / Math.PI;
         return 1 - 0.085 * Math.max(0, 1 - d * 2.4);
       }
-      if (r > Rw * 0.62 && y < headTop && y > faceY + mm(3)) {
-        const a = ((th * 4) % TAU + TAU) % TAU;
-        const d = Math.min(a, TAU - a) / Math.PI;
-        return 1 - 0.09 * Math.max(0, 1 - d * 3.2);
-      }
-      return 1;
+      if (!flutes || y < cornerY || y > headTop) return 1;
+      const t = clamp01((y - cornerY) / (headTop - cornerY));
+      return 1 - grooveR * gr.depthAt(th) * lerp(0.45, 1, t);
+    },
+    yFn: (th, r, y) => {
+      if (!flutes || y > cornerY + 1e-6) return 0;
+      const w = r <= Rw * 0.97 ? 1 : 0.62;
+      return grooveY * gr.depthAt(th) * w * clamp01(0.30 + r / (Rw * 0.55));
     },
   });
   part(T, g, body, steel, { name: 'head' });
 
-  const gaugeCount = Math.max(6, Math.round(diaMm / 13));
-  const gaugeDia = mm(clampv(diaMm * 0.105, 10, 18));
-  const faceDia = mm(clampv(diaMm * 0.095, 9, 16));
-  const layout = ringLayout({
-    count: gaugeCount, radius: Rw - gaugeDia * 0.6, y: faceY + mm(7.5),
-    tilt: 44 * DEG, dia: gaugeDia, kind: 'ballistic', gauge: true, phase: 0.2,
+  const row = bitButtonRow(DTH_BUTTONS, diaMm);
+  const gaugeCount = opts.gaugeButtons || row[1];
+  const gaugeDia = mm(row[2]);
+  const faceCount = opts.faceButtons || row[3];
+  const faceDia = mm(row[4]);
+  // Flat and concave fronts run spherical gauge buttons (Epiroc: "large
+  // spherical buttons which are easy to regrind"); convex fronts are the
+  // ballistic design. Gauge 35 degrees, inner row 20 — both straight off the
+  // catalogue's own angle columns.
+  const gKind = opts.buttonKind || (style === 'convex' ? 'ballistic' : 'spherical');
+  const fKind = opts.faceButtonKind || (style === 'convex' ? 'ballistic' : 'spherical');
+  const gaugeTilt = (opts.gaugeAngle || (style === 'convex' ? 40 : 35)) * DEG;
+  const gaugeWear = clamp01(wear * 1.25);
+  const gaugeLift = gaugeDia * 0.30 * clamp01((wear - 0.42) / 0.58);
+  const reach = buttonReach(T, {
+    dia: gaugeDia, kind: gKind, tilt: gaugeTilt, wear: gaugeWear, seg: btnSeg,
+  }) + gaugeLift * Math.sin(gaugeTilt);
+  const onLand = (ring) => ring.map((b) => {
+    const a = gr.clearOf(b.a);
+    const st = Math.sin(b.tiltR || 0);
+    return Object.assign({}, b, {
+      x: Math.cos(a) * b.r, z: Math.sin(a) * b.r,
+      nx: Math.cos(a) * st, nz: Math.sin(a) * st, a: a,
+    });
   });
-  const rOut = Rw * 0.68;
-  layout.push.apply(layout, ringLayout({
-    count: Math.max(4, Math.round(diaMm / 20)), radius: rOut, y: domeAt(rOut),
-    tilt: 12 * DEG, dia: faceDia, kind: 'spherical', phase: 0.7,
-  }));
-  const rIn = Rw * 0.32;
-  layout.push.apply(layout, ringLayout({
-    count: 4, radius: rIn, y: domeAt(rIn), tilt: 5 * DEG,
-    dia: faceDia, kind: 'spherical', phase: 1.4,
-  }));
-  studFace(T, ctx, g, layout, { wear: wear, seg: btnSeg });
+  const layout = ringLayout({
+    count: gaugeCount, radius: cutR - reach, y: faceY + mm(clampv(diaMm * 0.05, 3.5, 9)),
+    tilt: gaugeTilt, dia: gaugeDia, kind: gKind, gauge: true, phase: 0.25,
+  }).map((b) => Object.assign(b, { tiltR: gaugeTilt, even: true }));
+  const rOut = Rw * 0.64;
+  const outerN = Math.max(2, Math.round(faceCount * 0.6));
+  layout.push.apply(layout, onLand(ringLayout({
+    count: outerN, radius: rOut, y: faceAt(rOut),
+    tilt: 20 * DEG, dia: faceDia, kind: fKind, phase: 0.25 + Math.PI / gaugeCount,
+  }).map((b) => Object.assign(b, { tiltR: 20 * DEG }))));
+  const rIn = Rw * 0.28;
+  layout.push.apply(layout, onLand(ringLayout({
+    count: Math.max(1, faceCount - outerN), radius: rIn, y: faceAt(rIn),
+    // A concave front's cone buttons lean INWARD — Epiroc prints the angle as
+    // −20 — because they are cutting the pilot cone the dish leaves standing.
+    tilt: (style === 'concave' ? -20 : 8) * DEG,
+    dia: faceDia, kind: style === 'concave' ? 'conical' : fKind, phase: 1.4,
+  }).map((b) => Object.assign(b, { tiltR: (style === 'concave' ? -20 : 8) * DEG }))));
+  studFace(T, ctx, g, layout, { wear: wear, seg: btnSeg, bodyMat: steel });
 
-  for (let i = 0; i < 2; i++) {
-    const a = 0.8 + i * Math.PI;
-    const r = Rw * 0.5;
+  // Two blow holes on every size Epiroc lists from 70 to 152 mm; three from
+  // 165 up. They open into the floor of a waterway.
+  const holes = opts.flushHoles || (diaMm >= 160 ? 3 : 2);
+  const rHole = Rw * 0.44;
+  for (let i = 0; i < holes; i++) {
+    const a = gr.phase + (i / holes) * TAU;
     flushHole(T, ctx, g, {
-      x: Math.cos(a) * r, y: domeAt(r) - mm(0.4), z: Math.sin(a) * r,
+      x: Math.cos(a) * rHole, y: faceAt(rHole) + grooveY * gr.depthAt(a) * 0.85 - mm(0.4),
+      z: Math.sin(a) * rHole,
       r: mm(clampv(diaMm * 0.06, 4, 9)), dir: [0, -1, 0], seg: low ? 8 : 11, chamferMat: worn,
     });
   }
   // retaining-ring in the groove
   part(T, g, G.torus(T, shankR * 0.93, mm(3.4), 6, low ? 14 : 22), worn, {
-    p: [0, faceY + headLen + mm(33), 0],
+    p: [0, headTop + mm(33), 0],
   });
 
   return finalise(T, g, {
     id: 'dth-bit', family: 'Drill Bits & Cutting Tools / DTH Bits',
     name: 'Drillity ' + shank + ' DTH Bit ' + diaMm + ' mm',
     shank: shank, diameterMm: diaMm,
-    lengthMm: Math.round((headLen + shankLen) * 1000),
-    buttons: layout.length, buttonKind: 'ballistic/spherical',
+    lengthMm: Math.round(totalLen * 1000),
+    buttons: layout.length, buttonKind: gKind, gaugeButtons: gaugeCount,
+    gaugeButtonMm: row[2], faceButtonMm: row[4], gaugeAngleDeg: Math.round(gaugeTilt / DEG),
+    face: style, flushHoles: holes,
+    cutDiameterMm: Math.round(cutR * 2000 * 10) / 10,
     material: 'Carbide grade DP62 / body 42CrMo4(V)',
     method: 'dth', priceEur: Math.round(260 + diaMm * 5.2),
   }, opts);
