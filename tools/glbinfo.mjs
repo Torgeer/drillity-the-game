@@ -36,7 +36,8 @@
  * subtree, which is how you find WHICH assembly is the wrong size rather than
  * only that the machine is.
  */
-import { readFileSync, statSync } from 'node:fs';
+import { readFileSync, statSync, readdirSync, existsSync } from 'node:fs';
+import { join, basename } from 'node:path';
 
 /** Split a GLB container into its JSON chunk and its BIN chunk. */
 function parseGLB(buf) {
@@ -129,6 +130,7 @@ function readVec3(g, bin, accessorIndex) {
 
 /** World-space AABB of the whole file, plus one per node subtree. */
 function measure(g, bin) {
+  const unreadable = [];
   const nodes = g.nodes || [];
   const sub = new Array(nodes.length);                   // node + descendants
   const sceneIndex = g.scene === undefined ? 0 : g.scene;
@@ -150,8 +152,16 @@ function measure(g, bin) {
     const total = EMPTY();
     if (n.mesh !== undefined && g.meshes[n.mesh]) {
       for (const prim of g.meshes[n.mesh].primitives) {
-        if (prim.attributes.POSITION === undefined) continue;
-        const v = readVec3(g, bin, prim.attributes.POSITION);
+        /* REFUSE TO REPORT A NUMBER THIS CANNOT MEASURE.
+           A primitive with no POSITION, or an accessor that will not decode,
+           used to be skipped in silence — and a skipped primitive makes the
+           machine come out SMALLER, which is indistinguishable from a machine
+           that is correctly small. Count them and say so on the row instead. */
+        if (prim.attributes.POSITION === undefined) { unreadable.push('no POSITION'); continue; }
+        let v;
+        try {
+          v = readVec3(g, bin, prim.attributes.POSITION);
+        } catch (e) { unreadable.push(e.message); continue; }
         for (let k = 0; k < v.length; k += 3) {
           const x = v[k], y = v[k + 1], z = v[k + 2];
           grow(total, [
@@ -175,7 +185,7 @@ function measure(g, bin) {
     const b = walk(r, m4identity());
     if (real(b)) merge(all, b);
   }
-  return { all, sub, empty: !real(all) };
+  return { all, sub, empty: !real(all), unreadable };
 }
 
 const f3 = (n) => (Math.abs(n) < 5e-4 ? 0 : n).toFixed(3);
@@ -307,10 +317,78 @@ function report(path) {
 
 const argv = process.argv.slice(2);
 const PARTS = argv.includes('--parts');
-const files = argv.filter((a) => !a.startsWith('--'));
+let files = argv.filter((a) => !a.startsWith('--'));
+
+/* NO ARGUMENTS: measure the whole fleet, one line each.
+
+   This replaces `tools/glbdims.mjs`, now deleted. That file measured a machine
+   by transforming the EIGHT CORNERS of each primitive's local AABB — the
+   accessor min/max — through the node's world matrix. On axis-aligned geometry
+   that is exact, and the two tools agreed to the millimetre. On a node carrying
+   a ROTATION whose mesh does not fill its own local box — which is every joined
+   static under a raked mast — it is a strict OVER-estimate. It was larger on
+   four of nine machines and never smaller: the signature of a superset bound.
+
+   It was not a harmless imprecision. It put pd55 at 26.218 m where the true
+   height is 25.790 and max y is exactly 25.700 — the datasheet's 25.7 m piling
+   working height to the millimetre. It reported rc-rig reaching 2.598 m BELOW
+   ground and warned of "a runaway array or rotation"; the true minimum is
+   -0.014 m and there was no bug to find. It put tunnel-jumbo 19 mm over the
+   WIDTH constant the model is built from. Three false findings from one
+   approximation, and two were passed on as real.
+
+   `measure()` above transforms every actual VERTEX, so it is exact. ONE ruler:
+   HANDOFF.md 8B — two tables describing one thing will drift, and the one that
+   is wrong will be believed. */
 if (!files.length) {
-  console.error('usage: node tools/glbinfo.mjs <file.glb> [...]');
-  process.exit(2);
+  const MODELS = 'public/models';
+  if (!existsSync(MODELS)) {
+    console.error('usage: node tools/glbinfo.mjs <file.glb> [...]');
+    process.exit(2);
+  }
+  files = readdirSync(MODELS).filter((f) => f.endsWith('.glb')).map((f) => join(MODELS, f));
+  if (!files.length) {
+    console.log(MODELS + '/ is empty — nothing exported. Models are gitignored;'
+      + ' build them with `npm run blender`.');
+    process.exit(0);
+  }
+  console.log('EXACT world-space bounds — every vertex transformed.');
+  console.log('');
+  console.log('model                   width     height     length     ground   draws');
+  let bad = 0;
+  for (const f of files) {
+    try {
+      const { json: g, bin } = parseGLB(readFileSync(f));
+      const m = measure(g, bin);
+      let prims = 0;
+      for (const n of (g.nodes || [])) {
+        if (n.mesh !== undefined && g.meshes[n.mesh]) prims += g.meshes[n.mesh].primitives.length;
+      }
+      if (m.empty) { console.log(basename(f).padEnd(22) + ' no positioned geometry'); continue; }
+      const d = dimsOf(m.all);
+      const below = m.all.min[1] < -0.25;
+      if (below) bad++;
+      console.log(basename(f).padEnd(22)
+        + f3(d[0]).padStart(9) + f3(d[1]).padStart(11) + f3(d[2]).padStart(11)
+        + f3(m.all.min[1]).padStart(11) + String(prims).padStart(8)
+        + (below ? '   <- sits below y=0' : '')
+        + (m.unreadable.length ? '   INCOMPLETE (' + m.unreadable.length + ' prim)' : ''));
+    } catch (e) {
+      console.log(basename(f).padEnd(22) + ' FAILED: ' + e.message);
+    }
+  }
+  if (bad) {
+    console.log('');
+    console.log(bad + ' model(s) sit more than 250 mm below y=0. rig.py puts the origin at'
+      + ' the slew centre at ground level, so that is worth a look — but it is a question,'
+      + ' not a verdict: a raise borer legitimately hangs a string below its own floor.');
+  }
+  console.log('');
+  console.log('Compare each figure with the sourced dimension in research/rigs/<id>.md.'
+    + ' This tool has no opinion about what the number should be.');
+  console.log('One machine in full:  node tools/glbinfo.mjs --parts <file.glb>');
+  console.log('');
+  process.exit(0);
 }
 for (const f of files) {
   try { report(f); } catch (e) { console.error(`\n── ${f}\n   FAILED: ${e.message}`); }

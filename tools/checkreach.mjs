@@ -213,14 +213,29 @@ await ctx.route('**/@vite/client', (r) => r.fulfill({
 }));
 const say = (s = '') => console.log(s);
 const p = await ctx.newPage();
+/* ── "CANNOT REACH" MUST MEAN CANNOT REACH ────────────────────────────────
+   This was one `goto` with `waitUntil: 'load'` and a 20 s cap, and EVERY
+   failure of it printed "start the dev server first". On a machine running a
+   dozen agents the dev server answered the first request in 15.8 s and the
+   module graph well after that, so a running server was repeatedly reported
+   as absent — the same confident-false-negative shape this file's own header
+   warns about, pointed at the operator instead of at the layout.
+
+   Two separate things now: reachability, which is a HEAD of the origin and
+   fails fast and honestly; and readiness, which is the app booting and is
+   allowed to take as long as it takes. `domcontentloaded` rather than `load`,
+   because `load` waits on every module, font and texture and is not what
+   "the page exists" means here. */
+const ORIGIN = `http://127.0.0.1:${PORT}`;
 try {
-  await p.goto(`http://localhost:${PORT}/?quality=low&shot`, { waitUntil: 'load', timeout: 20000 });
+  await p.request.fetch(ORIGIN, { method: 'HEAD', timeout: 120000 });
 } catch (e) {
-  console.error(`Cannot reach http://localhost:${PORT} — start the dev server first:\n\n    npm run dev\n`);
+  console.error(`Cannot reach ${ORIGIN} — start the dev server first:\n\n    npm run dev\n\n  (${e.message.split('\n')[0]})`);
   await b.close();
   process.exit(2);
 }
-await p.waitForFunction(() => window.__DRILLITY?.ui?.show && window.__DRILLITY?.sim, null, { timeout: 60000 });
+await p.goto(`${ORIGIN}/?quality=low&shot`, { waitUntil: 'domcontentloaded', timeout: 180000 });
+await p.waitForFunction(() => window.__DRILLITY?.ui?.show && window.__DRILLITY?.sim, null, { timeout: 240000 });
 
 /* THE BOOT SCREEN IS NOT A SPLASH, IT IS A SHADER COMPILE. Measured here at
    27.5 s on this machine, and the project has seen 60-100 s. A fixed
