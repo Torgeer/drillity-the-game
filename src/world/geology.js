@@ -6522,6 +6522,54 @@ export function createGeology(ctx) {
        so on an HDD profile it is the TVD at the exit and not the bore length,
        which is a different number and would be a wrong one on a depth axis. */
     if (runM > 0) datum(tdTvd, 'TD', 'rgba(223,181,82,0.85)');
+    /* AND WHEN TD IS OFF THE BOTTOM OF THE PICTURE, WHICH IS MOST OF THE TIME.
+       The band shows 13.4 m; holes in this game run to 3,000. The run rail
+       states "how much is left" as a LENGTH, which is the right answer and
+       needs no number — but only while TD is in frame. Below 45 m of hole it
+       never is, and then the ruler said nothing about the target at all.
+       Nowhere else on the drilling screen states depth remaining either: the
+       HUD strip carries the target as a tail on its depth cell and eight of
+       the twenty-one programmes replace that whole cell with bags, bolts or
+       blows, so on those the section is the only thing that could.
+
+       An off-scale datum gets an arrow and its own value — the ordinary
+       instrument answer, and the unambiguous one on an axis whose every other
+       number is an absolute depth. "TD 45" cannot be misread as 45 remaining
+       the way a bare remaining figure could be misread as a depth. */
+    if (runM > 0 && !mode.horizontal) {
+      const yTd = (tdTvd - topDepth) * pxPerM;
+      /* NOT the band's floor — the floor is spoken for. drawScalePlate() sits
+         PLATE_H + 0.10 units deep across it and draws IN FRONT of this strip
+         (z 2.05 against 2.0), so a marker on the window's bottom edge is a
+         marker underneath the scale plate. It rides just above it instead.
+         (Only the vertical modes get here; the horizontal ones have the
+         station ruler down there as well, and no rail to mark.) */
+      const yBot = clamp(((ruler.windowTop ?? stripLead()) + viewH
+                          - (PLATE_H + 0.35)) * pxPerM, 0, H);
+      if (yTd > yBot + css(2)) {
+        const txt = `TD ${tdTvd < 100 ? tdTvd.toFixed(1) : Math.round(tdTvd)}`;
+        const by = yBot - css(3);
+        /* Opaque, not a wash: at 0.86 the tick numeral underneath read straight
+           through it and "TD 630" came out over the top of a "50". */
+        g.fillStyle = 'rgba(9,12,17,0.97)';
+        g.fillRect(0, by - css(9.5), W, css(12));
+        g.fillStyle = 'rgba(150,160,174,0.22)';
+        g.fillRect(0, by - css(9.5), W, Math.max(1, css(0.7)));
+        g.fillStyle = 'rgba(223,181,82,0.90)';
+        g.font = `700 ${css(7)}px ${BRAND.fontMono}`;
+        g.textAlign = 'left';
+        g.textBaseline = 'alphabetic';
+        // the caret rides the rail, because the rail is what it points along
+        const cx = Math.round(W * 0.045);
+        g.beginPath();
+        g.moveTo(cx - css(2.6), by - css(6.5));
+        g.lineTo(cx + css(2.6), by - css(6.5));
+        g.lineTo(cx, by - css(1.8));
+        g.closePath();
+        g.fill();
+        g.fillText(txt, Math.round(W * 0.11), by);
+      }
+    }
     if (raise) {
       datum(0, 'UPPER LVL', 'rgba(223,181,82,0.90)');
       datum(raise.length, 'LOWER LVL', 'rgba(223,181,82,0.90)');
@@ -6529,7 +6577,7 @@ export function createGeology(ctx) {
     if (pile && pile.bearing) datum(pile.bearing.top, 'BEARING', 'rgba(16,185,129,0.85)');
     if (path) datum(path.Dc, 'COVER', 'rgba(223,181,82,0.70)');
 
-    drawRulerHead(g, W, H, css, x0, pxPerM);
+    drawRulerHead(g, W, H, css, pxPerM);
 
     tex.needsUpdate = true;
     ruler.top = topDepth;
@@ -6559,10 +6607,9 @@ export function createGeology(ctx) {
         driller spots it in ten seconds and then trusts nothing else on screen.
 
         drawScalePlate() already states it, in words, on the floor of the band.
-        This is the same statement where the eye actually is, and it is drawn
-        rather than asserted: a bar of the TRUE bore diameter at the ruler's
-        own scale — 3 CSS px, a hairline — beside the ratio. The player can
-        hold that sliver against the fat bore in the middle of the band and
+        This is the same statement where the eye actually is, and it is DRAWN
+        rather than asserted — see the two bars below. The player can hold the
+        true-scale sliver against the fat bore in the middle of the band and
         check the number for themselves. That is the difference between a
         diagram and a claim.
 
@@ -6570,9 +6617,8 @@ export function createGeology(ctx) {
         variable, so the two cannot drift (ASTRA §5). Below 1.05x there is no
         exaggeration to declare and it draws nothing rather than saying "x1.0",
         which would be furniture. */
-  function drawRulerHead(g, W, H, css, x0, pxPerM) {
+  function drawRulerHead(g, W, H, css, pxPerM) {
     const winTop = clamp((ruler.windowTop ?? stripLead()) * pxPerM, 0, Math.max(0, H - css(26)));
-    const labelX = x0 + W * 0.34;
     const ex = boreExag;
     const declare = ex >= 1.05 || ex <= 0.95;
     const rows = declare ? css(21) : css(12);
