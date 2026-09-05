@@ -1057,6 +1057,24 @@ def build_concrete_line(z_head):
     concrete line from a ground-standing pump, across the ground and up to the
     swan neck on top of the string [S2] item 1.
 
+    THE MACHINE IS 4.440 m WIDE. THE MODEL BOUND IS 6.843 m, AND THAT IS
+    CORRECT — do not "fix" it. Measured per subtree with
+    `node tools/glbinfo.mjs --parts`: every part of the machine itself lies
+    within x -2.220..+2.220, i.e. 4.440 m over tracks, inside the printed
+    3 000-4 500 mm over-tracks range (working stance, tracks extended; the
+    3 000 mm figure is transport).
+
+    The extra 2.4 m is THIS HOSE and only this hose — `static:rubber` spans
+    -0.082..+4.623 while nothing else on the machine passes 2.220. It leaves
+    the swan neck at x = 0, comes down clear of the flights, and then RUNS
+    ALONG THE GROUND out to x = 4.60, where the pump truck stands.
+
+    So the overall bound of a model is not its width whenever a hose, a rope or
+    a raked mast is authored in a working pose. Establish WHICH SUBTREE reaches
+    the extreme before touching a constant: `piling_leader` really was 1.13 m
+    too wide at the same moment this one was not, and the two are
+    indistinguishable in a one-line dimension table.
+
     ROUTING CORRECTED FROM [W1]: on the dimensioned CFA elevation the hose is
     the single heaviest line in the drawing and it hangs from the swan neck as
     one long, near-vertical run standing about a metre FORWARD of the auger,
