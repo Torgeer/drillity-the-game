@@ -1314,6 +1314,42 @@ function finalise(T, g, spec, opts) {
   const size = box.getSize(new T.Vector3());
   g.userData.bounds = { min: box.min.toArray(), max: box.max.toArray() };
   g.userData.fitRadius = Math.max(size.x, size.y, size.z) * 0.5 || 0.25;
+  /*
+   * WHICH END IS THE INTERESTING ONE.
+   *
+   * Every tool in this library is built the way it hangs on the string: the
+   * business end points DOWN, at -Y. `core/preview.js` frames every thumbnail
+   * from a fixed camera at (0.42, 0.34, 0.86) x dist, i.e. from ABOVE — so a
+   * button bit's shop card is a photograph of its thread box, and the whole
+   * carbide face, the waterways and the gauge row are on the side you cannot
+   * see. It is the same for the DTH bits, the RC bits, the casing shoes, the
+   * crowns, the augers and the buckets.
+   *
+   * `preview.aim` is the direction the camera should look FROM, in the tool's
+   * own space, normalised. preview.js can honour it in one line — replace the
+   * fixed camera.position.set() in frame() with a scale of this vector — and
+   * `preview.roll` says how far to tip a long thin tool off vertical so that a
+   * 3.6 m rod is not three pixels wide in a square card.
+   *
+   * Declared here rather than in the consumer because only the builder knows
+   * where its own face is. Until preview.js reads it, this is inert.
+   */
+  const tall = size.y / Math.max(1e-6, Math.max(size.x, size.z));
+  g.userData.preview = {
+    /* Below the equator for anything whose work happens at its foot, above it
+       for plant that stands on the ground. The taxonomy family already says
+       which is which and every builder already sets it — a bit, a crown, a
+       shoe, an auger and a bolt are all read from underneath; a compressor
+       skid, a shaker and a wellhead are read from above. (Bounds cannot
+       decide this: every tool in the library is built downward from y = 0,
+       plant included, so min.y is negative for all of them.) */
+    aim: /Bits|Cutting Tools|Casing|Overburden|Foundation Tools|DTH|Top Hammer|Coring|Reamers|Rock Bolts|Anchor|Picks|Wear Tools/
+      .test((spec && spec.family) || '') ? [0.44, -0.30, 0.84] : [0.42, 0.34, 0.86],
+    // A rod, a pile or an anchor bar is 40:1 — lay it back until it fills the
+    // frame instead of bisecting it.
+    roll: tall > 6 ? Math.min(1.15, 0.42 + tall * 0.02) : 0,
+    tall: Math.round(tall * 10) / 10,
+  };
   return g;
 }
 

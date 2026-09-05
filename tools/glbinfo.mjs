@@ -45,22 +45,36 @@ function report(path) {
   const bytes = statSync(path).size;
 
   const meshes = g.meshes || [];
-  const prims = meshes.reduce((n, m) => n + m.primitives.length, 0);
+  const nodes = g.nodes || [];
 
-  // Triangles, straight off the accessors — the file's own count, not an estimate.
-  let tris = 0;
-  for (const m of meshes) {
+  /* COUNT PER NODE, NOT PER MESH.
+     glTF lets several nodes reference ONE mesh, and `gltf-transform dedup`
+     does exactly that to identical geometry — four track rollers become one
+     mesh with four nodes pointing at it. The file's mesh list then shrinks
+     while the number of things drawn does not. Counting meshes made a packed
+     machine look like it had shed four draw calls it had not shed. The number
+     that matters is what the renderer submits, which is one per primitive per
+     NODE that references it. */
+  const perMesh = meshes.map((m) => {
+    let t = 0;
     for (const p of m.primitives) {
       const mode = p.mode === undefined ? 4 : p.mode;
       if (mode !== 4) continue;                       // TRIANGLES only
       const count = p.indices !== undefined
         ? g.accessors[p.indices].count
         : g.accessors[p.attributes.POSITION].count;
-      tris += count / 3;
+      t += count / 3;
     }
-  }
+    return { prims: m.primitives.length, tris: t };
+  });
 
-  const nodes = g.nodes || [];
+  let prims = 0;
+  let tris = 0;
+  for (const n of nodes) {
+    if (n.mesh === undefined || !perMesh[n.mesh]) continue;
+    prims += perMesh[n.mesh].prims;
+    tris += perMesh[n.mesh].tris;
+  }
   const named = { pivot: [], slide: [], mount: [], aim: [], static: [], other: [] };
   for (const n of nodes) {
     const nm = n.name || '(unnamed)';

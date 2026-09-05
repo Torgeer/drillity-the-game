@@ -243,17 +243,31 @@ def bake_modifiers():
     is the whole reason the steel does not read as cardboard, so bake first.
     """
     bpy.ops.object.select_all(action='DESELECT')
-    for o in list(bpy.context.scene.objects):
-        if o.type != 'MESH' or not o.modifiers:
-            continue
-        bpy.context.view_layer.objects.active = o
+    todo = [o for o in bpy.context.scene.objects
+            if o.type == 'MESH' and o.modifiers]
+    if not todo:
+        return
+    # One convert() over the whole selection instead of a modifier_apply per
+    # modifier: each operator call re-evaluates the depsgraph across every
+    # object in the scene, and at ~1250 objects and ~200 modifiers that turned a
+    # rebuild into a nine-minute wait.
+    for o in todo:
         o.select_set(True)
-        for m in list(o.modifiers):
-            try:
-                bpy.ops.object.modifier_apply(modifier=m.name)
-            except Exception as exc:                        # pragma: no cover
-                print('  ! modifier %s on %s: %s' % (m.name, o.name, exc))
-        o.select_set(False)
+    bpy.context.view_layer.objects.active = todo[0]
+    try:
+        bpy.ops.object.convert(target='MESH')
+    except Exception as exc:                                # pragma: no cover
+        print('  ! bulk convert failed (%s), falling back per object' % exc)
+        for o in todo:
+            bpy.ops.object.select_all(action='DESELECT')
+            bpy.context.view_layer.objects.active = o
+            o.select_set(True)
+            for m in list(o.modifiers):
+                try:
+                    bpy.ops.object.modifier_apply(modifier=m.name)
+                except Exception as e2:
+                    print('  ! modifier %s on %s: %s' % (m.name, o.name, e2))
+    bpy.ops.object.select_all(action='DESELECT')
 
 
 def curves_to_mesh(skip=()):

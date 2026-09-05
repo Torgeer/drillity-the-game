@@ -46,6 +46,24 @@ const CASES = [
     kinds: ['pileBurst'],
     absent: ['cuttingChip', 'cuttingFines', 'dustPlume', 'dustBody', 'sparkStreak'],
     mirror: ['blows', 'headDamage', 'dollyCondition'] },
+  /* JET GROUTING. Shallow on purpose: the spoil only exists on the SECOND
+     pass, so the window has to outlast the pre-drill (about 16 s at 4 m).
+     The inputs are the LIFT's own optimum — ADVANCE = withdrawal rate, WORK =
+     jet pressure (0.62 -> 434 bar, clear of EN 12716's 250 bar floor),
+     PROTECT = rotation — which also drills the pre-drill acceptably.
+     `spoilWell` / `spoilOverflow` / `spoilRise` must be ALIVE and non-zero in
+     size; the mud ROTARY's spray must not be, because a jetting collar does
+     not spray — it wells up and overflows. Run with --secs 60. */
+  { id: 'jet-grouting', method: 'jet-grouting', depth: 3, stratum: 'clay',
+    inputs: { feed: 0.45, rotation: 0.62, flush: 0.55 },
+    kinds: ['spoilWell', 'spoilOverflow', 'spoilRise'],
+    /* `sprayDrops` is NOT in this list and must not be: the PRE-DRILL is an
+       ordinary mud-flushed rotary hole and does spray. What must be true is
+       that the spoil belongs to the LIFT — and the mirror below is what proves
+       it, because drilling.js publishes `jetBar` on no other pass. `sprayGlint`
+       is the water branch and never fires for a mud method. */
+    absent: ['sprayGlint'],
+    mirror: ['jetBar', 'return01', 'column01', 'stage', 'columnWorst01'] },
   { id: 'site-investigation', method: 'site-investigation', depth: 6, stratum: 'clay',
     inputs: { feed: 0.45, rotation: 0.55, flush: 0.60 },
     kinds: [], sptKinds: ['sptPuff'],

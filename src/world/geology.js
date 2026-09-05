@@ -196,6 +196,38 @@ const CFG = {
   whirlJam: 1.00,        // …and hard against the wall when it binds
   whirlSpinGate: 0.08,   // rpm below which a string is not turning, so cannot whirl
 
+  /* ── THE AUGER FLIGHT ─────────────────────────────────────────────────────
+     "An auger is defined by its helix" — the critic, on a frame where the
+     section drew an auger job as a smooth khaki cylinder. It is a domain-truth
+     failure (rubric axis 11, hard gate) and it is also literally what the
+     letters CFA stand for.
+
+     SOURCED, and the source gives the one ratio that matters.
+     research/13-string-elements.md:139-140, verbatim from CME's flight-auger
+     catalogue [CME-CAT]: the game's 300 mm auger is "a 279 mm (11") flight
+     cutting a 305 mm (12") hole ... 229 mm (9") spiral pitch", and the pack
+     warns in the same breath that "the flight OD and the hole size are two
+     different numbers". So:
+
+         flight OD / hole diameter = 279 / 305 = 0.915
+         pitch     / flight OD     = 229 / 279 = 0.821
+
+     THE RATIOS ARE TRUE EVEN THOUGH NEITHER NUMBER IS. Both are drawn at the
+     bore's own exaggeration, because they are both derived from the drawn hole
+     radius — so a player measuring the flight against the hole gets 0.915, and
+     measuring the pitch against the flight gets 0.821, whatever the contract
+     diameter. Drawing the pitch at true scale would put it at 4 CSS px on a
+     305 mm hole against a flight 28 px across: a fine grey buzz, not a helix.
+
+     The whole CME series holds the same shape (3"/2.5", 12"/11", pitches
+     2.75"-9"), so 0.915 is the series' ratio and not one row of it. */
+  flightGauge: 0.915,    // flight outer radius / drawn hole radius  [CME-CAT]
+  flightPitch: 0.821,    // helix pitch / flight outer diameter      [CME-CAT]
+  flightDrawLen: 26,     // m of string carrying a drawn flight — the band shows
+                         // 20, so this covers it with margin and no more
+  flightSeg: 512,        // ribbon segments over that length: at a 305 mm hole's
+                         // 1.19 m drawn pitch that is 23 per turn
+
   boulderCap: 96,
   fractureCap: 220,
   cavityCap: 6,          // must match uCav[] in the shaders
@@ -2225,22 +2257,52 @@ uniform float uWhirl;    // fraction of that clearance in use, 0..1
 uniform float uPrec;     // precession phase, rad — integrated on the CPU from rpm
 uniform float uHelix;    // rad of precession phase per metre along the string
 uniform float uSpans;    // half-waves of the mode shape over the free length
+uniform float uSpin;     // string rotation, rad — shared with ROD_FRAG's flutes
+uniform float uFlightR;  // auger flight outer radius, section units
+uniform float uFlightK;  // radians of flight helix per metre — TAU / pitch
+/* THE AUGER FLIGHT rides the same program and the same material as the stem.
+   aFlight is 0 on the tube's own vertices and 1 on the ribbon's; a geometry
+   that does not declare the attribute reads 0 and takes the stem path, which
+   is what lets the casing share this vertex shader untouched. */
+attribute float aFlight;
+attribute vec2  aHelix;  // x = metres above the bit, y = 0 at the hub, 1 at the edge
 varying float vSy;
 varying float vAng;
 varying float vRub;
+varying float vFlight;
+varying float vEdge;
 void main(){
+  float len = max(uTop - uBottom, 1e-3);
   float t = position.y + 0.5;
-  float sy = mix(uBottom, uTop, t);
+  float syStem = mix(uBottom, uTop, t);
+  /* The ribbon is a fixed grid in metres above the bit, clamped to the string
+     it is on: a flight longer than the hole collapses to zero-area triangles
+     at the collar rather than sticking out of the ground. */
+  float s = min(aHelix.x, len);
+  float sy = mix(syStem, uBottom + s, aFlight);
+
   float dz = sy - uBottom;                                   // metres above the bit
-  float u01 = clamp(dz / max(uTop - uBottom, 1e-3), 0.0, 1.0);
+  float u01 = clamp(dz / len, 0.0, 1.0);
   /* Mode shape. uSpans half-waves between wall contacts, times the first mode
      of the whole free length: zero at the bit, zero at the collar, zero at
      every contact, largest mid-span. |bow| <= 1, which is what bounds it. */
   float bow = sin(PI * uSpans * u01) * sin(PI * u01);
   float a = uPrec + uHelix * dz;                             // helical azimuth
   float amp = uClear * uWhirl * bow;                         // |amp| <= uClear
-  vec3 p = vec3(position.x * uR + cos(a) * amp, sy, position.z * uR + sin(a) * amp);
-  vSy = sy; vAng = atan(position.z, position.x);
+
+  /* A helicoid: azimuth advances with distance along the string at TAU/pitch,
+     and turning the string advances it further — which is why a working auger
+     appears to screw upward rather than merely spin. */
+  float angF = s * uFlightK + uSpin;
+  vec2 stemXZ = vec2(position.x, position.z) * uR;
+  vec2 flXZ = vec2(cos(angF), sin(angF)) * mix(uR * 1.04, uFlightR, aHelix.y);
+  vec2 xz = mix(stemXZ, flXZ, aFlight);
+
+  vec3 p = vec3(xz.x + cos(a) * amp, sy, xz.y + sin(a) * amp);
+  vSy = sy;
+  vAng = mix(atan(position.z, position.x), angF, aFlight);
+  vFlight = aFlight;
+  vEdge = aHelix.y;
   /* +1 on the side pressed into the wall, -1 on the side swinging away, scaled
      by how much of the clearance is in use. Computed here, not in the fragment
      shader, because vAng wraps at the geometry seam and a difference of two
@@ -2258,6 +2320,8 @@ uniform float uSpin;
 varying float vSy;
 varying float vAng;
 varying float vRub;
+varying float vFlight;
+varying float vEdge;
 void main(){
   float side = cos(vAng);
   float curve = 0.5 + 0.5 * side;
@@ -2281,6 +2345,20 @@ void main(){
   float spec = pow(max(side, 0.0), 6.0);
   c += uKeyWarm * spec * 0.45;
   c += uKeyWarm * pow(max(side, 0.0), 22.0) * rub * 0.55;
+
+  /* THE FLIGHT is a steel plate, not a tube, and it has to read as one: the
+     face catches the key, the underside does not, the outer edge is polished
+     where it cuts gauge, and spoil packs into the root against the stem. Every
+     term is driven by vEdge (hub 0 -> cutting edge 1) and vAng, so the plate
+     shades by where you are ON it rather than by a normal it does not have. */
+  float faceUp = 0.5 + 0.5 * cos(vAng);
+  vec3 fc = uSteel * (0.30 + 0.62 * faceUp);
+  float wear = smoothstep(0.80, 1.0, vEdge);
+  fc = mix(fc, uSteel * 1.55, wear * 0.72);                 // the cutting edge
+  fc = mix(fc * vec3(1.10, 0.90, 0.68), fc, smoothstep(0.02, 0.46, vEdge));  // spoil in the root
+  fc += uKeyWarm * pow(faceUp, 9.0) * (0.22 + 0.55 * wear);
+  c = mix(c, fc, vFlight);
+
   gl_FragColor = vec4(c, 1.0);
   #include <tonemapping_fragment>
   #include <colorspace_fragment>
@@ -2296,11 +2374,14 @@ uniform vec3  uSteel;
 uniform vec3  uKeyWarm;
 varying float vSy;
 varying float vAng;
-/* Declared because CASING_FRAG shares ROD_VERT, which writes it. Casing is
+/* Declared because CASING_FRAG shares ROD_VERT, which writes them. Casing is
    grouted or driven against the wall — it does not whirl, so its uWhirl stays
-   0 and vRub with it — but a varying the vertex stage writes and the fragment
-   stage does not declare is a link the driver is entitled to refuse. */
+   0 and vRub with it, and it has no flight — but a varying the vertex stage
+   writes and the fragment stage does not declare is a link the driver is
+   entitled to refuse. */
 varying float vRub;
+varying float vFlight;
+varying float vEdge;
 void main(){
   float side = cos(vAng);
   float curve = 0.5 + 0.5 * side;
@@ -4448,6 +4529,9 @@ export function createGeology(ctx) {
            multiplies out. */
         uClear: { value: 0 }, uWhirl: { value: 0 },
         uPrec: { value: 0 }, uHelix: { value: 0 }, uSpans: { value: 1 },
+        // …and the flight uniforms, for the same reason: shared vertex shader,
+        // no flight on a casing, so uFlightR stays 0 and aFlight is never set
+        uSpin: { value: 0 }, uFlightR: { value: 0 }, uFlightK: { value: 1 },
         uSteel: { value: new T.Color(0x9aa6b2) }, uKeyWarm: U.uKeyWarm,
       },
       vertexShader: ROD_VERT,

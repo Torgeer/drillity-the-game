@@ -8311,10 +8311,28 @@ export function createDrillSim(ctx = {}) {
            the only one with a unit, and it has one because both ends of it are
            sourced (EN 12716's 250 bar floor, [KLEMM]'s 700 bar pump). The
            column index deliberately has none. */
-        // The constants live on the JETTING stage, which is not the stage that
-        // is running during the pre-drill — read them off stages[1], never off
-        // whichever stage happens to be active.
-        const js = S.m.stages[1] && S.m.stages[1].jet;
+        /* ── PUBLISHED ONLY WHILE THE MONITOR IS ACTUALLY JETTING ────────
+           `p.jet` exists from the moment the programme starts, because
+           `startTwoStage()` builds it once for the whole run. Publishing off
+           that alone put `jetBar` and `return01` on `state.drill` through the
+           PRE-DRILL as well — and MEASURED, that is exactly what went wrong:
+           `sim/vfx.js` keys its spoil return on the presence of these fields,
+           so a 55 s browser capture drew a jet grouting spoil column for 1,100
+           frames of a run that never left stage 0. The picture was of a pass
+           that had not started.
+
+           So the gate is the PASS, not the programme. Off the jetting stage
+           these are explicitly null — `state.drill` is a shared mutable
+           object and a stale number left on it reads exactly like a live one.
+
+           The constants come off `stages[1]`, never off the active stage,
+           because during the pre-drill the active stage has no `jet` block. */
+        const js = onReversePass() && S.m.stages[1] && S.m.stages[1].jet;
+        if (!js || !p.jet) {
+          d.jetBar = null; d.jetFloorBar = null; d.jetBelowFloor = false;
+          d.column01 = null; d.columnWorst01 = null;
+          d.return01 = null; d.returnIdeal01 = null; d.columnDiaKnown = null;
+        }
         if (p.jet && js) {
           d.jetBar = Math.round(p.jet.bar);
           d.jetFloorBar = js.floorBar;
@@ -8624,7 +8642,9 @@ export function createDrillSim(ctx = {}) {
           pilotDeviation: +p.pilotDeviation.toFixed(2),
           /* A jetting lift is a different pass from a reaming one and says so,
              so a consumer can tell them apart without a method-id table. */
-          jet: p.jet && S.m.stages[1] && S.m.stages[1].jet ? {
+          // Null through the pre-drill, for the same reason state.drill's copy
+          // is: nothing is being jetted yet, so there is nothing to report.
+          jet: p.jet && onReversePass() && S.m.stages[1] && S.m.stages[1].jet ? {
             bar: Math.round(p.jet.bar),
             floorBar: S.m.stages[1].jet.floorBar,
             maxBar: S.m.stages[1].jet.maxBar,

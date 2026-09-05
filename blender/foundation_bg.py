@@ -514,15 +514,21 @@ def build_upper(slew):
     cwz = 2.30
     bx('cw-carrier', (CW_W + 0.10, CW_D + 0.10, 0.30), R.MAT_DARK, own, slew,
        (0, CW_FACE_Y + CW_D / 2, cwz + 0.15), bevel=0.03)
+    ph = (CW_H - 0.30) / 4
     for i in range(4):
-        z = cwz + 0.30 + 0.03 + i * (CW_H - 0.36) / 4 + (CW_H - 0.36) / 8
-        bx('cw-plate', (CW_W, CW_D, (CW_H - 0.36) / 4 - 0.02), R.MAT_DARK, own, slew,
-           (0, CW_FACE_Y + CW_D / 2, z), bevel=0.02)
+        z = cwz + 0.30 + i * ph + ph / 2
+        bx('cw-plate', (CW_W, CW_D, ph - 0.06), R.MAT_DARK, own, slew,
+           (0, CW_FACE_Y + CW_D / 2, z), bevel=0.025)
+        # a recessed shadow gap so the stack reads as five parts, not one lump
+        bx('cw-parting', (CW_W - 0.10, CW_D - 0.10, 0.06), R.MAT_WORN, own, slew,
+           (0, CW_FACE_Y + CW_D / 2, z + ph / 2 - 0.03), bevel=0.008)
         for sx in (-1, 1):
-            bx('cw-lift-eye', (0.10, 0.26, 0.20), R.MAT_WORN, own, slew,
-               (sx * (CW_W / 2 - 0.30), CW_FACE_Y + CW_D / 2, z + 0.18), bevel=0.02)
-        bx('cw-bolt-strip', (CW_W * 0.9, 0.06, 0.05), R.MAT_WORN, own, slew,
-           (0, CW_FACE_Y - 0.01, z), bevel=0.01)
+            bx('cw-lift-eye', (0.09, 0.24, 0.22), R.MAT_WORN, own, slew,
+               (sx * (CW_W / 2 - 0.34), CW_FACE_Y + CW_D - 0.20, z + ph / 2 + 0.05),
+               bevel=0.02)
+        for sx in (-1, 1):                    # the through-bolts that hold it on
+            bx('cw-bolt', (0.09, 0.09, 0.09), R.MAT_STEEL, own, slew,
+               (sx * (CW_W / 2 - 0.16), CW_FACE_Y - 0.02, z), bevel=0.012)
     # Hazard marking is a corner band, not a panel: striping the whole end face
     # buries the slab, and the slab is half of what makes this silhouette
     # asymmetric front-to-back [S2 §5.3].
@@ -536,27 +542,34 @@ def build_upper(slew):
     # The house fills the deck between the kinematics pedestals and the
     # counterweight — on a rig this size it is the mass that balances the
     # leader, not a bonnet sitting on an open frame.
-    bx('engine-house', (3.20, 3.10, HOUSE_TOP_Z - DECK_Z), R.MAT_PAINT, own, slew,
+    # House width is set by the 3 400 mm transport width [S1 p.22]: the machine
+    # travels on a low-loader with the walkways folded, so the HOUSE has to be
+    # inside that envelope and the walking platform hangs outboard of it.
+    HW = 1.45
+    bx('engine-house', (HW * 2, 3.10, HOUSE_TOP_Z - DECK_Z), R.MAT_PAINT, own, slew,
        (0, -2.20, (DECK_Z + HOUSE_TOP_Z) / 2), bevel=0.05)
-    bx('engine-hood', (2.95, 2.85, 0.18), R.MAT_PAINT, own, slew,
+    bx('engine-hood', (HW * 2 - 0.22, 2.85, 0.18), R.MAT_PAINT, own, slew,
        (0, -2.20, HOUSE_TOP_Z + 0.06), bevel=0.05)
-    bx('house-front-bay', (3.20, 1.10, 1.35), R.MAT_PAINT, own, slew,
+    bx('house-front-bay', (HW * 2, 1.10, 1.35), R.MAT_PAINT, own, slew,
        (0, -0.10, DECK_Z + 0.70), bevel=0.05)
-    for sy in (-3.55, -2.05, -0.75):          # hinged service doors
+    for sy in (-3.35, -2.05, -0.75):          # hinged service doors
         for sx in (-1, 1):
             bx('house-door-seam', (0.03, 0.05, 1.25), R.MAT_DARK, own, slew,
-               (sx * 1.61, sy, DECK_Z + 0.82), bevel=0.006)
+               (sx * (HW + 0.01), sy, DECK_Z + 0.82), bevel=0.006)
             bx('house-latch', (0.06, 0.10, 0.14), R.MAT_WORN, own, slew,
-               (sx * 1.62, sy + 0.60, DECK_Z + 0.82), bevel=0.012)
+               (sx * (HW + 0.02), sy + 0.55, DECK_Z + 0.82), bevel=0.012)
     for sx in (-1, 1):                            # louvre banks, both flanks
-        for i in range(5):
+        for i in range(4):
             bx('louvre', (0.05, 0.40, 0.85), R.MAT_DARK, own, slew,
-               (sx * 1.56, -1.35 - i * 0.44, DECK_Z + 0.85), bevel=0.01)
-    bx('cooler-pack', (1.60, 0.16, 1.25), R.MAT_DARK, own, slew,
-       (0.68, -3.77, DECK_Z + 0.95), bevel=0.02)
-    for i in range(9):                        # cooler core fins
-        bx('cooler-fin', (0.14, 0.06, 1.10), R.MAT_WORN, own, slew,
-           (-0.10 + i * 0.19, -3.80, DECK_Z + 0.95), bevel=0.006, seg=1)
+               (sx * (HW + 0.01), -1.45 - i * 0.46, DECK_Z + 0.85), bevel=0.01)
+    # The cooler pack sits in the RIGHT flank, not across the tail: the tail is
+    # the counterweight's, and a radiator grille standing where the slab should
+    # be reads as the wrong machine entirely.
+    bx('cooler-pack', (0.14, 1.45, 1.30), R.MAT_DARK, own, slew,
+       (HW + 0.05, -2.55, DECK_Z + 0.95), bevel=0.02)
+    for i in range(10):                       # cooler core fins
+        bx('cooler-fin', (0.06, 0.10, 1.16), R.MAT_WORN, own, slew,
+           (HW + 0.10, -3.18 + i * 0.13, DECK_Z + 0.95), bevel=0.006, seg=1)
     bx('hyd-tank', (0.90, 1.30, 1.05), R.MAT_PAINT, own, slew,
        (-1.05, -0.55, DECK_Z + 0.60), bevel=0.04)
     bx('fuel-tank', (0.85, 1.60, 0.95), R.MAT_PAINT, own, slew,
@@ -598,31 +611,50 @@ def build_upper(slew):
        (0, 2.80, DECK_Z + 0.06), bevel=0.012)
 
     # ── walkways, folding handrails, ladder ──────────────────────────────────
-    rail = [(-1.62, 2.35), (-1.62, -4.55), (1.62, -4.55), (1.62, 2.35)]
+    # [S1 p.6] "Walking platform with handrail (foldable for transport)" and
+    # "Guardrails upper level (foldable for transport)". The platform hangs
+    # OUTBOARD of the house and folds up against it; hard against the house wall
+    # a handrail is invisible and there is nowhere to stand.
+    WW0, WW1 = HW + 0.04, HW + 0.72
+    for sx in (-1, 1):
+        bx('walkway', ((WW1 - WW0), 6.30, 0.07), R.MAT_DARK, own, slew,
+           (sx * (WW0 + WW1) / 2, -1.20, DECK_Z + 0.03), bevel=0.012)
+        for i in range(18):                   # open grating, seen from below too
+            bx('walkway-grate', ((WW1 - WW0) * 0.92, 0.055, 0.05), R.MAT_WORN,
+               own, slew, (sx * (WW0 + WW1) / 2, -4.20 + i * 0.36, DECK_Z + 0.06),
+               bevel=0.006, seg=1)
+        for gy in (-3.80, -2.20, -0.60, 1.00):    # fold-up hinge brackets
+            bx('walkway-hinge', (0.16, 0.16, 0.20), R.MAT_WORN, own, slew,
+               (sx * (WW0 - 0.03), gy, DECK_Z - 0.05), bevel=0.02)
+            strut('walkway-stay', (sx * (WW0 - 0.02), gy, DECK_Z - 0.30),
+                  (sx * (WW1 - 0.05), gy, DECK_Z), 0.028, R.MAT_DARK, own, slew,
+                  sides=6)
+        bx('walkway-nose', (0.06, 6.30, 0.14), R.MAT_HAZARD, own, slew,
+           (sx * WW1, -1.20, DECK_Z + 0.07), bevel=0.012)
+
+    RX = HW + 0.70
+    rail = [(-RX, 2.35), (-RX, -4.60), (RX, -4.60), (RX, 2.35)]
     for i in range(len(rail) - 1):
         (x0, y0), (x1, y1) = rail[i], rail[i + 1]
         for h in (0.52, 1.05):
             strut('handrail', (x0, y0, DECK_Z + h), (x1, y1, DECK_Z + h),
                   0.021, R.MAT_PAINT, own, slew, sides=6)
     n_post = 0
-    for (px, py) in [(-1.62, 2.35), (-1.62, 0.20), (-1.62, -2.10), (-1.62, -4.55),
-                     (1.62, 2.35), (1.62, 0.20), (1.62, -2.10), (1.62, -4.55),
-                     (0.0, -4.55)]:
+    for (px, py) in [(-RX, 2.35), (-RX, 0.20), (-RX, -2.10), (-RX, -4.60),
+                     (RX, 2.35), (RX, 0.20), (RX, -2.10), (RX, -4.60),
+                     (0.0, -4.60)]:
         n_post += 1
         strut('rail-post', (px, py, DECK_Z), (px, py, DECK_Z + 1.05),
               0.024, R.MAT_PAINT, own, slew, sides=6)
         bx('rail-hinge', (0.09, 0.09, 0.13), R.MAT_WORN, own, slew,
            (px, py, DECK_Z + 0.14), bevel=0.01)     # folds flat for transport
-    bx('toe-board-l', (0.05, 6.90, 0.13), R.MAT_HAZARD, own, slew,
-       (-1.66, -1.10, DECK_Z + 0.09), bevel=0.01)
-    bx('toe-board-r', (0.05, 6.90, 0.13), R.MAT_HAZARD, own, slew,
-       (1.66, -1.10, DECK_Z + 0.09), bevel=0.01)
-    # access ladder up the side of the car body
+    # access ladder from grade to the walkway
     for sz in range(7):
         bx('ladder-rung', (0.44, 0.05, 0.04), R.MAT_WORN, own, slew,
-           (1.74, -3.30, 0.45 + sz * 0.32), bevel=0.008)
+           (RX - 0.06, -3.30, 0.45 + sz * 0.32), bevel=0.008)
     for sx in (-0.22, 0.22):
-        strut('ladder-rail', (1.74 + sx, -3.42, 0.35), (1.74 + sx, -3.28, 2.55),
+        strut('ladder-rail', (RX - 0.06 + sx, -3.42, 0.35),
+              (RX - 0.06 + sx, -3.28, DECK_Z + 0.06),
               0.028, R.MAT_HAZARD, own, slew, sides=6)
 
     # ── winches: main, crowd, auxiliary ──────────────────────────────────────
@@ -642,9 +674,17 @@ def build_upper(slew):
         bx(name + '-gearbox', (0.34, 0.52, 0.52), R.MAT_CAST, own, slew,
            (cx + w / 2 + 0.18, cy, cz), bevel=0.03)
 
-    drum('winch-main', 0.10, -1.30, 3.55, 0.36, 1.15, MAIN_ROPE_D)
-    drum('winch-crowd', 0.10, -0.10, 4.35, 0.31, 0.95, CROWD_ROPE_D)
-    drum('winch-aux', -1.05, -2.95, 3.40, 0.25, 0.70, AUX_ROPE_D)
+    # Main winch inside the house; crowd winch on the roof behind the A-frame,
+    # where a "service-friendly winch position" with a swing-down mechanism for
+    # transport [S2 §4.3] actually puts it — and where it can be seen working.
+    drum('winch-main', 0.10, -1.55, 3.45, 0.36, 1.15, MAIN_ROPE_D)
+    drum('winch-crowd', 0.34, -1.05, HOUSE_TOP_Z + 0.62, 0.31, 0.95, CROWD_ROPE_D)
+    drum('winch-aux', -1.00, -3.05, 3.40, 0.25, 0.70, AUX_ROPE_D)
+    for sx in (-1, 1):                        # crowd-winch mounting frame
+        bx('winch-frame', (0.14, 0.90, 0.72), R.MAT_DARK, own, slew,
+           (0.34 + sx * 0.62, -1.05, HOUSE_TOP_Z + 0.32), bevel=0.02)
+    bx('winch-guard', (1.50, 1.00, 0.07), R.MAT_DARK, own, slew,
+       (0.34, -1.05, HOUSE_TOP_Z + 1.02), bevel=0.015)
 
     # bulkhead plate on the base carrier — the fixed end of the hose package
     # ([S4]: "from bulkhead base carrier to bulkhead on the rotary drive")

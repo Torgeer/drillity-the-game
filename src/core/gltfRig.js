@@ -285,6 +285,51 @@ export function createGltfRigs(ctx) {
     return { restored, named: inFile };
   }
 
+  /**
+   * GET THE NAMED NODES OFF THE STATIC MESHES.
+   *
+   * `finish()` in blender/lib/rig.py joins the statics by material, and
+   * Blender re-parents the joined-away objects' children onto the survivor.
+   * HANDOFF §4b shows the result of a verified export:
+   *
+   *     static:paintedSteel [mesh] -> mount:lamp-1
+   *
+   * — a lamp whose parent is a MESH. That is fine in the file and fatal in the
+   * scene, because `ensureBuild()` then runs `mergeStatic()`, which merges
+   * every static mesh into one new mesh at the merge root and REMOVES the
+   * originals from their parents. A node parented to one of those meshes is
+   * removed with it: the lamp leaves the scene graph entirely, `getWorldPosition`
+   * keeps answering (from a detached node whose matrix nobody updates any more),
+   * and the drive is lit by a spotlight welded to wherever the machine happened
+   * to be standing when it was built. Nothing throws.
+   *
+   * So every pivot:, slide: and mount: that hangs off a mesh is lifted to its
+   * nearest non-mesh ancestor first. `attach()` preserves the world transform,
+   * so the lamp does not move a millimetre — it just stops being cargo.
+   * (`aim:` rides its mount and needs no lift of its own.)
+   */
+  function liftNamedOffMeshes(root, id) {
+    const PRE = [P_PIVOT, P_SLIDE, P_MOUNT];
+    const victims = [];
+    root.updateMatrixWorld(true);
+    root.traverse((o) => {
+      if (!o.name || !PRE.some((p) => o.name.startsWith(p))) return;
+      for (let p = o.parent; p && p !== root; p = p.parent) {
+        if (p.isMesh) { victims.push(o); return; }
+      }
+    });
+    for (const o of victims) {
+      let host = o.parent;
+      while (host && host !== root && host.isMesh) host = host.parent;
+      (host || root).attach(o);
+    }
+    if (victims.length) {
+      say('info', `"${id}": lifted ${victims.length} named node(s) off static meshes `
+        + '— mergeStatic() would otherwise have carried them out of the scene.');
+    }
+    return victims.length;
+  }
+
   /** Does this node sit under something the game moves? Decides lamp `moves`. */
   function underDynamic(node) {
     for (let p = node.parent; p; p = p.parent) {
@@ -317,22 +362,30 @@ export function createGltfRigs(ctx) {
       else if (n.startsWith(P_AIM)) aims.set(n.slice(P_AIM.length), o);
     });
 
-    // A mount with no aim cannot be pointed anywhere, and env.js's guard
-    // (`src && src.node && src.aim`) would drop it in silence — the lamp would
-    // stay wherever the authored fallback left it and nobody would know why
-    // the drive is lit wrong. Name it here instead.
+    /* NOT EVERY MOUNT IS A LAMP.
+       `blender/lib/rig.py` says so in as many words: a `mount:` is "a fixed
+       attachment point (lamp, hose end, decal plate)". The real machines use
+       both — `piling-leader` carries five lamps and four attachment points
+       (`marque`, `operator`, `plate`, `pile-head`). What separates them is
+       the `aim:` node, which only `worklight()` emits, so THAT is the test.
+       Publishing an attachment point as a lamp would hand env.js a spotlight
+       with nowhere to point; complaining about one would be four false alarms
+       per machine, which is how a real warning stops being read.
+
+       A mount that declares a cone or a range and has no aim is neither: it is
+       a lamp somebody half-wired, and that IS worth shouting about. */
     const lights = [];
     for (const [name, node] of mounts) {
       const aim = aims.get(name);
-      if (!aim) {
-        // Said once, when the model is prepared — not again on every clone.
-        if (!quiet) {
-          say('error', `"${id}": ${P_MOUNT}${name} has no ${P_AIM}${name}. env.js re-aims a `
-            + 'spotlight at that node every frame and will skip this lamp entirely.');
-        }
-        continue;
-      }
       const x = node.userData || {};
+      if (!aim) {
+        if (!quiet && (x.cone_deg !== undefined || x.range_m !== undefined)) {
+          say('error', `"${id}": ${P_MOUNT}${name} declares a lamp cone or range but has `
+            + `no ${P_AIM}${name}. env.js re-aims a spotlight at that node every frame `
+            + 'and will skip this lamp entirely.');
+        }
+        continue;   // a plain attachment point; it stays in `mounts`
+      }
       lights.push({
         name: name,
         node: node,
@@ -382,7 +435,12 @@ export function createGltfRigs(ctx) {
 
     let res;
     try {
-      res = await fetch(url, { cache: 'force-cache' });
+      // Default cache mode on purpose. 'force-cache' would reuse a stale
+      // heuristically-fresh copy, and these files are REBUILT constantly while
+      // the fleet is being authored — a modeller re-running the Blender script
+      // and seeing yesterday's machine is a debugging afternoon. The server's
+      // etag makes the re-check a 304 anyway.
+      res = await fetch(url);
     } catch (e) {
       // The `file://` case lands here, and it is worth naming exactly.
       throw new Error(`could not fetch ${url} — ${e.message}`
@@ -424,6 +482,7 @@ export function createGltfRigs(ctx) {
     // purpose. If a machine lands in the wrong place, fix the Blender script.
 
     const kinds = swapMaterials(root, id);
+    liftNamedOffMeshes(root, id);      // BEFORE indexing: it changes parents
     const nodes = index(root, id);
     const m = measure(root);
 

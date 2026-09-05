@@ -8,3 +8,9 @@ shots/*.jpg
 
 __pycache__/
 public/models/*.glb
+
+# QA scratch output — reports and logs regenerate on every run
+shots/*.json
+shots/*.txt
+*.log
+vfx-jet.txt

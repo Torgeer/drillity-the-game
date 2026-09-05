@@ -12,12 +12,15 @@
     "check:beds": "node tools/checkbeds.mjs",
     "check": "node tools/checkfacts.mjs && node tools/checkdata.mjs && node tools/checkbeds.mjs",
     "blender": "\"C:/Program Files/Blender Foundation/Blender 5.2/blender.exe\" --background --python blender/build.py --",
-    "check:reach": "node tools/checkreach.mjs"
+    "check:reach": "node tools/checkreach.mjs",
+    "models:pack": "node tools/glbpack.mjs",
+    "models:check": "node tools/glbpack.mjs --check"
   },
   "dependencies": {
     "three": "0.169.0"
   },
   "devDependencies": {
+    "@gltf-transform/cli": "^4.5.0",
     "playwright": "^1.49.1",
     "vite": "^5.4.10",
     "vite-plugin-singlefile": "^2.0.3"

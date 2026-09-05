@@ -320,18 +320,27 @@ const envRes = await page.evaluate(async (id) => {
   /* THE ACTUAL POINT: a lamp on a boom must SWEEP when the boom moves. Rotate
      the pivot and confirm the spotlight went with it. */
   let sweep = null;
-  const moving = lights.find((l) => l.moves);
+  /* The lamp that must sweep: one that (a) moves and (b) a spotlight actually
+     bound to, so the test measures the real path and not a hypothetical one.
+     The node to turn is its nearest pivot: ancestor, whatever that machine
+     happens to call it — 'mast' on a crawler, 'slew' or 'leader' on a leader
+     rig. Hardcoding a name here would make the test pass on one machine. */
+  const moving = lights.filter((l) => l.moves)
+    .find((l) => spots.some((sp) => near(sp.position, wp(l.node), 0.05)));
   if (moving) {
     const p0 = wp(moving.node);
     const s = spots.find((sp) => near(sp.position, p0, 0.05));
-    const pivot = b.dyn.pivots.get('mast');
+    let pivot = null;
+    for (let p = moving.node.parent; p; p = p.parent) {
+      if (p.name && p.name.startsWith('pivot:')) { pivot = p; break; }
+    }
     if (s && pivot) {
       const r0 = pivot.rotation.z;
       pivot.rotation.z = r0 + 0.45;
       await frames(4);
       const p1 = wp(moving.node);
       sweep = {
-        lamp: moving.name,
+        lamp: moving.name + " (turning " + pivot.name + ")",
         nodeMoved: +p0.distanceTo(p1).toFixed(4),
         lightFollowed: +s.position.distanceTo(p1).toFixed(4),
         lightMoved: +s.position.distanceTo(p0).toFixed(4),

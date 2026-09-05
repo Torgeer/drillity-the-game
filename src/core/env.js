@@ -991,6 +991,7 @@ const MEDIA_FRAG = /* glsl */`
   uniform vec4  uDust;         // (base density, face boost, sigma, gain)
   uniform float uFaceZ;
   uniform float uHG;           // Henyey-Greenstein g
+  uniform vec2  uSat;          // saturation constants: (beam k, haze k)
 
   varying vec3 vWP;
 
@@ -1084,7 +1085,43 @@ const MEDIA_FRAG = /* glsl */`
     float jit = fract( 52.9829189 * fract( dot( gl_FragCoord.xy, vec2( 0.06711056, 0.00583715 ) ) )
                        + uTime * 0.37 );
 
-    vec3 acc = vec3( 0.0 );
+    /* TWO ACCUMULATORS, AND THIS IS THE WHOLE FIX FOR "HAZE, NOT BEAMS".
+
+       Round 3 left one open gap, in its own words: "the medium reads as haze
+       with a bright core near the lamps, not as defined beams; the beam's edge
+       still sits below the surround's contrast." Measured with .qa-beam.mjs,
+       which shoots the band with __qaMedia(true) and (false) and analyses the
+       DIFFERENCE — the medium's contribution, isolated exactly:
+
+           method          contribution mean   p95/p50   coverage
+           tunnel-jumbo          27.5 L          4.0       74.3 %
+           longhole              15.2 L         13.9       50.6 %
+           rockbolt               8.1 L         51.6       24.0 %
+
+       74 % of the band lifted by more than 6 L, with a p95/p50 of 4, is not a
+       beam. It is a uniform veil with some brighter parts, and no amount of
+       tuning ONE accumulator could have separated the two, because a single
+       saturation curve has to serve both: the constant that keeps the beam
+       core off the ceiling is the same constant that lets the veil accumulate
+       over 40 m of tube.
+
+       So the integral is split by the ANGULAR STRUCTURE OF THE SOURCE, which
+       is what actually decides whether light arrives as a shaft:
+
+         accB   cone sources. A spot's in-scattering is shaped like its cone
+                wherever the eye crosses it, so all of it — including the
+                isotropic part of the phase function — is beam.
+         accH   omnidirectional sources. A point light seeds the medium
+                equally in every direction from every sample; it can never be
+                a shaft, only a glow, and it is the honest home of the veil.
+
+       Each gets its own saturation constant, and the physics supports the
+       asymmetry: the diffuse component is already the result of many
+       scattering events and saturates far sooner than a single-scattered beam
+       core. uSat = (2.6, 12.0) gives ceilings of 0.385 and 0.083 — a beam may
+       be 4.6x the brightest the veil is ever allowed to be. */
+    vec3 accB = vec3( 0.0 );
+    vec3 accH = vec3( 0.0 );
     float T = 1.0;
 
     for ( int i = 0; i < UG_STEPS; i ++ ) {
@@ -1122,7 +1159,8 @@ const MEDIA_FRAG = /* glsl */`
         float att = 1.0 / ( r2 + 1.2 );
 
         float sp = 1.0;
-        if ( uLCone[ k ].x > -1.5 ) {
+        bool cone = uLCone[ k ].x > -1.5;
+        if ( cone ) {
           float cd = dot( -l, uLDir[ k ] );
           sp = smoothstep( uLCone[ k ].x, uLCone[ k ].y, cd );
           sp *= sp;
@@ -1132,8 +1170,14 @@ const MEDIA_FRAG = /* glsl */`
         /* gobo. A real beam is broken up by the boom, the hoses and the canopy
            in front of it; that streaking IS the god-ray read. Hashing the
            DIRECTION to the light gives streaks that radiate from the source and
-           stay put in world space, for the price of one noise fetch. */
-        sp *= 0.58 + 0.52 * n3( l * 9.0 + float( k ) * 17.0 );
+           stay put in world space, for the price of one noise fetch.
+
+           0.58+0.52 -> 0.42+0.76 at the same mean (0.84 -> 0.80). The old
+           range put the darkest streak at 0.58 of the brightest, which at
+           1-2 px of screen separation is below the noise floor of the dither;
+           0.42 against 1.18 is 2.8:1 and survives it. Structure INSIDE the
+           beam is half of what makes it read as a beam and not as a wedge. */
+        sp *= 0.42 + 0.76 * n3( l * 9.0 + float( k ) * 17.0 );
 
         /* TWO-TERM Henyey-Greenstein: a forward lobe plus an isotropic floor.
            cos is +1 when the light shines INTO the camera, which is exactly
@@ -1159,7 +1203,8 @@ const MEDIA_FRAG = /* glsl */`
            light into an omnidirectional glow. */
         float ph = 0.20 + 0.78 * hg;
 
-        acc += uLCol[ k ] * ( att * sp * ph * d * dt * T * occ );
+        vec3 add = uLCol[ k ] * ( att * sp * ph * d * dt * T * occ );
+        if ( cone ) accB += add; else accH += add;
       }
 
       T *= exp( -d * uDust.z * dt );
@@ -1192,8 +1237,17 @@ const MEDIA_FRAG = /* glsl */`
        At 0.31 a beam core reaches sRGB ~135 on its own and still reads as a
        bright shaft, while the direct light on the work stays the brightest
        thing in the frame. The medium is a fraction of the picture, by
-       construction and not by tuning. */
-    gl_FragColor = vec4( ( acc / ( 1.0 + 3.2 * acc ) ) * uDust.w, 1.0 );
+       construction and not by tuning.
+
+       ROUND 4 splits it in two — see the accumulator note above. The BEAM
+       ceiling goes 0.3125 -> 0.385, still well under the 1.05 that blew a
+       white hole in shots/qb-tunnel-jumbo; the HAZE ceiling comes down to
+       0.083, which is the number that stops 40 m of tube summing into a veil.
+       They are added, not blended: a beam crossing a lit region is beam PLUS
+       glow, which is what a real one is. */
+    vec3 beam = accB / ( 1.0 + uSat.x * accB );
+    vec3 haze = accH / ( 1.0 + uSat.y * accH );
+    gl_FragColor = vec4( ( beam + haze ) * uDust.w, 1.0 );
   }
 `;
 
@@ -1551,10 +1605,15 @@ export function createEnvironment(ctx) {
     uDust:   { value: new THREE.Vector4(0.05, 1.6, 0.05, 1.0) },
     uFaceZ:  { value: -7 },
     uHG:     { value: 0.58 },
+    /* (beam k, haze k) — the two multiple-scattering saturation constants.
+       Ceilings are 1/k: 0.385 for a beam core, 0.083 for the omnidirectional
+       veil. See the accumulator note in MEDIA_FRAG for why they differ. */
+    uSat:    { value: new THREE.Vector2(2.6, 12.0) },
   };
 
   const _lw = new THREE.Vector3();
   const _lt = new THREE.Vector3();
+  const _fwd = new THREE.Vector3();      // camera forward, for axial de-weighting
   const _invVP = new THREE.Matrix4();
 
   /**
@@ -1954,8 +2013,20 @@ export function createEnvironment(ctx) {
       if (e.spec.kind === 'spot') {
         l.target.getWorldPosition(_lt);
         D.copy(_lt).sub(P).normalize();
-        // three's SpotLight falls off from `angle*(1-penumbra)` to `angle`
-        K.set(Math.cos(l.angle), Math.cos(l.angle * (1 - l.penumbra * 0.85)));
+        /* three's SpotLight falls off from `angle*(1-penumbra)` to `angle`,
+           and the medium used to copy that with a 0.85 weight — so on the key
+           (angle 0.47, penumbra 0.52) the transition ran from 0.26 to 0.47 rad
+           and the "edge" of the beam was 12 degrees wide. A shaft is read as
+           an edge: the line between lit air and unlit air. At 12 degrees there
+           is no line, and that is a second, independent reason the round-3
+           frames measured as haze.
+
+           0.32 puts the transition at 0.39-0.47 rad — a 4.6-degree shoulder,
+           which is about what a real luminaire's reflector cut-off gives. The
+           LIGHT itself keeps three's own penumbra for the surfaces it lands
+           on; only the medium's idea of the cone is sharpened, because a soft
+           edge on rock is correct and a soft edge in air is not. */
+        K.set(Math.cos(l.angle), Math.cos(l.angle * (1 - l.penumbra * 0.32)));
       } else {
         K.set(-2, -2);
       }
@@ -1972,8 +2043,38 @@ export function createEnvironment(ctx) {
          the medium than the lights whose job is to put value on rock. The rear
          work light is 3.2 because it is the only beam pointed at the camera and
          the Henyey-Greenstein peak is aimed straight down the lens. */
+      /* ── AXIAL DE-WEIGHTING, AND IT IS AN AUTHORING RULE, NOT PHYSICS ────
+         (declared, per HANDOFF §9.3 — every visual exaggeration is named.)
+
+         The round-4 split of the integral fixed longhole (coverage 50.6 % ->
+         30.9 %, p95/p50 13.9 -> 90) and rockbolt (24.0 % -> 29.9 %, 51 ->
+         151), and did almost nothing for the jumbo (74.3 % -> 68.5 %, 4.0 ->
+         3.4). The reason is geometry, and the same geometry the round-3 note
+         already worked out for `ugRear`: YOU CANNOT SEE A BEAM YOU ARE LOOKING
+         ALONG. The jumbo's key and fill are aimed at the face, i.e. straight
+         away down the drive, and the camera stands behind the machine looking
+         the same way — so those two cones project as large discs filling the
+         centre of the frame. Every sample inside them is lit, none of them
+         has an edge in view, and the result is a veil by construction. In the
+         5.0 m and 5.6 m drives the key is aimed at the ring or at the back,
+         i.e. ACROSS the view, so the same lights make shafts there.
+
+         So the medium's budget follows the geometry: `axial` is how nearly the
+         beam runs down the lens axis, and a beam that does carries a third of
+         its weight. It is not a physical term — the energy is real either way
+         — but the `media` weight was never physical (its own note says it is
+         "set by measurement, not derived"), and this makes it respond to the
+         one variable that decides whether the energy can be SEEN as a shaft.
+         It is computed per frame, so it stays correct as the boom sweeps and
+         as the camera moves, and it needs no per-variant authoring. */
+      let axialK = 1;
+      if (e.spec.kind === 'spot' && cam) {
+        cam.getWorldDirection(_fwd);
+        const axial = Math.abs(D.dot(_fwd));
+        axialK = 1 - 0.65 * sstep(0.72, 0.96, axial);
+      }
       C.set(l.color.r, l.color.g, l.color.b)
-        .multiplyScalar(l.intensity * 0.00085 * (e.spec.media || 1));
+        .multiplyScalar(l.intensity * 0.00085 * (e.spec.media || 1) * axialK);
     }
   }
 

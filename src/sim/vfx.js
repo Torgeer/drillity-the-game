@@ -322,6 +322,76 @@ export const EFFECTS = {
     rate: 34, burst: 14,
   },
 
+  /* ── SURFACE: JET GROUTING SPOIL RETURN ────────────────────────────────
+     NOT A FLUSH RETURN, AND NOT CUTTINGS. Every other collar in this file
+     throws something the bit made: chips, fines, spray off a rotary. A jet
+     grouting collar throws the SOIL ITSELF, taken apart at 400 bar and mixed
+     with cement, coming back up the annulus under the pressure of what is
+     still being injected below. `[KLEMM]`'s rig kit lists suction hose pumps
+     for the backflow because it arrives faster than it can drain away.
+
+     So it does not spray and it does not fall — it WELLS UP and OVERFLOWS.
+     Three things follow from that and they are the whole design of these two
+     kinds:
+
+       speed almost nothing   0.10-0.34 m/s against `mudStreak`'s 1.4-3.4.
+                              Spray leaves a collar; slurry leaves it at a
+                              walking pace and never gets above the platform.
+       gravity near zero      0.16, not mudStreak's 1.15. This is a viscous
+                              fluid moving as a body, not droplets on a
+                              ballistic arc.
+       size grows, then holds A slug of spoil spreads as it overflows and
+                              does not break up. It slumps.
+
+     Grey, because that is what it is: soil at whatever colour the bed is,
+     lightened and cooled by cement. `stratumColor` tints it live, so the same
+     kind reads as grey-brown out of a marl and a pale grey out of a chalk. */
+  spoilWell: {
+    band: BAND_SURFACE, pass: PASS_SOFT, sprite: 'mud', priority: 8,
+    life: [2.2, 4.2], size: [0.16, 0.34], drag: 2.4, gravity: 0.16, wind: 0.05,
+    turb: [0.03, 0.35], swirl: [0.03, 0.35], spin: 0.5, stretch: 0, bounce: 0.02, flow: 0,
+    color: '#8E8C86',
+    sizeCurve:  [[0, 0.5], [0.30, 1.0], [0.85, 1.18], [1, 1.10]],
+    alphaCurve: [[0, 0], [0.10, 0.95], [0.78, 0.85], [1, 0]],
+    colorCurve: [[0, '#C9C7BE'], [0.45, '#9A9891'], [1, '#6E6C66']],
+    emitCurve:  [[0, 0.34], [1, 0.26]],
+    // A RING at the collar, not a cone out of it: the annulus is what is
+    // producing this, so it arrives all the way round the rod.
+    emit: { shape: 'annulus', r: 0.30, r2: 0.13, speed: [0.10, 0.34], spread: 0.30, up: 1, yOff: 0.02 },
+    rate: 44, burst: 16,
+  },
+  spoilOverflow: {
+    band: BAND_SURFACE, pass: PASS_SOFT, sprite: 'smoke', priority: 5,
+    life: [3.0, 5.5], size: [0.22, 0.52], drag: 3.4, gravity: 0.34, wind: 0.10,
+    turb: [0.04, 0.30], swirl: [0.03, 0.28], spin: 0.22, stretch: 0, bounce: 0.02, flow: 0,
+    color: '#93918A',
+    // It spreads outward across the platform rather than dissipating upward.
+    sizeCurve:  [[0, 0.45], [0.35, 1.10], [1, 1.55]],
+    alphaCurve: [[0, 0], [0.14, 0.62], [0.70, 0.48], [1, 0]],
+    colorCurve: [[0, '#BFBDB4'], [0.5, '#95938C'], [1, '#6A6862']],
+    emitCurve:  [[0, 0.30], [1, 0.22]],
+    emit: { shape: 'annulus', r: 0.46, r2: 0.24, speed: [0.06, 0.22], spread: 1.15, up: 0.25, yOff: 0.01 },
+    rate: 30, burst: 12,
+  },
+  /* ── SECTION: the same spoil, in the annulus, on its way up ────────────
+     The section band's default column is `cuttingChip` + `cuttingFines`, and
+     neither is what is in this annulus: there are no chips, because nothing
+     was cut, and the fines are not airborne dust but a fluid. One slow,
+     coherent, buoyant column instead — flow 1.0, so it tracks the annulus,
+     and a drag/gravity pair that lets it RISE rather than settle. */
+  spoilRise: {
+    band: BAND_SECTION, pass: PASS_SOFT, sprite: 'mud', priority: 9,
+    life: [3.0, 6.0], size: [0.20, 0.44], drag: 2.9, gravity: -0.10, wind: 0,
+    turb: [0.045, 0.9], swirl: [0.05, 1.2], spin: 0.9, stretch: 0, bounce: 0.04, flow: 1.0,
+    color: '#8E8C86',
+    sizeCurve:  [[0, 0.55], [0.25, 1.0], [0.9, 1.12], [1, 0.95]],
+    alphaCurve: [[0, 0], [0.08, 0.92], [0.82, 0.80], [1, 0]],
+    colorCurve: [[0, '#C9C7BE'], [0.5, '#9A9891'], [1, '#726F69']],
+    emitCurve:  [[0, 0.40], [0.5, 0.34], [1, 0.28]],
+    emit: { shape: 'annulus', r: 0.90, r2: 0.28, speed: [0.10, 0.42], spread: 0.45, up: 1, yOff: 0.03 },
+    rate: 96, burst: 22,
+  },
+
   /* ── SURFACE: drilling foam ────────────────────────────────────────────
      Slow, clumpy, sticky. Very high drag, near-neutral buoyancy, low spin and
      a size curve that swells then holds — foam does not dissipate, it piles
@@ -1311,7 +1381,16 @@ export const EFFECTS = {
 export const FLUSH_MEDIUM = {
   auger: 'none', 'cable-tool': 'water', 'top-hammer': 'air', dth: 'air',
   overburden: 'air', core: 'water', 'rotary-kelly': 'none', cfa: 'none',
-  'cased-cfa': 'none', hdd: 'mud', sonic: 'water', 'jet-grouting': 'water',
+  /* `jet-grouting` read 'water' here against `game/data.js`'s
+     `flushMedium: 'mud'` and `audio/audio.js`'s `medium: 'mud'` — two files
+     out of three agreeing and this one drawing a clean water spray over a
+     cement-grout column. It also mattered beyond the picture: `site.js`
+     resolves this method to its `jet` control family (WITHDRAW / JET /
+     ROTATION) precisely BY reading `flushMedium === 'mud'`, so this row was
+     the odd one out in a chain that three other files agree on.
+     It is 'mud' now — and jet grouting does not spray it anyway; see the
+     spoil return in driveCollarReturn(). */
+  'cased-cfa': 'none', hdd: 'mud', sonic: 'water', 'jet-grouting': 'mud',
   anchor: 'air', dw: 'mud', displacement: 'none', 'soil-mixing': 'mud',
   'raise-boring': 'water', microtunnelling: 'mud', 'pipe-bursting': 'none',
   'auger-boring': 'none', vibro: 'none', 'dynamic-compaction': 'none',
@@ -2957,6 +3036,13 @@ const KIND_ANCHOR = {
   resinExtrude: ANCHOR.HEAD, groutReturn: ANCHOR.HEAD,
   pileBurst: ANCHOR.HEAD, pileSpall: ANCHOR.HEAD,
   sptPuff: ANCHOR.HEAD,
+  /* Jet grouting spoil. The two surface kinds are a COLLAR event — the spoil
+     arrives up the annulus and comes over the rim, which is the only place it
+     can be. The section kind rides the BIT anchor like the cuttings column
+     does, and that anchor follows `actionDepth`, so it travels UP the hole
+     with the monitor for the whole lift instead of freezing at the toe. */
+  spoilWell: ANCHOR.COLLAR, spoilOverflow: ANCHOR.COLLAR,
+  spoilRise: ANCHOR.BIT,
 };
 
 /* How strongly the live stratum colour tints each kind (0 = never). This is
@@ -2980,6 +3066,12 @@ const KIND_STRATUM_TINT = {
   rcInnerTube: 1.0,
   faceSlurry: 0.55, upholeSludge: 0.60,
   pileSpall: 0.15, pileBurst: 0.25, sptPuff: 0.50,
+  /* Jet grouting spoil IS the bed — that is the whole method: the soil is
+     taken apart and comes back up mixed with cement. So it carries the live
+     stratum colour strongly, but not at full strength, because the binder
+     lightens and cools everything it is mixed into. A jetted marl still
+     reads as marl; it just reads as a paler, greyer one. */
+  spoilWell: 0.60, spoilOverflow: 0.50, spoilRise: 0.62,
 };
 
 /* Module scratch — allocated once, reused for the life of the process. */
@@ -3088,6 +3180,16 @@ export function createVFX(ctx) {
   let uphole = false;
   let headDamage = 0, dollyCond = 1;
   let boltType = '';
+  /* ── IS THE MONITOR JETTING RIGHT NOW? ────────────────────────────────
+     Not "is this jet grouting" — the method spends its first pass drilling an
+     ordinary mud-flushed rotary hole, and that collar is an ordinary mud
+     collar. It is the SECOND pass that throws spoil, and drilling.js publishes
+     `return01` and `jetBar` on `state.drill` only while that pass is running.
+     So the picture turns over on what the machine is DOING, and this file
+     needs no jet-grouting row to know it — the same argument site.js makes
+     about not keeping a method-id lookup. `jetReturn01` also drives how much
+     comes over the collar, because that is literally what it measures. */
+  let jetting = false, jetReturn01 = 0;
   /* WHERE THE POWER IS COMING FROM. A jumbo drills the face on MAINS and
      trams on its diesel; drilling.js publishes `powerMode` and `tramming`
      for exactly that, because the changeover is a real event with its own
@@ -3944,6 +4046,13 @@ export function createVFX(ctx) {
       driveKind('cuttingFines', cut * 0.22);
     } else if (sectionReturn === 'face') {
       driveKind('faceWash', cut * (0.45 + flushN * 0.9));
+    } else if (sectionReturn === 'spoil') {
+      /* THE JETTING LIFT. Nothing is being cut, so `cut` — which is built out
+         of ROP — is the wrong driver: on this pass ROP is the WITHDRAWAL
+         RATE, and lifting faster makes LESS spoil per metre, not more. What
+         makes spoil is the jet, and what says how much of it is coming back
+         up the annulus is the return the sim is already measuring. */
+      driveKind('spoilRise', clamp(0.30 + jetReturn01 * 0.95, 0, 1.35));
     }
     // 'none' emits nothing, deliberately.
 
@@ -3980,6 +4089,29 @@ export function createVFX(ctx) {
    *  rather than being scaled to near-zero and still costing pool slots. */
   function driveCollarReturn(returnAmt, ropN, flushN) {
     void ropN; void flushN;
+    /* ── SPOIL, NOT SPRAY ────────────────────────────────────────────────
+       Jet grouting's medium is mud, and the mud branch below is a mud ROTARY
+       collar: droplets thrown off a turning string. That is not what a jetting
+       lift produces. The soil is taken apart at up to 700 bar and comes back
+       up the annulus as a grey cement slurry, pushed by what is still being
+       injected under it — it wells up over the collar and overflows, and
+       `[KLEMM]`'s rig kit carries suction hose pumps for it because it arrives
+       faster than it drains.
+
+       AND THE AMOUNT IS NOT THE RATE. Every other collar here scales with ROP.
+       On this pass ROP is the withdrawal, and lifting faster makes LESS spoil
+       per metre. The sim publishes what is actually arriving — `return01`, the
+       gauge the player is holding — so the picture is driven by that, and the
+       moment the return is lost the collar goes quiet, which is the tell. */
+    if (jetting) {
+      const back = clamp(jetReturn01 / 0.5, 0, 1.6);   // 1.0 at a managed return
+      driveKind('spoilWell', 0.30 + back * 0.85);
+      driveKind('spoilOverflow', 0.20 + back * 0.70);
+      // Heave: the annulus is packing off, and what cannot pass comes over the
+      // collar all at once instead of steadily.
+      if (jetReturn01 > 0.88) driveKind('mudStreak', (jetReturn01 - 0.88) * 2.4);
+      return;
+    }
     switch (medium) {
       case 'air':
         driveKind('dustBody', returnAmt * 0.92);
@@ -4595,6 +4727,16 @@ export function createVFX(ctx) {
       if (typeof d.headDamage === 'number') headDamage = clamp(d.headDamage, 0, 1);
       if (typeof d.dollyCondition === 'number') dollyCond = clamp(d.dollyCondition, 0, 1);
       boltType = d.boltType || '';
+      /* The jetting lift, and only the lift. `jetBar` is published by no other
+         pass of no other method, so its presence is the test — and the return
+         it comes with is how much spoil is actually arriving. */
+      /* `!= null`, not `typeof === 'number'`. drilling.js nulls both fields
+         off the jetting pass precisely so this test can be made, and a null
+         has to read as "not jetting" rather than as "field absent, keep the
+         last value" — which is how a spoil column got drawn over a pre-drill
+         for a whole 1,100-frame capture. */
+      jetting = d.jetBar != null && d.return01 != null;
+      jetReturn01 = jetting ? clamp(d.return01, 0, 1.25) : 0;
       /* Only the jumbo publishes this, and only it has the changeover. An
          absent field must read as '' rather than as 'diesel', so that a
          method with no cable reel keeps the plume it has always had. */
@@ -4660,6 +4802,8 @@ export function createVFX(ctx) {
     } else {
       grooveAmt = damp(grooveAmt, 0, 1.5, dt);
       programme = null; phaseNow = ''; powerMode = '';
+      // The collar cannot still be overflowing once the pass has stopped.
+      jetting = false; jetReturn01 = 0;
     }
     /* env owns the mode switch and has a documented single-writer rule about
        it, so ask env first and fall back to the method id only when env is
@@ -4695,7 +4839,12 @@ export function createVFX(ctx) {
     /* A piezocone replaces its parent method wholesale rather than being a
        mode of it, so it is looked up by programme and everything else by
        method id. */
+    /* A jetting lift's annulus carries SPOIL, not cuttings — and it carries it
+       only on that pass, so this is read off the live telemetry rather than
+       off a method-id row. The pre-drill before it is an ordinary annulus and
+       keeps the ordinary column. */
     sectionReturn = programme === 'cpt' ? 'none'
+      : jetting ? 'spoil'
       : (SECTION_RETURN[activeMethodId()] || 'annulus');
     purgeAmt = damp(purgeAmt, 0, 1.8, dt);
     blowPulse = damp(blowPulse, 0, 5.5, dt);
@@ -4824,6 +4973,7 @@ export function createVFX(ctx) {
     // counters at their last value across a scene change would fire a burst
     // on the first frame of the next hole, out of nowhere.
     programme = null; phaseNow = ''; sectionReturn = 'annulus';
+    jetting = false; jetReturn01 = 0;
     sampleWet = 0; sampleHoldUp = 0; sampleTrain = 0; sampleBags = -1;
     uphole = false; headDamage = 0; dollyCond = 1; boltType = ''; powerMode = '';
     blowCount = -1; sptBlowCount = -1; blowPulse = 0; purgeAmt = 0; purgeHold = 0;
