@@ -1,0 +1,46 @@
+{
+  "scope": "Frozen ruler integration snapshot; unrelated worktree modifications excluded",
+  "baselineGeologySha256": "90e4c21a586a0ce1f7ad34ffa72ac1811f02b3432699f13be3a5cecf5d2713bc",
+  "files": [
+    {
+      "path": "src/world/geology.js",
+      "sha256": "6ae1593f3dc86a402899b8dd552c421e5aec13eef3f5b7fc728b5c3470c00a9b",
+      "bytes": 412399
+    },
+    {
+      "path": "tools/checkruler.mjs",
+      "sha256": "18621b039bf1aaa795df495d966bf6dc15377259e5e7a04bc64a4cb7392209d7",
+      "bytes": 24585
+    },
+    {
+      "path": "tools/checkrulerbrowser.mjs",
+      "sha256": "518b6c245b8c35e1a793ed8dd107c46365bf47fda6671ce312b626260aa4c026",
+      "bytes": 8908
+    },
+    {
+      "path": "research/GEOLOGY_REGRESSION.md",
+      "sha256": "537dfe5c33d1a1bbd967af95e31a789af92f76f32c1090e98e7ec942cad413bb",
+      "bytes": 9584
+    },
+    {
+      "path": "research/GEOLOGY_READABILITY_REVIEW.md",
+      "sha256": "554f225d6740021c8b5b34b83d5454737c48fffe25e4941ad8e83911ad790b68",
+      "bytes": 16324
+    },
+    {
+      "path": "research/GEOLOGY_RULER_ADVERSARIAL.md",
+      "sha256": "24bfb43f8a830523ca4d8107eb9264100caffbd9a88e6925d9cd8e2640fcf7f6",
+      "bytes": 22360
+    },
+    {
+      "path": "research/GEOLOGY_RULER_IMPLEMENTATION.md",
+      "sha256": "5cec411e0ccbd1962e2b2463915878a1928da5e8e70008894c58ee04fafdbb8c",
+      "bytes": 7654
+    },
+    {
+      "path": "research/GEOLOGY_RULER_SOURCE.patch",
+      "sha256": "5f590708edc8006b58a8ec86ef38436290fdfdfad1840c29279ba0c31182f11f",
+      "bytes": 47706
+    }
+  ]
+}

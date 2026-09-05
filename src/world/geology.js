@@ -4720,7 +4720,7 @@ export function createGeology(ctx) {
       viewH = halfH * 2;
     }
     U.uHalfW.value = halfW;
-    U.uGeoX.value.set(-halfW + CFG.logWidth, halfW - CFG.rulerWidth);
+
 
     /* 261 CSS px / 13.44 m = 19.4 px per metre on the reference device — and
        19.4 is the number renderer.js `updateSectionFrustum()` deliberately
@@ -4728,6 +4728,7 @@ export function createGeology(ctx) {
        Taking both terms from the same source is what stops this becoming a
        second opinion about it (ASTRA §5). */
     pxPerMetre = bandH / Math.max(viewH, 1e-3);
+    U.uGeoX.value.set(-halfW + CFG.logWidth, halfW - rulerWidth());
     U.uEdgeShade.value = CFG.edgeMetres;
     U.uEdgeGeo.value = CFG.edgeGeoMetres;
     U.uEdgeRange.value = CFG.edgeRangeMetres;
@@ -5258,7 +5259,7 @@ export function createGeology(ctx) {
      accidental cyan that is nowhere else in the section. */
   function buildWaterLine() {
     if (waterLine) { root.remove(waterLine); waterLine.geometry.dispose(); }
-    const wide = CFG.rulerWidth * 1.15;
+    const wide = rulerWidth() * 1.15;
     const g = new T.PlaneGeometry(wide, 0.5, 1, 1);
     waterMat = waterMat || track(new T.ShaderMaterial({
       uniforms: { uTime: U.uTime, uCol: { value: new T.Color(BRAND.steel) } },
@@ -5803,7 +5804,7 @@ export function createGeology(ctx) {
       // the bearing stratum, called out
       if (pile.bearing) {
         q.box(-halfW + CFG.logWidth, secYForDepth(pile.bearing.top),
-              halfW - CFG.rulerWidth, secYForDepth(pile.bearing.top) - 0.08,
+              halfW - rulerWidth(), secYForDepth(pile.bearing.top) - 0.08,
               MP.ghost, 0, REV.always, 0.44);
       }
       // the toe
@@ -5895,20 +5896,15 @@ export function createGeology(ctx) {
     return clamp(dpr * 1.25, 2, 3.2);
   }
 
-  /* ── WHERE THE VISIBLE WINDOW SITS INSIDE A STRIP ─────────────────────────
-     A strip is drawn `stripSpanM()` metres tall and re-centred only when the
-     window leaves it, with the window `stripLead()` metres down from the
-     strip's top edge. THREE places need that lead and they must never
-     disagree: update() when it re-centres, drawLog() when it decides which
-     part of a bed the player can see, and drawRuler() when it puts a header
-     on screen — a header drawn at the strip's own top edge is 4.4 m above the
-     band and has never once been visible.
-
-     span is Math.max()'d for the same reason the face slab is: it must COVER
-     the visible band. Chrome only ever shrinks the band, so on every shipping
-     layout this is the authored 31 m exactly as before. */
+  // Strips retain overscan to avoid rebuilding geometry during scroll. The
+  // actual visible offsets are recorded per repaint, never inferred from lead.
   const stripSpanM = () => Math.max(viewMetres, viewH) * 1.55;
   const stripLead = () => viewMetres * 0.22;
+  // Authored screen layout, NOT SOURCED physical dimensions. A deep label
+  // gets space rather than being reduced to 6.5 px on a narrow phone.
+  const rulerWidth = () => Math.max(CFG.rulerWidth, 56 / pxPerMetre);
+  const plateHeight = () => 36 / pxPerMetre;
+  const footerHeight = () => plateHeight() + (xRuler?.heightUnits || 0) + 0.10;
 
   function makeStrip(name, widthUnits, xPos) {
     const span = stripSpanM();
@@ -5962,43 +5958,15 @@ export function createGeology(ctx) {
   function buildStrips() {
     killStrip(ruler);
     killStrip(logStrip);
-    ruler = makeStrip('depth-ruler', CFG.rulerWidth, halfW - CFG.rulerWidth * 0.55);
+    ruler = makeStrip('depth-ruler', rulerWidth(), halfW - rulerWidth() * 0.55);
     logStrip = makeStrip('drill-log', CFG.logWidth, -halfW + CFG.logWidth * 0.5);
     ruler.top = -1e9;
     logStrip.top = -1e9;
   }
 
-  /* ── THE STATION RULER ────────────────────────────────────────────────────
-     A real HDD profile drawing carries TWO scales, and it carries them because
-     without both the reader has no way to know the curve has been stretched.
-     DESIGN_EXPANSION.md §1 asks for exactly that and research/07 §F1 spells it
-     out: "a vertical ruler in metres of depth and a horizontal ruler in metres
-     of station, each labelled with its own scale, plus a small V.E. badge.
-     This is not decoration — it is the thing that stops a player misreading
-     the curve as tighter than it is."
-
-     So: the depth ruler on the right is untouched, and this is the second one,
-     across the bottom, in the mode's own length word (BORE / CHAINAGE).
-
-     IT NOW EXISTS IN EVERY MODE, and this is the fix for the bore. A vertical
-     section has only one length axis, so it never got a scale strip and never
-     declared anything — while drawing the borehole ~7x over gauge against a
-     depth ruler that is 1:1 (see CFG holeR* and applyHoleDiameter). A frame
-     stating two scales and admitting to neither is what the critic measured
-     and reported as "the tool is 9-17x oversize against the ruler drawn beside
-     it". HANDOFF §9.3: "Make the badge a property of the section, computed
-     from the actual transform, and show it whenever it is not 1:1."
-
-     So there is now ONE strip that states every scale the section is using,
-     and it is the only place in the file allowed to state them:
-
-       vertical / raise / pile   DEPTH 1:1 · BORE n:1        1.15 units tall
-       profile / heading         + the chainage ticks, V.E.  2.35 units tall
-
-     The bore number is boreExag, derived in applyHoleDiameter() from the two
-     diameters — never asserted, so it cannot drift from what is drawn. Below
-     1.0 it is drawn UNDER gauge (a 6 m raise bore hits the ceiling at 0.53x)
-     and the badge says so rather than staying silent. */
+  /* Horizontal modes have two axes: true vertical depth and horizontal offset.
+     Offset is secXForStation() before the display compression, not bore MD.
+     The footer states the vertical exaggeration from the actual transform. */
   function killStationRuler() {
     if (!xRuler) return;
     root.remove(xRuler.mesh);
@@ -6013,7 +5981,7 @@ export function createGeology(ctx) {
   function buildStationRuler() {
     killStationRuler();
     if (!mode.horizontal || !scene) return;
-    const heightUnits = 2.35;                       // 46 CSS px on the reference band
+    const heightUnits = 30 / pxPerMetre; // authored CSS layout, NOT SOURCED
     const span = halfW * 2 * 1.7;                   // units of x carried by the strip
     const cssK = stripSuper();
     const canvasW = Math.round(clamp(span * pxPerMetre * cssK * 0.5, 256, 1024));
@@ -6055,7 +6023,7 @@ export function createGeology(ctx) {
     grad.addColorStop(1, 'rgba(15,20,28,0.0)');
     g.fillStyle = grad;
     g.fillRect(0, 0, W, H);
-    const y0 = Math.round(H * 0.30);
+    const y0 = css(3);
     g.fillStyle = 'rgba(150,160,174,0.16)';
     g.fillRect(0, y0, W, 1.5);
 
@@ -6079,10 +6047,16 @@ export function createGeology(ctx) {
       const major = Math.abs((s / stepM) % 5) < 1e-6;
       g.fillStyle = major ? 'rgba(223,181,82,0.80)' : 'rgba(150,160,174,0.42)';
       g.fillRect(Math.round(x), y0, major ? 2 : 1, major ? H * 0.34 : H * 0.20);
-      if (major) {
+      if (s >= 0) {
         g.fillStyle = 'rgba(250,250,250,0.88)';
         g.font = `600 ${css(11)}px ${BRAND.fontMono}`;
-        g.fillText(String(Math.round(s)), x, y0 + H * 0.38);
+        const txt = String(Math.round(s));
+        const halfLabel = g.measureText(txt).width * 0.5;
+        const winLeft = (xRuler.windowLeft || 0) * pxPerUnit;
+        const winRight = winLeft + halfW * 2 * pxPerUnit;
+        if (x - halfLabel >= winLeft + css(4) && x + halfLabel <= winRight - css(4)) {
+          g.fillText(txt, x, css(15));
+        }
       }
     }
 
@@ -6102,26 +6076,8 @@ export function createGeology(ctx) {
     xRuler.left = leftUnits;
   }
 
-  /* ── THE SCALE PLATE — where the section admits what it is doing ──────────
-     A title block. It states every scale the drawing is using, it is anchored
-     to the FRUSTUM rather than to a scrolling texture, and it exists in every
-     mode.
-
-     This is HANDOFF §9.3 and §4. The depth axis is true metres while the bore
-     is drawn ~7x over gauge (CFG holeR*, applyHoleDiameter) so that a 152 mm
-     hole is not 1.3 px of nothing — a necessary exaggeration, and an
-     undeclared one. A frame carrying a 1:1 ruler beside a 7x bore states two
-     scales and admits to neither, which is exactly what the critic measured
-     and wrote up as "the tool is 9-17x oversize against the ruler drawn beside
-     it". research/07 §F1: "each labelled with its own scale, plus a small V.E.
-     badge. This is not decoration — it is the thing that stops a player
-     misreading the curve as tighter than it is."
-
-     Every number on it is DERIVED from the transform actually in force —
-     boreExag from the two diameters, layout.ve from metresPerUnitX — so it
-     cannot drift from what is drawn. Amber when a scale is not 1:1, grey when
-     it is, so an exaggeration is what the eye lands on. */
-  const PLATE_H = 1.45;                 // units — 28 CSS px on the reference band
+  // Scale declarations are screen-pinned and reserve their own two-row footer.
+  // Nominal/drawn diameters and exaggeration come from the actual mode uniforms.
   let scalePlate = null;
 
   function killScalePlate() {
@@ -6145,14 +6101,14 @@ export function createGeology(ctx) {
     const canvasW = Math.round(clamp(spanU * pxPerMetre * cssK * 0.5, 256, 1024));
     const canvas = document.createElement('canvas');
     canvas.width = canvasW;
-    canvas.height = Math.max(8, Math.round((canvasW * PLATE_H) / spanU));
+    canvas.height = Math.max(8, Math.round((canvasW * plateHeight()) / spanU));
     const tex = track(new T.CanvasTexture(canvas));
     tex.colorSpace = T.SRGBColorSpace;
     tex.minFilter = T.LinearFilter;
     tex.magFilter = T.LinearFilter;
     tex.generateMipmaps = false;
     const mat = track(new T.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false }));
-    const mesh = new T.Mesh(new T.PlaneGeometry(spanU, PLATE_H, 1, 1), mat);
+    const mesh = new T.Mesh(new T.PlaneGeometry(spanU, plateHeight(), 1, 1), mat);
     mesh.renderOrder = 20;
     mesh.frustumCulled = false;
     mesh.name = 'scale-plate';
@@ -6192,48 +6148,35 @@ export function createGeology(ctx) {
     g.fillStyle = 'rgba(150,160,174,0.20)';
     g.fillRect(0, Math.round(H * 0.14), W, Math.max(1, css(0.8)));
 
-    const GREY = 'rgba(166,176,190,0.74)';
+    const GREY = 'rgba(220,228,238,0.94)';
     const AMBER = 'rgba(232,192,94,0.96)';
-    /* Inset to the DRAWING area, not to the canvas. The depth ruler owns the
-       right CFG.rulerWidth units and the drill log the left CFG.logWidth, and
-       the plate draws in front of both (z 2.05 against their 2.0), so text run
-       to the canvas edge lands on top of a ruler numeral. */
-    const pxPerUnit = W / scalePlate.spanU;
-    const padL = Math.round(CFG.logWidth * pxPerUnit) + css(4);
-    const padR = W - Math.round(CFG.rulerWidth * pxPerUnit) - css(4);
+    // Both vertical strips reserve this full-width footer before labeling.
+    const padL = css(8);
     g.textBaseline = 'top';
 
-    /* LEFT: the axis that is true. Saying "1:1" out loud is the half of the
-       statement that gives the exaggeration something to be measured against. */
+    // The whole footer is reserved by the log and ruler. Two independent
+    // rows avoid left/right badges competing for the same line. CSS layout
+    // values are authored design choices, NOT SOURCED physical dimensions.
     g.textAlign = 'left';
     g.fillStyle = GREY;
-    g.font = `700 ${css(8.5)}px ${BRAND.fontMono}`;
-    g.fillText(mode.horizontal ? `${mode.lengthWord} 1 u = ${Math.max(layout.metresPerUnitX, 1e-6).toFixed(layout.metresPerUnitX < 10 ? 1 : 0)} m`
-                               : 'DEPTH 1:1', padL, css(3.5));
-
-    /* RIGHT: every scale that is NOT 1:1. Below 1.0 the bore is drawn UNDER
-       gauge — a 6 m raise bore hits holeRMax at 0.53x — and the plate says so
-       rather than staying silent, which is the same discipline as printing
-       `sourced: false` instead of rounding a number off and hoping. */
-    const badge = (txt, on, x) => {
-      g.fillStyle = on ? AMBER : GREY;
-      g.font = `700 ${css(9.5)}px ${BRAND.fontMono}`;
-      g.textAlign = 'right';
-      g.fillText(txt, x, css(3.0));
-      return x - g.measureText(txt).width - css(9);
-    };
-    let rx = padR;
-    rx = badge(ex >= 1.05 ? `BORE ${ex.toFixed(1)}:1`
-             : ex <= 0.95 ? `BORE 1:${(1 / Math.max(ex, 1e-6)).toFixed(1)}`
-             : 'BORE 1:1', ex >= 1.05 || ex <= 0.95, rx);
-    if (mode.horizontal) badge(ve > 1.05 ? `V.E. ${ve.toFixed(1)}:1` : 'V.E. 1:1', ve > 1.05, rx);
-
-    /* The arithmetic behind the badge, under it, so the ratio is checkable
-       against the ruler in the same frame rather than merely asserted. */
-    g.fillStyle = 'rgba(150,160,174,0.66)';
-    g.font = `500 ${css(8)}px ${BRAND.fontMono}`;
-    g.textAlign = 'right';
-    g.fillText(`Ø ${mm} mm DRAWN ${Math.round(2 * holeR * 1000)} mm`, padR, css(13.5));
+    g.font = `700 ${11 * k}px ${BRAND.fontMono}`;
+    const axis = mode.horizontal
+      ? `TVD m · OFFSET m · V.E. ×${ve.toFixed(1)}`
+      : 'DEPTH m';
+    g.fillText(axis, padL, 5 * k);
+    // MD is wellbore length; TVD is vertical distance to datum. The bottom
+    // axis is horizontal offset (secXForStation), never measured bore length.
+    // https://glossary.slb.com/en/terms/m/measured_depth
+    // https://glossary.slb.com/Terms/t/true_vertical_depth.aspx
+    // A heading is a tunnel opening, not a circular bore. Profiles and raises
+    // have a separate pilot, so identify the final nominal bore explicitly.
+    const finalRadius = path ? Math.max(U.uPathC.value.w, U.uBore.value.z) : holeR;
+    const drawnMm = Math.round(2 * finalRadius * 1000);
+    const ratio = (2 * finalRadius) / Math.max(mm / 1000, 1e-6);
+    const bore = layout.id === 'heading' ? 'TUNNEL HEIGHT TRUE SCALE'
+      : `${path || raise ? 'FINAL ' : ''}Ø${mm}→${drawnMm} mm · DRAWN×${ratio.toFixed(1)}`;
+    g.fillStyle = layout.id === 'heading' ? GREY : AMBER;
+    g.fillText(bore, padL, 20 * k);
 
     tex.needsUpdate = true;
     scalePlate.exag = ex; scalePlate.ve = ve; scalePlate.mm = mm;
@@ -6318,12 +6261,13 @@ export function createGeology(ctx) {
        See drawRulerHead(). */
     const winTop = clamp((ruler.windowTop ?? stripLead()) * pxPerM, 0, Math.max(0, H - css(14)));
     g.fillStyle = 'rgba(9,12,17,0.86)';
-    g.fillRect(0, winTop, W, css(11));
+    g.fillRect(0, winTop, W, css(30));
     g.fillStyle = 'rgba(150,160,174,0.62)';
-    g.font = `600 ${css(7.5)}px ${BRAND.fontSans}`;
+    g.font = `600 ${10 * k}px ${BRAND.fontSans}`;
     g.textAlign = 'left';
     g.textBaseline = 'top';
-    g.fillText('BLOWS / 250', css(1.5), winTop + css(1.5));
+    g.fillText('BLOWS', css(3), winTop + css(3));
+    g.fillText('/250 mm', css(3), winTop + css(16));
 
     // metre marks stay, small, so the record is still a depth axis
     const d0 = Math.ceil(topDepth), d1 = Math.floor(topDepth + span);
@@ -6331,9 +6275,9 @@ export function createGeology(ctx) {
     for (let m = d0; m <= d1; m++) {
       if (m < 0 || m % 5 !== 0) continue;
       const y = (m - topDepth) * pxPerM;
-      if (y < -8 || y > H + 8) continue;
+      if (y < winTop + css(36) || y > winTop + (viewH - footerHeight()) * pxPerM - css(8)) continue;
       g.fillStyle = 'rgba(250,250,250,0.70)';
-      g.font = `600 ${css(8)}px ${BRAND.fontMono}`;
+      g.font = `600 ${10 * k}px ${BRAND.fontMono}`;
       g.fillText(String(m), css(1.5), y);
     }
 
@@ -6345,7 +6289,7 @@ export function createGeology(ctx) {
         g.fillStyle = 'rgba(16,185,129,0.85)';
         g.fillRect(0, Math.round(ty) - 1, W, Math.max(1, css(1.4)));
         g.textAlign = 'right';
-        g.font = `700 ${css(8)}px ${BRAND.fontMono}`;
+        g.font = `700 ${10 * k}px ${BRAND.fontMono}`;
         g.fillText(`+${pile.toeIntoBearing.toFixed(1)} m`, W - css(2), ty - css(7));
       }
     }
@@ -6388,7 +6332,8 @@ export function createGeology(ctx) {
     i = Math.min(i, Math.max(mj - 3, 0));
     while (i < TICK_LADDER.length - 4 && at(i) * pxPerMetreCss < 6) i++;    // hard floor
     if (mj < i + 1) mj = i + 1;
-    return { minor: at(i), mid: at(Math.max(i + 1, mj - 1)), major: at(mj) };
+    const readableMid = TICK_LADDER.find((n) => n >= at(i) && n * pxPerMetreCss >= 22) || at(mj);
+    return { minor: at(i), mid: Math.min(readableMid, at(Math.max(i + 1, mj - 1))), major: at(mj) };
   }
 
   function drawRuler(topDepth) {
@@ -6413,7 +6358,16 @@ export function createGeology(ctx) {
     const x0 = Math.round(W * 0.20);
     const runM = Math.max(layout.totalLength || 0, 0);
     const lad = tickLadder(pxPerM / k, runM);          // in CSS px per metre
-    const labelX = x0 + W * 0.34;
+    const labelX = x0 + css(8);
+    const safeTop = (ruler.windowTop ?? stripLead()) * pxPerM + css(20);
+    const safeBot = ((ruler.windowTop ?? stripLead()) + viewH - footerHeight()) * pxPerM - css(3);
+    // Reserve the painted cursor before labels, not merely an opaque layer
+    // over them: translucent edges otherwise leave a second value visible.
+    const cursorY = (depthForStation(actionStation()) - topDepth) * pxPerM;
+    // The plate occupies 76 of 92 texture rows; the larger mesh includes
+    // transparent margins. Include its 2.5 px stroke and repaint tolerance.
+    const cursorHalf = (readout?.mesh.geometry.parameters.height || 0) * pxPerM * (38 + 1.25) / 92 + 0.5 * k;
+    const textBoxes = [[cursorY - cursorHalf, cursorY + cursorHalf]];
 
     /* ── THE RUN, DRAWN TO SCALE IN THE RULER'S OWN GUTTER ───────────────────
        Depth, depth remaining and rate of progress off ONE graphic, and none of
@@ -6479,32 +6433,35 @@ export function createGeology(ctx) {
       if (y < -8 || y > H + 8) continue;
       const major = nearInt(d, lad.major);
       const mid = !major && nearInt(d, lad.mid);
-      const len = major ? W * 0.46 : mid ? W * 0.30 : W * 0.16;
+      const len = major ? css(6) : mid ? css(4) : css(2);
       g.fillStyle = major ? 'rgba(223,181,82,0.80)' : mid ? 'rgba(150,160,174,0.70)' : 'rgba(150,160,174,0.38)';
       g.fillRect(x0, Math.round(y) - (major ? 1 : 0), len, major ? 2 : 1);
-      if (major || mid) {
+      if ((major || mid) && y >= safeTop + css(7) && y <= safeBot - css(7)
+          && Math.abs(y - cursorY) >= cursorHalf + (major ? 6 : 5) * k) {
         const txt = lad.major < 1 ? d.toFixed(1) : String(Math.round(d));
         /* A 3,000 m well prints four digits into a strip authored for two.
            The size is solved against the room that is actually left rather
            than asserted, so the deepest hole in the game does not print
            "2990" over the top of its own tick. */
-        g.fillStyle = major ? 'rgba(250,250,250,0.90)' : 'rgba(150,160,174,0.60)';
-        let sz = major ? 12 : 8.5;
-        for (; sz > 6.5; sz -= 0.5) {
-          g.font = `${major ? 600 : 500} ${css(sz)}px ${BRAND.fontMono}`;
-          if (g.measureText(txt).width <= W - labelX - css(1.5)) break;
+        g.fillStyle = major ? 'rgba(250,250,250,0.96)' : 'rgba(211,222,238,0.90)';
+        const sz = major ? 12 : 10;
+        g.font = `${major ? 600 : 500} ${sz * k}px ${BRAND.fontMono}`;
+        if (g.measureText(txt).width <= W - labelX - css(2)) {
+          g.fillText(txt, labelX, y);
+          textBoxes.push([y - sz * k * 0.5, y + sz * k * 0.5]);
         }
-        g.fillText(txt, labelX, y);
       }
     }
     // water table datum — starts clear of the run rail
     const wy = (waterTableDepth - topDepth) * pxPerM;
-    if (wy > -4 && wy < H + 4) {
+    if (wy >= safeTop + css(15) && wy <= safeBot &&
+        !textBoxes.some(([a,b]) => wy - css(17) < b && wy - css(4) > a)) {
       g.fillStyle = 'rgba(111,182,199,0.85)';
       g.fillRect(Math.round(W * 0.11), Math.round(wy) - 1, W * 0.11, css(1.2));
-      g.font = `600 ${css(7)}px ${BRAND.fontSans}`;
+      g.font = `600 ${10 * k}px ${BRAND.fontSans}`;
       g.textAlign = 'left';
-      g.fillText('GWL', Math.round(W * 0.11), wy - css(6));
+      g.fillText('GWL', Math.round(W * 0.11), wy - css(10));
+      textBoxes.push([wy - css(16), wy - css(4)]);
     }
     /* ── DATUMS THE MODE OWNS ────────────────────────────────────────────────
        A raise is bored between two levels and the section has to show both —
@@ -6516,13 +6473,16 @@ export function createGeology(ctx) {
        penetration into it is the only honest measure of a driven pile. */
     const datum = (dep, label, col) => {
       const y = (dep - topDepth) * pxPerM;
-      if (y < -4 || y > H + 4) return;
+      if (y < safeTop + css(15) || y > safeBot) return;
+      if (textBoxes.some(([a,b]) => y - css(17) < b && y - css(4) > a)) return;
       g.fillStyle = col;
       g.fillRect(0, Math.round(y) - 1, W * 0.62, css(1.6));
-      g.font = `700 ${css(7)}px ${BRAND.fontSans}`;
+      g.font = `700 ${10 * k}px ${BRAND.fontSans}`;
       g.textAlign = 'left';
       // clear of the run rail, same inset the GWL datum uses
-      g.fillText(label, Math.round(W * 0.11), y - css(6));
+      if (g.measureText(label).width > W - css(8)) return;
+      g.fillText(label, Math.round(W * 0.11), y - css(10));
+      textBoxes.push([y - css(16), y - css(4)]);
     };
     /* TOTAL DEPTH — the datum that makes the rail readable as "how much is
        left". It is the one depth on this axis the player is being paid to
@@ -6530,7 +6490,7 @@ export function createGeology(ctx) {
        carry. Drawn from the mode's own totalLength through depthForStation(),
        so on an HDD profile it is the TVD at the exit and not the bore length,
        which is a different number and would be a wrong one on a depth axis. */
-    if (runM > 0) datum(tdTvd, 'TD', 'rgba(223,181,82,0.85)');
+    if (runM > 0 && layout.id !== 'heading') datum(tdTvd, path ? 'EXIT' : 'TD', 'rgba(223,181,82,0.85)');
     /* AND WHEN TD IS OFF THE BOTTOM OF THE PICTURE, WHICH IS MOST OF THE TIME.
        The band shows 13.4 m; holes in this game run to 3,000. The run rail
        states "how much is left" as a LENGTH, which is the right answer and
@@ -6548,13 +6508,13 @@ export function createGeology(ctx) {
     if (runM > 0 && !mode.horizontal) {
       const yTd = (tdTvd - topDepth) * pxPerM;
       /* NOT the band's floor — the floor is spoken for. drawScalePlate() sits
-         PLATE_H + 0.10 units deep across it and draws IN FRONT of this strip
+         plateHeight() + 0.10 units deep across it and draws IN FRONT of this strip
          (z 2.05 against 2.0), so a marker on the window's bottom edge is a
          marker underneath the scale plate. It rides just above it instead.
          (Only the vertical modes get here; the horizontal ones have the
          station ruler down there as well, and no rail to mark.) */
       const yBot = clamp(((ruler.windowTop ?? stripLead()) + viewH
-                          - (PLATE_H + 0.35)) * pxPerM, 0, H);
+                          - (plateHeight() + 0.35)) * pxPerM, 0, H);
       if (yTd > yBot + css(2)) {
         const txt = `TD ${tdTvd < 100 ? tdTvd.toFixed(1) : Math.round(tdTvd)}`;
         const by = yBot - css(3);
@@ -6565,7 +6525,7 @@ export function createGeology(ctx) {
         g.fillStyle = 'rgba(150,160,174,0.22)';
         g.fillRect(0, by - css(9.5), W, Math.max(1, css(0.7)));
         g.fillStyle = 'rgba(223,181,82,0.90)';
-        g.font = `700 ${css(7)}px ${BRAND.fontMono}`;
+        g.font = `700 ${10 * k}px ${BRAND.fontMono}`;
         g.textAlign = 'left';
         g.textBaseline = 'alphabetic';
         // the caret rides the rail, because the rail is what it points along
@@ -6580,8 +6540,8 @@ export function createGeology(ctx) {
       }
     }
     if (raise) {
-      datum(0, 'UPPER LVL', 'rgba(223,181,82,0.90)');
-      datum(raise.length, 'LOWER LVL', 'rgba(223,181,82,0.90)');
+      datum(0, 'UPPER', 'rgba(223,181,82,0.90)');
+      datum(raise.length, 'LOWER', 'rgba(223,181,82,0.90)');
     }
     if (pile && pile.bearing) datum(pile.bearing.top, 'BEARING', 'rgba(16,185,129,0.85)');
     if (path) datum(path.Dc, 'COVER', 'rgba(223,181,82,0.70)');
@@ -6592,91 +6552,17 @@ export function createGeology(ctx) {
     ruler.top = topDepth;
   }
 
-  /* ── THE HEAD OF THE RULER, AND THE ONE THING IT HAS TO ADMIT ──────────────
-     TWO FINDINGS, BOTH MEASURED, ONE FIX.
-
-     1. The 'm' unit mark — described in the file as "the section's only unit
-        label" — was drawn 8 CSS px from the TOP OF THE CANVAS, and the canvas
-        is not the band. The strip is 31 m tall, the band shows 13.4 m of it,
-        and update() places the window `stripLead()` metres down the strip. So
-        the label sat 4.4 m above the top edge of the picture. Measured warm at
-        390x844: the strip's top edge projects to CSS y 231.4 and the band
-        begins at 359. **It was 127.6 px off screen and had never once been
-        visible.** Same arithmetic put the driving record's 'BLOWS / 250' axis
-        caption off screen too. Everything here is placed from `winTop`, the
-        canvas row the band's own top edge falls on, which update() hands over
-        as ruler.windowTop per repaint (`nt` is floored to 0.5 m, so the lead
-        is re-derived rather than assumed).
-
-     2. THE BORE IS DRAWN OVER GAUGE AND THE RULER DID NOT SAY SO.
-        applyHoleDiameter() draws a 152 mm hole at about 1.09 m — call it x7 —
-        against a depth axis that is 1:1. The exaggeration is necessary: at
-        19.4 CSS px per metre a true-scale 152 mm bore is 3 px wide and there
-        is nothing to look at. But undeclared it is simply wrong, and a working
-        driller spots it in ten seconds and then trusts nothing else on screen.
-
-        drawScalePlate() already states it, in words, on the floor of the band.
-        This is the same statement where the eye actually is, and it is DRAWN
-        rather than asserted — see the two bars below. The player can hold the
-        true-scale sliver against the fat bore in the middle of the band and
-        check the number for themselves. That is the difference between a
-        diagram and a claim.
-
-        It is the same `boreExag` the plate prints, read from the same
-        variable, so the two cannot drift (ASTRA §5). Below 1.05x there is no
-        exaggeration to declare and it draws nothing rather than saying "x1.0",
-        which would be furniture. */
+  // The unit follows the real retained-strip window. Bore scale belongs to
+  // the readable footer; duplicated miniature bars clipped on large raises.
   function drawRulerHead(g, W, H, css, pxPerM) {
-    const winTop = clamp((ruler.windowTop ?? stripLead()) * pxPerM, 0, Math.max(0, H - css(26)));
-    const ex = boreExag;
-    const declare = ex >= 1.05 || ex <= 0.95;
-    const rows = declare ? css(21) : css(12);
-
-    /* A backing plate: the head lands wherever the window happens to be, so it
-       can fall on a tick or a numeral, and instrument furniture that reads as
-       overlapping type is worse than none. */
-    const grad = g.createLinearGradient(0, winTop, 0, winTop + rows);
-    grad.addColorStop(0, 'rgba(9,12,17,0.90)');
-    grad.addColorStop(0.72, 'rgba(9,12,17,0.86)');
-    grad.addColorStop(1, 'rgba(9,12,17,0.0)');
-    g.fillStyle = grad;
-    g.fillRect(Math.round(W * 0.11), winTop, W, rows);
-
-    /* The unit goes hard RIGHT, over the numeral column it belongs to, rather
-       than at labelX where the numerals start: the bore tag shares this row
-       and at labelX the two overlapped into "×7.3 nØ". The strip is 50 CSS px
-       wide and there is exactly one row's worth of room in it. */
-    g.textBaseline = 'alphabetic';
+    const winTop = (ruler.windowTop ?? stripLead()) * pxPerM;
+    g.fillStyle = 'rgba(9,12,17,0.98)';
+    g.fillRect(0, winTop, W, css(18));
+    g.textBaseline = 'top';
     g.textAlign = 'right';
-    g.fillStyle = 'rgba(150,160,174,0.62)';
-    g.font = `600 ${css(8)}px ${BRAND.fontSans}`;
-    g.fillText('m', W - css(2), winTop + css(8.5));
-    g.textAlign = 'left';
-
-    if (!declare) return;
-    const gx = Math.round(W * 0.11);
-    g.fillStyle = 'rgba(232,192,94,0.90)';
-    g.font = `700 ${css(7)}px ${BRAND.fontMono}`;
-    g.fillText(`×${ex < 10 ? ex.toFixed(1) : Math.round(ex)} Ø`, gx, winTop + css(8.5));
-
-    /* TWO BARS, ONE ROW, AT THE RULER'S OWN SCALE: the long faint one is the
-       bore as DRAWN, the short bright one at its left end is the same bore at
-       TRUE scale. The ratio between them is the exaggeration, so the number
-       above is not asserted — it is measurable off the picture with the eye,
-       against the same px/m as the ticks beside it.
-       A first pass drew only the true bar. At 2.2 CSS px, and taller than it
-       was wide, it read as a bullet glyph rather than as a width — a gauge
-       nobody can read is the empty-set gate one level down (ASTRA §8), so it
-       needs the thing it is a fraction OF, drawn beside it. */
-    const trueM = Math.max(Number(spec.holeDiaMm) || CFG.holeDiaDefault, 1) / 1000;
-    const gy = winTop + css(12.0);
-    const gh = Math.max(1, css(3.2));
-    // holeR is clamped, so on a big bore this runs to the strip edge and stops
-    const drawnW = Math.min(2 * holeR * pxPerM, W - gx - css(1.5));
-    g.fillStyle = 'rgba(232,192,94,0.30)';
-    g.fillRect(gx, gy, Math.max(1, Math.round(drawnW)), gh);
-    g.fillStyle = 'rgba(232,192,94,0.96)';
-    g.fillRect(gx, gy, Math.max(1, Math.round(trueM * pxPerM)), gh);
+    g.fillStyle = 'rgba(232,238,246,0.96)';
+    g.font = `600 ${11 * ruler.k}px ${BRAND.fontSans}`;
+    g.fillText(mode.horizontal ? 'TVD m' : 'm', W - css(4), winTop + css(3));
   }
 
   /* Hatch pitches are given in CSS pixels and scaled by the strip's supersample
@@ -6742,12 +6628,12 @@ export function createGeology(ctx) {
      label can never exceed what it names. On the 20 m view (19.4 px/m) the
      three tiers below need beds of 1.13 m, 0.60 m and 0.47 m respectively. */
   const LOG_T = {
-    name: 9.5,     // name type size
-    ucs: 7.5,      // strength line type size
-    step: 10.8,    // baseline-to-baseline for name lines
+    name: 11,     // name type size
+    ucs: 10,      // strength line type size
+    step: 13,    // baseline-to-baseline for name lines
     padTop: 2.2,   // inset from the top contact of the bed
     padBot: 1.5,   // clearance above the next contact
-    code: 7.0,     // the 2-3 char code used in a thin bed
+    code: 10,     // the 2-3 char code used in a thin bed
     gutter: 3.0,   // gap between the text and the hatch column
   };
 
@@ -6819,8 +6705,8 @@ export function createGeology(ctx) {
     g.fillStyle = grad;
     g.fillRect(0, 0, W, H);
 
-    const colX = Math.round(W * 0.62);
-    const colW = Math.round(W * 0.28);
+    const colX = Math.round(W * 0.68);
+    const colW = Math.round(W * 0.22);
     const textR = colX - css(LOG_T.gutter);   // right edge of the text column
     const textW = textR - css(1.5);           // room a label has to fit into
 
@@ -6861,7 +6747,15 @@ export function createGeology(ctx) {
        They separate during a jump — and the raw one is the OPTIMISTIC one, so
        the strip would print a UCS for a bed the cut beside it was still
        drawing as projected. Two instruments, one bit. */
-    const loggedTo = logFrontier();
+    // A horizontal drive does not sample every bed above its centreline.
+    // Its vertical log is a projected column, not a record of cut ground.
+    const loggedTo = layout.id === 'heading' ? -Infinity : logFrontier();
+    const viewTop = (logStrip.windowTop ?? stripLead()) * pxPerM + css(3);
+    const viewBot = (logStrip.windowTop ?? stripLead()) * pxPerM
+      + (viewH - footerHeight()) * pxPerM - css(3);
+    const dividerY = layout.id === 'heading' ? viewTop : (loggedTo - topDepth) * pxPerM;
+    const showDivider = surveyCeiling() > 0.02
+      && dividerY >= viewTop && dividerY + css(14) <= viewBot;
 
     for (const s of strata) {
       const y0 = (s.top - topDepth) * pxPerM;
@@ -6897,7 +6791,17 @@ export function createGeology(ctx) {
 
       /* Choose a label that fits the BED, then a form of it that fits the
          COLUMN. A label may never be taller than the thing it names. */
-      const hhCss = toCss(hh);
+      let labelTop = Math.max(y0, viewTop);
+      let labelBot = Math.min(y1, viewBot);
+      if (showDivider && labelTop < dividerY + css(14) && labelBot > dividerY - css(3)) {
+        // Keep the larger contiguous part of the visible bed clear of the
+        // projected divider. Never clamp a tall label back into a thin sliver.
+        const above = dividerY - css(3) - labelTop;
+        const below = labelBot - dividerY - css(14);
+        if (above > below) labelBot = Math.min(labelBot, dividerY - css(3));
+        else labelTop = Math.max(labelTop, dividerY + css(14));
+      }
+      const hhCss = Math.max(0, toCss(labelBot - labelTop));
       const [full, short, code] = labelFormsFor(s);
       const ucsTxt = s.ucs >= 1 ? `${Math.round(s.ucs)} MPa` : 'SOIL';
       const oneLine = (sz) => (fits(full, sz, 600, BRAND.fontSans) ? full
@@ -6926,27 +6830,10 @@ export function createGeology(ctx) {
       }
 
       if (lines) {
-        /* ANCHOR TO THE VISIBLE CENTRE, NOT THE BED TOP.
-           Riding the top meant that at a contact two labels crowded into 20
-           CSS px while 200 px of the bed below them carried nothing at all —
-           the strip read as a caption stuck to a line rather than a legend for
-           a body of rock. The label now centres on the part of the bed the
-           player can actually see: the intersection of the bed with the
-           viewport, clamped back inside the bed so it still can never cross
-           the contact below it (which was the round-2 fix and stays).
-
-           stripLead() is where update() puts the window inside the span, and
-           the window is viewH tall — the MEASURED band, not the authored
-           anchor. It used to be `viewMetres` here, which claimed a 20 m window
-           on a 13.4 m band and pulled every label 3.3 m low. */
-        const viewTop = stripLead() * pxPerM;
-        const viewBot = viewTop + viewH * pxPerM;
-        const v0 = Math.max(y0, viewTop);
-        const v1 = Math.min(y1, viewBot);
-        const mid = v1 > v0 ? (v0 + v1) * 0.5 : (y0 + y1) * 0.5;
-        const top = y0 + css(LOG_T.padTop);
-        const bot = y1 - css(LOG_T.padBot) - css(blockCss);
-        let ly = Math.min(Math.max(mid - css(blockCss) * 0.5, top), Math.max(bot, top));
+        const mid = (labelTop + labelBot) * 0.5;
+        const top = labelTop + css(LOG_T.padTop);
+        const bot = labelBot - css(LOG_T.padBot) - css(blockCss);
+        let ly = clamp(mid - css(blockCss) * 0.5, top, Math.max(bot, top));
         g.textAlign = 'right';
         g.textBaseline = 'top';
         /* The NAME survives the doubt almost intact, and that is the same
@@ -6960,8 +6847,8 @@ export function createGeology(ctx) {
            bed the bit has entered and for no other. Not dimmed, not qualified
            — absent. A number on a log is either measured or it is a
            fabrication, and there is no third rendering of it. */
-        if (showUcs && entered) {
-          g.fillStyle = 'rgba(150,160,174,0.62)';
+        if (showUcs && entered && fits(ucsTxt, LOG_T.ucs, 500, BRAND.fontMono)) {
+          g.fillStyle = 'rgba(212,222,235,0.92)';
           g.font = `500 ${css(LOG_T.ucs)}px ${BRAND.fontMono}`;
           g.fillText(ucsTxt, textR, ly - css(trail));
         }
@@ -6978,16 +6865,15 @@ export function createGeology(ctx) {
        It is suppressed when there is nothing to qualify: a fully surveyed job
        (ceiling 0, and a reamed raise) has no projected half, and a line
        announcing one would be chrome. */
-    const ceil = surveyCeiling();
-    if (ceil > 0.02) {
-      const ly = (loggedTo - topDepth) * pxPerM;
+    if (showDivider) {
+      const ly = dividerY;
       if (ly > -2 && ly < H - css(2)) {
         g.fillStyle = 'rgba(223,181,82,0.55)';
         g.fillRect(0, Math.round(ly), W, Math.max(1, css(0.8)));
         g.textAlign = 'left';
         g.textBaseline = 'top';
         g.fillStyle = 'rgba(223,181,82,0.62)';
-        g.font = `700 ${css(7)}px ${BRAND.fontSans}`;
+        g.font = `700 ${css(10)}px ${BRAND.fontSans}`;
         g.fillText('PROJECTED', css(1.5), Math.round(ly) + css(1.5));
       }
     }
@@ -7007,7 +6893,7 @@ export function createGeology(ctx) {
     if (ore) {
       // the same frontier the lithology above uses, so the two halves of one
       // strip cannot disagree about which ground has been drilled
-      const drilledTvd = logFrontier();
+      const drilledTvd = loggedTo;
       const gw = colW * 0.86;
       const cutX = colX + (ore.cutoff / Math.max(ore.grade[3], 1e-6)) * gw;
       const stepM = Math.max((1.2 / pxPerM), profileDepth / 900);
@@ -7044,18 +6930,12 @@ export function createGeology(ctx) {
     logStrip.top = topDepth;
   }
 
-  /* The depth readout used to be CFG.rulerWidth * 2.5 = 11.5 units wide,
-     positioned at halfW - rulerWidth * 1.85. It spanned -7.22 to +4.28 against
-     a frustum of +/-7.04: wider than the whole camera, hanging off the LEFT
-     edge, covering 45% of the ruler and all of the log strip at the bit line.
-     It is now a compact index marker that sits ON the ruler and points inward:
-     1.25 ruler widths (63 CSS px) centred at halfW - rulerWidth * 0.55, which
-     is the ruler's own centre. Content is drawn in the left 94% of the canvas
-     so its right edge lands exactly on the frustum edge. */
+  // A screen-sized index marker follows the true vertical depth of the action
+  // point. Measured hole length remains a separate HUD quantity in long sections.
   const READOUT_CW = 240, READOUT_CH = 92, READOUT_INSET = 0.99;
   let readoutHalfW = CFG.rulerWidth * 0.625;
   function buildReadout() {
-    if (readout) { root.remove(readout.mesh); readout.mesh.geometry.dispose(); }
+    if (readout) killStrip(readout);
     const canvas = document.createElement('canvas');
     canvas.width = READOUT_CW; canvas.height = READOUT_CH;
     const tex = track(new T.CanvasTexture(canvas));
@@ -7067,7 +6947,7 @@ export function createGeology(ctx) {
        right rounded corner never rendered. It is anchored off its own half
        width now (see update()), with 0.15 units of margin, so the corner is
        inside the frustum whatever the ruler width or the aspect. */
-    const wU = CFG.rulerWidth * 1.25;
+    const wU = Math.max(rulerWidth() * 1.25, 76 / pxPerMetre);
     readoutHalfW = wU * 0.5;
     const mesh = new T.Mesh(new T.PlaneGeometry(wU, wU * (READOUT_CH / READOUT_CW), 1, 1), mat);
     mesh.renderOrder = 21;
@@ -7451,7 +7331,7 @@ export function createGeology(ctx) {
         _pv.set(axisXAt(p.station),
                 secYForDepth(depthForStation(p.station)) + holeR + 0.55, 1.2);
       } else {
-        _pv.set(halfW - CFG.rulerWidth - 0.4, secYForDepth(p.station), 1.2);
+        _pv.set(halfW - rulerWidth() - 0.4, secYForDepth(p.station), 1.2);
       }
       _mtx.compose(_pv, _q.identity(), new T.Vector3(1, 1, 1));
       pinMesh.setMatrixAt(i, _mtx);
@@ -7757,9 +7637,9 @@ export function createGeology(ctx) {
 
     /* ── scroll ──
        Vertical modes scroll DOWN with the bit, exactly as before. The two
-       long-section modes scroll HORIZONTALLY with the head, and hold their
-       vertical framing still: an HDD profile that bobbed up and down as the
-       bore sagged would be unreadable, and a drive has nowhere to go. */
+       long-section modes scroll horizontally with the head. Heading holds
+       vertical framing; a profile reveals deeper action only when it would
+       otherwise leave the usable band. True metres per pixel stay fixed. */
     if (!horiz) {
       const desired = camBaseY + halfH * (1 - 2 * mode.anchorY) + act;
       const clampedTop = camBaseY + halfH - CFG.headroom;
@@ -7771,8 +7651,13 @@ export function createGeology(ctx) {
         // the drive axis sits at the mode's own anchor height
         root.position.y = camBaseY + halfH * (1 - 2 * mode.anchorY);
       } else {
-        // ground line just below the top of the band, as in a real profile sheet
-        root.position.y = camBaseY + halfH - CFG.headroom;
+        // Hold the surface datum until a deep profile would put the action
+        // beneath the footer. Then reveal its TRUE depth by scrolling the
+        // section, never by pinning a false value to a shallower ruler tick.
+        const groundPose = camBaseY + halfH - CFG.headroom;
+        const markerHalfH = (readout?.mesh.geometry.parameters.height || 0) * 0.5;
+        const actionFloor = camBaseY - halfH + footerHeight() + markerHalfH + 3 / pxPerMetre;
+        root.position.y = Math.max(groundPose, actionFloor - secYForDepth(depthForStation(act)));
       }
     }
     // section x of the camera centre, in root's own space: everything that has
@@ -7937,7 +7822,9 @@ export function createGeology(ctx) {
        px, and while nothing is moving nothing repaints. */
     const rulerHeadMoved = ruler
       && Math.abs((topDepth - ruler.top) - (ruler.windowTop ?? -1e9)) > 0.2;
-    if (rulerScrolled || rulerStale || rulerHeadMoved) {
+    const rulerCursorMoved = ruler
+      && Math.abs(depthForStation(act) - (ruler.actionTvd ?? -1e9)) * pxPerMetre > 0.5;
+    if (rulerScrolled || rulerStale || rulerHeadMoved || rulerCursorMoved) {
       const nt = rulerScrolled
         ? Math.floor((topDepth - stripLead()) * 2) / 2
         : ruler.top;                                     // repaint in place
@@ -7950,6 +7837,7 @@ export function createGeology(ctx) {
       ruler.windowTop = topDepth - nt;
       drawRuler(nt);
       ruler.drawnAt = depthForStation(depth);
+      ruler.actionTvd = depthForStation(act);
       ruler.mesh.position.y = secYForDepth(nt + ruler.span * 0.5);
     }
     /* The log now carries the LOGGED/PROJECTED divider and hides the strength
@@ -7965,25 +7853,27 @@ export function createGeology(ctx) {
     const logStale = logStrip
       && Math.abs(loggedNow - (logStrip.loggedAt ?? -1e9)) > 0.15
       && loggedNow < botDepth + 1.0;
-    if (logStrip && (topDepth < logStrip.top + 1.0
-                     || botDepth > logStrip.top + logStrip.span - 1.0 || logStale)) {
-      const nt = logStale && !(topDepth < logStrip.top + 1.0
-                               || botDepth > logStrip.top + logStrip.span - 1.0)
-        ? logStrip.top                                   // repaint in place
-        : Math.floor((topDepth - stripLead()) * 2) / 2;
+    const logScrolled = logStrip && (topDepth < logStrip.top + 1.0
+      || botDepth > logStrip.top + logStrip.span - 1.0);
+    const logWindowMoved = logStrip && (Math.abs((topDepth - logStrip.top)
+      - (logStrip.windowTop ?? -1e9)) * pxPerMetre > 0.5
+      || logStrip.viewH !== viewH);
+    if (logStrip && (logScrolled || logStale || logWindowMoved)) {
+      const nt = logScrolled ? Math.floor((topDepth - stripLead()) * 2) / 2 : logStrip.top;
+      logStrip.windowTop = topDepth - nt;
+      logStrip.viewH = viewH;
       drawLog(nt);
       logStrip.loggedAt = loggedNow;
       logStrip.mesh.position.y = secYForDepth(nt + logStrip.span * 0.5);
     }
-    if (horiz) {
-      if (ruler) ruler.mesh.position.x = camX + halfW - CFG.rulerWidth * 0.55;
-      if (logStrip) logStrip.mesh.position.x = camX - halfW + CFG.logWidth * 0.5;
+    // Also reset these when changing from a horizontal to a vertical mode.
+    if (ruler) ruler.mesh.position.x = camX + halfW - rulerWidth() * 0.55;
+    if (logStrip) logStrip.mesh.position.x = camX - halfW + CFG.logWidth * 0.5;
       /* The joint mesh stops itself at the instrument strips so a fracture
          never runs out over the black bevel. Those strips belong to the
          SCREEN, so in a long-section the clip has to travel with the camera
          instead of staying nailed to the ground. */
-      U.uGeoX.value.set(camX - halfW + CFG.logWidth, camX + halfW - CFG.rulerWidth);
-    }
+      U.uGeoX.value.set(camX - halfW + CFG.logWidth, camX + halfW - rulerWidth());
 
     /* ── the scale plate: what the section admits it is doing ──
        Anchored to the camera, in every mode, so the declaration is on screen
@@ -8002,15 +7892,17 @@ export function createGeology(ctx) {
          where there is not. */
       scalePlate.mesh.position.y = camBaseY - halfH - root.position.y
                                  + (xRuler ? xRuler.heightUnits : 0)
-                                 + PLATE_H * 0.5 + 0.10;
+                                 + plateHeight() * 0.5 + 0.10;
       scalePlate.mesh.position.z = 2.05;
     }
 
     /* ── the station ruler: the second scale a long-section must carry ── */
     if (xRuler) {
       const leftX = camX - halfW;
-      if (leftX < xRuler.left + 1.0 || leftX + halfW * 2 > xRuler.left + xRuler.span - 1.0) {
-        const nl = Math.floor((leftX - halfW * 0.32) * 2) / 2;
+      const scrolled = leftX < xRuler.left + 1.0 || leftX + halfW * 2 > xRuler.left + xRuler.span - 1.0;
+      if (scrolled || Math.abs(leftX - xRuler.left - (xRuler.windowLeft ?? -1e9)) * pxPerMetre > 0.5) {
+        const nl = scrolled ? Math.floor((leftX - halfW * 0.32) * 2) / 2 : xRuler.left;
+        xRuler.windowLeft = leftX - nl;
         drawStationRuler(nl);
         xRuler.mesh.position.x = nl + xRuler.span * 0.5;
       }
@@ -8021,15 +7913,16 @@ export function createGeology(ctx) {
 
     /* ── readout: a compact index marker riding the ruler at the action point ── */
     if (readout) {
-      if (Math.abs(readout.last - depth) > 0.02) drawReadout(depth);
+      const actionTvd = depthForStation(act);
+      if (Math.abs(readout.last - actionTvd) > 0.005) drawReadout(actionTvd);
       readout.mesh.position.set(camX + halfW - readoutHalfW - 0.15,
-                                horiz ? actY : -smoothDepth, 2.2);
+                                actY, 2.2);
       readout.mesh.visible = true;
     }
     // the datum mark stays in the ruler gutter; buildWaterLine() set its x
     if (waterLine) {
       waterLine.position.y = secYForDepth(waterTableDepth);
-      if (horiz) waterLine.position.x = camX + halfW - CFG.rulerWidth * 1.15 * 0.5;
+      waterLine.position.x = camX + halfW - rulerWidth() * 1.15 * 0.5;
     }
 
 
@@ -8076,6 +7969,7 @@ export function createGeology(ctx) {
     buildBackdrop();
     buildWaterLine();
     buildStrips();
+    buildReadout();
     /* Both of these are laid out in the mode's horizontal scale, which
        computeView() has just re-solved from the new band width. */
     buildModeFurniture();
