@@ -1253,13 +1253,17 @@ float boreRadiusScale(float sy){
 }
 
 float boreSDF(vec2 wp, float ang, out float drilledOut, out float rOut){
+  // One initialized return path also makes the generated ANGLE/HLSL control
+  // flow explicit. The former early returns produced X4000 f_boreSDF warnings.
+  float distanceOut = 0.0;
+  drilledOut = 0.0;
+  rOut = 0.0;
   if (uBMode < 0.5) {
     // ── VERTICAL. The original hole, untouched.
     drilledOut = step(-uDepth - 0.02, wp.y);
     rOut = holeRadius(wp.y, ang);
-    return abs(wp.x) - rOut;
-  }
-  if (uBMode < 1.5) {
+    distanceOut = abs(wp.x) - rOut;
+  } else if (uBMode < 1.5) {
     /* ── PROFILE. Perpendicular distance to the designed curve. The path is
        drawn under a vertical exaggeration, so a vertical offset is divided by
        the ON-SCREEN gradient — otherwise the bore reads three times fatter on
@@ -1272,9 +1276,8 @@ float boreSDF(vec2 wp, float ang, out float drilledOut, out float rOut){
     float reamed = step(0.5, uBore.w) * step(uBore.x - uBore.y, X);
     rOut = mix(uBore.z, max(uPathC.w, uBore.z), reamed);
     drilledOut = step(0.0, X) * step(X, uBore.x);
-    return perp - rOut;
-  }
-  if (uBMode < 2.5) {
+    distanceOut = perp - rOut;
+  } else if (uBMode < 2.5) {
     /* ── HEADING. In a long-section the drive is a rectangle: crown above,
        invert below, ending at the face. The crown carries an overbreak wobble
        because that is what the player is scored on. */
@@ -1283,15 +1286,14 @@ float boreSDF(vec2 wp, float ang, out float drilledOut, out float rOut){
     float bot = uTun.y + min(ob, 0.0) * 0.5;
     drilledOut = step(wp.x, uTun.z);
     rOut = (top - bot) * 0.5;
-    return max(max(bot - wp.y, wp.y - top), wp.x - uTun.z);
-  }
-  if (uBMode < 3.5) {
+    distanceOut = max(max(bot - wp.y, wp.y - top), wp.x - uTun.z);
+  } else if (uBMode < 3.5) {
     // ── PILE. A column, not a hole: the face is cut and the concrete fills it.
     drilledOut = step(-uDepth - 0.02, wp.y);
     float bulge = 1.0 + (fbm2n(vec2(-wp.y * 0.55, 3.1)) - 0.5) * 0.22;
     rOut = uHoleR * bulge;
-    return abs(wp.x) - rOut;
-  }
+    distanceOut = abs(wp.x) - rOut;
+  } else {
   /* ── RAISE. Pilot down from the upper level, reamer pulled UP from the
      lower one, so the REAMED length is measured from the bottom. Both levels
      are drawn as openings in their own right. */
@@ -1304,7 +1306,9 @@ float boreSDF(vec2 wp, float ang, out float drilledOut, out float rOut){
   float lower = max(abs(wp.y + uRaise.y) - uRaise.z, abs(wp.x) - lw);
   float lvl = min(upper, lower);
   drilledOut = max(step(-uDepth - 0.02, wp.y), step(lvl, 0.0));
-  return min(shaft, lvl);
+  distanceOut = min(shaft, lvl);
+  }
+  return distanceOut;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
