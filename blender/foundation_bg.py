@@ -227,29 +227,16 @@ CAB_W, CAB_D, CAB_H = 1.250, 1.850, 2.150     # NOT SOURCED ([S2] §8 lists cab
 _bins = {}          # (owner_object_or_None, material_name) -> [objects]
 _order = []
 
-# ── A MEASURED CORRECTION, NOT A FUDGE ───────────────────────────────────────
-# rig.box() does `primitive_cube_add(size=1)` — a cube of EDGE 1, spanning
-# −0.5..+0.5 — and then sets `scale = size/2`, so the box it returns is HALF the
-# size asked for. Verified in Blender 5.2.1: box((4, 2, 10)) measures
-# (2.000, 1.000, 5.000); tube() is unaffected and correct.
+# The BOX_K build-time correction that used to live here is GONE, and it went
+# out exactly as it said it would: rig.box() was fixed centrally on 2026-09-05
+# and the probe measured 1.0, so this model did not move by a millimetre.
 #
-# That is a bug in a file six machines share, so it is not fixed from here: it
-# is MEASURED here, at build time, from a probe box that is then deleted. Every
-# dimension in this file is therefore the real dimension in metres, and the day
-# rig.box() is corrected centrally, BOX_K measures 1.0 and this model does not
-# move by a millimetre. Reported for a central fix; see the notes at the foot.
-BOX_K = 1.0
-
-
-def _measure_box_scale():
-    global BOX_K
-    o = R.box('__probe__', (4.0, 2.0, 10.0), R.MAT_PAINT)
-    d = o.dimensions
-    k = (4.0 / d.x, 2.0 / d.y, 10.0 / d.z)
-    bpy.data.objects.remove(o, do_unlink=True)
-    assert abs(k[0] - k[1]) < 1e-6 and abs(k[0] - k[2]) < 1e-6, k
-    BOX_K = k[0]
-    print('BOX_K measured = %.3f (1.0 once rig.box() is fixed)' % BOX_K)
+# The idea was the good one in the whole affair - it was the only place in the
+# fleet that MEASURED the helper instead of assuming it - so it has been
+# promoted rather than deleted. `rig.reset()` now runs the same probe on every
+# build for every machine, and RAISES instead of compensating, because a
+# library that has silently changed scale should stop the build rather than be
+# quietly worked around.
 
 
 def B(obj, owner, mat):
@@ -310,7 +297,6 @@ def weld_all():
 
 def bx(name, size, mat, owner, parent, loc=(0, 0, 0), rot=(0, 0, 0), bevel=0.012,
        seg=2):
-    size = (size[0] * BOX_K, size[1] * BOX_K, size[2] * BOX_K)
     o = R.box(name, size, mat, parent, loc, rot, bevel)
     if seg != 2 and 'bev' in o.modifiers:
         o.modifiers['bev'].segments = seg      # one segment is plenty on a part
@@ -359,7 +345,7 @@ def strut(name, p0, p1, r, mat, owner, parent, sides=10, square=False):
     L = d.length
     rot = d.to_track_quat('Z', 'Y').to_euler()
     if square:
-        o = R.box(name, (r * 2 * BOX_K, r * 2 * BOX_K, L * BOX_K), mat, parent,
+        o = R.box(name, (r * 2, r * 2, L), mat, parent,
                   (0, 0, 0), (0, 0, 0), r * 0.25)
         o.data.transform(Matrix.Translation((0, 0, L / 2)))
         o.rotation_euler = rot
@@ -1286,7 +1272,6 @@ def build(out_path):
     _bins.clear()
     del _order[:]
     R.reset()
-    _measure_box_scale()
 
     # ── the dynamic spine ────────────────────────────────────────────────────
     # slew → mast rake → crowd sledge → rotary spindle → three Kelly stages.
@@ -1360,21 +1345,15 @@ def build(out_path):
 # 4. rpmMax: tools.js derives 27 rpm; the published ceiling for the drives on
 #    this machine is 40 and 53 rpm [S1 p.11].
 #
-# 5. **BUG IN blender/lib/rig.py, NOT FIXED FROM HERE.** `box()` returns a box
-#    at HALF the size asked for: `primitive_cube_add(size=1)` makes a cube of
-#    EDGE 1 (-0.5..+0.5) and the next line sets `scale = size/2`, so the edge
-#    ends up size/2. Measured in Blender 5.2.1: `box((4, 2, 10))` has
-#    dimensions (2.000, 1.000, 5.000). `tube()` is correct — radius and depth
-#    both come out as asked — so a machine built from both silently ends up
-#    with correct cylinders and half-size boxes, which is exactly the failure
-#    that is hardest to see in a wireframe.
-#    Six machines share that file and were being written against it at the same
-#    time as this one, so it is not edited here. This model measures the factor
-#    at build time (`_measure_box_scale()`), prints it, and multiplies. When
-#    rig.box() is fixed centrally the probe returns 1.0 and this file needs no
-#    change. THE OTHER MACHINES WILL NEED ONE: whoever fixes rig.py must check
-#    every other blender/*.py for boxes that were sized by eye against the
-#    halved output, because those will double.
+# 5. **THE HALF-SIZE box() IS FIXED** (2026-09-05, in `blender/lib/rig.py`), and
+#    this file's `_measure_box_scale()` / BOX_K compensation is gone with it.
+#    It ended exactly as this note predicted: the probe returned 1.0 and the
+#    model did not move by a millimetre. Its warning about the other machines
+#    was right too - three of them (`rc_rig`, `crawler_th`, `dth_crawler`) had
+#    compensated by DOUBLING and would have exported at 2x; all three were
+#    de-doubled in the same pass. The probe idea was the best thing in the whole
+#    affair and has been promoted into `rig.reset()`, where it now runs for
+#    every machine on every build and RAISES instead of compensating.
 #
 # 6. What this model does NOT do, so nobody has to discover it twice:
 #    · the hose package is authored for the parked pose (drive at the bottom of

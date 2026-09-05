@@ -108,30 +108,15 @@ MASTL_Y = lambda y: y - BEAM_Y           # world Y -> mast-local Y
 
 
 # ── local helpers on top of rig.py ───────────────────────────────────────────
-def box(name, size, mat=R.MAT_PAINT, parent=None, loc=(0, 0, 0), rot=(0, 0, 0),
-        bevel=0.0):
-    """A box of the size you asked for.
-
-    `rig.py`'s box() halves it: `primitive_cube_add(size=1)` is a 1 m cube
-    spanning -0.5..+0.5, and it then applies `scale = size/2`, so a box asked
-    for at 1.90 m comes out 0.95 m.  Every dimension in this file traces to a
-    datasheet, so a silent factor of two makes the whole exercise pointless -
-    it is what made the first renders read as a spindly toy.  Fixed HERE and
-    not in the shared library, the same call `blender/pd55.py` made, because
-    rig.py is shared with other machines being built in parallel and half of
-    them may already be compensating for it.  The library should be fixed once,
-    in one commit, by whoever owns the fleet: `o.scale = size`.
-    """
-    bpy.ops.mesh.primitive_cube_add(size=1)
-    o = bpy.context.active_object
-    o.scale = size
-    bpy.ops.object.transform_apply(scale=True)
-    if bevel > 0:
-        m = o.modifiers.new('bev', 'BEVEL')
-        m.width = bevel
-        m.segments = 2
-        m.limit_method = 'ANGLE'
-    return R.part(name, o, mat, parent, loc, rot)
+# The local box() workaround that used to sit here is GONE. `rig.box()` scaled a
+# unit cube by size/2 on top of a primitive that was already 1 m on an edge, so
+# it built at half scale, and six of the nine machines had each independently
+# discovered that and shadowed it rather than change a file the others were
+# building against. Fixed centrally 2026-09-05; `rig.reset()` now measures a
+# probe box every build and raises if it ever drifts again.
+# What it cost here before it was measured: the first renders read as a spindly
+# toy, because every plate was half size against correct cylinders.
+box = R.box
 
 
 def bake(o):

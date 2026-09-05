@@ -112,7 +112,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lib'))
 
 from rig import (  # noqa: E402
-    reset, part, tube, hose, empty, worklight, finish,
+    reset, part, box, tube, hose, empty, worklight, finish,
     NODE_MOUNT, NODE_PIVOT, NODE_SLIDE,
     MAT_PAINT, MAT_DARK, MAT_STEEL, MAT_WORN, MAT_CAST, MAT_RUBBER,
     MAT_GLASS, MAT_CHROME, MAT_HAZARD,
@@ -121,45 +121,14 @@ from rig import (  # noqa: E402
 DEG = math.pi / 180.0
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-# BUG IN THE SHARED HELPER — rig.py box() BUILDS EVERY BOX AT HALF SIZE
-# ═══════════════════════════════════════════════════════════════════════════
-# rig.py:
-#     bpy.ops.mesh.primitive_cube_add(size=1)
-#     o.scale = (size[0] / 2, size[1] / 2, size[2] / 2)
-#     bpy.ops.object.transform_apply(scale=True)
-#
-# In Blender `size` on primitive_cube_add is the EDGE LENGTH, not a radius.
-# size=1 already gives a 1 m cube spanning -0.5..+0.5. Scaling that by size/2
-# therefore yields an edge of size/2. Verified in Blender 5.2.1: asking for
-# box(..., (0.80, 0.88, 17.80)) returns dimensions (0.40, 0.44, 8.90).
-#
-# Every box in every machine built on this library is half its stated
-# dimension, while tube() (which takes a real radius and a real depth) and any
-# hand-authored mesh are full size — so a rig mixes the two scales and the
-# dimensional provenance that the whole script-not-.blend argument rests on is
-# silently void. This needs fixing centrally in rig.py, ONE line:
-#     o.scale = size            # a size=1 cube is already 1 m on each edge
-#
-# It is NOT fixed here. blender/lib/rig.py is shared with the machines other
-# builders are exporting right now; some of them may already have compensated
-# by doubling their constants, and changing the helper underneath them mid-run
-# would break their models with no warning. So this file shadows box() locally
-# and reports the bug instead. Remove this override once rig.py is corrected —
-# the two are then identical.
-def box(name, size, mat=MAT_PAINT, parent=None, loc=(0, 0, 0), rot=(0, 0, 0),
-        bevel=0.0):
-    """A box of the size you actually asked for. See the note above."""
-    bpy.ops.mesh.primitive_cube_add(size=1)
-    o = bpy.context.active_object
-    o.scale = (size[0], size[1], size[2])
-    bpy.ops.object.transform_apply(scale=True)
-    if bevel > 0:
-        m = o.modifiers.new('bev', 'BEVEL')
-        m.width = bevel
-        m.segments = 2
-        m.limit_method = 'ANGLE'
-    return part(name, o, mat, parent, loc, rot)
+# The local box() workaround that used to sit here is GONE. `rig.box()` scaled a
+# unit cube by size/2 on top of a primitive that was already 1 m on an edge, so
+# it built at half scale, and six of the nine machines had each independently
+# discovered that and shadowed it rather than change a file the others were
+# building against. Fixed centrally 2026-09-05; `rig.reset()` now measures a
+# probe box every build and raises if it ever drifts again.
+# This file predicted the ending exactly: "Remove this override once rig.py is
+# corrected - the two are then identical." They were, and it is.
 
 # ═══════════════════════════════════════════════════════════════════════════
 # DIMENSIONS.  Metres.  Every line carries its source.

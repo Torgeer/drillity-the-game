@@ -81,40 +81,20 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 if os.path.join(HERE, 'lib') not in sys.path:
     sys.path.insert(0, os.path.join(HERE, 'lib'))
 
-from rig import (reset, tube, hose, empty, worklight, part, finish,
+from rig import (reset, box, tube, hose, empty, worklight, part, finish,
                  NODE_MOUNT, NODE_AIM, NODE_PIVOT, NODE_SLIDE,
                  MAT_PAINT, MAT_DARK, MAT_STEEL, MAT_WORN, MAT_CAST,
                  MAT_RUBBER, MAT_GLASS, MAT_CHROME, MAT_HAZARD)
 
 
-# ── rig.box() IS HALF SCALE — LOCAL REPLACEMENT ───────────────────────────────
-# `rig.box()` does primitive_cube_add(size=1), which in Blender is a cube of
-# SIDE 1 (-0.5 .. +0.5), and then scales it by size/2. The result is a box half
-# the size asked for in every axis. rig.tube() is correct, so a machine built
-# with the shared helpers comes out with correct cylinders and half-size boxes —
-# which is exactly what this rig looked like until it was measured: a 24.4 m
-# mast exported 12.2 m tall, a 1.10 m mast box exported 0.55 m wide.
-#
-# rig.py is shared with every other machine being built right now, and silently
-# doubling every box in every one of them mid-flight is not mine to do. So this
-# is fixed HERE and reported. The real fix is `primitive_cube_add(size=2)` (or
-# scaling by `size`, not `size/2`) in rig.py, once, with every machine re-tuned
-# in the same pass.
-def box(name, size, mat=MAT_PAINT, parent=None, loc=(0, 0, 0), rot=(0, 0, 0),
-        bevel=0.0):
-    """A box that is actually `size` metres. Bevel in metres — a bevelled edge
-    is what stops steel reading as cardboard, and it costs triangles, not draw
-    calls."""
-    bpy.ops.mesh.primitive_cube_add(size=1)
-    o = bpy.context.active_object
-    o.scale = (size[0], size[1], size[2])
-    bpy.ops.object.transform_apply(scale=True)
-    if bevel > 0:
-        m = o.modifiers.new('bev', 'BEVEL')
-        m.width = bevel
-        m.segments = 2
-        m.limit_method = 'ANGLE'
-    return part(name, o, mat, parent, loc, rot)
+# The local box() workaround that used to sit here is GONE. `rig.box()` scaled a
+# unit cube by size/2 on top of a primitive that was already 1 m on an edge, so
+# it built at half scale, and six of the nine machines had each independently
+# discovered that and shadowed it rather than change a file the others were
+# building against. Fixed centrally 2026-09-05; `rig.reset()` now measures a
+# probe box every build and raises if it ever drifts again.
+# What it cost here before it was measured: a 24.4 m mast exported 12.2 m tall
+# and a 1.10 m mast box exported 0.55 m wide.
 
 TAU = math.pi * 2.0
 

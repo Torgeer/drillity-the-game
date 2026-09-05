@@ -56,38 +56,23 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 if os.path.join(HERE, 'lib') not in sys.path:
     sys.path.insert(0, os.path.join(HERE, 'lib'))
 
-from rig import (reset, part, tube, hose, empty, worklight, finish,
+from rig import (reset, part, box, tube, hose, empty, worklight, finish,
                  NODE_MOUNT, NODE_AIM, NODE_PIVOT, NODE_SLIDE,
                  MAT_PAINT, MAT_DARK, MAT_STEEL, MAT_WORN, MAT_CAST,
                  MAT_RUBBER, MAT_GLASS, MAT_CHROME, MAT_HAZARD)
-from rig import box as _lib_box
 
 TAU = math.pi * 2
 
-
-def box(name, size, mat=MAT_PAINT, parent=None, loc=(0, 0, 0), rot=(0, 0, 0),
-        bevel=0.0):
-    """A box whose `size` is its actual extent in metres.
-
-    rig.box() builds its cube with primitive_cube_add(size=1) — a unit cube with
-    vertices at +/-0.5 — and then sets scale to size/2, so the object comes out
-    at HALF the requested extents. Measured, not guessed: a box asked for at
-    (0.26, 4.20, 0.24) exported with a bounding box of (0.13, 2.10, 0.12).
-
-    That halving is invisible while a machine is only boxes, because everything
-    shrinks together — but tube(), cone() and every hard-coded position are in
-    true metres, so in a mixed model it puts every truss member at half length
-    and leaves it floating clear of its own joints. A first render of this rig
-    showed exactly that: a stair made of disconnected sticks and a lattice with
-    daylight at every node.
-
-    rig.py is shared with the other machines being built in parallel, so it is
-    NOT edited here. This local wrapper doubles the request instead, so every
-    dimension written in this file means what it says. The bevel is applied
-    after the scale is baked, so bevel widths are unaffected by the doubling.
-    """
-    return _lib_box(name, (size[0] * 2, size[1] * 2, size[2] * 2), mat, parent,
-                    loc, rot, bevel)
+# The local box() workaround that used to sit here is GONE. `rig.box()` scaled a
+# unit cube by size/2 on top of a primitive that was already 1 m on an edge, so
+# it built at half scale, and six of the nine machines had each independently
+# discovered that and shadowed it rather than change a file the others were
+# building against. Fixed centrally 2026-09-05; `rig.reset()` now measures a
+# probe box every build and raises if it ever drifts again.
+# This file's wrapper DOUBLED every request before passing it on, so it was one
+# of the three that would have come out at twice size if the library had been
+# fixed underneath it. Every dimension below is unchanged and still means real
+# metres; only the doubling is gone.
 
 # ── PRINCIPAL DIMENSIONS ──────────────────────────────────────────────────────
 # rc-rig.md §8 is blunt: there is no dimensioned GA of any RC rig anywhere in the

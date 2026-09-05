@@ -160,26 +160,16 @@ def box(name, size, mat=R.MAT_PAINT, parent=None, loc=(0, 0, 0),
         rot=(0, 0, 0), bevel=0.0, seg=2):
     """rig.box() at the size you actually asked for, plus a bevel-segment knob.
 
-    MEASURED BUG in the shared helper: lib/rig.py box() does
-        primitive_cube_add(size=1)      -> a cube of EDGE 1 (-0.5 .. +0.5)
-        o.scale = (size[0] / 2, ...)    -> edge becomes size / 2
-    so every box it makes is HALF its nominal dimensions. Verified against this
-    machine's own canopy: asked for 2.44 x 2.78 x 1.76 m, exported world bounds
-    came back 1.24 x 1.42 x 1.36. Cylinders, tori and hoses are unaffected -
-    primitive_cylinder_add(radius=, depth=) and torus(major=, minor=) are true -
-    which is exactly why the first renders looked like a correct skeleton hung
-    with undersized plates.
-
-    Not fixed in lib/rig.py because that file is shared with four other machine
-    builds running against it right now, and blender/crawler_th.py and
-    blender/pd55.py have each already compensated locally in their own way. The
-    one-line fix (size=2, or scale=size) belongs to whoever owns the library -
-    it is item 1 of this build's report.
+    This used to double `size` on the way in, because rig.box() scaled a unit
+    cube by size/2 and so built at half scale. Item 1 of this build's report,
+    fixed in the library on 2026-09-05; the doubling had to come out in the same
+    pass or this machine would have exported at twice size. The canopy that
+    exposed it - asked for 2.44 x 2.78 x 1.76 m, measured 1.24 x 1.42 x 1.36 -
+    is now measured from the .glb by `tools/glbinfo.mjs`.
 
     `seg` drops the bevel to one segment for parts repeated dozens of times.
     """
-    o = R.box(name, (size[0] * 2, size[1] * 2, size[2] * 2), mat, parent, loc,
-              rot, bevel)
+    o = R.box(name, size, mat, parent, loc, rot, bevel)
     if seg != 2 and o.modifiers:
         o.modifiers[0].segments = seg
     return o

@@ -181,29 +181,16 @@ def bx(name, size, mat=R.MAT_PAINT, parent=None, loc=(0, 0, 0), rot=(0, 0, 0),
        bevel=0.012, seg=None):
     """A bevelled box, in TRUE METRES, with the bevel already baked.
 
-    !! BUG IN THE SHARED LIBRARY, COMPENSATED HERE !!
-    `lib/rig.py` `box()` calls `primitive_cube_add(size=1)` — which is already a
-    unit cube, vertices at +/-0.5 — and then sets `scale = size/2`.  That halves
-    it a second time, so a box asked for at (2.0, 1.0, 0.5) exports at
-    (1.0, 0.5, 0.25).  Measured in Blender, not assumed.
+    This used to double `size` before handing it to `R.box()`, because that
+    helper scaled a unit cube by size/2 and so built at half scale.  Fixed in
+    `rig.py` on 2026-09-05, and the doubling removed here in the same pass —
+    they had to move together or this machine would have exported at 2x.
 
-    Every dimension in this file is a real metre traceable to a datasheet, so
-    the doubling happens HERE and `rig.py` is left untouched: other machines are
-    being built against that file in parallel right now, and silently doubling
-    every box in the fleet mid-flight would be worse than the bug.  The fix
-    belongs in `rig.py` — `o.scale = (size[0] / 2, ...)` should be
-    `o.scale = (size[0], ...)` — landed in ONE commit with every machine that
-    has compensated for it.  `tube()` is correct: r = 0.5, len = 3.0 measures
-    1.0 x 1.0 x 3.0.
-
-    The bevel is applied AFTER the scale is baked, so it is unaffected by the
-    doubling and stays in true metres.  It is small and always on: a hard
-    90-degree edge is the single biggest tell of a game prop, and it costs
-    triangles, not draw calls.
+    The bevel is applied after the scale is baked, so it is in true metres
+    either way.  It is small and always on: a hard 90-degree edge is the single
+    biggest tell of a game prop, and it costs triangles, not draw calls.
     """
-    return _apply_mods(
-        R.box(name, (size[0] * 2, size[1] * 2, size[2] * 2), mat, parent, loc, rot, bevel),
-        seg)
+    return _apply_mods(R.box(name, size, mat, parent, loc, rot, bevel), seg)
 
 
 def tb(name, radius, length, mat=R.MAT_STEEL, parent=None, loc=(0, 0, 0),

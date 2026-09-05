@@ -173,33 +173,16 @@ def bake(o):
 
 def cube(name, size, mat=MAT_PAINT, parent=None, loc=(0, 0, 0), rot=(0, 0, 0),
          bevel=BEV):
-    """A box of exactly `size` metres. Modifiers left unapplied.
+    """A box of exactly `size` metres, with this machine's default edge break.
 
-    DELIBERATELY NOT rig.box(). That helper does
-
-        bpy.ops.mesh.primitive_cube_add(size=1)   # a 1 m cube, -0.5 .. +0.5
-        o.scale = (size[0] / 2, size[1] / 2, size[2] / 2)
-
-    so everything it makes comes out at HALF the dimension asked for. Measured,
-    not guessed: a 0.36 m hazard plate placed at x = 1.05 exported spanning
-    0.96 to 1.14 — 0.18 m wide. Every dimension in this file traces to a
-    datasheet page, so it has to be that dimension that lands in the .glb.
-
-    rig.py is shared and other machines are being built against it right now,
-    so the fix is local rather than a change made under somebody else's feet.
-    It should be fixed there: either primitive_cube_add(size=2) with the
-    existing scaling, or size=1 with `o.scale = size`.
+    This was a full copy of rig.box() with the scaling corrected, written when
+    that helper built at half size and could not be changed under the other
+    machines. rig.py was fixed centrally on 2026-09-05, so the copy is gone and
+    only the BEV default is left here. Nothing about the geometry changes: the
+    copy and the library now do the same thing, which is the point of deleting
+    it - two implementations of one primitive is how they drift.
     """
-    bpy.ops.mesh.primitive_cube_add(size=1)
-    o = bpy.context.active_object
-    o.scale = size
-    bpy.ops.object.transform_apply(scale=True)
-    if bevel > 0:
-        m = o.modifiers.new('bev', 'BEVEL')
-        m.width = bevel
-        m.segments = 2
-        m.limit_method = 'ANGLE'
-    return part(name, o, mat, parent, loc, rot)
+    return box(name, size, mat, parent, loc, rot, bevel)
 
 
 def bx(name, size, mat=MAT_PAINT, parent=None, loc=(0, 0, 0), rot=(0, 0, 0),
