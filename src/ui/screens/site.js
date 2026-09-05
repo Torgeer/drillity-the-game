@@ -1395,8 +1395,8 @@ export function createSiteScreen(app) {
      attributes, not the CSS. Writing `style.width` / `style.height` would put
      this function back in charge of layout and re-open the same gap; the
      stylesheet says so too. `offsetWidth/offsetHeight` rather than a rect,
-     for the same reason as publishChrome(): during `@keyframes dock-in` and
-     `screen-in` the rendered box is scaled and the laid-out one is not. */
+     for the same reason as publishChrome(): during `@keyframes screen-in`
+     the rendered box is scaled and the laid-out one is not. */
   function resizeGauge() {
     const w = gaugeCanvas.offsetWidth;
     const h = gaugeCanvas.offsetHeight;

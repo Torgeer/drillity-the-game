@@ -121,8 +121,9 @@
      for an element to cover a band or to move the split.
 
        --hud-top   51 content + 1 border  =  52 + the top safe area
-       --hud-dock  1 border + 9 + 86 inst + 4 + 34 aux + 4 + 80 ctl + 9
-                                          = 227 + the bottom safe area
+       --hud-dock  1 border + 9 top + 82 inst + 4 + 32 aux + 4 + 72 ctl
+                   + a 56px floor the thumb cannot reach into  =  260
+                   (224 on a method with no auxiliary row — see --dock-base)
 
      The auxiliary row is 0px on every method the sim gives neither a
      programme nor a mud column — `.sitedock--plain` takes it out, and the
@@ -130,9 +131,58 @@
 
      core/contract.js `LAYOUT.chromeTop` / `chromeBottom` carry the same two
      numbers as fractions for core/renderer.js, so the scissored bands can be
-     inset out from under them. Change one, change the other. */
+     inset out from under them. Change one, change the other.
+
+     ── THE DOCK IS NOW A SUM OF NAMED PARTS, NOT A WRITTEN-DOWN TOTAL ──────
+     `227px` was a hand-added total, and `.sitedock--plain`'s `189px` was a
+     second one; the two short-viewport / tall-viewport tiers below carried a
+     third and a fourth, and the plain variant was never restated in either —
+     so on a short viewport a plain dock declared 189px around 167px of rows.
+     Four copies of one arithmetic (HANDOFF §8B) and one of them already
+     wrong. The height is now the parts added up once, and a tier changes a
+     part rather than re-adding the sum.
+
+     ── --reach-floor: WHY THE DOCK RESERVES ITS BOTTOM EDGE ────────────────
+     The thumb sweeps an ARC about the joint at the base of the hand, which
+     sits below and outside the bottom corner. It cannot fold tighter than
+     that arc's inner radius, so the corner DIRECTLY UNDER the thumb is among
+     the hardest places on the screen to press — not the easiest, which is
+     what "the bottom third is fine" would have you believe. Hoober's
+     observational study of 1,300+ people (A List Apart, 2013) puts the truly
+     effortless region "at the bottom, ON THE SIDE OPPOSITE THE THUMB", and a
+     third of one-handed users are left-handed, so a control is only as
+     reachable as its WORSE hand — which makes both bottom corners dead.
+
+     `tools/checkreach.mjs` solves that model for this viewport. The number it
+     yields, and the only one this stylesheet needs, is a floor: THE CENTRE OF
+     THE LAST INTERACTIVE ROW MUST SIT AT LEAST ~90 css px ABOVE THE BOTTOM
+     EDGE, or its outer controls fall inside the fold for one hand or the
+     other. That distance is anchored to the bottom edge of the screen, not to
+     a fraction of it — the hand is the same size on a short phone — so it is
+     one constant on every tier: `--reach-floor + --dock-ctl / 2 >= 90`.
+
+     ── AND IT ABSORBS THE SAFE AREA RATHER THAN STACKING ON IT ─────────────
+     `--hud-dock` used to be `calc(var(--sa-b) + 227px)` with a matching
+     `padding-bottom`, so a phone with a home indicator got 227px of dock plus
+     34px of inset — 261px — while the QA harness, which reports no safe area,
+     measured 227 and put the controls 34px lower than any real iPhone shows
+     them. The harness was measuring a layout that ships on no phone, and the
+     two disagreed by exactly the inset. `max()` makes the reserve one thing:
+     on a device with a gesture bar the bar IS the reserve, and on one without
+     (an SE, most Android in 3-button mode, this harness) the dock provides
+     it. Same layout, same measurement, every device. */
   --hud-top:  calc(var(--sa-t) + 52px);
-  --hud-dock: calc(var(--sa-b) + 227px);
+
+  /* The dock's rows, and the reserve under them. Tiers below override these
+     three heights and nothing else. */
+  --dock-inst: 82px;   /* the gauge and one readout */
+  --dock-aux:  32px;   /* the action rail, or the well strip */
+  --dock-ctl:  72px;   /* three sliders and the one primary action */
+  --reach-floor: 56px; /* + --dock-ctl/2 = 92 >= the 90px the thumb arc needs */
+  --dock-floor: max(var(--sa-b), var(--reach-floor));
+  /* 1px border + 9px top padding, then the rows, their gaps and the floor. */
+  --dock-base: calc(10px + var(--dock-inst) + var(--s-1) + var(--dock-ctl) + var(--dock-floor));
+  --hud-dock: calc(var(--dock-base) + var(--s-1) + var(--dock-aux));
   --stage-w: min(100vw, calc(100vh * 0.5), 520px);
 
   /* ── Safe areas ──────────────────────────────────────────────────────── */
@@ -913,35 +963,60 @@ canvas { display: block; }
    The other permanent region, and the only opaque one. One flat surface —
    no cards inside it, no panels inside those. Three rows, all fixed:
 
-     INSTRUMENT  86px   the gauge, and one readout beside it
-     AUXILIARY   34px   the action rail, or the well strip. Present only on
-                        methods that can ever use it, decided at MOUNT and
+     INSTRUMENT  --dock-inst   the gauge, and one readout beside it
+     AUXILIARY   --dock-aux    the action rail, or the well strip. Present only
+                        on methods that can ever use it, decided at MOUNT and
                         never during a run, so nothing here can move the bands
-     CONTROLS    80px   three sliders and the one primary action
+     CONTROLS    --dock-ctl    three sliders and the one primary action
+     FLOOR       --dock-floor  reserved, and empty on purpose — see below
 
    `--hud-dock` is the complement of the two 3D bands and is the number
-   core/renderer.js needs in order to inset its scissored viewports. */
+   core/renderer.js needs in order to inset its scissored viewports.
+
+   ── THE FLOOR IS THE POINT OF THIS BLOCK ────────────────────────────────
+   The controls row is the last row, so its distance from the bottom EDGE of
+   the screen is what decides whether a thumb can reach it — and the bottom
+   corners, which is where the outermost slider and the primary action sit,
+   are inside the arc the thumb cannot fold into. Measured before this change,
+   on all five methods identically: `.actionbtn` centre (334, 795) HARD for
+   the right hand, `.vsl` centre (54, 795) HARD for the left. Both bottom
+   corners; the primary action unpressable by the thumb of two-thirds of
+   one-handed players.
+
+   The row does not move sideways and no control changed size. The floor moved
+   the row UP, to a centre 92px above the bottom edge, and both corners come
+   out of the fold together — `easy` for both hands on all five methods, with
+   ~14px of margin against the arc. `--reach-floor` in :root carries the
+   derivation; `npm run check:reach` is the gate. */
 .sitedock {
-  --dock-aux: 34px;
   position: relative; overflow: hidden;
   flex: none; height: var(--hud-dock);
   display: flex; flex-direction: column; gap: var(--s-1);
-  padding: 9px var(--s-3) calc(var(--sa-b) + 9px);
+  /* The floor is padding, not a spacer element: an empty element would be one
+     more thing for an enumerating harness to find on a screen whose whole
+     rule is that nothing unnecessary is on it. */
+  padding: 9px var(--s-3) var(--dock-floor);
   background: var(--c-bg-deep);
   border-top: 1px solid rgb(var(--rgb-border) / .9);
-  animation: dock-in var(--dur-4) var(--ease-out) both;
+  /* `animation: dock-in` — an 18px slide and a fade on mount — used to be
+     here. Nothing physically moved: the dock is chrome at a fixed height in a
+     reserved row, and it was sliding because entrances look expensive. Motion
+     only where something moved. It also meant the first 440ms of every mount
+     measured a dock that was not where it would end up, which is why
+     publishChrome() has to read offsetHeight rather than a rect. */
 }
-@keyframes dock-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
 /* A method the sim gives neither a programme nor a mud column can never fill
-   the auxiliary row, so it does not get one — and the 3D gets those 38px
+   the auxiliary row, so it does not get one — and the 3D gets those pixels
    back. This is decided once, at mount, from `telemetry.actions` and
    `telemetry.well`; it is not a state the run can enter or leave, which is
-   why it cannot make the layout jump. Redeclaring --hud-dock here is what
-   actually shortens the dock: a custom property resolves on the element that
-   declares it, and `height: var(--hud-dock)` is read on this same element. */
+   why it cannot make the layout jump.
+
+   `--dock-base` is the same sum without the auxiliary row and its gap, so
+   this variant states a SUBTRACTION rather than a second total. The 189px
+   that used to stand here was a hand-added copy that no tier ever updated. */
 .sitedock--plain {
   --dock-aux: 0px;
-  --hud-dock: calc(var(--sa-b) + 189px);
+  --hud-dock: var(--dock-base);
 }
 .sitedock--plain .dock__aux { display: none; }
 
@@ -951,9 +1026,9 @@ canvas { display: block; }
    `--dock-aux: 34px` and on the plain dock where `.dock__aux` is display:none
    and contributes neither height nor gap. */
 .dock__top  { position: relative; flex: none; display: flex; flex-direction: column; gap: var(--s-1); }
-.dock__inst { flex: none; height: 86px; display: flex; gap: var(--s-3); align-items: stretch; }
+.dock__inst { flex: none; height: var(--dock-inst); display: flex; gap: var(--s-3); align-items: stretch; }
 .dock__aux  { flex: none; height: var(--dock-aux); display: flex; align-items: center; gap: var(--s-2); }
-.dock__ctl  { flex: none; height: 80px; display: flex; gap: var(--s-2); align-items: stretch; }
+.dock__ctl  { flex: none; height: var(--dock-ctl); display: flex; gap: var(--s-2); align-items: stretch; }
 
 /* The gauge is the game. It gets the width, the radius and the row.
 
@@ -974,7 +1049,8 @@ canvas { display: block; }
    site.js sets only the backing-store attributes, from the size flex gave it.
    Setting the style back would restore the two-numbers problem. */
 .gaugebox {
-  position: relative; flex: none; width: 150px; height: 86px;
+  /* Height is the instrument row's, by reference — not a copy of it. */
+  position: relative; flex: none; width: 150px; height: var(--dock-inst);
   display: flex; flex-direction: column;
 }
 .gaugebox canvas { flex: 1 1 0; min-height: 0; width: 100%; display: block; }
@@ -1133,10 +1209,10 @@ canvas { display: block; }
   color: var(--c-steel-soft);
   transition: transform var(--dur-2) var(--ease-spring), background var(--dur-3), color var(--dur-3);
 }
-/* A 34px control in a 34px row — min-height: var(--dock-aux) is what makes
-   that true; without it the button was its label's 12px. The hit area is
-   expanded to the 44px target by the ::after below: 34 + 5 above + 5 below,
-   which reaches 1px past the 4px gap into the row on each side.
+/* The button is the auxiliary row's full height — min-height: var(--dock-aux)
+   is what makes that true; without it the button was its label's 12px. The hit
+   area is expanded to the 44px target by the ::after below, which reaches
+   past the 4px gap into the neighbouring row on each side.
 
    ── z-index: 1 IS LOad-BEARING ─────────────────────────────────────────────
    The comment that used to stand here said the overhang sits "where there is
@@ -1745,16 +1821,19 @@ canvas { display: block; }
   }
 }
 
-/* Short viewports: give the 3D more room by trimming the dock. Every number
-   here moves together with --hud-dock, because the dock's height IS the 3D's
-   complement and a stale one would put a band back under the chrome. */
+/* Short viewports: give the 3D more room by trimming the dock. A tier now
+   changes the ROW HEIGHTS and nothing else — `--hud-dock` and `--dock-base`
+   in :root add them up, so a tier can no longer carry a stale total (this one
+   did: it declared 203px, and `.sitedock--plain`'s 189px was never restated
+   here at all, so a plain dock on a short viewport claimed 189px around 167px
+   of rows and the renderer inset 22px of band that nothing covered).
+
+   --reach-floor does NOT scale with the viewport. The thumb is the same size
+   on a small phone, and the arc is anchored to the bottom edge, so a short
+   screen buys its 3D back out of the rows and never out of the floor. */
 @media (max-height: 680px) {
-  :root { --hud-dock: calc(var(--sa-b) + 203px); }   /* 1+9+74+4+32+4+70+9 */
-  .dock__inst { height: 74px; }
-  .dock__aux  { height: var(--dock-aux); }
-  .dock__ctl  { height: 70px; }
-  .sitedock { --dock-aux: 32px; }
-  .gaugebox { width: 134px; height: 74px; }
+  :root { --dock-inst: 72px; --dock-aux: 30px; --dock-ctl: 68px; }
+  .gaugebox { width: 134px; }
   .vsl__track { min-height: 48px; }    /* the 44px touch floor still clears */
   /* --stage-w is capped at half the height, so a short viewport is a narrow
      one: at ~64px per slider head the longest semantic labels (ROTATION,
@@ -1766,12 +1845,8 @@ canvas { display: block; }
      rows automatically. This override was a third copy of the same sum. */
 }
 @media (min-height: 900px) {
-  :root { --hud-dock: calc(var(--sa-b) + 249px); }   /* 1+9+98+4+36+4+88+9 */
-  .dock__inst { height: 98px; }
-  .dock__ctl  { height: 88px; }
-  .sitedock { --dock-aux: 36px; }
-  .gaugebox { height: 98px; }
-  /* .unitcard needs no height override — see the note in the block above. */
+  :root { --dock-inst: 94px; --dock-aux: 34px; --dock-ctl: 84px; }
+  /* .gaugebox and .unitcard need no override — both follow the row. */
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
