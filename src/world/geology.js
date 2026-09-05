@@ -153,6 +153,49 @@ const CFG = {
   holeRMax: 1.60,        // ceiling: a raise bore must not eat the section
   rodRatio: 0.40,        // drill string radius / hole radius
   casingRatio: 0.80,
+
+  /* ── DRILL STRING WHIRL ───────────────────────────────────────────────────
+     See ROD_VERT for the model. These are the four numbers it needs, and this
+     is the honest account of where each comes from (PLATFORM_TRUTH Part C
+     rule 7: a number must never outrun its source).
+
+     SOURCED — the clearance. research/rigs/dth-crawler.md:276, from Epiroc's
+     DTH catalogue p.20: "a 138 mm hammer in a 165 mm hole leaves a ~13 mm gap
+     all round"; research/02:239-248 and :341-343 tabulate wireline rod OD
+     against hole diameter. The shader does not need any of those numbers,
+     because it takes the clearance straight off the drawn annulus — but they
+     are what says the clearance is the right limit to bound the motion with.
+
+     DECLARED — the drawn clearance is not the real one. rodRatio 0.40 puts the
+     string at 40 % of the hole radius where a real NQ rod is 92 % of its hole
+     (69.9 mm in 75.7) and a 6" DTH hammer 91 % (138 in 152.4). That is the
+     same decision as holeRBase above and for the same reason: the bore is
+     already drawn ~7x over gauge so that it reads at all, and a to-scale
+     annulus inside it would be sub-pixel. The whirl is bounded by the
+     clearance the player can SEE, which is the one that has to look right.
+
+     NOT SOURCED — the wavelength, for this case. research/14:921-925
+     [CTES-TFM] p.9 gives a full sinusoidal buckling period of "30 to 100 ft
+     [9-30 m]", but for COILED TUBING IN CASING, not a rotary drill string.
+     It is the only buckling period in the repo, so whirlPeriodM takes its
+     order of magnitude from it and is otherwise a drawing choice.
+
+     NOT SOURCED, AND THEREFORE NOT DRAWN — backward whirl. Rolling contact
+     precesses AGAINST rotation at omega * rodR / clearance, which is pure
+     kinematics; but on the drawn annulus that ratio is 0.40/0.60 = 0.67, so
+     backward whirl would come out SLOWER than forward, the opposite of the
+     thing that makes it recognisable. No rod OD is sourced for percussion
+     strings (research/12:565-569 gives thread and bit diameters only), so the
+     true ratio cannot be computed either. Drawing it wrong-signed would be a
+     plausible invented number. Forward whirl is drawn; binding stalls it. */
+  whirlPeriodM: 18,      // m of one full buckling wave along the string
+  whirlSpanMin: 1.5,     // half-waves: fewer and a shallow hole just leans over
+  whirlSpanMax: 7.0,     // half-waves: more and the string reads as noise
+  whirlDrill: 0.30,      // fraction of the clearance used when turning and cutting
+  whirlTorque: 0.34,     // …added at full torque
+  whirlJam: 1.00,        // …and hard against the wall when it binds
+  whirlSpinGate: 0.08,   // rpm below which a string is not turning, so cannot whirl
+
   boulderCap: 96,
   fractureCap: 220,
   cavityCap: 6,          // must match uCav[] in the shaders
@@ -2133,21 +2176,76 @@ void main(){
 `;
 
 /* ── DRILL STRING ────────────────────────────────────────────────────────── */
+/* WHIRL, not wobble.
+
+   What this replaced displaced x ONLY —
+
+       float wob = uWobble * sin(sy * 0.9 + uTime * 9.0) * 0.05;
+       vec3 p = vec3(position.x * uR + wob, sy, position.z * uR);
+
+   — so the string wiggled inside a flat plane like a 2D snake, at a fixed
+   1.43 Hz with no relationship to rpm even though uSpin sits beside it driven
+   by state.drill.rpm, as a standing wave whose nodes never moved, at an
+   amplitude unrelated to the space the string actually has. Measured on the
+   running page (.probe-whirl-before.json): z displacement 0.0000 units at
+   every drive state, orbit radius CoV 0.53 against 0.00 for a circle, and
+   peak deflection 10.2 % of the clearance at rpm 0.30 against 11.6 % at
+   rpm 0.90 — i.e. rpm moved the amplitude by a tenth and the rate not at all.
+
+   A rotating string WHIRLS. It bows out and the bow precesses around the hole
+   axis. Two constraints make that physical, and both come out of geometry
+   already in this file rather than out of a taste decision:
+
+   1. THE ANNULAR CLEARANCE IS A HARD LIMIT. The string cannot deflect further
+      than holeRadius - rodRadius; past that it is inside the wall. uClear is
+      exactly annulus.outerR - annulus.innerR and the mode shape is normalised
+      to |bow| <= 1, so the bound holds BY CONSTRUCTION — there is no magic
+      amplitude number left to get wrong. research/14:921-925 [CTES-TFM] p.9
+      states the same limit for a buckled tubular: its amplitude "is no
+      greater than the ID of the casing".
+
+   2. THE BOW IS A MODE SHAPE BETWEEN CONTACT POINTS, not a free sine. Pinned
+      at the bit, pinned at the collar, pinned at every wall contact, maximum
+      mid-span, and largest where the string is least supported.
+
+   And because the bow is a HELIX rather than a plane curve, the deflection
+   TRAVELS: azimuth advances along the string, so as the precession turns, the
+   bulge crawls instead of standing still with fixed nodes.
+
+   vRub carries which side of the string is against the wall, so the fragment
+   shader can put the contact polish where the steel is actually rubbing. */
 const ROD_VERT = /* glsl */`
 precision highp float;
+#define PI 3.14159265
 uniform float uTop;
 uniform float uBottom;
 uniform float uR;
-uniform float uWobble;
-uniform float uTime;
+uniform float uClear;    // annular clearance, section units — the hard limit
+uniform float uWhirl;    // fraction of that clearance in use, 0..1
+uniform float uPrec;     // precession phase, rad — integrated on the CPU from rpm
+uniform float uHelix;    // rad of precession phase per metre along the string
+uniform float uSpans;    // half-waves of the mode shape over the free length
 varying float vSy;
 varying float vAng;
+varying float vRub;
 void main(){
   float t = position.y + 0.5;
   float sy = mix(uBottom, uTop, t);
-  float wob = uWobble * sin(sy * 0.9 + uTime * 9.0) * 0.05;
-  vec3 p = vec3(position.x * uR + wob, sy, position.z * uR);
+  float dz = sy - uBottom;                                   // metres above the bit
+  float u01 = clamp(dz / max(uTop - uBottom, 1e-3), 0.0, 1.0);
+  /* Mode shape. uSpans half-waves between wall contacts, times the first mode
+     of the whole free length: zero at the bit, zero at the collar, zero at
+     every contact, largest mid-span. |bow| <= 1, which is what bounds it. */
+  float bow = sin(PI * uSpans * u01) * sin(PI * u01);
+  float a = uPrec + uHelix * dz;                             // helical azimuth
+  float amp = uClear * uWhirl * bow;                         // |amp| <= uClear
+  vec3 p = vec3(position.x * uR + cos(a) * amp, sy, position.z * uR + sin(a) * amp);
   vSy = sy; vAng = atan(position.z, position.x);
+  /* +1 on the side pressed into the wall, -1 on the side swinging away, scaled
+     by how much of the clearance is in use. Computed here, not in the fragment
+     shader, because vAng wraps at the geometry seam and a difference of two
+     interpolated angles would tear across it. */
+  vRub = cos(vAng - a) * abs(bow) * uWhirl;
   gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
 }
 `;
@@ -2159,6 +2257,7 @@ uniform vec3  uKeyWarm;
 uniform float uSpin;
 varying float vSy;
 varying float vAng;
+varying float vRub;
 void main(){
   float side = cos(vAng);
   float curve = 0.5 + 0.5 * side;
@@ -2171,9 +2270,17 @@ void main(){
   vec3 c = uSteel * (0.30 + 0.55 * curve);
   c *= 0.86 + 0.20 * flute;
   c = mix(c, uSteel * 1.45, joint * 0.8);
+  /* Contact polish. The side of the string bearing against the wall is where
+     the flutes get rubbed off, and it is the only cue for the half of the
+     whirl the camera cannot see: this band is orthographic looking down -Z,
+     so the z half of the orbit is invisible as displacement and has to arrive
+     as shading or it does not arrive at all. */
+  float rub = smoothstep(0.35, 1.0, vRub);
+  c = mix(c, uSteel * 1.18, rub * 0.42);
   // specular band
   float spec = pow(max(side, 0.0), 6.0);
   c += uKeyWarm * spec * 0.45;
+  c += uKeyWarm * pow(max(side, 0.0), 22.0) * rub * 0.55;
   gl_FragColor = vec4(c, 1.0);
   #include <tonemapping_fragment>
   #include <colorspace_fragment>
@@ -2189,6 +2296,11 @@ uniform vec3  uSteel;
 uniform vec3  uKeyWarm;
 varying float vSy;
 varying float vAng;
+/* Declared because CASING_FRAG shares ROD_VERT, which writes it. Casing is
+   grouted or driven against the wall — it does not whirl, so its uWhirl stays
+   0 and vRub with it — but a varying the vertex stage writes and the fragment
+   stage does not declare is a link the driver is entitled to refuse. */
+varying float vRub;
 void main(){
   float side = cos(vAng);
   float curve = 0.5 + 0.5 * side;
@@ -4329,7 +4441,13 @@ export function createGeology(ctx) {
     casingMat = track(new T.ShaderMaterial({
       uniforms: {
         uTop: { value: 0 }, uBottom: { value: -1 },
-        uR: { value: annulus.casingR }, uWobble: { value: 0 }, uTime: U.uTime,
+        uR: { value: annulus.casingR },
+        /* Casing shares ROD_VERT, so it needs the whirl uniforms to link — but
+           casing is grouted or driven against the wall and does not whirl, so
+           uWhirl stays 0 for the life of the material and every term above
+           multiplies out. */
+        uClear: { value: 0 }, uWhirl: { value: 0 },
+        uPrec: { value: 0 }, uHelix: { value: 0 }, uSpans: { value: 1 },
         uSteel: { value: new T.Color(0x9aa6b2) }, uKeyWarm: U.uKeyWarm,
       },
       vertexShader: ROD_VERT,
@@ -4343,12 +4461,21 @@ export function createGeology(ctx) {
     casingMesh.name = 'casing';
     root.add(casingMesh);
 
-    // drill string
-    const rg = track(new T.CylinderGeometry(1, 1, 1, 20, 40, true));
+    /* 96 height segments, not 40. The string is bent in the vertex shader, so
+       the mode shape can only be as smooth as the ring spacing: at CFG's
+       whirlSpanMax of 7 half-waves, 40 rings gave 5.7 rings per half-wave and
+       the bow read as a chain of straight facets. 96 gives 13.7. It costs
+       3,840 triangles inside the ONE draw call the string already had —
+       geometry inside an existing call is the cheap axis here (HANDOFF §4b.3),
+       and the section runs 16-35 draw calls against a budget of 60. */
+    const rg = track(new T.CylinderGeometry(1, 1, 1, 20, 96, true));
     rodMat = track(new T.ShaderMaterial({
       uniforms: {
         uTop: { value: 1.6 }, uBottom: { value: -1 },
-        uR: { value: annulus.innerR }, uWobble: { value: 0 }, uTime: U.uTime,
+        uR: { value: annulus.innerR },
+        uClear: { value: annulus.outerR - annulus.innerR },
+        uWhirl: { value: 0 }, uPrec: { value: 0 },
+        uHelix: { value: TAU / CFG.whirlPeriodM }, uSpans: { value: 2 },
         uRodLen: { value: 3.0 }, uSpin: { value: 0 },
         uSteel: { value: new T.Color(0xb9a37a) }, uKeyWarm: U.uKeyWarm,
       },
@@ -6561,12 +6688,52 @@ export function createGeology(ctx) {
       rodMat.uniforms.uBottom.value = layout.id === 'raise' && stage >= 1
         ? -Math.max(0.05, actionStation()) : -holeLen;
       rodMat.uniforms.uR.value = annulus.innerR;
-      const rpm = state?.drill?.rpm ?? 0.5;
-      const jam = state?.drill?.jam ?? 0;
+      const rpm = clamp(state?.drill?.rpm ?? 0.5);
+      const jam = clamp(state?.drill?.jam ?? 0);
+      const torque = clamp(state?.drill?.torque ?? 0);
+      const active = !!state?.drill?.active;
       rodMat.uniforms.uSpin.value += dt * (2 + rpm * 26) * (1 - jam * 0.9);
-      rodMat.uniforms.uWobble.value = damp(rodMat.uniforms.uWobble.value,
-        (state?.drill?.active ? 0.35 + (state?.drill?.torque || 0) * 0.9 : 0) + jam * 1.2, 6, dt);
-      rodMat.uniforms.uTime.value = time;
+
+      /* ── WHIRL ──────────────────────────────────────────────────────────
+         The model is in ROD_VERT and the constants are in CFG.whirl*. This is
+         the only place the drive comes from, and every term of it is one of
+         the four numbers the sim already publishes.
+
+         A string that is not turning does not whirl — it hangs. That gate is
+         the rpm itself and NOT uSpin's rate above, whose +2 floor exists so
+         the flutes never freeze on a still frame; inheriting that floor would
+         have the string orbiting with the rotation stopped. */
+      const spinning = active ? clamp(rpm / CFG.whirlSpinGate, 0, 1) : 0;
+      /* Fraction of the annular clearance in use. Binding does not need
+         rotation, so it is added outside the gate: a bound string stays out
+         against the wall whatever the table is doing. The shader clamps
+         nothing — |bow| <= 1 and this is <= 1, so the product is <= uClear. */
+      const use = clamp(spinning * (CFG.whirlDrill + torque * CFG.whirlTorque)
+                        + jam * CFG.whirlJam, 0, 1);
+      /* Half-waves of the mode shape over the drawn free length. Derived from
+         the length and the buckling period so a 4 m hole and a 60 m hole are
+         drawn with the same wavelength rather than the same shape. */
+      const freeLen = Math.max(rodTop - rodMat.uniforms.uBottom.value, 0.05);
+      const spans = clamp(2 * freeLen / CFG.whirlPeriodM,
+                          CFG.whirlSpanMin, CFG.whirlSpanMax);
+      rodMat.uniforms.uSpans.value = spans;
+      /* Normalised by the mode shape's own peak, so `use` means exactly what
+         CFG says it means: whirlJam 1.00 puts the string ON the wall, not at
+         whatever fraction of it the product of two sines happens to reach
+         (0.86 at 3.6 spans, 0.72 at 7). Without this the constants would each
+         be silently scaled by a number nobody could see. */
+      rodMat.uniforms.uWhirl.value =
+        damp(rodMat.uniforms.uWhirl.value, use / bowPeak(spans), 6, dt);
+      /* FORWARD WHIRL: the bow precesses WITH rotation, at the rotary speed —
+         which is the definition, not a tuning. Binding stalls it, so a jam
+         reads as the string welded to one side of the wall rather than as a
+         bigger wiggle. */
+      const stall = 1 - clamp(jam * 1.1, 0, 1);
+      rodMat.uniforms.uPrec.value += dt * (rpm * 26) * spinning * stall;
+      /* The helix pitch IS the buckling period — one turn of azimuth per wave,
+         which is what makes the deflection travel instead of standing. */
+      rodMat.uniforms.uHelix.value = TAU / CFG.whirlPeriodM;
+      rodMat.uniforms.uClear.value = annulus.outerR - annulus.innerR;
       rodMat.uniforms.uRodLen.value = 3.0;
     }
     if (casingMesh) {
@@ -6897,6 +7064,34 @@ function hexToRgb(hex) {
   const v = parseInt(h.length === 3 ? h.split('').map((c) => c + c).join('') : h, 16);
   return [(v >> 16) & 255, (v >> 8) & 255, v & 255];
 }
+/**
+ * Peak of ROD_VERT's mode shape, |sin(PI*s*u) * sin(PI*u)| over u in [0,1].
+ *
+ * There is no closed form, so it is sampled — 256 points is finer than the 96
+ * rings the string is actually built from, which is the resolution that
+ * matters. Memoised on s rounded to 1/64, because s comes from a hole depth
+ * that changes every frame by a hair and the answer does not.
+ *
+ * It exists so the whirl constants in CFG mean what they say: with it,
+ * `uWhirl = 1` puts the string exactly on the wall at whatever span count the
+ * current depth produces, instead of at 0.86 of it (3.6 spans) or 0.72 (7).
+ */
+const BOW_PEAK = new Map();
+function bowPeak(s) {
+  const key = Math.round(s * 64);
+  const hit = BOW_PEAK.get(key);
+  if (hit !== undefined) return hit;
+  const ss = key / 64;
+  let m = 1e-6;
+  for (let i = 1; i < 256; i++) {
+    const u = i / 256;
+    const v = Math.abs(Math.sin(Math.PI * ss * u) * Math.sin(Math.PI * u));
+    if (v > m) m = v;
+  }
+  BOW_PEAK.set(key, m);
+  return m;
+}
+
 function clamp8(v) { return v < 0 ? 0 : v > 255 ? 255 : v | 0; }
 /** Accepts either a 0..1 fraction or a contract's 1..5 star rating. */
 function normDifficulty(d) {

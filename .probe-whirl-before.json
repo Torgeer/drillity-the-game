@@ -1,118 +1,508 @@
 {
-  "port": "5186",
+  "port": "5199",
   "started": {
     "ok": true,
-    "scene": "site",
-    "drill": {
-      "active": true,
-      "depth": 0.0007843292176532552,
-      "target": 30,
-      "rop": 0.03194100886370616,
-      "wob": 0.5743913198821048,
-      "rpm": 0.6756086801178953,
-      "flush": 0.357,
-      "torque": 0.7754791739244555,
-      "wear": 0.0000029042493502713772,
-      "heat": 0.15740300423895726,
-      "stability": 1,
-      "load": 0,
-      "returns": 1,
-      "timeSec": 1.8083333333333294,
-      "jam": 0,
-      "rods": 1,
-      "stratumIndex": 0,
-      "inGreenBand": false,
-      "greenBandTime": 0,
-      "score": 0,
-      "holeDepth": 0.0007843292176532552,
-      "stringDepth": 0.0007843292176532552,
-      "gauge": 0.7754791739244555,
-      "gaugeAxis": "torque",
-      "gaugeLabel": "TORQUE",
-      "gaugeUnit": "",
-      "gaugeMax": 1.25,
-      "gaugeReal": 0.775,
-      "bandCentre": 0.9723015936937393,
-      "bandHalf": 0.08107489404209275,
-      "phase": "drilling",
-      "phaseT": 0,
-      "phaseDur": 0,
-      "stage": 0,
-      "stageProgress": 0,
-      "stageCount": 1,
-      "stageId": "bore",
-      "stageReverse": false,
-      "actionDepth": 0.0007843292176532552,
-      "progress01": 0.000026144307255108504,
-      "programme": null,
-      "runLog": [
-        {
-          "depth": 0,
-          "text": "Spud in",
-          "kind": null
-        },
-        {
-          "depth": 1.4,
-          "text": "Clay ahead · ~32.8 m/h",
-          "kind": null
-        },
-        {
-          "depth": 0,
-          "text": "Topsoil ahead · ~88.1 m/h",
-          "kind": null
-        }
-      ]
-    }
+    "scene": "menu",
+    "holeDiaMm": 152
   },
-  "errors": [
-    "[init] geology ReferenceError: boreExag is not defined\n    at applyHoleDiameter (http://localhost:5186/src/world/geology.js:2682:14)\n    at computeView (http://localhost:5186/src/world/geology.js:4236:5)\n    at Object.init (http://localhost:5186/src/world/geology.js:6191:5)\n    at boot (http://local",
-    "ReferenceError: boreExag is not defined\n    at applyHoleDiameter (http://localhost:5186/src/world/geology.js:2682:14)\n    at computeView (http://localhost:5186/src/world/geology.js:4236:5)\n    at Object.resize (http://localhost:5186/src/world/geology.js:6680:5)\n    at resize (http://localhost:5186/s"
-  ],
+  "errors": [],
   "runs": [
     {
       "label": "idle (no rotation)",
-      "error": "no drill-string mesh"
+      "drive": {
+        "active": false,
+        "rpm": 0,
+        "torque": 0,
+        "jam": 0
+      },
+      "model": {
+        "model": "planar-wobble",
+        "missing": []
+      },
+      "holeDiaMm": 152,
+      "innerR": 0.21728000000000003,
+      "outerR": 0.5432,
+      "clearance": 0.32592,
+      "peakDeflection": 0,
+      "peakOverClearance": 0,
+      "withinClearance": true,
+      "medianRadiusCoV": 0,
+      "precessionRadPerS": -0.5143827513041004,
+      "lateralHz": 0,
+      "zMotion": 0,
+      "stringLength": 2.25,
+      "perStation": [
+        {
+          "station": 0.05,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": -0.5143827513041004,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.15,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": -0.5143827513041004,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.25,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": -0.5143827513041004,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.375,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": -0.5143827513041004,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.5,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": -0.5143827513041004,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.625,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.75,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.85,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.95,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        }
+      ]
     },
     {
       "label": "drilling rpm 0.30",
-      "error": "no drill-string mesh"
+      "drive": {
+        "active": true,
+        "rpm": 0.3,
+        "torque": 0.35,
+        "jam": 0
+      },
+      "model": {
+        "model": "planar-wobble",
+        "missing": []
+      },
+      "holeDiaMm": 152,
+      "innerR": 0.21728000000000003,
+      "outerR": 0.5432,
+      "clearance": 0.32592,
+      "peakDeflection": 0.03324506517755251,
+      "peakOverClearance": 0.10200375913583859,
+      "withinClearance": true,
+      "medianRadiusCoV": 0.5557270661904994,
+      "precessionRadPerS": 1.8951515072680611,
+      "lateralHz": 1.5081136514488398,
+      "zMotion": 0,
+      "stringLength": 2.25,
+      "perStation": [
+        {
+          "station": 0.05,
+          "peak": 0.03323620013783099,
+          "meanR": 0.019619161510906032,
+          "radiusCoV": 0.5091198156567951,
+          "precRadPerS": 0,
+          "xHz": 1.5081136514488398,
+          "xSpan": 0.06645812722963254,
+          "zSpan": 0
+        },
+        {
+          "station": 0.15,
+          "peak": 0.03324492300314099,
+          "meanR": 0.019421070117294683,
+          "radiusCoV": 0.5146250639150851,
+          "precRadPerS": 0,
+          "xHz": 1.5081136514488398,
+          "xSpan": 0.06646410363401058,
+          "zSpan": 0
+        },
+        {
+          "station": 0.25,
+          "peak": 0.03324506517755251,
+          "meanR": 0.019119050882039582,
+          "radiusCoV": 0.5306992419776038,
+          "precRadPerS": 0,
+          "xHz": 1.8097363817386076,
+          "xSpan": 0.06645385808039853,
+          "zSpan": 0
+        },
+        {
+          "station": 0.375,
+          "peak": 0.03324379131680801,
+          "meanR": 0.018777862636738474,
+          "radiusCoV": 0.5480405209981514,
+          "precRadPerS": 1.8951515072680611,
+          "xHz": 1.8097363817386076,
+          "xSpan": 0.06644423883865891,
+          "zSpan": 0
+        },
+        {
+          "station": 0.5,
+          "peak": 0.033241568476097716,
+          "meanR": 0.018577148324981682,
+          "radiusCoV": 0.5557270661904994,
+          "precRadPerS": 1.8951515072680611,
+          "xHz": 1.5081136514488398,
+          "xSpan": 0.06643225962553972,
+          "zSpan": 0
+        },
+        {
+          "station": 0.625,
+          "peak": 0.03323959379364288,
+          "meanR": 0.018516077028210412,
+          "radiusCoV": 0.558367183523095,
+          "precRadPerS": 1.8951515072680611,
+          "xHz": 1.5081136514488398,
+          "xSpan": 0.06641891333668976,
+          "zSpan": 0
+        },
+        {
+          "station": 0.75,
+          "peak": 0.03323626710813147,
+          "meanR": 0.018582101578308734,
+          "radiusCoV": 0.5588502928960496,
+          "precRadPerS": 1.8951515072680611,
+          "xHz": 1.5081136514488398,
+          "xSpan": 0.06640187043565585,
+          "zSpan": 0
+        },
+        {
+          "station": 0.85,
+          "peak": 0.033225627864133245,
+          "meanR": 0.018711748756590506,
+          "radiusCoV": 0.558080436735624,
+          "precRadPerS": 1.8951515072680611,
+          "xHz": 1.5081136514488398,
+          "xSpan": 0.06639329164406652,
+          "zSpan": 0
+        },
+        {
+          "station": 0.95,
+          "peak": 0.0332354932604192,
+          "meanR": 0.018888924740991908,
+          "radiusCoV": 0.5561527379899193,
+          "precRadPerS": 1.8951515072680611,
+          "xHz": 1.5081136514488398,
+          "xSpan": 0.0663962205106986,
+          "zSpan": 0
+        }
+      ]
     },
     {
       "label": "drilling rpm 0.90",
-      "error": "no drill-string mesh"
+      "drive": {
+        "active": true,
+        "rpm": 0.9,
+        "torque": 0.45,
+        "jam": 0
+      },
+      "model": {
+        "model": "planar-wobble",
+        "missing": []
+      },
+      "holeDiaMm": 152,
+      "innerR": 0.21728000000000003,
+      "outerR": 0.5432,
+      "clearance": 0.32592,
+      "peakDeflection": 0.037747230332894594,
+      "peakOverClearance": 0.11581747156631872,
+      "withinClearance": true,
+      "medianRadiusCoV": 0.5549452504657303,
+      "precessionRadPerS": 1.8908171252421264,
+      "lateralHz": 1.504664459825459,
+      "zMotion": 0,
+      "stringLength": 2.25,
+      "perStation": [
+        {
+          "station": 0.05,
+          "peak": 0.037739367727765684,
+          "meanR": 0.021242442944794774,
+          "radiusCoV": 0.5506824179325152,
+          "precRadPerS": 1.8908171252421264,
+          "xHz": 1.8055973517905508,
+          "xSpan": 0.07542369977086331,
+          "zSpan": 0
+        },
+        {
+          "station": 0.15,
+          "peak": 0.03772610173048259,
+          "meanR": 0.02108334729951204,
+          "radiusCoV": 0.5558091400637853,
+          "precRadPerS": 1.8908171252421264,
+          "xHz": 1.504664459825459,
+          "xSpan": 0.07541413830315068,
+          "zSpan": 0
+        },
+        {
+          "station": 0.25,
+          "peak": 0.037736799414404366,
+          "meanR": 0.021024089850898067,
+          "radiusCoV": 0.5580933044751013,
+          "precRadPerS": 1.8908171252421264,
+          "xHz": 1.504664459825459,
+          "xSpan": 0.07542268918805926,
+          "zSpan": 0
+        },
+        {
+          "station": 0.375,
+          "peak": 0.037737030111600664,
+          "meanR": 0.021082242643431916,
+          "radiusCoV": 0.5588076743240409,
+          "precRadPerS": 1.8908171252421264,
+          "xHz": 1.504664459825459,
+          "xSpan": 0.0754113139119588,
+          "zSpan": 0
+        },
+        {
+          "station": 0.5,
+          "peak": 0.037736675319012064,
+          "meanR": 0.021262614173908755,
+          "radiusCoV": 0.5579417891148657,
+          "precRadPerS": 1.8908171252421264,
+          "xHz": 1.504664459825459,
+          "xSpan": 0.07539681664337361,
+          "zSpan": 0
+        },
+        {
+          "station": 0.625,
+          "peak": 0.03773568738908295,
+          "meanR": 0.02152542782472109,
+          "radiusCoV": 0.5549452504657303,
+          "precRadPerS": 1.8908171252421264,
+          "xHz": 1.504664459825459,
+          "xSpan": 0.07537840755897894,
+          "zSpan": 0
+        },
+        {
+          "station": 0.75,
+          "peak": 0.03774056070668324,
+          "meanR": 0.021825864312084522,
+          "radiusCoV": 0.5482260635078455,
+          "precRadPerS": 1.8908171252421264,
+          "xHz": 1.504664459825459,
+          "xSpan": 0.07547457074382621,
+          "zSpan": 0
+        },
+        {
+          "station": 0.85,
+          "peak": 0.037747230332894594,
+          "meanR": 0.022056288297261726,
+          "radiusCoV": 0.5398666696272855,
+          "precRadPerS": 1.8908171252421264,
+          "xHz": 1.504664459825459,
+          "xSpan": 0.0754776192076598,
+          "zSpan": 0
+        },
+        {
+          "station": 0.95,
+          "peak": 0.03774572369695163,
+          "meanR": 0.022245701206760938,
+          "radiusCoV": 0.5294496723288924,
+          "precRadPerS": 1.8908171252421264,
+          "xHz": 1.504664459825459,
+          "xSpan": 0.0754642292665211,
+          "zSpan": 0
+        }
+      ]
     },
     {
       "label": "jammed",
-      "error": "no drill-string mesh"
+      "drive": {
+        "active": true,
+        "rpm": 0.35,
+        "torque": 0.95,
+        "jam": 1
+      },
+      "model": {
+        "model": "planar-wobble",
+        "missing": []
+      },
+      "holeDiaMm": 152,
+      "innerR": 0.21728000000000003,
+      "outerR": 0.5432,
+      "clearance": 0.32592,
+      "peakDeflection": 0.12023387642778208,
+      "peakOverClearance": 0.3689061009688945,
+      "withinClearance": true,
+      "medianRadiusCoV": 0.5387155751612551,
+      "precessionRadPerS": 1.8917279783128533,
+      "lateralHz": 1.505389293668642,
+      "zMotion": 0,
+      "stringLength": 2.25,
+      "perStation": [
+        {
+          "station": 0.05,
+          "peak": 0.12021745744782922,
+          "meanR": 0.06727405390299031,
+          "radiusCoV": 0.5589165573209847,
+          "precRadPerS": 1.8917279783128533,
+          "xHz": 1.505389293668642,
+          "xSpan": 0.24020953265787046,
+          "zSpan": 0
+        },
+        {
+          "station": 0.15,
+          "peak": 0.12020767913921176,
+          "meanR": 0.06777831045045499,
+          "radiusCoV": 0.5581203337968399,
+          "precRadPerS": 1.8917279783128533,
+          "xHz": 1.505389293668642,
+          "xSpan": 0.24013320860249862,
+          "zSpan": 0
+        },
+        {
+          "station": 0.25,
+          "peak": 0.1201719514768688,
+          "meanR": 0.06845558547922545,
+          "radiusCoV": 0.5555103514644414,
+          "precRadPerS": 1.8917279783128533,
+          "xHz": 1.505389293668642,
+          "xSpan": 0.24005374123303366,
+          "zSpan": 0
+        },
+        {
+          "station": 0.375,
+          "peak": 0.12023387642778208,
+          "meanR": 0.06941039586366428,
+          "radiusCoV": 0.5492105100531048,
+          "precRadPerS": 1.8917279783128533,
+          "xHz": 1.505389293668642,
+          "xSpan": 0.24038919928326521,
+          "zSpan": 0
+        },
+        {
+          "station": 0.5,
+          "peak": 0.1202259330612726,
+          "meanR": 0.07033253272748106,
+          "radiusCoV": 0.5387155751612551,
+          "precRadPerS": 1.8917279783128533,
+          "xHz": 1.505389293668642,
+          "xSpan": 0.24036227774120955,
+          "zSpan": 0
+        },
+        {
+          "station": 0.625,
+          "peak": 0.12022031072726572,
+          "meanR": 0.07102768656062959,
+          "radiusCoV": 0.5255063701956951,
+          "precRadPerS": 1.8917279783128533,
+          "xHz": 1.505389293668642,
+          "xSpan": 0.24035027502512207,
+          "zSpan": 0
+        },
+        {
+          "station": 0.75,
+          "peak": 0.12021396411767937,
+          "meanR": 0.07130029311444347,
+          "radiusCoV": 0.513570907145606,
+          "precRadPerS": 0,
+          "xHz": 1.505389293668642,
+          "xSpan": 0.2403411125993855,
+          "zSpan": 0
+        },
+        {
+          "station": 0.85,
+          "peak": 0.12019821333952899,
+          "meanR": 0.07109751819989585,
+          "radiusCoV": 0.509197847636022,
+          "precRadPerS": 0,
+          "xHz": 1.505389293668642,
+          "xSpan": 0.24034860383313844,
+          "zSpan": 0
+        },
+        {
+          "station": 0.95,
+          "peak": 0.12023023075246198,
+          "meanR": 0.07050440840304115,
+          "radiusCoV": 0.5118879413733803,
+          "precRadPerS": 0,
+          "xHz": 1.505389293668642,
+          "xSpan": 0.24037327005743753,
+          "zSpan": 0
+        }
+      ]
     }
   ],
   "pixels": {
     "frames": 24,
     "bytes": [
-      1196983,
-      1228349,
-      1252584,
-      1246540,
-      1258496,
-      1242038,
-      1259490,
-      1246673,
-      1245112,
-      1243548,
-      1259370,
-      1253035,
-      1245816,
-      1255787,
-      1260643,
-      1247513,
-      1243123,
-      1256762,
-      1250899,
-      1257194,
-      1242576,
-      1260434,
-      1256630,
-      1259959
+      1037275,
+      1035170,
+      1033662,
+      1031423,
+      1028281,
+      1023865,
+      1021387,
+      1017722,
+      1012203,
+      1012726,
+      1013469,
+      1014397,
+      1009129,
+      1016422,
+      1017619,
+      1015592,
+      1018742,
+      1016663,
+      1016261,
+      1017915,
+      1020002,
+      1020781,
+      1024338,
+      1025989
     ]
   }
 }

@@ -65,15 +65,20 @@ await page.waitForTimeout(8000);
 /* ── put the string down a hole ──────────────────────────────────────────────
    Deliberately NOT via ui.show('site'): the section scene is live in every
    scene, and driving the UI navigates the page out from under the probe. The
-   two things the measurement needs are a depth and a drill state, and geology
-   exposes setDepth() for exactly this. */
+   two things the measurement needs are a depth and a drill state.
+
+   Depth goes through state.drill.depth and NOT geology.setDepth(): update()
+   reads state.drill.depth every frame (geology.js:6595) and overwrites
+   whatever setDepth() put there, so a probe driving setDepth() is racing the
+   game loop and measures a depth that flickers between its value and the
+   sim's. This is HANDOFF §8C — verify the harness varies what you think. */
 const DEPTH_M = Number(arg('depth', 30));
 const started = await page.evaluate((depth) => {
   const D = window.__DRILLITY;
   if (!D) return { ok: false, why: 'no __DRILLITY' };
   window.__PROBE_DEPTH = depth;
-  D.geology.setDepth(depth);
   D.state.drill = D.state.drill || {};
+  D.state.drill.depth = depth;
   return { ok: true, scene: D.state?.scene, holeDiaMm: D.geology.holeDiaMm };
 }, DEPTH_M);
 await page.waitForTimeout(2500);
@@ -93,8 +98,15 @@ async function sample(drive, frames) {
        vary (HANDOFF §8C: verify your harness varies what you think it does).
        A getter re-installed every frame beats a one-shot assignment, because
        the sim writes state.drill continuously. */
-    const pin = () => { Object.assign(D.state.drill, drive); geo.setDepth(window.__PROBE_DEPTH); };
+    const pin = () => { Object.assign(D.state.drill, drive); D.state.drill.depth = window.__PROBE_DEPTH; };
     pin();
+
+    /* Let the amplitude envelope settle before measuring. The whirl amplitude
+       is damped toward its target (damp(..., 6, dt)), so the first ~0.7 s
+       after a drive change is a ramp, and a ramp inflates the circularity
+       number by exactly the amount the envelope moved — it is the instrument
+       measuring its own step response, not the shape of the orbit. */
+    for (let f = 0; f < 90; f++) { await new Promise((r) => requestAnimationFrame(r)); pin(); }
 
     const u = rod.material.uniforms;
     const src = rod.material.vertexShader;
@@ -133,8 +145,7 @@ function mirror(u, sy) {
     const len = Math.max(top - bot, 1e-3);
     const dz = sy - bot;                       // metres above the bit
     const uu = Math.min(Math.max(dz / len, 0), 1);
-    const spans = Math.max(u.uSpans, 1);
-    const bow = Math.sin(Math.PI * spans * uu) * Math.sin(Math.PI * uu);
+    const bow = Math.sin(Math.PI * u.uSpans * uu) * Math.sin(Math.PI * uu);
     const amp = u.uClear * u.uWhirl * bow;
     const a = u.uPrec + u.uHelix * dz;
     return { x: Math.cos(a) * amp, z: Math.sin(a) * amp, bow };
@@ -146,10 +157,26 @@ function mirror(u, sy) {
 function checkSource(src) {
   const need = src.includes('uWhirl')
     ? ['uClear', 'uWhirl', 'uPrec', 'uHelix', 'uSpans',
-       'sin(PI * uSpans * u01) * sin(PI * u01)', 'cos(a)', 'sin(a)']
+       'float bow = sin(PI * uSpans * u01) * sin(PI * u01);',
+       'float a = uPrec + uHelix * dz;',
+       'float amp = uClear * uWhirl * bow;',
+       'cos(a) * amp', 'sin(a) * amp']
     : ['uWobble', 'sin(sy * 0.9 + uTime * 9.0) * 0.05'];
   const missing = need.filter((t) => !src.includes(t));
   return { model: src.includes('uWhirl') ? 'whirl' : 'planar-wobble', missing };
+}
+
+/* Dominant temporal frequency of a signal, by mean-crossing count. Works on a
+   planar wave and on a circular orbit alike, which is the point: the two
+   models cannot be compared on the orbit angle, because a planar wave has no
+   orbit. This is what "the precession rate tracks rpm" is tested with. */
+function crossingHz(vals, T) {
+  const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
+  let n = 0;
+  for (let i = 1; i < vals.length; i++) {
+    if ((vals[i - 1] - mean) < 0 !== (vals[i] - mean) < 0) n++;
+  }
+  return T > 0.2 ? n / (2 * T) : 0;
 }
 
 /* ── analysis ────────────────────────────────────────────────────────────── */
@@ -158,9 +185,12 @@ function analyse(res, label, drive) {
   const clear = annulus.outerR - annulus.innerR;
   const u0 = rows[0];
   const len = Math.max(u0.uTop - u0.uBottom, 1e-3);
-  /* Sample at 9 stations along the string, expressed as a fraction of its
-     length so the same stations are compared whatever the depth. */
-  const stations = [0.05, 0.15, 0.25, 0.375, 0.5, 0.625, 0.75, 0.85, 0.95];
+  /* Stations along the string, as a fraction of its length so the same ones
+     are compared whatever the depth. 65 of them, not a handful: the mode
+     shape's peak does not sit on a round fraction, and a coarse set reports a
+     peak deflection lower than the real one — which would let a string that
+     really does punch through the wall pass the clearance check. */
+  const stations = Array.from({ length: 65 }, (_, i) => i / 64);
   const perStation = stations.map((s) => {
     const pts = rows.map((r) => {
       const sy = r.uBottom + s * Math.max(r.uTop - r.uBottom, 1e-3);
@@ -185,6 +215,7 @@ function analyse(res, label, drive) {
       station: s,
       peak: Math.max(...rs), meanR: mean, radiusCoV: cov,
       precRadPerS: T > 0.2 ? un / T : 0,
+      xHz: crossingHz(pts.map((p) => p.x), T),
       xSpan: Math.max(...pts.map((p) => p.x)) - Math.min(...pts.map((p) => p.x)),
       zSpan: Math.max(...pts.map((p) => p.z)) - Math.min(...pts.map((p) => p.z)),
     };
@@ -199,8 +230,10 @@ function analyse(res, label, drive) {
     peakDeflection: peak,
     peakOverClearance: peak / Math.max(clear, 1e-9),
     withinClearance: peak <= clear * 1.0001,
-    medianRadiusCoV: perStation.map((p) => p.radiusCoV).sort((a, b) => a - b)[4],
+    medianRadiusCoV: perStation.map((p) => p.radiusCoV).sort((a, b) => a - b)[Math.floor(perStation.length / 2)],
     precessionRadPerS: prec,
+    /* Model-independent: how fast the VISIBLE (x) displacement oscillates. */
+    lateralHz: perStation.map((p) => p.xHz).sort((a, b) => a - b)[Math.floor(perStation.length / 2)],
     zMotion: Math.max(...perStation.map((p) => p.zSpan)),
     stringLength: len,
     perStation,
@@ -248,6 +281,7 @@ for (const r of out.runs) {
     `${r.withinClearance ? '' : '  ** EXCEEDS CLEARANCE **'}` +
     `  radiusCoV ${r.medianRadiusCoV.toFixed(3)}` +
     `  prec ${r.precessionRadPerS.toFixed(2)} rad/s` +
+    `  lateral ${r.lateralHz.toFixed(2)} Hz` +
     `  zSpan ${r.zMotion.toFixed(4)}u`
   );
 }

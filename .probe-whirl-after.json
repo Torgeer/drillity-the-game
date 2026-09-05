@@ -1,0 +1,2725 @@
+{
+  "port": "5201",
+  "started": {
+    "ok": true,
+    "scene": "menu",
+    "holeDiaMm": 152
+  },
+  "errors": [
+    "[gltfRig] \"crawler-lite\" did NOT load. http://localhost:5201/models/crawler-lite.glb is not a GLB — the server answered with something else (1213 bytes). This is usually an SPA fallback page, not a model. ",
+    "[gltfRig] \"crawler-lite\" falls through to the PROCEDURAL builder for the same rig id. That is the same machine drawn the old way, not a substitute machine — but the Blender model you asked for is NOT on screen. "
+  ],
+  "runs": [
+    {
+      "label": "idle (no rotation)",
+      "drive": {
+        "active": false,
+        "rpm": 0,
+        "torque": 0,
+        "jam": 0
+      },
+      "model": {
+        "model": "whirl",
+        "missing": []
+      },
+      "holeDiaMm": 152,
+      "innerR": 0.21728000000000003,
+      "outerR": 0.5432,
+      "clearance": 0.32592,
+      "peakDeflection": 0,
+      "peakOverClearance": 0,
+      "withinClearance": true,
+      "medianRadiusCoV": 0,
+      "precessionRadPerS": 0,
+      "lateralHz": 0,
+      "zMotion": 0,
+      "stringLength": 32.199999999998326,
+      "perStation": [
+        {
+          "station": 0,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.015625,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.03125,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.046875,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.0625,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.078125,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.09375,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.109375,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.125,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.140625,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.15625,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.171875,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.1875,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.203125,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.21875,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.234375,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.25,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.265625,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.28125,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.296875,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.3125,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.328125,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.34375,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.359375,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.375,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.390625,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.40625,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.421875,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.4375,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.453125,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.46875,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.484375,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.5,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.515625,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.53125,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.546875,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.5625,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.578125,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.59375,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.609375,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.625,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.640625,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.65625,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.671875,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.6875,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.703125,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.71875,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.734375,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.75,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.765625,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.78125,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.796875,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.8125,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.828125,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.84375,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.859375,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.875,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.890625,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.90625,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.921875,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.9375,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.953125,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.96875,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.984375,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 1,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        }
+      ]
+    },
+    {
+      "label": "drilling rpm 0.30",
+      "drive": {
+        "active": true,
+        "rpm": 0.3,
+        "torque": 0.35,
+        "jam": 0
+      },
+      "model": {
+        "model": "whirl",
+        "missing": []
+      },
+      "holeDiaMm": 152,
+      "innerR": 0.21728000000000003,
+      "outerR": 0.5432,
+      "clearance": 0.32592,
+      "peakDeflection": 0.13646484813871276,
+      "peakOverClearance": 0.4187065787270274,
+      "withinClearance": true,
+      "medianRadiusCoV": 0.004138928658101369,
+      "precessionRadPerS": 7.8155968896770025,
+      "lateralHz": 1.1734334663224595,
+      "zMotion": 0.27289705888349647,
+      "stringLength": 32.12580670093321,
+      "perStation": [
+        {
+          "station": 0,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 7.372899914550089,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.015625,
+          "peak": 0.0012066112036664015,
+          "meanR": 0.0012044922064746708,
+          "radiusCoV": 0.004195522340270687,
+          "precRadPerS": 7.809708829697528,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.002412598867238488,
+          "zSpan": 0.0024126438602849725
+        },
+        {
+          "station": 0.03125,
+          "peak": 0.0047464789794290215,
+          "meanR": 0.004738161389513811,
+          "radiusCoV": 0.004184489098046555,
+          "precRadPerS": 7.80989876711622,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.009491540216707004,
+          "zSpan": 0.009491308539108918
+        },
+        {
+          "station": 0.046875,
+          "peak": 0.010384035252006778,
+          "meanR": 0.010365905197901345,
+          "radiusCoV": 0.004165789840545141,
+          "precRadPerS": 7.810088704534915,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.02076792767466111,
+          "zSpan": 0.020767856063500626
+        },
+        {
+          "station": 0.0625,
+          "peak": 0.01774087536760791,
+          "meanR": 0.017710064140572634,
+          "radiusCoV": 0.004138928658101369,
+          "precRadPerS": 7.810278641953607,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.03548036436758702,
+          "zSpan": 0.03548059762276917
+        },
+        {
+          "station": 0.078125,
+          "peak": 0.026316303370678112,
+          "meanR": 0.02627092212646502,
+          "radiusCoV": 0.0041031452445799525,
+          "precRadPerS": 7.8104685793723,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.052621356277593324,
+          "zSpan": 0.05262188062022432
+        },
+        {
+          "station": 0.09375,
+          "peak": 0.03551459954581744,
+          "meanR": 0.035453914930138886,
+          "radiusCoV": 0.004057333546033679,
+          "precRadPerS": 7.810658516790993,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.07101618809826872,
+          "zSpan": 0.0710153437990355
+        },
+        {
+          "station": 0.109375,
+          "peak": 0.04467760569548732,
+          "meanR": 0.04460214537452468,
+          "radiusCoV": 0.003999909638475847,
+          "precRadPerS": 7.810848454209685,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.08935324757719924,
+          "zSpan": 0.08932332281938932
+        },
+        {
+          "station": 0.125,
+          "peak": 0.053120947603361605,
+          "meanR": 0.05303252862927103,
+          "radiusCoV": 0.003928595197861515,
+          "precRadPerS": 7.811038391628375,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.10623951823564148,
+          "zSpan": 0.10623966074059907
+        },
+        {
+          "station": 0.140625,
+          "peak": 0.060172023288099924,
+          "meanR": 0.06007370058947579,
+          "radiusCoV": 0.0038400523097769797,
+          "precRadPerS": 7.811228329047069,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.1203229540570177,
+          "zSpan": 0.12032191730046264
+        },
+        {
+          "station": 0.15625,
+          "peak": 0.0652077897064194,
+          "meanR": 0.06510372652568698,
+          "radiusCoV": 0.003729240462807581,
+          "precRadPerS": 7.811418266465763,
+          "xHz": 1.4081201595869515,
+          "xSpan": 0.13038569520503215,
+          "zSpan": 0.13038725468320253
+        },
+        {
+          "station": 0.171875,
+          "peak": 0.06769038445649961,
+          "meanR": 0.06758565101093862,
+          "radiusCoV": 0.0035882183484376314,
+          "precRadPerS": 7.811608203884455,
+          "xHz": 1.4081201595869515,
+          "xSpan": 0.1353753743924525,
+          "zSpan": 0.1353769588411847
+        },
+        {
+          "station": 0.1875,
+          "peak": 0.06719872266707547,
+          "meanR": 0.06709903344198,
+          "radiusCoV": 0.003403743371523793,
+          "precRadPerS": 7.811798141303149,
+          "xHz": 1.4081201595869515,
+          "xSpan": 0.13439485209955104,
+          "zSpan": 0.1343954859936859
+        },
+        {
+          "station": 0.203125,
+          "peak": 0.06345440750661989,
+          "meanR": 0.06336581116928464,
+          "radiusCoV": 0.003151994414557539,
+          "precRadPerS": 7.811988078721841,
+          "xHz": 1.4081201595869515,
+          "xSpan": 0.12689029032149834,
+          "zSpan": 0.12688765990811796
+        },
+        {
+          "station": 0.21875,
+          "peak": 0.05634057570828384,
+          "meanR": 0.056269114460822466,
+          "radiusCoV": 0.0027854843533165934,
+          "precRadPerS": 7.8121780161405345,
+          "xHz": 1.4081201595869515,
+          "xSpan": 0.11264853487386384,
+          "zSpan": 0.11265212906804509
+        },
+        {
+          "station": 0.234375,
+          "peak": 0.04591265299905616,
+          "meanR": 0.04586401010755284,
+          "radiusCoV": 0.002195361809002733,
+          "precRadPerS": 7.812367953559227,
+          "xHz": 1.4081201595869515,
+          "xSpan": 0.09182065145348513,
+          "zSpan": 0.09182127846812642
+        },
+        {
+          "station": 0.25,
+          "peak": 0.03240040059932656,
+          "meanR": 0.03237955573657887,
+          "radiusCoV": 0.0011148205556045692,
+          "precRadPerS": 7.812557890977921,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.06478351910031603,
+          "zSpan": 0.06480038717581486
+        },
+        {
+          "station": 0.265625,
+          "peak": 0.016560745129827484,
+          "meanR": 0.016211984465427626,
+          "radiusCoV": 0.003136145565654213,
+          "precRadPerS": 7.8127478283966125,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.032437993063902534,
+          "zSpan": 0.03239823581442975
+        },
+        {
+          "station": 0.28125,
+          "peak": 0.0021360470284502615,
+          "meanR": 0.002090712601683293,
+          "radiusCoV": 0.06295158684175542,
+          "precRadPerS": 7.812937765815304,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.004270734916178251,
+          "zSpan": 0.004270764514644021
+        },
+        {
+          "station": 0.296875,
+          "peak": 0.02193302244182218,
+          "meanR": 0.021852102914635477,
+          "radiusCoV": 0.009896722118159578,
+          "precRadPerS": 7.813127703233999,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.04386336990270244,
+          "zSpan": 0.0438630656978719
+        },
+        {
+          "station": 0.3125,
+          "peak": 0.04241345121362351,
+          "meanR": 0.042297423512158545,
+          "radiusCoV": 0.007074128528298747,
+          "precRadPerS": 7.8133176406526905,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.08482662060921332,
+          "zSpan": 0.084826704049521
+        },
+        {
+          "station": 0.328125,
+          "peak": 0.06273800155830268,
+          "meanR": 0.06258903503303842,
+          "radiusCoV": 0.0060092873155187815,
+          "precRadPerS": 7.813507578071384,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.12546301752771827,
+          "zSpan": 0.12546295524410228
+        },
+        {
+          "station": 0.34375,
+          "peak": 0.0820435705532426,
+          "meanR": 0.08186549218942289,
+          "radiusCoV": 0.005409797516241106,
+          "precRadPerS": 7.813697515490075,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.16403058435335688,
+          "zSpan": 0.1640296783944883
+        },
+        {
+          "station": 0.359375,
+          "peak": 0.09948414307911563,
+          "meanR": 0.09928231509567287,
+          "radiusCoV": 0.004993785858628632,
+          "precRadPerS": 7.8138874529087685,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.19895172339077638,
+          "zSpan": 0.19894790027545445
+        },
+        {
+          "station": 0.375,
+          "peak": 0.11427133759036043,
+          "meanR": 0.11405245228138526,
+          "radiusCoV": 0.004662131759720158,
+          "precRadPerS": 7.814077390327462,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.22854246298084074,
+          "zSpan": 0.22854205004883943
+        },
+        {
+          "station": 0.390625,
+          "peak": 0.12571263184426715,
+          "meanR": 0.1254844330123584,
+          "radiusCoV": 0.0043691537448572815,
+          "precRadPerS": 7.814267327746154,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.251405625294509,
+          "zSpan": 0.25132911502921884
+        },
+        {
+          "station": 0.40625,
+          "peak": 0.13324536913432666,
+          "meanR": 0.13301631349591123,
+          "radiusCoV": 0.004088623106625884,
+          "precRadPerS": 7.8144572651648465,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.26640660136364414,
+          "zSpan": 0.2664034508989812
+        },
+        {
+          "station": 0.421875,
+          "peak": 0.13646484813871276,
+          "meanR": 0.13624372342748026,
+          "radiusCoV": 0.00380157495588073,
+          "precRadPerS": 7.81464720258354,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.2728983693797777,
+          "zSpan": 0.27289705888349647
+        },
+        {
+          "station": 0.4375,
+          "peak": 0.1351450871760292,
+          "meanR": 0.13494060614762796,
+          "radiusCoV": 0.0034903575115030195,
+          "precRadPerS": 7.814837140002234,
+          "xHz": 1.4081201595869515,
+          "xSpan": 0.2702893596623751,
+          "zSpan": 0.27028986566829705
+        },
+        {
+          "station": 0.453125,
+          "peak": 0.12925121214916652,
+          "meanR": 0.12907160315981414,
+          "radiusCoV": 0.0031341175976163493,
+          "precRadPerS": 7.815027077420926,
+          "xHz": 1.4081201595869515,
+          "xSpan": 0.2584866094546584,
+          "zSpan": 0.2584870769776913
+        },
+        {
+          "station": 0.46875,
+          "peak": 0.11894282888614639,
+          "meanR": 0.11879544409493292,
+          "radiusCoV": 0.002703179633080712,
+          "precRadPerS": 7.815217014839618,
+          "xHz": 1.4081201595869515,
+          "xSpan": 0.23781913883354422,
+          "zSpan": 0.23781700962894478
+        },
+        {
+          "station": 0.484375,
+          "peak": 0.10456818442236637,
+          "meanR": 0.10445914592519735,
+          "radiusCoV": 0.0021498149646783957,
+          "precRadPerS": 7.81540695225831,
+          "xHz": 1.4081201595869515,
+          "xSpan": 0.2090575412810564,
+          "zSpan": 0.20910806328598996
+        },
+        {
+          "station": 0.5,
+          "peak": 0.08664937584618197,
+          "meanR": 0.08658327822198213,
+          "radiusCoV": 0.001400356457480807,
+          "precRadPerS": 7.8155968896770025,
+          "xHz": 1.4081201595869515,
+          "xSpan": 0.1732967103459111,
+          "zSpan": 0.17329783479224722
+        },
+        {
+          "station": 0.515625,
+          "peak": 0.06611992379064788,
+          "meanR": 0.06583899189098004,
+          "radiusCoV": 0.0007476554941505213,
+          "precRadPerS": 7.815786827095696,
+          "xHz": 1.4081201595869515,
+          "xSpan": 0.1317118844213631,
+          "zSpan": 0.13197218053123838
+        },
+        {
+          "station": 0.53125,
+          "peak": 0.04389735110345115,
+          "meanR": 0.04301791508697832,
+          "radiusCoV": 0.002964400241179859,
+          "precRadPerS": 7.815976764514386,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.08601251238646171,
+          "zSpan": 0.08629220525744186
+        },
+        {
+          "station": 0.546875,
+          "peak": 0.02044534327061013,
+          "meanR": 0.018996371609983874,
+          "radiusCoV": 0.012293039710584442,
+          "precRadPerS": 7.816166701933081,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.03816969879406795,
+          "zSpan": 0.03823465319538633
+        },
+        {
+          "station": 0.5625,
+          "peak": 0.005419330729050447,
+          "meanR": 0.00530434355003237,
+          "radiusCoV": 0.06293654040042804,
+          "precRadPerS": 7.816356639351774,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.01083844935492085,
+          "zSpan": 0.010838498139274611
+        },
+        {
+          "station": 0.578125,
+          "peak": 0.029112873228249916,
+          "meanR": 0.02895970366859069,
+          "radiusCoV": 0.014571982743509657,
+          "precRadPerS": 7.816546576770468,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.058223958835276104,
+          "zSpan": 0.05822373423880854
+        },
+        {
+          "station": 0.59375,
+          "peak": 0.05126883763421976,
+          "meanR": 0.05108367952040024,
+          "radiusCoV": 0.00966813835612365,
+          "precRadPerS": 7.816736514189159,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.10251616896903654,
+          "zSpan": 0.10251548182817949
+        },
+        {
+          "station": 0.609375,
+          "peak": 0.07107814949072362,
+          "meanR": 0.07086843644402664,
+          "radiusCoV": 0.007711104800415079,
+          "precRadPerS": 7.816926451607852,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.1421300142050565,
+          "zSpan": 0.14212732422177612
+        },
+        {
+          "station": 0.625,
+          "peak": 0.08784603254817167,
+          "meanR": 0.08762008100162447,
+          "radiusCoV": 0.006594207648674799,
+          "precRadPerS": 7.817116389026544,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.17568813090627916,
+          "zSpan": 0.17564213630654504
+        },
+        {
+          "station": 0.640625,
+          "peak": 0.10102212644479988,
+          "meanR": 0.10078873790719305,
+          "radiusCoV": 0.005823019821418818,
+          "precRadPerS": 7.817306326445237,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.20203983004377407,
+          "zSpan": 0.20204070682747002
+        },
+        {
+          "station": 0.65625,
+          "peak": 0.11022347890229968,
+          "meanR": 0.10999152199935684,
+          "radiusCoV": 0.0052182368185687816,
+          "precRadPerS": 7.817496263863931,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.22040784702037147,
+          "zSpan": 0.22040719681551757
+        },
+        {
+          "station": 0.671875,
+          "peak": 0.11524933117853246,
+          "meanR": 0.11502732506247583,
+          "radiusCoV": 0.004696286638672886,
+          "precRadPerS": 7.817686201282624,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.2304435516137178,
+          "zSpan": 0.23035479045469692
+        },
+        {
+          "station": 0.6875,
+          "peak": 0.1160870248049592,
+          "meanR": 0.11588274543904475,
+          "radiusCoV": 0.0042095441632808974,
+          "precRadPerS": 7.817876138701315,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.2321655377756793,
+          "zSpan": 0.23216391679998302
+        },
+        {
+          "station": 0.703125,
+          "peak": 0.11290879956714654,
+          "meanR": 0.11272892916189105,
+          "radiusCoV": 0.0037245853776405164,
+          "precRadPerS": 7.818066076120009,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.22581502842102286,
+          "zSpan": 0.22581449284713662
+        },
+        {
+          "station": 0.71875,
+          "peak": 0.10605970511381668,
+          "meanR": 0.10590954267869317,
+          "radiusCoV": 0.0032118224316049957,
+          "precRadPerS": 7.818256013538702,
+          "xHz": 1.4081201595869515,
+          "xSpan": 0.21208886673226587,
+          "zSpan": 0.21208770811680472
+        },
+        {
+          "station": 0.734375,
+          "peak": 0.09603728884335874,
+          "meanR": 0.0959205365421234,
+          "radiusCoV": 0.0026385671640345824,
+          "precRadPerS": 7.818445950957393,
+          "xHz": 1.4081201595869515,
+          "xSpan": 0.19202047880754353,
+          "zSpan": 0.19202470189186838
+        },
+        {
+          "station": 0.75,
+          "peak": 0.08346412878382176,
+          "meanR": 0.083382764715917,
+          "radiusCoV": 0.001963817408219013,
+          "precRadPerS": 7.818635888376087,
+          "xHz": 1.4081201595869515,
+          "xSpan": 0.16691914163006064,
+          "zSpan": 0.16692081490704574
+        },
+        {
+          "station": 0.765625,
+          "peak": 0.06905463175395452,
+          "meanR": 0.06900887514428994,
+          "radiusCoV": 0.0011585755699976546,
+          "precRadPerS": 7.8188258257947805,
+          "xHz": 1.4081201595869515,
+          "xSpan": 0.13808292618923615,
+          "zSpan": 0.13810846125947968
+        },
+        {
+          "station": 0.78125,
+          "peak": 0.05387768965733419,
+          "meanR": 0.05356616643423886,
+          "radiusCoV": 0.0008390066753462373,
+          "precRadPerS": 7.819015763213473,
+          "xHz": 1.4081201595869515,
+          "xSpan": 0.10714340711311164,
+          "zSpan": 0.10733869013869304
+        },
+        {
+          "station": 0.796875,
+          "peak": 0.0385425635447513,
+          "meanR": 0.03783729901158682,
+          "radiusCoV": 0.0026758680727371974,
+          "precRadPerS": 7.819205700632167,
+          "xHz": 1.4081201595869515,
+          "xSpan": 0.07563265331017338,
+          "zSpan": 0.07635143215925441
+        },
+        {
+          "station": 0.8125,
+          "peak": 0.02360811295290769,
+          "meanR": 0.022580847352156135,
+          "radiusCoV": 0.007132848835095633,
+          "precRadPerS": 7.8193956380508585,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.04519928396437761,
+          "zSpan": 0.04577859383982332
+        },
+        {
+          "station": 0.828125,
+          "peak": 0.009759879830140216,
+          "meanR": 0.008493678074115408,
+          "radiusCoV": 0.024543468342761065,
+          "precRadPerS": 7.819585575469551,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.017175751459282285,
+          "zSpan": 0.017632460301520766
+        },
+        {
+          "station": 0.84375,
+          "peak": 0.0039057999504872325,
+          "meanR": 0.0038229629456412706,
+          "radiusCoV": 0.06291145679288371,
+          "precRadPerS": 7.819775512888245,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.007810767928733013,
+          "zSpan": 0.007810784105881125
+        },
+        {
+          "station": 0.859375,
+          "peak": 0.01398372148389241,
+          "meanR": 0.013891967433121278,
+          "radiusCoV": 0.01845586590819781,
+          "precRadPerS": 7.819965450306938,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.02795829931022204,
+          "zSpan": 0.027958212054143637
+        },
+        {
+          "station": 0.875,
+          "peak": 0.021476465193480416,
+          "meanR": 0.021382079248565073,
+          "radiusCoV": 0.01199746377480218,
+          "precRadPerS": 7.820155387725629,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.042949306899336445,
+          "zSpan": 0.042948741898015334
+        },
+        {
+          "station": 0.890625,
+          "peak": 0.026212943201355327,
+          "meanR": 0.026121751231855634,
+          "radiusCoV": 0.009278927507381648,
+          "precRadPerS": 7.820345325144321,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.05242585173805947,
+          "zSpan": 0.05242578946869224
+        },
+        {
+          "station": 0.90625,
+          "peak": 0.028187466115616153,
+          "meanR": 0.028104492434960934,
+          "radiusCoV": 0.007694848320309965,
+          "precRadPerS": 7.820535262563016,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.056370747640818605,
+          "zSpan": 0.056357362753372345
+        },
+        {
+          "station": 0.921875,
+          "peak": 0.02755631181426558,
+          "meanR": 0.027485489302873745,
+          "radiusCoV": 0.006592125418979291,
+          "precRadPerS": 7.820725199981709,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.05509498238499569,
+          "zSpan": 0.05509627523963453
+        },
+        {
+          "station": 0.9375,
+          "peak": 0.024625780854307038,
+          "meanR": 0.024569729896635795,
+          "radiusCoV": 0.005726420648363841,
+          "precRadPerS": 7.8209151374004025,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.04924688676906092,
+          "zSpan": 0.04924595440086453
+        },
+        {
+          "station": 0.953125,
+          "peak": 0.01983240445872954,
+          "meanR": 0.01979229331993055,
+          "radiusCoV": 0.004981792611260997,
+          "precRadPerS": 7.821105074819094,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.03966467739125247,
+          "zSpan": 0.03965074377693036
+        },
+        {
+          "station": 0.96875,
+          "peak": 0.013716370484166442,
+          "meanR": 0.013691865248310077,
+          "radiusCoV": 0.0042915658841968405,
+          "precRadPerS": 7.821295012237786,
+          "xHz": 1.1734334663224595,
+          "xSpan": 0.02743102831642743,
+          "zSpan": 0.027431079679151316
+        },
+        {
+          "station": 0.984375,
+          "peak": 0.006889577527952107,
+          "meanR": 0.006878884743864829,
+          "radiusCoV": 0.0036090182477372976,
+          "precRadPerS": 7.821484949656478,
+          "xHz": 1.4081201595869515,
+          "xSpan": 0.013775289424961878,
+          "zSpan": 0.013775296385802466
+        },
+        {
+          "station": 1,
+          "peak": 1.672393343339656e-17,
+          "meanR": 1.6702125454409804e-17,
+          "radiusCoV": 0,
+          "precRadPerS": 7.8216748870751704,
+          "xHz": 1.4081201595869515,
+          "xSpan": 3.3443591849639e-17,
+          "zSpan": 3.3443710489613323e-17
+        }
+      ]
+    },
+    {
+      "label": "drilling rpm 0.90",
+      "drive": {
+        "active": true,
+        "rpm": 0.9,
+        "torque": 0.45,
+        "jam": 0
+      },
+      "model": {
+        "model": "whirl",
+        "missing": []
+      },
+      "holeDiaMm": 152,
+      "innerR": 0.21728000000000003,
+      "outerR": 0.5432,
+      "clearance": 0.32592,
+      "peakDeflection": 0.14753837046036258,
+      "peakOverClearance": 0.45268277632659115,
+      "withinClearance": true,
+      "medianRadiusCoV": 0.003175828884825954,
+      "precessionRadPerS": 23.393378165365046,
+      "lateralHz": 3.724221404959941,
+      "zMotion": 0.2950245895841286,
+      "stringLength": 32.1490205789333,
+      "perStation": [
+        {
+          "station": 0,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 23.399973212328025,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.015625,
+          "peak": 0.001304522396771675,
+          "meanR": 0.0013027609607098873,
+          "radiusCoV": 0.0032146991833266916,
+          "precRadPerS": 23.389236092161905,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.002608420754659977,
+          "zSpan": 0.002608371808816493
+        },
+        {
+          "station": 0.03125,
+          "peak": 0.005131634875969727,
+          "meanR": 0.005124719253096189,
+          "radiusCoV": 0.0032071211777687193,
+          "precRadPerS": 23.3893655319495,
+          "xHz": 3.491457567149945,
+          "xSpan": 0.010262655101835678,
+          "zSpan": 0.01026296322173633
+        },
+        {
+          "station": 0.046875,
+          "peak": 0.011226654048912642,
+          "meanR": 0.011211574139219175,
+          "radiusCoV": 0.0031942779309137516,
+          "precRadPerS": 23.3894949717371,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.022453084794683352,
+          "zSpan": 0.022452620499219717
+        },
+        {
+          "station": 0.0625,
+          "peak": 0.019180469388184733,
+          "meanR": 0.019154827560968434,
+          "radiusCoV": 0.003175828884825954,
+          "precRadPerS": 23.389624411524697,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.03835576881587955,
+          "zSpan": 0.03835724025572154
+        },
+        {
+          "station": 0.078125,
+          "peak": 0.02845175566324491,
+          "meanR": 0.028413960132086413,
+          "radiusCoV": 0.0031512518845521215,
+          "precRadPerS": 23.389753851312296,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.056889227139195794,
+          "zSpan": 0.056890429562712286
+        },
+        {
+          "station": 0.09375,
+          "peak": 0.038396453123461696,
+          "meanR": 0.03834586317599463,
+          "radiusCoV": 0.0031197872694969917,
+          "precRadPerS": 23.38988329109989,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.0767892413800545,
+          "zSpan": 0.07678693354836244
+        },
+        {
+          "station": 0.109375,
+          "peak": 0.048302996927812765,
+          "meanR": 0.048240010995788195,
+          "radiusCoV": 0.0030803470553729174,
+          "precRadPerS": 23.390012730887495,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.09660471963002251,
+          "zSpan": 0.09660521283728599
+        },
+        {
+          "station": 0.125,
+          "peak": 0.057431478901849235,
+          "meanR": 0.05735755965375885,
+          "radiusCoV": 0.003031366056516444,
+          "precRadPerS": 23.390142170675094,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.11485468115100772,
+          "zSpan": 0.1148562817333959
+        },
+        {
+          "station": 0.140625,
+          "peak": 0.0650547183712097,
+          "meanR": 0.06497235254188312,
+          "radiusCoV": 0.002970550701275693,
+          "precRadPerS": 23.390271610462687,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.13007719314148214,
+          "zSpan": 0.130067763809461
+        },
+        {
+          "station": 0.15625,
+          "peak": 0.07049911508947986,
+          "meanR": 0.07041170943585208,
+          "radiusCoV": 0.002894436520422051,
+          "precRadPerS": 23.39040105025029,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.1409821525832518,
+          "zSpan": 0.14098643375933162
+        },
+        {
+          "station": 0.171875,
+          "peak": 0.07318316148618266,
+          "meanR": 0.07309487987495157,
+          "radiusCoV": 0.002797562873091173,
+          "precRadPerS": 23.390530490037882,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.14636525611422804,
+          "zSpan": 0.14636611649127976
+        },
+        {
+          "station": 0.1875,
+          "peak": 0.07265160350447403,
+          "meanR": 0.07256715349747614,
+          "radiusCoV": 0.0026708173156567813,
+          "precRadPerS": 23.390659929825482,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.14529615576978236,
+          "zSpan": 0.1452969649022413
+        },
+        {
+          "station": 0.203125,
+          "peak": 0.06860345363420407,
+          "meanR": 0.06852783385629578,
+          "radiusCoV": 0.0024977865361064697,
+          "precRadPerS": 23.390789369613085,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.13716877570880548,
+          "zSpan": 0.13717001019919628
+        },
+        {
+          "station": 0.21875,
+          "peak": 0.0609123656683331,
+          "meanR": 0.06085058755907652,
+          "radiusCoV": 0.0022456536780440404,
+          "precRadPerS": 23.39091880940068,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.12181429696695523,
+          "zSpan": 0.12181499312236269
+        },
+        {
+          "station": 0.234375,
+          "peak": 0.049638262887870065,
+          "meanR": 0.049595062023289484,
+          "radiusCoV": 0.0018384537408198847,
+          "precRadPerS": 23.39104824918828,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.09927576911575219,
+          "zSpan": 0.09927610962489483
+        },
+        {
+          "station": 0.25,
+          "peak": 0.035029550625875795,
+          "meanR": 0.03500910356009239,
+          "radiusCoV": 0.0010693201187780734,
+          "precRadPerS": 23.391177688975876,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.07005532894087088,
+          "zSpan": 0.0700568310049409
+        },
+        {
+          "station": 0.265625,
+          "peak": 0.017752948420731166,
+          "meanR": 0.017521380869984005,
+          "radiusCoV": 0.0018658213092226225,
+          "precRadPerS": 23.391307128763476,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.03506984837385653,
+          "zSpan": 0.035216003607977345
+        },
+        {
+          "station": 0.28125,
+          "peak": 0.0023093778530860125,
+          "meanR": 0.0022752964650723925,
+          "radiusCoV": 0.04331984962229483,
+          "precRadPerS": 23.39143656855108,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.0046168916354470185,
+          "zSpan": 0.004618112956578234
+        },
+        {
+          "station": 0.296875,
+          "peak": 0.023712790764091846,
+          "meanR": 0.023649203666499127,
+          "radiusCoV": 0.007124833768265692,
+          "precRadPerS": 23.39156600833867,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.04742532052676261,
+          "zSpan": 0.04742459496000656
+        },
+        {
+          "station": 0.3125,
+          "peak": 0.045855116268015646,
+          "meanR": 0.045762275559474354,
+          "radiusCoV": 0.005188895430035356,
+          "precRadPerS": 23.39169544812627,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.09170772683308899,
+          "zSpan": 0.09170747104511881
+        },
+        {
+          "station": 0.328125,
+          "peak": 0.06782891449586106,
+          "meanR": 0.06770846010578124,
+          "radiusCoV": 0.004458361335470447,
+          "precRadPerS": 23.391824887913867,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.13563518733286659,
+          "zSpan": 0.1356378882614208
+        },
+        {
+          "station": 0.34375,
+          "peak": 0.08870104551833026,
+          "meanR": 0.08855598284091604,
+          "radiusCoV": 0.0040470104500859565,
+          "precRadPerS": 23.39195432770147,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.17738619213021278,
+          "zSpan": 0.17736765015516384
+        },
+        {
+          "station": 0.359375,
+          "peak": 0.10755684380951147,
+          "meanR": 0.10739144988343147,
+          "radiusCoV": 0.0037615078248752275,
+          "precRadPerS": 23.392083767489066,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.21511256366652023,
+          "zSpan": 0.2151121160012374
+        },
+        {
+          "station": 0.375,
+          "peak": 0.12354395412833033,
+          "meanR": 0.12336361602971256,
+          "radiusCoV": 0.003533859939957558,
+          "precRadPerS": 23.392213207276665,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.24708283570544365,
+          "zSpan": 0.24708224777347956
+        },
+        {
+          "station": 0.390625,
+          "peak": 0.1359136590974541,
+          "meanR": 0.13572465186668903,
+          "radiusCoV": 0.0033327259192245462,
+          "precRadPerS": 23.392342647064265,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.2717870292764698,
+          "zSpan": 0.2717789107502395
+        },
+        {
+          "station": 0.40625,
+          "peak": 0.1440576448929329,
+          "meanR": 0.14386685960594867,
+          "radiusCoV": 0.0031401043559400755,
+          "precRadPerS": 23.39247208685186,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.2880638319636154,
+          "zSpan": 0.28805483358359535
+        },
+        {
+          "station": 0.421875,
+          "peak": 0.14753837046036258,
+          "meanR": 0.1473530058041277,
+          "radiusCoV": 0.0029429681142629093,
+          "precRadPerS": 23.39260152663946,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.2950692152361085,
+          "zSpan": 0.2950245895841286
+        },
+        {
+          "station": 0.4375,
+          "peak": 0.14611151669867337,
+          "meanR": 0.14593874946849955,
+          "radiusCoV": 0.0027291710799631553,
+          "precRadPerS": 23.392730966427052,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.29221607719201775,
+          "zSpan": 0.2922173058541278
+        },
+        {
+          "station": 0.453125,
+          "peak": 0.13973937963115468,
+          "meanR": 0.13958603082008053,
+          "radiusCoV": 0.00248431739464024,
+          "precRadPerS": 23.39286040621466,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.2794380926953257,
+          "zSpan": 0.2794453488716748
+        },
+        {
+          "station": 0.46875,
+          "peak": 0.12859451639692765,
+          "meanR": 0.1284667299238907,
+          "radiusCoV": 0.002187779616961327,
+          "precRadPerS": 23.39298984600225,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.2571304478466547,
+          "zSpan": 0.25714306411087917
+        },
+        {
+          "station": 0.484375,
+          "peak": 0.11305343274691902,
+          "meanR": 0.11295638334592074,
+          "radiusCoV": 0.0018057171526008535,
+          "precRadPerS": 23.39311928578985,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.22609553021773926,
+          "zSpan": 0.22610535162285167
+        },
+        {
+          "station": 0.5,
+          "peak": 0.09368059165230562,
+          "meanR": 0.09361823704284179,
+          "radiusCoV": 0.0012795820221018436,
+          "precRadPerS": 23.393248725577454,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.1873566869314156,
+          "zSpan": 0.18735614504963166
+        },
+        {
+          "station": 0.515625,
+          "peak": 0.07127211808352729,
+          "meanR": 0.07117839035235399,
+          "radiusCoV": 0.0006174567773789536,
+          "precRadPerS": 23.393378165365046,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.1423939863487725,
+          "zSpan": 0.14239391072702545
+        },
+        {
+          "station": 0.53125,
+          "peak": 0.047074043610620155,
+          "meanR": 0.046493225411554574,
+          "radiusCoV": 0.001752117067207448,
+          "precRadPerS": 23.39350760515265,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.0930149118801577,
+          "zSpan": 0.09336811261832217
+        },
+        {
+          "station": 0.546875,
+          "peak": 0.02155903566749948,
+          "meanR": 0.020510696628366926,
+          "radiusCoV": 0.008147188434316848,
+          "precRadPerS": 23.39363704494024,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.04142014140640557,
+          "zSpan": 0.042037882592469336
+        },
+        {
+          "station": 0.5625,
+          "peak": 0.005859085590121026,
+          "meanR": 0.005772643032152566,
+          "radiusCoV": 0.04330803454663496,
+          "precRadPerS": 23.393766484727845,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.011715020987851169,
+          "zSpan": 0.011718059288446929
+        },
+        {
+          "station": 0.578125,
+          "peak": 0.03147525487065786,
+          "meanR": 0.031356793294460186,
+          "radiusCoV": 0.010327798789927614,
+          "precRadPerS": 23.393895924515444,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.06294463828799311,
+          "zSpan": 0.06294583197116624
+        },
+        {
+          "station": 0.59375,
+          "peak": 0.05542907835706848,
+          "meanR": 0.05528344447118428,
+          "radiusCoV": 0.006966054790086692,
+          "precRadPerS": 23.39402536430304,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.1108398124029667,
+          "zSpan": 0.11082444226145367
+        },
+        {
+          "station": 0.609375,
+          "peak": 0.07684582875890467,
+          "meanR": 0.0766789147882565,
+          "radiusCoV": 0.005623717818114703,
+          "precRadPerS": 23.39415480409064,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.1536852542343417,
+          "zSpan": 0.15367966418412624
+        },
+        {
+          "station": 0.625,
+          "peak": 0.09497435178921346,
+          "meanR": 0.09479281221903935,
+          "radiusCoV": 0.0048574537408856925,
+          "precRadPerS": 23.394284243878236,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.18994600090645894,
+          "zSpan": 0.18994822172533293
+        },
+        {
+          "station": 0.640625,
+          "peak": 0.10921962776310068,
+          "meanR": 0.10903056119753275,
+          "radiusCoV": 0.004328278998025695,
+          "precRadPerS": 23.394413683665835,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.21840906810169078,
+          "zSpan": 0.21842047213254795
+        },
+        {
+          "station": 0.65625,
+          "peak": 0.1191676295089283,
+          "meanR": 0.11897824201859955,
+          "radiusCoV": 0.003913224890458317,
+          "precRadPerS": 23.394543123453435,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.23828145491927888,
+          "zSpan": 0.23827867550808524
+        },
+        {
+          "station": 0.671875,
+          "peak": 0.12460130759549597,
+          "meanR": 0.1244185748806345,
+          "radiusCoV": 0.0035549626604551876,
+          "precRadPerS": 23.39467256324103,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.2491810468092015,
+          "zSpan": 0.24918908084180622
+        },
+        {
+          "station": 0.6875,
+          "peak": 0.12550697637523656,
+          "meanR": 0.1253373221070834,
+          "radiusCoV": 0.003220805801227271,
+          "precRadPerS": 23.394802003028634,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.251005775944808,
+          "zSpan": 0.25101340760947755
+        },
+        {
+          "station": 0.703125,
+          "peak": 0.12207085213492061,
+          "meanR": 0.12191985895470334,
+          "radiusCoV": 0.002887781414986146,
+          "precRadPerS": 23.39493144281623,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.24412650081039095,
+          "zSpan": 0.24411343396013468
+        },
+        {
+          "station": 0.71875,
+          "peak": 0.11466598378493728,
+          "meanR": 0.11453815168084562,
+          "radiusCoV": 0.002535470184627557,
+          "precRadPerS": 23.39506088260383,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.22928605331259044,
+          "zSpan": 0.2292807239520545
+        },
+        {
+          "station": 0.734375,
+          "peak": 0.10383029250711732,
+          "meanR": 0.1037288567474553,
+          "radiusCoV": 0.00214104331225588,
+          "precRadPerS": 23.39519032239142,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.20763638924448388,
+          "zSpan": 0.20764379531009108
+        },
+        {
+          "station": 0.75,
+          "peak": 0.09023687579872282,
+          "meanR": 0.09016369340752775,
+          "radiusCoV": 0.0016745241795680986,
+          "precRadPerS": 23.395319762179025,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.1804718206905273,
+          "zSpan": 0.1804735779550648
+        },
+        {
+          "station": 0.765625,
+          "peak": 0.07465811145025877,
+          "meanR": 0.07461362153920452,
+          "radiusCoV": 0.0011004351696689975,
+          "precRadPerS": 23.395449201966624,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.1493110858357364,
+          "zSpan": 0.14930465036336976
+        },
+        {
+          "station": 0.78125,
+          "peak": 0.05804824660076933,
+          "meanR": 0.05790865851908968,
+          "radiusCoV": 0.0005764778125907092,
+          "precRadPerS": 23.395578641754216,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.11582602217558319,
+          "zSpan": 0.11583093742737208
+        },
+        {
+          "station": 0.796875,
+          "peak": 0.04135630427980476,
+          "meanR": 0.040895378132170236,
+          "radiusCoV": 0.001562167465495104,
+          "precRadPerS": 23.395708081541823,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.08176432376371849,
+          "zSpan": 0.08206102979000289
+        },
+        {
+          "station": 0.8125,
+          "peak": 0.02512206922525906,
+          "meanR": 0.02439424064346425,
+          "radiusCoV": 0.004600061738623205,
+          "precRadPerS": 23.395837521329415,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.04896206052972966,
+          "zSpan": 0.04940833851710315
+        },
+        {
+          "station": 0.828125,
+          "peak": 0.010089536555964245,
+          "meanR": 0.009158901036917654,
+          "radiusCoV": 0.0166029848235733,
+          "precRadPerS": 23.395966961117015,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.01874939968421806,
+          "zSpan": 0.01924882594357187
+        },
+        {
+          "station": 0.84375,
+          "peak": 0.004222738443533781,
+          "meanR": 0.004160467663708464,
+          "radiusCoV": 0.043288338048516985,
+          "precRadPerS": 23.39609640090461,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.008443253283421468,
+          "zSpan": 0.008443799391180794
+        },
+        {
+          "station": 0.859375,
+          "peak": 0.0151184389913908,
+          "meanR": 0.015048011434161526,
+          "radiusCoV": 0.012985130174910051,
+          "precRadPerS": 23.39622584069221,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.030232602638557718,
+          "zSpan": 0.030232496532671106
+        },
+        {
+          "station": 0.875,
+          "peak": 0.023219185903282084,
+          "meanR": 0.023145671870233312,
+          "radiusCoV": 0.008559970096391006,
+          "precRadPerS": 23.396355280479813,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.04643742142917157,
+          "zSpan": 0.046437533153198984
+        },
+        {
+          "station": 0.890625,
+          "peak": 0.028340008272407322,
+          "meanR": 0.028268161375455295,
+          "radiusCoV": 0.006695763127926349,
+          "precRadPerS": 23.396484720267406,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.056677422637673426,
+          "zSpan": 0.05667887577089539
+        },
+        {
+          "station": 0.90625,
+          "peak": 0.03047475503776235,
+          "meanR": 0.030408732404536783,
+          "radiusCoV": 0.005609120415917883,
+          "precRadPerS": 23.39661416005501,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.060936886204524095,
+          "zSpan": 0.06094104221569367
+        },
+        {
+          "station": 0.921875,
+          "peak": 0.029792385339948112,
+          "meanR": 0.029735507400480934,
+          "radiusCoV": 0.004852519905262987,
+          "precRadPerS": 23.396743599842605,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.05957023413272496,
+          "zSpan": 0.059574571724076014
+        },
+        {
+          "station": 0.9375,
+          "peak": 0.02662405467924102,
+          "meanR": 0.026578618038857273,
+          "radiusCoV": 0.0042584524898579175,
+          "precRadPerS": 23.396873039630204,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.0532464359049962,
+          "zSpan": 0.05324740591706692
+        },
+        {
+          "station": 0.953125,
+          "peak": 0.021441716867755194,
+          "meanR": 0.021408870844123854,
+          "radiusCoV": 0.0037474035891638057,
+          "precRadPerS": 23.397002479417807,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.04288236288886266,
+          "zSpan": 0.04288237733074329
+        },
+        {
+          "station": 0.96875,
+          "peak": 0.014829393631234321,
+          "meanR": 0.014809087516175079,
+          "radiusCoV": 0.0032736152671212276,
+          "precRadPerS": 23.3971319192054,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.02965494940228905,
+          "zSpan": 0.029655262336532803
+        },
+        {
+          "station": 0.984375,
+          "peak": 0.007448636447376738,
+          "meanR": 0.007439640633641735,
+          "radiusCoV": 0.002804950915613329,
+          "precRadPerS": 23.397261358993,
+          "xHz": 3.724221404959941,
+          "xSpan": 0.014893602719067414,
+          "zSpan": 0.014894249934459767
+        },
+        {
+          "station": 1,
+          "peak": 1.80810070877403e-17,
+          "meanR": 1.806226024436402e-17,
+          "radiusCoV": 0,
+          "precRadPerS": 23.39739079878059,
+          "xHz": 3.724221404959941,
+          "xSpan": 3.6161050176260074e-17,
+          "zSpan": 3.616104360726118e-17
+        }
+      ]
+    },
+    {
+      "label": "jammed",
+      "drive": {
+        "active": true,
+        "rpm": 0.35,
+        "torque": 0.95,
+        "jam": 1
+      },
+      "model": {
+        "model": "whirl",
+        "missing": []
+      },
+      "holeDiaMm": 152,
+      "innerR": 0.21728000000000003,
+      "outerR": 0.5432,
+      "clearance": 0.32592,
+      "peakDeflection": 0.3256917741410794,
+      "peakOverClearance": 0.9992997488373816,
+      "withinClearance": true,
+      "medianRadiusCoV": 0.003348904997519461,
+      "precessionRadPerS": 0.004147015912708463,
+      "lateralHz": 0.21898129899663693,
+      "zMotion": 0.006680793405898777,
+      "stringLength": 32.14574730565181,
+      "perStation": [
+        {
+          "station": 0,
+          "peak": 0,
+          "meanR": 0,
+          "radiusCoV": 0,
+          "precRadPerS": 0,
+          "xHz": 0,
+          "xSpan": 0,
+          "zSpan": 0
+        },
+        {
+          "station": 0.015625,
+          "peak": 0.002879740453197047,
+          "meanR": 0.0028756864353530758,
+          "radiusCoV": 0.0033899256810190504,
+          "precRadPerS": 0.00012959424727622385,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.000053009757824285225,
+          "zSpan": 0.00000918899957225985
+        },
+        {
+          "station": 0.03125,
+          "peak": 0.01132811255669938,
+          "meanR": 0.011312195909457005,
+          "radiusCoV": 0.0033819284556725693,
+          "precRadPerS": 0.0002591884945462239,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.00021109030570326016,
+          "zSpan": 0.00000417850873227614
+        },
+        {
+          "station": 0.046875,
+          "peak": 0.024782901312156325,
+          "meanR": 0.02474819394964408,
+          "radiusCoV": 0.0033683747001844026,
+          "precRadPerS": 0.0003887827418162239,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.00044981938118353326,
+          "zSpan": 0.00009635462347054157
+        },
+        {
+          "station": 0.0625,
+          "peak": 0.04234099295275738,
+          "meanR": 0.04228197616385401,
+          "radiusCoV": 0.003348904997519461,
+          "precRadPerS": 0.0005183769890924478,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0007188288809535925,
+          "zSpan": 0.00030619760028118177
+        },
+        {
+          "station": 0.078125,
+          "peak": 0.06280740901849732,
+          "meanR": 0.06272041846694645,
+          "radiusCoV": 0.003322968279177404,
+          "precRadPerS": 0.0006479712363624477,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0009524209066611236,
+          "zSpan": 0.0006442504448251549
+        },
+        {
+          "station": 0.09375,
+          "peak": 0.08476038402434355,
+          "meanR": 0.08464394397611132,
+          "radiusCoV": 0.003289762823315525,
+          "precRadPerS": 0.0007775654836324478,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0010839803594678843,
+          "zSpan": 0.0010881026851435951
+        },
+        {
+          "station": 0.109375,
+          "peak": 0.10662913462242257,
+          "meanR": 0.10648416065825063,
+          "radiusCoV": 0.0032481404129810934,
+          "precRadPerS": 0.0009071597309024478,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.001061367090428672,
+          "zSpan": 0.0015843829079126015
+        },
+        {
+          "station": 0.125,
+          "peak": 0.12678030939853524,
+          "meanR": 0.1266101662238877,
+          "radiusCoV": 0.0031964492251985,
+          "precRadPerS": 0.0010367539781786716,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0008602085930951991,
+          "zSpan": 0.0020575179894356532
+        },
+        {
+          "station": 0.140625,
+          "peak": 0.1436086529657825,
+          "meanR": 0.14341906205631058,
+          "radiusCoV": 0.0031322687601269645,
+          "precRadPerS": 0.0011663482254548954,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0004923265659927123,
+          "zSpan": 0.002423774295882586
+        },
+        {
+          "station": 0.15625,
+          "peak": 0.1556271890302467,
+          "meanR": 0.15542598930509544,
+          "radiusCoV": 0.0030519428774905036,
+          "precRadPerS": 0.0012959424727186717,
+          "xHz": 0.43796259799327386,
+          "xSpan": 0.0000702184281700137,
+          "zSpan": 0.0026080668981158794
+        },
+        {
+          "station": 0.171875,
+          "peak": 0.16155223639282934,
+          "meanR": 0.16134900942847763,
+          "radiusCoV": 0.002949708949815345,
+          "precRadPerS": 0.0014255367199948956,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0005130524640241973,
+          "zSpan": 0.0025603943274001284
+        },
+        {
+          "station": 0.1875,
+          "peak": 0.16037881918863928,
+          "meanR": 0.16018439821666555,
+          "radiusCoV": 0.00281595089370368,
+          "precRadPerS": 0.0015551309672711194,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0009680484073234172,
+          "zSpan": 0.002268692305036596
+        },
+        {
+          "station": 0.203125,
+          "peak": 0.151442505813426,
+          "meanR": 0.1512683944616433,
+          "radiusCoV": 0.0026333491113821775,
+          "precRadPerS": 0.001684725214541022,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0012549396496290624,
+          "zSpan": 0.0017654258245705101
+        },
+        {
+          "station": 0.21875,
+          "peak": 0.1344643863117941,
+          "meanR": 0.13432211837855274,
+          "radiusCoV": 0.0023672779487961914,
+          "precRadPerS": 0.0018143194618112167,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0012885814339600454,
+          "zSpan": 0.0011262755314476736
+        },
+        {
+          "station": 0.234375,
+          "peak": 0.10957674166018858,
+          "meanR": 0.1094772168592569,
+          "radiusCoV": 0.0019376039951058204,
+          "precRadPerS": 0.0019439137090872945,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0010190373672545883,
+          "zSpan": 0.0004606493556038038
+        },
+        {
+          "station": 0.25,
+          "peak": 0.07732792801424943,
+          "meanR": 0.07728076038576007,
+          "radiusCoV": 0.001126402166929987,
+          "precRadPerS": 0.0020735079563572946,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0004442585620325207,
+          "zSpan": 0.0002018323100737296
+        },
+        {
+          "station": 0.265625,
+          "peak": 0.03922235634714982,
+          "meanR": 0.03867896131490607,
+          "radiusCoV": 0.0019726644019012335,
+          "precRadPerS": 0.0022031022036273435,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.00041405787834540575,
+          "zSpan": 0.0004553955107763734
+        },
+        {
+          "station": 0.28125,
+          "peak": 0.00509796447071105,
+          "meanR": 0.005019647294354957,
+          "radiusCoV": 0.04574558326105986,
+          "precRadPerS": 0.0023326964508973433,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0013683647339724349,
+          "zSpan": 0.00046827510138535474
+        },
+        {
+          "station": 0.296875,
+          "peak": 0.052346117625404066,
+          "meanR": 0.052199892946976384,
+          "radiusCoV": 0.0075173819308632026,
+          "precRadPerS": 0.0024622906981735674,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.002370153249301135,
+          "zSpan": 0.00011582836733687804
+        },
+        {
+          "station": 0.3125,
+          "peak": 0.10122542444236897,
+          "meanR": 0.1010118671986943,
+          "radiusCoV": 0.005473823610643882,
+          "precRadPerS": 0.002591884945449791,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0032378561367239905,
+          "zSpan": 0.0006060406704966335
+        },
+        {
+          "station": 0.328125,
+          "peak": 0.14973270635902822,
+          "meanR": 0.14945558502240802,
+          "radiusCoV": 0.004702725689764524,
+          "precRadPerS": 0.002721479192713567,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.00382702551245509,
+          "zSpan": 0.0016317397364722375
+        },
+        {
+          "station": 0.34375,
+          "peak": 0.19580805178661898,
+          "meanR": 0.19547427714115193,
+          "radiusCoV": 0.00426855159843467,
+          "precRadPerS": 0.002851073439989791,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.004025531154929068,
+          "zSpan": 0.0028406213338356967
+        },
+        {
+          "station": 0.359375,
+          "peak": 0.2374323314847124,
+          "meanR": 0.23705174099438348,
+          "radiusCoV": 0.003967218543368738,
+          "precRadPerS": 0.0029806676872660147,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0037741249970998647,
+          "zSpan": 0.0040727094835815575
+        },
+        {
+          "station": 0.375,
+          "peak": 0.2727239665135476,
+          "meanR": 0.27230895270876415,
+          "radiusCoV": 0.0037269552806544998,
+          "precRadPerS": 0.0031102619345362093,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.003079518339873022,
+          "zSpan": 0.00515184984433531
+        },
+        {
+          "station": 0.390625,
+          "peak": 0.30003015909454067,
+          "meanR": 0.2995951588079533,
+          "radiusCoV": 0.0035146805919607192,
+          "precRadPerS": 0.0032398561818062096,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.002017427116310949,
+          "zSpan": 0.005912808628522032
+        },
+        {
+          "station": 0.40625,
+          "peak": 0.3180080530748417,
+          "meanR": 0.31756892192780406,
+          "radiusCoV": 0.0033113942467314704,
+          "precRadPerS": 0.003369450429082433,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0007371073541145579,
+          "zSpan": 0.006228042508871823
+        },
+        {
+          "station": 0.421875,
+          "peak": 0.3256917741410794,
+          "meanR": 0.32526507700837914,
+          "radiusCoV": 0.003103347207762562,
+          "precRadPerS": 0.0034990446763522387,
+          "xHz": 0.43796259799327386,
+          "xSpan": 0.0007643795164180012,
+          "zSpan": 0.006029747186912404
+        },
+        {
+          "station": 0.4375,
+          "peak": 0.32254198651755067,
+          "meanR": 0.32214423943454,
+          "radiusCoV": 0.002877721554185042,
+          "precRadPerS": 0.003628638923628365,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0018304316461646986,
+          "zSpan": 0.005323405682087778
+        },
+        {
+          "station": 0.453125,
+          "peak": 0.30847545846581526,
+          "meanR": 0.3081223603268204,
+          "radiusCoV": 0.002619327213332692,
+          "precRadPerS": 0.0037582331708984626,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.002686184382464883,
+          "zSpan": 0.004190316503114078
+        },
+        {
+          "station": 0.46875,
+          "peak": 0.28387311083116684,
+          "meanR": 0.2835788040971682,
+          "radiusCoV": 0.002306402987514409,
+          "precRadPerS": 0.0038878274181684625,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0030823968786795747,
+          "zSpan": 0.002778294364636724
+        },
+        {
+          "station": 0.484375,
+          "peak": 0.24956608215485218,
+          "meanR": 0.2493424805851296,
+          "radiusCoV": 0.0019032622835084567,
+          "precRadPerS": 0.0040174216654446865,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0029283622409359,
+          "zSpan": 0.0012816295875215378
+        },
+        {
+          "station": 0.5,
+          "peak": 0.20680042758818273,
+          "meanR": 0.20665664578869633,
+          "radiusCoV": 0.0013482502802027653,
+          "precRadPerS": 0.004147015912708463,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.002225092275478846,
+          "zSpan": 0.0004994938674579841
+        },
+        {
+          "station": 0.515625,
+          "peak": 0.1573411090208901,
+          "meanR": 0.15712403736254862,
+          "radiusCoV": 0.0006515231587405034,
+          "precRadPerS": 0.004276610159984638,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0010547332502085088,
+          "zSpan": 0.0012469675724385287
+        },
+        {
+          "station": 0.53125,
+          "peak": 0.10399759752095017,
+          "meanR": 0.1026349811007867,
+          "radiusCoV": 0.0018523719878479328,
+          "precRadPerS": 0.004406204407260959,
+          "xHz": 0.43796259799327386,
+          "xSpan": 0.0005405925030338016,
+          "zSpan": 0.0017082436096764186
+        },
+        {
+          "station": 0.546875,
+          "peak": 0.04774420078103934,
+          "meanR": 0.045281944079526695,
+          "radiusCoV": 0.00860093199657131,
+          "precRadPerS": 0.00453579865453091,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0020313387166814717,
+          "zSpan": 0.0016692102142165828
+        },
+        {
+          "station": 0.5625,
+          "peak": 0.012933964067149428,
+          "meanR": 0.012735322930930838,
+          "radiusCoV": 0.04573336900212779,
+          "precRadPerS": 0.004665392901800911,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0035095838214238475,
+          "zSpan": 0.0010727270387092072
+        },
+        {
+          "station": 0.578125,
+          "peak": 0.06948180035977321,
+          "meanR": 0.06920945006375961,
+          "radiusCoV": 0.010899005003989286,
+          "precRadPerS": 0.004794987149077134,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0046720893375027245,
+          "zSpan": 0.00003641554432873978
+        },
+        {
+          "station": 0.59375,
+          "peak": 0.12235999905721871,
+          "meanR": 0.12202508394565299,
+          "radiusCoV": 0.007350100195534807,
+          "precRadPerS": 0.004924581396347135,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.005346794650334025,
+          "zSpan": 0.0014640588632829
+        },
+        {
+          "station": 0.609375,
+          "peak": 0.1696375947961989,
+          "meanR": 0.1692536663080639,
+          "radiusCoV": 0.005933148505020736,
+          "precRadPerS": 0.005054175643623358,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.005436655563127862,
+          "zSpan": 0.003049868135547508
+        },
+        {
+          "station": 0.625,
+          "peak": 0.2096564103065909,
+          "meanR": 0.20923877552788964,
+          "radiusCoV": 0.005124331934593568,
+          "precRadPerS": 0.005183769890887134,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.004928269980699784,
+          "zSpan": 0.004553810013081708
+        },
+        {
+          "station": 0.640625,
+          "peak": 0.24110293632153795,
+          "meanR": 0.24066792619706456,
+          "radiusCoV": 0.004565793460794033,
+          "precRadPerS": 0.0053133641381633585,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.003893773316174104,
+          "zSpan": 0.00576229088716837
+        },
+        {
+          "station": 0.65625,
+          "peak": 0.26306320555479756,
+          "meanR": 0.26262740042100263,
+          "radiusCoV": 0.0041277235911958325,
+          "precRadPerS": 0.005442958385439582,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0024797101128591903,
+          "zSpan": 0.006505212029419699
+        },
+        {
+          "station": 0.671875,
+          "peak": 0.2750580801787345,
+          "meanR": 0.2746375324738771,
+          "radiusCoV": 0.0037496067164670363,
+          "precRadPerS": 0.005572552632703358,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0008846895294778168,
+          "zSpan": 0.006680793405898777
+        },
+        {
+          "station": 0.6875,
+          "peak": 0.27705734905022306,
+          "meanR": 0.2766668431464359,
+          "radiusCoV": 0.0033969412106266655,
+          "precRadPerS": 0.005702146879979582,
+          "xHz": 0.43796259799327386,
+          "xSpan": 0.0008569587357699637,
+          "zSpan": 0.006269772887308511
+        },
+        {
+          "station": 0.703125,
+          "peak": 0.2694720856590511,
+          "meanR": 0.26912447273308343,
+          "radiusCoV": 0.0030454808097630393,
+          "precRadPerS": 0.005831741127255806,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0020137175096300447,
+          "zSpan": 0.0053368193385527896
+        },
+        {
+          "station": 0.71875,
+          "peak": 0.2531257975517478,
+          "meanR": 0.25283143936982166,
+          "radiusCoV": 0.002673678088997497,
+          "precRadPerS": 0.005961335374525806,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0028734135888999757,
+          "zSpan": 0.004019042340005358
+        },
+        {
+          "station": 0.734375,
+          "peak": 0.22920594873189437,
+          "meanR": 0.2289722983800191,
+          "radiusCoV": 0.002257450535799786,
+          "precRadPerS": 0.006090929621795806,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.003247596014584282,
+          "zSpan": 0.0025035449758420425
+        },
+        {
+          "station": 0.75,
+          "peak": 0.19919840567190977,
+          "meanR": 0.19902974592383194,
+          "radiusCoV": 0.001765198421561525,
+          "precRadPerS": 0.00622052386907203,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.003087266789339606,
+          "zSpan": 0.0009994188475239696
+        },
+        {
+          "station": 0.765625,
+          "peak": 0.16480819664423352,
+          "meanR": 0.16470554821361216,
+          "radiusCoV": 0.0011596669179342882,
+          "precRadPerS": 0.00635011811634203,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0024482403749436776,
+          "zSpan": 0.0006015655279479615
+        },
+        {
+          "station": 0.78125,
+          "peak": 0.12815680035499347,
+          "meanR": 0.1278318440342706,
+          "radiusCoV": 0.0006091306600089656,
+          "precRadPerS": 0.006479712363618254,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.001456406245341324,
+          "zSpan": 0.0013382302411076297
+        },
+        {
+          "station": 0.796875,
+          "peak": 0.09135816561783246,
+          "meanR": 0.09027733012246658,
+          "radiusCoV": 0.001651414835949314,
+          "precRadPerS": 0.006609306610888254,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.00028320815591496157,
+          "zSpan": 0.00176053095023887
+        },
+        {
+          "station": 0.8125,
+          "peak": 0.05556187747224426,
+          "meanR": 0.053853073248012515,
+          "radiusCoV": 0.0048573671580954105,
+          "precRadPerS": 0.006738900858158254,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.000905614507613825,
+          "zSpan": 0.0017630874231115076
+        },
+        {
+          "station": 0.828125,
+          "peak": 0.022408813043250896,
+          "meanR": 0.020222688193192267,
+          "radiusCoV": 0.017521870453186764,
+          "precRadPerS": 0.006868495105434502,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.001875713030767879,
+          "zSpan": 0.0013713015029458552
+        },
+        {
+          "station": 0.84375,
+          "peak": 0.009321718628876196,
+          "meanR": 0.009178622151140977,
+          "radiusCoV": 0.045713006999895715,
+          "precRadPerS": 0.0069980893527044775,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.00255424561933277,
+          "zSpan": 0.0006892099835190462
+        },
+        {
+          "station": 0.859375,
+          "peak": 0.033374038244257755,
+          "meanR": 0.03321213706853582,
+          "radiusCoV": 0.013705046484425377,
+          "precRadPerS": 0.007127683599974283,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0028521188221196127,
+          "zSpan": 0.00013460456979180052
+        },
+        {
+          "station": 0.875,
+          "peak": 0.05125648214848521,
+          "meanR": 0.05108744169194873,
+          "radiusCoV": 0.00903323720587614,
+          "precRadPerS": 0.007257277847250701,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0027658721805345343,
+          "zSpan": 0.0009348574534253176
+        },
+        {
+          "station": 0.890625,
+          "peak": 0.06256072603512396,
+          "meanR": 0.06239548533288525,
+          "radiusCoV": 0.007065324091169476,
+          "precRadPerS": 0.007386872094520701,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0023576173281635304,
+          "zSpan": 0.0015708512086166602
+        },
+        {
+          "station": 0.90625,
+          "peak": 0.06727319140283489,
+          "meanR": 0.06712131922133895,
+          "radiusCoV": 0.005918299101405047,
+          "precRadPerS": 0.007516466341790701,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0017391722307653693,
+          "zSpan": 0.001941438977519104
+        },
+        {
+          "station": 0.921875,
+          "peak": 0.06576685649516788,
+          "meanR": 0.06563599839189405,
+          "radiusCoV": 0.005119692279963298,
+          "precRadPerS": 0.007646060589066925,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0010487372252146812,
+          "zSpan": 0.00200513842537179
+        },
+        {
+          "station": 0.9375,
+          "peak": 0.05877274892260554,
+          "meanR": 0.05866819633489752,
+          "radiusCoV": 0.004492666573211585,
+          "precRadPerS": 0.007775654836336925,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0004235656669149407,
+          "zSpan": 0.0017834895181128574
+        },
+        {
+          "station": 0.953125,
+          "peak": 0.04733270935283335,
+          "meanR": 0.047257115070836346,
+          "radiusCoV": 0.003953283625947084,
+          "precRadPerS": 0.007905249083613149,
+          "xHz": 0.43796259799327386,
+          "xSpan": 0.00008733238308019156,
+          "zSpan": 0.001353565981320276
+        },
+        {
+          "station": 0.96875,
+          "peak": 0.03273596899674885,
+          "meanR": 0.03268922528842657,
+          "radiusCoV": 0.003453242958115122,
+          "precRadPerS": 0.008034843330876925,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.0002485268252515778,
+          "zSpan": 0.0008301847435601972
+        },
+        {
+          "station": 0.984375,
+          "peak": 0.01644290642428554,
+          "meanR": 0.016422193065183135,
+          "radiusCoV": 0.0029586263963311188,
+          "precRadPerS": 0.008164437578153149,
+          "xHz": 0.21898129899663693,
+          "xSpan": 0.00021271810948249315,
+          "zSpan": 0.0003411321755836614
+        },
+        {
+          "station": 1,
+          "peak": 3.99139238031357e-17,
+          "meanR": 3.9870742384254023e-17,
+          "radiusCoV": 0,
+          "precRadPerS": 0.008294031825429373,
+          "xHz": 0.21898129899663693,
+          "xSpan": 6.810685217975859e-19,
+          "zSpan": 5.936690514199305e-19
+        }
+      ]
+    }
+  ],
+  "pixels": {
+    "error": "Error: locator.screenshot: Target page, context or browser has been closed\nCall log:\n\u001b[2m  - taking element screenshot\u001b[22m\n\u001b[2m  - waiting for fonts to load...\u001b[22m\n\u001b[2m  - fonts loaded\u001b[22m\n\u001b[2m  - "
+  }
+}
