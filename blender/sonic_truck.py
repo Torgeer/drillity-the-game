@@ -666,17 +666,29 @@ MAST_Y     = 0.440    # [D] the mast BOX stands 440 mm forward of the drilling
 CROWN_H    = 0.300    # [D] the head block above the mast columns
 WORK_H     = MAST_FOOT_Z + MAST_LEN + CROWN_H   # [D] 7.314 m, mast vertical
 TRANSPORT_TILT = -1.32                          # rad, `rigFactory.js` line 7599
-CARR_Z0    = MAST_FOOT_Z + 1.100                # [D] 1.980 - bottom of travel:
-                      # the head's sub face clears the clamp jaws and the
-                      # breakout table below it
-CARR_Z1    = CARR_Z0 + FEED_STROKE              # [D] 6.273, and the mast top is
-                      # at 7.014, so the carriage stops 0.74 m short of the
-                      # crown - [REF] section 4.5 requires it to stop well short
-                      # of BOTH ends.  Stroke/mast here is 4.293/6.134 = 0.700
-                      # against [GEO]'s 3.600/6.200 = 0.581 for the compact
-                      # crawler: a truck rig uses more of its mast, and that is
-                      # a real published difference between the two carriers,
-                      # not a liberty.
+# THE BOTTOM OF TRAVEL IS SOLVED FROM THE TOP, and the arithmetic is the whole
+# reason the head is the size it is.  A mast of MAST_LEN carries a stroke of
+# FEED_STROKE plus ONE HEAD HEIGHT: the sub face cannot rise past
+# mast_top - head_height or the head stands out of the top of its own mast.
+#     mast top   = MAST_FOOT_Z + MAST_LEN            = 7.014
+#     spare      = MAST_LEN - FEED_STROKE            = 1.841
+# So the head, sub face to the top of its gearbox, has 1.841 m to live in, and
+# the first draft of this file built a 1.795 m head and then started it at
+# MAST_FOOT_Z + 1.100 - which put the top of the head at 8.038, a metre out of
+# the top of a 7.014 m mast, at full stroke.  Caught by arithmetic, not by
+# looking: the model is authored at the BOTTOM of travel, where it looks fine.
+CARR_Z0    = MAST_FOOT_Z + 0.220                # [D] 1.100 - bottom of travel:
+                      # the head's sub face just clears the clamp jaws
+CARR_Z1    = CARR_Z0 + FEED_STROKE              # [D] 5.393.  Head top then
+                      # lands at 7.008 against a mast top of 7.014 - 6 mm, and
+                      # that is not slack, it is what [TSI-CT]'s own 70 % stroke
+                      # ratio leaves once a real head is drawn.  [GEO]'s compact
+                      # crawler is 0.581, so it has far more room; a truck rig
+                      # uses more of its mast, which is a real published
+                      # difference between the carriers, not a liberty.
+HEAD_STACK = 1.621    # [D] sub face to the top of the gearbox.  It is a CEILING
+                      # set by the line above, not a free choice, and
+                      # `build_carriage()` prints it back.
 CRADLE_Y   = 5.020    # [D] where the folded mast tip comes down - worked in
                       # build_mast()'s docstring, and it lands on the cab roof,
                       # which is where a compact truck rig's mast rest is.
@@ -1101,17 +1113,23 @@ def build_deck():
 #     cab.  [REF] section 9.5 records that the shipping builder has no guarding
 #     at all, on a machine whose entire hazard is a violently vibrating string.
 # ═════════════════════════════════════════════════════════════════════════════
-PLAT_Z = 0.550          # [D] the fold-down rear platform, deployed
-CLAMP_Z = MAST_FOOT_Z + 0.300                   # [D] 1.180 - waist height for
-                        # the man standing on the platform
-CAGE_TOP = 1.800        # [D] SOLVED, and it is pinned from BOTH sides.  It has
-                        # to stop below the head's bottom of travel
-                        # (CARR_Z0 = 1.980) - 180 mm clear - AND below the
-                        # FOLDED mast, whose underside crosses this station at
-                        # z = 1.948 + 0.2562 y, i.e. 1.840 at the cage's aft
-                        # face.  1.800 clears both, and leaves 1.25 m of guard
-                        # above the platform, which is the chest-high cage
-                        # [GEO] p8 and p11 photograph.
+PLAT_Z = 0.300          # [D] the fold-down rear platform, deployed.  Set by
+                        # the clamp, not chosen: CLAMP_Z - PLAT_Z = 0.640, which
+                        # is waist height for the man standing at the string -
+                        # which is how [BR] p7 photographs the job being done.
+CLAMP_Z = MAST_FOOT_Z + 0.060                   # [D] 0.940 - the clamp jaws,
+                        # bolted to the mast foot, which is where they have to
+                        # be: the head comes down onto them at the bottom of the
+                        # feed stroke
+CAGE_TOP = 1.800        # [D] SOLVED by the FOLDED MAST, whose underside
+                        # crosses this station at z = 1.948 + 0.2562 y - 1.840
+                        # at the cage's aft face.  It is NOT constrained by the
+                        # head: the guard is two side screens at x +-0.520 and a
+                        # gate at y -0.420, and the head is 0.769 wide by 0.460
+                        # deep, so it comes down the open middle between them
+                        # without ever touching the frame.  That is exactly the
+                        # arrangement [GEO] p8 and p11 photograph, and it leaves
+                        # 1.50 m of guard above the platform.
 
 
 def build_station():
@@ -1132,9 +1150,9 @@ def build_station():
              sides=6)
     pipe('plat_top_b', (-1.09, -0.560, PLAT_Z + 1.000),
          (1.09, -0.560, PLAT_Z + 1.000), 0.017, MAT_PAINT, None, sides=6)
-    for i in range(3):
+    for i in range(2):
         box('plat_step%d' % i, (0.400, 0.200, 0.024), MAT_WORN, None,
-            (0.70, -0.470, 0.150 + i * 0.145), bevel=0.0)
+            (0.70, -0.470, 0.110 + i * 0.100), bevel=0.0)
 
     # ── the CLAMP / BREAKOUT TABLE.  [REF] section 4.5: two hydraulic clamp
     # boxes either side of the string with jaws between them, the lower one
@@ -1212,11 +1230,11 @@ def build_station():
     # of the top of it.
     tube('casing_shoe', CASE_OD / 2 + 0.012, 0.130, MAT_WORN, None,
          (0, 0, 0.0), sides=12)
-    tube('casing', CASE_OD / 2, 1.420, MAT_WORN, None, (0, 0, 0.010), sides=12)
+    tube('casing', CASE_OD / 2, 0.980, MAT_WORN, None, (0, 0, 0.010), sides=12)
     tube('casing_collar', CASE_OD / 2 + 0.014, 0.090, MAT_STEEL, None,
-         (0, 0, 1.340), sides=12)
-    tube('barrel', CORE_OD / 2, CARR_Z0 - 1.300, MAT_STEEL, None,
-         (0, 0, 1.300), sides=12)
+         (0, 0, 0.900), sides=12)
+    tube('barrel', CORE_OD / 2, CARR_Z0 - 0.860, MAT_STEEL, None,
+         (0, 0, 0.860), sides=12)
     # timber cribbing and mud round the collar are the terrain's job, not the
     # rig's - `research/rigs/_model-critique.md` section 3.3 records what site
     # props inside a rig mesh do to `frameRadius`.
@@ -1505,22 +1523,38 @@ def build_carriage(dump):
     # instead: it reads as a separate grey mass against an amber machine, which
     # is the read the photographs have.  It also costs nothing - `castIron` is
     # already a draw call under this carriage.
-    ztop = 0.535 + HEAD_H + 0.090
-    tube('rot_unit', 0.185, 0.330, MAT_CAST, carr, (0, 0, ztop), sides=16)
-    box('gearbox', (0.560, 0.400, 0.300), MAT_CAST, carr,
-        (0, 0.020, ztop + 0.480), bevel=0.018)
-    tube('swivel', 0.090, 0.190, MAT_CAST, carr, (0, 0, ztop + 0.630),
+    # The stack order is [BR] p3's, bottom up: oscillator, rotation unit, water
+    # swivel, then the hose manifold / gearbox box at the top.  The SWIVEL SITS
+    # UNDER THE GEARBOX, not over it - it is fed from the gooseneck and it turns
+    # with the string.  Putting it on top cost 180 mm the mast does not have.
+    ztop = 0.535 + HEAD_H + 0.080
+    tube('rot_unit', 0.185, 0.280, MAT_CAST, carr, (0, 0, ztop), sides=16)
+    tube('swivel', 0.090, 0.150, MAT_CAST, carr, (0, 0, ztop + 0.280),
          sides=12)
-    pipe('gooseneck', (0, 0, ztop + 0.790), (0, -0.230, ztop + 0.700), 0.032,
+    pipe('gooseneck', (0, 0, ztop + 0.360), (0, -0.230, ztop + 0.300), 0.032,
          MAT_STEEL, carr, sides=8)
+    box('gearbox', (0.560, 0.400, 0.220), MAT_CAST, carr,
+        (0, 0.020, ztop + 0.540), bevel=0.018)
+    # THE CEILING, CHECKED HERE AND NOT ASSUMED.  Sub face to the top of the
+    # gearbox must fit in MAST_LEN - FEED_STROKE, or the head stands out of the
+    # top of the mast at full stroke.
+    stack_h = ztop + 0.540 + 0.110
+    if stack_h > MAST_LEN - FEED_STROKE:
+        raise AssertionError(
+            'the head is %.3f m from its sub face to the top of the gearbox, '
+            'and a %.3f m mast running a %.3f m stroke leaves only %.3f. At '
+            'full stroke the head would stand %.3f m out of the top of its own '
+            'mast.' % (stack_h, MAST_LEN, FEED_STROKE,
+                       MAST_LEN - FEED_STROKE,
+                       stack_h - (MAST_LEN - FEED_STROKE)))
     # ── THE AIR DAMPER.  [BR] p5, p6 and [EIJ] both: the head is isolated from
     # the mast by an air cushion at 0.7 MPa on a minimum of 8 l/min.  [REF]
     # section 9.6 records it as missing today - without it the model has no
     # explanation for why the mast survives a 150 Hz source bolted to it.
-    tube('damper_vessel', 0.088, 0.360, MAT_DARK, carr,
-         (0.330, 0.170, ztop + 0.120), sides=12)
+    tube('damper_vessel', 0.088, 0.320, MAT_DARK, carr,
+         (0.330, 0.170, ztop + 0.080), sides=12)
     tube('damper_cap', 0.094, 0.030, MAT_WORN, carr,
-         (0.330, 0.170, ztop + 0.480), sides=12)
+         (0.330, 0.170, ztop + 0.400), sides=12)
     pipe('damper_line', (0.330, 0.170, ztop + 0.140), (0.120, 0.060, 0.640),
          0.014, MAT_STEEL, carr, sides=6)
     # the rubber isolation pucks between head and carriage
@@ -1532,7 +1566,11 @@ def build_carriage(dump):
     # hose bulkhead plate on the head - [BAU]: a mast hose package runs
     # bulkhead plate to bulkhead plate, not as loose lines
     box('head_bulkhead', (0.300, 0.030, 0.150), MAT_DARK, carr,
-        (-0.300, 0.150, ztop + 0.180), bevel=0.006)
+        (-0.300, 0.150, ztop + 0.150), bevel=0.006)
+    print('SONIC_CHECK head_stack=%.3f  (ceiling %.3f = MAST_LEN - '
+          'FEED_STROKE; top of head at full stroke %.3f vs mast top %.3f)'
+          % (stack_h, MAST_LEN - FEED_STROKE, CARR_Z1 + stack_h,
+             MAST_FOOT_Z + MAST_LEN))
     return carr, spin
 
 
@@ -1678,14 +1716,20 @@ def build_services(piv, dump, carr):
     # ── THE FREE LOOPS AT THE HEAD.  [BR] p7: two very large black hoses leave
     # the head in generous UNSUPPORTED loops and drop away.  On a working
     # machine the hoses are not tidy - they hang, sag and swing.
-    ztop = 0.535 + HEAD_H + 0.090
-    for i, xo in enumerate((-0.055, 0.055)):
+    # They hang on the AFT face, into the open air over the drilling station.
+    # The first routing took them forward at x -0.375..-0.195 and y 0.165..0.700
+    # - straight through the mast box (x +-0.350, y 0.230..0.650) and then
+    # through a tilt guide.  The AABB sweep missed it because the two are under
+    # DIFFERENT moving nodes, so it was caught by hand; the sweep only compares
+    # parts within one assembly, and that is a real limit of it.
+    ztop = 0.535 + HEAD_H + 0.080
+    for i, xo in enumerate((-0.245, 0.245)):
         hose('head_loop%d' % i,
-             [(-0.300 + xo, 0.165, ztop + 0.180),
-              (-0.430 + xo, 0.560, ztop - 0.420),
-              (-0.380 + xo, 0.700, ztop - 1.150),
-              (-0.250 + xo, 0.400, ztop - 1.000)],
-             0.042, MAT_RUBBER, carr, sides=6)
+             [(xo, -0.235, ztop + 0.110),
+              (xo * 1.16, -0.440, ztop - 0.380),
+              (xo * 1.10, -0.470, ztop - 0.870),
+              (xo * 0.86, -0.280, ztop - 0.700)],
+             0.040, MAT_RUBBER, carr, sides=6)
     # the air line from the deck reel up to the damper, thin and separate
     hose('air_line',
          [(-1.010, 3.480, RAIL_TOP + 0.230),
