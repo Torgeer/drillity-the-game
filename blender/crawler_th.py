@@ -220,8 +220,9 @@ def _apply_mods(o, seg=None):
 
     `seg` drops the bevel to one segment.  `rig.box()` always asks for two,
     which is right for a big painted panel and wasteful on a part cloned two
-    hundred times: a two-segment bevel on a cube is ~470 triangles against ~150
-    for one segment, and at the size of a track shoe nobody can tell.
+    hundred times: the fresh Blender 5.2 export profile measured 108 triangles
+    for a two-segment box and 44 for one segment.  Track shoes retain that
+    one-segment chamfer; the large painted panels keep two segments.
     """
     if not o.modifiers:
         return o
@@ -274,6 +275,13 @@ def curve_to_mesh(o):
     """Hoses are Bezier curves.  A curve exports as its own primitive, so ten
     festoon hoses would be ten draw calls; converted to mesh they fall into the
     rubber bucket and cost one."""
+    # Authored tessellation choice, not a machine dimension: narrow hydraulic
+    # lines use one radial bevel subdivision. Keep the AUTO Bezier handles,
+    # longitudinal resolution, routing and radius unchanged. The defining
+    # 127 mm suction hose retains its original radial tessellation. Actual
+    # exports and CPU render comparisons: research/rigs/crawler-optimization-2026-09-06.md.
+    if o.name.startswith(('boom1_line', 'boom2_line', 'drifter_hose', 'festoon', 'carrier_hose')):
+        o.data.bevel_resolution = 1
     bpy.ops.object.select_all(action='DESELECT')
     o.select_set(True)
     C.view_layer.objects.active = o
@@ -306,7 +314,15 @@ def weld(objs, label, parent):
             bpy.ops.object.join()
         a = grp[0]
         a.name = label + ':' + key
-        a.parent = parent
+        if a.parent != parent:
+            # The glass group starts on mount:feed-l. Joining the right lens
+            # preserves both authored world positions, but changing the active
+            # mesh's parent to the cradle used to move both lenses away from
+            # their housings. Keep that joined world transform on reparenting.
+            C.view_layer.update()
+            world = a.matrix_world.copy()
+            a.parent = parent
+            a.matrix_world = world
         out.append(a)
     return out
 
@@ -314,7 +330,7 @@ def weld(objs, label, parent):
 def hz(name, size, parent, loc, rot=(0, 0, 0)):
     """A hazard-striped plate.  Cheap, and the yellow/black decal is one of the
     things [R1] §7 photo 4 calls out as reading at distance."""
-    return bx(name, size, R.MAT_HAZARD, parent, loc, rot, bevel=0.004)
+    return bx(name, size, R.MAT_HAZARD, parent, loc, rot, bevel=0.004, seg=1)
 
 
 def ram(name, parent, base, tip, barrel_r=0.055, rod_r=0.032, mat_b=R.MAT_DARK,
@@ -374,9 +390,11 @@ def lamp(name, parent, loc, aim, cone=54, rng=26, watt=70):
     mount['watt_w'] = watt
     mount['colour_hex'] = 0xFFE9C0
     m = [
-        bx(name + '_stalk', (0.036, 0.036, 0.16), R.MAT_DARK, mount, (0, 0, -0.10)),
-        bx(name + '_shell', (0.27, 0.13, 0.18), R.MAT_DARK, mount, (0, 0.02, 0)),
-        bx(name + '_lens', (0.22, 0.012, 0.14), R.MAT_GLASS, mount, (0, -0.055, 0)),
+        # Eight repeated lamps keep their bevel width and a one-segment
+        # chamfer. Only tessellation changes; light nodes and materials do not.
+        bx(name + '_stalk', (0.036, 0.036, 0.16), R.MAT_DARK, mount, (0, 0, -0.10), seg=1),
+        bx(name + '_shell', (0.27, 0.13, 0.18), R.MAT_DARK, mount, (0, 0.02, 0), seg=1),
+        bx(name + '_lens', (0.22, 0.012, 0.14), R.MAT_GLASS, mount, (0, -0.055, 0), seg=1),
         bx(name + '_barH', (0.28, 0.013, 0.013), R.MAT_WORN, mount, (0, -0.075, 0.086),
            bevel=0.0),
     ]

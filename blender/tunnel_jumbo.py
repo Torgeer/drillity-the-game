@@ -196,6 +196,27 @@ BOOMS = (('l', -1), ('r', +1))
 # ===========================================================================
 # small helpers
 # ===========================================================================
+# Hydraulic-line calls below use rig.hose(sides=3): its Blender bevel resolution
+# is 1, producing six circumference segments instead of eight. The authored
+# radius, AUTO Bezier control points and longitudinal resolution_u=6 are unchanged.
+# The longer trailing power cable keeps the shared default tessellation.
+
+
+def detail_box(*args, **kwargs):
+    """Keep the authored bevel width on narrow detail with a single chamfer.
+
+    Two rounded bevel segments cost 108 triangles per box; one chamfer costs
+    44. Only narrow ribs, rails, flanges, shoes, posts and guards use this helper.
+    Main panels, boom sections and the drifter retain their rounded edges.
+    Tessellation is an authored rendering choice, not a machine dimension.
+    """
+    o = box(*args, **kwargs)
+    for modifier in o.modifiers:
+        if modifier.type == 'BEVEL':
+            modifier.segments = 1
+    return o
+
+
 def taper(o, y_from, scale_xz):
     """Squeeze the +Y end of a mesh. A boom arm that is the same section at the
     head as at the base is a girder, not a boom."""
@@ -363,7 +384,7 @@ def build_front_frame(art):
                   (s * BOOM_X + dx * 1.4, y1 - 0.72, FRAME_TOP + 0.20),
                   (s * BOOM_X + dx * 1.3, y1 - 0.40, BOOM_Z - 0.02),
                   (s * BOOM_X + dx, y1 - 0.26, BOOM_Z - 0.16)],
-                 radius=0.019 if i % 2 else 0.015, parent=g)
+                 radius=0.019 if i % 2 else 0.015, parent=g, sides=3)
     # towing eyes
     for s in (-1, 1):
         box('ff-eye', (0.05, 0.20, 0.14), MAT_WORN, g,
@@ -424,7 +445,7 @@ def build_rear_frame(root):
          loc=(-0.60, -2.95, DECK), sides=10)
     hose('rf-firetube', [(-0.60, -2.95, DECK + 0.42), (-0.40, -2.30, HOOD_TOP + 0.02),
                          (0.0, -1.40, HOOD_TOP + 0.04), (0.42, -0.60, HOOD_TOP - 0.10)],
-         radius=0.010, mat=MAT_STEEL, parent=g)
+         radius=0.010, mat=MAT_STEEL, parent=g, sides=3)
     # accessory hose reel: 80 m of 32 mm hose [S/B]
     tube('rf-hosereel-h', 0.26, 0.05, MAT_PAINT, g,
          loc=(-0.30, -3.16, DECK + 0.30), rot=(0, math.pi / 2, 0), sides=16)
@@ -467,10 +488,10 @@ def build_articulation(root, art):
         hose('art-hose-%d' % i,
              [(dx, -0.80, FRAME_TOP - 0.06), (dx * 1.5, -0.20, FRAME_TOP + 0.16),
               (dx * 1.5, 0.24, FRAME_TOP + 0.14), (dx, 0.86, FRAME_TOP - 0.04)],
-             radius=0.022 if i % 2 else 0.017, parent=root)
+             radius=0.022 if i % 2 else 0.017, parent=root, sides=3)
     hose('art-cable', [(0.34, -0.86, FRAME_TOP - 0.02), (0.46, -0.10, FRAME_TOP + 0.22),
                        (0.46, 0.30, FRAME_TOP + 0.20), (0.34, 0.90, FRAME_TOP - 0.02)],
-         radius=0.026, mat=MAT_RUBBER, parent=root)
+         radius=0.026, mat=MAT_RUBBER, parent=root, sides=3)
 
 
 def build_station(art):
@@ -540,7 +561,7 @@ def build_station(art):
             tube('st-rail-post', 0.018, 0.80, MAT_STEEL, art,
                  loc=(x0 + px + s * 0.15, 1.02 + py, DECK), sides=6)
         for rz in (0.78, 0.42):
-            box('st-rail', (0.05, 1.28, 0.04), MAT_STEEL, art,
+            detail_box('st-rail', (0.05, 1.28, 0.04), MAT_STEEL, art,
                 loc=(x0 + px + s * 0.15, 1.02, DECK + rz), bevel=0.01)
         # illuminated stair, three treads
         for i in range(3):
@@ -634,7 +655,7 @@ def build_boom(art, side, sgn):
     taper(arm, BOOM_LEN * 0.15, 0.74)
     # weld flanges along the box - the tell that it is fabricated plate
     for s in (-1, 1):
-        box(nm + '-flange', (0.035, BOOM_LEN * 0.92, 0.05), MAT_PAINT, lift,
+        detail_box(nm + '-flange', (0.035, BOOM_LEN * 0.92, 0.05), MAT_PAINT, lift,
             loc=(s * 0.14, BOOM_LEN / 2, 0.14), bevel=0.006)
     # the parallel-holding link, below the arm, base bracket to head bracket
     tube(nm + '-parallink', 0.038, BOOM_LEN + BOOM_TELE * 0.5, MAT_PAINT, lift,
@@ -645,7 +666,7 @@ def build_boom(art, side, sgn):
         hose(nm + '-boomhose-%d' % i,
              [(dx, -0.10, -0.19), (dx * 1.2, BOOM_LEN * 0.4, -0.215),
               (dx, BOOM_LEN * 0.9, -0.20), (dx, BOOM_LEN + 0.25, -0.14)],
-             radius=0.017, parent=lift)
+             radius=0.017, parent=lift, sides=3)
 
     # lift cylinder slung underneath: base lug to a lug about half way along
     lc = empty(NODE_PIVOT, nm + '-liftcyl', slew, (0, 0.06, -0.20))
@@ -708,7 +729,7 @@ def build_feed(feed, nm):
         loc=(0, FEED_LEN / 2, 0), bevel=0.012)
     for s in (-1, 1):
         for dz in (-0.045, 0.045):
-            box(nm + '-rib', (0.022, FEED_LEN * 0.98, 0.022), MAT_STEEL, feed,
+            detail_box(nm + '-rib', (0.022, FEED_LEN * 0.98, 0.022), MAT_STEEL, feed,
                 loc=(s * (FEED_W / 2 - 0.012), FEED_LEN / 2, dz), bevel=0.004)
     # inner telescopic beam, drawn part-out so the joint is visible
     box(nm + '-beam2', (FEED_W * 0.74, FEED_LEN * 0.62, FEED_H * 0.74), MAT_STEEL, feed,
@@ -720,7 +741,7 @@ def build_feed(feed, nm):
     # chrome for the two lamp lenses, which on a jumbo are THE light in the
     # heading - but it puts the rail on the material named after it.
     for s in (-1, 1):
-        box(nm + '-rail', (0.028, FEED_LEN * 1.06, 0.020), MAT_STEEL, feed,
+        detail_box(nm + '-rail', (0.028, FEED_LEN * 1.06, 0.020), MAT_STEEL, feed,
             loc=(s * (FEED_W / 2 - 0.03), FEED_LEN * 0.53, FEED_H / 2), bevel=0.004)
     # front centraliser: the black block at the very nose, no paint left on it
     nose_y = FEED_LEN + 0.13
@@ -739,7 +760,7 @@ def build_feed(feed, nm):
              [(dx * (FEED_W / 2 + 0.02), 0.05, -0.04),
               (dx * (FEED_W / 2 + 0.03), FEED_LEN * 0.5, -0.05),
               (dx * (FEED_W / 2 + 0.02), FEED_LEN * 0.95, -0.03)],
-             radius=0.012, mat=MAT_STEEL, parent=feed)
+             radius=0.012, mat=MAT_STEEL, parent=feed, sides=3)
 
     build_carriage(feed, nm)
 
@@ -763,7 +784,7 @@ def build_feed(feed, nm):
         tube(nm + '-lampglass-%d' % i, 0.048, 0.012, MAT_STEEL, feed,
              loc=(lx, FEED_LEN * 0.22 + 0.088, 0.10 + 0.009), rot=(-math.pi / 2 + 0.10, 0, 0),
              sides=10)
-        box(nm + '-lampguard-%d' % i, (0.11, 0.02, 0.11), MAT_STEEL, feed,
+        detail_box(nm + '-lampguard-%d' % i, (0.11, 0.02, 0.11), MAT_STEEL, feed,
             loc=(lx, FEED_LEN * 0.22 + 0.10, 0.10), bevel=0.004)
         worklight(nm + '-lamp-%d' % i, feed, (lx, FEED_LEN * 0.22 + 0.10, 0.10),
                   (0, 1.0, -0.10), 54, 26)
@@ -811,7 +832,7 @@ def build_carriage(feed, nm):
          loc=(DRIFTER_W / 2, DRIFTER_LEN * 0.34, 0.10), rot=(0, math.pi / 2, 0), sides=12)
     # cradle shoes that grip the feed rails
     for s in (-1, 1):
-        box(nm + '-shoe', (0.045, DRIFTER_LEN * 0.8, 0.05), MAT_CHROME, car,
+        detail_box(nm + '-shoe', (0.045, DRIFTER_LEN * 0.8, 0.05), MAT_CHROME, car,
             loc=(s * (FEED_W / 2 - 0.03), DRIFTER_LEN / 2, FEED_H / 2), bevel=0.006)
     # the hose fan off the back of the drifter: percussion, return, rotation,
     # water, air, shank lubrication - five lines, drooping and doubling back
@@ -820,7 +841,7 @@ def build_carriage(feed, nm):
         hose(nm + '-drifterhose-%d' % i,
              [(dx, 0.02, 0.10 + abs(dx)), (dx * 1.6, -0.24, -0.02 - 0.03 * i),
               (dx * 1.9, -0.46, -0.16 - 0.02 * i), (dx * 1.2, -0.30, -0.26)],
-             radius=0.014 + 0.002 * (i % 2), parent=car)
+             radius=0.014 + 0.002 * (i % 2), parent=car, sides=3)
     # shank adapter: the cleanest steel on the machine, it lives inside the
     # drill. It stays on the carriage rather than on the spindle below: it is a
     # 160 mm tube, a body of revolution, so whether it turns is invisible, and
@@ -903,7 +924,7 @@ def build_basket_boom(art):
     box('bb-floor', (0.78, 0.62, 0.05), MAT_DARK, cage, loc=(0, 0.30, 0), bevel=0.01)
     for sx in (-1, 1):
         for sy in (0, 1):
-            box('bb-cagepost', (0.035, 0.035, 0.62), MAT_DARK, cage,
+            detail_box('bb-cagepost', (0.035, 0.035, 0.62), MAT_DARK, cage,
                 loc=(sx * 0.37, 0.02 + sy * 0.57, 0.32), bevel=0.006)
     for rz in (0.32, 0.60):
         box('bb-cagerail-x', (0.78, 0.03, 0.03), MAT_DARK, cage, loc=(0, 0.02, rz))
@@ -1028,24 +1049,6 @@ def collapse_nodes():
         bpy.context.active_object.name = '%s:%s' % (short, mat)
 
 
-def report_extent():
-    """Measure the built machine and print it against the sourced figures. The
-    brief says do not trust intent, read the file - this is the same rule
-    applied one step earlier: do not trust the constants, measure the geometry."""
-    xs, ys, zs = [], [], []
-    for o in bpy.context.scene.objects:
-        if o.type != 'MESH' or o.name.startswith('trail'):
-            continue   # the trailing cable lies down the drive; it is not the rig
-        for c in o.bound_box:
-            w = o.matrix_world @ __import__('mathutils').Vector(c)
-            xs.append(w.x)
-            ys.append(w.y)
-            zs.append(w.z)
-    print('MEASURED width=%.3f length=%.3f height=%.3f (front tip y=%.3f, tail y=%.3f)'
-          % (max(xs) - min(xs), max(ys) - min(ys), max(zs), max(ys), min(ys)))
-    print('SOURCED  width=2.260 transport_len=10.375 tramming_height=1.775')
-
-
 def build(out_path):
     reset()
     root = empty('', 'rig-root', None)
@@ -1073,10 +1076,11 @@ def build(out_path):
 
     bake_all()
     collapse_nodes()
-    report_extent()
+    # Read dimensions from the exported vertices with tools/glbinfo.mjs --parts.
+    # Transforming local bound_box corners here overstated rotated subtrees.
     return finish(out_path)
 
 
 if __name__ == '__main__':
     build(os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                       '..', 'public', 'models', 'tunnel_jumbo.glb'))
+                       '..', 'public', 'models', 'tunnel-jumbo.glb'))

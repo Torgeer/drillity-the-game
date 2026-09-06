@@ -34,6 +34,7 @@ SOURCES
           read at 600 dpi for this model.  p3 and p7 are the only photographs
           of complete sonic rigs in the owner's library.  pp.4-6, 8 are head
           specification tables.
+[BR p.N] Alias for [DT p.N], retained for the existing inline source citations.
 [GEO p.N] `C:/Users/henri/Downloads/Comacchio-GEO-305Pres_2023_FULL_WEB.pdf`,
           18 pp.  p16 and p17 are dimensioned general-arrangement drawings
           (working and transport) of the compact crawler the p3 sonic head is
@@ -204,6 +205,22 @@ def torus(name, major, minor, mat=MAT_STEEL, parent=None, loc=(0, 0, 0),
     bpy.ops.mesh.primitive_torus_add(major_radius=major, minor_radius=minor,
                                      major_segments=mseg, minor_segments=nseg)
     return part(name, bpy.context.active_object, mat, parent, loc, rot)
+
+
+def hydraulic_hose(name, points, radius, parent=None):
+    """Keep the authored spline/radius; use a six-vertex thin-hose profile.
+
+    Tessellation is an authored rendering choice, not a sourced dimension.
+    `rig.hose(..., sides=6)` measures EIGHT profile vertices in Blender 5.2:
+    bevel_resolution=2. One bevel subdivision measures six, retaining the
+    six samples per Bezier span and every AUTO handle/control point. The
+    thicker head loops/mast bundles and thin winch rope keep their original
+    profile. See the measured export and
+    CPU comparison in research/rigs/sonic-optimization-2026-09-06.md.
+    """
+    o = hose(name, points, radius, MAT_RUBBER, parent, sides=6)
+    o.data.bevel_resolution = 1
+    return o
 
 
 def arrayed(obj, count, offset, name='arr'):
@@ -510,9 +527,14 @@ MAST_DUMP    = 55 * IN                  # 1.3970 - "Mast Dump: 55 in (1.4 m)".
                                         # mast foot.  See build_mast().
 PULLBACK_KN  = 74.7                     # "Pull Back Force: 16,800 lbf"
 PULLDOWN_KN  = 50.3                     # "Down Force: 11,300 lbf"
-OSC_KN       = 222                      # "Oscillator Force: 50,000 lbf" -
-                                        # and [BR] p8 and [TSI-T] agree exactly
-OSC_HZ       = 150                      # "Oscillator Frequency: 0 to 150 Hz"
+OSC_KN       = 222                      # [TSI-CT] p2, 50,000 lbf (222 kN).
+                                        # Maximum oscillator output capability:
+                                        # maker's TSi 150 head page says "up to";
+                                        # [DT] p8 labels the same 50K-class value
+                                        # max. Not feed force or displacement.
+OSC_HZ       = 150                      # [TSI-CT] p2: adjustable 0 to 150 Hz.
+                                        # Capability ceiling, not a prescribed
+                                        # drilling setpoint or operating band.
 OSC_NM       = 6341                     # "Max Torque (high torque/low speed):
                                         # 4,677 ft-lb (6,341 Nm)"
 RPM_MAX      = 62                       # "0-62 rpm"
@@ -816,8 +838,12 @@ def build_chassis():
                 bevel=0.0)
     for i, y in enumerate((0.24, 1.05, AXLE_R2, AXLE_R1, 3.55, 4.35, 5.20,
                            AXLE_F, 6.70)):
-        box('xmem%d' % i, (RAIL_IN, 0.070, RAIL_H * 0.78), MAT_DARK, None,
-            (0, y, zc), bevel=0.004)
+        xmem = box('xmem%d' % i, (RAIL_IN, 0.070, RAIL_H * 0.78), MAT_DARK,
+                   None, (0, y, zc), bevel=0.004)
+        # These nine under-deck crossmembers retain the authored 4 mm chamfer
+        # and outer dimensions. One flat chamfer replaces the two-segment
+        # bevel; cab, hood, mast and oscillator edge profiles are unchanged.
+        xmem.modifiers['bev'].segments = 1
     box('bumper', (2.180, 0.085, 0.230), MAT_DARK, None,
         (0, BUMPER_Y - 0.043, RAIL_BOT - 0.150), bevel=0.012)
     box('rear_bar', (BODY_W - 0.36, 0.085, 0.170), MAT_DARK, None,
@@ -1683,7 +1709,11 @@ def lamp(name, parent, loc, aim, cone=54, rng=18, watt=50):
     rakes - which is the whole point of the named-node contract.
     """
     mount, aimnode = worklight(name, parent, loc, aim, cone, rng)
-    mount['watt_w'] = watt
+    # NOT SOURCED electrical wattage: the existing 50/60 values are authored
+    # relative brightness hints. gltfRig reads `watt_hint`; env.js trims its
+    # separately solved light power by clamp(wattHint / 70, 0.45, 1.6).
+    # Preserve those values; `watt_w` previously missed the consumer's key.
+    mount['watt_hint'] = watt
     mount['colour_hex'] = 0xFFE9C0
     box(name + '_stalk', (0.024, 0.024, 0.100), MAT_DARK, mount,
         (0, 0, -0.065))
@@ -1744,7 +1774,7 @@ def build_services(piv, dump, carr):
         pts.append((-0.250 + math.cos(a) * 0.115,
                     MAST_D / 2 + 0.150 + math.sin(a) * 0.115,
                     MAST_Z0 + 2.520 + t * 1.150))
-    hose('coil_hose', pts, 0.026, MAT_RUBBER, dump, sides=6)
+    hydraulic_hose('coil_hose', pts, 0.026, dump)
 
     # ── THE FREE LOOPS AT THE HEAD.  [BR] p7: two very large black hoses leave
     # the head in generous UNSUPPORTED loops and drop away.  On a working
@@ -1764,11 +1794,11 @@ def build_services(piv, dump, carr):
               (xo * 0.86, -0.280, ztop - 0.700)],
              0.040, MAT_RUBBER, carr, sides=6)
     # the air line from the deck reel up to the damper, thin and separate
-    hose('air_line',
+    hydraulic_hose('air_line',
          [(-1.010, 3.480, RAIL_TOP + 0.230),
           (-0.640, 2.100, DECK_Z + 0.560),
           (-0.420, 0.760, DECK_Z + 0.320)],
-         0.013, MAT_RUBBER, None, sides=6)
+         0.013)
     return lamps
 
 

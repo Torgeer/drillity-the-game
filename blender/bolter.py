@@ -412,6 +412,21 @@ def cheapbox(name, size, mat, parent=None, loc=(0, 0, 0), rot=(0, 0, 0), bev=0.0
     return box(name, size, mat, parent, loc, rot, bevel=bev, seg=1)
 
 
+def hydraulic_hose(name, points, radius=0.035, mat=R.MAT_RUBBER,
+                   parent=None, sides=6):
+    """Keep the authored route/radius; simplify only the circular profile.
+
+    Tessellation is an authored mesh choice, not a machine dimension. Keep
+    the shared AUTO handles and longitudinal sampling. The trailing supply
+    cable, injection line and drifter hoses retain their original profiles
+    to preserve overall and carriage-subtree extrema.
+    See research/rigs/bolter-optimization-2026-09-06.md for exported checks.
+    """
+    o = R.hose(name, points, radius=radius, mat=mat, parent=parent, sides=sides)
+    o.data.bevel_resolution = 1
+    return o
+
+
 def cyl(name, r, h, mat, parent=None, loc=(0, 0, 0), rot=(0, 0, 0), sides=12):
     """tube() is correct in the shared library - measured - so it is used raw."""
     return R.tube(name, r, h, mat, parent, loc, rot, sides)
@@ -1064,12 +1079,14 @@ def build_deck(parent):
                  R.MAT_DARK, parent, (s * RAIL_X, yc, DECK_Z - 0.050))
     # toe boards - hazard striped, because they are the edge of a working
     # platform 920 mm above a wet floor
+    # One chamfer retains the edge width; a second segment on these small
+    # plates adds topology without changing their authored envelope.
     for s in (-1, 1):
         box('deck_toe%d' % (s > 0), (0.022, DECK_Y1 - DECK_Y0, 0.110),
             R.MAT_HAZARD, parent, (s * DECK_HALF, yc, DECK_Z + 0.055),
-            bevel=0.004)
+            bevel=0.004, seg=1)
     box('deck_toe_front', (2 * DECK_HALF, 0.022, 0.110), R.MAT_HAZARD, parent,
-        (0, DECK_Y1, DECK_Z + 0.055), bevel=0.004)
+        (0, DECK_Y1, DECK_Z + 0.055), bevel=0.004, seg=1)
 
     # THE BOLT-LOADING PLATFORM, right flank, full length of the deck. This is
     # the one the feed swings back to [BM]p.3.
@@ -1104,7 +1121,7 @@ def build_stair(parent):
     for i, z in enumerate((0.320, 0.520, 0.720)):
         y = y0 + 0.150 * i
         box('stair_tread%d' % i, (0.470, 0.230, 0.024), R.MAT_DARK, parent,
-            (x, y, z), bevel=0.005)
+            (x, y, z), bevel=0.005, seg=1)
         cheapbox('stair_riser%d' % i, (0.470, 0.020, 0.090), R.MAT_DARK,
                  parent, (x, y - 0.105, z - 0.050))
     # stringers
@@ -1550,10 +1567,10 @@ def build_boom_hoses(lift, L_out, L_in):
             y = 0.160 + (L_out + 0.120) * t
             z = BOOM_D / 2 + 0.072 + math.sin(t * math.pi) * 0.045
             pts.append((dx, y, z))
-        R.hose('boom_hose%d' % j, pts, radius=rr, parent=lift, sides=6)
+        hydraulic_hose('boom_hose%d' % j, pts, radius=rr, parent=lift, sides=6)
     # the big free loop at the boom-to-feed transition
     for j, (dx, rr) in enumerate(((-0.030, 0.032), (0.030, 0.030))):
-        R.hose('boom_loop%d' % j, [
+        hydraulic_hose('boom_loop%d' % j, [
             (dx, L_out - 0.180, BOOM_D / 2 + 0.090),
             (dx + 0.060, L_out + 0.320, BOOM_D / 2 + 0.360),
             (dx + 0.040, L_out + L_in + 0.140, BOOM_D / 2 - 0.020),
@@ -1709,10 +1726,10 @@ def build_feed(mast_parent):
         box('feed_rail%d' % (s > 0), (0.030, 0.054, FEED_BODY - 0.040),
             R.MAT_STEEL, index,
             (dx + s * (FEED_W / 2 + 0.008), -FEED_D / 2 + 0.062,
-             (BOT_Z + TOP_Z) / 2), bevel=0.004)
+             (BOT_Z + TOP_Z) / 2), bevel=0.004, seg=1)
     box('feed_topface', (FEED_W - 0.060, 0.020, FEED_BODY - 0.060),
         R.MAT_STEEL, index, (dx, FEED_D / 2 + 0.004, (BOT_Z + TOP_Z) / 2),
-        bevel=0.003)
+        bevel=0.003, seg=1)
     n_hole = 15
     for i in range(n_hole):
         z = BOT_Z + 0.150 + (FEED_BODY - 0.300) * i / (n_hole - 1)
@@ -1759,6 +1776,8 @@ def build_feed(mast_parent):
         R.MAT_CAST, car, (0, body_dz, 0.048), bevel=0.010)
     for j, (hx, rr) in enumerate(((-0.062, 0.019), (-0.021, 0.019),
                                   (0.021, 0.022), (0.062, 0.016))):
+        # Keep the original profile at the carriage's extrema: simplifying
+        # these hoses moved its exported subtree bound by 1.248 mm.
         R.hose('drifter_hose%d' % j, [
             (hx, -0.130, -0.200), (hx * 1.5, -0.200, 0.010),
             (hx, -0.070, 0.140), (hx, body_dz - 0.060, 0.200),
@@ -1903,8 +1922,9 @@ def _bolt(parent, name, x, y, z, length, plated=True):
     cheapbox(name + '_slot', (0.006, BOLT_OD * 0.9, length - 0.10), R.MAT_DARK,
              parent, (x + BOLT_OD / 2, y, z + length / 2))
     if plated:
+        # Keep the plate and domed nut; simplify only the outer edge bevel.
         box(name + '_plate', (PLATE_SQ, PLATE_SQ, PLATE_T), MAT_GALV,
-            parent, (x, y, z + 0.030), bevel=0.010)
+            parent, (x, y, z + 0.030), bevel=0.010, seg=1)
         cone(name + '_nut', NUT_AF / 2 * 1.15, NUT_AF / 2 * 0.62, 0.030,
              MAT_GALV, parent, (x, y, z + 0.034), sides=6)
 
@@ -1997,6 +2017,8 @@ def build_bolting_unit(index, car, spindle_parent, bot_z, top_z, col_z):
     # line running up to the collar, not a pump skid.
     box('inject_guide', (0.130, 0.110, 0.180), R.MAT_DARK, index,
         (bx + 0.190, 0.150, bot_z + 1.180), bevel=0.010)
+    # Keep the original profile at the forward overall extremum: simplifying
+    # this line moved the exported max-z bound by 0.585 mm (glbinfo ruler).
     R.hose('inject_hose', [
         (bx + 0.190, 0.230, bot_z + 1.180),
         (bx + 0.250, 0.330, bot_z + 1.900),
@@ -2019,7 +2041,7 @@ def build_deck_stores(parent):
     for i in range(5):
         box('store_plate%d' % i, (PLATE_SQ, PLATE_SQ, PLATE_T), MAT_GALV,
             parent, (0.720, 0.430, DECK_Z + 0.010 + i * (PLATE_T + 0.002)),
-            (0, 0, 0.06 * i), bevel=0.008)
+            (0, 0, 0.06 * i), bevel=0.008, seg=1)
     # and a short stack of round ones
     for i in range(3):
         cyl('store_rplate%d' % i, PLATE_RD_D / 2, PLATE_T, MAT_GALV, parent,
@@ -2203,7 +2225,7 @@ def build_service_hoses(root):
                                        (-0.060, 0.026, 0.50),
                                        (0.060, 0.030, 0.47),
                                        (0.130, 0.024, 0.41))):
-        R.hose('svc_hose%d' % j, [
+        hydraulic_hose('svc_hose%d' % j, [
             (dx - 0.180, 0.420, DECK_Z - 0.120),
             (dx - 0.120, 1.150, FRAME_Z1 - sag * 0.35),
             (dx, Y_TICK_F - 0.120, FRAME_Z1 - sag),
@@ -2211,7 +2233,7 @@ def build_service_hoses(root):
             (dx * 0.5, Y_FOOT - 0.060, Z_FOOT - 0.140),
         ], radius=rr, parent=root, sides=6)
     # the water line to the boom, run separately as it is on the real machine
-    R.hose('svc_water', [
+    hydraulic_hose('svc_water', [
         (0.640, -2.700, 1.240), (0.680, -1.200, 1.020),
         (0.520, 0.600, DECK_Z + 0.060), (0.300, Y_TICK_F, FRAME_Z1 - 0.240),
         (0.140, Y_FOOT - 0.100, Z_FOOT - 0.220),
