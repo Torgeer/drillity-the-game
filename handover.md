@@ -239,3 +239,53 @@ reviewed, actual-font browser validation remains due. Tunnel-cycle delivery
 fixes the economy fallback only; measured-par progression and public estimator
 still need a coordinated follow-through. The new tool catalogue task owns alias
 arguments and narrow T45 bit data, not rockbolt items or rig definitions.
+## Current live checkpoint — 2026-09-06, 02:36 Stockholm
+
+This update supersedes older pending-task descriptions below. Live Codex usage
+was 32% remaining at the latest check. Graceful shutdown is still at <=5%:
+preserve atomic writes and WIP, finalize this briefing, commit reviewed explicit
+paths, push origin codex/astra-improvements without force, verify remote SHA and
+pause the heartbeat. No actual push has occurred yet.
+
+Current reviewed HEAD: a3fb994. Recent additions: 3d919d3 optimizes/corrects four
+machine source modules with freshly regenerated matching GLBs (12 comparison
+exports,150 node contracts, exact overall bounds; 12040 fewer triangles and
+538392 fewer bytes, NOT a measured FPS improvement). GLBs remain intentionally
+gitignored; scripts and provenance reports reproduce them. f4e8ad9 adds Blender
+UI atlas source and tracked PNGs. a3fb994 fixes selected bolt length and trial-fit
+labels, tunnel whole-cycle billing/estimation, T45 diameters/alias defaults and
+sonic oscillator specification. Domain UI passed18 actual-font phone cases with
+90 native >=44px controls and no measured overlap. Full current preview catalogue
+passed1457 variants/19 GLBs/134585 frames with zero crops.
+
+Root still has UNCOMMITTED renderer hero framing + isolated instruments/warm-up,
+geology deep-profile/cache/font-lifecycle fixes, dedicated gates/reports and
+package check wiring. Focused CPU checks pass; whole build remains due.
+Ten-case actual instrument GPU run FAILED: four unchanged-repeat cases already
+change small hero-band pixel sets, so the outside-world comparison is not yet
+controlled. Six cases have zero differences; all ten have zero opaque optical
+differences. Isolated footer also appears ghosted versus clean shared-chain
+baseline. Do not infer duplicate text declarations or relax thresholds: source
+has one footer. Root is capturing source canvases/intermediate targets and
+repeated shadow states. Report: shots/instrument-grade-integration/report.json;
+independent diagnosis: coordination/instrument-gpu-diagnostics.md.
+
+Claude now explicitly reports STARTED in coordination/claude-sites.md, on
+claude/site-environments in Downloads/threads/drillity-claude-sites, baseline
+673f888. Its reserved eight environments and terrain/site library remain separate;
+none of that candidate work is integrated here. Read CLAUDE_PARALLEL.md and its
+live checkpoint. Root's current hero camera differs from that older baseline,
+so final integrated environment captures must use the combined renderer.
+
+Three new Codex tasks are active in private worktrees: drillity-ui-atlas-game-
+adoption (menu controls and consumer; pre-render patch), drillity-drilling-view-
+space (HUD opportunity toward82%, keeping numeric depth), drillity-contract-
+readiness (pure authoritative preflight; independent37 cases passed; browser
+queued). Full IDs/ownership/GPU queue are in coordination/root-coordinator.md.
+Do not archive these or geology before their final verification. Completed
+optimization, original atlas, preview, contract board, domain, tunnel timing and
+tool catalogue tasks have been integrated and archived.
+
+The paragraph history below remains as provenance; these current facts win
+where status differs. Final shutdown SHA, remote verification and build result
+are still pending.
