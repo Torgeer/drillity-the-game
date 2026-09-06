@@ -149,9 +149,31 @@ test('missing hammer default and all other methods keep existing resolution',()=
     assert.equal(checkMethodEquipment('driven-pile',{hammerId}).ok,true);
     assert.deepEqual(resolveMethod('driven-pile',{hammerId}),baseline.resolveMethod('driven-pile',{hammerId}));
   }
+  /* ── THE CLAIM IS THE GUARD'S SCOPE, NOT A FROZEN TUNING TABLE ─────────
+     This loop compared every other method's resolved tuning against the
+     pre-guard commit byte for byte. The CLAIM it exists to make is "fitting a
+     vibratory hammer changes nothing outside driven-pile", and that claim is
+     still asserted below — but a snapshot of the whole TUNING table is the
+     wrong instrument for it: it fails for any legitimate change to any
+     method's model, forever, on a gate whose subject is one equipment check.
+     It failed first on the CFA concrete-lift programme, which has nothing to
+     do with hammers.
+
+     The replacement measures the property directly and keeps working: with the
+     vibro fitted, every other method must resolve to exactly what it resolves
+     to with nothing fitted. That catches a guard leaking into another method —
+     the actual regression — and it catches it for methods added later, which
+     the snapshot never could. `driven-pile` itself is still compared against
+     the pre-guard baseline in the loop above, and that is the comparison the
+     guard's own subject needs. */
   for (const method of METHODS.filter(m=>m.id!=='driven-pile')) {
     assert.equal(checkMethodEquipment(method.id,{hammerId:vibro}).ok,true);
-    assert.deepEqual(resolveMethod(method.id,{hammerId:vibro}),baseline.resolveMethod(method.id,{hammerId:vibro}));
+    assert.deepEqual(resolveMethod(method.id,{hammerId:vibro}),resolveMethod(method.id,{}),
+      `fitting a vibratory hammer must not change ${method.id} resolution`);
+    // …and it held before the guard existed too, in the baseline's own terms.
+    assert.deepEqual(baseline.resolveMethod(method.id,{hammerId:vibro}),
+      baseline.resolveMethod(method.id,{}),
+      `the pre-guard baseline also ignored the hammer for ${method.id}`);
   }
 });
 test('every shipped impact configuration keeps exact baseline drive behavior',()=>{

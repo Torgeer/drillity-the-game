@@ -19,10 +19,18 @@ const files = ['src/core/gltfRig.js', 'src/rig/rigFactory.js', 'src/sim/drilling
   'public/models/cfa-rig.glb', 'public/models/rc-rig.glb'];
 const hash = path => createHash('sha256').update(readFileSync(resolve(root, path))).digest('hex');
 const fingerprints = Object.fromEntries(files.map(p => [p, hash(p)]));
+/* THESE THREE LINES USED TO SAY THE OPPOSITE, AND THEY WERE TRUE WHEN WRITTEN.
+   The first two are retired by the commit that adds the concrete lift: this
+   gate no longer injects a decreasing `actionDepth` at all — it drives the
+   ACTUAL two-stage programme to depth, turns it round, and follows the real
+   carriage back up. A hardcoded claim inside a gate outlives the defect it
+   describes (ASTRA §10), so they are replaced rather than left standing.
+   The third is untouched: nothing here establishes stroke capacity. */
 const report = { passed: false, fingerprints, cases: [], limitations: [
-  'CFA and cased-CFA currently have no simulated withdrawal or concrete pumping stage.',
-  'Injected decreasing actionDepth checks the runtime return adapter, not a shipping CFA return programme.',
   'Authored stroke saturation does not establish capacity or above-grade auger clearance.',
+  'The withdrawal rate driving this return is a machine cap, not a sourced figure — '
+    + 'src/sim/drilling.js stages[1].liftRateSourced is false.',
+  'Depths, target 18 m and tolerances below are synthetic NOT SOURCED test inputs.',
 ] };
 let checks = 0;
 function ok(condition, message) { assert.ok(condition, message); checks++; }
@@ -93,14 +101,76 @@ try {
         }
         near(Math.abs(result.samples[3].coordinate - result.samples[2].coordinate), 0.002, 'no 3 m rod-cycle jump');
         near(result.samples[0].coordinate, rest[axis], 'depth zero preserves authored rest');
-        // The REAL CFA mirror currently never enters a reverse or pump stage.
-        ok(state.drill.stageCount === 1 && !state.drill.stageReverse, 'actual single-pass CFA state');
-        result.actualStage = { stageCount: state.drill.stageCount, stageId: state.drill.stageId, stageReverse: state.drill.stageReverse };
-        const injectedReturn = [15, 8.5, 3.001, 2.999, 0].map(actionDepth => ({ actionDepth,
-          coordinate: pose({ ...state.drill, active: true, depth: 18, actionDepth, stageReverse: true }) }));
-        for (let i = 1; i < injectedReturn.length; i++) ok((injectedReturn[i].coordinate - injectedReturn[i - 1].coordinate) * direction <= 1e-8, 'injected return reverses feed');
-        near(injectedReturn.at(-1).coordinate, rest[axis], 'injected return ends at authored rest');
-        result.injectedReturn = injectedReturn;
+        /* ── THE ACTUAL RETURN, DRIVEN BY THE ACTUAL PROGRAMME ────────────
+           This block used to inject a decreasing `actionDepth` into `pose()`
+           and check that the carriage followed it. That proved the runtime
+           ADAPTER reverses; it could not prove a return exists, and the sim
+           it was standing in for published `stageCount: 1`. It now runs the
+           real thing: the two-stage CFA programme is driven to depth at its
+           own published optimum, turns round on its own, and the carriage is
+           posed from `state.drill` exactly as the game poses it. */
+        ok(state.drill.stageCount === 2, 'actual two-pass CFA programme');
+        ok(state.drill.stageId === 'bore' && !state.drill.stageReverse, 'the bore is not a reverse pass');
+        const drive = () => {
+          const t = sim.getTelemetry();
+          sim.setInput('feed', t.optimal.wob);
+          sim.setInput('rotation', t.optimal.rpm);
+          sim.setInput('flush', t.optimal.flush);
+          sim.debug.stepFixed(10); sim.update(0);
+        };
+        let guard = 0;
+        while (state.drill.stage === 0 && guard++ < 40000) drive();
+        ok(guard < 40000, 'the programme actually turned round');
+        ok(state.drill.stage === 1 && state.drill.stageId === 'concrete-lift'
+           && state.drill.stageReverse === true, 'actual CFA concrete lift reached');
+        // The pump is armed BEFORE the auger moves — the shipped fact in
+        // FACTS_VERIFIED.md, and stages[1].armOnEnter is what makes it true.
+        ok(Number.isFinite(state.drill.concreteBar) && state.drill.concreteBar > 0,
+          'concrete is pumping at the moment the lift begins');
+        const realReturn = [{ actionDepth: state.drill.actionDepth, coordinate: pose(state.drill) }];
+        let pileLog = null;
+        guard = 0;
+        while (sim.active && guard++ < 60000) {
+          drive();
+          // Read the log while the pour is LIVE. `state.drill` retires these
+          // fields when the pass ends, which is correct and is why a gate that
+          // read them afterwards would be measuring an absence.
+          if (state.drill.concreteRatio != null) {
+            pileLog = { ratio: state.drill.concreteRatio, worst: state.drill.concreteWorstRatio,
+              neckAt: state.drill.concreteNeckAt, bar: state.drill.concreteBar,
+              head01: state.drill.concreteHead01, diaM: state.drill.pileDiaM,
+              tipPressureKnown: state.drill.tipPressureKnown };
+          }
+          if (guard % 20 === 0) realReturn.push({ actionDepth: state.drill.actionDepth, coordinate: pose(state.drill) });
+        }
+        ok(guard < 60000, 'the lift finished rather than running out of budget');
+        realReturn.push({ actionDepth: state.drill.actionDepth, coordinate: pose(state.drill) });
+        // A gate over an empty set passes forever: measuring nothing is a failure.
+        ok(realReturn.length >= 5, `the return was sampled ${realReturn.length} times, not asserted`);
+        ok(realReturn.at(-1).actionDepth < realReturn[0].actionDepth - 1, 'actionDepth actually counted back down the hole');
+        for (let i = 1; i < realReturn.length; i++) {
+          ok((realReturn[i].coordinate - realReturn[i - 1].coordinate) * direction <= 1e-8, 'real return reverses feed');
+        }
+        // Tolerance, not identity: the last frame of a real run lands wherever
+        // the fixed step left it, and demanding 1e-8 there would be asserting
+        // the step size rather than the motion.
+        ok(Math.abs(realReturn.at(-1).coordinate - rest[axis]) < 0.02,
+          `real return ends at authored rest: ${realReturn.at(-1).coordinate} vs ${rest[axis]}`);
+        result.actualStage = { stageCount: state.drill.stageCount, stageId: state.drill.stageId,
+          stageReverse: state.drill.stageReverse, passM: state.drill.passM };
+        result.realReturn = realReturn;
+        /* The pile log, measured off the actual run. The ratio band is the one
+           sourced number on this pass and a clean pour has to land inside it,
+           or the model's own optimum is telling the player to neck the pile. */
+        ok(pileLog && Number.isFinite(pileLog.ratio), 'the pile log was measured during the pour');
+        ok(pileLog.tipPressureKnown === false, 'the tip pressure is published as NOT known');
+        // A clean pour at the model's own optimum has to land inside the one
+        // sourced band on this pass, or the green band is telling the player to
+        // neck the pile. 1.15-1.20, [BUNGENSTAB] via research/CFA_CONCRETING_PROGRAMME.md.
+        ok(pileLog.ratio >= 1.13 && pileLog.ratio <= 1.22,
+          `optimum pour lands in the sourced volume-ratio band: ${pileLog.ratio}`);
+        ok(pileLog.ratio > pileLog.neckAt, 'the optimum pour is above the theoretical bore volume');
+        result.pileLog = pileLog;
         near(pose({ ...state.drill, active: false, actionDepth: 0 }), rest[axis], 'inactive zero-depth pose preserves rest');
         ok(Number.isFinite(pose({ ...state.drill, actionDepth: NaN })), 'nonfinite action state cannot corrupt transform');
       } finally { sim.dispose(); }
@@ -148,4 +218,5 @@ try {
 const args = process.argv.slice(2), i = args.indexOf('--json');
 if (i >= 0) { assert.ok(args[i + 1], '--json requires a path'); const path = resolve(root, args[i + 1]);
   mkdirSync(dirname(path), { recursive: true }); writeFileSync(path, JSON.stringify(report, null, 2) + '\n'); }
-console.log(`CFA feed: ${checks} checks passed across ${report.cases.length} actual builds (5 GLB, 2 procedural). No simulated CFA return/pumping stage exists.`);
+console.log(`CFA feed: ${checks} checks passed across ${report.cases.length} actual builds (5 GLB, 2 procedural), 
+driving the real two-stage CFA programme through its bore and its concrete lift.`);

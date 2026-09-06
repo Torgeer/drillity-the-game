@@ -28,6 +28,98 @@ import { getItem } from '../game/data.js';
 import { checkEquipmentSupport } from '../game/equipment-support.js';
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   OVER-FLIGHTING — the CFA bore's own gauge, and the one sourced number in
+   this file that is measured in revolutions rather than metres.
+
+   Both CFA rows share it, so it is one object rather than two copies that can
+   drift apart. Everything in it is sourced; see
+   `research/CFA_CONCRETING_PROGRAMME.md` for the quotes and the URLs.
+
+   The mechanism, in the guidance's own words: *"rotation slightly greater than
+   one rotation per flight pitch is required to loosen the soil and allow the
+   tool to penetrate"*, and where more is turned than that, *"soil transported
+   is greater than the volume of soil contained between the flights per
+   revolution"* — which is ground leaving the site up the auger. The cost is
+   not the pile. It is *"undetected voids or excessive settlement below a
+   piling platform"*, which *"may undermine the stability of the piling machine
+   relying on its support"* `[FPS-OF]` §3.
+   ═══════════════════════════════════════════════════════════════════════════ */
+const FLIGHTING = {
+  /* The drive head's rotation, in real rpm. Sourced for the machine this game
+     ships as the CFA rig: `research/rigs/cfa-rig.md` records "Rotary 248 kNm,
+     6–28 rpm" from the manufacturer page it hashes. */
+  rpmMin: 6, rpmMax: 28, sourcedRpm: true,
+  /* Auger pitch from pile diameter. `src/rig/tools.js:4081` carries the same
+     ratio with its source beside it — "Liebherr's CFA-AU data gives 500→350,
+     600→450, 900→650, 1200→900 — P/D ≈ 0.72-0.75" — and clamps it to the
+     250–950 mm band. The tool geometry and the simulation must not disagree
+     about the pitch of the same auger, so this is that number, not another. */
+  pitchPerDia: 0.735, pitchMinM: 0.25, pitchMaxM: 0.95, sourcedPitch: true,
+  /* THE COMPETENT BAND, in revolutions per pitch of penetration. FHWA GEC-8
+     (Brown et al. 2007) *"suggests maintaining the number of revolutions per
+     auger pitch penetration between 1.5 and 2"*, quoted in `[SIEGEL]` p.4.
+     One revolution per pitch is the geometric identity — the auger advancing
+     exactly its own pitch each turn — and the guidance's "slightly greater
+     than one" is the floor under this band `[FPS-OF]` §3. */
+  optRevPerPitchLo: 1.5, optRevPerPitchHi: 2.0, sourcedBand: true,
+  /* THE TRIGGER, in revolutions per METRE — a different ratio, and it is the
+     one written into a specification. ICE SPERW 2007 §C4.4.2, quoted verbatim
+     in `[FPS-OF]` §4: excessive flighting *"may be defined as rate of
+     penetration of less than 1 m per 10 auger revolutions for standard or
+     heavy duty CFA augers and could be less than 1 m per 20 auger revolutions
+     for extra heavy duty CFA augers."* The game ships standard and HD flights,
+     so 10 is the live figure. The 20 is deliberately NOT carried here as a
+     second constant with no consumer: it belongs to a duty class the catalogue
+     does not have, and the clause above is the record of it. */
+  trigRevPerM: 10, sourcedTrigger: true,
+  /* THE COST, AND ITS CEILING. `[TOM]` §2.4.2: in loose silty sands
+     over-rotation disturbs the surrounding soil and *"can reduce shaft
+     resistance by 30 %."* Measured independently at 73–91 % of calculated
+     shaft resistance across penetration ratios of 1.9 to 9.8 `[SIEGEL]` p.10
+     — and the same paper is explicit that *"the reduction does not appear to
+     be predictable as a proportion to the number of rotations or the auger
+     penetration ratio."* So the CEILING is sourced and the shape by which the
+     game reaches it is not: metres flighted accumulate linearly to a cap that
+     is the one published number, and nothing here claims a curve. */
+  lossMax: 0.30, sourcedLossCeiling: true, sourcedLossShape: false,
+  /* ── AND IT IS MEASURED WITHOUT BEING CHARGED, ON PURPOSE ────────────────
+     `revPerM` is an identity — rotations divided by metres per minute — so it
+     is only as real as the two quantities that go into it. The rpm is real
+     (the shipped rig's own 6–28 band). THE RATE IS NOT ON THE SAME FOOTING:
+     `game/data.js` gives CFA `nominalRop: 25` m/h and this file caps it at 75,
+     and measured through the actual model an 18 m bore runs at about 23 m/h.
+     Put that into the identity at a real auger's rotation and every CFA bore
+     in the game reads 30–80 revolutions per metre against SPERW's trigger of
+     10 — which does not mean every bore in the game is over-flighting. It
+     means the CFA rate model and a real auger's geometry are not yet
+     expressed in the same units, which is the third item in the handover's
+     own list: *"`nominalRop`, model caps and actual drilling rates have
+     different definitions"*.
+
+     Inverting the identity says the same thing from the other side: at the
+     model's 25 m/h and a 441 mm pitch, holding the sourced competent band of
+     1.5–2.0 revolutions per pitch would need the head to turn at about
+     1.7 rpm, which is a quarter of the slowest speed the drive has.
+
+     So the gauge is COMPUTED AND PUBLISHED — it is a measurement, and hiding
+     it would hide the finding — and it does not touch the score until the two
+     rate definitions are reconciled. Charging for it would grade every player
+     30 % down for a mismatch in the game's own units, and inventing a
+     scaling factor to make the number come out right is exactly the plausible
+     invented constant the owner's rule forbids. `concreteQuality()` reads
+     this flag; flip it in the same commit that reconciles the rate. */
+  chargeScore: false,
+  /* Which beds are prone to it. Sourced as a NAMED LIST, not as a weighting:
+     *"soft clays, loose silts and sandy silts… loose single sized sands have
+     been noted as being susceptible to collapse"*, and soft ground overlying
+     firm-to-hard strata `[FPS-OF]` §3. The multipliers are game tuning and
+     print nowhere. */
+  prone: { silt: 1.35, sand: 1.25, topsoil: 1.20, clay: 1.05, gravel: 0.85,
+           marl: 0.70, chalk: 0.65, till: 0.60, _default: 0.60 },
+  proneSourced: false,
+};
+
+/* ═══════════════════════════════════════════════════════════════════════════
    TUNING — every number in the model lives here.
    ═══════════════════════════════════════════════════════════════════════════ */
 export const TUNING = {
@@ -663,6 +755,34 @@ export const TUNING = {
       colCut: 0.55,           // full penalty, in column index
     },
 
+    /* ── LOSING THE CONCRETE HEAD ON A CFA LIFT ───────────────────────────
+       The same hazard kind as jet grouting's `return-lost` — the fluid that
+       should be at the tool is not there, and the haptic vocabulary already
+       files that under "the ground went away" — but the CORRECT ANSWER IS THE
+       OPPOSITE ONE, and that is why it has its own row rather than reusing
+       jet's constants. On a jetting lift you CUT THE PUMP, because the mix is
+       escaping into the formation. On a CFA lift you SLOW THE WITHDRAWAL and
+       PUMP HARDER, because the void behind the auger is not being filled:
+
+         *"Raising up the withdraw auger speed can simultaneously reduce the
+          pumping pressure. In such cases, the space between the auger tip and
+          soil cannot be completely filled by concrete, resulting in a soil
+          collapse inward and a neck in the pile. To avoid it, the operator has
+          to control the auger withdraw rate…"*   [BUNGENSTAB] §3
+
+       And the specification's own instruction for the auger that has come away
+       from its concrete: *"it shall be reinserted to the original tip elevation
+       and the rate of withdrawal decreased"* [UFGS-ACIP] §1.6. Slowing down IS
+       the answer, in the source's words. */
+    cfaHead: {
+      sec: 4.0,
+      liftMax: 0.40,          // ease the withdrawal to at or below this ...
+      supplyMin: 0.55,        // ... and hold at least this much pump
+      mishandlePerSec: 0.34,  // shaft penalty banked per second of the wrong answer
+      recoverPerSec: 0.10,    // ... and how slowly it stops costing once fixed
+      colCut: 0.55,           // full penalty, in the placement index
+    },
+
     /* Fallback hazard rates when geology is not emitting them, PER METRE.
        These were authored against 50 m holes. A method drilling thousands of
        metres must scale them down with `hazardScale`, or a 2,000 m well takes a
@@ -886,6 +1006,102 @@ export const TUNING = {
       bandMul: 1.10, driftMul: 0.85, casing: true, impact: 'grind',
       bitKinds: ['tricone', 'drag', 'auger', 'bucket'],
     },
+    /* ═════════════════════════════════════════════════════════════════
+       CFA — TWO PASSES, AND THE SECOND ONE IS THE PILE.
+
+       This method used to be a single downward bore, which is not a
+       simplification of CFA — it is the half of CFA that does not make the
+       product. A continuous flight auger pile is screwed to depth in one
+       pass, high-slump concrete is pumped down the hollow stem, and **the
+       auger is then withdrawn against that pump**. `FACTS_VERIFIED.md`
+       already ships the rule in the game's own voice — *"CFA never lifts the
+       auger until concrete is pumping. Pull dry and the bore collapses."* —
+       and until this commit nothing in the simulation could make that true or
+       false. `tools/checkcfafeed.mjs` said so out loud in its own limitation
+       list, and `research/CFA_FEED_MOTION.md` §"Limits that remain open"
+       said an injected `actionDepth` is the runtime adapter, not a programme.
+
+       The design was already written and never built: `research/05` §E3
+       ("Concreting up — the tension") specifies the three controls, the
+       per-metre volume-ratio loop and both failure directions. This is that
+       design, with every constant traced in
+       `research/CFA_CONCRETING_PROGRAMME.md`.
+
+       ── THE THREE CONTROLS, AND THE HUD ALREADY PRINTS THEM ──
+       `ui/screens/site.js` CONTROL_SETS.cfa has said this since before there
+       was anything behind it:
+            ADVANCE (wob)   = PENETRATION RATE  → on the lift, WITHDRAWAL RATE
+            WORK    (rpm)   = ROTATION
+            PROTECT (flush) = CONCRETE PRESSURE
+       The third slider was labelled for a concrete pump the model did not
+       have. That is the same defect jet grouting carried, and the fallback
+       note below this table warns about it by name.
+
+       ── WHAT IS SOURCED, AND IS THEREFORE MODELLED ──
+       • THE SEQUENCE. Screw to depth; pump; *"once sufficient pressure has
+         built up"* withdraw at a controlled rate `[TOM]` §2.4.2, §3.4.7. A
+         two-pass method whose second pass runs backwards — the `stages[]`
+         machinery `hdd`, `raise-boring` and `jet-grouting` already use.
+       • THE PUMP, BOTH ENDS. 55–95 bar working pressure `[FPS-PUMP]`, and a
+         published ACIP grout pump delivering *"approximately 46 m3 (60 yd3)
+         per hour"* `[SIEGEL]` p.6. So `bar` and `m3/h` on this pass are real
+         numbers on real machine limits, which is the only reason this file
+         will put either unit on a 0..1 slider.
+       • THE ACCEPTANCE BAND. The KPI is the volume ratio per metre, and the
+         band is quoted in three independent places: the operator controls the
+         withdrawal *"so there is always a positive pressure of about 50 to
+         100 kPa and a relative consumption ratio (real to theoretical volume)
+         of about 15 to 20 % of concrete"* `[BUNGENSTAB]` §3; the concrete
+         placed must not be *"less than the volume of soil removed during the
+         pile boring"* `[FPS-OF]` §2; and *"the volume of grout per linear
+         foot of pile shall be not less than the volume of grout per foot of
+         test piles"* `[UFGS-ACIP]` §3.1.
+       • THE FAILURE, AND ITS MECHANISM. *"Raising up the withdraw auger speed
+         can simultaneously reduce the pumping pressure. In such cases, the
+         space between the auger tip and soil cannot be completely filled by
+         concrete, resulting in a soil collapse inward and a neck in the
+         pile."* `[BUNGENSTAB]` §3. The other end is real too and is NOT a
+         defect of the same kind: over-supply is *"concrete you paid for"*
+         (`research/05` §E3), and pressed too hard into soft ground it makes
+         bulges, *"commonly undesirable because of soil negative friction
+         effect"* `[BUNGENSTAB]` §3.
+       • THE AUGER JUMP. *"If the auger jumps upward during withdrawal, it
+         shall be reinserted to the original tip elevation and the rate of
+         withdrawal decreased to prevent further jumping."* `[UFGS-ACIP]`
+         §1.6 — a real event with a real, non-obvious answer.
+       • OVER-FLIGHTING, ON THE WAY DOWN. *"Excessive penetration resistance
+         or flighting in typical soils may be defined as rate of penetration
+         of less than 1 m per 10 auger revolutions"* — ICE SPERW 2007 §C4.4.2,
+         quoted verbatim in `[FPS-OF]` §4 — and the competent band is *"the
+         number of revolutions per auger pitch penetration between 1.5 and
+         2"* (FHWA GEC-8, Brown et al. 2007, quoted in `[SIEGEL]` p.4). The
+         cost is sourced and bounded: in loose silty sands over-rotation
+         *"can reduce shaft resistance by 30 %"* `[TOM]` §2.4.2 — measured
+         independently at 73–91 % of calculated shaft resistance over
+         penetration ratios of 1.9 to 9.8 `[SIEGEL]` p.10.
+       • WHY IT IS HIDDEN. Unlike a conventional bored pile *"you cannot
+         inspect the stratification or the soil quality during installation"*
+         `[TOM]` §2.4.2. The pile log is the only witness, which is why the
+         score is the log and not the clock.
+
+       ── WHAT IS NOT SOURCED, AND IS THEREFORE NOT CLAIMED ──
+       • THE WITHDRAWAL RATE. No document in the pack states one in any unit,
+         and `[UFGS-ACIP]` §1.6 says why in as many words: the magnitude of
+         the pressure and *"other augering and grouting procedures, such as
+         rate of augering, rate of grout injection… are dependent on soil
+         conditions and equipment capability and shall be at the option of
+         the Contractor."* `liftMaxMh` below is a MACHINE CAP with
+         `liftRateSourced: false`, exactly as jet grouting carries its own.
+       • THE TIP PRESSURE. `[BUNGENSTAB]`'s 50–100 kPa is a real band but it
+         is a measurement at the tool, and nothing here computes one. The
+         head gauge is normalised 0..1, prints no unit, and telemetry carries
+         `tipPressureKnown: false`. The sourced part is the RULE — positive at
+         all times `[UFGS-ACIP]` §1.6 — and that is what the gauge enforces.
+       • GROUND TAKE-UP. Only the ORDERING is sourced: soft and loose ground
+         takes more concrete than stiff ground, *"in soft soils… an
+         overconsumption of concrete is often used"* `[BUNGENSTAB]` §3. No
+         table of overbreak by soil exists here and none is invented.
+       ═════════════════════════════════════════════════════════════════ */
     cfa: {
       name: 'CFA', kind: 'auger', rodLength: 0, ropMax: 75,        // continuous — no rod adds
       K: 88, wobExp: 0.30, rpmExp: 0.90, ucsExp: 0.62, ucsFloor: 1.4,
@@ -895,6 +1111,112 @@ export const TUNING = {
       wearMul: 0.7, heatMul: 0.5, flushK: 0.5, erodeK: 0.35,
       bandMul: 1.20, driftMul: 0.9, casing: false, impact: 'grind',
       bitKinds: ['auger', 'drag'],
+      /* The product is the PILE, and the pile is made on the way up. The run
+         is over when the auger is back at the collar, not when the bore
+         reaches the contract depth — the same as all three other two-pass
+         methods. (`game/data.js` says `scoredOn: 'metres drilled'` for both
+         CFA rows. That is the wrong axis for a method whose deliverable is a
+         concrete column, and it is not this file's field to change.) */
+      completeOnProgramme: true,
+      score: { weights: { time: 0.10, groove: 0.10, bit: 0.06, straight: 0.04,
+                          hazard: 0.10, safety: 0.10, quality: 0.50 } },
+      stages: [
+        { id: 'bore', name: 'Auger to depth', reverse: false, flight: FLIGHTING },
+        { id: 'concrete-lift', name: 'Concrete & extract', reverse: true,
+          /* The auger is not cutting on the way up; it is being hauled out of
+             a hole it already made, against a pump. The rate is the
+             withdrawal the operator COMMANDS, capped by the winch — the same
+             commanded-rate branch the jet grouting lift and the CPT push use,
+             and the reason ADVANCE lifts here instead of pushing down. */
+          liftMaxMh: 190,
+          liftRateSourced: false,   // ← no withdrawal rate is sourced in any unit
+          /* THE CONCRETE IS PUMPED BEFORE THE AUGER MOVES. This is the whole
+             rule, it is already a shipped fact, and `armOnEnter` is what makes
+             it true: the pass opens with the pump at the pass's own optimum
+             instead of carrying the bore's third-slider setting into the first
+             metres of the pile. Those first metres are the toe. */
+          armOnEnter: true,
+          /* PROTECT is the pump on this pass, and the pump is also what is
+             circulating: 55–95 bar of concrete going down the stem and spoil
+             riding the flights out. So `circulationNow()` reads the third
+             slider here exactly as it does on an ordinary method — no
+             `flushFromWork`, no `flushOff`. */
+          ownsReturns: true,        // this pass computes its own head at the tip
+          gauge: { axis: 'ratio', label: 'CONCRETE', unit: '', max: 2.0 },
+          optWob: 0.45,             // a withdrawal, not a thrust
+          /* ROTATION ON THE WAY UP IS NOT FREE. `[FPS-OF]` §5, control
+             measures: *"over rotation during the concreting phase should be
+             minimised"*. Turning the auger while lifting flights more soil
+             out of a hole that is being filled with concrete. Low, not zero:
+             the flights have to keep moving their load to the surface. */
+          optRpm: 0.22,
+          /* The competent pump setting is NOT a constant — it is whatever
+             matches the withdrawal the operator has chosen, for the diameter
+             being poured. `optimalNow()` computes it; this is the value the
+             band falls back to when there is no live command yet. */
+          optFlush: 0.62,
+          heatMul: 0.05,            // nothing is cutting and the stem is full of concrete
+          wearMul: 0.35,            // the flights wear on the way down, not on the way up
+          loadDrain: 0.30,          // spoil rides the flights out; the annulus does not pack
+          concrete: {
+            /* ── SOURCED, BOTH ENDS: THE PUMP ─────────────────────────── */
+            pumpMinBar: 55, pumpMaxBar: 95,   // [FPS-PUMP] working pressure
+            pumpMaxM3h: 46,                   // [SIEGEL] p.6, ACIP grout pump, 46 m3/h
+            sourcedPump: true,
+            /* ── SOURCED: THE ACCEPTANCE BAND ON THE RATIO ─────────────
+               Dimensionless, so it can be shown as a number without
+               inventing a unit. 1.00 is the theoretical bore volume;
+               anything under it is a void that was not filled. */
+            neckAt: 1.00,                     // [FPS-OF] §2, [UFGS-ACIP] §3.1, [05] §E3
+            targetLo: 1.15, targetHi: 1.20,   // [BUNGENSTAB] §3, "15 to 20 %"
+            sourcedBand: true,
+            /* The GREEN BAND's half-width, which is not the acceptance band —
+               see `bandHalfOverride()`. Game tuning, and it prints nowhere. */
+            gaugeTol: 0.10,
+            /* Nominal diameter when the contract does not name one. Mirrors
+               `game/data.js` METHODS.cfa `nominalDia`, which is that file's
+               authority; nothing here invents a pile size. */
+            nominalDiaMm: 600,
+            /* ── NORMALISED GAME TUNING BELOW THIS LINE ────────────────
+               Not one of these prints beside a unit, and `sourced: false` is
+               carried into telemetry so no caption can quote them. */
+            sourced: false,
+            /* THE HEAD AT THE TIP. The sourced rule is that it is positive at
+               all times [UFGS-ACIP] §1.6; the sourced magnitude (50–100 kPa,
+               [BUNGENSTAB] §3) is a measurement this model does not make, so
+               the gauge is an index and `tipPressureKnown` is false. It rises
+               with the surplus the pump is putting in over what the metre
+               needs, and it is what actually falls when the operator lifts
+               faster than the pump can follow — which is the mechanism the
+               source describes, not an analogy for it. */
+            headIdeal: 0.50, headPerSurplus: 0.62, headLambda: 2.2,
+            dryAt: 0.12,              // below this the auger is effectively lifting dry
+            bulgeAt: 0.86,            // above it the ground is taking a bulge, not a shaft
+            /* GROUND TAKE-UP — how much more than the theoretical bore this
+               bed will actually accept before the surplus stops being volume
+               and becomes pressure. ORDERING ONLY: loose and soft above
+               stiff, per [BUNGENSTAB] §3 and [FPS-OF] §3. No overbreak table
+               by soil exists in the pack and none is invented here; this
+               scales a ceiling on an index, not a diameter. Restricted to the
+               beds `game/data.js` `validGround` lists for CFA, plus the two a
+               bore can stray into. */
+            takeUp: {
+              topsoil: 1.55, silt: 1.50, sand: 1.42, gravel: 1.38,
+              clay: 1.26, marl: 1.20, chalk: 1.18, till: 1.16,
+              _default: 1.15,
+            },
+            /* A NECK IS PERMANENT AND A GOOD METRE DOES NOT UNDO IT, which is
+               why the worst section carries most of the mark — the same
+               argument jet grouting's column makes, for the same reason. */
+            neckColMul: 0.55,         // what a metre placed under 1.00 is worth
+            bulgeColMul: 0.88,        // ... and a metre pressed into a bulge
+            /* THE AUGER JUMP. [UFGS-ACIP] §1.6 names the event and its
+               answer: reinsert and SLOW DOWN. Fires when the head is gone and
+               the withdrawal is still fast. */
+            jumpLiftMin: 0.62,
+          },
+        },
+      ],
     },
     'cased-cfa': {
       name: 'Cased CFA', kind: 'auger', rodLength: 0, ropMax: 55,
@@ -906,6 +1228,46 @@ export const TUNING = {
       wearMul: 0.8, heatMul: 0.55, flushK: 0.5, erodeK: 0.25,
       bandMul: 1.15, driftMul: 0.9, casing: true, impact: 'grind',
       bitKinds: ['auger', 'drag'],
+      completeOnProgramme: true,
+      score: { weights: { time: 0.10, groove: 0.10, bit: 0.06, straight: 0.04,
+                          hazard: 0.10, safety: 0.10, quality: 0.50 } },
+      stages: [
+        { id: 'bore', name: 'Auger to depth', reverse: false, flight: FLIGHTING },
+        { id: 'concrete-lift', name: 'Concrete & extract', reverse: true,
+          /* Slower than plain CFA on the way out: there is a counter-rotating
+             casing to recover as well as an auger, and the machine is the
+             heaviest in the piling family (`research/05` §A7). The number is
+             a machine cap and is no more sourced than the CFA one. */
+          liftMaxMh: 150,
+          liftRateSourced: false,
+          armOnEnter: true,
+          ownsReturns: true,
+          gauge: { axis: 'ratio', label: 'CONCRETE', unit: '', max: 2.0 },
+          optWob: 0.45, optRpm: 0.22, optFlush: 0.62,
+          heatMul: 0.05, wearMul: 0.35, loadDrain: 0.30,
+          concrete: {
+            pumpMinBar: 55, pumpMaxBar: 95, pumpMaxM3h: 46, sourcedPump: true,
+            neckAt: 1.00, targetLo: 1.15, targetHi: 1.20, sourcedBand: true, gaugeTol: 0.10,
+            nominalDiaMm: 750,        // mirrors game/data.js METHODS['cased-cfa'].nominalDia
+            sourced: false,
+            headIdeal: 0.50, headPerSurplus: 0.62, headLambda: 2.2,
+            dryAt: 0.12, bulgeAt: 0.86,
+            /* THE CASING IS THE POINT OF THIS METHOD. It holds the bore while
+               the concrete goes in, so the ground takes far less than it does
+               on an open CFA bore — that is what the double-rotary system is
+               bought for (`research/05` §A7: it exists for the ground *"where
+               you must not lose spoil to the surrounding soil"*). Ordering
+               only, and the ordering is the same one, compressed. */
+            takeUp: {
+              topsoil: 1.28, silt: 1.26, sand: 1.24, gravel: 1.22,
+              clay: 1.18, marl: 1.16, chalk: 1.15, till: 1.15, boulder: 1.15,
+              _default: 1.14,
+            },
+            neckColMul: 0.55, bulgeColMul: 0.88,
+            jumpLiftMin: 0.62,
+          },
+        },
+      ],
     },
     hdd: {
       // 4.6 m is the real HDD pipe length, it is what METHODS in game/data.js
@@ -3612,6 +3974,12 @@ export function createDrillSim(ctx = {}) {
        packing off until the ground heaves. It is the only gauge in this file
        that is wrong at BOTH ends of its travel. */
     if (axis === 'return') return clamp(S.prog?.jet ? nz(S.prog.jet.return01) : 0, 0, T.torque.displayMax);
+    /* …and on a CFA pour it is measured in the VOLUME RATIO. The sourced KPI
+       is "concrete volume ratio at every metre of the withdrawal" (research/05
+       §A6), it is dimensionless, and like the jet grouting return it is wrong
+       at both ends: under 1.00 there is a void behind the auger, and far above
+       the ground's take-up the pump is making a bulge instead of a shaft. */
+    if (axis === 'ratio') return clamp(S.prog?.concrete ? nz(S.prog.concrete.ratio) : 0, 0, T.torque.displayMax);
     if (axis === 'set') {
       const mm = S.prog ? S.prog.measuredSetMm : 0;
       return clamp(Math.pow(clamp(mm / m.pile.setGaugeMaxMm), m.pile.gaugeExp));
@@ -3663,6 +4031,18 @@ export function createDrillSim(ctx = {}) {
       const st = activeStage();
       return clamp(nz(st && st.jet && st.jet.retIdeal, 0.5), 0.1, 0.95);
     }
+    /* The written acceptance band, and it is written in three places: place
+       15–20 % more than the theoretical bore volume `[BUNGENSTAB]` §3, never
+       less than the volume of soil removed `[FPS-OF]` §2, never less than the
+       test pile's volume per metre `[UFGS-ACIP]` §3.1. Its centre is the
+       midpoint of the one band that carries numbers. Like the return above it
+       is a standard, not a moving sweet spot, so it does not drift and it does
+       not narrow with a worn flight. */
+    if (axis === 'ratio') {
+      const st = activeStage();
+      const c = st && st.concrete;
+      return c ? 0.5 * (c.targetLo + c.targetHi) : 1.175;
+    }
     if (axis === 'set') {
       const d = S.prog ? S.prog.designSetMm : 5;
       return clamp(Math.pow(clamp(d / m.pile.setGaugeMaxMm), m.pile.gaugeExp));
@@ -3691,6 +4071,21 @@ export function createDrillSim(ctx = {}) {
     if (axis === 'return') {
       const st = activeStage();
       return Math.max(TUNING.groove.minHalfWidth, nz(st && st.jet && st.jet.retTol, 0.16));
+    }
+    /* ── THE GAUGE BAND IS NOT THE ACCEPTANCE BAND, AND SAYS SO ──────────
+       The acceptance band is ±0.025 about 1.175 and it is the sourced one:
+       telemetry publishes `targetLo`/`targetHi`, the log prints against it,
+       and `concreteQuality()` grades on the ratio continuously. But one step
+       of a touch slider moves this ratio by roughly 0.02, so a GREEN BAND
+       ±0.025 wide would be narrower than the control that has to reach it —
+       and a band the machine cannot be held on is the reachability failure
+       ASTRA §1.3 and the raise-boring band centre already cost this project
+       twice. So the groove axis gets a working band and the SCORE keeps the
+       standard. The two are different things and they are published
+       separately rather than one quietly standing in for the other. */
+    if (axis === 'ratio') {
+      const st = activeStage();
+      return Math.max(TUNING.groove.minHalfWidth, nz(st && st.concrete && st.concrete.gaugeTol, 0.10));
     }
     if (axis === 'set') {
       const p0 = m.pile;
@@ -4343,6 +4738,26 @@ export function createDrillSim(ctx = {}) {
          metre. The bind model owns the consequence, so the escape that already
          exists (work the string) is the escape here too. */
       if (h.kind === 'pull-stall') {
+        /* ── THE SAME KIND, A DIFFERENT MACHINE ──────────────────────────
+           On a CFA lift this event is the AUGER JUMP, not a stalling reamer,
+           and the specification gives the answer in its own words: *"If the
+           auger jumps upward during withdrawal, it shall be reinserted to the
+           original tip elevation and the rate of withdrawal decreased to
+           prevent further jumping"* [UFGS-ACIP] §1.6. Slowing down is the
+           whole of it — there is no flush to hold open, the stem is full of
+           concrete, and asking for one would grade the player on a lever this
+           machine does not have. */
+        const ch = S.prog && S.prog.concrete;
+        if (ch) {
+          const cz = T.hazard.cfaHead;
+          if (S.act.wob <= cz.liftMax) h.goodTime += dt;
+          else { h.badTime += dt; S.prog.concrete.mishandled = clamp(nz(ch.mishandled) + cz.mishandlePerSec * dt); }
+          if (h.t >= cz.sec) {
+            if (S.act.wob > cz.liftMax) S.prog.stalls++;
+            finishHazard(h, h.goodTime > h.badTime);
+          }
+          continue;
+        }
         const ps = T.hazard.pullStall;
         const eased = S.act.wob <= ps.rateMax
           && (S.m.stages && S.m.stages[1] && S.m.stages[1].flushOff ? true : S.act.flush >= ps.flushMin);
@@ -4373,6 +4788,28 @@ export function createDrillSim(ctx = {}) {
          moving: a faster withdrawal makes less per metre, so the pressure has
          somewhere to go other than into lifting whatever is standing on top of
          it. Cutting the pump also helps and is not required. */
+      /* ── the concrete head, and why it cannot share jet grouting's answer ──
+         Same hazard kind, opposite lever. A jetting monitor that has lost its
+         return is pumping into the formation and the answer is to CUT THE
+         PUMP. A CFA auger that has lost its head is not filling the void
+         behind itself and the answer is to SLOW DOWN AND PUMP HARDER — the
+         instinct the jet grouting handler would punish. Two machines, one
+         gauge reading, and the wrong answer on either one is a defective pile.
+         [BUNGENSTAB] §3, [UFGS-ACIP] §1.6. */
+      if (h.kind === 'return-lost' && S.prog && S.prog.concrete) {
+        const cz = T.hazard.cfaHead;
+        const C = S.prog.concrete;
+        const right = S.act.wob <= cz.liftMax && S.act.flush >= cz.supplyMin;
+        if (right) h.goodTime += dt;
+        else {
+          h.badTime += dt;
+          // The cost is not the event, it is the shaft being poured through it.
+          C.mishandled = clamp(nz(C.mishandled) + cz.mishandlePerSec * dt);
+        }
+        if (h.t >= cz.sec) finishHazard(h, h.goodTime > h.badTime);
+        continue;
+      }
+
       if (h.kind === 'return-lost' || h.kind === 'ground-heave') {
         const jr = T.hazard.jetReturn;
         const J = S.prog && S.prog.jet;
@@ -4665,6 +5102,31 @@ export function createDrillSim(ctx = {}) {
     if (st && st.optRpm != null) inp.rpm = st.optRpm;
     if (st && st.optFlush != null) inp.flush = st.optFlush;
     if (st && st.flushOff) inp.flush = 0;
+    /* THE PUMP THAT MATCHES THE WITHDRAWAL THE OPERATOR HAS ACTUALLY CHOSEN.
+       A fixed `optFlush` here would be the same defect as a fixed anything
+       else on this pass: the concrete a metre needs is `pi/4 D^2` times the
+       rate it is going past at, so the competent pump setting for a 1 200 mm
+       pile is not the one for a 400 mm pile, and on a big diameter the fixed
+       value necks every pour while the green band says it is right. This is
+       the one control in the game whose band FOLLOWS another control, and it
+       follows it because the real cab display does: the target concrete rate
+       is shown against the extraction. When the answer runs past 1.0 the pump
+       cannot keep up at that withdrawal, the band pegs, and the only thing
+       left to do is lift slower — which is the correct instruction. */
+    if (st && st.concrete) {
+      /* AND THE WITHDRAWAL IS CAPPED BY THE PUMP, NOT BY THE WINCH.
+         A 1 200 mm pile at the stage's nominal 0.45 of winch speed asks for
+         about 76 m3/h and the pump delivers 46 `[SIEGEL]`, so the band would
+         be telling the operator to lift at a rate that necks the pile no
+         matter what they do with the third slider. On a big diameter the
+         correct instruction is LIFT SLOWER, and this is where it is said:
+         the ADVANCE band comes down to whatever the pump can actually
+         follow. Same arithmetic, solved for the other unknown. */
+      const full = matchedSupply01(st, 1);
+      if (full > 1) inp.wob = Math.min(clamp(inp.wob), clamp(1 / full));
+      const live = S.stage === 1 && S.prog && S.prog.passM > 0;
+      inp.flush = clamp(matchedSupply01(st, live ? clamp(S.act.wob) : clamp(inp.wob)));
+    }
     if (st && st.reverse) return inp;      // the pull axis has its own model
 
     /* NO COMPETENT OPERATOR PARKS THE NEEDLE IN THE RED.
@@ -4685,6 +5147,22 @@ export function createDrillSim(ctx = {}) {
                 * nz(S.bit.wobCap, 1);
     if (q > cap && slope > 1e-3) inp.wob = clamp(inp.wob - (q - cap) / slope, 0.08, 1);
     return inp;
+  }
+
+  /**
+   * The operator hint for a hazard kind, WITH THE MACHINE TAKEN INTO ACCOUNT.
+   *
+   * Two hazard kinds are shared by two different machines whose correct answers
+   * are opposites — `return-lost` (jet grouting cuts the pump; CFA slows down
+   * and pumps harder) and `pull-stall` (a raise borer eases the pull and keeps
+   * the hole open; a CFA auger that has jumped is reinserted and slowed). A
+   * flat table keyed on kind alone would print one machine's instruction on the
+   * other machine's gauge, which is worse than printing nothing: the player
+   * would do the thing that makes it worse, on a caption the game gave them.
+   */
+  function hintFor(kind) {
+    if (S.prog && S.prog.concrete && CFA_HINTS[kind]) return CFA_HINTS[kind];
+    return HINTS[kind] || '';
   }
 
   /** The live instance of a hazard kind, if there is one. */
@@ -6245,6 +6723,7 @@ export function createDrillSim(ctx = {}) {
 
   function startTwoStage() {
     const st = S.m.stages && S.m.stages[1];
+    const st0 = S.m.stages && S.m.stages[0];
     return {
       kind: 'twoStage',
       passM: 0,                 // metres of the SECOND pass completed
@@ -6266,6 +6745,33 @@ export function createDrillSim(ctx = {}) {
         lostEvents: 0, heaveEvents: 0,
         mishandled: 0,        // a return event answered wrongly, still costing column
         erodibility: 0,       // the ground's, right now — ordering only, never a size
+      } : null,
+      /* Only a stage that declares `concrete` carries this, so `p.concrete`
+         being null is the test for "this reverse pass is not a pour"
+         everywhere below — the same shape as `p.jet` above. */
+      concrete: st && st.concrete ? {
+        bar: 0,               // pump pressure, 55–95 bar [FPS-PUMP] — real, and printed
+        supplyM3h: 0,         // what the pump is delivering, m3/h [SIEGEL]
+        demandM3h: 0,         // what a metre of this bore needs at this withdrawal
+        ratio: 0,             // placed / theoretical. THE KPI. Dimensionless on purpose.
+        worstRatio: Infinity, // THE NECK. A pile is as good as its thinnest section.
+        ratioSum: 0, shortSum: 0,
+        head01: 0.5,          // the head at the tip — an index, never a pressure
+        dryM: 0, bulgeM: 0,   // metres placed with the head out of control
+        neckM: 0,             // metres placed under 1.00 — a void that was not filled
+        dryEvents: 0, jumpEvents: 0,
+        mishandled: 0,        // a head event answered wrongly, still costing the shaft
+        takeUp: 0,            // the bed's take-up ceiling right now — ordering only
+        placedM3: 0, theoreticalM3: 0,   // the pile log's two totals
+        diaM: 0,              // the pile being poured, m — the contract's own number
+      } : null,
+      /* THE BORE'S OWN GAUGE, and the only accumulator on this programme that
+         belongs to stage 0. Metres augered above the SPERW flighting trigger,
+         and the shaft loss they have banked — hidden until the log prints,
+         which is what [TOM] §2.4.2 says the method is actually like. */
+      flight: st0 && st0.flight ? {
+        revPerPitch: 0, revPerM: 0, pitchM: 0, rpm: 0,
+        flightedM: 0, loss01: 0, worstRevPerM: 0,
       } : null,
     };
   }
@@ -6310,6 +6816,7 @@ export function createDrillSim(ctx = {}) {
 
     /* ── stage 0: the pilot ── */
     if (S.stage === 0) {
+      if (p.flight) stepFlighting(dt, dBore);
       if (S.depth + dBore >= S.target) {
         const left = Math.max(0, S.target - S.depth);
         beginSecondPass();
@@ -6337,6 +6844,13 @@ export function createDrillSim(ctx = {}) {
        lifts a monitor through a hole that already exists while jets take the
        soil apart around it. It has its own model, and it ends here. */
     if (st.jet) return stepJetLift(dt, dBore, st);
+
+    /* ── the pass that is POURING rather than reaming ────────────────────
+       A CFA auger coming out of the ground is not cutting either, and it is
+       not being hauled into rock: it is being lifted against a concrete pump,
+       and the whole job is whether those two stay matched. Its own model, and
+       it ends here too. */
+    if (st.concrete) return stepConcreteLift(dt, dBore, st);
 
     // PULL FORCE. Not a rate: how hard the head is being hauled into the rock
     // it is breaking, plus whatever has not fallen away behind it.
@@ -6560,6 +7074,268 @@ export function createDrillSim(ctx = {}) {
       - 0.45 * clamp(J.heaveM / m));
   }
 
+  /**
+   * THE PILE BEING POURED, in metres. The contract's own number where it has
+   * one; the method's nominal diameter otherwise, which mirrors `game/data.js`
+   * rather than inventing a size.
+   */
+  function pileDiaM(c) {
+    const mm = nz(S.contract && S.contract.holeDia, 0);
+    return (mm > 0 ? mm : c.nominalDiaMm) / 1000;
+  }
+
+  /**
+   * THE PUMP SETTING THAT MATCHES A GIVEN WITHDRAWAL, 0..1.
+   *
+   * This is the whole method expressed as one line: the metre being made needs
+   * `pi/4 D^2` of concrete, the withdrawal decides how fast that metre goes by,
+   * and the pump has to deliver the two multiplied together — plus the sourced
+   * 15–20 % `[BUNGENSTAB]` that stops it being exactly enough and therefore
+   * sometimes not enough.
+   *
+   * It is a real ratio of real quantities: `pumpMaxM3h` is a published ACIP
+   * grout pump `[SIEGEL]` p.6 and the diameter is the contract's. The only
+   * unsourced number in it is `liftMaxMh`, the winch cap, and that is declared
+   * as such on the stage.
+   *
+   * Returns > 1 when the pump CANNOT keep up with the commanded withdrawal.
+   * That is not an error and it is not clamped away — it is the answer, and the
+   * only thing the operator can do about it is lift slower.
+   */
+  function matchedSupply01(st, lift01) {
+    const c = st.concrete;
+    const dia = pileDiaM(c);
+    const areaM2 = Math.PI * 0.25 * dia * dia;
+    const vMh = clamp(lift01) * nz(st.liftMaxMh, 0);
+    const target = 0.5 * (c.targetLo + c.targetHi);
+    return (areaM2 * vMh * target) / Math.max(1e-6, c.pumpMaxM3h);
+  }
+
+  /**
+   * OVER-FLIGHTING — the CFA bore's own gauge, on the way DOWN.
+   *
+   * The auger is a screw. Turn it exactly one pitch per revolution and it
+   * advances into the ground without moving any more soil than the flights
+   * hold; turn it faster than that, and the difference leaves the site up the
+   * auger. `[FPS-OF]` §3 is explicit that the consequence is not the pile — it
+   * is voids and settlement under the platform the machine is standing on.
+   *
+   * Two sourced ratios, and they are NOT the same number:
+   *   revolutions per PITCH   the competent band, 1.5–2.0 (FHWA GEC-8)
+   *   revolutions per METRE   the specification's trigger, > 10 (SPERW C4.4.2)
+   * Both are computed and both are published. Neither is invented: the rpm
+   * range is the shipped rig's, the pitch is the same P/D the tool geometry
+   * uses, and the trigger is quoted verbatim in the guidance.
+   *
+   * The cost is banked and hidden. `[TOM]` §2.4.2 caps it at 30 % of shaft
+   * resistance and `[SIEGEL]` p.10 says in as many words that the reduction is
+   * not predictable as a proportion of the rotations — so metres accumulate
+   * linearly toward the one published ceiling and no curve is claimed.
+   */
+  function stepFlighting(dt, dBore) {
+    void dt;
+    const p = S.prog, F = p.flight, f = S.m.stages[0].flight;
+    if (!F || !f) return;
+
+    const conc = S.m.stages[1] && S.m.stages[1].concrete;
+    const dia = conc ? pileDiaM(conc) : 0.6;
+    const pitch = Math.min(f.pitchMaxM, Math.max(f.pitchMinM, f.pitchPerDia * dia));
+    const rpm = lerp(f.rpmMin, f.rpmMax, clamp(S.act.rpm));
+
+    F.pitchM = pitch;
+    F.rpm = rpm;
+    /* A RATIO OVER A RATE IS ONLY DEFINED WHILE THE AUGER IS MOVING. An auger
+       turning against a face it is not advancing into has an infinite number of
+       revolutions per metre, and that is a true statement about a divide by
+       zero rather than a reading. Holding the last live value through a stall
+       is the honest answer — and it keeps `Infinity` out of the telemetry,
+       where `toFixed` would print it and JSON would quietly turn it into null. */
+    if (!(dBore > 0)) return;
+
+    // The rate the auger is actually making, in metres per MINUTE. S.rop is
+    // downhole metres per hour, which is the clock the whole model runs on.
+    const vMmin = Math.max(1e-4, S.rop / 60);
+    F.revPerPitch = (rpm * pitch) / vMmin;   // Brown et al. 2007 Eq. 2, via [SIEGEL] p.5
+    F.revPerM = rpm / vMmin;                 // the SPERW ratio, [FPS-OF] §4
+    if (F.revPerM > F.worstRevPerM) F.worstRevPerM = F.revPerM;
+
+    if (F.revPerM > f.trigRevPerM) {
+      F.flightedM += dBore;
+      /* How far past the trigger, capped — a bore turning at ten times the
+         trigger is not ten times as damaging, it has already lost the ground
+         it was going to lose. The ceiling is the sourced 30 %; the fraction of
+         it a metre banks is game tuning and prints nowhere. */
+      const over = clamp((F.revPerM - f.trigRevPerM) / f.trigRevPerM);
+      const prone = nz(f.prone[S.ground.id], f.prone._default);
+      F.loss01 = clamp(F.loss01 + f.lossMax * over * prone * (dBore / Math.max(1, S.target)), 0, f.lossMax);
+    }
+  }
+
+  /**
+   * THE CONCRETE LIFT — CFA's second pass, and the whole of the product.
+   *
+   * The auger is at depth and full of concrete. Nothing below it is being
+   * drilled: the pump is filling the bore from the tip while the flights carry
+   * their soil out, and what is left behind is a cast-in-place pile. The three
+   * controls are the ones `ui/screens/site.js` already prints —
+   *
+   *   ADVANCE  withdrawal rate   how fast the pile is left behind
+   *   WORK     rotation          how much more soil leaves while it is poured
+   *   PROTECT  concrete pressure the pump, 55–95 bar [FPS-PUMP]
+   *
+   * — and the score is PLACEMENT CONTINUITY, weighted on the worst section,
+   * because a shaft with one neck in it is a shaft that did not work.
+   *
+   * TWO SOURCED THINGS DECIDE IT. The volume ratio per metre, whose band is
+   * quoted in three independent places; and the head at the tip, which must be
+   * positive at all times. Everything else here is a normalised tuning
+   * constant that never prints beside a unit — no kPa, no m/min, no overbreak
+   * table by soil. See the method entry in TUNING.
+   */
+  function stepConcreteLift(dt, dLift, st) {
+    const p = S.prog, c = st.concrete, C = p.concrete;
+    if (!C) return 0;
+
+    const lift01 = clamp(S.act.wob);      // ADVANCE — withdrawal rate
+    const rot01 = clamp(S.act.rpm);       // WORK    — rotation while pouring
+    const supply01 = clamp(S.act.flush);  // PROTECT — the pump
+
+    /* ── THE TWO FIGURES WITH A SOURCE, IN THEIR OWN UNITS ──────────────
+       The PROTECT control commands a fraction of a real pump: 55–95 bar of
+       working pressure `[FPS-PUMP]` and about 46 m3/h of delivery `[SIEGEL]`.
+       Both endpoints are published, so both may be printed. */
+    C.bar = lerp(c.pumpMinBar, c.pumpMaxBar, supply01);
+    C.supplyM3h = c.pumpMaxM3h * supply01;
+
+    const dia = pileDiaM(c);
+    const areaM2 = Math.PI * 0.25 * dia * dia;
+    C.diaM = dia;
+    const vMh = lift01 * nz(st.liftMaxMh, 0);
+    C.demandM3h = areaM2 * vMh;
+
+    /* THE RATIO. Placed over theoretical, per metre — `research/05` §E3's core
+       loop, written as the quotient of two rates because that is what it is.
+       A withdrawal of zero is a stopped auger, not an infinite ratio: with the
+       pump running and nothing moving, the head is climbing, and the head is
+       the thing that carries that state. */
+    const raw = C.demandM3h > 1e-6 ? C.supplyM3h / C.demandM3h : (supply01 > 0 ? c.takeUp._default * 2 : 0);
+
+    /* THE GROUND ONLY TAKES SO MUCH. Past its take-up the surplus stops being
+       volume and becomes pressure — which is exactly the mechanism behind a
+       bulge. Ordering only: loose and soft above stiff `[BUNGENSTAB]` §3. */
+    const take = nz(c.takeUp[S.ground.id], c.takeUp._default);
+    C.takeUp = take;
+    C.ratio = Math.min(raw, take);
+
+    /* ROTATION ON THE WAY UP flights more soil out of a bore that is being
+       filled, so the void the same pump has to fill is larger. `[FPS-OF]` §5:
+       over-rotation during the concreting phase should be minimised. */
+    const overRot = Math.max(0, rot01 - nz(st.optRpm, 0.22));
+    C.ratio = Math.max(0, C.ratio - overRot * 0.35);
+
+    /* ── THE HEAD AT THE TIP, WHICH IS THE RULE RATHER THAN A NUMBER ─────
+       An index, not a pressure: the sourced magnitude is a measurement at the
+       tool and nothing here makes one. What IS sourced is that it must be
+       positive at all times `[UFGS-ACIP]` §1.6, and the mechanism by which it
+       is lost — lifting faster than the pump can follow `[BUNGENSTAB]` §3. */
+    const band = 0.5 * (c.targetLo + c.targetHi);
+    const want = c.headIdeal + c.headPerSurplus * (raw - band);
+    C.head01 = clamp(damp(C.head01, clamp(want, 0, 1.25), c.headLambda, dt), 0, 1.25);
+
+    const hz = T.hazard.cfaHead;
+    let place = clamp(C.ratio / Math.max(1e-6, 0.5 * (c.targetLo + c.targetHi)));
+    if (C.head01 <= c.dryAt) {
+      /* NO HEAD. The auger is coming up out of its own concrete and the bore
+         is closing in behind it. This is the one the shipped fact is about. */
+      place *= c.neckColMul;
+      C.dryM += dLift;
+      if (!liveHazard('return-lost')
+          && queueHazard('return-lost', { depth: actionDepth(), severity: 0.85 })) C.dryEvents++;
+      /* THE AUGER JUMP, and it is a different event from the dry lift: the
+         specification's answer is to reinsert and SLOW DOWN, so it only fires
+         while the operator is still hauling. `[UFGS-ACIP]` §1.6. */
+      if (lift01 >= c.jumpLiftMin && !liveHazard('pull-stall')
+          && queueHazard('pull-stall', { depth: actionDepth(), severity: 0.7 })) C.jumpEvents++;
+    } else if (C.head01 >= c.bulgeAt) {
+      // Pressed into soft ground rather than placed: a bulge, and a bulge is
+      // not a bonus — [BUNGENSTAB] §3 calls it undesirable for the negative
+      // friction it attracts.
+      place *= c.bulgeColMul;
+      C.bulgeM += dLift;
+    }
+    C.mishandled = clamp(nz(C.mishandled) - hz.recoverPerSec * dt);
+    place = Math.max(0, place - C.mishandled * hz.colCut);
+
+    /* ── THE PILE LOG ────────────────────────────────────────────────────
+       Sampled per metre LIFTED, so an auger parked at depth accumulates
+       nothing and a slow lift is graded on every metre it actually makes.
+       This is the deliverable `[TOM]` §2.4.2 describes: a strip recording the
+       under- or over-supply of concrete against depth. */
+    if (dLift > 0) {
+      C.ratioSum += C.ratio * dLift;
+      C.shortSum += Math.max(0, 1 - place) * dLift;
+      if (C.ratio < C.worstRatio) C.worstRatio = C.ratio;
+      if (C.ratio < c.neckAt) C.neckM += dLift;
+      C.placedM3 += C.supplyM3h * (dLift / Math.max(1e-6, vMh));
+      C.theoreticalM3 += areaM2 * dLift;
+    }
+
+    if (p.passM >= S.target - 1e-6) {
+      p.quality01 = concreteQuality();
+      complete();
+    }
+    return 0;                    // the contract depth does not grow on the way up
+  }
+
+  /**
+   * THE PILE, which is what CFA is scored on.
+   *
+   * The sourced KPI is "concrete volume ratio at every metre of the
+   * withdrawal, and pumping pressure never below the trigger" (`research/05`
+   * §A6). So the mean ratio is only part of the mark and the WORST SECTION
+   * carries nearly as much: a pile is as good as its thinnest place, and a
+   * player who pours a beautiful 18 m and necks the last 2 has not made a
+   * pile, they have made two.
+   *
+   * The bore's own sin is charged here as well, because it is charged nowhere
+   * else and because that is when it actually arrives: over-flighting is
+   * invisible while it happens and reads on the log at handover.
+   */
+  function concreteQuality() {
+    const p = S.prog, C = p && p.concrete;
+    const c = S.m.stages[1] && S.m.stages[1].concrete;
+    if (!C || !c) return 1;
+    /* NOTHING POURED IS NOT A PERFECT PILE. `worstRatio` starts at Infinity
+       and `shortSum` at 0 — both mean "no neck seen yet", not "no neck". The
+       product of this method is the pile. Until a metre has been lifted there
+       is none, and the mark for it is zero. Same argument as jetQuality(). */
+    if (!(p.passM > 0)) return 0;
+    const m = Math.max(1e-3, p.passM);
+    const mean = clamp(C.ratioSum / m / Math.max(1e-6, 0.5 * (c.targetLo + c.targetHi)));
+    const worst = Number.isFinite(C.worstRatio)
+      ? clamp(C.worstRatio / Math.max(1e-6, c.neckAt)) : 0;
+    const shortFrac = clamp(C.shortSum / m);
+    // Measured, published, and NOT charged until the rate definitions agree.
+    // See FLIGHTING.chargeScore for why, and for what has to change first.
+    const flightLoss = FLIGHTING.chargeScore && p.flight ? clamp(p.flight.loss01) : 0;
+    return clamp(
+      0.34 * mean
+      + 0.32 * worst                     // the neck
+      + 0.20 * (1 - shortFrac)
+      // A metre under the theoretical volume is a void, not a thin pile. It is
+      // charged separately and hardest, because it is the failure the method
+      // exists to avoid and the one nobody can see afterwards.
+      - 0.85 * clamp(C.neckM / m)
+      - 0.40 * clamp(C.dryM / m)
+      // A bulge costs, and costs less: it is concrete in the wrong place
+      // rather than a hole where the pile should be.
+      - 0.20 * clamp(C.bulgeM / m)
+      // The bore's hidden bill, capped by [TOM]'s own 30 %.
+      - flightLoss
+      // …plus 0.14 of headroom, so a clean pour reads 1.00 rather than 0.86.
+      + 0.14);
+  }
+
   /* ═════════════════════════════════════════════════════════════════════
      THE METHOD'S OWN SCORE AXIS
      ═════════════════════════════════════════════════════════════════════ */
@@ -6707,6 +7483,44 @@ export function createDrillSim(ctx = {}) {
               withdrawRateKnown: false,
               rotationSpeedKnown: false,
               needs: 'column diameter by soil, withdrawal rate and monitor rpm are UNVERIFIED (research/05 §A12)',
+            } };
+        }
+        const C = p.concrete;
+        const cs = S.m.stages[1] && S.m.stages[1].concrete;
+        if (C && cs) {
+          const mm = Math.max(1e-3, p.passM);
+          const F = p.flight;
+          return { score: clamp(concreteQuality()),
+            label: S.stage === 0 ? 'BORE' : 'PILE',
+            detail: {
+              stage: S.stage, passM: +p.passM.toFixed(2),
+              /* THE PILE LOG'S OWN NUMBERS. The ratio is dimensionless and its
+                 acceptance band is quoted in three independent sources; the
+                 pump is a real machine at both ends. Nothing here is a
+                 withdrawal rate or a tip pressure. */
+              volumeRatioMean: +(C.ratioSum / mm).toFixed(3),
+              volumeRatioWorst: Number.isFinite(C.worstRatio) ? +C.worstRatio.toFixed(3) : 0,
+              targetLo: cs.targetLo, targetHi: cs.targetHi,
+              metresUnderTheoretical: +C.neckM.toFixed(2),
+              metresLiftedDry: +C.dryM.toFixed(2),
+              metresBulged: +C.bulgeM.toFixed(2),
+              concretePlacedM3: +C.placedM3.toFixed(2),
+              theoreticalM3: +C.theoreticalM3.toFixed(2),
+              pumpBar: Math.round(C.bar),
+              pileDiaM: +C.diaM.toFixed(3),
+              // The bore's hidden bill, and the published ceiling on it.
+              flightedM: F ? +F.flightedM.toFixed(2) : 0,
+              shaftLoss01: F ? +F.loss01.toFixed(3) : 0,
+              shaftLossCeiling01: FLIGHTING.lossMax,
+              worstRevPerM: F ? +F.worstRevPerM.toFixed(1) : 0,
+              triggerRevPerM: FLIGHTING.trigRevPerM,
+              flightingCharged: FLIGHTING.chargeScore,
+              // ── never print what is not sourced ──
+              withdrawRateKnown: false,
+              tipPressureKnown: false,
+              overbreakBySoilKnown: false,
+              needs: 'withdrawal rate, tip pressure magnitude and overbreak by soil are NOT SOURCED '
+                   + '(see research/CFA_CONCRETING_PROGRAMME.md)',
             } };
         }
         return { score: clamp(pullQuality()), label,
@@ -8536,6 +9350,41 @@ export function createDrillSim(ctx = {}) {
           // Column DIAMETER is not published, in any unit, at any confidence.
           pd.columnDiaKnown = false;
         }
+        /* ── THE CFA POUR'S OWN THREE NUMBERS ────────────────────────────
+           Same argument, same gate: these are what the pass is played on, so
+           they belong on the state the HUD reads, and they are published ONLY
+           while the pour is actually running. `concreteRatio` and `concreteBar`
+           carry units because both are sourced; `concreteHead01` is an index
+           and says so through `tipPressureKnown`. */
+        const cs = onReversePass() && S.m.stages[1] && S.m.stages[1].concrete;
+        if (!cs || !p.concrete) {
+          pd.concreteBar = null; pd.concreteRatio = null; pd.concreteWorstRatio = null;
+          pd.concreteNeckAt = null; pd.concreteHead01 = null; pd.concreteHeadIdeal01 = null;
+          pd.pileDiaM = null; pd.tipPressureKnown = null;
+        }
+        if (p.concrete && cs) {
+          pd.concreteBar = Math.round(p.concrete.bar);
+          pd.concreteRatio = p.concrete.ratio;
+          pd.concreteWorstRatio = Number.isFinite(p.concrete.worstRatio) ? p.concrete.worstRatio : null;
+          pd.concreteNeckAt = cs.neckAt;
+          pd.concreteHead01 = clamp(p.concrete.head01, 0, 1.25);
+          pd.concreteHeadIdeal01 = cs.headIdeal;
+          pd.pileDiaM = p.concrete.diaM;
+          // The tip pressure is a MEASUREMENT in the sources, not a model
+          // output here. Nothing may print one, in any unit.
+          pd.tipPressureKnown = false;
+        }
+        /* The bore gauge stays published across both passes: the flighting is
+           done on the way down and paid for at handover, and a HUD that hides
+           it once the pour starts hides the one thing the player can no longer
+           do anything about but is about to be graded on. */
+        if (p.flight) {
+          pd.augerRevPerPitch = p.flight.revPerPitch;
+          pd.augerRevPerM = p.flight.revPerM;
+          pd.flightTriggerRevPerM = FLIGHTING.trigRevPerM;
+          pd.flightedM = p.flight.flightedM;
+          pd.shaftLoss01 = p.flight.loss01;
+        }
         break;
       }
       default: pd.programme = null; break;
@@ -8596,7 +9445,7 @@ export function createDrillSim(ctx = {}) {
     for (const h of S.hazards) {
       if (h.phase === 'telegraph') {
         return { kind: h.kind, progress01: clamp(h.t / h.telegraph), severity: h.severity,
-                 hint: HINTS[h.kind] || '', telegraph: true };
+                 hint: hintFor(h.kind), telegraph: true };
       }
     }
     if (S.jamState === 'stuck') {
@@ -8614,7 +9463,7 @@ export function createDrillSim(ctx = {}) {
     for (const h of S.hazards) {
       if (h.phase === 'active') {
         return { kind: h.kind, progress01: clamp(nz(h.progress, h.t / 8)), severity: h.severity,
-                 hint: HINTS[h.kind] || '', telegraph: false };
+                 hint: hintFor(h.kind), telegraph: false };
       }
     }
     if (S.jamState === 'binding') {
@@ -8888,6 +9737,68 @@ export function createDrillSim(ctx = {}) {
             columnDiaKnown: false,
             withdrawRateKnown: false,
             rotationSpeedKnown: false,
+          } : null,
+          /* ── THE CFA PILE LOG ──────────────────────────────────────────
+             `[TOM]` §2.4.2 describes the deliverable as a printed strip
+             recording the construction parameters and the under- or
+             over-supply of concrete against depth. This is that strip, live.
+             Null through the bore for the same reason the jet block is null
+             through the pre-drill: nothing is being poured yet, and a stale
+             number on a shared object reads exactly like a live one. */
+          concrete: p.concrete && onReversePass() && S.m.stages[1] && S.m.stages[1].concrete ? {
+            // The two with a source at both ends, in their own units.
+            bar: Math.round(p.concrete.bar),
+            pumpMinBar: S.m.stages[1].concrete.pumpMinBar,
+            pumpMaxBar: S.m.stages[1].concrete.pumpMaxBar,
+            supplyM3h: +p.concrete.supplyM3h.toFixed(2),
+            demandM3h: +p.concrete.demandM3h.toFixed(2),
+            // The KPI. Dimensionless, and its band is quoted in three places.
+            ratio: +p.concrete.ratio.toFixed(3),
+            worstRatio: Number.isFinite(p.concrete.worstRatio) ? +p.concrete.worstRatio.toFixed(3) : null,
+            neckAt: S.m.stages[1].concrete.neckAt,
+            targetLo: S.m.stages[1].concrete.targetLo,
+            targetHi: S.m.stages[1].concrete.targetHi,
+            neckM: +p.concrete.neckM.toFixed(2),
+            // The head is an INDEX. The rule it enforces is sourced; the
+            // magnitude is a measurement this model does not make.
+            head01: +clamp(p.concrete.head01, 0, 1.25).toFixed(3),
+            headIdeal01: S.m.stages[1].concrete.headIdeal,
+            dryM: +p.concrete.dryM.toFixed(2), bulgeM: +p.concrete.bulgeM.toFixed(2),
+            headEvents: p.concrete.dryEvents + p.concrete.jumpEvents,
+            pileDiaM: +p.concrete.diaM.toFixed(3),
+            placedM3: +p.concrete.placedM3.toFixed(2),
+            theoreticalM3: +p.concrete.theoreticalM3.toFixed(2),
+            takeUp: +p.concrete.takeUp.toFixed(2),
+            /* THE GATE. No withdrawal rate is sourced in any unit — the
+               specification says so itself, calling the rate of augering and
+               of grout injection *"dependent on soil conditions and equipment
+               capability"* and at the contractor's option [UFGS-ACIP] §1.6 —
+               and the tip pressure is a measurement, not a model output. The
+               ratio and the pump ARE real; these three are not, and nothing
+               may print them. */
+            withdrawRateKnown: false,
+            tipPressureKnown: false,
+            overbreakBySoilKnown: false,
+          } : null,
+          /* The bore's own gauge, live on stage 0 and retained afterwards
+             because the bill is paid at handover, not when it is incurred. */
+          flight: p.flight ? {
+            revPerPitch: +p.flight.revPerPitch.toFixed(2),
+            revPerM: +p.flight.revPerM.toFixed(1),
+            optRevPerPitchLo: FLIGHTING.optRevPerPitchLo,
+            optRevPerPitchHi: FLIGHTING.optRevPerPitchHi,
+            triggerRevPerM: FLIGHTING.trigRevPerM,
+            augerRpm: +p.flight.rpm.toFixed(1),
+            pitchM: +p.flight.pitchM.toFixed(3),
+            flightedM: +p.flight.flightedM.toFixed(2),
+            shaftLoss01: +p.flight.loss01.toFixed(3),
+            shaftLossCeiling01: FLIGHTING.lossMax,
+            /* THE GAUGE IS MEASURED AND NOT YET CHARGED. `revPerM` divides a
+               real rotation by a rate whose definition does not match it —
+               see FLIGHTING.chargeScore — so this is a diagnostic, not a
+               grade, and a caption must say so rather than print a loss the
+               score did not take. */
+            rateBasisReconciled: FLIGHTING.chargeScore,
           } : null,
         };
       }
@@ -9393,6 +10304,16 @@ const HINTS = {
   // Jet grouting. One object, two opposite failures, two different levers.
   'return-lost': 'NO SPOIL AT THE COLLAR — CUT THE JET PRESSURE',
   'ground-heave': 'GROUND LIFTING — WITHDRAW FASTER NOW',
+};
+
+/* CFA's concrete lift shares two hazard kinds with machines whose answers are
+   the opposite of its own, so it carries its own captions and `hintFor()`
+   picks them while a pour is running. Both instructions are the source's:
+   slow the withdrawal and keep the pump up [BUNGENSTAB] §3, and reinstate the
+   tip and decrease the rate of withdrawal [UFGS-ACIP] §1.6. */
+const CFA_HINTS = {
+  'return-lost': 'NO HEAD AT THE TIP — SLOW THE LIFT, MORE CONCRETE',
+  'pull-stall': 'AUGER JUMPING — SLOW THE WITHDRAWAL',
 };
 
 export default createDrillSim;
