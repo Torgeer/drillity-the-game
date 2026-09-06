@@ -2472,7 +2472,19 @@ export function createSiteScreen(app) {
               + 'watch for its own [sim] warning naming the method it settled on.');
           }
           try { sim.startHole(c || state.contract || undefined); }
-          catch (e) { console.error('[ui] startHole', e); }
+          catch (e) {
+            if (e.code === 'unsupported-piling-hammer') {
+              // Finish this mount before navigating; keep the accepted job so
+              // the player can fit a supported hammer without abandoning it.
+              queueMicrotask(() => {
+                if (!el.isConnected || state.scene !== SCENES.SITE || sim.active) return;
+                app.nav(SCENES.GARAGE);
+                app.toast(e.message, 'warn');
+              });
+              return;
+            }
+            console.error('[ui] startHole', e);
+          }
         }
       } else if (!d.active) {
         d.active = true;

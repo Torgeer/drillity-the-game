@@ -32,7 +32,7 @@ export function createMenuScreen(app) {
   const playBtn = C.Button({
     label: 'Play', kind: 'amber', size: 'lg', icon: 'play', haptic: 'heavy',
     onTap: () => {
-      if (state.drill && state.drill.active) app.nav(SCENES.SITE);
+      if (state.contract || state.drill?.active) app.nav(SCENES.SITE);
       else app.nav(SCENES.CONTRACTS);
     },
   });
@@ -214,8 +214,9 @@ export function createMenuScreen(app) {
       (role && !region && !method) ? C.Pill('Content unavailable', 'danger') : null,
     ]);
 
-    playBtn.querySelector('.btn__label').textContent =
-      state.drill && state.drill.active ? 'Resume Hole' : (state.contract ? 'Continue' : 'Play');
+    const playLabel = state.drill && state.drill.active ? 'Resume Hole' : (state.contract ? 'Continue' : 'Play');
+    playBtn.querySelector('.btn__label').textContent = playLabel;
+    playBtn.setAttribute('aria-label', playLabel);
   }
 
   return {

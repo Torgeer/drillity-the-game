@@ -88,16 +88,21 @@ test('unrelated equipped hammer cannot alter the active drive; next start resolv
     assert.notEqual(sim.debug.state.m, methodOf('driven-pile'), 'Fitted profile resolved per run');
   } finally { sim.dispose(); }
 });
-test('missing hammer retains explicit 9 t default, and alternate vibro limitation is measured', () => {
-  for (const id of [null, 'vibro-hammer-1500']) {
-    const { sim } = run(id);
-    try {
-      const p = sim.getTelemetry().programme;
-      assert.equal(p.hammerItemId, item.id); assert.equal(p.ramKg, 9000);
-      if (id) measurements.push({ limitation: 'vibro item still uses default impact programme',
-        fitted: id, simulated: p.hammerItemId });
-    } finally { sim.dispose(); }
-  }
+test('missing hammer retains explicit 9 t default; vibro refuses unsupported impact start', () => {
+  const { sim } = run(null);
+  try {
+    const p = sim.getTelemetry().programme;
+    assert.equal(p.hammerItemId, item.id); assert.equal(p.ramKg, 9000);
+  } finally { sim.dispose(); }
+  const state = createGameState();
+  state.garage.loadout = { hammer: 'vibro-hammer-1500' };
+  const unsupported = createDrillSim({ state, bus: createBus() });
+  try {
+    assert.throws(() => unsupported.startHole(contract), (error) =>
+      error.code === 'unsupported-piling-hammer' && error.itemId === 'vibro-hammer-1500');
+    assert.equal(unsupported.active, false);
+    measurements.push({ containment: 'vibro impact start refused', fitted: 'vibro-hammer-1500' });
+  } finally { unsupported.dispose(); }
 });
 let failed = 0;
 for (const { name, fn } of tests) {

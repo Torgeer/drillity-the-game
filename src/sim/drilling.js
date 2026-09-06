@@ -25,6 +25,7 @@ import {
   clamp, lerp, smoothstep, damp, makeRandom,
 } from '../core/contract.js';
 import { getItem } from '../game/data.js';
+import { checkEquipmentSupport } from '../game/equipment-support.js';
 
 /* ═══════════════════════════════════════════════════════════════════════════
    TUNING — every number in the model lives here.
@@ -2177,6 +2178,14 @@ function bitFits(bit, method) {
   return (method.bitKinds || []).includes(bit.kind);
 }
 
+/** Pure support check shared by method resolution and start/preflight callers.
+ * An explicitly fitted vibratory driver must not inherit the impact fallback.
+ * Missing equipment keeps the existing method default; no inventory is changed.
+ */
+export function checkMethodEquipment(id, opts = {}) {
+  return checkEquipmentSupport(id, opts.hammerId, getItem);
+}
+
 /**
  * Resolve a method id to the tuning entry the RUN will use.
  *
@@ -2187,6 +2196,14 @@ function bitFits(bit, method) {
  * once here rather than branched on in twenty places.
  */
 export function resolveMethod(id, opts = {}) {
+  const equipment = checkMethodEquipment(id, opts);
+  if (!equipment.ok) {
+    const error = new Error(equipment.reason);
+    error.code = equipment.code;
+    error.methodId = equipment.methodId;
+    error.itemId = equipment.itemId;
+    throw error;
+  }
   const base = methodOf(id);
   if (id === 'driven-pile') {
     const item = getItem(opts.hammerId);
@@ -3426,6 +3443,11 @@ export function createDrillSim(ctx = {}) {
 
   function startHole(contract) {
     const c = contract || ctx.state?.contract || {};
+    // Resolve the proposed equipment before beginHole creates an attempt or
+    // newRunState discards a live run. A refusal is a caller-visible coded
+    // error, with no events, inventory changes or replacement default hammer.
+    const methodId = resolveMethodId(c);
+    const method = resolveMethod(methodId, { probeMode: resolveProbeMode(), hammerId: loadoutIds().hammer });
     const identity = typeof ctx.progression?.beginHole === 'function'
       ? ctx.progression.beginHole(c) : null;
     if (ctx.progression && !identity) {
@@ -3445,12 +3467,12 @@ export function createDrillSim(ctx = {}) {
     S.contract = c;
     S.runId = identity?.runId ?? null;
     S.attemptId = identity?.attemptId ?? null;
-    S.methodId = resolveMethodId(c);
+    S.methodId = methodId;
     // One method genuinely becomes a different machine depending on what is
     // fitted: with a piezocone in the probe slot, site investigation is not a
     // boring rig at all — the cone is pushed, nothing turns and nothing is
     // circulated. Resolve that once, here, and everything downstream is honest.
-    S.m = resolveMethod(S.methodId, { probeMode: resolveProbeMode(), hammerId: loadoutIds().hammer });
+    S.m = method;
     S.flushMedium = resolveFlushMedium(c);
     S.bit = resolveBit();
     S.wear = S.bitStartWear;

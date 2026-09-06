@@ -19,6 +19,7 @@
  */
 
 import { EVENTS, clamp, createGameState } from '../core/contract.js';
+import { checkEquipmentSupport } from './equipment-support.js';
 import {
   METHODS, RIGS, REGIONS, CERTS, ROLES, SKILLS, LEVELS, MAX_LEVEL, CORE_SLOTS,
   getMethod, getRig, getItem, getRegion, getCert, getSkill,
@@ -787,6 +788,8 @@ export function createProgression(ctx) {
     if (state.player.level < method.unlockLevel || !state.unlocked.methods.includes(method.id)) {
       return { ok: false, reason: `Requires ${method.shortName} at level ${method.unlockLevel}` };
     }
+    const equipment = checkEquipmentSupport(method.id, state.garage?.loadout?.hammer, getItem);
+    if (!equipment.ok) return equipment;
     // Read validity without expiring certificates or creating career state:
     // rejected acceptance has no accounting or selection side effects.
     const currentCareer = state.player.career;
