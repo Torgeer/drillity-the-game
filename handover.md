@@ -1,5 +1,14 @@
 # Drillity handover for Claude
 
+## Reserve resources — 2026-09-06, 04:30 heartbeat
+
+Live allowance7% remaining. Root QA server5198/session22747 was stopped after
+all captures/build checks finished; PID248 and listening socket5198 are absent.
+The user's5178 server/PID30152 remains live. Root browsers are closed and the GPU
+lease is empty. This supersedes older notes saying5198 remains live. Reviewed
+source/build and pending-work snapshots are preserved; no new long jobs started.
+Actual GitHub push is still due at the mandatory5% orderly shutdown.
+
 ## Handoff inventory update — 2026-09-06, 04:24 heartbeat
 
 `research/CURRENT_BUILD_ASSETS.json` records hashes and byte counts for all57
