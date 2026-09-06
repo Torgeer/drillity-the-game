@@ -349,12 +349,61 @@ function startFrameLoop() {
   requestAnimationFrame(frame);
 }
 
-/** No fetch and no awaited delay: use only a model the garage already owns. */
+/**
+ * No fetch and no awaited delay: use only a model that is ALREADY PARSED.
+ *
+ * TITLE_RIG is the machine the game opens on, chosen for the picture rather
+ * than for what the player owns: a piling leader is the tallest, most
+ * immediately readable silhouette in the fleet, and a Rookie owns a
+ * `crawler-lite`, which reads as a small box at title framing.
+ *
+ * It is preferred, NOT required. `warmOwnedModels()` fetches it alongside the
+ * owned machines, inside the await and the timeout that step already has, so
+ * the title costs no extra boot phase — and if that fetch fails or times out
+ * the list falls through to the garage rig exactly as before. The one rule
+ * this function must keep is that it never fetches: `g.has()` is a
+ * parsed-and-resident test, and a title that awaited a model would add its
+ * fetch to a boot that is already a 27.8 s shader compile.
+ */
+let TITLE_RIG = 'piling-leader';
+
+/**
+ * A DIFFERENT MACHINE ON EVERY LOAD.
+ *
+ * The fleet is nineteen machines and the boot screen is the one place the
+ * player reliably looks at one for several seconds, so showing the same rig
+ * every time wastes the whole fleet. This picks one per boot.
+ *
+ * The list is READ FROM `data.js`, never restated here: a hardcoded copy is the
+ * "two tables describing one thing" drift ASTRA §5 is about, and it would go
+ * stale the first time a machine is added. `rigRenderId()` maps a rig to the
+ * model that can actually be built, which is why `pd55` correctly shows as the
+ * piling leader rather than failing to resolve.
+ *
+ * It avoids repeating the previous boot's pick, because two identical loads in
+ * a row read as "it always shows this one" and undo the point. That memory is
+ * a nicety, so every localStorage access is wrapped — a private window or
+ * blocked site data must not break the title.
+ */
+function pickTitleRig() {
+  const d = ctx.data;
+  if (!d?.RIGS?.length || typeof d.rigRenderId !== 'function') return TITLE_RIG;
+  const ids = [...new Set(d.RIGS.map((r) => d.rigRenderId(r.id)).filter(Boolean))];
+  if (!ids.length) return TITLE_RIG;
+  let last = null;
+  try { last = localStorage.getItem('drillity.titleRig'); } catch (e) { /* private window */ }
+  const pool = ids.length > 1 ? ids.filter((id) => id !== last) : ids;
+  const pick = pool[Math.floor(Math.random() * pool.length)];
+  try { localStorage.setItem('drillity.titleRig', pick); } catch (e) { /* ignore */ }
+  return pick;
+}
+
 async function startTitle() {
   const r = ctx.renderer;
   const g = ctx.gltfRigs;
   const t0 = performance.now();
-  const id = [ctx.state.garage?.rigId, ...ownedRigIds()].find((rid) => rid && g?.has(rid));
+  const id = [TITLE_RIG, ctx.state.garage?.rigId, ...ownedRigIds()]
+    .find((rid) => rid && g?.has(rid));
   const report = ctx.bootTitle = { rigId: id || null, status: 'unavailable', frames: 0 };
   if (!r?.warmTitle || !id) return;
 
@@ -417,10 +466,29 @@ function endTitle() {
 async function warmOwnedModels(blocking) {
   const g = ctx.gltfRigs;
   if (!g) return;
-  const ids = ownedRigIds().filter((id) => !g.has(id));
+  /* TITLE_RIG rides along with the owned machines rather than getting a fetch
+     of its own, so the title screen's hero costs no extra boot phase and is
+     covered by the same timeout. It is deduped against the owned set because a
+     player who has bought it must not fetch it twice. */
+  /* Choose the boot's hero HERE, not in startTitle(), because this is the step
+     that fetches it — picking later would mean asking for a model nobody
+     warmed. `pickTitleRig()` needs ctx.data, which is loaded before this runs. */
+  TITLE_RIG = pickTitleRig();
+  const ids = [...new Set([TITLE_RIG, ...ownedRigIds()])].filter((id) => id && !g.has(id));
   if (!ids.length) return;
   const work = g.warm(ids).then((rows) => {
-    const bad = rows.filter((r) => !r.ok).map((r) => r.id);
+    /* Only report machines the player actually HAS. TITLE_RIG is fetched for
+       the title picture, so a failure there costs a nicer hero and nothing
+       else — startTitle() falls through to the garage rig on its own. Telling
+       a Rookie their piling leader is broken would be alarming and false: they
+       do not own one. It is still logged, because a silent fetch failure is
+       how the six-of-eight machine bug stayed hidden (ASTRA §4 contract 4). */
+    const owned = new Set(ownedRigIds());
+    const allBad = rows.filter((r) => !r.ok).map((r) => r.id);
+    const bad = allBad.filter((id) => owned.has(id));
+    for (const id of allBad) {
+      if (!owned.has(id)) console.warn('[boot] title rig "%s" did not load; using an owned machine instead', id);
+    }
     if (bad.length) showModelError(bad, g.problems());
   });
   if (!blocking) return;
