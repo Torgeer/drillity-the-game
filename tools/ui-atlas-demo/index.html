@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <link rel="icon" href="data:,">
+  <title>Drillity · Blender UI asset review</title>
+</head>
+<body>
+  <main class="atlas-review" data-blender-ui>
+    <header class="review-header">
+      <p class="eyebrow">DRILLITY / UI MATERIAL STUDY</p>
+      <h1>Rendered faces.<br>Live controls.</h1>
+      <p>Isolated Blender asset review. The game’s controls are not connected here.</p>
+    </header>
+    <p id="load-status" role="status">Loading the authored atlas…</p>
+    <section class="review-section" aria-labelledby="button-heading">
+      <div class="section-title"><h2 id="button-heading">Button faces</h2><span>144 × 44 CSS px</span></div>
+      <div class="button-columns" aria-hidden="true"><span>NEUTRAL</span><span>ACCENT</span></div>
+      <p class="state-label">Normal · activate to preview motion</p>
+      <div class="button-row">
+        <button class="bui-button" type="button" data-action="preview"><span class="bui-button__label">Preview press</span></button>
+        <button class="bui-button bui-button--accent" type="button" data-action="meter"><span class="bui-button__label">Preview value</span></button>
+      </div>
+      <p class="state-label">Pressed · live toggle state</p>
+      <div class="button-row">
+        <button class="bui-button" type="button" aria-pressed="true" data-action="toggle"><span class="bui-button__label">Pressed</span></button>
+        <button class="bui-button bui-button--accent" type="button" aria-pressed="true" data-action="toggle"><span class="bui-button__label">Pressed</span></button>
+      </div>
+      <p class="state-label">Disabled · unavailable in this review</p>
+      <div class="button-row">
+        <button class="bui-button" type="button" disabled><span class="bui-button__label">Unavailable</span></button>
+        <button class="bui-button bui-button--accent" type="button" disabled><span class="bui-button__label">Unavailable</span></button>
+      </div>
+    </section>
+    <section class="review-section" aria-labelledby="compact-heading">
+      <div class="section-title"><h2 id="compact-heading">Compact faces</h2><span>88 × 44 CSS px</span></div>
+      <div class="compact-row">
+        <button class="bui-button bui-button--compact" type="button" data-action="preview"><span class="bui-button__label">Preview</span></button>
+        <button class="bui-button bui-button--compact bui-button--accent" type="button" aria-pressed="true" data-action="toggle"><span class="bui-button__label">Pressed</span></button>
+        <button class="bui-button bui-button--compact" type="button" disabled><span class="bui-button__label">Locked</span></button>
+      </div>
+      <p class="readout-note">Native compact width. These short labels demonstrate the face safe area.</p>
+    </section>
+    <section class="review-section" aria-labelledby="readout-heading">
+      <div class="section-title"><h2 id="readout-heading">Live readouts</h2><span>DOM values</span></div>
+      <div class="meter-header"><span id="meter-label">Sample capacity</span><output id="meter-output" aria-live="off">62%</output></div>
+      <div class="bui-meter" role="meter" aria-labelledby="meter-label" aria-valuemin="0" aria-valuemax="100" aria-valuenow="62" aria-valuetext="62 percent" style="--bui-value:.62"><span class="bui-meter__fill" aria-hidden="true"></span></div>
+      <div class="badge-row">
+        <span class="bui-badge"><span aria-hidden="true">○</span><span>Idle</span></span>
+        <span class="bui-badge bui-badge--ready"><span aria-hidden="true">✓</span><span>Ready</span></span>
+        <span class="bui-badge bui-badge--warning"><span aria-hidden="true">!</span><span>Check</span></span>
+      </div>
+      <p class="readout-note" id="interaction-status" role="status" aria-live="polite">Select Preview value to animate the sample.</p>
+    </section>
+    <section class="review-section" aria-labelledby="sheet-heading">
+      <div class="section-title"><h2 id="sheet-heading">Authored atlas</h2><span id="asset-summary">Verifying files…</span></div>
+      <div class="review-controls">
+        <button class="review-control" type="button" data-action="ground" aria-pressed="false">Light ground</button>
+        <button class="review-control" type="button" data-action="reduce" aria-pressed="false">Reduce motion</button>
+      </div>
+      <div class="atlas-sheet"><img id="atlas-image" alt="Unlabelled Blender button faces, compact badges and meter backing. All labels above are live text." width="352" height="480"></div>
+      <p class="readout-note">The atlas above fits the review width. Controls retain native dimensions; high-density displays request the 2× export.</p>
+    </section>
+    <footer><span id="motion-summary">Motion: Blender F-Curves</span><span>Asset slice · pending game integration</span></footer>
+  </main>
+  <script type="module" src="./demo.js"></script>
+</body>
+</html>

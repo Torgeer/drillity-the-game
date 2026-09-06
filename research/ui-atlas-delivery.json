@@ -1,0 +1,259 @@
+{
+  "scope": "new isolated UI atlas paths only; no game integration",
+  "sourcePaths": [
+    {
+      "path": "blender/ui_atlas.py",
+      "bytes": 20851,
+      "sha256": "454d161d250f29c5a08d3d1c7084b322a722d25f0f01dacc00c5c0820975df4f"
+    },
+    {
+      "path": "public/ui/blender/badge-neutral.png",
+      "bytes": 1055,
+      "sha256": "161541af3af58810da8003ecb4e7246209ca67f4b9732d62bbd90ba765ec45c6"
+    },
+    {
+      "path": "public/ui/blender/badge-neutral@2x.png",
+      "bytes": 4115,
+      "sha256": "7c2a57d7ac212f1b6aa6524a627d5dc973177d3b6894d41241e3a0940c6fc176"
+    },
+    {
+      "path": "public/ui/blender/badge-ready.png",
+      "bytes": 1232,
+      "sha256": "a58736ad5c379e642e6dca8536ad947b32ed8de1c80fd5469e8d53af3dfee40b"
+    },
+    {
+      "path": "public/ui/blender/badge-ready@2x.png",
+      "bytes": 5353,
+      "sha256": "be94ed0f63d463f27102eff34cf9b5d3560111e6ef960ee8ea2a73b09a22f1fd"
+    },
+    {
+      "path": "public/ui/blender/badge-warning.png",
+      "bytes": 1360,
+      "sha256": "3ff5d5f3b09e9734809c0792769b7ff7008009ad4213ad394f61aea4ebeeb552"
+    },
+    {
+      "path": "public/ui/blender/badge-warning@2x.png",
+      "bytes": 5281,
+      "sha256": "82a51c73a2815aef9068d3eb7df072f0d9bf65e20b5a3bc51db1a15ec2b84a4c"
+    },
+    {
+      "path": "public/ui/blender/button-accent-disabled.png",
+      "bytes": 2194,
+      "sha256": "4740d4f445f752cfe3f130a87b65ac22a66fc267f4d5d40ea06d9dd543afc8dc"
+    },
+    {
+      "path": "public/ui/blender/button-accent-disabled@2x.png",
+      "bytes": 9439,
+      "sha256": "874083a88f91a3b35b8e25ca515f8820c70dbb6a8cca2ab7fa7116b39de3045a"
+    },
+    {
+      "path": "public/ui/blender/button-accent-pressed.png",
+      "bytes": 3574,
+      "sha256": "39f7735fb106b63483de1866056250ed38fffd981820b592087a63e71321f44e"
+    },
+    {
+      "path": "public/ui/blender/button-accent-pressed@2x.png",
+      "bytes": 16375,
+      "sha256": "5cf982cbaea6d685749314bb9f1160273602da9e6dfe2e726863edab262d11ee"
+    },
+    {
+      "path": "public/ui/blender/button-accent.png",
+      "bytes": 3105,
+      "sha256": "edd1992b05212be9670d0b89f216d563748a54ef8df9cf12535ad419da96d7c8"
+    },
+    {
+      "path": "public/ui/blender/button-accent@2x.png",
+      "bytes": 14663,
+      "sha256": "7dbbcd465e9efa29ead1a2022c95d09d83bd1a322d32784d8b19d740d5607154"
+    },
+    {
+      "path": "public/ui/blender/button-compact-accent-disabled.png",
+      "bytes": 1606,
+      "sha256": "5e1b6d1f8a80fb0255ab8057fae2495d382e9a194cddb3a3982bbb5e14c62862"
+    },
+    {
+      "path": "public/ui/blender/button-compact-accent-disabled@2x.png",
+      "bytes": 6350,
+      "sha256": "87bea59575812cecc08199e1612b2050f157f374cbf80423120d41e7f858d5e5"
+    },
+    {
+      "path": "public/ui/blender/button-compact-accent-pressed.png",
+      "bytes": 2515,
+      "sha256": "09f3b5e58db1e9ecb3a54104377b75f1ae73b31207c072649fc8a759b9a7e53c"
+    },
+    {
+      "path": "public/ui/blender/button-compact-accent-pressed@2x.png",
+      "bytes": 10817,
+      "sha256": "ac799d8eaf9fcb2a0404605d9dd61d239b989a6aa7d4b6db2a9a4b326666af47"
+    },
+    {
+      "path": "public/ui/blender/button-compact-accent.png",
+      "bytes": 2094,
+      "sha256": "3be62fbe5bbca59d6df73b8f2f50e0f59a4460128249ab10117b2840e064da8c"
+    },
+    {
+      "path": "public/ui/blender/button-compact-accent@2x.png",
+      "bytes": 9564,
+      "sha256": "058939e7f5b3a068e85eb7637c748b75691d86be1299149c2b1260deb0efbe3a"
+    },
+    {
+      "path": "public/ui/blender/button-compact-neutral-disabled.png",
+      "bytes": 1606,
+      "sha256": "5e1b6d1f8a80fb0255ab8057fae2495d382e9a194cddb3a3982bbb5e14c62862"
+    },
+    {
+      "path": "public/ui/blender/button-compact-neutral-disabled@2x.png",
+      "bytes": 6350,
+      "sha256": "87bea59575812cecc08199e1612b2050f157f374cbf80423120d41e7f858d5e5"
+    },
+    {
+      "path": "public/ui/blender/button-compact-neutral-pressed.png",
+      "bytes": 1962,
+      "sha256": "b534d42244bd42ed93898c2873ab680d13e4c85aab05d5de0bd4ccf84732fb09"
+    },
+    {
+      "path": "public/ui/blender/button-compact-neutral-pressed@2x.png",
+      "bytes": 8175,
+      "sha256": "7c98943611e100918e0f92eb47a41f13b0a39c47bbe5dfb28823ebded077342c"
+    },
+    {
+      "path": "public/ui/blender/button-compact-neutral.png",
+      "bytes": 1888,
+      "sha256": "0d1d86225cc76ae6773d367238ce1385ba6dd065b739281563a183b4fdaf1afc"
+    },
+    {
+      "path": "public/ui/blender/button-compact-neutral@2x.png",
+      "bytes": 7532,
+      "sha256": "361ac37e7b18b6da6a52949870e8b370819d07cb8816d95ee7f26bab2ab2dd15"
+    },
+    {
+      "path": "public/ui/blender/button-neutral-disabled.png",
+      "bytes": 2194,
+      "sha256": "4740d4f445f752cfe3f130a87b65ac22a66fc267f4d5d40ea06d9dd543afc8dc"
+    },
+    {
+      "path": "public/ui/blender/button-neutral-disabled@2x.png",
+      "bytes": 9439,
+      "sha256": "874083a88f91a3b35b8e25ca515f8820c70dbb6a8cca2ab7fa7116b39de3045a"
+    },
+    {
+      "path": "public/ui/blender/button-neutral-pressed.png",
+      "bytes": 2566,
+      "sha256": "c17d55b4ee6bf27363bbbe45e5e60c4c405b46a37e834cfb326ebba7696319da"
+    },
+    {
+      "path": "public/ui/blender/button-neutral-pressed@2x.png",
+      "bytes": 11920,
+      "sha256": "5f6fe664849310c3999c25247a497715e51f0bf66b2f37d8ca134dfcfb827acf"
+    },
+    {
+      "path": "public/ui/blender/button-neutral.png",
+      "bytes": 2568,
+      "sha256": "0a890af90d5704958c401ba04b588eda814603ffa2033dcf1784be31327fc8d5"
+    },
+    {
+      "path": "public/ui/blender/button-neutral@2x.png",
+      "bytes": 11390,
+      "sha256": "158afd6cc707626626b8ebdd427fd3c84e330d327a0967e6d7b3e6176f7a5716"
+    },
+    {
+      "path": "public/ui/blender/manifest.json",
+      "bytes": 27937,
+      "sha256": "19c256bae84742a4a231584aefbc885c6f95813bcffa0261262d0875b7fad3f0"
+    },
+    {
+      "path": "public/ui/blender/meter-backing.png",
+      "bytes": 2240,
+      "sha256": "5d938a74042bdd74d8b44c909114a960d81b28ae7d3a3dd92b55de750f70c899"
+    },
+    {
+      "path": "public/ui/blender/meter-backing@2x.png",
+      "bytes": 9626,
+      "sha256": "fec8e591a551d2de6a74cf1b0b6f2d19c512103adbc9be5a39e40ad5577e284e"
+    },
+    {
+      "path": "public/ui/blender/ui-atlas.png",
+      "bytes": 32819,
+      "sha256": "d47d03644865648c8485c052b26ef38ee13f35bdc55709c60d4799263ba253f9"
+    },
+    {
+      "path": "public/ui/blender/ui-atlas@2x.png",
+      "bytes": 148221,
+      "sha256": "ac05d0f6b6647f3d2e5017fdda7ef911b09e58d10eab07a86b3db206df8e0d9f"
+    },
+    {
+      "path": "research/ui-atlas-art-direction.md",
+      "bytes": 8931,
+      "sha256": "2589dcce0c999e3f805518f341ddda6e042c5026ac39d73aaa6a6cec4e7add58"
+    },
+    {
+      "path": "research/ui-atlas-consumer.md",
+      "bytes": 11688,
+      "sha256": "e8e2129921451c3300b2fce23c0b86b45fbb7901275349c8f6a62bf2d499262d"
+    },
+    {
+      "path": "research/ui-atlas-integration.md",
+      "bytes": 7142,
+      "sha256": "7df0b4c06568f8d01df44d420df3c9b3fecad666cd1396cdc7834bd52c216832"
+    },
+    {
+      "path": "research/ui-atlas-review.md",
+      "bytes": 21752,
+      "sha256": "b12d5ab3a0d725372b3e7983d2b8307df9c4cda72138ed73ce04d0147f016906"
+    },
+    {
+      "path": "src/ui/blender-atlas.css",
+      "bytes": 7412,
+      "sha256": "88ee5224baeb0b6af9b850148a8021653ef2a3fd87f135b9eb75ac5874655f60"
+    },
+    {
+      "path": "tools/check-ui-atlas-repeatability.mjs",
+      "bytes": 4443,
+      "sha256": "3280bfdd87d4ab85dab1cbb6e33e0a34ae07ce098c70aef9aeb16acdbc4e8b49"
+    },
+    {
+      "path": "tools/check-ui-atlas.mjs",
+      "bytes": 26978,
+      "sha256": "46fbac4f95d2554ba0971d6c441fd2846a22fc4cfeb6b444c4ed6ac981119416"
+    },
+    {
+      "path": "tools/ui-atlas-demo/.gitignore",
+      "bytes": 45,
+      "sha256": "eebcab57f76a19c2941cd5ecb61d4b90d090e3815fd94c00c5fec8172d740ba4"
+    },
+    {
+      "path": "tools/ui-atlas-demo/demo.css",
+      "bytes": 4122,
+      "sha256": "b1770e517ce22f0c8a406a65f1c28822bb7c20575a2212a279a21e5785c7ff24"
+    },
+    {
+      "path": "tools/ui-atlas-demo/demo.js",
+      "bytes": 6610,
+      "sha256": "44b1614929288aa2d5cbdd0af0be4f7f797c205622172b5326a9f134750855c0"
+    },
+    {
+      "path": "tools/ui-atlas-demo/index.html",
+      "bytes": 5060,
+      "sha256": "264ea6f6a54e790329fcba1a237f8b00be645290d17e456d27d0622d6b307f28"
+    },
+    {
+      "path": "tools/ui-atlas-demo/serve.mjs",
+      "bytes": 975,
+      "sha256": "b12991249d3038179a19e843e6fd37f439174de18629623da1ac21d5c2d08178"
+    },
+    {
+      "path": "tools/ui-atlas-demo/vite.config.mjs",
+      "bytes": 1191,
+      "sha256": "cd9fb4a8a24645650138131c140c45b5fb40b195bbda44b131397cdcad394dae"
+    }
+  ],
+  "sourceBytes": 516325,
+  "browserVerified": true,
+  "browserCases": 4,
+  "verifiedCaptures": 32,
+  "browserClosed": true,
+  "previewClosed": true,
+  "preservedBaselineFiles": 15,
+  "commit": null,
+  "commitLimitation": "Git index is outside permitted worktree; parent requested exact paths without escalation"
+}

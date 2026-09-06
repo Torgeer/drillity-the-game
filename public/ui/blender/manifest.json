@@ -1,0 +1,1056 @@
+{
+  "schemaVersion": 1,
+  "generator": {
+    "source": "blender/ui_atlas.py",
+    "sourceSha256": "454d161d250f29c5a08d3d1c7084b322a722d25f0f01dacc00c5c0820975df4f",
+    "blenderVersion": "5.2.1 LTS",
+    "engine": "CYCLES",
+    "device": "CPU",
+    "samples": 64,
+    "threads": 4,
+    "seed": 17,
+    "colorManagement": "Standard / None / exposure 0 / gamma 1 / RGBA8 sRGB"
+  },
+  "design": {
+    "paletteSource": [
+      "src/ui/styles.css :root",
+      "src/core/contract.js BRAND"
+    ],
+    "palette": {
+      "bg": "#0F141C",
+      "bgDeep": "#0D1219",
+      "card": "#161C26",
+      "muted": "#1E242E",
+      "border": "#28303B",
+      "amber": "#F59E0B",
+      "amberHot": "#FFBE3D",
+      "amberDeep": "#231502",
+      "amberDim": "#B06F05",
+      "success": "#10B981",
+      "warning": "#F0B319",
+      "fg": "#FAFAFA",
+      "fgMuted": "#96A0AE"
+    },
+    "dimensionProvenance": "NOT SOURCED: authored UI design choices; 44px from existing --touch contract",
+    "keyLight": {
+      "screenDirection": "upper-left",
+      "position": [
+        -85,
+        105,
+        150
+      ],
+      "energy": 18000,
+      "size": 95,
+      "provenance": "NOT SOURCED: authored UI lighting choices"
+    },
+    "alpha": "straight RGBA; transparent corners; no baked backdrop or labels",
+    "densityPolicy": "2x CPU render; alpha-weighted 2x2 native reduction; CSS dimensions remain native",
+    "atlasGutterNativePx": 8
+  },
+  "atlases": {
+    "1x": {
+      "file": "ui-atlas.png",
+      "width": 352,
+      "height": 480,
+      "bytes": 32819,
+      "sha256": "d47d03644865648c8485c052b26ef38ee13f35bdc55709c60d4799263ba253f9"
+    },
+    "2x": {
+      "file": "ui-atlas@2x.png",
+      "width": 704,
+      "height": 960,
+      "bytes": 148221,
+      "sha256": "ac05d0f6b6647f3d2e5017fdda7ef911b09e58d10eab07a86b3db206df8e0d9f"
+    }
+  },
+  "sprites": [
+    {
+      "id": "button-neutral",
+      "role": "button",
+      "variant": "neutral",
+      "state": "normal",
+      "native": {
+        "width": 144,
+        "height": 44
+      },
+      "safeText": {
+        "x": 12,
+        "y": 10,
+        "width": 120,
+        "height": 24
+      },
+      "recommendedForeground": "#FAFAFA",
+      "atlas": {
+        "x": 8,
+        "y": 8,
+        "width": 144,
+        "height": 44
+      },
+      "files": {
+        "1x": {
+          "file": "button-neutral.png",
+          "width": 144,
+          "height": 44,
+          "bytes": 2568,
+          "sha256": "0a890af90d5704958c401ba04b588eda814603ffa2033dcf1784be31327fc8d5"
+        },
+        "2x": {
+          "file": "button-neutral@2x.png",
+          "width": 288,
+          "height": 88,
+          "bytes": 11390,
+          "sha256": "158afd6cc707626626b8ebdd427fd3c84e330d327a0967e6d7b3e6176f7a5716"
+        }
+      },
+      "metrics": {
+        "transparentPixels": 58,
+        "partialAlphaPixels": 383,
+        "opaquePixels": 5895,
+        "safeTextMinAlpha": 255,
+        "minTextContrast": 14.526
+      },
+      "metricsByDensity": {
+        "1x": {
+          "transparentPixels": 58,
+          "partialAlphaPixels": 383,
+          "opaquePixels": 5895,
+          "safeTextMinAlpha": 255,
+          "minTextContrast": 14.526
+        },
+        "2x": {
+          "transparentPixels": 291,
+          "partialAlphaPixels": 1056,
+          "opaquePixels": 23997,
+          "safeTextMinAlpha": 255,
+          "minTextContrast": 14.526
+        }
+      }
+    },
+    {
+      "id": "button-accent",
+      "role": "button",
+      "variant": "accent",
+      "state": "normal",
+      "native": {
+        "width": 144,
+        "height": 44
+      },
+      "safeText": {
+        "x": 12,
+        "y": 10,
+        "width": 120,
+        "height": 24
+      },
+      "recommendedForeground": "#231502",
+      "atlas": {
+        "x": 184,
+        "y": 8,
+        "width": 144,
+        "height": 44
+      },
+      "files": {
+        "1x": {
+          "file": "button-accent.png",
+          "width": 144,
+          "height": 44,
+          "bytes": 3105,
+          "sha256": "edd1992b05212be9670d0b89f216d563748a54ef8df9cf12535ad419da96d7c8"
+        },
+        "2x": {
+          "file": "button-accent@2x.png",
+          "width": 288,
+          "height": 88,
+          "bytes": 14663,
+          "sha256": "7dbbcd465e9efa29ead1a2022c95d09d83bd1a322d32784d8b19d740d5607154"
+        }
+      },
+      "metrics": {
+        "transparentPixels": 58,
+        "partialAlphaPixels": 383,
+        "opaquePixels": 5895,
+        "safeTextMinAlpha": 255,
+        "minTextContrast": 10.382
+      },
+      "metricsByDensity": {
+        "1x": {
+          "transparentPixels": 58,
+          "partialAlphaPixels": 383,
+          "opaquePixels": 5895,
+          "safeTextMinAlpha": 255,
+          "minTextContrast": 10.382
+        },
+        "2x": {
+          "transparentPixels": 291,
+          "partialAlphaPixels": 1056,
+          "opaquePixels": 23997,
+          "safeTextMinAlpha": 255,
+          "minTextContrast": 10.279
+        }
+      }
+    },
+    {
+      "id": "button-neutral-pressed",
+      "role": "button",
+      "variant": "neutral",
+      "state": "pressed",
+      "native": {
+        "width": 144,
+        "height": 44
+      },
+      "safeText": {
+        "x": 12,
+        "y": 10,
+        "width": 120,
+        "height": 24
+      },
+      "recommendedForeground": "#FAFAFA",
+      "atlas": {
+        "x": 8,
+        "y": 68,
+        "width": 144,
+        "height": 44
+      },
+      "files": {
+        "1x": {
+          "file": "button-neutral-pressed.png",
+          "width": 144,
+          "height": 44,
+          "bytes": 2566,
+          "sha256": "c17d55b4ee6bf27363bbbe45e5e60c4c405b46a37e834cfb326ebba7696319da"
+        },
+        "2x": {
+          "file": "button-neutral-pressed@2x.png",
+          "width": 288,
+          "height": 88,
+          "bytes": 11920,
+          "sha256": "5f6fe664849310c3999c25247a497715e51f0bf66b2f37d8ca134dfcfb827acf"
+        }
+      },
+      "metrics": {
+        "transparentPixels": 58,
+        "partialAlphaPixels": 383,
+        "opaquePixels": 5895,
+        "safeTextMinAlpha": 255,
+        "minTextContrast": 15.099
+      },
+      "metricsByDensity": {
+        "1x": {
+          "transparentPixels": 58,
+          "partialAlphaPixels": 383,
+          "opaquePixels": 5895,
+          "safeTextMinAlpha": 255,
+          "minTextContrast": 15.099
+        },
+        "2x": {
+          "transparentPixels": 291,
+          "partialAlphaPixels": 1056,
+          "opaquePixels": 23997,
+          "safeTextMinAlpha": 255,
+          "minTextContrast": 15.063
+        }
+      }
+    },
+    {
+      "id": "button-accent-pressed",
+      "role": "button",
+      "variant": "accent",
+      "state": "pressed",
+      "native": {
+        "width": 144,
+        "height": 44
+      },
+      "safeText": {
+        "x": 12,
+        "y": 10,
+        "width": 120,
+        "height": 24
+      },
+      "recommendedForeground": "#231502",
+      "atlas": {
+        "x": 184,
+        "y": 68,
+        "width": 144,
+        "height": 44
+      },
+      "files": {
+        "1x": {
+          "file": "button-accent-pressed.png",
+          "width": 144,
+          "height": 44,
+          "bytes": 3574,
+          "sha256": "39f7735fb106b63483de1866056250ed38fffd981820b592087a63e71321f44e"
+        },
+        "2x": {
+          "file": "button-accent-pressed@2x.png",
+          "width": 288,
+          "height": 88,
+          "bytes": 16375,
+          "sha256": "5cf982cbaea6d685749314bb9f1160273602da9e6dfe2e726863edab262d11ee"
+        }
+      },
+      "metrics": {
+        "transparentPixels": 58,
+        "partialAlphaPixels": 383,
+        "opaquePixels": 5895,
+        "safeTextMinAlpha": 255,
+        "minTextContrast": 8.019
+      },
+      "metricsByDensity": {
+        "1x": {
+          "transparentPixels": 58,
+          "partialAlphaPixels": 383,
+          "opaquePixels": 5895,
+          "safeTextMinAlpha": 255,
+          "minTextContrast": 8.019
+        },
+        "2x": {
+          "transparentPixels": 291,
+          "partialAlphaPixels": 1056,
+          "opaquePixels": 23997,
+          "safeTextMinAlpha": 255,
+          "minTextContrast": 8.019
+        }
+      }
+    },
+    {
+      "id": "button-neutral-disabled",
+      "role": "button",
+      "variant": "neutral",
+      "state": "disabled",
+      "native": {
+        "width": 144,
+        "height": 44
+      },
+      "safeText": {
+        "x": 12,
+        "y": 10,
+        "width": 120,
+        "height": 24
+      },
+      "recommendedForeground": "#96A0AE",
+      "atlas": {
+        "x": 8,
+        "y": 128,
+        "width": 144,
+        "height": 44
+      },
+      "files": {
+        "1x": {
+          "file": "button-neutral-disabled.png",
+          "width": 144,
+          "height": 44,
+          "bytes": 2194,
+          "sha256": "4740d4f445f752cfe3f130a87b65ac22a66fc267f4d5d40ea06d9dd543afc8dc"
+        },
+        "2x": {
+          "file": "button-neutral-disabled@2x.png",
+          "width": 288,
+          "height": 88,
+          "bytes": 9439,
+          "sha256": "874083a88f91a3b35b8e25ca515f8820c70dbb6a8cca2ab7fa7116b39de3045a"
+        }
+      },
+      "metrics": {
+        "transparentPixels": 58,
+        "partialAlphaPixels": 383,
+        "opaquePixels": 5895,
+        "safeTextMinAlpha": 255,
+        "minTextContrast": 6.173
+      },
+      "metricsByDensity": {
+        "1x": {
+          "transparentPixels": 58,
+          "partialAlphaPixels": 383,
+          "opaquePixels": 5895,
+          "safeTextMinAlpha": 255,
+          "minTextContrast": 6.173
+        },
+        "2x": {
+          "transparentPixels": 291,
+          "partialAlphaPixels": 1056,
+          "opaquePixels": 23997,
+          "safeTextMinAlpha": 255,
+          "minTextContrast": 6.173
+        }
+      }
+    },
+    {
+      "id": "button-accent-disabled",
+      "role": "button",
+      "variant": "accent",
+      "state": "disabled",
+      "native": {
+        "width": 144,
+        "height": 44
+      },
+      "safeText": {
+        "x": 12,
+        "y": 10,
+        "width": 120,
+        "height": 24
+      },
+      "recommendedForeground": "#96A0AE",
+      "atlas": {
+        "x": 184,
+        "y": 128,
+        "width": 144,
+        "height": 44
+      },
+      "files": {
+        "1x": {
+          "file": "button-accent-disabled.png",
+          "width": 144,
+          "height": 44,
+          "bytes": 2194,
+          "sha256": "4740d4f445f752cfe3f130a87b65ac22a66fc267f4d5d40ea06d9dd543afc8dc"
+        },
+        "2x": {
+          "file": "button-accent-disabled@2x.png",
+          "width": 288,
+          "height": 88,
+          "bytes": 9439,
+          "sha256": "874083a88f91a3b35b8e25ca515f8820c70dbb6a8cca2ab7fa7116b39de3045a"
+        }
+      },
+      "metrics": {
+        "transparentPixels": 58,
+        "partialAlphaPixels": 383,
+        "opaquePixels": 5895,
+        "safeTextMinAlpha": 255,
+        "minTextContrast": 6.173
+      },
+      "metricsByDensity": {
+        "1x": {
+          "transparentPixels": 58,
+          "partialAlphaPixels": 383,
+          "opaquePixels": 5895,
+          "safeTextMinAlpha": 255,
+          "minTextContrast": 6.173
+        },
+        "2x": {
+          "transparentPixels": 291,
+          "partialAlphaPixels": 1056,
+          "opaquePixels": 23997,
+          "safeTextMinAlpha": 255,
+          "minTextContrast": 6.173
+        }
+      }
+    },
+    {
+      "id": "badge-neutral",
+      "role": "badge",
+      "variant": "neutral",
+      "state": "normal",
+      "native": {
+        "width": 88,
+        "height": 24
+      },
+      "safeText": {
+        "x": 10,
+        "y": 5,
+        "width": 68,
+        "height": 14
+      },
+      "recommendedForeground": "#FAFAFA",
+      "atlas": {
+        "x": 8,
+        "y": 188,
+        "width": 88,
+        "height": 24
+      },
+      "files": {
+        "1x": {
+          "file": "badge-neutral.png",
+          "width": 88,
+          "height": 24,
+          "bytes": 1055,
+          "sha256": "161541af3af58810da8003ecb4e7246209ca67f4b9732d62bbd90ba765ec45c6"
+        },
+        "2x": {
+          "file": "badge-neutral@2x.png",
+          "width": 176,
+          "height": 48,
+          "bytes": 4115,
+          "sha256": "7c2a57d7ac212f1b6aa6524a627d5dc973177d3b6894d41241e3a0940c6fc176"
+        }
+      },
+      "metrics": {
+        "transparentPixels": 24,
+        "partialAlphaPixels": 228,
+        "opaquePixels": 1860,
+        "safeTextMinAlpha": 255,
+        "minTextContrast": 14.712
+      },
+      "metricsByDensity": {
+        "1x": {
+          "transparentPixels": 24,
+          "partialAlphaPixels": 228,
+          "opaquePixels": 1860,
+          "safeTextMinAlpha": 255,
+          "minTextContrast": 14.712
+        },
+        "2x": {
+          "transparentPixels": 136,
+          "partialAlphaPixels": 620,
+          "opaquePixels": 7692,
+          "safeTextMinAlpha": 255,
+          "minTextContrast": 14.526
+        }
+      }
+    },
+    {
+      "id": "badge-ready",
+      "role": "badge",
+      "variant": "ready",
+      "state": "normal",
+      "native": {
+        "width": 88,
+        "height": 24
+      },
+      "safeText": {
+        "x": 10,
+        "y": 5,
+        "width": 68,
+        "height": 14
+      },
+      "recommendedForeground": "#FAFAFA",
+      "atlas": {
+        "x": 184,
+        "y": 188,
+        "width": 88,
+        "height": 24
+      },
+      "files": {
+        "1x": {
+          "file": "badge-ready.png",
+          "width": 88,
+          "height": 24,
+          "bytes": 1232,
+          "sha256": "a58736ad5c379e642e6dca8536ad947b32ed8de1c80fd5469e8d53af3dfee40b"
+        },
+        "2x": {
+          "file": "badge-ready@2x.png",
+          "width": 176,
+          "height": 48,
+          "bytes": 5353,
+          "sha256": "be94ed0f63d463f27102eff34cf9b5d3560111e6ef960ee8ea2a73b09a22f1fd"
+        }
+      },
+      "metrics": {
+        "transparentPixels": 24,
+        "partialAlphaPixels": 228,
+        "opaquePixels": 1860,
+        "safeTextMinAlpha": 255,
+        "minTextContrast": 14.271
+      },
+      "metricsByDensity": {
+        "1x": {
+          "transparentPixels": 24,
+          "partialAlphaPixels": 228,
+          "opaquePixels": 1860,
+          "safeTextMinAlpha": 255,
+          "minTextContrast": 14.271
+        },
+        "2x": {
+          "transparentPixels": 136,
+          "partialAlphaPixels": 620,
+          "opaquePixels": 7692,
+          "safeTextMinAlpha": 255,
+          "minTextContrast": 14.1
+        }
+      }
+    },
+    {
+      "id": "badge-warning",
+      "role": "badge",
+      "variant": "warning",
+      "state": "normal",
+      "native": {
+        "width": 88,
+        "height": 24
+      },
+      "safeText": {
+        "x": 10,
+        "y": 5,
+        "width": 68,
+        "height": 14
+      },
+      "recommendedForeground": "#FAFAFA",
+      "atlas": {
+        "x": 8,
+        "y": 248,
+        "width": 88,
+        "height": 24
+      },
+      "files": {
+        "1x": {
+          "file": "badge-warning.png",
+          "width": 88,
+          "height": 24,
+          "bytes": 1360,
+          "sha256": "3ff5d5f3b09e9734809c0792769b7ff7008009ad4213ad394f61aea4ebeeb552"
+        },
+        "2x": {
+          "file": "badge-warning@2x.png",
+          "width": 176,
+          "height": 48,
+          "bytes": 5281,
+          "sha256": "82a51c73a2815aef9068d3eb7df072f0d9bf65e20b5a3bc51db1a15ec2b84a4c"
+        }
+      },
+      "metrics": {
+        "transparentPixels": 24,
+        "partialAlphaPixels": 228,
+        "opaquePixels": 1860,
+        "safeTextMinAlpha": 255,
+        "minTextContrast": 13.746
+      },
+      "metricsByDensity": {
+        "1x": {
+          "transparentPixels": 24,
+          "partialAlphaPixels": 228,
+          "opaquePixels": 1860,
+          "safeTextMinAlpha": 255,
+          "minTextContrast": 13.746
+        },
+        "2x": {
+          "transparentPixels": 136,
+          "partialAlphaPixels": 620,
+          "opaquePixels": 7692,
+          "safeTextMinAlpha": 255,
+          "minTextContrast": 13.703
+        }
+      }
+    },
+    {
+      "id": "meter-backing",
+      "role": "meter",
+      "variant": "neutral",
+      "state": "normal",
+      "native": {
+        "width": 160,
+        "height": 24
+      },
+      "safeText": null,
+      "recommendedForeground": "#FAFAFA",
+      "atlas": {
+        "x": 184,
+        "y": 248,
+        "width": 160,
+        "height": 24
+      },
+      "files": {
+        "1x": {
+          "file": "meter-backing.png",
+          "width": 160,
+          "height": 24,
+          "bytes": 2240,
+          "sha256": "5d938a74042bdd74d8b44c909114a960d81b28ae7d3a3dd92b55de750f70c899"
+        },
+        "2x": {
+          "file": "meter-backing@2x.png",
+          "width": 320,
+          "height": 48,
+          "bytes": 9626,
+          "sha256": "fec8e591a551d2de6a74cf1b0b6f2d19c512103adbc9be5a39e40ad5577e284e"
+        }
+      },
+      "metrics": {
+        "transparentPixels": 24,
+        "partialAlphaPixels": 372,
+        "opaquePixels": 3444
+      },
+      "metricsByDensity": {
+        "1x": {
+          "transparentPixels": 24,
+          "partialAlphaPixels": 372,
+          "opaquePixels": 3444
+        },
+        "2x": {
+          "transparentPixels": 132,
+          "partialAlphaPixels": 1024,
+          "opaquePixels": 14204
+        }
+      },
+      "safeFill": {
+        "x": 10,
+        "y": 8,
+        "width": 140,
+        "height": 8
+      }
+    },
+    {
+      "id": "button-compact-neutral",
+      "role": "button",
+      "variant": "neutral",
+      "state": "normal",
+      "native": {
+        "width": 88,
+        "height": 44
+      },
+      "safeText": {
+        "x": 10,
+        "y": 10,
+        "width": 68,
+        "height": 24
+      },
+      "recommendedForeground": "#FAFAFA",
+      "atlas": {
+        "x": 8,
+        "y": 308,
+        "width": 88,
+        "height": 44
+      },
+      "files": {
+        "1x": {
+          "file": "button-compact-neutral.png",
+          "width": 88,
+          "height": 44,
+          "bytes": 1888,
+          "sha256": "0d1d86225cc76ae6773d367238ce1385ba6dd065b739281563a183b4fdaf1afc"
+        },
+        "2x": {
+          "file": "button-compact-neutral@2x.png",
+          "width": 176,
+          "height": 88,
+          "bytes": 7532,
+          "sha256": "361ac37e7b18b6da6a52949870e8b370819d07cb8816d95ee7f26bab2ab2dd15"
+        }
+      },
+      "metrics": {
+        "transparentPixels": 60,
+        "partialAlphaPixels": 269,
+        "opaquePixels": 3543,
+        "safeTextMinAlpha": 255,
+        "minTextContrast": 14.578
+      },
+      "metricsByDensity": {
+        "1x": {
+          "transparentPixels": 60,
+          "partialAlphaPixels": 269,
+          "opaquePixels": 3543,
+          "safeTextMinAlpha": 255,
+          "minTextContrast": 14.578
+        },
+        "2x": {
+          "transparentPixels": 295,
+          "partialAlphaPixels": 736,
+          "opaquePixels": 14457,
+          "safeTextMinAlpha": 255,
+          "minTextContrast": 14.526
+        }
+      }
+    },
+    {
+      "id": "button-compact-accent",
+      "role": "button",
+      "variant": "accent",
+      "state": "normal",
+      "native": {
+        "width": 88,
+        "height": 44
+      },
+      "safeText": {
+        "x": 10,
+        "y": 10,
+        "width": 68,
+        "height": 24
+      },
+      "recommendedForeground": "#231502",
+      "atlas": {
+        "x": 184,
+        "y": 308,
+        "width": 88,
+        "height": 44
+      },
+      "files": {
+        "1x": {
+          "file": "button-compact-accent.png",
+          "width": 88,
+          "height": 44,
+          "bytes": 2094,
+          "sha256": "3be62fbe5bbca59d6df73b8f2f50e0f59a4460128249ab10117b2840e064da8c"
+        },
+        "2x": {
+          "file": "button-compact-accent@2x.png",
+          "width": 176,
+          "height": 88,
+          "bytes": 9564,
+          "sha256": "058939e7f5b3a068e85eb7637c748b75691d86be1299149c2b1260deb0efbe3a"
+        }
+      },
+      "metrics": {
+        "transparentPixels": 60,
+        "partialAlphaPixels": 269,
+        "opaquePixels": 3543,
+        "safeTextMinAlpha": 255,
+        "minTextContrast": 10.416
+      },
+      "metricsByDensity": {
+        "1x": {
+          "transparentPixels": 60,
+          "partialAlphaPixels": 269,
+          "opaquePixels": 3543,
+          "safeTextMinAlpha": 255,
+          "minTextContrast": 10.416
+        },
+        "2x": {
+          "transparentPixels": 295,
+          "partialAlphaPixels": 736,
+          "opaquePixels": 14457,
+          "safeTextMinAlpha": 255,
+          "minTextContrast": 10.382
+        }
+      }
+    },
+    {
+      "id": "button-compact-neutral-pressed",
+      "role": "button",
+      "variant": "neutral",
+      "state": "pressed",
+      "native": {
+        "width": 88,
+        "height": 44
+      },
+      "safeText": {
+        "x": 10,
+        "y": 10,
+        "width": 68,
+        "height": 24
+      },
+      "recommendedForeground": "#FAFAFA",
+      "atlas": {
+        "x": 8,
+        "y": 368,
+        "width": 88,
+        "height": 44
+      },
+      "files": {
+        "1x": {
+          "file": "button-compact-neutral-pressed.png",
+          "width": 88,
+          "height": 44,
+          "bytes": 1962,
+          "sha256": "b534d42244bd42ed93898c2873ab680d13e4c85aab05d5de0bd4ccf84732fb09"
+        },
+        "2x": {
+          "file": "button-compact-neutral-pressed@2x.png",
+          "width": 176,
+          "height": 88,
+          "bytes": 8175,
+          "sha256": "7c98943611e100918e0f92eb47a41f13b0a39c47bbe5dfb28823ebded077342c"
+        }
+      },
+      "metrics": {
+        "transparentPixels": 60,
+        "partialAlphaPixels": 269,
+        "opaquePixels": 3543,
+        "safeTextMinAlpha": 255,
+        "minTextContrast": 15.099
+      },
+      "metricsByDensity": {
+        "1x": {
+          "transparentPixels": 60,
+          "partialAlphaPixels": 269,
+          "opaquePixels": 3543,
+          "safeTextMinAlpha": 255,
+          "minTextContrast": 15.099
+        },
+        "2x": {
+          "transparentPixels": 295,
+          "partialAlphaPixels": 736,
+          "opaquePixels": 14457,
+          "safeTextMinAlpha": 255,
+          "minTextContrast": 15.099
+        }
+      }
+    },
+    {
+      "id": "button-compact-accent-pressed",
+      "role": "button",
+      "variant": "accent",
+      "state": "pressed",
+      "native": {
+        "width": 88,
+        "height": 44
+      },
+      "safeText": {
+        "x": 10,
+        "y": 10,
+        "width": 68,
+        "height": 24
+      },
+      "recommendedForeground": "#231502",
+      "atlas": {
+        "x": 184,
+        "y": 368,
+        "width": 88,
+        "height": 44
+      },
+      "files": {
+        "1x": {
+          "file": "button-compact-accent-pressed.png",
+          "width": 88,
+          "height": 44,
+          "bytes": 2515,
+          "sha256": "09f3b5e58db1e9ecb3a54104377b75f1ae73b31207c072649fc8a759b9a7e53c"
+        },
+        "2x": {
+          "file": "button-compact-accent-pressed@2x.png",
+          "width": 176,
+          "height": 88,
+          "bytes": 10817,
+          "sha256": "ac799d8eaf9fcb2a0404605d9dd61d239b989a6aa7d4b6db2a9a4b326666af47"
+        }
+      },
+      "metrics": {
+        "transparentPixels": 60,
+        "partialAlphaPixels": 269,
+        "opaquePixels": 3543,
+        "safeTextMinAlpha": 255,
+        "minTextContrast": 8.107
+      },
+      "metricsByDensity": {
+        "1x": {
+          "transparentPixels": 60,
+          "partialAlphaPixels": 269,
+          "opaquePixels": 3543,
+          "safeTextMinAlpha": 255,
+          "minTextContrast": 8.107
+        },
+        "2x": {
+          "transparentPixels": 295,
+          "partialAlphaPixels": 736,
+          "opaquePixels": 14457,
+          "safeTextMinAlpha": 255,
+          "minTextContrast": 8.019
+        }
+      }
+    },
+    {
+      "id": "button-compact-neutral-disabled",
+      "role": "button",
+      "variant": "neutral",
+      "state": "disabled",
+      "native": {
+        "width": 88,
+        "height": 44
+      },
+      "safeText": {
+        "x": 10,
+        "y": 10,
+        "width": 68,
+        "height": 24
+      },
+      "recommendedForeground": "#96A0AE",
+      "atlas": {
+        "x": 8,
+        "y": 428,
+        "width": 88,
+        "height": 44
+      },
+      "files": {
+        "1x": {
+          "file": "button-compact-neutral-disabled.png",
+          "width": 88,
+          "height": 44,
+          "bytes": 1606,
+          "sha256": "5e1b6d1f8a80fb0255ab8057fae2495d382e9a194cddb3a3982bbb5e14c62862"
+        },
+        "2x": {
+          "file": "button-compact-neutral-disabled@2x.png",
+          "width": 176,
+          "height": 88,
+          "bytes": 6350,
+          "sha256": "87bea59575812cecc08199e1612b2050f157f374cbf80423120d41e7f858d5e5"
+        }
+      },
+      "metrics": {
+        "transparentPixels": 60,
+        "partialAlphaPixels": 269,
+        "opaquePixels": 3543,
+        "safeTextMinAlpha": 255,
+        "minTextContrast": 6.239
+      },
+      "metricsByDensity": {
+        "1x": {
+          "transparentPixels": 60,
+          "partialAlphaPixels": 269,
+          "opaquePixels": 3543,
+          "safeTextMinAlpha": 255,
+          "minTextContrast": 6.239
+        },
+        "2x": {
+          "transparentPixels": 295,
+          "partialAlphaPixels": 736,
+          "opaquePixels": 14457,
+          "safeTextMinAlpha": 255,
+          "minTextContrast": 6.173
+        }
+      }
+    },
+    {
+      "id": "button-compact-accent-disabled",
+      "role": "button",
+      "variant": "accent",
+      "state": "disabled",
+      "native": {
+        "width": 88,
+        "height": 44
+      },
+      "safeText": {
+        "x": 10,
+        "y": 10,
+        "width": 68,
+        "height": 24
+      },
+      "recommendedForeground": "#96A0AE",
+      "atlas": {
+        "x": 184,
+        "y": 428,
+        "width": 88,
+        "height": 44
+      },
+      "files": {
+        "1x": {
+          "file": "button-compact-accent-disabled.png",
+          "width": 88,
+          "height": 44,
+          "bytes": 1606,
+          "sha256": "5e1b6d1f8a80fb0255ab8057fae2495d382e9a194cddb3a3982bbb5e14c62862"
+        },
+        "2x": {
+          "file": "button-compact-accent-disabled@2x.png",
+          "width": 176,
+          "height": 88,
+          "bytes": 6350,
+          "sha256": "87bea59575812cecc08199e1612b2050f157f374cbf80423120d41e7f858d5e5"
+        }
+      },
+      "metrics": {
+        "transparentPixels": 60,
+        "partialAlphaPixels": 269,
+        "opaquePixels": 3543,
+        "safeTextMinAlpha": 255,
+        "minTextContrast": 6.239
+      },
+      "metricsByDensity": {
+        "1x": {
+          "transparentPixels": 60,
+          "partialAlphaPixels": 269,
+          "opaquePixels": 3543,
+          "safeTextMinAlpha": 255,
+          "minTextContrast": 6.239
+        },
+        "2x": {
+          "transparentPixels": 295,
+          "partialAlphaPixels": 736,
+          "opaquePixels": 14457,
+          "safeTextMinAlpha": 255,
+          "minTextContrast": 6.173
+        }
+      }
+    }
+  ],
+  "totalPngBytes": 361188
+}
