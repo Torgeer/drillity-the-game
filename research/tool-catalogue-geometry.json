@@ -1,0 +1,4442 @@
+{
+  "pass": true,
+  "sourceRef": null,
+  "compareRef": "1b913e8b24011c90e42001fe1ff6dfc4660cc13b",
+  "mutant": null,
+  "sourceHashes": {
+    "src/rig/tools.js": "a7d825767db8f33ba54a52d6c1b679fbba8d9504a37919c701e2bedc72a69fa6",
+    "src/game/data.js": "5eb6d315ee0a33fe2fa91dbf4d45bcbba3e752d5beb115658d38951484d2626a",
+    "src/core/preview.js": "190c23f5729d1a194b83edd8559122a70827e033df79f360a74d3bf25d4c0c9f",
+    "tools/glbinfo.mjs": "057bb6c89e0e8d974e2182b5db758e37c10b2254c3cd18409e8a097fab17cc11"
+  },
+  "previousToolsSha256": "76de61d7688fa3043063898e3f2bc52bf4f21f0d96b88484b1af6395fd8788c2",
+  "cases": 265,
+  "passed": 265,
+  "failed": 0,
+  "builds": 850,
+  "inspectedVertices": 2917583,
+  "aliasCount": 178,
+  "independentlyTestedAliasKeys": 342,
+  "results": [
+    {
+      "name": "ruler adapter applies nested world and per-instance transforms",
+      "pass": true
+    },
+    {
+      "name": "bit-th-t45-76-std: sourced numeric catalogue diameter",
+      "pass": true
+    },
+    {
+      "name": "bit-th-t45-89-hd: sourced numeric catalogue diameter",
+      "pass": true
+    },
+    {
+      "name": "catalogue geometry normal wear 0",
+      "pass": true
+    },
+    {
+      "name": "catalogue geometry normal wear 0.5",
+      "pass": true
+    },
+    {
+      "name": "catalogue geometry normal wear 1",
+      "pass": true
+    },
+    {
+      "name": "catalogue geometry low wear 0",
+      "pass": true
+    },
+    {
+      "name": "catalogue geometry low wear 0.5",
+      "pass": true
+    },
+    {
+      "name": "catalogue geometry low wear 1",
+      "pass": true
+    },
+    {
+      "name": "button-bit-t51-hd: undefined defaults / wear 0",
+      "pass": true
+    },
+    {
+      "name": "button-bit-t51-hd: undefined defaults / wear 0.5",
+      "pass": true
+    },
+    {
+      "name": "button-bit-t51-hd: undefined defaults / wear 1",
+      "pass": true
+    },
+    {
+      "name": "button-bit-face-45: undefined defaults / wear 0",
+      "pass": true
+    },
+    {
+      "name": "button-bit-face-45: undefined defaults / wear 0.5",
+      "pass": true
+    },
+    {
+      "name": "button-bit-face-45: undefined defaults / wear 1",
+      "pass": true
+    },
+    {
+      "name": "dth-bit-4: undefined defaults / wear 0",
+      "pass": true
+    },
+    {
+      "name": "dth-bit-4: undefined defaults / wear 0.5",
+      "pass": true
+    },
+    {
+      "name": "dth-bit-4: undefined defaults / wear 1",
+      "pass": true
+    },
+    {
+      "name": "ith-bit-216: undefined defaults / wear 0",
+      "pass": true
+    },
+    {
+      "name": "ith-bit-216: undefined defaults / wear 0.5",
+      "pass": true
+    },
+    {
+      "name": "ith-bit-216: undefined defaults / wear 1",
+      "pass": true
+    },
+    {
+      "name": "dth-hammer-6: undefined defaults / wear 0",
+      "pass": true
+    },
+    {
+      "name": "dth-hammer-6: undefined defaults / wear 0.5",
+      "pass": true
+    },
+    {
+      "name": "dth-hammer-6: undefined defaults / wear 1",
+      "pass": true
+    },
+    {
+      "name": "tricone-milled-445: undefined defaults / wear 0",
+      "pass": true
+    },
+    {
+      "name": "tricone-milled-445: undefined defaults / wear 0.5",
+      "pass": true
+    },
+    {
+      "name": "tricone-milled-445: undefined defaults / wear 1",
+      "pass": true
+    },
+    {
+      "name": "core-bit-bq: undefined defaults / wear 0",
+      "pass": true
+    },
+    {
+      "name": "core-bit-bq: undefined defaults / wear 0.5",
+      "pass": true
+    },
+    {
+      "name": "core-bit-bq: undefined defaults / wear 1",
+      "pass": true
+    },
+    {
+      "name": "core-bit-hq: undefined defaults / wear 0",
+      "pass": true
+    },
+    {
+      "name": "core-bit-hq: undefined defaults / wear 0.5",
+      "pass": true
+    },
+    {
+      "name": "core-bit-hq: undefined defaults / wear 1",
+      "pass": true
+    },
+    {
+      "name": "rod-t45: undefined defaults / wear 0",
+      "pass": true
+    },
+    {
+      "name": "rod-t45: undefined defaults / wear 0.5",
+      "pass": true
+    },
+    {
+      "name": "rod-t45: undefined defaults / wear 1",
+      "pass": true
+    },
+    {
+      "name": "rod-t38-face-1830: undefined defaults / wear 0",
+      "pass": true
+    },
+    {
+      "name": "rod-t38-face-1830: undefined defaults / wear 0.5",
+      "pass": true
+    },
+    {
+      "name": "rod-t38-face-1830: undefined defaults / wear 1",
+      "pass": true
+    },
+    {
+      "name": "rc-pipe-114-6m: undefined defaults / wear 0",
+      "pass": true
+    },
+    {
+      "name": "rc-pipe-114-6m: undefined defaults / wear 0.5",
+      "pass": true
+    },
+    {
+      "name": "rc-pipe-114-6m: undefined defaults / wear 1",
+      "pass": true
+    },
+    {
+      "name": "rc-bit-146: undefined defaults / wear 0",
+      "pass": true
+    },
+    {
+      "name": "rc-bit-146: undefined defaults / wear 0.5",
+      "pass": true
+    },
+    {
+      "name": "rc-bit-146: undefined defaults / wear 1",
+      "pass": true
+    },
+    {
+      "name": "casing-crown-168: undefined defaults / wear 0",
+      "pass": true
+    },
+    {
+      "name": "casing-crown-168: undefined defaults / wear 0.5",
+      "pass": true
+    },
+    {
+      "name": "casing-crown-168: undefined defaults / wear 1",
+      "pass": true
+    },
+    {
+      "name": "pdc-bit-311: undefined defaults / wear 0",
+      "pass": true
+    },
+    {
+      "name": "pdc-bit-311: undefined defaults / wear 0.5",
+      "pass": true
+    },
+    {
+      "name": "pdc-bit-311: undefined defaults / wear 1",
+      "pass": true
+    },
+    {
+      "name": "cfa-flight-450: undefined defaults / wear 0",
+      "pass": true
+    },
+    {
+      "name": "cfa-flight-450: undefined defaults / wear 0.5",
+      "pass": true
+    },
+    {
+      "name": "cfa-flight-450: undefined defaults / wear 1",
+      "pass": true
+    },
+    {
+      "name": "push-rod-reducer: undefined defaults / wear 0",
+      "pass": true
+    },
+    {
+      "name": "push-rod-reducer: undefined defaults / wear 0.5",
+      "pass": true
+    },
+    {
+      "name": "push-rod-reducer: undefined defaults / wear 1",
+      "pass": true
+    },
+    {
+      "name": "mud-motor-241: undefined defaults / wear 0",
+      "pass": true
+    },
+    {
+      "name": "mud-motor-241: undefined defaults / wear 0.5",
+      "pass": true
+    },
+    {
+      "name": "mud-motor-241: undefined defaults / wear 1",
+      "pass": true
+    },
+    {
+      "name": "sample-bag-calico: undefined defaults / wear 0",
+      "pass": true
+    },
+    {
+      "name": "sample-bag-calico: undefined defaults / wear 0.5",
+      "pass": true
+    },
+    {
+      "name": "sample-bag-calico: undefined defaults / wear 1",
+      "pass": true
+    },
+    {
+      "name": "tube-pile-914: undefined defaults / wear 0",
+      "pass": true
+    },
+    {
+      "name": "tube-pile-914: undefined defaults / wear 0.5",
+      "pass": true
+    },
+    {
+      "name": "tube-pile-914: undefined defaults / wear 1",
+      "pass": true
+    },
+    {
+      "name": "spt-hammer-auto: undefined defaults / wear 0",
+      "pass": true
+    },
+    {
+      "name": "spt-hammer-auto: undefined defaults / wear 0.5",
+      "pass": true
+    },
+    {
+      "name": "spt-hammer-auto: undefined defaults / wear 1",
+      "pass": true
+    },
+    {
+      "name": "auger-flight-std: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "auger-flight-hd: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "rod-r32: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "rod-r38: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "rod-t38: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "rod-t45: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "rod-t51: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "rod-hq: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "button-bit-r32: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "button-bit-t38: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "button-bit-t45: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "button-bit-t51: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "button-bit-t51-hd: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "dth-hammer-4: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "dth-hammer-5: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "dth-hammer-6: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "dth-bit-4: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "dth-bit-5: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "dth-bit-6: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "tricone-milled: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "tricone-tci: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "wing-bit: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "core-bit-bq: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "core-bit-nq: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "core-bit-hq: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "core-bit-pq: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "core-barrel-nq: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "core-barrel-hq: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "casing-crown-114: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "casing-crown-140: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "casing-crown-168: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "casing-crown-193: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "ring-bit-system: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "ring-bit-140: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "ring-bit-168: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "kelly-auger-620: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "kelly-auger-800: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "kelly-auger-1200: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "cfa-flight-450: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "cfa-flight-600: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "bucket-800: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "bucket-1000: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "pdc-bit-152: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "pdc-bit-216: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "sda-r32: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "sda-r51: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "sda-bit-cross: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "sda-bit-button: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "backreamer-300: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "backreamer-450: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "compressor-12k: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "compressor-18k: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "compressor-26k: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "mud-pump-340: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "mud-pump-700: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "power-unit-120: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "power-unit-250: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "drill-pipe-114: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "drill-pipe-127: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "drill-pipe-140: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "hwdp-127: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "drill-collar-165: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "drill-collar-203: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "drill-collar-241: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "stabiliser-216: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "stabiliser-311: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "stabiliser-sleeve-216: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "mud-motor-172: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "mud-motor-241: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "mwd-collar-172: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "bop-stack-5k: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "bop-stack-10k: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "wellhead-340: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "shale-shaker-3: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "shale-shaker-4: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "mud-pump-2200: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "tricone-tci-216: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "tricone-tci-311: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "tricone-milled-445: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "pdc-bit-216-oil: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "pdc-bit-311: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "rc-pipe-89: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "rc-pipe-102: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "rc-pipe-114: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "rc-pipe-114-6m: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "rc-hammer-92: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "rc-hammer-109: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "rc-hammer-116: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "rc-hammer-132: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "rc-bit-102: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "rc-bit-124: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "rc-bit-146: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "rc-cyclone-100: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "rc-cyclone-75: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "rc-splitter-2: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "rc-splitter-4: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "sample-bag-calico: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "rod-t38-face-2435: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "rod-t38-face-1830: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "rod-r32-face-1830: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "button-bit-face-45: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "button-bit-face-48: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "button-bit-face-51: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "jumbo-feed-3900: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "jumbo-feed-3100: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "charging-hose-anfo: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "charging-hose-emulsion: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "detonator-reel-500: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "detonator-reel-1000: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "rod-t51-longhole-1525: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "rod-t45-longhole-1220: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "rod-t38-longhole-915: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "button-bit-longhole-64: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "button-bit-longhole-89: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "button-bit-longhole-102: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "button-bit-longhole-127: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "ith-hammer-3: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "ith-hammer-4: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "ith-hammer-5: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "ith-hammer-6: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "ith-hammer-8: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "ith-bit-89: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "ith-bit-115: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "ith-bit-140: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "ith-bit-165: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "ith-bit-216: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "guide-tube-102: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "guide-tube-152: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "friction-bolt-33: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "friction-bolt-39: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "friction-bolt-46: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "rebar-bolt-20: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "rebar-bolt-25: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "resin-fast: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "resin-slow: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "cable-bolt-6m: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "cable-bolt-9m: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "mesh-2400: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "mesh-3000: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "bolt-plate-150: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "bolt-plate-200: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "bolt-nut-m24: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "precast-pile-300: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "precast-pile-350: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "precast-pile-450: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "tube-pile-610: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "tube-pile-914: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "tube-pile-1422: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "h-pile-305: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "sheet-pile-z-630: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "impact-hammer-3t: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "impact-hammer-9t: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "impact-hammer-16t: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "impact-hammer-30t: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "vibro-hammer-1500: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "vibro-hammer-700: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "pile-helmet-350: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "pile-helmet-450: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "drive-cap-tube-610: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "drive-cap-h-305: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "spt-sampler-51: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "spt-hammer-auto: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "cpt-cone-10: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "cpt-cone-15: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "cpt-piezo-10: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "cpt-piezo-15: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "push-rod-1m: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "push-rod-reducer: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "window-sampler-60: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "window-sampler-80: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "u100: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "shelby-76: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "piezometer-50: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "chisel-bit-165: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "chisel-bit-250: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "drilling-jars-500: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "bailer-140: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "bailer-200: every alias default key independently",
+      "pass": true
+    },
+    {
+      "name": "button-bit-t51-hd: explicit {\"thread\":\"T38\",\"diameterMm\":64,\"buttonKind\":\"spherical\"}",
+      "pass": true
+    },
+    {
+      "name": "core-bit-bq: explicit {\"size\":\"PQ\"}",
+      "pass": true
+    },
+    {
+      "name": "rod-t38-face-1830: explicit {\"thread\":\"R32\",\"lengthMm\":2435}",
+      "pass": true
+    },
+    {
+      "name": "rc-pipe-114-6m: explicit {\"lengthMm\":3000}",
+      "pass": true
+    },
+    {
+      "name": "push-rod-reducer: explicit {\"reducer\":false}",
+      "pass": true
+    },
+    {
+      "name": "mud-motor-241: explicit {\"bendDeg\":0}",
+      "pass": true
+    },
+    {
+      "name": "sample-bag-calico: explicit {\"fill\":0}",
+      "pass": true
+    },
+    {
+      "name": "button-bit-t51-hd: explicit {\"flutes\":0,\"merge\":false}",
+      "pass": true
+    },
+    {
+      "name": "push-rod-reducer: explicit {\"reducer\":null}",
+      "pass": true
+    },
+    {
+      "name": "core-bit-bq: explicit {\"size\":\"\"}",
+      "pass": true
+    },
+    {
+      "name": "single undefined does not discard another explicit override",
+      "pass": true
+    },
+    {
+      "name": "inherited option stays excluded and frozen own option stays intact",
+      "pass": true
+    },
+    {
+      "name": "omitted options, undefined options and empty options agree",
+      "pass": true
+    },
+    {
+      "name": "button-bit: direct/fallback undefined caller semantics",
+      "pass": true
+    },
+    {
+      "name": "core-bit: direct/fallback undefined caller semantics",
+      "pass": true
+    },
+    {
+      "name": "push-rod: direct/fallback undefined caller semantics",
+      "pass": true
+    },
+    {
+      "name": "catalogue-regression-unknown-id: direct/fallback undefined caller semantics",
+      "pass": true
+    },
+    {
+      "name": "procedural T45 wear changes carbide geometry and loses buttons at scrap",
+      "pass": true
+    }
+  ],
+  "samples": [
+    {
+      "type": "catalogue",
+      "id": "bit-th-t45-76-std",
+      "lod": "normal",
+      "wear": 0,
+      "nominalMm": 76,
+      "fingerprint": "2207c20fc115035c5cdd783e52534341035378327fe9c4beb91a2ad607fcba98",
+      "vertices": 3239,
+      "triangles": 5304,
+      "meshes": 4,
+      "carbideMeshes": 1,
+      "extentMm": [
+        75.31599700450897,
+        80.65050235018134,
+        74.7668594121933
+      ],
+      "boundsM": {
+        "min": [
+          -0.037657998502254486,
+          -0.07765050232410431,
+          -0.03738342970609665
+        ],
+        "max": [
+          0.037657998502254486,
+          0.003000000026077032,
+          0.03738342970609665
+        ]
+      },
+      "spec": {
+        "id": "button-bit",
+        "family": "Drill Bits & Cutting Tools / Button Bits",
+        "name": "Drillity T45 Button Bit 76 mm",
+        "thread": "T45",
+        "diameterMm": 76,
+        "lengthMm": 72,
+        "buttons": 13,
+        "buttonKind": "spherical",
+        "gaugeButtons": 8,
+        "gaugeButtonMm": 12,
+        "faceButtonMm": 11,
+        "gaugeAngleDeg": 35,
+        "face": "drop",
+        "flutes": 4,
+        "flushHoles": 4,
+        "cutDiameterMm": 76.8,
+        "material": "Carbide grade DP55 / body 42CrMo4(V)",
+        "method": "top-hammer",
+        "priceEur": 378
+      }
+    },
+    {
+      "type": "catalogue",
+      "id": "bit-th-t45-89-hd",
+      "lod": "normal",
+      "wear": 0,
+      "nominalMm": 89,
+      "fingerprint": "2d169c6f1421b714219c1c37c073a9a96172bc7a2ff44cb88b1a44eea2362a57",
+      "vertices": 3096,
+      "triangles": 5044,
+      "meshes": 4,
+      "carbideMeshes": 1,
+      "extentMm": [
+        88.19899708032608,
+        81.7347108386457,
+        87.55593001842499
+      ],
+      "boundsM": {
+        "min": [
+          -0.04409949854016304,
+          -0.07873471081256866,
+          -0.043777965009212494
+        ],
+        "max": [
+          0.04409949854016304,
+          0.003000000026077032,
+          0.043777965009212494
+        ]
+      },
+      "spec": {
+        "id": "button-bit",
+        "family": "Drill Bits & Cutting Tools / Button Bits",
+        "name": "Drillity T45 Button Bit 89 mm",
+        "thread": "T45",
+        "diameterMm": 89,
+        "lengthMm": 73,
+        "buttons": 13,
+        "buttonKind": "ballistic",
+        "gaugeButtons": 8,
+        "gaugeButtonMm": 13,
+        "faceButtonMm": 12,
+        "gaugeAngleDeg": 35,
+        "face": "drop",
+        "flutes": 4,
+        "flushHoles": 4,
+        "cutDiameterMm": 89.9,
+        "material": "Carbide grade DP55 / body 42CrMo4(V)",
+        "method": "top-hammer",
+        "priceEur": 423
+      }
+    },
+    {
+      "type": "catalogue",
+      "id": "bit-th-t45-76-std",
+      "lod": "normal",
+      "wear": 0.5,
+      "nominalMm": 76,
+      "fingerprint": "34bcf2db9062014251b19d285369fa18dafa6d5e861bf55a6ca7a8ab1e535de8",
+      "vertices": 3625,
+      "triangles": 5790,
+      "meshes": 4,
+      "carbideMeshes": 1,
+      "extentMm": [
+        75.31599700450897,
+        80.24374535307288,
+        74.7668594121933
+      ],
+      "boundsM": {
+        "min": [
+          -0.037657998502254486,
+          -0.07724374532699585,
+          -0.03738342970609665
+        ],
+        "max": [
+          0.037657998502254486,
+          0.003000000026077032,
+          0.03738342970609665
+        ]
+      },
+      "spec": {
+        "id": "button-bit",
+        "family": "Drill Bits & Cutting Tools / Button Bits",
+        "name": "Drillity T45 Button Bit 76 mm",
+        "thread": "T45",
+        "diameterMm": 76,
+        "lengthMm": 72,
+        "buttons": 13,
+        "buttonKind": "spherical",
+        "gaugeButtons": 8,
+        "gaugeButtonMm": 12,
+        "faceButtonMm": 11,
+        "gaugeAngleDeg": 35,
+        "face": "drop",
+        "flutes": 4,
+        "flushHoles": 4,
+        "cutDiameterMm": 75.8,
+        "material": "Carbide grade DP55 / body 42CrMo4(V)",
+        "method": "top-hammer",
+        "priceEur": 378
+      }
+    },
+    {
+      "type": "catalogue",
+      "id": "bit-th-t45-89-hd",
+      "lod": "normal",
+      "wear": 0.5,
+      "nominalMm": 89,
+      "fingerprint": "a75ecb44147501565609fe28009c0380e65c57ad667e495efab5269eeac16099",
+      "vertices": 3735,
+      "triangles": 5990,
+      "meshes": 4,
+      "carbideMeshes": 1,
+      "extentMm": [
+        88.19899708032608,
+        81.29406115040183,
+        87.55593001842499
+      ],
+      "boundsM": {
+        "min": [
+          -0.04409949854016304,
+          -0.0782940611243248,
+          -0.043777965009212494
+        ],
+        "max": [
+          0.04409949854016304,
+          0.003000000026077032,
+          0.043777965009212494
+        ]
+      },
+      "spec": {
+        "id": "button-bit",
+        "family": "Drill Bits & Cutting Tools / Button Bits",
+        "name": "Drillity T45 Button Bit 89 mm",
+        "thread": "T45",
+        "diameterMm": 89,
+        "lengthMm": 73,
+        "buttons": 13,
+        "buttonKind": "ballistic",
+        "gaugeButtons": 8,
+        "gaugeButtonMm": 13,
+        "faceButtonMm": 12,
+        "gaugeAngleDeg": 35,
+        "face": "drop",
+        "flutes": 4,
+        "flushHoles": 4,
+        "cutDiameterMm": 88.8,
+        "material": "Carbide grade DP55 / body 42CrMo4(V)",
+        "method": "top-hammer",
+        "priceEur": 423
+      }
+    },
+    {
+      "type": "catalogue",
+      "id": "bit-th-t45-76-std",
+      "lod": "normal",
+      "wear": 1,
+      "nominalMm": 76,
+      "fingerprint": "a85467555a0bce06a2abff8694ab74e6393f64cf18ed100b1a0b32f71ef2231d",
+      "vertices": 2965,
+      "triangles": 4708,
+      "meshes": 4,
+      "carbideMeshes": 1,
+      "extentMm": [
+        75.31599700450897,
+        77.7015550993383,
+        74.7668594121933
+      ],
+      "boundsM": {
+        "min": [
+          -0.037657998502254486,
+          -0.07470155507326126,
+          -0.03738342970609665
+        ],
+        "max": [
+          0.037657998502254486,
+          0.003000000026077032,
+          0.03738342970609665
+        ]
+      },
+      "spec": {
+        "id": "button-bit",
+        "family": "Drill Bits & Cutting Tools / Button Bits",
+        "name": "Drillity T45 Button Bit 76 mm",
+        "thread": "T45",
+        "diameterMm": 76,
+        "lengthMm": 72,
+        "buttons": 13,
+        "buttonKind": "spherical",
+        "gaugeButtons": 8,
+        "gaugeButtonMm": 12,
+        "faceButtonMm": 11,
+        "gaugeAngleDeg": 35,
+        "face": "drop",
+        "flutes": 4,
+        "flushHoles": 4,
+        "cutDiameterMm": 74.8,
+        "material": "Carbide grade DP55 / body 42CrMo4(V)",
+        "method": "top-hammer",
+        "priceEur": 378
+      }
+    },
+    {
+      "type": "catalogue",
+      "id": "bit-th-t45-89-hd",
+      "lod": "normal",
+      "wear": 1,
+      "nominalMm": 89,
+      "fingerprint": "f3386b838888c901e15173208c6763d3013413b714e86270d29adc5684e649ca",
+      "vertices": 3163,
+      "triangles": 5068,
+      "meshes": 4,
+      "carbideMeshes": 1,
+      "extentMm": [
+        88.19899708032608,
+        78.54001363739371,
+        87.55593001842499
+      ],
+      "boundsM": {
+        "min": [
+          -0.04409949854016304,
+          -0.07554001361131668,
+          -0.043777965009212494
+        ],
+        "max": [
+          0.04409949854016304,
+          0.003000000026077032,
+          0.043777965009212494
+        ]
+      },
+      "spec": {
+        "id": "button-bit",
+        "family": "Drill Bits & Cutting Tools / Button Bits",
+        "name": "Drillity T45 Button Bit 89 mm",
+        "thread": "T45",
+        "diameterMm": 89,
+        "lengthMm": 73,
+        "buttons": 13,
+        "buttonKind": "ballistic",
+        "gaugeButtons": 8,
+        "gaugeButtonMm": 13,
+        "faceButtonMm": 12,
+        "gaugeAngleDeg": 35,
+        "face": "drop",
+        "flutes": 4,
+        "flushHoles": 4,
+        "cutDiameterMm": 87.6,
+        "material": "Carbide grade DP55 / body 42CrMo4(V)",
+        "method": "top-hammer",
+        "priceEur": 423
+      }
+    },
+    {
+      "type": "catalogue",
+      "id": "bit-th-t45-76-std",
+      "lod": "low",
+      "wear": 0,
+      "nominalMm": 76,
+      "fingerprint": "64c4f2ccb77cca68765fc0108980f5f5b32599ea21dedc4c2ef2cc1eb70f2167",
+      "vertices": 2112,
+      "triangles": 3302,
+      "meshes": 4,
+      "carbideMeshes": 1,
+      "extentMm": [
+        75.31599700450897,
+        80.64854284748435,
+        73.65182414650917
+      ],
+      "boundsM": {
+        "min": [
+          -0.037657998502254486,
+          -0.07764854282140732,
+          -0.03671383485198021
+        ],
+        "max": [
+          0.037657998502254486,
+          0.003000000026077032,
+          0.03693798929452896
+        ]
+      },
+      "spec": {
+        "id": "button-bit",
+        "family": "Drill Bits & Cutting Tools / Button Bits",
+        "name": "Drillity T45 Button Bit 76 mm",
+        "thread": "T45",
+        "diameterMm": 76,
+        "lengthMm": 72,
+        "buttons": 13,
+        "buttonKind": "spherical",
+        "gaugeButtons": 8,
+        "gaugeButtonMm": 12,
+        "faceButtonMm": 11,
+        "gaugeAngleDeg": 35,
+        "face": "drop",
+        "flutes": 4,
+        "flushHoles": 4,
+        "cutDiameterMm": 76.8,
+        "material": "Carbide grade DP55 / body 42CrMo4(V)",
+        "method": "top-hammer",
+        "priceEur": 378
+      }
+    },
+    {
+      "type": "catalogue",
+      "id": "bit-th-t45-89-hd",
+      "lod": "low",
+      "wear": 0,
+      "nominalMm": 89,
+      "fingerprint": "2c453353abee636304768da7142230cc10094f895d132c43b084f3b84395d546",
+      "vertices": 2008,
+      "triangles": 3120,
+      "meshes": 4,
+      "carbideMeshes": 1,
+      "extentMm": [
+        88.19899708032608,
+        81.73258742317557,
+        86.20380610227585
+      ],
+      "boundsM": {
+        "min": [
+          -0.04409949854016304,
+          -0.07873258739709854,
+          -0.042993832379579544
+        ],
+        "max": [
+          0.04409949854016304,
+          0.003000000026077032,
+          0.043209973722696304
+        ]
+      },
+      "spec": {
+        "id": "button-bit",
+        "family": "Drill Bits & Cutting Tools / Button Bits",
+        "name": "Drillity T45 Button Bit 89 mm",
+        "thread": "T45",
+        "diameterMm": 89,
+        "lengthMm": 73,
+        "buttons": 13,
+        "buttonKind": "ballistic",
+        "gaugeButtons": 8,
+        "gaugeButtonMm": 13,
+        "faceButtonMm": 12,
+        "gaugeAngleDeg": 35,
+        "face": "drop",
+        "flutes": 4,
+        "flushHoles": 4,
+        "cutDiameterMm": 89.9,
+        "material": "Carbide grade DP55 / body 42CrMo4(V)",
+        "method": "top-hammer",
+        "priceEur": 423
+      }
+    },
+    {
+      "type": "catalogue",
+      "id": "bit-th-t45-76-std",
+      "lod": "low",
+      "wear": 0.5,
+      "nominalMm": 76,
+      "fingerprint": "e25d63e809f867a5b05ca19c8bb628aac18c233aa33897a0b3016a5daec9d34e",
+      "vertices": 2466,
+      "triangles": 3750,
+      "meshes": 4,
+      "carbideMeshes": 1,
+      "extentMm": [
+        75.31599700450897,
+        80.24178585037589,
+        73.42766970396042
+      ],
+      "boundsM": {
+        "min": [
+          -0.037657998502254486,
+          -0.07724178582429886,
+          -0.03671383485198021
+        ],
+        "max": [
+          0.037657998502254486,
+          0.003000000026077032,
+          0.03671383485198021
+        ]
+      },
+      "spec": {
+        "id": "button-bit",
+        "family": "Drill Bits & Cutting Tools / Button Bits",
+        "name": "Drillity T45 Button Bit 76 mm",
+        "thread": "T45",
+        "diameterMm": 76,
+        "lengthMm": 72,
+        "buttons": 13,
+        "buttonKind": "spherical",
+        "gaugeButtons": 8,
+        "gaugeButtonMm": 12,
+        "faceButtonMm": 11,
+        "gaugeAngleDeg": 35,
+        "face": "drop",
+        "flutes": 4,
+        "flushHoles": 4,
+        "cutDiameterMm": 75.8,
+        "material": "Carbide grade DP55 / body 42CrMo4(V)",
+        "method": "top-hammer",
+        "priceEur": 378
+      }
+    },
+    {
+      "type": "catalogue",
+      "id": "bit-th-t45-89-hd",
+      "lod": "low",
+      "wear": 0.5,
+      "nominalMm": 89,
+      "fingerprint": "7cbbb095f7522367c1c0752bb26c7fef0334c3a2d434997655dbc2ba85102a03",
+      "vertices": 2546,
+      "triangles": 3890,
+      "meshes": 4,
+      "carbideMeshes": 1,
+      "extentMm": [
+        88.19899708032608,
+        81.29193773493171,
+        85.98766475915909
+      ],
+      "boundsM": {
+        "min": [
+          -0.04409949854016304,
+          -0.07829193770885468,
+          -0.042993832379579544
+        ],
+        "max": [
+          0.04409949854016304,
+          0.003000000026077032,
+          0.042993832379579544
+        ]
+      },
+      "spec": {
+        "id": "button-bit",
+        "family": "Drill Bits & Cutting Tools / Button Bits",
+        "name": "Drillity T45 Button Bit 89 mm",
+        "thread": "T45",
+        "diameterMm": 89,
+        "lengthMm": 73,
+        "buttons": 13,
+        "buttonKind": "ballistic",
+        "gaugeButtons": 8,
+        "gaugeButtonMm": 13,
+        "faceButtonMm": 12,
+        "gaugeAngleDeg": 35,
+        "face": "drop",
+        "flutes": 4,
+        "flushHoles": 4,
+        "cutDiameterMm": 88.8,
+        "material": "Carbide grade DP55 / body 42CrMo4(V)",
+        "method": "top-hammer",
+        "priceEur": 423
+      }
+    },
+    {
+      "type": "catalogue",
+      "id": "bit-th-t45-76-std",
+      "lod": "low",
+      "wear": 1,
+      "nominalMm": 76,
+      "fingerprint": "9c9bef15aa20f59c3033c52f3b2b743c712ddd18c8ec1a49fb4494f048074fb8",
+      "vertices": 2050,
+      "triangles": 3114,
+      "meshes": 4,
+      "carbideMeshes": 1,
+      "extentMm": [
+        75.31599700450897,
+        77.6995955966413,
+        73.42766970396042
+      ],
+      "boundsM": {
+        "min": [
+          -0.037657998502254486,
+          -0.07469959557056427,
+          -0.03671383485198021
+        ],
+        "max": [
+          0.037657998502254486,
+          0.003000000026077032,
+          0.03671383485198021
+        ]
+      },
+      "spec": {
+        "id": "button-bit",
+        "family": "Drill Bits & Cutting Tools / Button Bits",
+        "name": "Drillity T45 Button Bit 76 mm",
+        "thread": "T45",
+        "diameterMm": 76,
+        "lengthMm": 72,
+        "buttons": 13,
+        "buttonKind": "spherical",
+        "gaugeButtons": 8,
+        "gaugeButtonMm": 12,
+        "faceButtonMm": 11,
+        "gaugeAngleDeg": 35,
+        "face": "drop",
+        "flutes": 4,
+        "flushHoles": 4,
+        "cutDiameterMm": 74.8,
+        "material": "Carbide grade DP55 / body 42CrMo4(V)",
+        "method": "top-hammer",
+        "priceEur": 378
+      }
+    },
+    {
+      "type": "catalogue",
+      "id": "bit-th-t45-89-hd",
+      "lod": "low",
+      "wear": 1,
+      "nominalMm": 89,
+      "fingerprint": "2802fe3b9b211639e1ff92e5a93a817eb35955f69b0284134db23e848a9205db",
+      "vertices": 2194,
+      "triangles": 3366,
+      "meshes": 4,
+      "carbideMeshes": 1,
+      "extentMm": [
+        88.19899708032608,
+        78.53789022192359,
+        85.98766475915909
+      ],
+      "boundsM": {
+        "min": [
+          -0.04409949854016304,
+          -0.07553789019584656,
+          -0.042993832379579544
+        ],
+        "max": [
+          0.04409949854016304,
+          0.003000000026077032,
+          0.042993832379579544
+        ]
+      },
+      "spec": {
+        "id": "button-bit",
+        "family": "Drill Bits & Cutting Tools / Button Bits",
+        "name": "Drillity T45 Button Bit 89 mm",
+        "thread": "T45",
+        "diameterMm": 89,
+        "lengthMm": 73,
+        "buttons": 13,
+        "buttonKind": "ballistic",
+        "gaugeButtons": 8,
+        "gaugeButtonMm": 13,
+        "faceButtonMm": 12,
+        "gaugeAngleDeg": 35,
+        "face": "drop",
+        "flutes": 4,
+        "flushHoles": 4,
+        "cutDiameterMm": 87.6,
+        "material": "Carbide grade DP55 / body 42CrMo4(V)",
+        "method": "top-hammer",
+        "priceEur": 423
+      }
+    },
+    {
+      "type": "alias",
+      "id": "button-bit-t51-hd",
+      "wear": 0,
+      "fingerprint": "3844ead41495934928857761e9ba8c136e72554d17f077de0ba3883641d5a7cb",
+      "vertices": 2596,
+      "triangles": 4104,
+      "meshes": 4,
+      "carbideMeshes": 1,
+      "extentMm": [
+        114.89152908325195,
+        106.43898090347648,
+        114.09946903586388
+      ],
+      "boundsM": {
+        "min": [
+          -0.057909030467271805,
+          -0.10343898087739944,
+          -0.05642905831336975
+        ],
+        "max": [
+          0.05698249861598015,
+          0.003000000026077032,
+          0.057670410722494125
+        ]
+      },
+      "spec": {
+        "id": "button-bit",
+        "family": "Drill Bits & Cutting Tools / Button Bits",
+        "name": "Drillity T51 Button Bit 115 mm",
+        "thread": "T51",
+        "diameterMm": 115,
+        "lengthMm": 94,
+        "buttons": 19,
+        "buttonKind": "ballistic",
+        "gaugeButtons": 9,
+        "gaugeButtonMm": 14,
+        "faceButtonMm": 12,
+        "gaugeAngleDeg": 35,
+        "face": "drop",
+        "flutes": 4,
+        "flushHoles": 3,
+        "cutDiameterMm": 116.2,
+        "material": "Carbide grade DP55 / body 42CrMo4(V)",
+        "method": "top-hammer",
+        "priceEur": 511
+      }
+    },
+    {
+      "type": "alias",
+      "id": "button-bit-t51-hd",
+      "wear": 0.5,
+      "fingerprint": "73c0f42bcfc875c29462c17d4ff590dcae82c3e97a03ec689f38ddabb313fd33",
+      "vertices": 3385,
+      "triangles": 5234,
+      "meshes": 4,
+      "carbideMeshes": 1,
+      "extentMm": [
+        114.18994888663292,
+        106.43898090347648,
+        112.71392554044724
+      ],
+      "boundsM": {
+        "min": [
+          -0.05720745027065277,
+          -0.10343898087739944,
+          -0.05577864125370979
+        ],
+        "max": [
+          0.05698249861598015,
+          0.003000000026077032,
+          0.05693528428673744
+        ]
+      },
+      "spec": {
+        "id": "button-bit",
+        "family": "Drill Bits & Cutting Tools / Button Bits",
+        "name": "Drillity T51 Button Bit 115 mm",
+        "thread": "T51",
+        "diameterMm": 115,
+        "lengthMm": 94,
+        "buttons": 19,
+        "buttonKind": "ballistic",
+        "gaugeButtons": 9,
+        "gaugeButtonMm": 14,
+        "faceButtonMm": 12,
+        "gaugeAngleDeg": 35,
+        "face": "drop",
+        "flutes": 4,
+        "flushHoles": 3,
+        "cutDiameterMm": 114.7,
+        "material": "Carbide grade DP55 / body 42CrMo4(V)",
+        "method": "top-hammer",
+        "priceEur": 511
+      }
+    },
+    {
+      "type": "alias",
+      "id": "button-bit-t51-hd",
+      "wear": 1,
+      "fingerprint": "460670604b095118d54b893edb0641c15f0d39989f50b13a550aff9b1286af9e",
+      "vertices": 2812,
+      "triangles": 4376,
+      "meshes": 4,
+      "carbideMeshes": 1,
+      "extentMm": [
+        113.9649972319603,
+        106.43898090347648,
+        111.77355423569679
+      ],
+      "boundsM": {
+        "min": [
+          -0.05698249861598015,
+          -0.10343898087739944,
+          -0.05555383116006851
+        ],
+        "max": [
+          0.05698249861598015,
+          0.003000000026077032,
+          0.05621972307562828
+        ]
+      },
+      "spec": {
+        "id": "button-bit",
+        "family": "Drill Bits & Cutting Tools / Button Bits",
+        "name": "Drillity T51 Button Bit 115 mm",
+        "thread": "T51",
+        "diameterMm": 115,
+        "lengthMm": 94,
+        "buttons": 19,
+        "buttonKind": "ballistic",
+        "gaugeButtons": 9,
+        "gaugeButtonMm": 14,
+        "faceButtonMm": 12,
+        "gaugeAngleDeg": 35,
+        "face": "drop",
+        "flutes": 4,
+        "flushHoles": 3,
+        "cutDiameterMm": 113.2,
+        "material": "Carbide grade DP55 / body 42CrMo4(V)",
+        "method": "top-hammer",
+        "priceEur": 511
+      }
+    },
+    {
+      "type": "alias",
+      "id": "button-bit-face-45",
+      "wear": 0,
+      "fingerprint": "d5275bfb60886a1273b8f01b071a00fd927cb0dba8f32c9f4e0f84a43bfb9ffa",
+      "vertices": 1628,
+      "triangles": 2550,
+      "meshes": 4,
+      "carbideMeshes": 1,
+      "extentMm": [
+        44.50000077486038,
+        84.6767365001142,
+        44.43961940705776
+      ],
+      "boundsM": {
+        "min": [
+          -0.02225000038743019,
+          -0.08167673647403717,
+          -0.02209308370947838
+        ],
+        "max": [
+          0.02225000038743019,
+          0.003000000026077032,
+          0.022346535697579384
+        ]
+      },
+      "spec": {
+        "id": "button-bit",
+        "family": "Drill Bits & Cutting Tools / Button Bits",
+        "name": "Drillity R32 Button Bit 45 mm",
+        "thread": "R32",
+        "diameterMm": 45,
+        "lengthMm": 72,
+        "buttons": 9,
+        "buttonKind": "spherical",
+        "gaugeButtons": 6,
+        "gaugeButtonMm": 9,
+        "faceButtonMm": 9,
+        "gaugeAngleDeg": 35,
+        "face": "flat",
+        "flutes": 4,
+        "flushHoles": 3,
+        "cutDiameterMm": 45.6,
+        "material": "Carbide grade DP55 / body 42CrMo4(V)",
+        "method": "top-hammer",
+        "priceEur": 273
+      }
+    },
+    {
+      "type": "alias",
+      "id": "button-bit-face-45",
+      "wear": 0.5,
+      "fingerprint": "4fa4214a3f2b2bf7dfe6bf2a053df8f15cd267d928ff47ff22ee866cb9d3ae5c",
+      "vertices": 1881,
+      "triangles": 2874,
+      "meshes": 4,
+      "carbideMeshes": 1,
+      "extentMm": [
+        44.50000077486038,
+        84.6767365001142,
+        43.7297597527504
+      ],
+      "boundsM": {
+        "min": [
+          -0.02225000038743019,
+          -0.08167673647403717,
+          -0.021723534911870956
+        ],
+        "max": [
+          0.02225000038743019,
+          0.003000000026077032,
+          0.02200622484087944
+        ]
+      },
+      "spec": {
+        "id": "button-bit",
+        "family": "Drill Bits & Cutting Tools / Button Bits",
+        "name": "Drillity R32 Button Bit 45 mm",
+        "thread": "R32",
+        "diameterMm": 45,
+        "lengthMm": 72,
+        "buttons": 9,
+        "buttonKind": "spherical",
+        "gaugeButtons": 6,
+        "gaugeButtonMm": 9,
+        "faceButtonMm": 9,
+        "gaugeAngleDeg": 35,
+        "face": "flat",
+        "flutes": 4,
+        "flushHoles": 3,
+        "cutDiameterMm": 44.9,
+        "material": "Carbide grade DP55 / body 42CrMo4(V)",
+        "method": "top-hammer",
+        "priceEur": 273
+      }
+    },
+    {
+      "type": "alias",
+      "id": "button-bit-face-45",
+      "wear": 1,
+      "fingerprint": "9ed44b5682e029b796dbd6b5390d0d5727c008bd0fab8ada69d15cba7ec728ca",
+      "vertices": 1686,
+      "triangles": 2572,
+      "meshes": 4,
+      "carbideMeshes": 1,
+      "extentMm": [
+        44.50000077486038,
+        84.6767365001142,
+        43.38429123163223
+      ],
+      "boundsM": {
+        "min": [
+          -0.02225000038743019,
+          -0.08167673647403717,
+          -0.021692145615816116
+        ],
+        "max": [
+          0.02225000038743019,
+          0.003000000026077032,
+          0.021692145615816116
+        ]
+      },
+      "spec": {
+        "id": "button-bit",
+        "family": "Drill Bits & Cutting Tools / Button Bits",
+        "name": "Drillity R32 Button Bit 45 mm",
+        "thread": "R32",
+        "diameterMm": 45,
+        "lengthMm": 72,
+        "buttons": 9,
+        "buttonKind": "spherical",
+        "gaugeButtons": 6,
+        "gaugeButtonMm": 9,
+        "faceButtonMm": 9,
+        "gaugeAngleDeg": 35,
+        "face": "flat",
+        "flutes": 4,
+        "flushHoles": 3,
+        "cutDiameterMm": 44.2,
+        "material": "Carbide grade DP55 / body 42CrMo4(V)",
+        "method": "top-hammer",
+        "priceEur": 273
+      }
+    },
+    {
+      "type": "alias",
+      "id": "dth-bit-4",
+      "wear": 0,
+      "fingerprint": "278aea3d7fe7e007d18ff4b832a0369172190886ff834705563311ff227082c6",
+      "vertices": 2419,
+      "triangles": 3940,
+      "meshes": 4,
+      "carbideMeshes": 1,
+      "extentMm": [
+        126.9238293170929,
+        211.449533700943,
+        126.3056993484497
+      ],
+      "boundsM": {
+        "min": [
+          -0.06346191465854645,
+          -0.211449533700943,
+          -0.06293594092130661
+        ],
+        "max": [
+          0.06346191465854645,
+          0,
+          0.0633697584271431
+        ]
+      },
+      "spec": {
+        "id": "dth-bit",
+        "family": "Drill Bits & Cutting Tools / DTH Bits",
+        "name": "Drillity DHD35 DTH Bit 129 mm",
+        "shank": "DHD35",
+        "diameterMm": 129,
+        "lengthMm": 200,
+        "buttons": 16,
+        "buttonKind": "spherical",
+        "gaugeButtons": 8,
+        "gaugeButtonMm": 15.8,
+        "faceButtonMm": 14.5,
+        "gaugeAngleDeg": 35,
+        "face": "flat",
+        "flushHoles": 2,
+        "cutDiameterMm": 130.3,
+        "material": "Carbide grade DP62 / body 42CrMo4(V)",
+        "method": "dth",
+        "priceEur": 931
+      }
+    },
+    {
+      "type": "alias",
+      "id": "dth-bit-4",
+      "wear": 0.5,
+      "fingerprint": "c271eb0633b894f940836bdeb9b0b3372a698853b3a032adf6afe4fa5b067774",
+      "vertices": 2839,
+      "triangles": 4464,
+      "meshes": 4,
+      "carbideMeshes": 1,
+      "extentMm": [
+        126.38421356678009,
+        211.449533700943,
+        124.92493912577629
+      ],
+      "boundsM": {
+        "min": [
+          -0.06319210678339005,
+          -0.211449533700943,
+          -0.062316905707120895
+        ],
+        "max": [
+          0.06319210678339005,
+          0,
+          0.0626080334186554
+        ]
+      },
+      "spec": {
+        "id": "dth-bit",
+        "family": "Drill Bits & Cutting Tools / DTH Bits",
+        "name": "Drillity DHD35 DTH Bit 129 mm",
+        "shank": "DHD35",
+        "diameterMm": 129,
+        "lengthMm": 200,
+        "buttons": 16,
+        "buttonKind": "spherical",
+        "gaugeButtons": 8,
+        "gaugeButtonMm": 15.8,
+        "faceButtonMm": 14.5,
+        "gaugeAngleDeg": 35,
+        "face": "flat",
+        "flushHoles": 2,
+        "cutDiameterMm": 128.7,
+        "material": "Carbide grade DP62 / body 42CrMo4(V)",
+        "method": "dth",
+        "priceEur": 931
+      }
+    },
+    {
+      "type": "alias",
+      "id": "dth-bit-4",
+      "wear": 1,
+      "fingerprint": "288190d9b3529496ad59ad501f3c5a7b77f257bd177d55ae53d6171e838ae410",
+      "vertices": 2261,
+      "triangles": 3584,
+      "meshes": 4,
+      "carbideMeshes": 1,
+      "extentMm": [
+        126.38421356678009,
+        211.449533700943,
+        124.63381141424179
+      ],
+      "boundsM": {
+        "min": [
+          -0.06319210678339005,
+          -0.211449533700943,
+          -0.062316905707120895
+        ],
+        "max": [
+          0.06319210678339005,
+          0,
+          0.062316905707120895
+        ]
+      },
+      "spec": {
+        "id": "dth-bit",
+        "family": "Drill Bits & Cutting Tools / DTH Bits",
+        "name": "Drillity DHD35 DTH Bit 129 mm",
+        "shank": "DHD35",
+        "diameterMm": 129,
+        "lengthMm": 200,
+        "buttons": 16,
+        "buttonKind": "spherical",
+        "gaugeButtons": 8,
+        "gaugeButtonMm": 15.8,
+        "faceButtonMm": 14.5,
+        "gaugeAngleDeg": 35,
+        "face": "flat",
+        "flushHoles": 2,
+        "cutDiameterMm": 127,
+        "material": "Carbide grade DP62 / body 42CrMo4(V)",
+        "method": "dth",
+        "priceEur": 931
+      }
+    },
+    {
+      "type": "alias",
+      "id": "ith-bit-216",
+      "wear": 0,
+      "fingerprint": "66d3908a77c9cf83500bcaf3cb0429c01b8c9057f203edb3df53c5aada2e7776",
+      "vertices": 3239,
+      "triangles": 5238,
+      "meshes": 4,
+      "carbideMeshes": 1,
+      "extentMm": [
+        212.52360939979553,
+        357.25104808807373,
+        211.45741641521454
+      ],
+      "boundsM": {
+        "min": [
+          -0.10626180469989777,
+          -0.35725104808807373,
+          -0.10546787083148956
+        ],
+        "max": [
+          0.10626180469989777,
+          0,
+          0.10598954558372498
+        ]
+      },
+      "spec": {
+        "id": "dth-bit",
+        "family": "Drill Bits & Cutting Tools / DTH Bits",
+        "name": "Drillity QL6 DTH Bit 216 mm",
+        "shank": "QL6",
+        "diameterMm": 216,
+        "lengthMm": 335,
+        "buttons": 23,
+        "buttonKind": "spherical",
+        "gaugeButtons": 12,
+        "gaugeButtonMm": 19,
+        "faceButtonMm": 19,
+        "gaugeAngleDeg": 35,
+        "face": "flat",
+        "flushHoles": 3,
+        "cutDiameterMm": 218.2,
+        "material": "Carbide grade DP62 / body 42CrMo4(V)",
+        "method": "dth",
+        "priceEur": 1383
+      }
+    },
+    {
+      "type": "alias",
+      "id": "ith-bit-216",
+      "wear": 0.5,
+      "fingerprint": "6577f4374736e1c5ebae763d268281be498efa941c93ced7ab6a6c5aa948dc52",
+      "vertices": 3873,
+      "triangles": 6044,
+      "meshes": 4,
+      "carbideMeshes": 1,
+      "extentMm": [
+        211.61723136901855,
+        357.25104808807373,
+        209.04507488012314
+      ],
+      "boundsM": {
+        "min": [
+          -0.10580861568450928,
+          -0.35725104808807373,
+          -0.10434458404779434
+        ],
+        "max": [
+          0.10580861568450928,
+          0,
+          0.1047004908323288
+        ]
+      },
+      "spec": {
+        "id": "dth-bit",
+        "family": "Drill Bits & Cutting Tools / DTH Bits",
+        "name": "Drillity QL6 DTH Bit 216 mm",
+        "shank": "QL6",
+        "diameterMm": 216,
+        "lengthMm": 335,
+        "buttons": 23,
+        "buttonKind": "spherical",
+        "gaugeButtons": 12,
+        "gaugeButtonMm": 19,
+        "faceButtonMm": 19,
+        "gaugeAngleDeg": 35,
+        "face": "flat",
+        "flushHoles": 3,
+        "cutDiameterMm": 215.4,
+        "material": "Carbide grade DP62 / body 42CrMo4(V)",
+        "method": "dth",
+        "priceEur": 1383
+      }
+    },
+    {
+      "type": "alias",
+      "id": "ith-bit-216",
+      "wear": 1,
+      "fingerprint": "9d4be6c1e17b6ac07ea6221c69622a01d14e225b8793d5daf3feeb9fd0ebd087",
+      "vertices": 3179,
+      "triangles": 4974,
+      "meshes": 4,
+      "carbideMeshes": 1,
+      "extentMm": [
+        211.61723136901855,
+        357.25104808807373,
+        208.68916809558868
+      ],
+      "boundsM": {
+        "min": [
+          -0.10580861568450928,
+          -0.35725104808807373,
+          -0.10434458404779434
+        ],
+        "max": [
+          0.10580861568450928,
+          0,
+          0.10434458404779434
+        ]
+      },
+      "spec": {
+        "id": "dth-bit",
+        "family": "Drill Bits & Cutting Tools / DTH Bits",
+        "name": "Drillity QL6 DTH Bit 216 mm",
+        "shank": "QL6",
+        "diameterMm": 216,
+        "lengthMm": 335,
+        "buttons": 23,
+        "buttonKind": "spherical",
+        "gaugeButtons": 12,
+        "gaugeButtonMm": 19,
+        "faceButtonMm": 19,
+        "gaugeAngleDeg": 35,
+        "face": "flat",
+        "flushHoles": 3,
+        "cutDiameterMm": 212.7,
+        "material": "Carbide grade DP62 / body 42CrMo4(V)",
+        "method": "dth",
+        "priceEur": 1383
+      }
+    },
+    {
+      "type": "alias",
+      "id": "dth-hammer-6",
+      "wear": 0,
+      "fingerprint": "a545848ce672af1758ae582c0355ceee804fede3959fdc19f75012e932b031af",
+      "vertices": 4138,
+      "triangles": 6558,
+      "meshes": 6,
+      "carbideMeshes": 1,
+      "extentMm": [
+        181.03863298892975,
+        1674.531053751707,
+        180.14217913150787
+      ],
+      "boundsM": {
+        "min": [
+          -0.09051931649446487,
+          -1.62165105342865,
+          -0.08981025218963623
+        ],
+        "max": [
+          0.09051931649446487,
+          0.052880000323057175,
+          0.09033192694187164
+        ]
+      },
+      "spec": {
+        "id": "dth-hammer",
+        "family": "DTH Tools / DTH Hammers",
+        "name": "Drillity Stormhammer 6IN",
+        "size": "6in",
+        "odMm": 159,
+        "lengthMm": 1320,
+        "thread": "API312",
+        "shank": "QL6",
+        "workingPressureBar": 30,
+        "airLpm": 17000,
+        "material": "Case-hardened 25CrMo4V piston, 42CrMo4 sleeve",
+        "method": "dth",
+        "priceEur": 5298
+      }
+    },
+    {
+      "type": "alias",
+      "id": "dth-hammer-6",
+      "wear": 0.5,
+      "fingerprint": "d3635d2fbcf00eb5c7c135e6f242b6af87354a2aaf23d1b5128ff8cb02b7f7a0",
+      "vertices": 4733,
+      "triangles": 7322,
+      "meshes": 6,
+      "carbideMeshes": 1,
+      "extentMm": [
+        180.26895821094513,
+        1674.531053751707,
+        178.12510579824448
+      ],
+      "boundsM": {
+        "min": [
+          -0.09013447910547256,
+          -1.62165105342865,
+          -0.08888612687587738
+        ],
+        "max": [
+          0.09013447910547256,
+          0.052880000323057175,
+          0.0892389789223671
+        ]
+      },
+      "spec": {
+        "id": "dth-hammer",
+        "family": "DTH Tools / DTH Hammers",
+        "name": "Drillity Stormhammer 6IN",
+        "size": "6in",
+        "odMm": 159,
+        "lengthMm": 1320,
+        "thread": "API312",
+        "shank": "QL6",
+        "workingPressureBar": 30,
+        "airLpm": 17000,
+        "material": "Case-hardened 25CrMo4V piston, 42CrMo4 sleeve",
+        "method": "dth",
+        "priceEur": 5298
+      }
+    },
+    {
+      "type": "alias",
+      "id": "dth-hammer-6",
+      "wear": 1,
+      "fingerprint": "c5d88faa358547a28f6152f6d1d9d503385136fce53d168f13926f881a2e341c",
+      "vertices": 4032,
+      "triangles": 6240,
+      "meshes": 6,
+      "carbideMeshes": 1,
+      "extentMm": [
+        180.26895821094513,
+        1674.531053751707,
+        177.77225375175476
+      ],
+      "boundsM": {
+        "min": [
+          -0.09013447910547256,
+          -1.62165105342865,
+          -0.08888612687587738
+        ],
+        "max": [
+          0.09013447910547256,
+          0.052880000323057175,
+          0.08888612687587738
+        ]
+      },
+      "spec": {
+        "id": "dth-hammer",
+        "family": "DTH Tools / DTH Hammers",
+        "name": "Drillity Stormhammer 6IN",
+        "size": "6in",
+        "odMm": 159,
+        "lengthMm": 1320,
+        "thread": "API312",
+        "shank": "QL6",
+        "workingPressureBar": 30,
+        "airLpm": 17000,
+        "material": "Case-hardened 25CrMo4V piston, 42CrMo4 sleeve",
+        "method": "dth",
+        "priceEur": 5298
+      }
+    },
+    {
+      "type": "alias",
+      "id": "tricone-milled-445",
+      "wear": 0,
+      "fingerprint": "66c9a3de0228558dc89e3322ac34846427859e30073e7767d15ea9231552f54b",
+      "vertices": 12839,
+      "triangles": 11748,
+      "meshes": 16,
+      "carbideMeshes": 4,
+      "extentMm": [
+        377.3235441017872,
+        585.0249975919724,
+        405.61283446904946
+      ],
+      "boundsM": {
+        "min": [
+          -0.14668500423431396,
+          -0.4450249969959259,
+          -0.20280641723452467
+        ],
+        "max": [
+          0.23063853986747324,
+          0.14000000059604645,
+          0.20280641723452478
+        ]
+      },
+      "spec": {
+        "id": "tricone-bit",
+        "family": "Drill Bits & Cutting Tools / Tricone Bits",
+        "name": "Drillity Tricone MT 444.5 mm",
+        "diameterMm": 444.5,
+        "variant": "milled",
+        "connection": "7 5/8 API REG",
+        "connectionFamily": "REG",
+        "cones": 3,
+        "nozzles": 3,
+        "iadcCode": "116",
+        "journalAngleDeg": 33,
+        "bearing": "Sealed journal",
+        "dullGrading": "Teeth, bearing and gauge — the three things that end a run",
+        "material": "Milled steel teeth, hardfaced",
+        "method": "oil-rotary",
+        "priceEur": 7123
+      }
+    },
+    {
+      "type": "alias",
+      "id": "tricone-milled-445",
+      "wear": 0.5,
+      "fingerprint": "af79afa04216109ffe499d5d553e59173543590b0326528a04585478a1cfcfb6",
+      "vertices": 13217,
+      "triangles": 12396,
+      "meshes": 19,
+      "carbideMeshes": 4,
+      "extentMm": [
+        377.25902322047614,
+        585.0249975919724,
+        405.5507540771902
+      ],
+      "boundsM": {
+        "min": [
+          -0.14668500423431396,
+          -0.4450249969959259,
+          -0.20282212346642156
+        ],
+        "max": [
+          0.2305740189861622,
+          0.14000000059604645,
+          0.20272863061076862
+        ]
+      },
+      "spec": {
+        "id": "tricone-bit",
+        "family": "Drill Bits & Cutting Tools / Tricone Bits",
+        "name": "Drillity Tricone MT 444.5 mm",
+        "diameterMm": 444.5,
+        "variant": "milled",
+        "connection": "7 5/8 API REG",
+        "connectionFamily": "REG",
+        "cones": 3,
+        "nozzles": 3,
+        "iadcCode": "116",
+        "journalAngleDeg": 33,
+        "bearing": "Sealed journal",
+        "dullGrading": "Teeth, bearing and gauge — the three things that end a run",
+        "material": "Milled steel teeth, hardfaced",
+        "method": "oil-rotary",
+        "priceEur": 7123
+      }
+    },
+    {
+      "type": "alias",
+      "id": "tricone-milled-445",
+      "wear": 1,
+      "fingerprint": "d0d0a8d5a4e3d31717fd7a890c951fac73f6bbe8a0b04af560a6bc57872d3e31",
+      "vertices": 13436,
+      "triangles": 12726,
+      "meshes": 19,
+      "carbideMeshes": 4,
+      "extentMm": [
+        377.45477901634683,
+        585.0249975919724,
+        405.9299099472605
+      ],
+      "boundsM": {
+        "min": [
+          -0.14668500423431396,
+          -0.4450249969959259,
+          -0.20299428835656486
+        ],
+        "max": [
+          0.23076977478203287,
+          0.14000000059604645,
+          0.20293562159069564
+        ]
+      },
+      "spec": {
+        "id": "tricone-bit",
+        "family": "Drill Bits & Cutting Tools / Tricone Bits",
+        "name": "Drillity Tricone MT 444.5 mm",
+        "diameterMm": 444.5,
+        "variant": "milled",
+        "connection": "7 5/8 API REG",
+        "connectionFamily": "REG",
+        "cones": 3,
+        "nozzles": 3,
+        "iadcCode": "116",
+        "journalAngleDeg": 33,
+        "bearing": "Sealed journal",
+        "dullGrading": "Teeth, bearing and gauge — the three things that end a run",
+        "material": "Milled steel teeth, hardfaced",
+        "method": "oil-rotary",
+        "priceEur": 7123
+      }
+    },
+    {
+      "type": "alias",
+      "id": "core-bit-bq",
+      "wear": 0,
+      "fingerprint": "58425a1d1579f97020b2ae303a989050d18184adb57c57e5dc5d832d88263232",
+      "vertices": 1557,
+      "triangles": 908,
+      "meshes": 3,
+      "carbideMeshes": 0,
+      "extentMm": [
+        59.99999865889549,
+        61.99999898672104,
+        59.99999865889549
+      ],
+      "boundsM": {
+        "min": [
+          -0.029999999329447746,
+          -0.06199999898672104,
+          -0.029999999329447746
+        ],
+        "max": [
+          0.029999999329447746,
+          0,
+          0.029999999329447746
+        ]
+      },
+      "spec": {
+        "id": "core-bit",
+        "family": "Drill Bits & Cutting Tools / Core Bits",
+        "name": "Drillity Impreg Crown BQ 60/36.5",
+        "size": "BQ",
+        "holeMm": 60,
+        "coreMm": 36.5,
+        "segments": 8,
+        "crownHeightMm": 12,
+        "matrixSeries": "Series 6 (medium-hard)",
+        "material": "Impregnated synthetic diamond in WC matrix",
+        "method": "core",
+        "priceEur": 636
+      }
+    },
+    {
+      "type": "alias",
+      "id": "core-bit-bq",
+      "wear": 0.5,
+      "fingerprint": "a261d4de3e98c1342006bcf0e80b131c930d55e71b2ad5497c0ded9987f33652",
+      "vertices": 1557,
+      "triangles": 908,
+      "meshes": 3,
+      "carbideMeshes": 0,
+      "extentMm": [
+        59.99999865889549,
+        57.679999619722366,
+        59.99999865889549
+      ],
+      "boundsM": {
+        "min": [
+          -0.029999999329447746,
+          -0.057679999619722366,
+          -0.029999999329447746
+        ],
+        "max": [
+          0.029999999329447746,
+          0,
+          0.029999999329447746
+        ]
+      },
+      "spec": {
+        "id": "core-bit",
+        "family": "Drill Bits & Cutting Tools / Core Bits",
+        "name": "Drillity Impreg Crown BQ 60/36.5",
+        "size": "BQ",
+        "holeMm": 60,
+        "coreMm": 36.5,
+        "segments": 8,
+        "crownHeightMm": 12,
+        "matrixSeries": "Series 6 (medium-hard)",
+        "material": "Impregnated synthetic diamond in WC matrix",
+        "method": "core",
+        "priceEur": 636
+      }
+    },
+    {
+      "type": "alias",
+      "id": "core-bit-bq",
+      "wear": 1,
+      "fingerprint": "ccef3bf41b3377b749f4d6c7829c53305e169941fd169606e1c1cb262dea618b",
+      "vertices": 1557,
+      "triangles": 908,
+      "meshes": 3,
+      "carbideMeshes": 0,
+      "extentMm": [
+        59.99999865889549,
+        53.360000252723694,
+        59.99999865889549
+      ],
+      "boundsM": {
+        "min": [
+          -0.029999999329447746,
+          -0.053360000252723694,
+          -0.029999999329447746
+        ],
+        "max": [
+          0.029999999329447746,
+          0,
+          0.029999999329447746
+        ]
+      },
+      "spec": {
+        "id": "core-bit",
+        "family": "Drill Bits & Cutting Tools / Core Bits",
+        "name": "Drillity Impreg Crown BQ 60/36.5",
+        "size": "BQ",
+        "holeMm": 60,
+        "coreMm": 36.5,
+        "segments": 8,
+        "crownHeightMm": 12,
+        "matrixSeries": "Series 6 (medium-hard)",
+        "material": "Impregnated synthetic diamond in WC matrix",
+        "method": "core",
+        "priceEur": 636
+      }
+    },
+    {
+      "type": "alias",
+      "id": "core-bit-hq",
+      "wear": 0,
+      "fingerprint": "66e8bbd5e29ba6e04d825e527413d473d8f161602e9fbc34395abdcff330fe8b",
+      "vertices": 1869,
+      "triangles": 1012,
+      "meshes": 3,
+      "carbideMeshes": 0,
+      "extentMm": [
+        96.00000083446503,
+        61.99999898672104,
+        96.19200229644775
+      ],
+      "boundsM": {
+        "min": [
+          -0.04800000041723251,
+          -0.06199999898672104,
+          -0.04809600114822388
+        ],
+        "max": [
+          0.04800000041723251,
+          0,
+          0.04809600114822388
+        ]
+      },
+      "spec": {
+        "id": "core-bit",
+        "family": "Drill Bits & Cutting Tools / Core Bits",
+        "name": "Drillity Impreg Crown HQ 96/63.5",
+        "size": "HQ",
+        "holeMm": 96,
+        "coreMm": 63.5,
+        "segments": 10,
+        "crownHeightMm": 12,
+        "matrixSeries": "Series 6 (medium-hard)",
+        "material": "Impregnated synthetic diamond in WC matrix",
+        "method": "core",
+        "priceEur": 838
+      }
+    },
+    {
+      "type": "alias",
+      "id": "core-bit-hq",
+      "wear": 0.5,
+      "fingerprint": "869fce07b7a610081cb8410d8027651fe7a7998930c8bbf9a60d1b8dccf29f5c",
+      "vertices": 1869,
+      "triangles": 1012,
+      "meshes": 3,
+      "carbideMeshes": 0,
+      "extentMm": [
+        96.00000083446503,
+        57.679999619722366,
+        96.19200229644775
+      ],
+      "boundsM": {
+        "min": [
+          -0.04800000041723251,
+          -0.057679999619722366,
+          -0.04809600114822388
+        ],
+        "max": [
+          0.04800000041723251,
+          0,
+          0.04809600114822388
+        ]
+      },
+      "spec": {
+        "id": "core-bit",
+        "family": "Drill Bits & Cutting Tools / Core Bits",
+        "name": "Drillity Impreg Crown HQ 96/63.5",
+        "size": "HQ",
+        "holeMm": 96,
+        "coreMm": 63.5,
+        "segments": 10,
+        "crownHeightMm": 12,
+        "matrixSeries": "Series 6 (medium-hard)",
+        "material": "Impregnated synthetic diamond in WC matrix",
+        "method": "core",
+        "priceEur": 838
+      }
+    },
+    {
+      "type": "alias",
+      "id": "core-bit-hq",
+      "wear": 1,
+      "fingerprint": "59d6f8edd2422e2d3d3b12afbfe586edc68b2589441852c0260e18c71bf2b962",
+      "vertices": 1869,
+      "triangles": 1012,
+      "meshes": 3,
+      "carbideMeshes": 0,
+      "extentMm": [
+        96.00000083446503,
+        53.360000252723694,
+        96.19200229644775
+      ],
+      "boundsM": {
+        "min": [
+          -0.04800000041723251,
+          -0.053360000252723694,
+          -0.04809600114822388
+        ],
+        "max": [
+          0.04800000041723251,
+          0,
+          0.04809600114822388
+        ]
+      },
+      "spec": {
+        "id": "core-bit",
+        "family": "Drill Bits & Cutting Tools / Core Bits",
+        "name": "Drillity Impreg Crown HQ 96/63.5",
+        "size": "HQ",
+        "holeMm": 96,
+        "coreMm": 63.5,
+        "segments": 10,
+        "crownHeightMm": 12,
+        "matrixSeries": "Series 6 (medium-hard)",
+        "material": "Impregnated synthetic diamond in WC matrix",
+        "method": "core",
+        "priceEur": 838
+      }
+    },
+    {
+      "type": "alias",
+      "id": "rod-t45",
+      "wear": 0,
+      "fingerprint": "7c9f0a7eb435d4d2398d64dc831c2617785bb819515d5611185dfd32dd0a2646",
+      "vertices": 527,
+      "triangles": 756,
+      "meshes": 3,
+      "carbideMeshes": 0,
+      "extentMm": [
+        51.660001277923584,
+        3676.5313148498535,
+        63.00000101327896
+      ],
+      "boundsM": {
+        "min": [
+          -0.025830000638961792,
+          -3.6765313148498535,
+          -0.03150000050663948
+        ],
+        "max": [
+          0.025830000638961792,
+          0,
+          0.03150000050663948
+        ]
+      },
+      "spec": {
+        "id": "drill-rod",
+        "family": "Drill String & Rods / Drill Rods (Threaded)",
+        "name": "Drillity T45 Drill Rod 3660 mm MF",
+        "thread": "T45",
+        "type": "MF",
+        "lengthMm": 3660,
+        "odMm": 46,
+        "boreMm": 17,
+        "collarOdMm": 63,
+        "material": "34CrNiMo6, induction hardened ends",
+        "method": "top-hammer",
+        "priceEur": 185
+      }
+    },
+    {
+      "type": "alias",
+      "id": "rod-t45",
+      "wear": 0.5,
+      "fingerprint": "15fe5ecbef55731754747b645db8c8790d4f630c906f79a2f434251fdc37e058",
+      "vertices": 599,
+      "triangles": 792,
+      "meshes": 3,
+      "carbideMeshes": 0,
+      "extentMm": [
+        52.2800013422966,
+        3676.5313148498535,
+        63.00000101327896
+      ],
+      "boundsM": {
+        "min": [
+          -0.025830000638961792,
+          -3.6765313148498535,
+          -0.03150000050663948
+        ],
+        "max": [
+          0.02645000070333481,
+          0,
+          0.03150000050663948
+        ]
+      },
+      "spec": {
+        "id": "drill-rod",
+        "family": "Drill String & Rods / Drill Rods (Threaded)",
+        "name": "Drillity T45 Drill Rod 3660 mm MF",
+        "thread": "T45",
+        "type": "MF",
+        "lengthMm": 3660,
+        "odMm": 46,
+        "boreMm": 17,
+        "collarOdMm": 63,
+        "material": "34CrNiMo6, induction hardened ends",
+        "method": "top-hammer",
+        "priceEur": 185
+      }
+    },
+    {
+      "type": "alias",
+      "id": "rod-t45",
+      "wear": 1,
+      "fingerprint": "15fe5ecbef55731754747b645db8c8790d4f630c906f79a2f434251fdc37e058",
+      "vertices": 599,
+      "triangles": 792,
+      "meshes": 3,
+      "carbideMeshes": 0,
+      "extentMm": [
+        52.2800013422966,
+        3676.5313148498535,
+        63.00000101327896
+      ],
+      "boundsM": {
+        "min": [
+          -0.025830000638961792,
+          -3.6765313148498535,
+          -0.03150000050663948
+        ],
+        "max": [
+          0.02645000070333481,
+          0,
+          0.03150000050663948
+        ]
+      },
+      "spec": {
+        "id": "drill-rod",
+        "family": "Drill String & Rods / Drill Rods (Threaded)",
+        "name": "Drillity T45 Drill Rod 3660 mm MF",
+        "thread": "T45",
+        "type": "MF",
+        "lengthMm": 3660,
+        "odMm": 46,
+        "boreMm": 17,
+        "collarOdMm": 63,
+        "material": "34CrNiMo6, induction hardened ends",
+        "method": "top-hammer",
+        "priceEur": 185
+      }
+    },
+    {
+      "type": "alias",
+      "id": "rod-t38-face-1830",
+      "wear": 0,
+      "fingerprint": "fda20f91be32bb38a3f03d192fd30f63de1b291669eea55bacee87fc052b78bf",
+      "vertices": 527,
+      "triangles": 756,
+      "meshes": 3,
+      "carbideMeshes": 0,
+      "extentMm": [
+        45.9199994802475,
+        1845.2208042144775,
+        56.0000017285347
+      ],
+      "boundsM": {
+        "min": [
+          -0.02295999974012375,
+          -1.8452208042144775,
+          -0.02800000086426735
+        ],
+        "max": [
+          0.02295999974012375,
+          0,
+          0.02800000086426735
+        ]
+      },
+      "spec": {
+        "id": "drill-rod",
+        "family": "Drill String & Rods / Drill Rods (Threaded)",
+        "name": "Drillity T38 Drill Rod 1830 mm MF",
+        "thread": "T38",
+        "type": "MF",
+        "lengthMm": 1830,
+        "odMm": 39,
+        "boreMm": 14.5,
+        "collarOdMm": 56,
+        "material": "34CrNiMo6, induction hardened ends",
+        "method": "top-hammer",
+        "priceEur": 120
+      }
+    },
+    {
+      "type": "alias",
+      "id": "rod-t38-face-1830",
+      "wear": 0.5,
+      "fingerprint": "eaac92ef30a4ddbb3280f507dfbfe1269355cbb8cbb432f8e4c86ac7018fd77c",
+      "vertices": 599,
+      "triangles": 792,
+      "meshes": 3,
+      "carbideMeshes": 0,
+      "extentMm": [
+        45.9199994802475,
+        1845.2208042144775,
+        56.0000017285347
+      ],
+      "boundsM": {
+        "min": [
+          -0.02295999974012375,
+          -1.8452208042144775,
+          -0.02800000086426735
+        ],
+        "max": [
+          0.02295999974012375,
+          0,
+          0.02800000086426735
+        ]
+      },
+      "spec": {
+        "id": "drill-rod",
+        "family": "Drill String & Rods / Drill Rods (Threaded)",
+        "name": "Drillity T38 Drill Rod 1830 mm MF",
+        "thread": "T38",
+        "type": "MF",
+        "lengthMm": 1830,
+        "odMm": 39,
+        "boreMm": 14.5,
+        "collarOdMm": 56,
+        "material": "34CrNiMo6, induction hardened ends",
+        "method": "top-hammer",
+        "priceEur": 120
+      }
+    },
+    {
+      "type": "alias",
+      "id": "rod-t38-face-1830",
+      "wear": 1,
+      "fingerprint": "eaac92ef30a4ddbb3280f507dfbfe1269355cbb8cbb432f8e4c86ac7018fd77c",
+      "vertices": 599,
+      "triangles": 792,
+      "meshes": 3,
+      "carbideMeshes": 0,
+      "extentMm": [
+        45.9199994802475,
+        1845.2208042144775,
+        56.0000017285347
+      ],
+      "boundsM": {
+        "min": [
+          -0.02295999974012375,
+          -1.8452208042144775,
+          -0.02800000086426735
+        ],
+        "max": [
+          0.02295999974012375,
+          0,
+          0.02800000086426735
+        ]
+      },
+      "spec": {
+        "id": "drill-rod",
+        "family": "Drill String & Rods / Drill Rods (Threaded)",
+        "name": "Drillity T38 Drill Rod 1830 mm MF",
+        "thread": "T38",
+        "type": "MF",
+        "lengthMm": 1830,
+        "odMm": 39,
+        "boreMm": 14.5,
+        "collarOdMm": 56,
+        "material": "34CrNiMo6, induction hardened ends",
+        "method": "top-hammer",
+        "priceEur": 120
+      }
+    },
+    {
+      "type": "alias",
+      "id": "rc-pipe-114-6m",
+      "wear": 0,
+      "fingerprint": "e8e8f2c996177264ccb9be04440ba390dedae20da59bf9f74f52198a18727f0d",
+      "vertices": 1861,
+      "triangles": 2588,
+      "meshes": 4,
+      "carbideMeshes": 0,
+      "extentMm": [
+        129.78079915046692,
+        6115.840122103691,
+        133.11834633350372
+      ],
+      "boundsM": {
+        "min": [
+          -0.06489039957523346,
+          -6.0938401222229,
+          -0.06655917316675186
+        ],
+        "max": [
+          0.06489039957523346,
+          0.02199999988079071,
+          0.06655917316675186
+        ]
+      },
+      "spec": {
+        "id": "rc-dual-wall-pipe",
+        "family": "Drill String & Rods / RC & Dual-Wall",
+        "name": "Drillity RC Dual-Wall Pipe 4 1/2 in x 6000 mm",
+        "odMm": 114.3,
+        "innerTubeOdMm": 63.5,
+        "wallMm": 9,
+        "lengthMm": 6000,
+        "connection": "Heavy-duty RC box x pin",
+        "connectionFamily": "rotary",
+        "flowPath": "Air down the annulus, sample up the inner tube",
+        "material": "Outer 42CrMo4(V), inner tube seamless, O-ring sealed",
+        "method": "rc",
+        "priceEur": 1362
+      }
+    },
+    {
+      "type": "alias",
+      "id": "rc-pipe-114-6m",
+      "wear": 0.5,
+      "fingerprint": "06ade92a4c688c29f453fd175d173fcaf4c1dd53c4980a1b25ef69880ebba17e",
+      "vertices": 1949,
+      "triangles": 2644,
+      "meshes": 6,
+      "carbideMeshes": 0,
+      "extentMm": [
+        129.78079915046692,
+        6115.840122103691,
+        133.11834633350372
+      ],
+      "boundsM": {
+        "min": [
+          -0.06489039957523346,
+          -6.0938401222229,
+          -0.06655917316675186
+        ],
+        "max": [
+          0.06489039957523346,
+          0.02199999988079071,
+          0.06655917316675186
+        ]
+      },
+      "spec": {
+        "id": "rc-dual-wall-pipe",
+        "family": "Drill String & Rods / RC & Dual-Wall",
+        "name": "Drillity RC Dual-Wall Pipe 4 1/2 in x 6000 mm",
+        "odMm": 114.3,
+        "innerTubeOdMm": 63.5,
+        "wallMm": 9,
+        "lengthMm": 6000,
+        "connection": "Heavy-duty RC box x pin",
+        "connectionFamily": "rotary",
+        "flowPath": "Air down the annulus, sample up the inner tube",
+        "material": "Outer 42CrMo4(V), inner tube seamless, O-ring sealed",
+        "method": "rc",
+        "priceEur": 1362
+      }
+    },
+    {
+      "type": "alias",
+      "id": "rc-pipe-114-6m",
+      "wear": 1,
+      "fingerprint": "06ade92a4c688c29f453fd175d173fcaf4c1dd53c4980a1b25ef69880ebba17e",
+      "vertices": 1949,
+      "triangles": 2644,
+      "meshes": 6,
+      "carbideMeshes": 0,
+      "extentMm": [
+        129.78079915046692,
+        6115.840122103691,
+        133.11834633350372
+      ],
+      "boundsM": {
+        "min": [
+          -0.06489039957523346,
+          -6.0938401222229,
+          -0.06655917316675186
+        ],
+        "max": [
+          0.06489039957523346,
+          0.02199999988079071,
+          0.06655917316675186
+        ]
+      },
+      "spec": {
+        "id": "rc-dual-wall-pipe",
+        "family": "Drill String & Rods / RC & Dual-Wall",
+        "name": "Drillity RC Dual-Wall Pipe 4 1/2 in x 6000 mm",
+        "odMm": 114.3,
+        "innerTubeOdMm": 63.5,
+        "wallMm": 9,
+        "lengthMm": 6000,
+        "connection": "Heavy-duty RC box x pin",
+        "connectionFamily": "rotary",
+        "flowPath": "Air down the annulus, sample up the inner tube",
+        "material": "Outer 42CrMo4(V), inner tube seamless, O-ring sealed",
+        "method": "rc",
+        "priceEur": 1362
+      }
+    },
+    {
+      "type": "alias",
+      "id": "rc-bit-146",
+      "wear": 0,
+      "fingerprint": "2d9d72aad68381ac2323aa557eadfd9a1167558000c4757abaa8971ec538f3c1",
+      "vertices": 2807,
+      "triangles": 4450,
+      "meshes": 4,
+      "carbideMeshes": 1,
+      "extentMm": [
+        140.0163322687149,
+        279.52948957681656,
+        142.9634541273117
+      ],
+      "boundsM": {
+        "min": [
+          -0.07020041346549988,
+          -0.18352948129177094,
+          -0.07125117629766464
+        ],
+        "max": [
+          0.06981591880321503,
+          0.09600000828504562,
+          0.07171227782964706
+        ]
+      },
+      "spec": {
+        "id": "rc-bit",
+        "family": "Drill Bits & Cutting Tools / DTH Bits (RC)",
+        "name": "Drillity Chipline RC Bit 146 mm",
+        "diameterMm": 146,
+        "lengthMm": 168,
+        "buttons": 19,
+        "buttonKind": "spherical",
+        "face": "Drop centre",
+        "samplePorts": 4,
+        "samplePortMm": 20,
+        "connection": "Splined RC shank + retaining ring",
+        "connectionFamily": "percussion-dth",
+        "material": "Carbide grade DP55 / body 42CrMo4(V)",
+        "method": "rc",
+        "priceEur": 1471
+      }
+    },
+    {
+      "type": "alias",
+      "id": "rc-bit-146",
+      "wear": 0.5,
+      "fingerprint": "28dfcf60a6b4403033548bd509b72561493ccbc5bb18bc73464cda80e95afb2d",
+      "vertices": 2575,
+      "triangles": 4046,
+      "meshes": 4,
+      "carbideMeshes": 1,
+      "extentMm": [
+        137.58406788110733,
+        279.52948957681656,
+        140.07315039634705
+      ],
+      "boundsM": {
+        "min": [
+          -0.06914740800857544,
+          -0.18352948129177094,
+          -0.069809190928936
+        ],
+        "max": [
+          0.06843665987253189,
+          0.09600000828504562,
+          0.07026395946741104
+        ]
+      },
+      "spec": {
+        "id": "rc-bit",
+        "family": "Drill Bits & Cutting Tools / DTH Bits (RC)",
+        "name": "Drillity Chipline RC Bit 146 mm",
+        "diameterMm": 146,
+        "lengthMm": 168,
+        "buttons": 19,
+        "buttonKind": "spherical",
+        "face": "Drop centre",
+        "samplePorts": 4,
+        "samplePortMm": 20,
+        "connection": "Splined RC shank + retaining ring",
+        "connectionFamily": "percussion-dth",
+        "material": "Carbide grade DP55 / body 42CrMo4(V)",
+        "method": "rc",
+        "priceEur": 1471
+      }
+    },
+    {
+      "type": "alias",
+      "id": "rc-bit-146",
+      "wear": 1,
+      "fingerprint": "3db57e340441c285a1f7734c82f57f5d98c542e5a9fc756d055772210202d8f6",
+      "vertices": 2399,
+      "triangles": 3738,
+      "meshes": 4,
+      "carbideMeshes": 1,
+      "extentMm": [
+        137.54285126924515,
+        279.52948957681656,
+        141.84070378541946
+      ],
+      "boundsM": {
+        "min": [
+          -0.06998171657323837,
+          -0.18352948129177094,
+          -0.06999555975198746
+        ],
+        "max": [
+          0.06756113469600677,
+          0.09600000828504562,
+          0.071845144033432
+        ]
+      },
+      "spec": {
+        "id": "rc-bit",
+        "family": "Drill Bits & Cutting Tools / DTH Bits (RC)",
+        "name": "Drillity Chipline RC Bit 146 mm",
+        "diameterMm": 146,
+        "lengthMm": 168,
+        "buttons": 19,
+        "buttonKind": "spherical",
+        "face": "Drop centre",
+        "samplePorts": 4,
+        "samplePortMm": 20,
+        "connection": "Splined RC shank + retaining ring",
+        "connectionFamily": "percussion-dth",
+        "material": "Carbide grade DP55 / body 42CrMo4(V)",
+        "method": "rc",
+        "priceEur": 1471
+      }
+    },
+    {
+      "type": "alias",
+      "id": "casing-crown-168",
+      "wear": 0,
+      "fingerprint": "825f7249cd3bd137921d7281b07ef3334841e901157f5d9cbfb5658ac92c74a3",
+      "vertices": 10357,
+      "triangles": 10296,
+      "meshes": 3,
+      "carbideMeshes": 1,
+      "extentMm": [
+        186.2928867340088,
+        384.7291171550751,
+        186.15249544382095
+      ],
+      "boundsM": {
+        "min": [
+          -0.0931464433670044,
+          -0.3847291171550751,
+          -0.09305177628993988
+        ],
+        "max": [
+          0.0931464433670044,
+          0,
+          0.09310071915388107
+        ]
+      },
+      "spec": {
+        "id": "casing-crown",
+        "family": "Casing & Overburden Tools / Casing Crowns",
+        "name": "Drillity Casing Crown 168.3 mm",
+        "casingOdMm": 168.3,
+        "wallMm": 10,
+        "cutDiaMm": 191,
+        "segments": 8,
+        "buttons": 48,
+        "flushingSlots": 8,
+        "material": "Carbide grade DP70 in 42CrMo4 crown, welded to S355J2 shoe",
+        "duty": "Heavy-duty (HD)",
+        "method": "overburden",
+        "priceEur": 1497
+      }
+    },
+    {
+      "type": "alias",
+      "id": "casing-crown-168",
+      "wear": 0.5,
+      "fingerprint": "ea01d5409411f45c862c52aefa5d2165391bd74dd0184df08c619ea8288ed109",
+      "vertices": 8845,
+      "triangles": 10114,
+      "meshes": 4,
+      "carbideMeshes": 1,
+      "extentMm": [
+        185.37217378616333,
+        373.9926517009735,
+        185.13471633195877
+      ],
+      "boundsM": {
+        "min": [
+          -0.0926918163895607,
+          -0.3739926517009735,
+          -0.0925440713763237
+        ],
+        "max": [
+          0.09268035739660263,
+          0,
+          0.09259064495563507
+        ]
+      },
+      "spec": {
+        "id": "casing-crown",
+        "family": "Casing & Overburden Tools / Casing Crowns",
+        "name": "Drillity Casing Crown 168.3 mm",
+        "casingOdMm": 168.3,
+        "wallMm": 10,
+        "cutDiaMm": 190,
+        "segments": 8,
+        "buttons": 48,
+        "flushingSlots": 8,
+        "material": "Carbide grade DP70 in 42CrMo4 crown, welded to S355J2 shoe",
+        "duty": "Heavy-duty (HD)",
+        "method": "overburden",
+        "priceEur": 1497
+      }
+    },
+    {
+      "type": "alias",
+      "id": "casing-crown-168",
+      "wear": 1,
+      "fingerprint": "2ee7fec292532335b09817b28a89b2abfd4400d5227e5e05d95631408020344e",
+      "vertices": 8269,
+      "triangles": 9106,
+      "meshes": 4,
+      "carbideMeshes": 1,
+      "extentMm": [
+        189.15563821792603,
+        365.472674369812,
+        189.13807719945908
+      ],
+      "boundsM": {
+        "min": [
+          -0.09461738169193268,
+          -0.365472674369812,
+          -0.09509526193141937
+        ],
+        "max": [
+          0.09453825652599335,
+          0,
+          0.0940428152680397
+        ]
+      },
+      "spec": {
+        "id": "casing-crown",
+        "family": "Casing & Overburden Tools / Casing Crowns",
+        "name": "Drillity Casing Crown 168.3 mm",
+        "casingOdMm": 168.3,
+        "wallMm": 10,
+        "cutDiaMm": 196,
+        "segments": 8,
+        "buttons": 48,
+        "flushingSlots": 8,
+        "material": "Carbide grade DP70 in 42CrMo4 crown, welded to S355J2 shoe",
+        "duty": "Heavy-duty (HD)",
+        "method": "overburden",
+        "priceEur": 1497
+      }
+    },
+    {
+      "type": "alias",
+      "id": "pdc-bit-311",
+      "wear": 0,
+      "fingerprint": "4619e7841ac3a8b2d14bc5ce2617423b75296f1b2494d11731dd39fad22e882a",
+      "vertices": 13368,
+      "triangles": 8267,
+      "meshes": 6,
+      "carbideMeshes": 1,
+      "extentMm": [
+        307.1662485599518,
+        350.01252591609955,
+        309.26892161369324
+      ],
+      "boundsM": {
+        "min": [
+          -0.14939457178115845,
+          -0.2230125218629837,
+          -0.15171341598033905
+        ],
+        "max": [
+          0.15777167677879333,
+          0.12700000405311584,
+          0.1575555056333542
+        ]
+      },
+      "spec": {
+        "id": "pdc-bit",
+        "family": "Drill Bits & Cutting Tools / PDC Bits",
+        "name": "Drillity PDC 7-Blade 311.2 mm",
+        "diameterMm": 311.2,
+        "blades": 7,
+        "cuttersPerBlade": 12,
+        "cutterDiaMm": 19,
+        "connection": "6 5/8 API REG",
+        "connectionFamily": "REG",
+        "nozzles": 7,
+        "backRakeDeg": 20,
+        "dullGrading": "Wear flat, chipping and shoulder ring-out",
+        "material": "Tungsten-carbide matrix body, synthetic diamond tables",
+        "method": "oil-rotary",
+        "priceEur": 8446
+      }
+    },
+    {
+      "type": "alias",
+      "id": "pdc-bit-311",
+      "wear": 0.5,
+      "fingerprint": "f1d53da3a53df6493490a26a01210b7f4a3dd28428ab4af520dd7869012be85b",
+      "vertices": 17008,
+      "triangles": 10283,
+      "meshes": 7,
+      "carbideMeshes": 1,
+      "extentMm": [
+        307.1662485599518,
+        350.01252591609955,
+        308.05155634880066
+      ],
+      "boundsM": {
+        "min": [
+          -0.14939457178115845,
+          -0.2230125218629837,
+          -0.15049605071544647
+        ],
+        "max": [
+          0.15777167677879333,
+          0.12700000405311584,
+          0.1575555056333542
+        ]
+      },
+      "spec": {
+        "id": "pdc-bit",
+        "family": "Drill Bits & Cutting Tools / PDC Bits",
+        "name": "Drillity PDC 7-Blade 311.2 mm",
+        "diameterMm": 311.2,
+        "blades": 7,
+        "cuttersPerBlade": 12,
+        "cutterDiaMm": 19,
+        "connection": "6 5/8 API REG",
+        "connectionFamily": "REG",
+        "nozzles": 7,
+        "backRakeDeg": 20,
+        "dullGrading": "Wear flat, chipping and shoulder ring-out",
+        "material": "Tungsten-carbide matrix body, synthetic diamond tables",
+        "method": "oil-rotary",
+        "priceEur": 8446
+      }
+    },
+    {
+      "type": "alias",
+      "id": "pdc-bit-311",
+      "wear": 1,
+      "fingerprint": "a92daf5a1470cdb13218363455c5a51ff40550785d0c8610806f67abeab37b4a",
+      "vertices": 15294,
+      "triangles": 11303,
+      "meshes": 8,
+      "carbideMeshes": 1,
+      "extentMm": [
+        308.3155155181885,
+        350.01252591609955,
+        307.5912445783615
+      ],
+      "boundsM": {
+        "min": [
+          -0.14920306205749512,
+          -0.2230125218629837,
+          -0.15005707740783691
+        ],
+        "max": [
+          0.15911245346069336,
+          0.12700000405311584,
+          0.1575341671705246
+        ]
+      },
+      "spec": {
+        "id": "pdc-bit",
+        "family": "Drill Bits & Cutting Tools / PDC Bits",
+        "name": "Drillity PDC 7-Blade 311.2 mm",
+        "diameterMm": 311.2,
+        "blades": 7,
+        "cuttersPerBlade": 12,
+        "cutterDiaMm": 19,
+        "connection": "6 5/8 API REG",
+        "connectionFamily": "REG",
+        "nozzles": 7,
+        "backRakeDeg": 20,
+        "dullGrading": "Wear flat, chipping and shoulder ring-out",
+        "material": "Tungsten-carbide matrix body, synthetic diamond tables",
+        "method": "oil-rotary",
+        "priceEur": 8446
+      }
+    },
+    {
+      "type": "alias",
+      "id": "cfa-flight-450",
+      "wear": 0,
+      "fingerprint": "2fe2de5e037f93d03d50210be33cf6a93cf2989d1401ce2b94409205b74a2abf",
+      "vertices": 2283,
+      "triangles": 3680,
+      "meshes": 5,
+      "carbideMeshes": 1,
+      "extentMm": [
+        451.79563760757446,
+        3172.0340251922607,
+        451.8127888441086
+      ],
+      "boundsM": {
+        "min": [
+          -0.22589564323425293,
+          -3.1720340251922607,
+          -0.2259078472852707
+        ],
+        "max": [
+          0.22589999437332153,
+          0,
+          0.2259049415588379
+        ]
+      },
+      "spec": {
+        "id": "cfa-flight",
+        "family": "Rotary & Kelly Foundation Tools / CFA & Hollow-Stem Augers",
+        "name": "Drillity CFA Flight 450 mm",
+        "diameterMm": 450,
+        "lengthMm": 3000,
+        "stemOdMm": 219,
+        "concreteBoreMm": 120,
+        "connector": "Octagonal SW175",
+        "pitchMm": 325,
+        "material": "S355J2 flight, Hardox wear edge",
+        "method": "cfa",
+        "priceEur": 4500
+      }
+    },
+    {
+      "type": "alias",
+      "id": "cfa-flight-450",
+      "wear": 0.5,
+      "fingerprint": "460868885ac984e07002b331ec31ccaaf1eed768d11b0eb2e7bdd8ca686299a7",
+      "vertices": 2349,
+      "triangles": 3800,
+      "meshes": 6,
+      "carbideMeshes": 1,
+      "extentMm": [
+        451.79563760757446,
+        3171.0143089294434,
+        451.8127888441086
+      ],
+      "boundsM": {
+        "min": [
+          -0.22589564323425293,
+          -3.1710143089294434,
+          -0.2259078472852707
+        ],
+        "max": [
+          0.22589999437332153,
+          0,
+          0.2259049415588379
+        ]
+      },
+      "spec": {
+        "id": "cfa-flight",
+        "family": "Rotary & Kelly Foundation Tools / CFA & Hollow-Stem Augers",
+        "name": "Drillity CFA Flight 450 mm",
+        "diameterMm": 450,
+        "lengthMm": 3000,
+        "stemOdMm": 219,
+        "concreteBoreMm": 120,
+        "connector": "Octagonal SW175",
+        "pitchMm": 325,
+        "material": "S355J2 flight, Hardox wear edge",
+        "method": "cfa",
+        "priceEur": 4500
+      }
+    },
+    {
+      "type": "alias",
+      "id": "cfa-flight-450",
+      "wear": 1,
+      "fingerprint": "2c992558c5414feb6f41fc711f8d0e4bc48cd1e2439f92fcbbabe108e1fd125d",
+      "vertices": 2338,
+      "triangles": 3780,
+      "meshes": 6,
+      "carbideMeshes": 2,
+      "extentMm": [
+        451.79563760757446,
+        3169.9036171470457,
+        451.8127888441086
+      ],
+      "boundsM": {
+        "min": [
+          -0.22589564323425293,
+          -3.1699036171470456,
+          -0.2259078472852707
+        ],
+        "max": [
+          0.22589999437332153,
+          0,
+          0.2259049415588379
+        ]
+      },
+      "spec": {
+        "id": "cfa-flight",
+        "family": "Rotary & Kelly Foundation Tools / CFA & Hollow-Stem Augers",
+        "name": "Drillity CFA Flight 450 mm",
+        "diameterMm": 450,
+        "lengthMm": 3000,
+        "stemOdMm": 219,
+        "concreteBoreMm": 120,
+        "connector": "Octagonal SW175",
+        "pitchMm": 325,
+        "material": "S355J2 flight, Hardox wear edge",
+        "method": "cfa",
+        "priceEur": 4500
+      }
+    },
+    {
+      "type": "alias",
+      "id": "push-rod-reducer",
+      "wear": 0,
+      "fingerprint": "eef58e9498d51f589f526c79f8688576ae3dcfe7a2a94326d0e441e17facc7cd",
+      "vertices": 1015,
+      "triangles": 1464,
+      "meshes": 4,
+      "carbideMeshes": 0,
+      "extentMm": [
+        70.51608711481094,
+        1050.320029258728,
+        74.14499670267105
+      ],
+      "boundsM": {
+        "min": [
+          -0.03525804355740547,
+          -1.050320029258728,
+          -0.037072498351335526
+        ],
+        "max": [
+          0.03525804355740547,
+          0,
+          0.037072498351335526
+        ]
+      },
+      "spec": {
+        "id": "push-rod",
+        "family": "Site Investigation & Testing / CPT",
+        "name": "Drillity Probeline CPT Push Rod 44.5 mm x 1000 mm",
+        "action": "pushed",
+        "odMm": 44.5,
+        "lengthMm": 1000,
+        "frictionReducer": true,
+        "cable": "Signal cable through the bore",
+        "beat": "The push pauses at every rod break; on SCPT the geophone is read there",
+        "standard": "ASTM D5778",
+        "connection": "CPT push-rod thread",
+        "connectionFamily": "push-rod",
+        "material": "Seamless high-tensile tube",
+        "method": "site-investigation",
+        "priceEur": 190
+      }
+    },
+    {
+      "type": "alias",
+      "id": "push-rod-reducer",
+      "wear": 0.5,
+      "fingerprint": "260ccec77d558c9965a3853ed5954990f708d6e7c2cf01ba15d9d8a0a56669b1",
+      "vertices": 1015,
+      "triangles": 1464,
+      "meshes": 5,
+      "carbideMeshes": 0,
+      "extentMm": [
+        70.51608711481094,
+        1050.320029258728,
+        74.14499670267105
+      ],
+      "boundsM": {
+        "min": [
+          -0.03525804355740547,
+          -1.050320029258728,
+          -0.037072498351335526
+        ],
+        "max": [
+          0.03525804355740547,
+          0,
+          0.037072498351335526
+        ]
+      },
+      "spec": {
+        "id": "push-rod",
+        "family": "Site Investigation & Testing / CPT",
+        "name": "Drillity Probeline CPT Push Rod 44.5 mm x 1000 mm",
+        "action": "pushed",
+        "odMm": 44.5,
+        "lengthMm": 1000,
+        "frictionReducer": true,
+        "cable": "Signal cable through the bore",
+        "beat": "The push pauses at every rod break; on SCPT the geophone is read there",
+        "standard": "ASTM D5778",
+        "connection": "CPT push-rod thread",
+        "connectionFamily": "push-rod",
+        "material": "Seamless high-tensile tube",
+        "method": "site-investigation",
+        "priceEur": 190
+      }
+    },
+    {
+      "type": "alias",
+      "id": "push-rod-reducer",
+      "wear": 1,
+      "fingerprint": "260ccec77d558c9965a3853ed5954990f708d6e7c2cf01ba15d9d8a0a56669b1",
+      "vertices": 1015,
+      "triangles": 1464,
+      "meshes": 5,
+      "carbideMeshes": 0,
+      "extentMm": [
+        70.51608711481094,
+        1050.320029258728,
+        74.14499670267105
+      ],
+      "boundsM": {
+        "min": [
+          -0.03525804355740547,
+          -1.050320029258728,
+          -0.037072498351335526
+        ],
+        "max": [
+          0.03525804355740547,
+          0,
+          0.037072498351335526
+        ]
+      },
+      "spec": {
+        "id": "push-rod",
+        "family": "Site Investigation & Testing / CPT",
+        "name": "Drillity Probeline CPT Push Rod 44.5 mm x 1000 mm",
+        "action": "pushed",
+        "odMm": 44.5,
+        "lengthMm": 1000,
+        "frictionReducer": true,
+        "cable": "Signal cable through the bore",
+        "beat": "The push pauses at every rod break; on SCPT the geophone is read there",
+        "standard": "ASTM D5778",
+        "connection": "CPT push-rod thread",
+        "connectionFamily": "push-rod",
+        "material": "Seamless high-tensile tube",
+        "method": "site-investigation",
+        "priceEur": 190
+      }
+    },
+    {
+      "type": "alias",
+      "id": "mud-motor-241",
+      "wear": 0,
+      "fingerprint": "2bc3feb28c7996ff84d3d904dee190620b64f0e04e3dc36200efcab2c0b3b3f0",
+      "vertices": 9726,
+      "triangles": 5511,
+      "meshes": 8,
+      "carbideMeshes": 1,
+      "extentMm": [
+        296.23521864414215,
+        11308.203697741032,
+        286.1536741256714
+      ],
+      "boundsM": {
+        "min": [
+          -0.12589915096759796,
+          -11.30820369720459,
+          -0.15167511999607086
+        ],
+        "max": [
+          0.1703360676765442,
+          5.364417798858767e-10,
+          0.13447855412960052
+        ]
+      },
+      "spec": {
+        "id": "mud-motor",
+        "family": "Downhole & Well / Directional Drilling / Mud Motors",
+        "name": "Drillity Torqueline PDM 241.3 mm 5:6",
+        "odMm": 241.3,
+        "lobes": "5:6",
+        "stages": 5,
+        "bendDeg": 1.15,
+        "bendType": "Surface-adjustable, 0-3 deg",
+        "lengthMm": 11582,
+        "connection": "NC56",
+        "bitConnection": "6 5/8 API REG",
+        "flowRangeLpm": "820-2220",
+        "material": "Chrome-plated rotor, nitrile stator, 4145H housings",
+        "method": "oil-rotary",
+        "priceEur": 120042
+      }
+    },
+    {
+      "type": "alias",
+      "id": "mud-motor-241",
+      "wear": 0.5,
+      "fingerprint": "6cb540661aff20db8d06bce2190287bbafdaeba51d879ddbc58d8547ee624cec",
+      "vertices": 9726,
+      "triangles": 5511,
+      "meshes": 8,
+      "carbideMeshes": 1,
+      "extentMm": [
+        293.2540625333786,
+        11308.203697741032,
+        284.62740778923035
+      ],
+      "boundsM": {
+        "min": [
+          -0.123655304312706,
+          -11.30820369720459,
+          -0.150926411151886
+        ],
+        "max": [
+          0.1695987582206726,
+          5.364417798858767e-10,
+          0.13370099663734436
+        ]
+      },
+      "spec": {
+        "id": "mud-motor",
+        "family": "Downhole & Well / Directional Drilling / Mud Motors",
+        "name": "Drillity Torqueline PDM 241.3 mm 5:6",
+        "odMm": 241.3,
+        "lobes": "5:6",
+        "stages": 5,
+        "bendDeg": 1.15,
+        "bendType": "Surface-adjustable, 0-3 deg",
+        "lengthMm": 11582,
+        "connection": "NC56",
+        "bitConnection": "6 5/8 API REG",
+        "flowRangeLpm": "820-2220",
+        "material": "Chrome-plated rotor, nitrile stator, 4145H housings",
+        "method": "oil-rotary",
+        "priceEur": 120042
+      }
+    },
+    {
+      "type": "alias",
+      "id": "mud-motor-241",
+      "wear": 1,
+      "fingerprint": "805e8878a55730bf97fb4063191eed807e42b36f56c80f9d8a0b2a1670349ba7",
+      "vertices": 9777,
+      "triangles": 5601,
+      "meshes": 8,
+      "carbideMeshes": 1,
+      "extentMm": [
+        290.27289152145386,
+        11308.203697741032,
+        283.2297533750534
+      ],
+      "boundsM": {
+        "min": [
+          -0.12141145765781403,
+          -11.30820369720459,
+          -0.1501777023077011
+        ],
+        "max": [
+          0.16886143386363983,
+          5.364417798858767e-10,
+          0.1330520510673523
+        ]
+      },
+      "spec": {
+        "id": "mud-motor",
+        "family": "Downhole & Well / Directional Drilling / Mud Motors",
+        "name": "Drillity Torqueline PDM 241.3 mm 5:6",
+        "odMm": 241.3,
+        "lobes": "5:6",
+        "stages": 5,
+        "bendDeg": 1.15,
+        "bendType": "Surface-adjustable, 0-3 deg",
+        "lengthMm": 11582,
+        "connection": "NC56",
+        "bitConnection": "6 5/8 API REG",
+        "flowRangeLpm": "820-2220",
+        "material": "Chrome-plated rotor, nitrile stator, 4145H housings",
+        "method": "oil-rotary",
+        "priceEur": 120042
+      }
+    },
+    {
+      "type": "alias",
+      "id": "sample-bag-calico",
+      "wear": 0,
+      "fingerprint": "8c1858170194f154f7e25602ab7bb820aeb9d406037c21447f3ed9f89a32c25c",
+      "vertices": 267,
+      "triangles": 418,
+      "meshes": 3,
+      "carbideMeshes": 0,
+      "extentMm": [
+        368.8001483678818,
+        366.50400608778,
+        365.8294273649215
+      ],
+      "boundsM": {
+        "min": [
+          -0.1766110509634018,
+          -0.30450400710105896,
+          -0.18219582736492157
+        ],
+        "max": [
+          0.19218909740447998,
+          0.06199999898672104,
+          0.18363359999999998
+        ]
+      },
+      "spec": {
+        "id": "sample-bag",
+        "family": "RC Sample Systems / Sample Bags",
+        "name": "Drillity Calico Sample Bag 200 x 340 mm",
+        "widthMm": 200,
+        "heightMm": 340,
+        "fill": 0.82,
+        "massKg": 2.5,
+        "intervalM": 1,
+        "material": "Calico / woven polypropylene, drawstring tie",
+        "connection": "Slips over the splitter bag ring",
+        "connectionFamily": "none",
+        "method": "rc",
+        "priceEur": 1
+      }
+    },
+    {
+      "type": "alias",
+      "id": "sample-bag-calico",
+      "wear": 0.5,
+      "fingerprint": "8c1858170194f154f7e25602ab7bb820aeb9d406037c21447f3ed9f89a32c25c",
+      "vertices": 267,
+      "triangles": 418,
+      "meshes": 3,
+      "carbideMeshes": 0,
+      "extentMm": [
+        368.8001483678818,
+        366.50400608778,
+        365.8294273649215
+      ],
+      "boundsM": {
+        "min": [
+          -0.1766110509634018,
+          -0.30450400710105896,
+          -0.18219582736492157
+        ],
+        "max": [
+          0.19218909740447998,
+          0.06199999898672104,
+          0.18363359999999998
+        ]
+      },
+      "spec": {
+        "id": "sample-bag",
+        "family": "RC Sample Systems / Sample Bags",
+        "name": "Drillity Calico Sample Bag 200 x 340 mm",
+        "widthMm": 200,
+        "heightMm": 340,
+        "fill": 0.82,
+        "massKg": 2.5,
+        "intervalM": 1,
+        "material": "Calico / woven polypropylene, drawstring tie",
+        "connection": "Slips over the splitter bag ring",
+        "connectionFamily": "none",
+        "method": "rc",
+        "priceEur": 1
+      }
+    },
+    {
+      "type": "alias",
+      "id": "sample-bag-calico",
+      "wear": 1,
+      "fingerprint": "8c1858170194f154f7e25602ab7bb820aeb9d406037c21447f3ed9f89a32c25c",
+      "vertices": 267,
+      "triangles": 418,
+      "meshes": 3,
+      "carbideMeshes": 0,
+      "extentMm": [
+        368.8001483678818,
+        366.50400608778,
+        365.8294273649215
+      ],
+      "boundsM": {
+        "min": [
+          -0.1766110509634018,
+          -0.30450400710105896,
+          -0.18219582736492157
+        ],
+        "max": [
+          0.19218909740447998,
+          0.06199999898672104,
+          0.18363359999999998
+        ]
+      },
+      "spec": {
+        "id": "sample-bag",
+        "family": "RC Sample Systems / Sample Bags",
+        "name": "Drillity Calico Sample Bag 200 x 340 mm",
+        "widthMm": 200,
+        "heightMm": 340,
+        "fill": 0.82,
+        "massKg": 2.5,
+        "intervalM": 1,
+        "material": "Calico / woven polypropylene, drawstring tie",
+        "connection": "Slips over the splitter bag ring",
+        "connectionFamily": "none",
+        "method": "rc",
+        "priceEur": 1
+      }
+    },
+    {
+      "type": "alias",
+      "id": "tube-pile-914",
+      "wear": 0,
+      "fingerprint": "eb800e925986d05207376662f3472161e6d09d6bfa2a6a59eb3ff5941fe4c433",
+      "vertices": 854,
+      "triangles": 1256,
+      "meshes": 3,
+      "carbideMeshes": 0,
+      "extentMm": [
+        937.2559785842896,
+        18002.000000094995,
+        920.5712080001831
+      ],
+      "boundsM": {
+        "min": [
+          -0.4686279892921448,
+          -18,
+          -0.4579404890537262
+        ],
+        "max": [
+          0.4686279892921448,
+          0.0020000000949949026,
+          0.4626307189464569
+        ]
+      },
+      "spec": {
+        "id": "tube-pile",
+        "family": "Piling Equipment / Sheet & Bearing Piles / Steel Tube Piles",
+        "name": "Drillity Leaderline Tube Pile 914.4 x 12.5 mm",
+        "odMm": 914.4,
+        "wallMm": 12.5,
+        "lengthMm": 18000,
+        "toe": "Open with a stiffener ring",
+        "note": "Easier driving; the plug must be drilled out if the pile is to be concreted",
+        "grade": "S355J2 / S460MH",
+        "connection": "Butt-welded splice",
+        "connectionFamily": "welded",
+        "material": "Longitudinally or spirally welded steel tube",
+        "method": "driven-pile",
+        "priceEur": 1132
+      }
+    },
+    {
+      "type": "alias",
+      "id": "tube-pile-914",
+      "wear": 0.5,
+      "fingerprint": "cc8dba083be798550d3d08934b3610ecb6693deead3fdaaef23f2886ebc00882",
+      "vertices": 892,
+      "triangles": 1328,
+      "meshes": 3,
+      "carbideMeshes": 0,
+      "extentMm": [
+        937.2559785842896,
+        18002.000000094995,
+        924.4027137756348
+      ],
+      "boundsM": {
+        "min": [
+          -0.4686279892921448,
+          -18,
+          -0.46177199482917786
+        ],
+        "max": [
+          0.4686279892921448,
+          0.0020000000949949026,
+          0.4626307189464569
+        ]
+      },
+      "spec": {
+        "id": "tube-pile",
+        "family": "Piling Equipment / Sheet & Bearing Piles / Steel Tube Piles",
+        "name": "Drillity Leaderline Tube Pile 914.4 x 12.5 mm",
+        "odMm": 914.4,
+        "wallMm": 12.5,
+        "lengthMm": 18000,
+        "toe": "Open with a stiffener ring",
+        "note": "Easier driving; the plug must be drilled out if the pile is to be concreted",
+        "grade": "S355J2 / S460MH",
+        "connection": "Butt-welded splice",
+        "connectionFamily": "welded",
+        "material": "Longitudinally or spirally welded steel tube",
+        "method": "driven-pile",
+        "priceEur": 1132
+      }
+    },
+    {
+      "type": "alias",
+      "id": "tube-pile-914",
+      "wear": 1,
+      "fingerprint": "ced1064f0c1a325d8cc64c836acdb5b8cd109c90223f8bd939bc940b4f2414f7",
+      "vertices": 892,
+      "triangles": 1328,
+      "meshes": 3,
+      "carbideMeshes": 0,
+      "extentMm": [
+        937.2559785842896,
+        18002.000000094995,
+        932.6879978179932
+      ],
+      "boundsM": {
+        "min": [
+          -0.4686279892921448,
+          -18,
+          -0.4663439989089966
+        ],
+        "max": [
+          0.4686279892921448,
+          0.0020000000949949026,
+          0.4663439989089966
+        ]
+      },
+      "spec": {
+        "id": "tube-pile",
+        "family": "Piling Equipment / Sheet & Bearing Piles / Steel Tube Piles",
+        "name": "Drillity Leaderline Tube Pile 914.4 x 12.5 mm",
+        "odMm": 914.4,
+        "wallMm": 12.5,
+        "lengthMm": 18000,
+        "toe": "Open with a stiffener ring",
+        "note": "Easier driving; the plug must be drilled out if the pile is to be concreted",
+        "grade": "S355J2 / S460MH",
+        "connection": "Butt-welded splice",
+        "connectionFamily": "welded",
+        "material": "Longitudinally or spirally welded steel tube",
+        "method": "driven-pile",
+        "priceEur": 1132
+      }
+    },
+    {
+      "type": "alias",
+      "id": "spt-hammer-auto",
+      "wear": 0,
+      "fingerprint": "b2ee9094e65810724b814dcbb977daa7091ecb2cc0e1c8f7e9cb6624efcc494e",
+      "vertices": 1763,
+      "triangles": 1992,
+      "meshes": 8,
+      "carbideMeshes": 0,
+      "extentMm": [
+        362.199991941452,
+        1968.4939980506897,
+        306.5173327922821
+      ],
+      "boundsM": {
+        "min": [
+          -0.15719999372959137,
+          -1.4448800086975098,
+          -0.15325866639614105
+        ],
+        "max": [
+          0.20499999821186066,
+          0.5236139893531799,
+          0.15325866639614105
+        ]
+      },
+      "spec": {
+        "id": "spt-hammer",
+        "family": "Site Investigation & Testing / SPT Samplers & Hammers",
+        "name": "Drillity Probeline SPT Trip Hammer 63.5 kg",
+        "action": "driven",
+        "massKg": 63.5,
+        "dropMm": 760,
+        "theoreticalEnergyJ": 473.4,
+        "type": "Automatic trip, free fall",
+        "energyRatio": "Reported with N; N60 corrects the measured ratio to 60 %",
+        "tolerance": "ISO 22476-3: 63.5 +/- 0.5 kg, 760 +/- 10 mm",
+        "standard": "ASTM D1586 / EN ISO 22476-3",
+        "connection": "Anvil to A-rod / N-rod",
+        "connectionFamily": "drive-rod",
+        "material": "Forged steel mass, hardened anvil",
+        "method": "site-investigation",
+        "priceEur": 7400
+      }
+    },
+    {
+      "type": "alias",
+      "id": "spt-hammer-auto",
+      "wear": 0.5,
+      "fingerprint": "b2ee9094e65810724b814dcbb977daa7091ecb2cc0e1c8f7e9cb6624efcc494e",
+      "vertices": 1763,
+      "triangles": 1992,
+      "meshes": 8,
+      "carbideMeshes": 0,
+      "extentMm": [
+        362.199991941452,
+        1968.4939980506897,
+        306.5173327922821
+      ],
+      "boundsM": {
+        "min": [
+          -0.15719999372959137,
+          -1.4448800086975098,
+          -0.15325866639614105
+        ],
+        "max": [
+          0.20499999821186066,
+          0.5236139893531799,
+          0.15325866639614105
+        ]
+      },
+      "spec": {
+        "id": "spt-hammer",
+        "family": "Site Investigation & Testing / SPT Samplers & Hammers",
+        "name": "Drillity Probeline SPT Trip Hammer 63.5 kg",
+        "action": "driven",
+        "massKg": 63.5,
+        "dropMm": 760,
+        "theoreticalEnergyJ": 473.4,
+        "type": "Automatic trip, free fall",
+        "energyRatio": "Reported with N; N60 corrects the measured ratio to 60 %",
+        "tolerance": "ISO 22476-3: 63.5 +/- 0.5 kg, 760 +/- 10 mm",
+        "standard": "ASTM D1586 / EN ISO 22476-3",
+        "connection": "Anvil to A-rod / N-rod",
+        "connectionFamily": "drive-rod",
+        "material": "Forged steel mass, hardened anvil",
+        "method": "site-investigation",
+        "priceEur": 7400
+      }
+    },
+    {
+      "type": "alias",
+      "id": "spt-hammer-auto",
+      "wear": 1,
+      "fingerprint": "b2ee9094e65810724b814dcbb977daa7091ecb2cc0e1c8f7e9cb6624efcc494e",
+      "vertices": 1763,
+      "triangles": 1992,
+      "meshes": 8,
+      "carbideMeshes": 0,
+      "extentMm": [
+        362.199991941452,
+        1968.4939980506897,
+        306.5173327922821
+      ],
+      "boundsM": {
+        "min": [
+          -0.15719999372959137,
+          -1.4448800086975098,
+          -0.15325866639614105
+        ],
+        "max": [
+          0.20499999821186066,
+          0.5236139893531799,
+          0.15325866639614105
+        ]
+      },
+      "spec": {
+        "id": "spt-hammer",
+        "family": "Site Investigation & Testing / SPT Samplers & Hammers",
+        "name": "Drillity Probeline SPT Trip Hammer 63.5 kg",
+        "action": "driven",
+        "massKg": 63.5,
+        "dropMm": 760,
+        "theoreticalEnergyJ": 473.4,
+        "type": "Automatic trip, free fall",
+        "energyRatio": "Reported with N; N60 corrects the measured ratio to 60 %",
+        "tolerance": "ISO 22476-3: 63.5 +/- 0.5 kg, 760 +/- 10 mm",
+        "standard": "ASTM D1586 / EN ISO 22476-3",
+        "connection": "Anvil to A-rod / N-rod",
+        "connectionFamily": "drive-rod",
+        "material": "Forged steel mass, hardened anvil",
+        "method": "site-investigation",
+        "priceEur": 7400
+      }
+    },
+    {
+      "type": "wear-unmerged",
+      "wear": 0,
+      "fingerprint": "3d7a4dad03460ee972cf9ed486d707976af221d99f48ac9176843b5d596de138",
+      "vertices": 3096,
+      "triangles": 5044,
+      "meshes": 25,
+      "carbideMeshes": 13,
+      "extentMm": [
+        88.19899708032608,
+        81.73470757406922,
+        87.55593001842499
+      ],
+      "boundsM": {
+        "min": [
+          -0.04409949854016304,
+          -0.07873470754799218,
+          -0.043777965009212494
+        ],
+        "max": [
+          0.04409949854016304,
+          0.003000000026077032,
+          0.043777965009212494
+        ]
+      },
+      "spec": {
+        "id": "button-bit",
+        "family": "Drill Bits & Cutting Tools / Button Bits",
+        "name": "Drillity T45 Button Bit 89 mm",
+        "thread": "T45",
+        "diameterMm": 89,
+        "lengthMm": 73,
+        "buttons": 13,
+        "buttonKind": "ballistic",
+        "gaugeButtons": 8,
+        "gaugeButtonMm": 13,
+        "faceButtonMm": 12,
+        "gaugeAngleDeg": 35,
+        "face": "drop",
+        "flutes": 4,
+        "flushHoles": 4,
+        "cutDiameterMm": 89.9,
+        "material": "Carbide grade DP55 / body 42CrMo4(V)",
+        "method": "top-hammer",
+        "priceEur": 423
+      }
+    },
+    {
+      "type": "wear-unmerged",
+      "wear": 0.5,
+      "fingerprint": "6a777af4776a21753b1c5a01af555144334b14775e25e1ec4dd3b11ad44c7ff2",
+      "vertices": 3735,
+      "triangles": 5990,
+      "meshes": 38,
+      "carbideMeshes": 13,
+      "extentMm": [
+        88.19899708032608,
+        81.29406026748617,
+        87.55593001842499
+      ],
+      "boundsM": {
+        "min": [
+          -0.04409949854016304,
+          -0.07829406024140914,
+          -0.043777965009212494
+        ],
+        "max": [
+          0.04409949854016304,
+          0.003000000026077032,
+          0.043777965009212494
+        ]
+      },
+      "spec": {
+        "id": "button-bit",
+        "family": "Drill Bits & Cutting Tools / Button Bits",
+        "name": "Drillity T45 Button Bit 89 mm",
+        "thread": "T45",
+        "diameterMm": 89,
+        "lengthMm": 73,
+        "buttons": 13,
+        "buttonKind": "ballistic",
+        "gaugeButtons": 8,
+        "gaugeButtonMm": 13,
+        "faceButtonMm": 12,
+        "gaugeAngleDeg": 35,
+        "face": "drop",
+        "flutes": 4,
+        "flushHoles": 4,
+        "cutDiameterMm": 88.8,
+        "material": "Carbide grade DP55 / body 42CrMo4(V)",
+        "method": "top-hammer",
+        "priceEur": 423
+      }
+    },
+    {
+      "type": "wear-unmerged",
+      "wear": 1,
+      "fingerprint": "00841ea305c2535aba4264f8dbf8a35db633c20b5a72aae5dbbe1aa87fc6b8ea",
+      "vertices": 3163,
+      "triangles": 5068,
+      "meshes": 31,
+      "carbideMeshes": 6,
+      "extentMm": [
+        88.19899708032608,
+        78.54001460134215,
+        87.55593001842499
+      ],
+      "boundsM": {
+        "min": [
+          -0.04409949854016304,
+          -0.07554001457526512,
+          -0.043777965009212494
+        ],
+        "max": [
+          0.04409949854016304,
+          0.003000000026077032,
+          0.043777965009212494
+        ]
+      },
+      "spec": {
+        "id": "button-bit",
+        "family": "Drill Bits & Cutting Tools / Button Bits",
+        "name": "Drillity T45 Button Bit 89 mm",
+        "thread": "T45",
+        "diameterMm": 89,
+        "lengthMm": 73,
+        "buttons": 13,
+        "buttonKind": "ballistic",
+        "gaugeButtons": 8,
+        "gaugeButtonMm": 13,
+        "faceButtonMm": 12,
+        "gaugeAngleDeg": 35,
+        "face": "drop",
+        "flutes": 4,
+        "flushHoles": 4,
+        "cutDiameterMm": 87.6,
+        "material": "Carbide grade DP55 / body 42CrMo4(V)",
+        "method": "top-hammer",
+        "priceEur": 423
+      }
+    }
+  ],
+  "limits": "CPU geometry only; no GPU, pixels, occlusion, draw calls, FPS or whole-catalogue physical certification. Assembly XYZ bounds are not nominal or swept cutting diameter."
+}

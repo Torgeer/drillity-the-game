@@ -11024,6 +11024,13 @@ export function buildTool(THREE_, ctx, toolId, opts) {
     g = buildBillet(T, ctx, o);
   } else {
     const merged = alias ? Object.assign({}, alias.opts, o) : o;
+    if (alias) {
+      // Optional caller fields may be present but undefined. Keep the alias's
+      // defaults in that case; explicit null, zero and false still override.
+      for (const key of Object.keys(alias.opts)) {
+        if (merged[key] === undefined) merged[key] = alias.opts[key];
+      }
+    }
     try {
       g = fn(T, ctx || {}, merged);
     } catch (e) {

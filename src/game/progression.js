@@ -23,7 +23,7 @@ import {
   METHODS, RIGS, REGIONS, CERTS, ROLES, SKILLS, LEVELS, MAX_LEVEL, CORE_SLOTS,
   getMethod, getRig, getItem, getRegion, getCert, getSkill,
   levelForXP, xpProgress, xpToNext, unlockedAt, roleForLevel, nextRole, canEquip,
-  defaultLoadoutFor, makeContractBoard, SKILL_BRANCHES, estimateHours,
+  defaultLoadoutFor, makeContractBoard, SKILL_BRANCHES, estimateHours, estimateHoursBreakdown,
   rigDepthCapacity, DEPTH_IS_VERTICAL,
 } from './data.js';
 import {
@@ -1021,13 +1021,22 @@ export function createProgression(ctx) {
        carries: `time.parSec` and `time.actualSec`, whose RATIO is the player's
        performance against a competent run, and multiplies the settlement's own
        hour model by it. Same units on both sides, no magic number, and a player
-       who takes twice as long as par pays for twice as long. */
+       who takes twice as long as par increases the performance-scaled hours.
+       Jumbo keeps its separate heading setup fixed, as detailed below. */
     const par = payload?.breakdown?.time || null;
     const parRatio = par && par.parSec > 0 && par.actualSec > 0
       ? clamp(par.actualSec / par.parSec, 0.4, 3) : null;
+    // Jumbo's computePar includes charging/firing/mucking programme beats:
+    // this ratio measures the whole simulated run, not cutting-tool ROP.
+    // Scale its undivided cycle, leaving the separate heading setup unchanged.
+    // No physical cutting fraction or conversion from player seconds is known.
+    const cycleEstimate = parRatio != null && contract.methodId === 'tunnel-jumbo'
+      ? estimateHoursBreakdown(contract.methodId, depth, contract.hardness ?? 0.5, 1) : null;
     const hours = parRatio != null
-      ? Math.max(0.25, estimateHours(contract.methodId, depth, contract.hardness ?? 0.5, 1)
-        * ropBasisFactor(contract.methodId) * parRatio)
+      ? Math.max(0.25, cycleEstimate
+        ? cycleEstimate.cycle * parRatio + cycleEstimate.flat
+        : estimateHours(contract.methodId, depth, contract.hardness ?? 0.5, 1)
+          * ropBasisFactor(contract.methodId) * parRatio)
       : null;
     if (parRatio == null) {
       /* This is the ~48x under-charge coming back if it is ever the normal

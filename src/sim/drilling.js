@@ -1446,9 +1446,10 @@ export const TUNING = {
       score: { weights: { time: 0.08, groove: 0.08, bit: 0.06, straight: 0.04,
                           hazard: 0.08, safety: 0.08, quality: 0.58 } },
       bolt: {
-        lengthM: 2.4,           // a 39 mm friction bolt runs 0.9-3.0 m; 2.4 m is the workhorse
+        lengthM: 2.4,           // NOT SOURCED: legacy programme default when fitted length is unknown
         odMm: 39,               // nominal outside diameter of the split tube
-        overdrillM: 0.05,       // the hole must be at least two inches longer than the bolt
+        overdrillM: 0.05,       // SS-39/SS-46 installation pages, "Bit selection": 5 cm beyond bolt
+                               // https://www.splitset.com.au/ss-46-stabiliser-installation/
         ringSpacingM: 1.5,      // rings of bolts along the drive
         perRing: 5,             // bolts per ring across the back and the shoulders
         // Nominal BIT trial ranges come from the fitted item's sourced
@@ -3031,7 +3032,7 @@ export function createDrillSim(ctx = {}) {
   function nominalStringM(m) {
     if (m.round) return m.round.lengthGood;
     if (m.ring) return m.ring.holeLengthM;
-    if (m.bolt) return m.bolt.lengthM + m.bolt.overdrillM;
+    if (m.bolt) return boltProgrammeLength(m.bolt).holeTargetM;
     return Infinity;
   }
 
@@ -3071,7 +3072,7 @@ export function createDrillSim(ctx = {}) {
     if (m.bolt) {
       const b = m.bolt;
       const bolts = Math.max(1, Math.round(target / (b.ringSpacingM / b.perRing)));
-      return bolts * (b.lengthM + b.overdrillM);
+      return bolts * boltProgrammeLength(b).holeTargetM;
     }
     return target;
   }
@@ -5407,11 +5408,12 @@ export function createDrillSim(ctx = {}) {
     const b = S.m.bolt;
     const total = Math.max(1, Math.round(S.target / (b.ringSpacingM / b.perRing)));
     const bitRangeMm = getItem(loadoutIds().install)?.stats?.bitTrialRangeMm;
+    const length = boltProgrammeLength(b, false);
     const p = {
       kind: 'bolt', type: resolveBoltType(),
       frictionSpec: bitRangeMm ? { bitRangeMm } : null,
       total, index: 0, ring: 1, inRing: 1,
-      holeTargetM: b.lengthM + b.overdrillM,
+      ...length,
       holeOpen: true, holeDevDeg: 0, holeMm: 0,
       spinT: 0, spunSec: 0, gelled: false, heldSec: 0, mixIn: 0, mixT: 0,
       driveSec: 0, anchorage: 1, slotClosureIn: b.slotClosedIn,
@@ -5421,6 +5423,20 @@ export function createDrillSim(ctx = {}) {
       advancePerBolt: b.ringSpacingM / b.perRing,
     };
     return p;
+  }
+
+  function boltProgrammeLength(b, captured = true) {
+    // The live programme owns its captured item dimensions even if a loadout
+    // changes meanwhile. A fresh programme resolves the fitted item again.
+    if (captured && S.prog?.kind === 'bolt') return S.prog;
+    const candidate = getItem(loadoutIds().install)?.stats?.boltLengthM;
+    const boltLengthM = Number.isFinite(candidate) && candidate > 0 ? candidate : null;
+    const modeledBoltLengthM = boltLengthM ?? b.lengthM;
+    return {
+      boltLengthM, modeledBoltLengthM,
+      boltLengthBasis: boltLengthM == null ? 'NOT SOURCED: legacy programme default' : 'manufacturer-item',
+      holeTargetM: modeledBoltLengthM + b.overdrillM,
+    };
   }
 
   /** The hole diameter the fitted bit is actually making right now. */
@@ -5581,6 +5597,8 @@ export function createDrillSim(ctx = {}) {
     const due = n === 1 || n % b.torqueTestEvery === 0 || n === p.total;
     p.installs.push({
       index: n, ring: p.ring, type: p.type,
+      boltLengthM: p.boltLengthM, modeledBoltLengthM: p.modeledBoltLengthM,
+      boltLengthBasis: p.boltLengthBasis, holeTargetM: +p.holeTargetM.toFixed(2),
       holeMm: +p.holeMm.toFixed(1), holeDevDeg: +p.holeDevDeg.toFixed(2),
       bitGaugeMm: +p.bitGaugeMm.toFixed(3),
       anchorage01: +p.anchorage.toFixed(3),
@@ -8726,7 +8744,8 @@ export function createDrillSim(ctx = {}) {
           kind: 'rockbolt', unit: 'bolt', boltType: p.type,
           boltIndex: p.index + 1, boltsTotal: p.total,
           ring: p.ring, inRing: p.inRing, perRing: b.perRing,
-          boltLengthM: b.lengthM, holeTargetM: +p.holeTargetM.toFixed(2),
+          boltLengthM: p.boltLengthM, modeledBoltLengthM: p.modeledBoltLengthM,
+          boltLengthBasis: p.boltLengthBasis, holeTargetM: +p.holeTargetM.toFixed(2),
           intoHoleM: +S.holeDepth.toFixed(2),
           holeMm: +boltHoleMm().toFixed(1),
           // No physical ideal hole diameter was established by the bit trial

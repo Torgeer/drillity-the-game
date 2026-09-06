@@ -2583,7 +2583,10 @@ function buildSonicTruck(T, ctx) {
     spec: {
       id: 'sonic-truck', name: 'Corvara SN-6 Resonant',
       klass: 'Truck-mounted sonic drill rig', weightKg: 21000, powerKw: 205,
-      mastM: mastH, rodLenM: rodLen, oscillatorHz: 150, oscillatorKn: 180,
+      // Maximum oscillator capabilities, not feed force or operating setpoints.
+      // TSi 150CT datasheet p2: https://www.terrasonicinternational.com/wp-content/uploads/2025/04/150CT.pdf
+      // Force ceiling: https://www.terrasonicinternational.com/products/tsi-sonic-heads/
+      mastM: mastH, rodLenM: rodLen, oscillatorHz: 150, oscillatorKn: 222,
       methods: ['sonic', 'auger'], carrier: '6x6 truck',
       frameRadius: 7.5,
     },

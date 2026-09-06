@@ -1627,7 +1627,7 @@ export function settleRun(contract, p = {}) {
   // as long with the best crown in the shop as with the worst.
   const bit = getItem(loadout.bit);
   const toolRop = clamp((bit?.stats.ropMult || 1) * sk.m('rop.mult'), 0.5, 2.6);
-  const split = estimateHoursBreakdown(contract?.methodId, metres, hardness, holesCompleted);
+  const split = estimateHoursBreakdown(methodId, metres, hardness, holesCompleted);
   /* THE ROP BASIS. `estimateHoursBreakdown` divides contract metres by
      `nominalRop`, which is correct on twenty methods and wrong on `rockbolt`,
      whose rate is quoted per metre of HOLE. Scaling the drilling half — and
@@ -1639,7 +1639,7 @@ export function settleRun(contract, p = {}) {
   const mobHours = (includeSetup && holesCompleted > 0) ? mobilisationHours(rigId, methodId) : 0;
   const hours = hoursOverride != null
     ? Math.max(0.5, hoursOverride + mobHours)
-    : Math.max(0.5, (split.drill * ropBasis) / toolRop + split.flat + mobHours);
+    : Math.max(0.5, (split.drill * ropBasis) / toolRop + (split.cycle ?? 0) + split.flat + mobHours);
   /* The client's deadline came out of the same estimate, so it carries the same
      omissions: `estimateHoursBreakdown` counts no rig-up at all, and on
      `rockbolt` it divides drive metres by a hole-metre rate. Correct the

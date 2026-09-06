@@ -1249,7 +1249,9 @@ export const RIGS = deepFreeze([
     methods: ['sonic', 'auger'],
     stats: { power: 168, torque: 9.6, feedForce: 90, depthCapacity: 120, rodHandling: 0.75, mobility: 0.95, comfort: 0.8 },
     upkeepPerHour: 61, fuelPerHour: 39, transportTons: 18,
-    description: 'Truck-mounted sonic head running 90–160 Hz against a hydraulic isolator. Drives its own casing, needs no flush, and hands the geologist a metre of undisturbed core in a plastic sleeve.',
+    // Adjustable frequency ceiling, not a recommended operating band: TSi 150CT p2.
+    // https://www.terrasonicinternational.com/wp-content/uploads/2025/04/150CT.pdf
+    description: 'Truck-mounted sonic head with frequency adjustable up to 150 Hz against a hydraulic isolator. Drives its own casing, needs no flush, and hands the geologist a metre of undisturbed core in a plastic sleeve.',
     family: CAT.rigSonic,
   },
   {
@@ -1467,11 +1469,13 @@ const ITEMS_BITS = [
     description: 'Ballistic buttons bite harder in medium rock and clear cuttings better, at the price of chipping if you let the percussion run dry.' }),
   it({ id: 'bit-th-t45-76-std', name: 'T45 76 mm Button Bit, Retrac', category: CAT.buttonBits, slot: 'bit',
     price: 398, unlockLevel: 12, methods: ['top-hammer'], thread: 'T45', material: 'carbide grade K20',
+    diameterMm: 76, // Sandvik Construction, Top hammer drilling tools, p.53: T45 Retrac, Dimensions D (mm); research/TOOL_CATALOGUE_DIMENSIONS.md.
     consumable: true,
     stats: { ropMult: 1.2, wearRate: 0.94, maxUCS: 230, abrasionRes: 0.68, life: 480 },
     description: 'Retrac skirt with reaming buttons, the one you reach for in fractured ground where a plain bit gets stuck on the way out.' }),
   it({ id: 'bit-th-t45-89-hd', name: 'T45 89 mm Button Bit, Heavy Duty', category: CAT.buttonBits, slot: 'bit',
     price: 624, unlockLevel: 16, methods: ['top-hammer'], thread: 'T45', material: 'carbide grade K25',
+    diameterMm: 89, // Sandvik Construction, Top hammer drilling tools, p.53: T45 button bits, Dimensions D (mm); research/TOOL_CATALOGUE_DIMENSIONS.md.
     duty: 'HD', tier: 'prem', consumable: true,
     stats: { ropMult: 1.3, wearRate: 0.7, maxUCS: 280, abrasionRes: 0.85, life: 760 },
     description: 'Deep-face HD head with gauge protection and a heavier carbide grade. Twice the money, three times the life in quartzitic ground.' }),
@@ -2766,12 +2770,17 @@ const ITEMS_NEWMETHODS = [
   it({ id: 'friction-bolt-39', name: 'Split-Tube Friction Bolt, 39 mm x 2.4 m', category: CAT.rockBolts, slot: 'install',
     price: 31, unlockLevel: 29, methods: ['rockbolt'],
     thread: 'n/a', material: 'S355J2', model: 'friction-bolt', consumable: true,
-    stats: { life: 2.4, bitTrialRangeMm: [35, 38.1] }, // source and nominal inch rounding above
+    // Manufacturer Order information, SS-39 tube row 2400 mm:
+    // https://www.splitset.com.au/product/split-setstabilisers-ss-39/
+    // This length is independent of the consumable-life field.
+    stats: { life: 2.4, boltLengthM: 2.4, bitTrialRangeMm: [35, 38.1] }, // trial range source/rounding above
     description: 'A slotted tube driven into a hole narrower than itself. Start with a 35–38 mm trial bit and verify anchorage with site pull tests. No resin or cure time; the tube grips through interference with the rock.' }),
   it({ id: 'friction-bolt-46', name: 'Split-Tube Friction Bolt, 46 mm x 3.0 m', category: CAT.rockBolts, slot: 'install',
     price: 44, unlockLevel: 32, methods: ['rockbolt'], duty: 'HD',
     thread: 'n/a', material: 'S355J2', model: 'friction-bolt', consumable: true,
-    stats: { life: 3.0, bitTrialRangeMm: [41, 45] }, // manufacturer SS-46 installation page above
+    // Manufacturer Order information, SS-46 tube row 3000 mm:
+    // https://www.splitset.com.au/product/split-setstabilisers-ss-46/
+    stats: { life: 3.0, boltLengthM: 3.0, bitTrialRangeMm: [41, 45] }, // trial range installation source above
     description: 'The larger split-tube family uses a 41–45 mm trial bit range. The smaller bolting bits in this catalogue do not cover that range. Select the support system and verify anchorage against the site design.' }),
   it({ id: 'rebar-bolt-20', name: 'Resin-Grouted Rebar Bolt, 20 mm x 2.4 m', category: CAT.rockBolts, slot: 'install',
     price: 30, unlockLevel: 29, methods: ['rockbolt', 'anchor'],
@@ -4560,7 +4569,10 @@ export function estimateHours(methodId, metres, hardness, holes = 1) {
  * 2.6x while the payout does not move. A bit speeds up cutting rock. That is
  * all it does.
  *
- * @returns {{drill:number, flat:number, total:number}} hours
+ * Jumbo also returns `cycle`: its nominal chainage rate covers the entire
+ * drill-and-blast cycle, with no sourced cutting-only fraction. That component
+ * must not receive a cutting-tool multiplier. Other methods retain their shape.
+ * @returns {{drill:number, flat:number, total:number, cycle?:number}} hours
  */
 export function estimateHoursBreakdown(methodId, metres, hardness, holes = 1) {
   const m = getMethod(methodId);
@@ -4568,6 +4580,16 @@ export function estimateHoursBreakdown(methodId, metres, hardness, holes = 1) {
   const rop = Math.max(0.15, m.nominalRop * (1.35 - 0.7 * hardness));
   const drillHours = metres / rop;
   const setupPerHole = m.setupPerHole ?? (0.4 + m.difficulty * 0.28);
+  if (m.id === 'tunnel-jumbo') {
+    // NFF Publication 14 §7.5 and the Epiroc cycle diagram: drilling, charging,
+    // blasting, ventilation, mucking and support form one cycle. See
+    // research/tunnel-cycle-definition-2026-09-06.md for primary links/limits.
+    // The existing nominal rate, hardness adjustment and separate heading setup
+    // remain NOT SOURCED calibration. Chainage is not a rod-string length;
+    // do not add generic metres/rodLength handling to the undivided cycle.
+    const flat = holes * setupPerHole;
+    return { drill: 0, cycle: drillHours, flat, total: drillHours + flat };
+  }
   const joints = metres / Math.max(1, m.rodLength);
   const tripHours = joints * 0.035;
 

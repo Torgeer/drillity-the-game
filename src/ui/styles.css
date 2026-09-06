@@ -1416,8 +1416,14 @@ canvas { display: block; }
 .unitcard--bad  .unitcard__t { color: var(--c-danger-soft); }
 .unitcard__rows { display: flex; align-items: flex-start; gap: var(--s-3); min-width: 0; }
 .ucell { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+/* Three outcomes can have unequal captions ("Bit" beside "Trial range").
+   Use their actual content widths before sharing the remaining row space. */
+.unitcard__rows:has(> .ucell:nth-child(3):not([hidden])):not(:has(> .ucell:nth-child(4):not([hidden]))) > .ucell {
+  flex-basis: auto;
+}
 .ucell__k {
-  font-size: var(--t-2xs); line-height: 1; font-weight: 800;
+  /* Inter's 14px text bounds at 11px size exceed the old 11px line box. */
+  font-size: var(--t-2xs); line-height: 1.4; font-weight: 800;
   letter-spacing: var(--tr-label); text-transform: uppercase; color: var(--c-fg-dim);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }

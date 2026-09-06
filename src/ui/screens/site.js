@@ -235,10 +235,50 @@ const STATUS_UNIT = {
    completes; `card` turns the finished unit into a title, a few outcome
    figures and ONE line of consequence. Then it goes away.
 
-   Everything here is an OUTCOME, never a control: the anchorage you got, the
+   Everything here is an OUTCOME, never a control: the bolt's trial fit, the
    recovery on the bag, the crown you spent. Controls live on the sliders and
    the gauge; a value that appears in both places is a value stated twice. The
    figures come off `telemetry.programme` and nothing is re-derived. */
+/** The rock-bolt unit card consumes recorded fit, never a claimed capacity. */
+export function boltUnitCard(p, tl = {}) {
+  const inst = Array.isArray(p.installs) ? p.installs.at(-1) : null;
+  const type = inst?.type || p.boltType;
+  const title = `Bolt ${int(inst?.index ?? p.boltIndex)} of ${int(p.boltsTotal)}${inst?.abandoned ? ' skipped' : ' in'}`;
+  if (type === 'friction') {
+    const mm = (v) => Number.isInteger(v) ? int(v) : num(v, 1);
+    const basis = inst ? inst.anchorageBasis : p.anchorageBasis;
+    const fit = basis === 'game-fit-score-not-pull-test'
+      ? (inst ? inst.diameterFit : p.diameterFit) : 'unknown';
+    const gauge = inst ? inst.bitGaugeMm : p.bitGaugeMm;
+    const range = p.bitTrialRangeMm;
+    const hasRange = Array.isArray(range) && range.length === 2
+      && range.every((v) => typeof v === 'number' && Number.isFinite(v)) && range[0] <= range[1];
+    const labels = { supported: 'In range', undersize: 'Too small', oversize: 'Too large' };
+    const valid = hasRange && Object.hasOwn(labels, fit);
+    return {
+      title, tone: inst?.abandoned ? 'bad' : valid && fit === 'supported' ? 'good' : 'warn',
+      rows: [
+        ['Trial fit', inst?.abandoned ? 'Skipped' : valid ? labels[fit] : 'Unknown'],
+        ['Bit', typeof gauge === 'number' && Number.isFinite(gauge) ? `${mm(gauge)} mm` : '—'],
+        ['Trial range', hasRange ? `${mm(range[0])}–${mm(range[1])} mm` : '—'],
+      ],
+      note: inst?.abandoned ? 'Bolt skipped. This position has no installed support.'
+        : !valid ? 'No trial fit confirmed. Check the selected bolt specification.'
+          : fit === 'supported' ? 'Within the bit trial range. Check anchorage with a pull test.'
+            : 'Bit outside the trial range. Check the bit and bolt pairing.',
+    };
+  }
+  const score = inst?.quality01;
+  return {
+    title, tone: inst?.abandoned ? 'bad' : score == null ? 'warn' : score >= 0.75 ? 'good' : score >= 0.5 ? 'warn' : 'bad',
+    rows: [['Game score', score == null ? '—' : pct01(score)], ['Crown', pct01(1 - n01(tl.wear))]],
+    note: inst?.abandoned ? 'Bolt skipped. This position has no installed support.'
+      : p.torqueTestPending ? 'Scheduled torque sample due. This game score is not a capacity test.'
+        : type === 'resin' ? 'Spin, gel and hold set the game score. Anchorage needs testing.'
+          : 'Installation game score. Anchorage needs testing.',
+  };
+}
+
 const UNIT_VIEWS = {
   rc: {
     stamp: (p) => p.bagsCut,
@@ -291,38 +331,7 @@ const UNIT_VIEWS = {
       note: 'The toes are surveyed when the ring is fired. Deviation becomes dilution, and you will not see it before then.',
     }),
   },
-  bolt: {
-    stamp: (p) => p.boltIndex,
-    card: (p, tl) => {
-      const inst = Array.isArray(p.installs) ? p.installs[p.installs.length - 1] : null;
-      const anch = inst ? inst.anchorage01 : p.lastAnchorage01;
-      /* Three figures, not four: the bolt TYPE is a garage decision and the
-         note below already names it wherever it changes what the numbers
-         mean. A fourth cell only crowded the other three into ellipses. */
-      const rows = [
-        ['Anchorage', anch == null ? '—' : pct01(anch)],
-        ['Crown', pct01(1 - n01(tl.wear))],
-      ];
-      /* THE HOLE DIAMETER IS A LOADOUT DECISION, made in the garage, so it is
-         only worth the room when it is WRONG — which is exactly when it is the
-         most interesting number on the method: a friction bolt in an
-         over-gauge hole is holding nothing at all. */
-      const off = Math.abs(n(p.holeMm) - n(p.holeIdealMm));
-      if (off > 0.6) rows.push(['Hole vs ideal', `${num(p.holeMm, 1)} / ${num(p.holeIdealMm, 1)} mm`]);
-      return {
-        title: `Bolt ${int(p.boltIndex)} of ${int(p.boltsTotal)} in`,
-        tone: anch == null ? 'warn' : anch >= 0.75 ? 'good' : anch >= 0.5 ? 'warn' : 'bad',
-        rows,
-        note: inst && inst.slotClosureIn != null
-          ? `Slot closed ${num(inst.slotClosureIn, 4)} in — full contact is ${num(p.slotFullContactIn, 4)} in.`
-          : p.torqueTestPending
-            ? 'A statutory torque test is due on this one. The end-of-shift audit checks it.'
-            : (off > 0.6
-              ? 'The hole is off the bit this bolt wants. That is where the anchorage went.'
-              : 'Anchorage is what the roof hangs on. Metres of drive are not.'),
-      };
-    },
-  },
+  bolt: { stamp: (p) => p.boltIndex, card: boltUnitCard },
   pile: {
     stamp: (p) => (p.setTaken ? 1 : 0) + (p.founded ? 2 : 0) + (p.refused ? 4 : 0),
     card: (p) => ({
@@ -437,9 +446,9 @@ const BEAT_COPY = {
   'trim-blast':   ['Trim blast', 'Bringing the profile back to line'],
   'ring-index':   ['Indexing the cradle', 'Round to the next hole in the ring'],
   redrill:        ['Re-drilling', 'Pulled back — starting the hole again'],
-  'bolt-install': ['Installing the bolt', 'The drive time is the tell'],
+  'bolt-install': ['Installing the bolt', 'Insert the bolt, then seat the plate'],
   'bolt-plate':   ['Plating up', 'Tight to the rock'],
-  'bolt-torque':  ['Torque test', 'The statutory sample'],
+  'bolt-torque':  ['Torque test', 'The scheduled sample'],
   'bolt-ream':    ['Reaming the hole', 'It closed before the bolt went in'],
   'bolt-inspect': ['Reading the slot', 'A light down the tube'],
   pitch:          ['Pitching the pile', 'Into the leader guides'],
@@ -470,13 +479,20 @@ const RESIN_STEPS = [
   ['Hold', 'Hold it still while it cures'],
 ];
 
+/** Current simulation stage, without reconstructing its clock from hazards. */
+export function resinInstallStep(programme) {
+  const index = programme?.boltType === 'resin'
+    ? ['spin', 'gel', 'hold'].indexOf(programme.installStage) : -1;
+  return { index, copy: index < 0 ? null : RESIN_STEPS[index] };
+}
+
 /** One-line captions for the sim's pulse verbs. The label is the sim's. */
 const PULSE_SUB = {
   blowDown:   'Clear the sample train before the next bag',
   shortRound: 'Take the round the ground class allows',
   redrill:    'Pull back and start the hole again',
   inspectSlot:'Read the slot closure on the last bolt',
-  torqueTest: 'The statutory torque sample',
+  torqueTest: 'The scheduled torque sample',
   reamHole:   'Open a hole that has closed',
   changeDolly:'New packing under the helmet',
   takeSet:    'Ten blows, held steady, and read the toe',
@@ -1217,11 +1233,9 @@ export function createSiteScreen(app) {
         say('Round shortened', `Taken down to ${num(r.roundLengthM, 2)} m`, 'warn'); break;
       case 'redrill': log(d.depth, 'Re-drilling the hole', 'warn'); break;
       case 'inspectSlot':
-        // The slot reading is a MEASUREMENT, so it goes in the log with its
-        // number and its unit, not into a toast that scrolls away.
-        log(d.depth, `Slot closed ${num(r.slotClosureIn, 4)} in`, r.closedFully ? null : 'warn');
-        if (r.closedFully) say('Slot closed', 'Full rock-to-metal contact', 'good');
-        else say('Slot barely closed', 'The hole was too big for this bolt', 'warn');
+        // This game inspection is not a field measurement of contact or capacity.
+        log(d.depth, `Modelled slot closure ${num(r.slotClosureIn, 4)} in`, r.closedFully ? null : 'warn');
+        say('Slot inspected', 'Check anchorage with a pull test', 'info');
         break;
       case 'torqueTest': log(d.depth, 'Torque test taken', null); break;
       case 'reamHole': log(d.depth, 'Hole reamed open', null); break;
@@ -1962,11 +1976,7 @@ export function createSiteScreen(app) {
 
   /* ═══ The beat, in the cluster's readout slot ══════════════════════════ */
   const beatUi = { on: false, key: '', title: '', sub: '', left: '', steps: -1, p: '' };
-  /* The resin cure is three jobs in one beat and the sim does not publish the
-     boundaries — but it DOES fire the `gel-clock` hazard exactly when the gel
-     window opens, which is the only boundary that matters. Seeing it is how
-     the HUD knows the spin is over; it resets when a new install starts. */
-  let gelSeen = false;
+  // Resin stages come from the simulation, including when a frame misses a hazard.
 
   function beatCopyFor(tl) {
     const b = tl.beat;
@@ -1975,7 +1985,7 @@ export function createSiteScreen(app) {
     if (!copy) return null;
     if (kind === 'bolt-install' && b && b.data) {
       if (b.data.type === 'resin') return ['Resin bolt curing', 'Spin, stop, hold — in that order'];
-      if (b.data.type === 'friction') return ['Driving the friction bolt', 'The drive time is the tell'];
+      if (b.data.type === 'friction') return ['Driving the friction bolt', 'Insert the bolt, then seat the plate'];
     }
     return copy;
   }
@@ -2007,7 +2017,7 @@ export function createSiteScreen(app) {
       if (beatUi.on) {
         beatUi.on = false;
         beatStepsEl.hidden = true;
-        beatUi.key = ''; gelSeen = false;
+        beatUi.key = '';
       }
       // The beat TAKES the slot: nothing is being made while it runs, so the
       // rate has nothing to say and the stage gains no new region.
@@ -2017,20 +2027,18 @@ export function createSiteScreen(app) {
     const key = (b ? b.kind : tl.phase) + ':' + (b ? Math.round(b.dur * 10) : 0);
     if (!beatUi.on) beatUi.on = true;
     setReadout('beat');
-    if (key !== beatUi.key) { beatUi.key = key; gelSeen = false; }
+    if (key !== beatUi.key) { beatUi.key = key; }
 
     if (copy[0] !== beatUi.title) { beatUi.title = copy[0]; beatTitle.textContent = copy[0]; }
 
-    /* The resin steps. SPIN until the gel clock fires, GEL while it is live —
-       the one moment rotation must stop — and HOLD after it. */
+    /* Use the actual spin/gel/hold stage; a hazard is not the cure clock. */
     const resin = !!(b && b.kind === 'bolt-install' && b.data && b.data.type === 'resin');
     let sub = copy[1];
     let step = -1;
     if (resin) {
-      const gelling = hazardLive(tl, 'gel-clock');
-      if (gelling) gelSeen = true;
-      step = gelling ? 1 : gelSeen ? 2 : 0;
-      sub = RESIN_STEPS[step][1];
+      const stage = resinInstallStep(tl.programme);
+      step = stage.index;
+      if (stage.copy) sub = stage.copy[1];
     }
     if (step !== beatUi.steps) {
       beatUi.steps = step;
@@ -2195,7 +2203,7 @@ export function createSiteScreen(app) {
   function resetProgramme() {
     beatUi.on = false; beatUi.key = ''; beatUi.title = ''; beatUi.sub = '';
     beatUi.left = ''; beatUi.steps = -1; beatUi.p = '';
-    beatEl.hidden = true; beatStepsEl.hidden = true; ropBox.hidden = false; gelSeen = false;
+    beatEl.hidden = true; beatStepsEl.hidden = true; ropBox.hidden = false;
     railOn = false; railEl.hidden = true;
     for (const s of railBtns) {
       s.id = null; s.label = ''; s.due = false; s.crit = false; s.armed = false;
