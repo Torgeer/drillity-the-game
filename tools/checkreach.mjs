@@ -162,13 +162,73 @@ function zoneOf(x, y, hand) {
   return 'hard';
 }
 
+/* ── THE CONTROL IS A RECTANGLE. THE VERDICT IS ITS CENTRE. WHY BOTH. ──────
+   `research/CRITIQUE.md` §10 [A]: "checkreach scores a POINT, not a CONTROL:
+   `.actionbtn` has 24.1 % of its area inside the gate's own HARD zone for the
+   right hand — its centre clears the inner radius by 15.5px, its nearest
+   corner is 37.3px inside it." That observation is correct and it is measured
+   here now, per control, per hand, and PRINTED — a finding that lives only in
+   a document is a finding the next run cannot check.
+
+   It is NOT the pass/fail, and that is a deliberate modelling decision rather
+   than an oversight:
+
+     - People aim at the middle of a target, not at its corner. Fitts' law is
+       about the distance to a target's CENTRE; the corner of a 96x68 button
+       is not where a thumb goes.
+     - "The whole rectangle must be reachable" penalises a control for being
+       BIG, which is backwards — it would fail a generous button and pass a
+       mean one placed at the same centre.
+     - Any middle rule ("60 % of the area", "a 44x44 reachable patch") needs a
+       threshold nobody has measured on this game's players. §1.1: a plausible
+       invented number is worse than an admitted gap. The three constants at
+       the top of this file are already marked `assumed`; a fourth, doing the
+       actual gating, would be worse than the three.
+
+   So: the centre decides, the area is measured, and the area is RATCHETED —
+   a control may not get less reachable than it is today without somebody
+   raising WORST_INSIDE_HARD on purpose. That makes the §10 [A] number a
+   regression test instead of a sentence. */
+const AREA_SAMPLES = 24;   // 24 x 24 = 576 samples per control per hand
+
+/** Fraction of a control's own area that falls in the thumb's hard zone. */
+function hardAreaFraction(t, hand) {
+  let hard = 0;
+  for (let i = 0; i < AREA_SAMPLES; i++) {
+    for (let j = 0; j < AREA_SAMPLES; j++) {
+      const x = t.x + t.w * ((i + 0.5) / AREA_SAMPLES);
+      const y = t.y + t.h * ((j + 0.5) / AREA_SAMPLES);
+      if (zoneOf(x, y, hand) === 'hard') hard++;
+    }
+  }
+  return hard / (AREA_SAMPLES * AREA_SAMPLES);
+}
+
+/* The worst hard-area fraction any single drilling control may reach, over
+   the five methods, either hand. Measured on this layout; raise it only with
+   the report that earned it. It is NOT zero and cannot be: the control row
+   sits above the thumb's fold, so the outermost controls always have a corner
+   inside it. Zero would require controls narrower than the fold's chord. */
+const WORST_INSIDE_HARD = 0.28;
+/* Measured 2026-09-06 on this layout, all five methods: the worst is `.vsl`,
+   the leftmost slider, at 26.0 % — 0.0 % for the right hand and 26.0 % for the
+   left, which is the same shape §10 [A] reported for `.actionbtn` and the same
+   reason: the control nearest a bottom corner has that corner in the fold of
+   the thumb on that side. 28 % is 26.0 plus enough headroom for sub-pixel and
+   font differences (one sample of the 24x24 grid is 0.17 %), not slack. */
+
 function assessTargets(targets) {
   const rows = targets.map((t) => {
     const cx = t.x + t.w / 2, cy = t.y + t.h / 2;
     const right = zoneOf(cx, cy, 'right'), left = zoneOf(cx, cy, 'left');
     const worst = [right, left].includes('hard') ? 'hard'
       : [right, left].includes('stretch') ? 'stretch' : 'easy';
-    return { ...t, cx: Math.round(cx), cy: Math.round(cy), right, left, worst };
+    const hardR = hardAreaFraction(t, 'right'), hardL = hardAreaFraction(t, 'left');
+    return {
+      ...t, cx: Math.round(cx), cy: Math.round(cy), right, left, worst,
+      hardAreaRight: +hardR.toFixed(3), hardAreaLeft: +hardL.toFixed(3),
+      hardArea: +Math.max(hardR, hardL).toFixed(3),
+    };
   });
   const drilling = rows.filter((r) => r.reach === 'drilling');
   const between = rows.filter((r) => r.reach === 'between');
@@ -183,6 +243,13 @@ function assessTargets(targets) {
   for (const r of unsorted) failures.push(`.${r.cls} declares invalid data-reach=${JSON.stringify(r.reach)}`);
   for (const r of small) failures.push(`.${r.cls} target ${r.w.toFixed(2)} x ${r.h.toFixed(2)} is below ${MIN_TARGET_PX} x ${MIN_TARGET_PX}px`);
   for (const r of bad) failures.push(`.${r.cls} at (${r.cx},${r.cy}) is outside the thumb arc: right=${r.right}, left=${r.left}`);
+  /* The area ratchet — CRITIQUE §10 [A], measured rather than asserted. */
+  const areaBad = drilling.filter((r) => r.hardArea > WORST_INSIDE_HARD);
+  for (const r of areaBad) {
+    failures.push(`.${r.cls} has ${(r.hardArea * 100).toFixed(1)}% of its area in the thumb's hard zone`
+      + ` (right ${(r.hardAreaRight * 100).toFixed(1)}%, left ${(r.hardAreaLeft * 100).toFixed(1)}%),`
+      + ` over the ${(WORST_INSIDE_HARD * 100).toFixed(0)}% this layout is allowed`);
+  }
   // The exit is required even if all remaining controls are valid. It cannot
   // be removed, disabled, or classified "between" to make the gate green.
   if (leaves.length !== 1) failures.push(`expected one interactive .site__leave button, found ${leaves.length}`);
@@ -193,7 +260,7 @@ function assessTargets(targets) {
       failures.push('.site__leave is not entirely inside the viewport');
     }
   }
-  return { rows, drilling, between, unsorted, small, bad, leaves, failures };
+  return { rows, drilling, between, unsorted, small, bad, areaBad, leaves, failures };
 }
 
 if (argv.includes('--self-test')) {
@@ -214,6 +281,21 @@ if (argv.includes('--self-test')) {
     ['exit exempted as between', [{ ...leave, reach: 'between' }, feed], /must declare/],
     ['nonbutton exit', [{ ...leave, tag: 'DIV' }, feed], /DOM <button>/],
     ['partially offscreen exit', [{ ...leave, y: H - 20 }, feed], /inside the viewport/],
+    /* CRITIQUE §10 [A]: THE CASE THE CENTRE RULE WAVES THROUGH.
+       A 160x60 control at (218,770): its centre (298,800) is `easy` for BOTH
+       hands, so every other rule in this file passes it — and 47.9 % of its
+       body is inside the right thumb's fold. That is the whole argument for
+       measuring the area, and it is the only fixture here that makes it.
+
+       An earlier version of this fixture used a 60x54 box at (0,790), which
+       is 100 % in the LEFT fold with its centre `hard` — so it failed on the
+       centre rule at `:247` and proved nothing about the area rule at all. A
+       regression test that the older rule already catches is a test of
+       nothing; it is the empty-set problem this file's header is about,
+       wearing a fixture's clothes. Verified against this file's own zoneOf
+       before being written down. */
+    ['centre clears the arc but half the control does not',
+      [leave, { ...feed, x: 218, y: 770, w: 160, h: 60 }], /hard zone/],
   ];
   for (const [name, targets, expected] of fixtures) {
     assert.ok(verdict(targets).some((f) => expected.test(f)), `${name} must fail: ${verdict(targets).join('; ')}`);
@@ -305,7 +387,29 @@ const say = (s = '') => console.log(s);
    dev server that is already up, or starts one for the run and stops it after.
    See ./devserver.mjs. */
 const SERVER = await ensureServer(PORT, say);
-const b = await chromium.launch({ args: ['--mute-audio'], headless: false, channel: 'chrome' });
+/* ── --headless: OPT-IN, AND IT MEASURES THE SAME THING ────────────────────
+   Every number this gate produces is a `getBoundingClientRect()` and a class
+   name. None of it is a frame, a draw call or a pixel, so unlike
+   `.hudqa/measure.mjs` — which is headed-mandatory for real reasons and says
+   so in its own header — nothing here needs the discrete GPU.
+
+   Headed stays the DEFAULT so no existing invocation changes. The flag exists
+   because this machine runs many agents behind one GPU lease
+   (`drillity-coordination/gpu-owner.txt`), and a gate that cannot run while
+   somebody else is measuring is a gate that gets skipped — which is the
+   empty-set failure this file's own header is about, one level up.
+
+   ANGLE is pointed at SwiftShader rather than left to pick: a headless
+   Chrome that quietly binds the real GPU would contend with the lease holder,
+   which is the thing the flag exists to avoid. Layout is identical either
+   way; if it ever is not, that difference is a finding and not a nuisance. */
+const HEADLESS = argv.includes('--headless');
+const b = await chromium.launch({
+  headless: HEADLESS, channel: 'chrome',
+  args: HEADLESS
+    ? ['--mute-audio', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader']
+    : ['--mute-audio'],
+});
 const ctx = await b.newContext({
   ...devices['iPhone 13 Pro'],
   viewport: { width: W, height: H }, deviceScaleFactor: 2, isMobile: true, hasTouch: true,
@@ -373,7 +477,7 @@ for (const m of CASES) {
     targets = await p.evaluate(COLLECT);
   }
 
-  const { rows, drilling, between, unsorted, small, bad, leaves, failures } = assessTargets(targets);
+  const { rows, drilling, between, unsorted, small, bad, areaBad, leaves, failures } = assessTargets(targets);
   const stretched = drilling.filter((r) => r.worst === 'stretch');
   const betweenHard = between.filter((r) => r.worst === 'hard');
   /* Declared 'drilling' but not in the dock, or in the dock but not declared
@@ -386,6 +490,7 @@ for (const m of CASES) {
     targets: rows.length, drilling: drilling.length, between: between.length,
     hard: bad.map((r) => r.cls), unsorted: unsorted.map((r) => r.cls),
     small: small.map((r) => r.cls), leaveButtons: leaves.length, failures, rows,
+    worstHardArea: Math.max(...drilling.map((r) => r.hardArea), 0), hardAreaCeiling: WORST_INSIDE_HARD,
   };
   fails.push(...failures.map((f) => `${m}: ${f}`));
 
@@ -410,6 +515,13 @@ for (const m of CASES) {
       + (bad.length ? '  <-- GATE FAIL' : '  ok'));
     for (const r of bad) say(`     HARD      .${r.cls}  centre (${r.cx},${r.cy})  right=${r.right} left=${r.left}`);
     for (const r of stretched) say(`     stretch   .${r.cls}  centre (${r.cx},${r.cy})  right=${r.right} left=${r.left}`);
+    /* Printed every run, pass or fail: the §10 [A] number. The centre decides
+       the verdict; this says how much of each control the fold takes. */
+    const worstArea = drilling.slice().sort((a, b) => b.hardArea - a.hardArea)[0];
+    say(`  in the fold  worst .${worstArea.cls} ${(worstArea.hardArea * 100).toFixed(1)}% of its area`
+      + ` (right ${(worstArea.hardAreaRight * 100).toFixed(1)}%, left ${(worstArea.hardAreaLeft * 100).toFixed(1)}%)`
+      + `   ceiling ${(WORST_INSIDE_HARD * 100).toFixed(0)}%`
+      + (areaBad.length ? '  <-- GATE FAIL' : '  ok'));
   }
   for (const r of unsorted) {
     say(`  INVALID SORT .${r.cls}  data-reach=${JSON.stringify(r.reach)}  — sort it in site.js  <-- GATE FAIL`);

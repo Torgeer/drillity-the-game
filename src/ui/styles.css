@@ -123,18 +123,18 @@
      else on it lives INSIDE one of the two, which is what makes it impossible
      for an element to cover a band or to move the split.
 
-       --hud-top   51 content + 1 border  =  52 + the top safe area
-       --hud-dock  1 border + 9 top + 82 inst + 4 + 32 aux + 4 + 72 ctl
-                   + a 56px footer with clear outer corners    =  260
-                   (224 on a method with no auxiliary row — see --dock-base)
+       --hud-top   status content, progress rules and the top safe area
+       --hud-dock  border, padding, instrument and optional auxiliary rows,
+                   controls, gaps and the footer's thumb/safe-area reserve
 
      The auxiliary row is 0px on every method the sim gives neither a
      programme nor a mud column — `.sitedock--plain` takes it out, and the
      site screen decides that ONCE, at mount, never during a run.
 
-     core/contract.js `LAYOUT.chromeTop` / `chromeBottom` carry the same two
-     numbers as fractions for core/renderer.js, so the scissored bands can be
-     inset out from under them. Change one, change the other.
+     `.site` and `.sitedock` define the actual compact row sizes below. The
+     screen publishes measured offsetHeight values through `ctx.hud`, which
+     the renderer consumes. Core layout fractions are separate fallbacks,
+     not a second authority for this live DOM reservation.
 
      ── THE DOCK IS NOW A SUM OF NAMED PARTS, NOT A WRITTEN-DOWN TOTAL ──────
      `227px` was a hand-added total, and `.sitedock--plain`'s `189px` was a
@@ -167,17 +167,44 @@
      The centre footer now contains navigation. Reserve its 44px target,
      8px breathing room and the bottom safe area; never put the button inside
      a home-indicator inset. The existing reach floor remains the minimum. */
-  --hud-top:  calc(var(--sa-t) + 52px);
+  /* ── THESE ARE THE ROW HEIGHTS. THERE IS NO SECOND SET. ─────────────────
+     They were briefly declared twice — 52 / 82 / 72 here and 40 / 72 / 68
+     again on `.site` — with the `.site` copy winning by inheritance on the
+     only screen that has a dock. That is HANDOFF §8B's two-numbers-for-one-
+     thing, and it had already produced one live consequence: `.toasts` is a
+     child of `.ui-stage` and NOT of `.site`, so `.ui-stage.is-site .toasts`
+     resolved THIS `--hud-dock` — 272px — while the dock measured 254px on an
+     auxiliary method and 190px on a plain one. A toast on the site screen
+     therefore floated 18px, or 82px, above the dock it was supposed to sit on.
 
-  /* The dock's rows, and the reserve under them. Tiers below override these
-     three heights and nothing else. */
-  --dock-inst: 82px;   /* the gauge and one readout */
+     Agreeing here did NOT finish that job, and an earlier draft of this note
+     claimed it had. The plain dock's height is not a :root value at all —
+     `--dock-inst` is overridden on `.sitedock` itself — so no selector
+     outside the dock can compute it, and the toast was still 64px out on
+     `dth` and `oil-rotary`. The toast now reads `--hud-dock-live`, the dock's
+     measured offsetHeight, published by site.js publishChrome().
+
+     Measured, six phones x five methods: the dock is 254px on every one of
+     them (190px plain). See .hudqa/bandshare-after.json.
+
+     The row heights do NOT scale with the viewport, and that is deliberate:
+     the hand is the same size on a small phone, so a short screen buys its 3D
+     back out of the auxiliary row it does not need, never out of a control.
+     The two `@media (max-height/min-height)` tiers that used to change these
+     are gone for the same reason — measured, they moved the dock through
+     258 / 272 / 296px and made the share WORST on the smallest phone. */
+  --hud-top:  calc(var(--sa-t) + 40px);
+  --dock-inst: 72px;   /* the gauge and one readout */
   --dock-aux:  var(--touch); /* native action targets keep their full 44px row */
-  --dock-ctl:  72px;   /* three sliders and the one primary action */
-  --reach-floor: 56px; /* + --dock-ctl/2 = 92 >= the 90px the thumb arc needs */
+  --dock-ctl:  68px;   /* three sliders and the one primary action */
+  --reach-floor: 56px; /* + --dock-ctl/2 = 90 = the 90px the thumb arc needs */
   --dock-floor: max(calc(var(--sa-b) + var(--touch) + 8px), var(--reach-floor));
-  /* 1px border + 9px top padding, then the rows, their gaps and the floor. */
-  --dock-base: calc(10px + var(--dock-inst) + var(--s-1) + var(--dock-ctl) + var(--dock-floor));
+  /* 1px border + 5px top padding, then the rows, their gaps and the floor.
+     `.sitedock` restates this calc for one reason that is not duplication:
+     `var()` inside a custom property is substituted where the property is
+     DECLARED, so a `--dock-inst` overridden on `.sitedock--plain` cannot
+     reach a `--dock-base` computed up here. */
+  --dock-base: calc(6px + var(--dock-inst) + var(--s-1) + var(--dock-ctl) + var(--dock-floor));
   --hud-dock: calc(var(--dock-base) + var(--s-1) + var(--dock-aux));
   --stage-w: min(100vw, calc(100vh * 0.5), 520px);
 
@@ -830,7 +857,15 @@ canvas { display: block; }
    `LAYOUT.chromeBottom` in core/contract.js carry the same two numbers for
    core/renderer.js, so the scissored bands can be inset to match.
    ═══════════════════════════════════════════════════════════════════════════ */
-.site { pointer-events: none; }
+.site {
+  pointer-events: none;
+  container: site-hud / inline-size;
+  /* `--hud-top`, `--dock-inst` and `--dock-ctl` were declared here as well as
+     in :root. They are now declared ONCE, in :root — see the note there for
+     the toast that was 18px out because two places disagreed. This rule keeps
+     only the container, which is what the narrow-stage rules at the foot of
+     this file query. */
+}
 .site > * { pointer-events: auto; }
 
 /* The 3D's own rows. Empty by construction — putting anything in one is the
@@ -872,7 +907,7 @@ canvas { display: block; }
 .sstrip__face:not([hidden]) { animation: face-in var(--dur-2) both var(--curve-enter); }
 @keyframes face-in { from { opacity: 0; } to { opacity: 1; } }
 
-.sstrip__cell { display: flex; flex-direction: column; justify-content: center; gap: 3px; min-width: 0; }
+.sstrip__cell { display: flex; flex-direction: column; justify-content: center; gap: 2px; min-width: 0; }
 .sstrip__cell--grow { flex: 1 1 auto; }
 /* `display: flex` beats the UA's `[hidden] { display: none }`, so the strip's
    third cell — hidden on every method whose progress the section band's own
@@ -881,12 +916,12 @@ canvas { display: block; }
    with two rules against each other. */
 .sstrip__cell[hidden], .sstrip__div[hidden] { display: none; }
 .sstrip__k {
-  font-size: var(--t-2xs); line-height: 1; font-weight: 800;
+  font-size: var(--t-2xs); line-height: 1.4; font-weight: 800;
   letter-spacing: var(--tr-label); text-transform: uppercase;
   color: var(--c-fg-dim); white-space: nowrap;
 }
 .sstrip__v {
-  font-size: var(--t-sm); line-height: 1.1; font-weight: 800;
+  font-size: var(--t-sm); line-height: 1.25; font-weight: 800;
   font-variant-numeric: tabular-nums; letter-spacing: var(--tr-tight); white-space: nowrap;
 }
 .sstrip__v em { font-style: normal; color: var(--c-fg-dim); font-weight: 600; }
@@ -941,12 +976,12 @@ canvas { display: block; }
 .sstrip__alert .sstrip__ico { flex: none; display: grid; place-items: center; color: currentColor; }
 .sstrip__ab { min-width: 0; flex: 1 1 auto; }
 .sstrip__at {
-  font-size: var(--t-sm); line-height: 1.1; font-weight: 850;
+  font-size: var(--t-sm); line-height: 1.4; font-weight: 850;
   letter-spacing: var(--tr-label); text-transform: uppercase; color: currentColor;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .sstrip__as {
-  font-size: var(--t-2xs); line-height: 1.2; font-weight: 600; color: var(--c-fg-muted);
+  font-size: var(--t-2xs); line-height: 1.4; font-weight: 600; color: var(--c-fg-muted);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .sstrip.is-alert         { background: linear-gradient(180deg, rgb(var(--rgb-danger)  / .22), var(--c-bg-deep) 76%); }
@@ -1011,14 +1046,22 @@ canvas { display: block; }
    ~14px of margin against the arc. `--reach-floor` in :root carries the
    derivation; `npm run check:reach` is the gate. */
 .sitedock {
+  /* Recompute the sum here: the plain variant changes the instrument row.
+     Four pixels of clearance also leave room for a focused control's ring. */
+  --dock-base: calc(6px + var(--dock-inst) + var(--s-1) + var(--dock-ctl) + var(--dock-floor));
+  --hud-dock: calc(var(--dock-base) + var(--s-1) + var(--dock-aux));
   position: relative; overflow: hidden;
   flex: none; height: var(--hud-dock);
   display: flex; flex-direction: column; gap: var(--s-1);
   /* The footer occupies the reserved padding; it does not add another row
      to the instrument/controls sum or cover either 3D band. */
-  padding: 9px var(--s-3) var(--dock-floor);
+  padding: 5px var(--s-3) var(--dock-floor);
   background: var(--c-bg-deep);
   border-top: 1px solid rgb(var(--rgb-border) / .9);
+  /* The reduced-motion rule sets a duration on every element. With the
+     default transition-property:all that briefly animated this fixed dock's
+     height, causing publishChrome to read the previous method's reservation. */
+  transition-property: none;
   /* `animation: dock-in` — an 18px slide and a fade on mount — used to be
      here. Nothing physically moved: the dock is chrome at a fixed height in a
      reserved row, and it was sliding because entrances look expensive. Motion
@@ -1036,52 +1079,57 @@ canvas { display: block; }
    this variant states a SUBTRACTION rather than a second total. The 189px
    that used to stand here was a hand-added copy that no tier ever updated. */
 .sitedock--plain {
+  --dock-inst: 56px;
   --dock-aux: 0px;
   --hud-dock: var(--dock-base);
 }
 .sitedock--plain .dock__aux { display: none; }
+/* The current unit-card consumer without an auxiliary row is a two-pass
+   programme. Its three outcomes and full note need their own stable reserve. */
+.sitedock--plain.sitedock--units { --dock-inst: 88px; }
 
 /* The two rows the unit card covers, wrapped so the card has something real to
    be the size of. It is `position: relative` for exactly that reason — see
    `.unitcard`. Its own height is the sum of its children, so it is correct on
-   `--dock-aux: 34px` and on the plain dock where `.dock__aux` is display:none
+   an auxiliary touch row and on the plain dock where `.dock__aux` is display:none
    and contributes neither height nor gap. */
 .dock__top  { position: relative; flex: none; display: flex; flex-direction: column; gap: var(--s-1); }
 .dock__inst { flex: none; height: var(--dock-inst); display: flex; gap: var(--s-3); align-items: stretch; }
 .dock__aux  { flex: none; height: var(--dock-aux); display: flex; align-items: center; gap: var(--s-2); }
-.dock__ctl  { flex: none; height: var(--dock-ctl); display: flex; gap: var(--s-2); align-items: stretch; }
+.dock__ctl  { flex: none; height: var(--dock-ctl); display: flex; gap: var(--s-1); align-items: stretch; }
+/* These are layout and canvas-sizing boxes, not animated controls. The
+   universal reduced-motion duration must not create implicit size transitions
+   that leave a canvas backing store sized to the previous programme row. */
+.siteband, .dock__top, .dock__inst, .dock__aux, .dock__ctl,
+.gaugebox, .site canvas { transition-property: none; }
 
-/* The gauge is the game. It gets the width, the radius and the row.
-
-   ── THE CAPTION AND THE DIAL CANNOT OVERLAP, BY CONSTRUCTION ──────────────
-   The caption began as an absolutely-positioned label over the bottom 11px of
-   the dial. It was then given its own row, and the canvas was sized to "the
-   box minus a CAP_H constant" that site.js kept a copy of — two numbers
-   describing one thing (HANDOFF §8B), and they drifted: the box is 86px and
-   the harness measured a 75px canvas against a 14px caption, 89px of content
-   in an 86px box, so the caption sat 2px into the needle.
-
-   Neither number exists any more. The caption is a fixed row and the canvas
-   takes WHAT IS LEFT — `flex: 1 1 0` against `min-height: 0` — so the sum is
-   the box height whatever either one is, and the media queries below can
-   change the box height without a matching edit anywhere in the JS.
-
-   The canvas must therefore never be given an inline width/height STYLE:
-   site.js sets only the backing-store attributes, from the size flex gave it.
-   Setting the style back would restore the two-numbers problem. */
+/* A linear target track keeps the whole sweet-spot instrument visible in a
+   short row. The numeric reading and caption occupy a separate DOM header;
+   the canvas gets the remaining height from flexbox. site.js sizes only its
+   backing store, from the actual laid-out canvas, never a second height. */
 .gaugebox {
   /* Height is the instrument row's, by reference — not a copy of it. */
-  position: relative; flex: none; width: 150px; height: var(--dock-inst);
+  position: relative; flex: none; width: 45%; max-width: 170px; height: var(--dock-inst);
   display: flex; flex-direction: column;
 }
 .gaugebox canvas { flex: 1 1 0; min-height: 0; width: 100%; display: block; }
+.gaugebox__head {
+  flex: none; min-height: 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 4px;
+}
+.gaugebox__reading { display: inline-flex; align-items: baseline; gap: 3px; white-space: nowrap; }
+.gaugebox__value {
+  font-size: var(--t-sm); line-height: 1.4; font-weight: 850;
+  font-variant-numeric: tabular-nums;
+}
+.gaugebox__unit { font-size: var(--t-2xs); line-height: 1.4; font-weight: 700; color: var(--c-fg-dim); }
 /* Baseline text bounds were 15px high inside a 14px row. The caption's
    18px line box reserves the whole glyph, reducing the canvas accordingly. */
 .gaugebox__cap {
   position: static; flex: none; height: 18px;
-  display: flex; align-items: center; justify-content: center;
+  display: flex; align-items: center; justify-content: flex-start;
   font-size: var(--t-2xs); line-height: 18px; font-weight: 800;
-  letter-spacing: var(--tr-label); text-transform: uppercase; color: var(--c-fg-dim);
+  letter-spacing: .03em; text-transform: uppercase; color: var(--c-fg-dim); white-space: nowrap;
 }
 
 /* ONE readout slot beside the gauge, with three possible occupants and never
@@ -1091,8 +1139,8 @@ canvas { display: block; }
 .readouts { flex: 1 1 auto; min-width: 0; position: relative; }
 .readouts > * { position: absolute; inset: 0; }
 
-/* The rate. Flat on the dock — no card, no border, no second background.
-   Label and trend share a row; value and groove have their own lines. */
+/* The rate. Label and trend share the first row; value and groove share the
+   second. The two-row readout fits the shortest plain instrument row. */
 .rop {
   display: flex; flex-direction: column; justify-content: center; gap: var(--s-1);
   padding: 0;
@@ -1107,9 +1155,10 @@ canvas { display: block; }
 }
 .rop__v {
   position: relative; flex: 1 1 auto;
-  font-size: var(--t-2xl); font-weight: 850; font-variant-numeric: tabular-nums;
-  letter-spacing: var(--tr-hero); line-height: 1.35;
+  font-size: var(--t-lg); font-weight: 850; font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tr-tight); line-height: 1.35; white-space: nowrap;
 }
+.rop__reading { display: flex; align-items: center; justify-content: space-between; gap: 4px; min-width: 0; }
 .rop__u { font-size: var(--t-2xs); font-weight: 700; color: var(--c-fg-muted); margin-left: 3px; }
 
 /* The groove chip — the ONE place success green is allowed on this screen,
@@ -1148,22 +1197,23 @@ canvas { display: block; }
    the rule along its foot is the only mark it makes. */
 .beat {
   --p: 0;
-  display: flex; flex-direction: column; justify-content: center; gap: 3px;
-  padding: 0 0 11px;
+  display: flex; flex-direction: column; justify-content: center; gap: 2px;
+  padding: 0 0 4px;
 }
 .beat__hd { display: flex; align-items: baseline; gap: var(--s-2); }
+.beat__hd, .beat__s, .beat__steps { flex: none; }
 .beat__t {
   flex: 1 1 auto; min-width: 0;
-  font-size: var(--t-sm); line-height: 1.1; font-weight: 850;
+  font-size: var(--t-sm); line-height: 1.25; font-weight: 850;
   letter-spacing: var(--tr-label); text-transform: uppercase; color: var(--c-fg);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  white-space: normal;
 }
 .beat__left {
   flex: none; font-size: var(--t-2xs); font-weight: 800;
   font-variant-numeric: tabular-nums; color: var(--c-fg-dim);
 }
 .beat__s {
-  font-size: var(--t-2xs); line-height: var(--lh-snug); font-weight: 600;
+  font-size: var(--t-2xs); line-height: 1.4; font-weight: 600;
   color: var(--c-fg-muted);
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
 }
@@ -1180,7 +1230,7 @@ canvas { display: block; }
 }
 .beat__step.is-done { color: var(--c-fg-muted); }
 .beat__step.is-on { background: rgb(var(--rgb-amber) / .22); color: var(--c-amber-hot); }
-.beat__rule { position: absolute; left: 0; right: 0; bottom: 11px; height: 2px; background: rgb(var(--rgb-fg) / .08); }
+.beat__rule { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: rgb(var(--rgb-fg) / .08); }
 .beat__rule i {
   position: absolute; inset: 0; background: var(--c-amber);
   -webkit-clip-path: inset(0 calc(100% - var(--p) * 100%) 0 0);
@@ -1200,11 +1250,11 @@ canvas { display: block; }
    one method the driving record IS the rate readout and it takes the slot —
    one increment per column, deepest at the right, the two limit rules across
    it. It is not an extra card and it is not on the render. */
-.blowchart { display: flex; flex-direction: column; gap: 2px; padding: 0 0 11px; }
+.blowchart { display: flex; flex-direction: column; gap: 2px; padding: 0; }
 .blowchart canvas { flex: 1 1 auto; min-height: 0; width: 100%; display: block; }
 .blowchart__cap {
   flex: none;
-  font-size: var(--t-2xs); line-height: 1; font-weight: 800;
+  font-size: var(--t-2xs); line-height: 1.4; font-weight: 800;
   letter-spacing: var(--tr-label); text-transform: uppercase; color: var(--c-fg-dim);
 }
 
@@ -1224,7 +1274,7 @@ canvas { display: block; }
 .railbtn {
   flex: 0 1 auto; min-width: var(--touch); min-height: var(--touch);
   display: inline-flex; align-items: center; justify-content: center;
-  padding: 0 var(--s-3);
+  padding: 0 var(--s-1);
   border-radius: var(--r-sm);
   background: rgb(var(--rgb-fg) / .07);
   color: var(--c-steel-soft);
@@ -1233,9 +1283,9 @@ canvas { display: block; }
 /* Reserve the complete native hit box in layout. The previous pseudo-element
    extended a 30–34px row over its neighbours and borrowed their hit area. */
 .railbtn__l {
-  font-size: var(--t-2xs); line-height: 1.1; font-weight: 850;
+  font-size: var(--t-2xs); line-height: 1.3; font-weight: 850;
   letter-spacing: var(--tr-label); text-transform: uppercase;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  white-space: normal; text-align: center;
   transition: transform var(--dur-2) var(--curve-release);
 }
 .railbtn.is-pressed .railbtn__l { transform: scale(.95); transition-duration: var(--motion-d1); transition-timing-function: var(--curve-press); }
@@ -1264,9 +1314,17 @@ canvas { display: block; }
    — the margin is the decision, and the inputs are on the results screen.
    The kick itself arrives in the strip, like every other hazard. */
 .wellstrip { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: var(--s-2); }
-.pit { --g: 0; --l: 0; flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: var(--s-2); }
+.dock__aux:has(> .wellstrip:not([hidden])) .actrail { flex: 0 0 120px; }
+.dock__aux:has(> .wellstrip:not([hidden])) .railbtn { flex: 1 1 0; }
+.pit {
+  --g: 0; --l: 0; flex: 1 1 auto; min-width: 0;
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px;
+}
+.pit__k { grid-column: 1; grid-row: 1; }
+.pit__s { grid-column: 2; grid-row: 1; justify-self: end; }
+.pit__track { grid-column: 1 / -1; grid-row: 2; }
 .pit__k, .wnum__k {
-  flex: none; font-size: var(--t-2xs); line-height: 1; font-weight: 800;
+  flex: none; font-size: var(--t-2xs); line-height: 1.4; font-weight: 800;
   letter-spacing: var(--tr-label); text-transform: uppercase; color: var(--c-fg-dim);
 }
 .pit__track {
@@ -1290,13 +1348,13 @@ canvas { display: block; }
           clip-path: inset(0 0 0 calc(100% - var(--l) * 100%));
 }
 .pit__s {
-  flex: none; font-size: var(--t-2xs); line-height: 1; font-weight: 800;
+  flex: none; font-size: var(--t-2xs); line-height: 1.4; font-weight: 800;
   letter-spacing: var(--tr-label); text-transform: uppercase; color: var(--c-fg-dim);
 }
 .pit.is-gaining .pit__s { color: var(--c-danger-soft); }
 .pit.is-losing .pit__s { color: var(--c-steel-soft); }
 
-.wnum { flex: none; display: flex; align-items: center; gap: 5px; padding-left: var(--s-2); }
+.wnum { flex: none; display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .wnum__v {
   font-size: var(--t-sm); line-height: 1; font-weight: 800;
   font-variant-numeric: tabular-nums; letter-spacing: var(--tr-tight); color: var(--c-fg); white-space: nowrap;
@@ -1313,17 +1371,52 @@ canvas { display: block; }
 /* ═══ CONTROLS ═══════════════════════════════════════════════════════════
    Three sliders and one action, and that is the whole of what a player acts
    on in the next three seconds. */
-.controls__sliders { display: flex; gap: var(--s-2); flex: 1 1 auto; min-width: 0; }
+.controls__sliders { display: flex; gap: var(--s-1); flex: 1 1 auto; min-width: 0; }
+.site .vsl__head { height: 16px; }
+.site .vsl__name, .site .vsl__val { line-height: 1.4; }
+.site .vsl__track { min-height: 48px; }
+/* ── WHY 96px ─────────────────────────────────────────────────────────────
+   The committed baseline is 88px (`git show HEAD:src/ui/styles.css`); an
+   intermediate state on the way here was 80px, and an earlier draft of this
+   comment quoted that 80 as if it were the baseline. It was not. The change
+   under review is 88 -> 96, i.e. +8px, and the numbers below are against 88.
+
+   At its old width the primary action's own words did not fit its row.
+   `tools/checkdrillingviewspace.mjs` caught it on `rod-add` and `bailing-run`
+   at every viewport it tests: "STAB ROD" wrapped to two lines (36px), "Timing
+   window open" to three (43px), and 36 + 2 + 43 = 81px of content in a 68px
+   `--dock-ctl`. The button overflowed its row, the sub-label's last word was
+   cut off by `.sitedock`'s `overflow: hidden`, and the enumerator scored the
+   escaped box against `.beat__rule` in the instrument row above it. The
+   screenshot in shots/drilling-view-space shows the clipped word.
+
+   8px of width buys a line of height back: at 96px the label fits on one line
+   and the sub on two, which is 48px of content in the 68px row. The sliders
+   pay for it out of width they have to spare — each slider is
+   `(stage - 132) / 3`, so the narrowest stage the gate tests, 280px, still
+   leaves 49.3px against the 44px floor. The right edge is pinned at
+   `stage - 12`, so +8px of width moves the button's CENTRE 4px inward: at
+   390x844 the centre goes 334 -> 330, it clears the thumb's inner radius by
+   15.9px instead of 13.8px, and its hard-zone area falls 25.7% -> 23.4%.
+   Measured by `node tools/checkreach.mjs 5180 --headless --json`.
+
+   THERE IS DELIBERATELY NO `-webkit-line-clamp` HERE. A clamp would have hidden
+   this instead of fixing it, and the next piece of copy that does not fit
+   would ship silently. Overflow stays visible so the gate keeps catching it —
+   ASTRA §10, "a silent fallback that works is the most expensive kind of
+   failure". If a future action label overflows, widen the button or shorten
+   the words; do not teach this box to swallow them. */
 .actionbtn {
-  flex: none; width: 88px;
+  flex: none; width: 96px;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
   border-radius: var(--r-sm);
   background: rgb(var(--rgb-fg) / .07);
   transition: transform var(--dur-2) var(--curve-release), background var(--dur-3) var(--curve-swap), box-shadow var(--dur-3) var(--curve-swap);
 }
-.actionbtn.is-pressed { transform: scale(.95); }
+.actionbtn > * { transition: transform var(--dur-2) var(--curve-release); }
+.actionbtn.is-pressed > * { transform: scale(.95); transition-duration: var(--motion-d1); transition-timing-function: var(--curve-press); }
 .actionbtn__l { font-size: var(--t-sm); font-weight: 850; letter-spacing: var(--tr-label); text-transform: uppercase; text-align: center; line-height: 1.4; }
-.actionbtn__s { font-size: var(--t-2xs); font-weight: 600; color: var(--c-fg-dim); text-align: center; padding: 0 5px; line-height: 1.4; }
+.actionbtn__s { font-size: var(--t-2xs); font-weight: 600; color: var(--c-fg-dim); text-align: center; padding: 0 5px; line-height: 1.3; }
 /* The single accent, doing its single job: THIS is the thing to press. */
 .actionbtn--amber  { background: linear-gradient(180deg, var(--c-amber-hot), var(--c-amber)); color: var(--c-amber-deep); box-shadow: 0 0 22px rgb(var(--rgb-amber) / .34); }
 .actionbtn--amber .actionbtn__s { color: rgb(var(--rgb-black) / .62); }
@@ -1333,7 +1426,6 @@ canvas { display: block; }
 .actionbtn--ghost  { color: var(--c-fg-muted); }
 .actionbtn--ghost .actionbtn__l { color: var(--c-fg-muted); }
 .actionbtn.is-urgent { animation: pulse-urgent calc(var(--motion-d6) * 2) infinite var(--curve-swap); }
-.actionbtn__ico { color: currentColor; opacity: .9; }
 .actionbtn:focus-visible { outline: 2px solid rgb(var(--rgb-amber) / .9); outline-offset: 2px; }
 @keyframes pulse-urgent {
   0%, 100% { filter: brightness(1); }
@@ -1382,7 +1474,7 @@ canvas { display: block; }
    too, where `.dock__aux` is display:none and this formula had to know it. */
 .unitcard {
   position: absolute; z-index: 2; inset: 0;
-  display: flex; flex-direction: column; justify-content: center; gap: 4px;
+  display: flex; flex-direction: column; justify-content: center; gap: 2px;
   padding-left: var(--s-3);
   background: var(--c-bg-deep);
   border-left: 2px solid var(--c-fg-dim);
@@ -1407,7 +1499,7 @@ canvas { display: block; }
 .unitcard--warn { border-left-color: var(--c-warning); }
 .unitcard--bad  { border-left-color: var(--c-danger); }
 .unitcard__t {
-  font-size: var(--t-sm); line-height: 1.15; font-weight: 850;
+  font-size: var(--t-sm); line-height: 1.4; font-weight: 850;
   letter-spacing: var(--tr-label); text-transform: uppercase; color: var(--c-fg);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
@@ -1415,11 +1507,17 @@ canvas { display: block; }
 .unitcard--warn .unitcard__t { color: var(--c-warning); }
 .unitcard--bad  .unitcard__t { color: var(--c-danger-soft); }
 .unitcard__rows { display: flex; align-items: flex-start; gap: var(--s-3); min-width: 0; }
-.ucell { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.ucell { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 0; }
 /* Three outcomes can have unequal captions ("Bit" beside "Trial range").
    Use their actual content widths before sharing the remaining row space. */
 .unitcard__rows:has(> .ucell:nth-child(3):not([hidden])):not(:has(> .ucell:nth-child(4):not([hidden]))) > .ucell {
   flex-basis: auto;
+}
+/* Four outcomes need two columns to preserve captions and measured values.
+   The permanent programme row reserves this card's full 120px height. */
+.unitcard__rows:has(> .ucell:nth-child(4):not([hidden])) {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px var(--s-3); flex: none;
 }
 .ucell__k {
   /* Inter's 14px text bounds at 11px size exceed the old 11px line box. */
@@ -1428,7 +1526,7 @@ canvas { display: block; }
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .ucell__v {
-  font-size: var(--t-sm); line-height: 1.15; font-weight: 800;
+  font-size: var(--t-sm); line-height: 1.4; font-weight: 800;
   font-variant-numeric: tabular-nums; letter-spacing: var(--tr-tight); color: var(--c-fg);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
@@ -1773,7 +1871,13 @@ canvas { display: block; }
    the status strip, which is the screen's one alert channel and is chrome
    rather than something floating on the render. This rule only clears the
    dock for the shell's own messages (a level-up, a purchase settling). */
-.ui-stage.is-site .toasts { bottom: calc(var(--hud-dock) + var(--s-3)); }
+/* `--hud-dock-live` is the dock's MEASURED offsetHeight, published by
+   site.js publishChrome(). It has to be measured: `.toasts` is a sibling of
+   the screens under `.ui-stage`, so it cannot see `.sitedock`'s own
+   `--hud-dock`, and the plain dock (190px) differs from :root's 254px by 64px
+   — which put a toast over the live section band. `var(--hud-dock)` remains
+   the fallback for the frame before publishChrome() has run. */
+.ui-stage.is-site .toasts { bottom: calc(var(--hud-dock-live, var(--hud-dock)) + var(--s-3)); }
 
 .sheet { position: absolute; inset: 0; z-index: 70; display: flex; flex-direction: column; justify-content: flex-end; }
 .sheet__scrim { position: absolute; inset: 0; background: rgb(var(--rgb-black) / .62); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); animation: fade-in var(--dur-3) both var(--curve-enter); }
@@ -1844,33 +1948,29 @@ canvas { display: block; }
   }
 }
 
-/* Short viewports: give the 3D more room by trimming the dock. A tier now
-   changes the ROW HEIGHTS and nothing else — `--hud-dock` and `--dock-base`
-   in :root add them up, so a tier can no longer carry a stale total (this one
-   did: it declared 203px, and `.sitedock--plain`'s 189px was never restated
-   here at all, so a plain dock on a short viewport claimed 189px around 167px
-   of rows and the renderer inset 22px of band that nothing covered).
+/* ── THE SHORT-VIEWPORT TIER IS GONE, AND IT WAS ALREADY UNREACHABLE ───────
+   `@media (max-height: 680px)` stood here with two declarations left in it,
+   and NEITHER could ever apply:
 
-   --reach-floor does NOT scale with the viewport. The thumb is the same size
-   on a small phone, and the arc is anchored to the bottom edge, so a short
-   screen buys its 3D back out of the rows and never out of the floor. */
-@media (max-height: 680px) {
-  :root { --dock-inst: 72px; --dock-ctl: 68px; }
-  .gaugebox { width: 134px; }
-  .vsl__track { min-height: 48px; }    /* the 44px touch floor still clears */
-  /* --stage-w is capped at half the height, so a short viewport is a narrow
-     one: at ~64px per slider head the longest semantic labels (ROTATION,
-     CONCRETE, WITHDRAW, CLEANING — all 8 characters) need the tracking back
-     to fit without clipping. */
-  .vsl__name { letter-spacing: .06em; }
-  .rop__v { font-size: var(--t-xl); }
-  /* No .unitcard height here: it is inset:0 against .dock__top and follows the
-     rows automatically. This override was a third copy of the same sum. */
-}
-@media (min-height: 900px) {
-  :root { --dock-inst: 94px; --dock-ctl: 84px; }
-  /* .gaugebox and .unitcard need no override — both follow the row. */
-}
+     .vsl__track { min-height: 48px }   — `.site .vsl__track` above declares
+       the same 48px at higher specificity, and `.vsl` exists on no other
+       screen (`C.VSlider` has exactly three callers, all in site.js).
+     .vsl__name { letter-spacing: .06em } — beaten by `.site .vsl__name`
+       inside `@container site-hud (width < 390px)`, which matches on EVERY
+       viewport this media query can: `.ui-stage.is-site` is
+       `min(100vw, max(320px, 100vh * .5), 520px)`, so a viewport 680px tall
+       caps the stage at 340px, always < 390. Measured: iPhone SE at 375x667
+       records `stageW: 334` in .hudqa/bandshare-final.json.
+
+   Its comment also claimed the tracking "tightens to preserve its semantic
+   label". It never ran, and `.06em` would have WIDENED the tracking — the
+   opposite of what the words said. A rule that cannot fire, under a comment
+   describing a behaviour it would not have produced, is ASTRA §10's declared
+   contract with no consumer; deleted rather than left looking live.
+
+   The row heights it used to change now live once, on :root. The reason is
+   there: the hand is the same size on a small phone, so a short screen buys
+   its 3D back out of the auxiliary row, never out of a control. */
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Controls used by the settings sheet and a few screen-local bits
@@ -1929,7 +2029,6 @@ canvas { display: block; }
 }
 
 .pcard__stats { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
-.actionbtn__ico { display: grid; place-items: center; opacity: .9; }
 .famgrid { grid-template-columns: 1fr; }
 .crumb.is-link { position: relative; cursor: pointer; }
 .crumb.is-link::after { content: ''; position: absolute; left: -5px; right: -5px; top: 50%; height: var(--touch); transform: translateY(-50%); }
@@ -1997,10 +2096,59 @@ canvas { display: block; }
 }
 /* A short phone is still a portrait phone. Preserve its full 320px width;
    the old 2:1 stage cap reduced it to 284px and truncated HAMMER. */
-.ui-stage.is-site { width: min(100vw, max(320px, calc(100vh * .5)), 520px); }
-@media (max-width: 360px) {
+.ui-stage.is-site {
+  width: min(100vw, max(320px, calc(100vh * .5)), 520px);
+  /* Reduced motion must not animate structural width before canvas sizing. */
+  transition-property: none;
+}
+/* The site can be narrower than its viewport on a letterboxed phone. */
+@container site-hud (width < 390px) {
   /* The slider fill and aria-valuenow carry input amount; the label gets its
      whole row instead of repeating the amount as a competing tiny number. */
   .site .vsl__val { display: none; }
-  .site .vsl__name { letter-spacing: 0; }
+  /* 10px, not 11. Widening the primary action to 96px (see `.actionbtn`) took
+     ~2px off each slider head, and WITHDRAW — the widest of the four 8-letter
+     control names, with CONCRETE, ROTATION and CLEANING — then measured 65px
+     against a 63px head and ellipsised. A FULL WORD AT 10px BEATS A TRUNCATED
+     ONE AT 11px: `research/CRITIQUE.md` §11 is an entire section about names
+     the player needs, cut off by their own container. Measured after the
+     change by tools/checkdrillingviewspace.mjs: WITHDRAW 59px in 63px at
+     320px, and 46px in 49px at the 280px stage, where the rule below also
+     drops it to lower case. The slider's amount is carried by the fill and by
+     aria-valuenow, so nothing here is the only statement of anything. */
+  .site .vsl__name { letter-spacing: 0; font-size: 10px; }
+}
+@container site-hud (max-width: 300px) {
+  /* At 280px the career ornament crowded actual job progress. The status
+     strip keeps the depth/target or programme count and the running clock. */
+  .site .sstrip__lvl, .site .sstrip__cell--grow, .site .sstrip__div--career { display: none; }
+  .site .sstrip__steady { justify-content: space-between; }
+  /* Full control words fit more naturally in lower case on this narrow
+     screen. The native target and the accessible semantic name stay intact. */
+  .site .vsl__name { text-transform: lowercase; }
+  .site .gaugebox { width: 50%; }
+  .site .rop__reading { flex-wrap: wrap; }
+  .site .beat__t { letter-spacing: .03em; }
+  .site .sitedock--plain:not(.sitedock--units) { --dock-inst: 72px; }
+  /* The units programme's beat is the tallest thing this readout ever holds:
+     a title, a note and the three-step row. At 280px the readout is 129px
+     wide, "RESIN CURE" takes two lines instead of one, and the whole stack
+     overran the 88px reserve — the step chips sat ON the progress rule and
+     `.sitedock`'s `overflow: hidden` cut the title's glyphs. Both were caught
+     by tools/checkdrillingviewspace.mjs on `bolt-beat`, and only here: at
+     320px the title fits one line and the 88px reserve is correct.
+
+     A reserve is a promise about the WORST content the row can hold, so this
+     is the narrow-stage value of that promise, not a general increase — no
+     phone at 320px or above pays the 12px. */
+  .site .sitedock--plain.sitedock--units { --dock-inst: 100px; }
+  /* The same programme on a dock that DOES have an auxiliary row was the one
+     the gate actually caught, and the first fix here missed it by requiring
+     `.sitedock--plain` as well: the failing element list reads
+     `sitedock cluster sitedock--units`, with no `--plain`, so that dock was
+     still on the 72px default. Read the classes the instrument printed, not
+     the ones the stylesheet expects. Its unit card grows with the row, which
+     is more room, not less. */
+  .site .sitedock--units:not(.sitedock--plain) { --dock-inst: 88px; }
+  .site .dock__aux:has(> .wellstrip:not([hidden])) .actrail { flex-basis: 96px; }
 }

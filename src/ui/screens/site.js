@@ -328,7 +328,7 @@ const UNIT_VIEWS = {
         ['Re-drills', int(p.redrills)],
         ['Crown', pct01(1 - n01(tl.wear))],
       ],
-      note: 'The toes are surveyed when the ring is fired. Deviation becomes dilution, and you will not see it before then.',
+      note: 'Toes are surveyed at firing; deviation becomes dilution.',
     }),
   },
   bolt: { stamp: (p) => p.boltIndex, card: boltUnitCard },
@@ -346,8 +346,8 @@ const UNIT_VIEWS = {
       /* The instrument that can lie, said out loud at the one moment the
          player can still do something about it. */
       note: p.founded
-        ? 'Founded: the toe is far enough into the bearing stratum for that set to mean something.'
-        : 'The set reads the same whether the toe is bearing or brooming. Only the depth into bearing is honest.',
+        ? 'Founded: enough depth into bearing for a valid set.'
+        : 'The same set can hide brooming. Check depth into bearing.',
     }),
   },
   'probe:spt': {
@@ -444,7 +444,7 @@ const BEAT_COPY = {
   mucking:        ['Mucking out', 'Round away'],
   misfire:        ['Misfire', 'Made safe before the next round'],
   'trim-blast':   ['Trim blast', 'Bringing the profile back to line'],
-  'ring-index':   ['Indexing the cradle', 'Round to the next hole in the ring'],
+  'ring-index':   ['Index cradle', 'Next hole in the ring'],
   redrill:        ['Re-drilling', 'Pulled back — starting the hole again'],
   'bolt-install': ['Installing the bolt', 'Insert the bolt, then seat the plate'],
   'bolt-plate':   ['Plating up', 'Tight to the rock'],
@@ -454,11 +454,11 @@ const BEAT_COPY = {
   pitch:          ['Pitching the pile', 'Into the leader guides'],
   'take-set':     ['Taking the set', 'Ten blows, held steady'],
   'dolly-change': ['Changing the dolly', 'New packing under the helmet'],
-  're-drive':     ['Re-driving', 'A second pile alongside the rejected one'],
+  're-drive':     ['Re-driving', 'New pile beside the rejected pile'],
   'spt-drive':    ['SPT drive', 'Release cleanly on the beat'],
   'clean-out':    ['Cleaning out', 'Fall-in off the base of the hole'],
   dissipation:    ['Dissipation test', 'Excess pore pressure decaying'],
-  'blow-down':    ['Blowing the string down', 'Clearing the sample train'],
+  'blow-down':    ['Blowing down', 'Clearing the sample train'],
   bail:           ['Bailing run', 'Lifting the cuttings out of the hole'],
   'bailing-run':  ['Bailing run', 'Lifting the cuttings out of the hole'],
   'cutter-change':['Changing cutters', 'From below, on the reamer head'],
@@ -625,7 +625,7 @@ export function createSiteScreen(app) {
   // Numeric depth stays available while the new ruler is under verification.
   // Its target replaces the elapsed-time cell on these methods to fit phones.
   const depthCell = C.h('div.sstrip__cell', { hidden: true }, depthKeyEl, depthEl);
-  const depthDiv = C.h('i.sstrip__div', { hidden: true });
+  const depthDiv = C.h('i.sstrip__div.sstrip__div--career', { hidden: true });
   const timeDiv = C.h('i.sstrip__div');
   const timeCell = C.h('div.sstrip__cell', C.h('span.sstrip__k', { text: 'On tools' }), timeEl);
 
@@ -916,7 +916,7 @@ export function createSiteScreen(app) {
     } else if (killing) {
       title = 'Shut in'; sub = 'Circulating the influx out and weighting up';
     } else {
-      title = 'Underbalanced'; sub = 'The column is not holding the formation back';
+      title = 'Underbalanced'; sub = 'Mud cannot hold back the formation';
     }
     return {
       title, sub,
@@ -936,26 +936,26 @@ export function createSiteScreen(app) {
 
 
   /* ═══ Instrument cluster ═══════════════════════════════════════════════ */
-  /* 1 border + 8 padding + 92 row + 4 gap + 88 controls + 4 padding = 197px, so
-   * 191px of the 388px geological section survives (it was 9.5px). Nothing goes
-   * in here without something else coming out. */
+  /* The gauge and the changing readout share one compact instrument row.
+     Its reserved CSS height also contributes to the unit card's real box. */
   const gaugeCanvas = C.h('canvas', { 'aria-hidden': 'true' });
   /* THE NEEDLE IS NOT ALWAYS TORQUE. sim/drilling.js publishes `gauge.axis`
      with the label, the unit, the normalised value and the value in the
      gauge's OWN units, because on a driven pile the needle is the SET in mm
      per blow, on a piezocone it is the PUSH RATE in mm/s, and on the way back
-     up a raise or home along a bore it is PULL. Same dial, same band, same
-     groove; the caption and the number under it follow the sim. */
+     up a raise or home along a bore it is PULL. Same track, band and groove;
+     the caption, number and units follow the sim. */
   const gaugeCap = C.h('span.gaugebox__cap', { text: 'Torque' });
+  const gaugeNumber = C.h('span.gaugebox__value', { text: '0' });
+  const gaugeUnit = C.h('span.gaugebox__unit', { text: '%' });
+  const gaugeReading = C.h('span.gaugebox__reading', gaugeNumber, gaugeUnit);
   const gaugeBox = C.h('div.gaugebox', {
     role: 'img',
     'aria-label': 'Torque gauge with moving sweet-spot band',
-  }, gaugeCanvas, gaugeCap);
+  }, C.h('div.gaugebox__head', gaugeCap, gaugeReading), gaugeCanvas);
 
-  // The band readout used to be a pill parked at 12 o'clock inside the gauge,
-  // directly over the arc the sweet spot travels along. It is now the groove
-  // chip: one mark for one idea — whether you are in the band, and what the
-  // band is paying. Shape carries it without colour: square out, triangle in.
+  // The groove chip states the band's reward. Shape also states whether the
+  // pointer is in the target: square out, triangle in.
   const grooveX = C.h('span.groove__x', { text: '1.00×' });
   const grooveChip = C.h('div.groove', { role: 'status', 'aria-label': 'Off the sweet-spot band' },
     C.h('i'), grooveX);
@@ -964,12 +964,11 @@ export function createSiteScreen(app) {
   const spark = C.Sparkline({ capacity: 72 });
   spark.el.classList.add('rop__spark');
   const trend = C.h('div.rop__trend', spark.el);
-  // Label and trend share a row, with separate bounds. A full-width 30px
-  // sparkline above the label made the compact rate stack overrun the controls.
+  // Label and trend share a row; value and reward share the next. Each mark
+  // has its own bounds, including on the compact plain instrument row.
   const ropBox = C.h('div.rop',
     C.h('div.rop__line', C.h('span.rop__k', { text: 'ROP' }), trend),
-    ropVal,
-    grooveChip,
+    C.h('div.rop__reading', ropVal, grooveChip),
   );
 
   /* ── The beat, INSIDE the cluster ──────────────────────────────────────
@@ -1094,7 +1093,7 @@ export function createSiteScreen(app) {
      this screen exists to put under a thumb. It is the one that was measured
      HARD for the right hand, which is two-thirds of one-handed players. */
   const actionBtn = reach(C.h('button.actionbtn.actionbtn--ghost', { type: 'button', 'aria-label': 'Contextual action' },
-    C.h('span.actionbtn__ico', C.Icon('bit', 20)), actLabel, actSub), 'drilling');
+    actLabel, actSub), 'drilling');
   let actionMode = 'idle';
   let actionTimer = 0;
 
@@ -1409,37 +1408,13 @@ export function createSiteScreen(app) {
       fg: t('--rgb-fg', '250 250 250'),
       border: t('--rgb-border', '40 48 59'),
       black: t('--rgb-black', '0 0 0'),
-      // Cached here so the frame loop never reads computed style.
-      fontBig: '850 19px ' + t('--font-sans', 'sans-serif'),
+      // The driving record still paints its labels in the canvas.
       fontUnit: '800 11px ' + t('--font-sans', 'sans-serif'),
     };
   }
   const rgba = (trip, a) => `rgb(${trip} / ${a})`;
 
-  /* A 180° sweep, not 200°. The old dial spent 20° of its travel below the
-     horizon on both sides, which cost vertical space without adding arc: at the
-     same box height the semicircle carries a 10% larger radius. */
-  const A0 = Math.PI;
-  const SWEEP = Math.PI;
   const REDLINE = 0.86;
-  /* `const CAP_H = 14` used to live here, as this file's copy of
-     `.gaugebox__cap`'s height in styles.css. Two numbers describing one thing
-     (HANDOFF §8B), and they drifted — see the note over `.gaugebox`. The
-     caption row and the dial are now sized against each other by flexbox and
-     neither height is written down twice. */
-
-  /** roundRect is not in every Safari the game has to run on. */
-  function roundRectPath(c, x, y, w, h, rr) {
-    if (typeof c.roundRect === 'function') { c.beginPath(); c.roundRect(x, y, w, h, rr); return; }
-    const k = Math.min(rr, w / 2, h / 2);
-    c.beginPath();
-    c.moveTo(x + k, y);
-    c.arcTo(x + w, y, x + w, y + h, k);
-    c.arcTo(x + w, y + h, x, y + h, k);
-    c.arcTo(x, y + h, x, y, k);
-    c.arcTo(x, y, x + w, y, k);
-    c.closePath();
-  }
 
   /* ASK THE CANVAS HOW BIG IT IS. DO NOT COMPUTE IT.
      This used to measure `.gaugebox` and subtract a local copy of the caption
@@ -1461,19 +1436,12 @@ export function createSiteScreen(app) {
     // Not laid out — the unit card has the instrument row. Keep the last good
     // size rather than writing a fallback one over it.
     if (!w || !h) return;
-    gW = Math.max(80, w);
-    gH = Math.max(48, h);
+    gW = w;
+    gH = h;
     gDpr = app.viewport.dpr || window.devicePixelRatio || 1;
     gaugeCanvas.width = Math.round(gW * gDpr);
     gaugeCanvas.height = Math.round(gH * gDpr);
     readTokens();
-  }
-
-  function arc(c, cx, cy, r, a, b, w, style, cap = 'butt') {
-    c.beginPath();
-    c.arc(cx, cy, r, a, b);
-    c.lineWidth = w; c.strokeStyle = style; c.lineCap = cap;
-    c.stroke();
   }
 
   const needle = new C.Spring(0, 118, 17);   // real physical lag
@@ -1483,33 +1451,32 @@ export function createSiteScreen(app) {
   /**
    * The live gauge spec, mirrored straight off `telemetry.gauge`.
    *
-   * `num`/`unit` are what goes on the knockout plate at the centre of the
-   * dial. On torque and pull the honest reading is the normalised percentage
+   * Number and unit occupy the DOM header above the track. On torque and pull
+   * the honest reading is the normalised percentage
    * of the rig limit; on a set gauge and a push-rate gauge the sim carries
-   * the value in real units (`real`) and the plate prints THAT, because
+   * the value in real units (`real`) and the header prints THAT, because
    * "37 %" of a set is not a thing a pile driver has ever read.
    */
   const gauge = { axis: 'torque', label: 'TORQUE', unit: '', redline: true, cap: 'Torque' };
-  /* This frame's raw `telemetry.gauge`, or null with no sim. The plate reads
+  /* This frame's raw `telemetry.gauge`, or null with no sim. The reading uses
      `real` off it, so it must be the sim's object and not a copy. */
   let lastGauge = null;
 
-  /** How the plate reads this axis. Nothing here re-derives a sim number. */
+  /** How the reading follows this axis. Nothing re-derives a sim number. */
   function gaugePlate(g, v) {
     const axis = (g && g.axis) || 'torque';
     const real = g ? Number(g.real) : 0;
-    if (axis === 'set') return [Number.isFinite(real) ? real.toFixed(1) : '—', 'mm'];
+    if (axis === 'set') return [Number.isFinite(real) ? real.toFixed(1) : '—', 'mm/blow'];
     if (axis === 'push-rate') return [Number.isFinite(real) ? real.toFixed(1) : '—', 'mm/s'];
     // Torque and pull are both fractions of the machine's limit.
     return [String(Math.round(clamp(v, 0, 1.25) * 100)), '%'];
   }
 
-  /** The caption strip under the dial: the label, and the unit when it has one. */
+  /** The axis name; its unit accompanies the numeric reading beside it. */
   function gaugeCaption(g) {
     const label = (g && g.label) || 'TORQUE';
-    const unit = (g && g.unit) || '';
     const cap = label.charAt(0) + label.slice(1).toLowerCase();
-    return unit ? `${cap} · ${unit}` : cap;
+    return cap;
   }
 
   function syncGauge(g) {
@@ -1521,8 +1488,8 @@ export function createSiteScreen(app) {
     /* The red line is the RIG LIMIT, and that is a torque idea. A set gauge's
        danger is at the OTHER end — a vanishing set is refusal, not overload —
        and the sim does not publish that threshold in normalised units, so the
-       dial does not draw a rule it would have to invent the position of. The
-       design-set window is already on the dial as the band, and the blows per
+       track does not draw a rule it would have to invent the position of. The
+       design-set window is already on the track as the band, and the blows per
        250 mm are on the programme bar against the practical and refusal
        limits the sim does publish. */
     gauge.redline = axis === 'torque';
@@ -1537,131 +1504,52 @@ export function createSiteScreen(app) {
     c.setTransform(gDpr, 0, 0, gDpr, 0, 0);
     c.clearRect(0, 0, gW, gH);
 
-    /* The dial sits on its own baseline with the caption strip below it. Both
-       clearances are real: the 13px band halo must not clip at 12 o'clock, and
-       the hub must not touch the caption — it used to overlap it by 3px. */
-    const cx = gW / 2;
-    const cy = gH - 10;   // gH is the canvas's own height; the caption row is not in it
-    const r = Math.min(gW / 2 - 8, cy - 7);
-    const at = (v) => A0 + SWEEP * clamp(v, 0, 1);
-    const bandW = bandHi - bandLo;
-
-    // Track
-    arc(c, cx, cy, r, A0, A0 + SWEEP, 9, rgba(tokens.black, 0.5), 'round');
-    arc(c, cx, cy, r, A0, A0 + SWEEP, 7, rgba(tokens.border, 0.95), 'round');
-
-    // Ticks, under the marks that matter.
-    c.strokeStyle = rgba(tokens.fg, 0.34);
-    c.lineWidth = 1.4;
+    /* A linear instrument retains the moving target, the rig limit and the
+       spring-driven pointer without spending a semicircle's height. Numeric
+       text has its own DOM row, so it cannot mask the target or the pointer.
+       The canvas uses its actual CSS dimensions, including short phones. */
+    const left = 8, right = Math.max(left + 1, gW - 8);
+    const y = gH / 2;
+    const x = (v) => left + (right - left) * clamp(v, 0, 1);
+    const line = (lo, hi, width, color) => {
+      c.beginPath(); c.moveTo(x(lo), y); c.lineTo(x(hi), y);
+      c.lineWidth = width; c.lineCap = 'butt'; c.strokeStyle = color; c.stroke();
+    };
+    line(0, 1, 7, rgba(tokens.border, 0.95));
+    c.strokeStyle = rgba(tokens.fg, 0.34); c.lineWidth = 1;
     for (let i = 0; i <= 10; i++) {
-      const a = at(i / 10);
-      const ca = Math.cos(a), sa = Math.sin(a);
-      const inner = r - (i % 5 === 0 ? 15 : 12.5);
-      c.beginPath();
-      c.moveTo(cx + ca * inner, cy + sa * inner);
-      c.lineTo(cx + ca * (r - 5.5), cy + sa * (r - 5.5));
-      c.stroke();
+      const tick = i % 5 === 0 ? 8 : 5;
+      c.beginPath(); c.moveTo(x(i / 10), y - tick);
+      c.lineTo(x(i / 10), y + tick); c.stroke();
     }
-
-    // Redline — the rig's torque limit, and only on the axis that has one.
-    if (gauge.redline) arc(c, cx, cy, r, at(REDLINE), at(1), 7, rgba(tokens.danger, 0.55));
-
-    /* The sweet spot is the whole point of the dial, so it is the most
-       prominent mark on it: a wide halo, a near-opaque core, a glow when the
-       needle is inside, and — only when the band is wide enough for the hatch
-       to read as texture rather than as chopping — the colour-blind hatch. */
-    arc(c, cx, cy, r, at(bandLo), at(bandHi), 13, rgba(tokens.success, inBand ? 0.34 : 0.22));
+    // A rig-limit redline is only meaningful on the torque axis.
+    if (gauge.redline) line(REDLINE, 1, 7, rgba(tokens.danger, 0.65));
+    line(bandLo, bandHi, 13, rgba(tokens.success, inBand ? 0.34 : 0.22));
+    line(bandLo, bandHi, 7, rgba(tokens.success, inBand ? 0.98 : 0.85));
+    // Hatching keeps the target distinguishable without colour.
     c.save();
-    if (inBand) { c.shadowColor = rgba(tokens.success, 0.9); c.shadowBlur = 10; }
-    arc(c, cx, cy, r, at(bandLo), at(bandHi), 7, rgba(tokens.success, inBand ? 0.98 : 0.85));
-    c.restore();
-    if (bandW > 0.22) {
-      c.save();
-      c.strokeStyle = rgba(tokens.black, 0.45);
-      c.lineWidth = 1.6;
-      const steps = Math.max(2, Math.round(bandW * 22));
-      for (let i = 1; i < steps; i++) {
-        const a = at(bandLo + bandW * (i / steps));
-        const ca = Math.cos(a), sa = Math.sin(a);
-        c.beginPath();
-        c.moveTo(cx + ca * (r - 3.4), cy + sa * (r - 3.4));
-        c.lineTo(cx + ca * (r + 3.4), cy + sa * (r + 3.4));
-        c.stroke();
-      }
-      c.restore();
+    c.beginPath(); c.rect(x(bandLo), y - 3.5, x(bandHi) - x(bandLo), 7); c.clip();
+    c.strokeStyle = rgba(tokens.black, 0.55); c.lineWidth = 1;
+    for (let xx = x(bandLo) - 7; xx < x(bandHi); xx += 5) {
+      c.beginPath(); c.moveTo(xx, y + 3.5); c.lineTo(xx + 7, y - 3.5); c.stroke();
     }
+    c.restore();
 
     const v = clamp(torque, 0, 1);
     const over = !!(gauge.redline && v > REDLINE);
-
-    /* ── ONE VALUE, STATED TWICE, AND THAT IS THE INSTRUMENT ──────────────
-       Rubric 7a: state any value once. This dial used to state `v` FOUR times
-       in a 150x86 box — a coloured value arc at r-8.5, the needle, the hub
-       ring tinted by the same colour, and the numeral on the plate. Two of
-       those are gone.
-
-       The arc was the clearest duplicate: a second angular reading of exactly
-       what the needle already points at, drawn 8.5 px inside it. The hub tint
-       was a fourth, encoding band state — which the sweet-spot band itself
-       already says by going near-opaque and glowing when `inBand`, and which
-       the groove chip says again in words.
-
-       What is left is one instrument, not two readings: the NEEDLE gives the
-       value's position relative to the band and the redline, and the NUMERAL
-       gives the figure. Neither is legible without the other — a bare dial
-       cannot be read to a number, and a bare number has no band.
-
-       Every other mark on the face is a different quantity: the tick ring is
-       the scale, the redline arc is the limit, the green band is the target.
-       The one signal that survives is the needle going red past the limit,
-       because that states a LIMIT BREACH, not the value. One mark, one job. */
-
-    // Needle — the value's position
-    const na = at(needle.value);
-    const nc = Math.cos(na), ns = Math.sin(na);
-    c.save();
-    c.shadowColor = rgba(tokens.black, 0.8);
-    c.shadowBlur = 6; c.shadowOffsetY = 1;
-    c.beginPath();
-    c.moveTo(cx - nc * 9, cy - ns * 9);
-    c.lineTo(cx + nc * (r - 3), cy + ns * (r - 3));
-    c.lineWidth = 2.6; c.lineCap = 'round';
+    const px = x(needle.value);
     c.strokeStyle = over ? rgba(tokens.danger, 0.98) : rgba(tokens.fg, 0.97);
-    c.stroke();
-    c.restore();
+    c.lineWidth = 2;
+    c.beginPath(); c.moveTo(px, y - 10); c.lineTo(px, y + 10); c.stroke();
+    c.fillStyle = c.strokeStyle;
+    c.beginPath(); c.moveTo(px - 4, y - 11); c.lineTo(px + 4, y - 11);
+    c.lineTo(px, y - 7); c.closePath(); c.fill();
 
-    // Hub — the needle's pivot, and nothing else. It carries no reading.
-    c.beginPath(); c.arc(cx, cy, 7.5, 0, Math.PI * 2);
-    c.fillStyle = rgba(tokens.black, 0.85); c.fill();
-    c.lineWidth = 1.5; c.strokeStyle = rgba(tokens.fg, 0.28); c.stroke();
-
-    /* Readout. The needle used to stroke straight through the numerals; it now
-       passes UNDER a knockout plate. One label for one quantity: the unit is
-       folded into the value and the caption below the dial names the axis.
-       On a set or push-rate gauge the number is the sim's own `gauge.real`,
-       in its own units — a pile driver reads mm per blow, never a percent. */
-    const [plateNum, plateUnit] = gaugePlate(lastGauge, v);
-    c.font = tokens.fontBig;
-    const wNum = c.measureText(plateNum).width;
-    c.font = tokens.fontUnit;
-    const wUnit = c.measureText(plateUnit).width;
-    const wTot = wNum + 3 + wUnit;
-    const plateW = Math.min(gW - 12, wTot + 18);
-    const plateH = 24;
-    const plateY = cy - 12 - plateH;
-    c.fillStyle = rgba(tokens.black, 0.72);
-    roundRectPath(c, cx - plateW / 2, plateY, plateW, plateH, 7);
-    c.fill();
-
-    c.textAlign = 'left'; c.textBaseline = 'middle';
-    const tx = cx - wTot / 2;
-    const ty = plateY + plateH / 2 + 0.5;
-    c.font = tokens.fontBig;
-    c.fillStyle = rgba(tokens.fg, 0.97);
-    c.fillText(plateNum, tx, ty);
-    c.font = tokens.fontUnit;
-    c.fillStyle = rgba(tokens.fg, 0.72);
-    c.fillText(plateUnit, tx + wNum + 3, ty);
+    const [value, unit] = gaugePlate(lastGauge, v);
+    if (gaugeNumber.textContent !== value) gaugeNumber.textContent = value;
+    if (gaugeUnit.textContent !== unit) gaugeUnit.textContent = unit;
+    const spoken = `${gaugeCap.textContent}: ${value} ${unit}; ${inBand ? 'in' : 'off'} the sweet-spot band`;
+    if (gaugeBox.getAttribute('aria-label') !== spoken) gaugeBox.setAttribute('aria-label', spoken);
   }
 
   /* ═══ Sweet-spot normalisation — the sim may report any of these ═══════ */
@@ -1696,10 +1584,11 @@ export function createSiteScreen(app) {
    * measured CSS pixels of `--hud-top` and `--hud-dock`, and the dock's
    * height depends on the method — see `.sitedock--plain` — which is exactly
    * why this is published rather than hardcoded. `LAYOUT.chromeTop` /
-   * `chromeBottom` in core/contract.js carry the same two numbers as
-   * fractions for a consumer that has no live screen to ask.
+   * `chromeBottom` in core/contract.js are separate fallback fractions for
+   * a consumer that has no live HUD; this pixel measurement is authoritative
+   * while the site screen is mounted.
    *
-   * Called twice per run, never per frame.
+   * Called on mount and resize, never per frame.
    *
    * ── offsetHeight, NOT getBoundingClientRect ─────────────────────────────
    * `.screen.is-entering` runs `@keyframes screen-in`, which starts at
@@ -1722,11 +1611,31 @@ export function createSiteScreen(app) {
     const prev = ctx.hud;
     if (prev && prev.top === top && prev.bottom === bottom) return;
     ctx.hud = { top, bottom };
-    /* Nothing consumes this yet, and re-laying the composer out costs a
-       render-target reallocation — so the nudge is opt-in. core/renderer.js
-       sets `usesHudChrome = true` when `computeLayout()` starts reading
-       `ctx.hud`, and only then does a change of chrome height re-derive the
-       bands. Until it does, this function writes one small object and stops. */
+    /* ── THE TOASTS LIVE OUTSIDE THIS SCREEN ────────────────────────────
+       ui/shell.js appends `.toasts` to `.ui-stage`, as a SIBLING of the
+       screens, so `.ui-stage.is-site .toasts { bottom: calc(var(--hud-dock)
+       + ...) }` cannot see anything declared on `.site` or on `.sitedock`.
+       It resolved :root's `--hud-dock`, which is the auxiliary-dock figure —
+       254px — while a `.sitedock--plain` method measures 190px. Toasts on
+       `dth` and `oil-rotary` therefore floated 64px above the dock, over the
+       live section band, which is the one thing this screen forbids.
+
+       Making :root and `.site` agree fixed only half of it, because the
+       plain dock's height is not a :root value at all: `--dock-inst` is
+       overridden ON `.sitedock`, and `var()` in a custom property is
+       substituted where that property is DECLARED. No selector outside the
+       dock can compute it.
+
+       So publish the MEASURED height instead of restating the arithmetic a
+       third time. `bottom` is already `dock.offsetHeight`, and it is correct
+       for every method, tier and container-query variant by construction.
+       The stylesheet keeps `var(--hud-dock)` as the fallback for the first
+       frame, before this has run. */
+    const stageEl = el.closest('.ui-stage');
+    if (stageEl) stageEl.style.setProperty('--hud-dock-live', bottom + 'px');
+    /* Re-laying the composer out costs a render-target reallocation, so only
+       a renderer that declares `usesHudChrome` is resized here. Its layout
+       consumes these measured pixels before deriving the two bands. */
     if (ctx.renderer && ctx.renderer.usesHudChrome
       && typeof ctx.renderer.resize === 'function' && app.viewport) {
       try { ctx.renderer.resize(app.viewport.w, app.viewport.h, app.viewport.dpr); }
@@ -1984,8 +1893,8 @@ export function createSiteScreen(app) {
     const copy = BEAT_COPY[kind];
     if (!copy) return null;
     if (kind === 'bolt-install' && b && b.data) {
-      if (b.data.type === 'resin') return ['Resin bolt curing', 'Spin, stop, hold — in that order'];
-      if (b.data.type === 'friction') return ['Driving the friction bolt', 'Insert the bolt, then seat the plate'];
+      if (b.data.type === 'resin') return ['Resin cure', 'Spin, stop, hold — in that order'];
+      if (b.data.type === 'friction') return ['Friction bolt', 'Insert the bolt, then seat the plate'];
     }
     return copy;
   }
@@ -2109,9 +2018,11 @@ export function createSiteScreen(app) {
   const b2d = blowCanvas.getContext('2d');
   let bW = 196, bH = 60, bDpr = 1, blowKey = '';
   function resizeBlow() {
-    const r = blowCanvas.getBoundingClientRect();
-    bW = Math.max(60, Math.round(r.width || 196));
-    bH = Math.max(24, Math.round(r.height || 60));
+    const w = blowCanvas.offsetWidth;
+    const h = blowCanvas.offsetHeight;
+    if (!w || !h) return;
+    bW = w;
+    bH = h;
     bDpr = app.viewport.dpr || window.devicePixelRatio || 1;
     blowCanvas.width = Math.round(bW * bDpr);
     blowCanvas.height = Math.round(bH * bDpr);
@@ -2130,7 +2041,23 @@ export function createSiteScreen(app) {
     const rec = Array.isArray(prog.blowLog) ? prog.blowLog : [];
     const key = `${rec.length}:${rec.length ? rec[rec.length - 1].blowsPer250 : 0}:${bW}x${bH}`;
     if (key === blowKey) return;
-    blowKey = key;
+    const gap = 2;
+    const COL_MAX = 14;         // a bar, never a wall
+    const fit = Math.max(4, Math.floor((bW + gap) / (COL_MAX + gap)));
+    const rows = rec.slice(-Math.max(fit, 8));
+    if (rows.length) {
+      const capTxt = rows.some((r) => r.incrementMm <= 25)
+        ? `Blows / 25 mm · toe ${num(rows[rows.length - 1].toM, 2)} m`
+        : `Blows / 250 mm · toe ${num(rows[rows.length - 1].toM, 1)} m`;
+      if (blowCap.textContent !== capTxt) {
+        blowCap.textContent = capTxt;
+        // A wrapped caption changes the remaining chart height. Measure its
+        // final layout before drawing, only when that caption actually changes.
+        resizeBlow();
+      }
+    }
+    // Caption wrapping can resize the chart, so cache its final dimensions.
+    blowKey = `${rec.length}:${rec.length ? rec[rec.length - 1].blowsPer250 : 0}:${bW}x${bH}`;
 
     const c = b2d;
     c.setTransform(bDpr, 0, 0, bDpr, 0, 0);
@@ -2143,10 +2070,6 @@ export function createSiteScreen(app) {
       return;
     }
 
-    const gap = 2;
-    const COL_MAX = 14;         // a bar, never a wall
-    const fit = Math.max(4, Math.floor((bW + gap) / (COL_MAX + gap)));
-    const rows = rec.slice(-Math.max(fit, 8));
     const practical = Number(prog.practicalBlows) || 135;
     const refusal = Number(prog.refusalBlows) || 248;
     /* Scaled on the refusal limit, so the two rules do not move under the
@@ -2183,10 +2106,6 @@ export function createSiteScreen(app) {
       x -= colW + gap;
     }
 
-    const capTxt = rows.some((r) => r.incrementMm <= 25)
-      ? `Blows / 25 mm · toe ${num(rows[rows.length - 1].toM, 2)} m`
-      : `Blows / 250 mm · toe ${num(rows[rows.length - 1].toM, 1)} m`;
-    if (blowCap.textContent !== capTxt) blowCap.textContent = capTxt;
   }
 
   let blowOn = false;
@@ -2240,16 +2159,20 @@ export function createSiteScreen(app) {
        properties of the METHOD and fixed for the whole run —
        `availableActions()` keys off the programme and `method.wellControl` —
        so this is not a state a run can enter or leave, and the two bands
-       cannot move while the player is drilling. Fifteen of the twenty-one
-       methods are plain, and they get those 38px of 3D back. */
+       cannot move while the player is drilling. A plain method reserves no
+       auxiliary row, leaving more DOM space available for the scene. */
     if (!dockLocked && simTel) {
       dockLocked = true;
       const plain = !simTel.well && !(Array.isArray(simTel.actions) && simTel.actions.length);
+      // A two-pass run has a unit summary but no action rail. Reserve its
+      // card at mount rather than enlarging the dock when the pass completes.
+      dock.classList.toggle('sitedock--units', !!UNIT_VIEWS[pkey]);
       if (dock.classList.contains('sitedock--plain') !== plain) {
         dock.classList.toggle('sitedock--plain', plain);
-        requestAnimationFrame(() => { resizeGauge(); sizeSpark(); if (blowOn) resizeBlow(); });
       }
-      requestAnimationFrame(publishChrome);
+      // Both capabilities can change the row height, including when delayed
+      // telemetry adds a unit card while the retained dock remains plain.
+      requestAnimationFrame(() => { resizeGauge(); sizeSpark(); if (blowOn) resizeBlow(); publishChrome(); });
     }
 
     /* The method decides what the three controls are called (GAMEDESIGN §7).

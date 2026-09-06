@@ -1,0 +1,1356 @@
+{
+  "tag": "before",
+  "port": "5180",
+  "when": "2026-09-06T15:16:31.664Z",
+  "phones": [
+    {
+      "id": "iphone-se",
+      "name": "iPhone SE 2/3",
+      "w": 375,
+      "h": 667,
+      "dpr": 2,
+      "tier": "short"
+    },
+    {
+      "id": "galaxy-s8",
+      "name": "Galaxy S8 / A-class",
+      "w": 360,
+      "h": 740,
+      "dpr": 3,
+      "tier": "base"
+    },
+    {
+      "id": "iphone-13-mini",
+      "name": "iPhone 13 mini",
+      "w": 375,
+      "h": 812,
+      "dpr": 3,
+      "tier": "base"
+    },
+    {
+      "id": "iphone-13-pro",
+      "name": "iPhone 13 Pro / 14",
+      "w": 390,
+      "h": 844,
+      "dpr": 3,
+      "tier": "base"
+    },
+    {
+      "id": "pixel-7",
+      "name": "Pixel 7",
+      "w": 412,
+      "h": 915,
+      "dpr": 2.6,
+      "tier": "tall"
+    },
+    {
+      "id": "iphone-14-pmax",
+      "name": "iPhone 14/15 Pro Max",
+      "w": 430,
+      "h": 932,
+      "dpr": 3,
+      "tier": "tall"
+    }
+  ],
+  "floor": {
+    "iphone-se": null,
+    "galaxy-s8": null,
+    "iphone-13-mini": null,
+    "iphone-13-pro": null,
+    "pixel-7": null,
+    "iphone-14-pmax": null
+  },
+  "summary": [
+    {
+      "phone": "iphone-se",
+      "worst": 53.5,
+      "best": 60.7,
+      "floor": null,
+      "worstMethod": "rockbolt"
+    },
+    {
+      "phone": "galaxy-s8",
+      "worst": 56.2,
+      "best": 62.7,
+      "floor": null,
+      "worstMethod": "rockbolt"
+    },
+    {
+      "phone": "iphone-13-mini",
+      "worst": 60.1,
+      "best": 66,
+      "floor": null,
+      "worstMethod": "rockbolt"
+    },
+    {
+      "phone": "iphone-13-pro",
+      "worst": 61.6,
+      "best": 67.3,
+      "floor": null,
+      "worstMethod": "rockbolt"
+    },
+    {
+      "phone": "pixel-7",
+      "worst": 62,
+      "best": 67.2,
+      "floor": null,
+      "worstMethod": "rockbolt"
+    },
+    {
+      "phone": "iphone-14-pmax",
+      "worst": 62.7,
+      "best": 67.8,
+      "floor": null,
+      "worstMethod": "rockbolt"
+    }
+  ],
+  "rows": [
+    {
+      "phone": "iphone-se",
+      "phoneName": "iPhone SE 2/3",
+      "vw": 375,
+      "vh": 667,
+      "tier": "short",
+      "method": "rockbolt",
+      "stageW": 334,
+      "stageH": 667,
+      "stripH": 52,
+      "dockH": 258,
+      "bandH": 357,
+      "surfH": 193,
+      "sectH": 164,
+      "stagePct": 53.5,
+      "surfPct": 54.1,
+      "sectPct": 45.9,
+      "rendererBandsH": 357,
+      "rendererChrome": {
+        "top": 52,
+        "bottom": 258
+      },
+      "hud": {
+        "top": 52,
+        "bottom": 258
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "targets": 7,
+      "smallTargets": [],
+      "targetList": [
+        "railbtn 80x45",
+        "railbtn 80x45",
+        "vsl 66.8x68",
+        "vsl 66.8x68",
+        "vsl 66.8x68",
+        "actionbtn 80x70.5",
+        "site__leave 80x45"
+      ],
+      "clipped": [
+        "vsl__name \"THRUST\" 50>47",
+        "vsl__name \"ROTATION\" 62>47"
+      ]
+    },
+    {
+      "phone": "iphone-se",
+      "phoneName": "iPhone SE 2/3",
+      "vw": 375,
+      "vh": 667,
+      "tier": "short",
+      "method": "driven-pile",
+      "stageW": 334,
+      "stageH": 667,
+      "stripH": 52,
+      "dockH": 258,
+      "bandH": 357,
+      "surfH": 193,
+      "sectH": 164,
+      "stagePct": 53.5,
+      "surfPct": 54.1,
+      "sectPct": 45.9,
+      "rendererBandsH": 357,
+      "rendererChrome": {
+        "top": 52,
+        "bottom": 258
+      },
+      "hud": {
+        "top": 52,
+        "bottom": 258
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "targets": 5,
+      "smallTargets": [],
+      "targetList": [
+        "vsl 66.8x68",
+        "vsl 66.8x68",
+        "vsl 66.8x68",
+        "actionbtn 80x73",
+        "site__leave 80x45"
+      ],
+      "clipped": [
+        "beat__t \"Pitching the pile\" 155>129",
+        "vsl__name \"ENERGY\" 49>47"
+      ]
+    },
+    {
+      "phone": "iphone-se",
+      "phoneName": "iPhone SE 2/3",
+      "vw": 375,
+      "vh": 667,
+      "tier": "short",
+      "method": "rc",
+      "stageW": 334,
+      "stageH": 667,
+      "stripH": 52,
+      "dockH": 258,
+      "bandH": 357,
+      "surfH": 193,
+      "sectH": 164,
+      "stagePct": 53.5,
+      "surfPct": 54.1,
+      "sectPct": 45.9,
+      "rendererBandsH": 357,
+      "rendererChrome": {
+        "top": 52,
+        "bottom": 258
+      },
+      "hud": {
+        "top": 52,
+        "bottom": 258
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "targets": 6,
+      "smallTargets": [],
+      "targetList": [
+        "railbtn 80x45",
+        "vsl 66.8x68",
+        "vsl 66.8x68",
+        "vsl 66.8x68",
+        "actionbtn 80x70.5",
+        "site__leave 80x45"
+      ],
+      "clipped": [
+        "vsl__name \"HAMMER\" 55>47"
+      ]
+    },
+    {
+      "phone": "iphone-se",
+      "phoneName": "iPhone SE 2/3",
+      "vw": 375,
+      "vh": 667,
+      "tier": "short",
+      "method": "dth",
+      "stageW": 334,
+      "stageH": 667,
+      "stripH": 52,
+      "dockH": 210,
+      "bandH": 405,
+      "surfH": 219,
+      "sectH": 186,
+      "stagePct": 60.7,
+      "surfPct": 54.1,
+      "sectPct": 45.9,
+      "rendererBandsH": 405,
+      "rendererChrome": {
+        "top": 52,
+        "bottom": 210
+      },
+      "hud": {
+        "top": 52,
+        "bottom": 210
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "targets": 5,
+      "smallTargets": [],
+      "targetList": [
+        "vsl 66.8x68",
+        "vsl 66.8x68",
+        "vsl 66.8x68",
+        "actionbtn 80x68",
+        "site__leave 80x45"
+      ],
+      "clipped": [
+        "vsl__name \"HAMMER\" 55>47"
+      ]
+    },
+    {
+      "phone": "iphone-se",
+      "phoneName": "iPhone SE 2/3",
+      "vw": 375,
+      "vh": 667,
+      "tier": "short",
+      "method": "oil-rotary",
+      "stageW": 334,
+      "stageH": 667,
+      "stripH": 52,
+      "dockH": 258,
+      "bandH": 357,
+      "surfH": 193,
+      "sectH": 164,
+      "stagePct": 53.5,
+      "surfPct": 54.1,
+      "sectPct": 45.9,
+      "rendererBandsH": 357,
+      "rendererChrome": {
+        "top": 52,
+        "bottom": 258
+      },
+      "hud": {
+        "top": 52,
+        "bottom": 258
+      },
+      "overlaps": 1,
+      "overlapList": [
+        "pit__s(55x14@90,510) x wnum__k(55x14@132,510) = 13x14"
+      ],
+      "onBand3D": [],
+      "targets": 6,
+      "smallTargets": [],
+      "targetList": [
+        "railbtn 71.9x45",
+        "vsl 66.8x68",
+        "vsl 66.8x68",
+        "vsl 66.8x68",
+        "actionbtn 80x70.5",
+        "site__leave 80x45"
+      ],
+      "clipped": [
+        "railbtn__l \"SHUT IN\" 56>47",
+        "vsl__name \"ROTARY\" 50>47"
+      ]
+    },
+    {
+      "phone": "galaxy-s8",
+      "phoneName": "Galaxy S8 / A-class",
+      "vw": 360,
+      "vh": 740,
+      "tier": "base",
+      "method": "rockbolt",
+      "stageW": 360,
+      "stageH": 740,
+      "stripH": 52,
+      "dockH": 272,
+      "bandH": 416,
+      "surfH": 225,
+      "sectH": 191,
+      "stagePct": 56.2,
+      "surfPct": 54.1,
+      "sectPct": 45.9,
+      "rendererBandsH": 416,
+      "rendererChrome": {
+        "top": 52,
+        "bottom": 272
+      },
+      "hud": {
+        "top": 52,
+        "bottom": 272
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "targets": 7,
+      "smallTargets": [],
+      "targetList": [
+        "railbtn 80x45",
+        "railbtn 80x45",
+        "vsl 75.6x72",
+        "vsl 75.6x72",
+        "vsl 75.6x72",
+        "actionbtn 80x72.5",
+        "site__leave 80x45"
+      ],
+      "clipped": []
+    },
+    {
+      "phone": "galaxy-s8",
+      "phoneName": "Galaxy S8 / A-class",
+      "vw": 360,
+      "vh": 740,
+      "tier": "base",
+      "method": "driven-pile",
+      "stageW": 360,
+      "stageH": 740,
+      "stripH": 52,
+      "dockH": 272,
+      "bandH": 416,
+      "surfH": 225,
+      "sectH": 191,
+      "stagePct": 56.2,
+      "surfPct": 54.1,
+      "sectPct": 45.9,
+      "rendererBandsH": 416,
+      "rendererChrome": {
+        "top": 52,
+        "bottom": 272
+      },
+      "hud": {
+        "top": 52,
+        "bottom": 272
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "targets": 5,
+      "smallTargets": [],
+      "targetList": [
+        "vsl 75.6x72",
+        "vsl 75.6x72",
+        "vsl 75.6x72",
+        "actionbtn 80x75",
+        "site__leave 80x45"
+      ],
+      "clipped": [
+        "beat__t \"Pitching the pile\" 155>140"
+      ]
+    },
+    {
+      "phone": "galaxy-s8",
+      "phoneName": "Galaxy S8 / A-class",
+      "vw": 360,
+      "vh": 740,
+      "tier": "base",
+      "method": "rc",
+      "stageW": 360,
+      "stageH": 740,
+      "stripH": 52,
+      "dockH": 272,
+      "bandH": 416,
+      "surfH": 225,
+      "sectH": 191,
+      "stagePct": 56.2,
+      "surfPct": 54.1,
+      "sectPct": 45.9,
+      "rendererBandsH": 416,
+      "rendererChrome": {
+        "top": 52,
+        "bottom": 272
+      },
+      "hud": {
+        "top": 52,
+        "bottom": 272
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "targets": 6,
+      "smallTargets": [],
+      "targetList": [
+        "railbtn 80x45",
+        "vsl 75.6x72",
+        "vsl 75.6x72",
+        "vsl 75.6x72",
+        "actionbtn 80x72.5",
+        "site__leave 80x45"
+      ],
+      "clipped": []
+    },
+    {
+      "phone": "galaxy-s8",
+      "phoneName": "Galaxy S8 / A-class",
+      "vw": 360,
+      "vh": 740,
+      "tier": "base",
+      "method": "dth",
+      "stageW": 360,
+      "stageH": 740,
+      "stripH": 52,
+      "dockH": 224,
+      "bandH": 464,
+      "surfH": 251,
+      "sectH": 213,
+      "stagePct": 62.7,
+      "surfPct": 54.1,
+      "sectPct": 45.9,
+      "rendererBandsH": 464,
+      "rendererChrome": {
+        "top": 52,
+        "bottom": 224
+      },
+      "hud": {
+        "top": 52,
+        "bottom": 224
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "targets": 5,
+      "smallTargets": [],
+      "targetList": [
+        "vsl 75.6x72",
+        "vsl 75.6x72",
+        "vsl 75.6x72",
+        "actionbtn 80x72",
+        "site__leave 80x45"
+      ],
+      "clipped": []
+    },
+    {
+      "phone": "galaxy-s8",
+      "phoneName": "Galaxy S8 / A-class",
+      "vw": 360,
+      "vh": 740,
+      "tier": "base",
+      "method": "oil-rotary",
+      "stageW": 360,
+      "stageH": 740,
+      "stripH": 52,
+      "dockH": 272,
+      "bandH": 416,
+      "surfH": 225,
+      "sectH": 191,
+      "stagePct": 56.2,
+      "surfPct": 54.1,
+      "sectPct": 45.9,
+      "rendererBandsH": 416,
+      "rendererChrome": {
+        "top": 52,
+        "bottom": 272
+      },
+      "hud": {
+        "top": 52,
+        "bottom": 272
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "targets": 6,
+      "smallTargets": [],
+      "targetList": [
+        "railbtn 78x45",
+        "vsl 75.6x72",
+        "vsl 75.6x72",
+        "vsl 75.6x72",
+        "actionbtn 80x72.5",
+        "site__leave 80x45"
+      ],
+      "clipped": [
+        "railbtn__l \"SHUT IN\" 56>53"
+      ]
+    },
+    {
+      "phone": "iphone-13-mini",
+      "phoneName": "iPhone 13 mini",
+      "vw": 375,
+      "vh": 812,
+      "tier": "base",
+      "method": "rockbolt",
+      "stageW": 375,
+      "stageH": 812,
+      "stripH": 52,
+      "dockH": 272,
+      "bandH": 488,
+      "surfH": 264,
+      "sectH": 224,
+      "stagePct": 60.1,
+      "surfPct": 54.1,
+      "sectPct": 45.9,
+      "rendererBandsH": 488,
+      "rendererChrome": {
+        "top": 52,
+        "bottom": 272
+      },
+      "hud": {
+        "top": 52,
+        "bottom": 272
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "targets": 7,
+      "smallTargets": [],
+      "targetList": [
+        "railbtn 80x45",
+        "railbtn 80x45",
+        "vsl 79.8x72",
+        "vsl 79.8x72",
+        "vsl 79.8x72",
+        "actionbtn 80x72.5",
+        "site__leave 80x45"
+      ],
+      "clipped": []
+    },
+    {
+      "phone": "iphone-13-mini",
+      "phoneName": "iPhone 13 mini",
+      "vw": 375,
+      "vh": 812,
+      "tier": "base",
+      "method": "driven-pile",
+      "stageW": 375,
+      "stageH": 812,
+      "stripH": 52,
+      "dockH": 272,
+      "bandH": 488,
+      "surfH": 264,
+      "sectH": 224,
+      "stagePct": 60.1,
+      "surfPct": 54.1,
+      "sectPct": 45.9,
+      "rendererBandsH": 488,
+      "rendererChrome": {
+        "top": 52,
+        "bottom": 272
+      },
+      "hud": {
+        "top": 52,
+        "bottom": 272
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "targets": 5,
+      "smallTargets": [],
+      "targetList": [
+        "vsl 79.8x72",
+        "vsl 79.8x72",
+        "vsl 79.8x72",
+        "actionbtn 80x75",
+        "site__leave 80x45"
+      ],
+      "clipped": []
+    },
+    {
+      "phone": "iphone-13-mini",
+      "phoneName": "iPhone 13 mini",
+      "vw": 375,
+      "vh": 812,
+      "tier": "base",
+      "method": "rc",
+      "stageW": 375,
+      "stageH": 812,
+      "stripH": 52,
+      "dockH": 272,
+      "bandH": 488,
+      "surfH": 264,
+      "sectH": 224,
+      "stagePct": 60.1,
+      "surfPct": 54.1,
+      "sectPct": 45.9,
+      "rendererBandsH": 488,
+      "rendererChrome": {
+        "top": 52,
+        "bottom": 272
+      },
+      "hud": {
+        "top": 52,
+        "bottom": 272
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "targets": 6,
+      "smallTargets": [],
+      "targetList": [
+        "railbtn 80x45",
+        "vsl 79.8x72",
+        "vsl 79.8x72",
+        "vsl 79.8x72",
+        "actionbtn 80x72.5",
+        "site__leave 80x45"
+      ],
+      "clipped": []
+    },
+    {
+      "phone": "iphone-13-mini",
+      "phoneName": "iPhone 13 mini",
+      "vw": 375,
+      "vh": 812,
+      "tier": "base",
+      "method": "dth",
+      "stageW": 375,
+      "stageH": 812,
+      "stripH": 52,
+      "dockH": 224,
+      "bandH": 536,
+      "surfH": 289,
+      "sectH": 247,
+      "stagePct": 66,
+      "surfPct": 53.9,
+      "sectPct": 46.1,
+      "rendererBandsH": 536,
+      "rendererChrome": {
+        "top": 52,
+        "bottom": 224
+      },
+      "hud": {
+        "top": 52,
+        "bottom": 224
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "targets": 5,
+      "smallTargets": [],
+      "targetList": [
+        "vsl 79.8x72",
+        "vsl 79.8x72",
+        "vsl 79.8x72",
+        "actionbtn 80x72",
+        "site__leave 80x45"
+      ],
+      "clipped": []
+    },
+    {
+      "phone": "iphone-13-mini",
+      "phoneName": "iPhone 13 mini",
+      "vw": 375,
+      "vh": 812,
+      "tier": "base",
+      "method": "oil-rotary",
+      "stageW": 375,
+      "stageH": 812,
+      "stripH": 52,
+      "dockH": 272,
+      "bandH": 488,
+      "surfH": 264,
+      "sectH": 224,
+      "stagePct": 60.1,
+      "surfPct": 54.1,
+      "sectPct": 45.9,
+      "rendererBandsH": 488,
+      "rendererChrome": {
+        "top": 52,
+        "bottom": 272
+      },
+      "hud": {
+        "top": 52,
+        "bottom": 272
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "targets": 6,
+      "smallTargets": [],
+      "targetList": [
+        "railbtn 80x45",
+        "vsl 79.8x72",
+        "vsl 79.8x72",
+        "vsl 79.8x72",
+        "actionbtn 80x72.5",
+        "site__leave 80x45"
+      ],
+      "clipped": []
+    },
+    {
+      "phone": "iphone-13-pro",
+      "phoneName": "iPhone 13 Pro / 14",
+      "vw": 390,
+      "vh": 844,
+      "tier": "base",
+      "method": "rockbolt",
+      "stageW": 390,
+      "stageH": 844,
+      "stripH": 52,
+      "dockH": 272,
+      "bandH": 520,
+      "surfH": 281,
+      "sectH": 239,
+      "stagePct": 61.6,
+      "surfPct": 54,
+      "sectPct": 46,
+      "rendererBandsH": 520,
+      "rendererChrome": {
+        "top": 52,
+        "bottom": 272
+      },
+      "hud": {
+        "top": 52,
+        "bottom": 272
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "targets": 7,
+      "smallTargets": [],
+      "targetList": [
+        "railbtn 80x45",
+        "railbtn 80x45",
+        "vsl 80x72",
+        "vsl 80x72",
+        "vsl 80x72",
+        "actionbtn 80x72.5",
+        "site__leave 80x45"
+      ],
+      "clipped": []
+    },
+    {
+      "phone": "iphone-13-pro",
+      "phoneName": "iPhone 13 Pro / 14",
+      "vw": 390,
+      "vh": 844,
+      "tier": "base",
+      "method": "driven-pile",
+      "stageW": 390,
+      "stageH": 844,
+      "stripH": 52,
+      "dockH": 272,
+      "bandH": 520,
+      "surfH": 281,
+      "sectH": 239,
+      "stagePct": 61.6,
+      "surfPct": 54,
+      "sectPct": 46,
+      "rendererBandsH": 520,
+      "rendererChrome": {
+        "top": 52,
+        "bottom": 272
+      },
+      "hud": {
+        "top": 52,
+        "bottom": 272
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "targets": 5,
+      "smallTargets": [],
+      "targetList": [
+        "vsl 80x72",
+        "vsl 80x72",
+        "vsl 80x72",
+        "actionbtn 80x75",
+        "site__leave 80x45"
+      ],
+      "clipped": []
+    },
+    {
+      "phone": "iphone-13-pro",
+      "phoneName": "iPhone 13 Pro / 14",
+      "vw": 390,
+      "vh": 844,
+      "tier": "base",
+      "method": "rc",
+      "stageW": 390,
+      "stageH": 844,
+      "stripH": 52,
+      "dockH": 272,
+      "bandH": 520,
+      "surfH": 281,
+      "sectH": 239,
+      "stagePct": 61.6,
+      "surfPct": 54,
+      "sectPct": 46,
+      "rendererBandsH": 520,
+      "rendererChrome": {
+        "top": 52,
+        "bottom": 272
+      },
+      "hud": {
+        "top": 52,
+        "bottom": 272
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "targets": 6,
+      "smallTargets": [],
+      "targetList": [
+        "railbtn 80x45",
+        "vsl 80x72",
+        "vsl 80x72",
+        "vsl 80x72",
+        "actionbtn 80x72.5",
+        "site__leave 80x45"
+      ],
+      "clipped": []
+    },
+    {
+      "phone": "iphone-13-pro",
+      "phoneName": "iPhone 13 Pro / 14",
+      "vw": 390,
+      "vh": 844,
+      "tier": "base",
+      "method": "dth",
+      "stageW": 390,
+      "stageH": 844,
+      "stripH": 52,
+      "dockH": 224,
+      "bandH": 568,
+      "surfH": 307,
+      "sectH": 261,
+      "stagePct": 67.3,
+      "surfPct": 54,
+      "sectPct": 46,
+      "rendererBandsH": 568,
+      "rendererChrome": {
+        "top": 52,
+        "bottom": 224
+      },
+      "hud": {
+        "top": 52,
+        "bottom": 224
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "targets": 5,
+      "smallTargets": [],
+      "targetList": [
+        "vsl 80x72",
+        "vsl 80x72",
+        "vsl 80x72",
+        "actionbtn 80x72",
+        "site__leave 80x45"
+      ],
+      "clipped": []
+    },
+    {
+      "phone": "iphone-13-pro",
+      "phoneName": "iPhone 13 Pro / 14",
+      "vw": 390,
+      "vh": 844,
+      "tier": "base",
+      "method": "oil-rotary",
+      "stageW": 390,
+      "stageH": 844,
+      "stripH": 52,
+      "dockH": 272,
+      "bandH": 520,
+      "surfH": 281,
+      "sectH": 239,
+      "stagePct": 61.6,
+      "surfPct": 54,
+      "sectPct": 46,
+      "rendererBandsH": 520,
+      "rendererChrome": {
+        "top": 52,
+        "bottom": 272
+      },
+      "hud": {
+        "top": 52,
+        "bottom": 272
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "targets": 6,
+      "smallTargets": [],
+      "targetList": [
+        "railbtn 80x45",
+        "vsl 80x72",
+        "vsl 80x72",
+        "vsl 80x72",
+        "actionbtn 80x72.5",
+        "site__leave 80x45"
+      ],
+      "clipped": []
+    },
+    {
+      "phone": "pixel-7",
+      "phoneName": "Pixel 7",
+      "vw": 412,
+      "vh": 915,
+      "tier": "tall",
+      "method": "rockbolt",
+      "stageW": 412,
+      "stageH": 915,
+      "stripH": 52,
+      "dockH": 296,
+      "bandH": 567,
+      "surfH": 306,
+      "sectH": 261,
+      "stagePct": 62,
+      "surfPct": 54,
+      "sectPct": 46,
+      "rendererBandsH": 567,
+      "rendererChrome": {
+        "top": 41,
+        "bottom": 285
+      },
+      "hud": {
+        "top": 52,
+        "bottom": 296
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "targets": 7,
+      "smallTargets": [],
+      "targetList": [
+        "railbtn 80x45",
+        "railbtn 80x45",
+        "vsl 80x80",
+        "vsl 80x80",
+        "vsl 80x80",
+        "actionbtn 80x80",
+        "site__leave 80x45"
+      ],
+      "clipped": []
+    },
+    {
+      "phone": "pixel-7",
+      "phoneName": "Pixel 7",
+      "vw": 412,
+      "vh": 915,
+      "tier": "tall",
+      "method": "driven-pile",
+      "stageW": 412,
+      "stageH": 915,
+      "stripH": 52,
+      "dockH": 296,
+      "bandH": 567,
+      "surfH": 306,
+      "sectH": 261,
+      "stagePct": 62,
+      "surfPct": 54,
+      "sectPct": 46,
+      "rendererBandsH": 567,
+      "rendererChrome": {
+        "top": 41,
+        "bottom": 285
+      },
+      "hud": {
+        "top": 52,
+        "bottom": 296
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "targets": 5,
+      "smallTargets": [],
+      "targetList": [
+        "vsl 80x80",
+        "vsl 80x80",
+        "vsl 80x80",
+        "actionbtn 80x80",
+        "site__leave 80x45"
+      ],
+      "clipped": []
+    },
+    {
+      "phone": "pixel-7",
+      "phoneName": "Pixel 7",
+      "vw": 412,
+      "vh": 915,
+      "tier": "tall",
+      "method": "rc",
+      "stageW": 412,
+      "stageH": 915,
+      "stripH": 52,
+      "dockH": 296,
+      "bandH": 567,
+      "surfH": 306,
+      "sectH": 261,
+      "stagePct": 62,
+      "surfPct": 54,
+      "sectPct": 46,
+      "rendererBandsH": 567,
+      "rendererChrome": {
+        "top": 41,
+        "bottom": 285
+      },
+      "hud": {
+        "top": 52,
+        "bottom": 296
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "targets": 6,
+      "smallTargets": [],
+      "targetList": [
+        "railbtn 80x45",
+        "vsl 80x80",
+        "vsl 80x80",
+        "vsl 80x80",
+        "actionbtn 80x80",
+        "site__leave 80x45"
+      ],
+      "clipped": []
+    },
+    {
+      "phone": "pixel-7",
+      "phoneName": "Pixel 7",
+      "vw": 412,
+      "vh": 915,
+      "tier": "tall",
+      "method": "dth",
+      "stageW": 412,
+      "stageH": 915,
+      "stripH": 52,
+      "dockH": 248,
+      "bandH": 615,
+      "surfH": 332,
+      "sectH": 283,
+      "stagePct": 67.2,
+      "surfPct": 54,
+      "sectPct": 46,
+      "rendererBandsH": 615,
+      "rendererChrome": {
+        "top": 41,
+        "bottom": 237
+      },
+      "hud": {
+        "top": 52,
+        "bottom": 248
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "targets": 5,
+      "smallTargets": [],
+      "targetList": [
+        "vsl 80x80",
+        "vsl 80x80",
+        "vsl 80x80",
+        "actionbtn 80x80",
+        "site__leave 80x45"
+      ],
+      "clipped": []
+    },
+    {
+      "phone": "pixel-7",
+      "phoneName": "Pixel 7",
+      "vw": 412,
+      "vh": 915,
+      "tier": "tall",
+      "method": "oil-rotary",
+      "stageW": 412,
+      "stageH": 915,
+      "stripH": 52,
+      "dockH": 296,
+      "bandH": 567,
+      "surfH": 306,
+      "sectH": 261,
+      "stagePct": 62,
+      "surfPct": 54,
+      "sectPct": 46,
+      "rendererBandsH": 567,
+      "rendererChrome": {
+        "top": 41,
+        "bottom": 285
+      },
+      "hud": {
+        "top": 52,
+        "bottom": 296
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "targets": 6,
+      "smallTargets": [],
+      "targetList": [
+        "railbtn 80x45",
+        "vsl 80x80",
+        "vsl 80x80",
+        "vsl 80x80",
+        "actionbtn 80x80",
+        "site__leave 80x45"
+      ],
+      "clipped": []
+    },
+    {
+      "phone": "iphone-14-pmax",
+      "phoneName": "iPhone 14/15 Pro Max",
+      "vw": 430,
+      "vh": 932,
+      "tier": "tall",
+      "method": "rockbolt",
+      "stageW": 430,
+      "stageH": 932,
+      "stripH": 52,
+      "dockH": 296,
+      "bandH": 584,
+      "surfH": 315,
+      "sectH": 269,
+      "stagePct": 62.7,
+      "surfPct": 53.9,
+      "sectPct": 46.1,
+      "rendererBandsH": 584,
+      "rendererChrome": {
+        "top": 52,
+        "bottom": 296
+      },
+      "hud": {
+        "top": 52,
+        "bottom": 296
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "targets": 7,
+      "smallTargets": [],
+      "targetList": [
+        "railbtn 80x45",
+        "railbtn 80x45",
+        "vsl 80x80",
+        "vsl 80x80",
+        "vsl 80x80",
+        "actionbtn 80x80",
+        "site__leave 80x45"
+      ],
+      "clipped": []
+    },
+    {
+      "phone": "iphone-14-pmax",
+      "phoneName": "iPhone 14/15 Pro Max",
+      "vw": 430,
+      "vh": 932,
+      "tier": "tall",
+      "method": "driven-pile",
+      "stageW": 430,
+      "stageH": 932,
+      "stripH": 52,
+      "dockH": 296,
+      "bandH": 584,
+      "surfH": 315,
+      "sectH": 269,
+      "stagePct": 62.7,
+      "surfPct": 53.9,
+      "sectPct": 46.1,
+      "rendererBandsH": 584,
+      "rendererChrome": {
+        "top": 52,
+        "bottom": 296
+      },
+      "hud": {
+        "top": 52,
+        "bottom": 296
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "targets": 5,
+      "smallTargets": [],
+      "targetList": [
+        "vsl 80x80",
+        "vsl 80x80",
+        "vsl 80x80",
+        "actionbtn 80x80",
+        "site__leave 80x45"
+      ],
+      "clipped": []
+    },
+    {
+      "phone": "iphone-14-pmax",
+      "phoneName": "iPhone 14/15 Pro Max",
+      "vw": 430,
+      "vh": 932,
+      "tier": "tall",
+      "method": "rc",
+      "stageW": 430,
+      "stageH": 932,
+      "stripH": 52,
+      "dockH": 296,
+      "bandH": 584,
+      "surfH": 315,
+      "sectH": 269,
+      "stagePct": 62.7,
+      "surfPct": 53.9,
+      "sectPct": 46.1,
+      "rendererBandsH": 584,
+      "rendererChrome": {
+        "top": 52,
+        "bottom": 296
+      },
+      "hud": {
+        "top": 52,
+        "bottom": 296
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "targets": 6,
+      "smallTargets": [],
+      "targetList": [
+        "railbtn 80x45",
+        "vsl 80x80",
+        "vsl 80x80",
+        "vsl 80x80",
+        "actionbtn 80x80",
+        "site__leave 80x45"
+      ],
+      "clipped": []
+    },
+    {
+      "phone": "iphone-14-pmax",
+      "phoneName": "iPhone 14/15 Pro Max",
+      "vw": 430,
+      "vh": 932,
+      "tier": "tall",
+      "method": "dth",
+      "stageW": 430,
+      "stageH": 932,
+      "stripH": 52,
+      "dockH": 248,
+      "bandH": 632,
+      "surfH": 341,
+      "sectH": 291,
+      "stagePct": 67.8,
+      "surfPct": 54,
+      "sectPct": 46,
+      "rendererBandsH": 632,
+      "rendererChrome": {
+        "top": 52,
+        "bottom": 248
+      },
+      "hud": {
+        "top": 52,
+        "bottom": 248
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "targets": 5,
+      "smallTargets": [],
+      "targetList": [
+        "vsl 80x80",
+        "vsl 80x80",
+        "vsl 80x80",
+        "actionbtn 80x80",
+        "site__leave 80x45"
+      ],
+      "clipped": []
+    },
+    {
+      "phone": "iphone-14-pmax",
+      "phoneName": "iPhone 14/15 Pro Max",
+      "vw": 430,
+      "vh": 932,
+      "tier": "tall",
+      "method": "oil-rotary",
+      "stageW": 430,
+      "stageH": 932,
+      "stripH": 52,
+      "dockH": 296,
+      "bandH": 584,
+      "surfH": 315,
+      "sectH": 269,
+      "stagePct": 62.7,
+      "surfPct": 53.9,
+      "sectPct": 46.1,
+      "rendererBandsH": 584,
+      "rendererChrome": {
+        "top": 52,
+        "bottom": 296
+      },
+      "hud": {
+        "top": 52,
+        "bottom": 296
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "targets": 6,
+      "smallTargets": [],
+      "targetList": [
+        "railbtn 80x45",
+        "vsl 80x80",
+        "vsl 80x80",
+        "vsl 80x80",
+        "actionbtn 80x80",
+        "site__leave 80x45"
+      ],
+      "clipped": []
+    }
+  ],
+  "consoleErrors": [],
+  "failures": [
+    "iphone-se/oil-rotary: 1 overlap(s): pit__s(55x14@90,510) x wnum__k(55x14@132,510) = 13x14"
+  ]
+}
