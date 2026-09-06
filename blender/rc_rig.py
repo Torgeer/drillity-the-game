@@ -108,9 +108,52 @@ UNITS: metres, Blender Z-up. The exporter converts to three.js Y-up
 the machine and Blender -Y is the drilling end.
 
 ORIGIN: undercarriage (slew) centre at ground level, per the pipeline contract,
-so the rig drops on terrain at y=0. The drill centre is 2.85 m FORWARD of the
-origin — [MET p.22]: the hole is off the front of the machine, clear of the
+so the rig drops on terrain at y=0. The MAST FOOT is 2.85 m forward of the
+origin, on the fabricated nose that carries it out past the track front
+[MET p.22, rc-rig.md §4.7]. The drill centre is a further 0.79 m forward at
+3.64 m — [MET p.22]: the hole is off the front of the machine, clear of the
 tracks — and is published as the node `mount:hole` so nothing has to guess it.
+
+WORKING-AXIS REPAIR, 2026-09-06 — what changed and why it was not a marker move
+------------------------------------------------------------------------------
+This file used to place `pivot:mast`, the rod guide, the breakout table and both
+clamp levels on ONE line and the rotation spindle on ANOTHER, 0.79 m apart, at
+every feed position and every swing angle. `mount:hole` was on the mast line.
+The machine was therefore drilling a hole it was not over, its clamps closed on
+air, and — measured on exported triangles, not on bounding boxes — the spindle
+line ran through `drill-floor-front` and `drill-floor-kick-f`.
+
+The previous investigation (Codex, private worktree `drillity-rc-axis`) proved
+the defect, refused to ship a guessed correction, and left two coherent scopes.
+That refusal was right: moving `mount:hole` alone, or drawing the string at an
+angle at runtime, would have hidden a broken mechanism behind a passing number.
+
+What was wrong was a FRAME error, not a missing dimension. The carriage rides
+rails on the mast's FRONT face; the swing boss stands off that face; the gearbox
+is built around its own spindle. Those three offsets were all already authored
+in this file and are unchanged. Their sum is the working axis, and the bore had
+simply never been put on it. So:
+
+  * `HOLE_Y` is now DERIVED (`MAST_Y - WORK_AXIS`) and can no longer be typed.
+  * The mast, the nose that carries it, the deck, the machine house and every
+    hose route DID NOT MOVE — `MAST_Y` holds the value `HOLE_Y` used to.
+  * The four assemblies that touch the string moved onto the working axis.
+  * The drill floor was re-cut to open on the bore instead of on the mast.
+  * The feed down-stop now clears the clamp stack it can no longer pass beside.
+
+Measured against the previous export with `tools/glbinfo.mjs`: 44 primitives
+(unchanged, budget 70), 70,912 triangles (+108, the split table), width and
+height unchanged, length 7.608 -> 7.857 m because the drill floor had to reach
+the bore. `tools/check_rc_axis.mjs`, unmodified, goes from 0.7900002 m of
+perpendicular miss and two obstructing triangle hits to 0.0 and none.
+
+NOT SOURCED and stated as such: the two head standoffs that make up WORK_AXIS.
+An exhaustive search of the local catalogue library found no dimensioned GA of
+any RC rig, and both Epiroc Explorac brochures are behind HTTP 403. Where OEMs
+publish this at all they publish drill-axis-to-mast-FRONT-FACE, never to the
+structural centre — e.g. Bauer BG 36 H doc 905.868.2 p.16, "Drilling axis
+1,100 mm / 1,400 mm". This machine's equivalent front-face figure is 0.46 m.
+See research/rigs/rc-axis-repair.md for the full evidence and the open items.
 """
 
 import math
@@ -191,7 +234,52 @@ DRILL_FLOOR = 1.50     # the lower working floor at the mast foot, reached from
 # which is what MAST_LEN already was, derived independently from the rod. The
 # same source is why BODY_W came down from 2.55 to 2.42: 2260 mm shipping width
 # plus the handrails.
-HOLE_Y = -2.85         # drill centre, 0.70 m forward of the track nose (-2.15)
+# ── THE WORKING AXIS.  Read this before changing any number in this block ────
+# The drill string does NOT run down the mast's structural centreline, and the
+# file used to assume it did: `pivot:mast`, the rod guide, the breakout table
+# and both clamp levels all sat on mast-local Y = 0, while the rotation spindle
+# — the thing the string is actually threaded into — sits 0.79 m in front of it.
+# The machine was drilling a hole it was not over, at every feed position, and
+# the exported spindle line ran through the front floor plate and its kick.
+#
+# The mast is not the axis because the carriage rides rails on the mast's FRONT
+# face (`mast-rail`, L~810), the head-swing boss stands off that face, and the
+# rotation gearbox is built around its own spindle. Those three offsets are all
+# already authored below. WORK_AXIS is their SUM — it is not a new dimension and
+# it was not chosen to make anything come out even:
+#
+#     MAST_D / 2            0.330   half the mast depth, to its front face
+#     HEAD_SWING_STANDOFF   0.300   swing-pin boss, clear of the carriage plate
+#     HEAD_SPINDLE_OFF      0.160   gearbox/spindle centre, ahead of that pin
+#                           -----
+#                           0.790
+#
+# [MET p.22] supports the ARRANGEMENT and not the number: on the reference
+# photograph the rod clamp / breakout assembly stands clearly proud of the mast
+# lattice on the working face, which is exactly this offset and is exactly what
+# the file previously got wrong. The two components below are NOT SOURCED as
+# published mounting dimensions; they are preserved unchanged from the shipped
+# model rather than re-guessed, because a plausible new number would be worse
+# than the admitted gap (§1.1). See research/rigs/rc-axis-repair.md.
+GUIDE_Z = 0.66               # rod guide, mast-local. Top of the foot stack, and
+                             # therefore what the head's down-stop clears.
+HEAD_SWING_STANDOFF = 0.30   # NOT SOURCED — swing-pin boss off the mast face
+HEAD_SPINDLE_OFF = 0.16      # NOT SOURCED — spindle centre ahead of that pin
+WORK_AXIS = MAST_D / 2 + HEAD_SWING_STANDOFF + HEAD_SPINDLE_OFF     # 0.79
+
+# MAST_Y keeps the value HOLE_Y used to carry, so the mast, the fabricated nose
+# that carries its foot, the deck, the machine house and every hose route are
+# untouched by this repair — only the bore and the parts that touch the string
+# move. build_deck() cites [MET p.22, rc-rig.md §4.7] for "the fabricated nose
+# that carries the mast foot out past the track front", and that is the sourced
+# relationship this choice preserves.
+MAST_Y = -2.85         # mast foot pin, 0.70 m forward of the track nose (-2.15)
+HOLE_Y = MAST_Y - WORK_AXIS   # -3.64. DERIVED from the head, never typed: the
+                       # bore is wherever the spindle is. 1.49 m forward of the
+                       # track nose and 1.09 m forward of the front jack line
+                       # (-2.55) — a real cantilever, and a consequence of the
+                       # mechanism rather than a chosen number. [MET p.22] shows
+                       # the working floor and clamps ahead of the front jack.
 TRACK_LEN = 4.30
 TRACK_W = 0.62         # triple-grouser shoe width. NOT SOURCED (§8 item 3)
 GAUGE = 1.18           # track centres. NOT SOURCED
@@ -213,8 +301,10 @@ CYC_OUT_Z = 1.98              # outlet height, so a splitter and a bag fit under
 # and glaring in a render — an earlier pass had the hose starting 0.9 m off the
 # head because the numbers were written out by hand.
 CARRIAGE_Z = MAST_LEN - 2.05                 # carriage rest height on the mast
-HEAD_PIVOT = (0.0, HOLE_Y - MAST_D / 2 - 0.30, MAST_FOOT + CARRIAGE_Z + 0.10)
-HEAD_OUT = (HEAD_PIVOT[0] + 0.90, HEAD_PIVOT[1] - 0.16, HEAD_PIVOT[2] - 0.735)
+HEAD_PIVOT = (0.0, MAST_Y - MAST_D / 2 - HEAD_SWING_STANDOFF,
+              MAST_FOOT + CARRIAGE_Z + 0.10)
+HEAD_OUT = (HEAD_PIVOT[0] + 0.90, HEAD_PIVOT[1] - HEAD_SPINDLE_OFF,
+            HEAD_PIVOT[2] - 0.735)
 CYC_INLET = (CYC_X - CYC_BARREL_D / 2 - 0.26,
              CYC_Y + CYC_BARREL_D / 2 * 0.55,
              CYC_OUT_Z + CYC_CONE_H + CYC_BARREL_H + 0.17)
@@ -533,25 +623,46 @@ def build_deck():
     # a second, lower floor around the mast foot that the crew works the rods
     # from, reached from the main deck by a short stair. Web walkarounds of
     # exploration crawlers of this class show exactly that split-level layout.
+    # THIS FLOOR USED TO BE A 1.70 m PLATFORM CENTRED ON THE MAST FOOT, built
+    # when the file still believed the bore was in the middle of the mast. It
+    # was not: the bore is WORK_AXIS further forward, and the old front plate
+    # and its kick were the two things Codex's ray actually hit — solid steel
+    # across the line the drill string has to occupy. So the platform now runs
+    # from behind the mast-foot hood forward to past the bore, and its opening
+    # covers both. The front plate and front kick keep the 0.60 m and 0.78 m of
+    # standing room ahead of the hole they were authored with: those two are
+    # PRESERVED, not re-chosen, because preserving an existing number beats
+    # inventing a new one (§1.1). Measured, not estimated: the front plate moves
+    # forward exactly WORK_AXIS (0.79 m), the floor's own length grows 1.70 ->
+    # 2.39 m because its rear stays at the mast foot, and the MACHINE's overall
+    # bound grows 249 mm — from 7.608 to 7.857 m — because other geometry
+    # already reached further forward than the old floor did. That is the cost
+    # of the repair and it is measured, not hidden.
+    OPEN_Y0 = HOLE_Y - 0.40          # working opening, front — clear of the bore
+    OPEN_Y1 = MAST_Y + 0.30          # working opening, rear — clear of the hood
+    open_mid = (OPEN_Y0 + OPEN_Y1) / 2
+    floor_y0, floor_y1 = HOLE_Y - 0.80, MAST_Y + 0.70
     box('drill-floor-front', (2.10, 0.40, 0.05), MAT_DARK,
         loc=(0, HOLE_Y - 0.60, DRILL_FLOOR), bevel=0.008)
     box('drill-floor-rear', (2.10, 0.40, 0.05), MAT_DARK,
-        loc=(0, HOLE_Y + 0.50, DRILL_FLOOR), bevel=0.008)
+        loc=(0, MAST_Y + 0.50, DRILL_FLOOR), bevel=0.008)
     for s in (-1, 1):
-        box('drill-floor-side', (0.65, 0.70, 0.05), MAT_DARK,
-            loc=(s * 0.725, HOLE_Y - 0.05, DRILL_FLOOR), bevel=0.008)
+        box('drill-floor-side', (0.65, OPEN_Y1 - OPEN_Y0, 0.05), MAT_DARK,
+            loc=(s * 0.725, open_mid, DRILL_FLOOR), bevel=0.008)
         strut('drill-floor-beam', (s * 0.90, HOLE_Y - 0.78, DRILL_FLOOR - 0.14),
               (s * 0.62, -1.60, DRILL_FLOOR - 0.14), 0.16, MAT_DARK)
-        box('drill-floor-kick', (0.05, 1.70, 0.16), MAT_HAZARD,
-            loc=(s * 1.02, HOLE_Y - 0.05, DRILL_FLOOR + 0.10), bevel=0.006)
+        box('drill-floor-kick', (0.05, floor_y1 - floor_y0 + 0.10, 0.16),
+            MAT_HAZARD,
+            loc=(s * 1.02, (floor_y0 + floor_y1) / 2 + 0.05, DRILL_FLOOR + 0.10),
+            bevel=0.006)
     box('drill-floor-kick-f', (2.10, 0.05, 0.16), MAT_HAZARD,
         loc=(0, HOLE_Y - 0.78, DRILL_FLOOR + 0.10), bevel=0.006)
     # fabricated nose carrying the mast foot out past the track front
     box('front-frame', (0.98, 1.55, 0.34), MAT_DARK,
-        loc=(0, HOLE_Y + 0.62, DRILL_FLOOR - 0.36), bevel=0.024)
+        loc=(0, MAST_Y + 0.62, DRILL_FLOOR - 0.36), bevel=0.024)
     for s in (-1, 1):
         strut('front-frame-brace', (s * 0.48, -1.55, DECK_Z - 0.46),
-              (s * 0.40, HOLE_Y + 0.24, DRILL_FLOOR - 0.30), 0.14, MAT_DARK)
+              (s * 0.40, MAST_Y + 0.24, DRILL_FLOOR - 0.30), 0.14, MAT_DARK)
     # steps from the main deck down to the drill floor
     for i in range(3):
         t = (i + 1) / 4.0
@@ -773,7 +884,7 @@ def build_mast():
     two polished stripes worn by the carriage rollers — rc-rig.md §9.K asks for
     exactly that and calls it free.
     """
-    pv = empty(NODE_PIVOT, 'mast', None, (0, HOLE_Y, MAST_FOOT))
+    pv = empty(NODE_PIVOT, 'mast', None, (0, MAST_Y, MAST_FOOT))
     pv['axis'] = 'x'
     # -19 deg is the reference photograph's rake, leaning back over the deck;
     # +90 is the head swing from vertical for fan drilling [MIN p.13].
@@ -845,16 +956,35 @@ def build_mast():
 
     # rod clamp / breakout table at the mast foot — right for heavy dual-wall
     # pipe [rc-rig.md §9.L]: a lower holding clamp and an upper breakout clamp.
-    box('breakout-table', (0.92, 0.62, 0.16), MAT_DARK, pv, (0, -0.05, 0.44),
-        bevel=0.014)
+    #
+    # THESE FOUR ASSEMBLIES TOUCH THE DRILL STRING, SO THEY LIVE ON THE WORKING
+    # AXIS, NOT ON THE MAST CENTRELINE. They used to sit at mast-local Y = 0
+    # and -0.05 — inside the lattice footprint, gripping a rod that was not
+    # there, while the head turned one 0.79 m in front of them. On [MET p.22]
+    # the clamp/breakout assembly stands clearly proud of the mast on the
+    # working face, which is what -WORK_AXIS puts it back to. Their offsets
+    # RELATIVE TO EACH OTHER are unchanged: the rams stay 0.20 m ahead of the
+    # jaws they drive, exactly as authored.
+    #
+    # The table is built as a SPLIT PAIR rather than one solid box. A breakout
+    # table has to pass the string; off-axis nobody noticed it had no bore, and
+    # on-axis a solid plate would be steel across the hole. Split tables are the
+    # real idiom and this costs 12 triangles in a material already drawn. The
+    # 0.20 m bore passes the 124 mm bit and the 114.3 mm rod [R02 §A2]; it is
+    # NOT SOURCED as a table dimension, it is sized off the string it must pass.
+    TABLE_BORE = 0.20
+    half = (0.92 - TABLE_BORE) / 2
+    for sx in (-1, 1):
+        box('breakout-table', (half, 0.62, 0.16), MAT_DARK, pv,
+            (sx * (TABLE_BORE + half) / 2, -WORK_AXIS, 0.44), bevel=0.014)
     for z in (0.46, 0.62):
         for sx in (-1, 1):
             box('clamp-jaw', (0.26, 0.20, 0.11), MAT_WORN, pv,
-                (sx * 0.20, -0.05, z), rot=(0, 0, sx * 0.18), bevel=0.01)
+                (sx * 0.20, -WORK_AXIS, z), rot=(0, 0, sx * 0.18), bevel=0.01)
             tube('clamp-ram', 0.032, 0.30, MAT_CHROME, pv,
-                 (sx * 0.34 - sx * 0.15, -0.25, z), rot=(0, sx * math.pi / 2, 0),
-                 sides=8)
-    torus('rod-guide', 0.115, 0.028, MAT_WORN, pv, (0, 0, 0.66))
+                 (sx * 0.34 - sx * 0.15, -WORK_AXIS - 0.20, z),
+                 rot=(0, sx * math.pi / 2, 0), sides=8)
+    torus('rod-guide', 0.115, 0.028, MAT_WORN, pv, (0, -WORK_AXIS, GUIDE_Z))
     return pv
 
 
@@ -972,15 +1102,33 @@ def build_head(pv):
     """
     sl = empty(NODE_SLIDE, 'carriage', pv, (0, 0, MAST_LEN - 2.05))
     sl['axis'] = 'z'
-    # FEED STROKE, and it is a checkable number rather than a guess.
-    # Down: the head stops with the spindle nose 50 mm clear of the drill floor,
-    # because the rotary head on this class never travels below the floor — the
-    # rod clamp and the breakout table are down there. The nose sits 1.36 m below
-    # the carriage centre, so the bottom of travel is carriage local z 1.76.
-    # Up: the carriage rides the rails, which stop 0.45 m short of the mast top.
-    # 1.64 + 1.55 = 3.19 m of stroke, against a 3.05 m rod — just over a rod
-    # length, which is what a real feed frame gives you, and in the same country
-    # as the 3400 mm published for a comparable published crawler RC rig.
+    # FEED STROKE. The author's rule was already the right one — "the rotary
+    # head on this class never travels below the floor, the rod clamp and the
+    # breakout table are down there" — but it was applied to the DRILL FLOOR
+    # (z 1.50) while the head was 0.79 m off the axis and sailed past the clamp
+    # stack entirely. On the axis it cannot. The binding obstruction is the top
+    # of the mast-foot stack, and the number below is that rule applied to the
+    # real one.
+    #
+    # mount:tool IS the head's lowest geometry: tube() origins at its base
+    # (lib/rig.py L181), so the saver sub spans spindle-local -0.66..-0.46 and
+    # mount:tool sits on its bottom face. That sub is 196 mm across and the rod
+    # guide's bore is 2 x (0.115 - 0.028) = 174 mm, so the head physically
+    # cannot enter the guide — this is a hard stop, not a styling choice.
+    #
+    # THE STROKE THIS GIVES IS 2.85 m, NOT THE 3.19 m THIS FILE USED TO CLAIM,
+    # and the difference is not a regression: the old 3.19 m was only reachable
+    # because the head descended THROUGH the front floor plate at a Y where the
+    # string was not. 2.85 m is the first stroke this machine has published that
+    # it can actually execute. It is now SHORT of one rod — 3.05 m, itself NOT
+    # SOURCED; [R02 §A2, citing BL-RC p.6] publishes 1.5 / 3 / 6 m pipe, so even
+    # the sourced 3 m does not fit. Resolving that means growing the mast or
+    # shortening the rods, which is the size-class decision this module's header
+    # already records as unresolved and rc-rig.md §9.F says must be made FIRST.
+    # It is reported, not silently absorbed into a fudged clearance.
+    HEAD_DROP = 1.36                     # mount:tool below the carriage centre:
+                                         # pvh +0.10, spindle -0.80, sub -0.66
+    STACK_TOP = GUIDE_Z + 0.028          # mast-local, rod-guide outer top
     #
     # THE KEY IS `travel_m`, AND IT IS THE ONLY KEY THE RUNTIME READS.
     # This node used to declare `range_m: [-1.64, 1.55]` and nothing else. The
@@ -990,9 +1138,9 @@ def build_head(pv):
     # at all. (`range_m` is a real key in this pipeline, but it belongs to
     # `mount:` lamps, where it is a spotlight THROW in metres. Two different
     # meanings under one name is how this went unnoticed.)
-    CARR_LO = -1.64                      # carriage-local, bottom of travel
+    CARR_LO = (STACK_TOP + 0.05) + HEAD_DROP - (MAST_LEN - 2.05)   # -1.302
     CARR_HI = 1.55                       # carriage-local, top of travel
-    sl['travel_m'] = CARR_HI - CARR_LO   # 3.19 m of stroke
+    sl['travel_m'] = CARR_HI - CARR_LO   # 2.852 m of stroke — see above
     # Absolute exported-parent Y is Blender mast-local Z; extras stay literal.
     sl['travel_space'] = 'parent-local'
     sl['travel_axis'] = 'y'
@@ -1019,9 +1167,15 @@ def build_head(pv):
         box('chain-anchor', (0.07, 0.10, 0.20), MAT_DARK, sl,
             (sx * (hw + 0.036), -hd - 0.02, 0.42), bevel=0.008)
 
+    # HEAD_SWING_STANDOFF and HEAD_SPINDLE_OFF (module head) are the two
+    # offsets that put the working axis in front of the mast. They are named
+    # here so the bore, which is derived from their sum, can never drift away
+    # from the mechanism that actually produces it.
     tube('head-swing-boss', 0.13, 0.30, MAT_DARK, sl,
-         (-0.15, -hd - 0.30, 0.10), rot=(0, math.pi / 2, 0), sides=14)
-    pvh = empty(NODE_PIVOT, 'head-swing', sl, (0, -hd - 0.30, 0.10))
+         (-0.15, -hd - HEAD_SWING_STANDOFF, 0.10),
+         rot=(0, math.pi / 2, 0), sides=14)
+    pvh = empty(NODE_PIVOT, 'head-swing', sl,
+                (0, -hd - HEAD_SWING_STANDOFF, 0.10))
     pvh['axis'] = 'y'
     pvh['range_deg'] = [-90.0, 90.0]
 
@@ -1029,29 +1183,34 @@ def build_head(pv):
     # spindle below [rc-rig.md §4.2]. Painted in the machine colour against a
     # grey mast — the one bright complicated object moving on a plain structure,
     # which is why it carries most of the eye.
-    box('head-gearbox', (0.62, 0.66, 0.60), MAT_PAINT, pvh, (0, -0.16, -0.16),
+    box('head-gearbox', (0.62, 0.66, 0.60), MAT_PAINT, pvh,
+        (0, -HEAD_SPINDLE_OFF, -0.16),
         bevel=0.03)
     box('head-motor-pad', (0.30, 0.34, 0.22), MAT_PAINT, pvh,
-        (-0.40, -0.16, 0.02), bevel=0.02)
+        (-0.40, -HEAD_SPINDLE_OFF, 0.02), bevel=0.02)
     # The two rotation motors are bolted to the painted motor pad on a painted
     # gearbox. MAT_PAINT, not MAT_DARK: they were the whole of pivot:head-swing's
     # paintedDark material — 88 triangles for a draw call — and a motor in the
     # machine colour is what the reference actually shows [MET p.22].
-    tube('head-motor', 0.115, 0.30, MAT_PAINT, pvh, (-0.62, -0.16, 0.02),
+    tube('head-motor', 0.115, 0.30, MAT_PAINT, pvh,
+         (-0.62, -HEAD_SPINDLE_OFF, 0.02),
          rot=(0, -math.pi / 2, 0), sides=12)
-    tube('head-motor', 0.115, 0.30, MAT_PAINT, pvh, (0.42, -0.16, 0.02),
+    tube('head-motor', 0.115, 0.30, MAT_PAINT, pvh,
+         (0.42, -HEAD_SPINDLE_OFF, 0.02),
          rot=(0, math.pi / 2, 0), sides=12)
-    cone('head-bell', 0.30, 0.155, 0.34, MAT_PAINT, pvh, (0, -0.16, -0.80),
+    cone('head-bell', 0.30, 0.155, 0.34, MAT_PAINT, pvh,
+         (0, -HEAD_SPINDLE_OFF, -0.80),
          sides=18)
     for t in range(10):
         a = t / 10 * TAU
         # ring of 10 — no bevel, same rule as the splitter bolts at L1301 and
         # the arm base bolts at L1416, which already state it.
         box('head-bolt', (0.036, 0.036, 0.026), MAT_WORN, pvh,
-            (math.cos(a) * 0.255, -0.16 + math.sin(a) * 0.255, -0.47),
+            (math.cos(a) * 0.255,
+             -HEAD_SPINDLE_OFF + math.sin(a) * 0.255, -0.47),
             rot=(0, 0, a))
 
-    spn = empty(NODE_PIVOT, 'spindle', pvh, (0, -0.16, -0.80))
+    spn = empty(NODE_PIVOT, 'spindle', pvh, (0, -HEAD_SPINDLE_OFF, -0.80))
     spn['axis'] = 'z'
     tube('spindle', 0.088, 0.46, MAT_STEEL, spn, (0, 0, -0.46), sides=14)
     for t in range(16):
@@ -1073,36 +1232,44 @@ def build_head(pv):
     # triangles for a draw call, and it sits between the worn air-inlet elbow
     # and the worn wear tube it feeds. pivot:head-swing was SIX materials for
     # 3,208 triangles; this, the motors and the water line take it to three.
-    tube('dual-swivel', 0.135, 0.30, MAT_WORN, pvh, (0, -0.16, 0.30), sides=16)
-    tube('swivel-shaft', 0.062, 0.16, MAT_CHROME, pvh, (0, -0.16, 0.58), sides=12)
+    tube('dual-swivel', 0.135, 0.30, MAT_WORN, pvh,
+         (0, -HEAD_SPINDLE_OFF, 0.30), sides=16)
+    tube('swivel-shaft', 0.062, 0.16, MAT_CHROME, pvh,
+         (0, -HEAD_SPINDLE_OFF, 0.58), sides=12)
     tube('air-inlet-elbow', 0.055, 0.24, MAT_WORN, pvh, (0, 0.04, 0.42),
          rot=(math.pi / 2, 0, 0), sides=10)
 
     # head wear tube / blow-back assembly
-    tube('wear-tube', 0.072, 0.92, MAT_WORN, pvh, (0.40, -0.16, -0.30), sides=12)
+    tube('wear-tube', 0.072, 0.92, MAT_WORN, pvh,
+         (0.40, -HEAD_SPINDLE_OFF, -0.30), sides=12)
     for z in (-0.26, 0.02, 0.32, 0.58):
-        tube('wear-tube-flange', 0.098, 0.030, MAT_WORN, pvh, (0.40, -0.16, z),
+        tube('wear-tube-flange', 0.098, 0.030, MAT_WORN, pvh,
+             (0.40, -HEAD_SPINDLE_OFF, z),
              sides=12)
-    tube('blowback-ram', 0.030, 0.34, MAT_CHROME, pvh, (0.30, -0.16, 0.10),
+    tube('blowback-ram', 0.030, 0.34, MAT_CHROME, pvh,
+         (0.30, -HEAD_SPINDLE_OFF, 0.10),
          sides=8)
 
     # deflector box: heavy fabricated wedge, bolted flange face, smooth 90 deg
     # internal path — where the sample turns from vertical to horizontal and
     # LEAVES THE RIG SIDEWAYS.
     box('deflector-box', (0.40, 0.40, 0.42), MAT_PAINT, pvh,
-        (0.44, -0.16, -0.62), bevel=0.035)
+        (0.44, -HEAD_SPINDLE_OFF, -0.62), bevel=0.035)
     box('deflector-wedge', (0.34, 0.36, 0.20), MAT_PAINT, pvh,
-        (0.52, -0.16, -0.76), rot=(0, -0.5, 0), bevel=0.03)
+        (0.52, -HEAD_SPINDLE_OFF, -0.76), rot=(0, -0.5, 0), bevel=0.03)
     for t in range(8):
         a = t / 8 * TAU
         box('deflector-bolt', (0.030, 0.030, 0.024), MAT_WORN, pvh,
-            (0.44 + math.cos(a) * 0.17, -0.16 + math.sin(a) * 0.17, -0.415),
+            (0.44 + math.cos(a) * 0.17,
+             -HEAD_SPINDLE_OFF + math.sin(a) * 0.17, -0.415),
             rot=(0, 0, a))                 # ring of 8 — no bevel
-    cone('hose-tail', 0.088, 0.070, 0.26, MAT_WORN, pvh, (0.62, -0.16, -0.68),
+    cone('hose-tail', 0.088, 0.070, 0.26, MAT_WORN, pvh,
+         (0.62, -HEAD_SPINDLE_OFF, -0.68),
          rot=(0, math.pi / 2 + 0.22, 0), sides=14)
-    tube('knock-on-nut', 0.105, 0.055, MAT_WORN, pvh, (0.66, -0.16, -0.665),
+    tube('knock-on-nut', 0.105, 0.055, MAT_WORN, pvh,
+         (0.66, -HEAD_SPINDLE_OFF, -0.665),
          rot=(0, math.pi / 2 + 0.22, 0), sides=12)
-    empty(NODE_MOUNT, 'sample-out', pvh, (0.90, -0.16, -0.735))
+    empty(NODE_MOUNT, 'sample-out', pvh, (0.90, -HEAD_SPINDLE_OFF, -0.735))
 
     # MAT_WORN, not MAT_RUBBER. A 32 mm water line braided to the head is not
     # the same object as the 124 mm sample hose, and rubber here bought one
@@ -1552,7 +1719,7 @@ def build_hoses():
          stiff, with big swaged steel end fittings.
     """
     for (px, py, pz) in ((0.28, -2.28, DECK_Z + 0.34),
-                         (0.30, HOLE_Y + 0.55, MAST_FOOT + 0.72)):
+                         (0.30, MAST_Y + 0.55, MAST_FOOT + 0.72)):
         box('bulkhead-plate', (0.40, 0.05, 0.26), MAT_DARK, loc=(px, py, pz),
             bevel=0.008)
         for i in range(6):
@@ -1563,8 +1730,8 @@ def build_hoses():
          loc=(0.11, -2.55, DECK_Z + 0.12), rot=(0, math.pi / 2, 0), sides=12)
     hose('hose-bag', [(0.28, -2.28, DECK_Z + 0.36),
                       (0.29, -2.62, DECK_Z + 0.02),
-                      (0.30, -2.86, MAST_FOOT + 1.20),
-                      (0.30, HOLE_Y + 0.55, MAST_FOOT + 0.80)],
+                      (0.30, MAST_Y - 0.01, MAST_FOOT + 1.20),
+                      (0.30, MAST_Y + 0.55, MAST_FOOT + 0.80)],
          radius=0.105, mat=MAT_DARK, sides=8)
     for i in range(4):
         o = i * 0.036
@@ -1604,7 +1771,7 @@ def build_sample_hose():
     sl['axis'] = 'z'
     sl['range_m'] = [0.0, 0.0]     # reserved rigid assembly; no runtime driver yet
     a = (HEAD_OUT[0] + 0.08, HEAD_OUT[1] + 0.02, HEAD_OUT[2] - 0.04)
-    b = (1.42, HOLE_Y + 0.20, MAST_FOOT + 1.28)     # the lazy sag
+    b = (1.42, MAST_Y + 0.20, MAST_FOOT + 1.28)     # the lazy sag
     c = (ARM_TIP[0] - 0.06, ARM_TIP[1] + 0.02, ARM_TIP[2] + 0.10)  # arm saddle
     d = CYC_INLET                                   # cyclone inlet
     h = hose('sample-hose', [a, b, c, d], radius=0.062, mat=MAT_RUBBER,

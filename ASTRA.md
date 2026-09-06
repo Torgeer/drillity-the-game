@@ -601,6 +601,8 @@ rc-rig. `m07-core` measures **82 against 80** on the surface band — only visib
 once the harness started grading **warm**.
 
 The rc-rig precedent shows the shape of the win: **171,908 → 84,260 triangles,
+(that 84,260 is stale — the shipped model measured 70,804 and is 70,912 after
+the 2026-09-06 axis repair; measure it, do not quote this line),
 11.73 → 5.43 MB, bounds and draw calls unchanged** — it was all bevel hiding
 inside arrays (480 track shoes and 332 chain links at 108 triangles each where
 12 would do).

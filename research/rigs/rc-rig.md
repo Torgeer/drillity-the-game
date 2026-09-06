@@ -129,6 +129,17 @@ down a plain structure, so it carries most of the eye. Rated **30-40 t axial and
 **swings plus/minus 90 degrees from vertical for fan drilling** (`Mincon` p.13), so the
 head-to-mast joint must read as a rated pivot, not a bracket.
 
+> **THE HEAD IS NOT COAXIAL WITH THE MAST, and the model got this wrong until
+> 2026-09-06.** The carriage rides rails on the mast's FRONT face, so the axis
+> the string actually turns on stands clear in front of the mast structure — on
+> `Mineral Exploration Tooling` p.22 the rod clamp / breakout assembly at the
+> mast foot is visibly proud of the lattice on the same working face. The model
+> had `mount:hole`, the rod guide, the breakout table and both clamp levels on
+> the mast CENTRELINE and the spindle 0.79 m in front of them, at every feed
+> position. **No published RC drawing dimensions that setback** — see §8 — so it
+> is derived from the model's own head geometry and marked `NOT SOURCED`. Full
+> evidence, the two repair scopes and the decision: `rc-axis-repair.md`.
+
 ### 4.3 The RC plumbing at the head — what makes it RC and not a rotary rig
 
 In flow order (`research/02` §A2 from `[BL-RC]`; shapes from `Mincon` pp.12-13):
@@ -464,6 +475,32 @@ place RC differs sharply from every other rig in the game:
 > correct content in the wrong NODE, not in the wrong place — and there is no
 > blender-side lever for it, because `src/core/gltfRig.js` derives `prep.size`
 > and `prep.radius` from the whole scene graph with no exclusion.
+>
+> ### STILL NOT SOURCED after both GAs — 2026-09-06
+>
+> **Neither GA dimensions the rotary head's standoff from the mast, and neither
+> places the bore relative to the carrier.** A sweep of the whole local
+> catalogue library found no dimensioned GA of any RC rig, and both Epiroc PDFs
+> now return **HTTP 403** (as do `pdf.directindustry.com`, `neemba.com`,
+> `machinecatalogic.com`, `anyflip.com`). The transcriptions above are all
+> anybody has.
+>
+> Two findings worth keeping:
+>
+> 1. **OEMs never publish drill-axis to mast structural CENTRE-PLANE.** Where
+>    the dimension appears at all it is drill-axis to mast **FRONT FACE**, or
+>    drill-axis to **slew centre** ("reach" / "working radius"). The one located
+>    published instance of the front-face form is **Bauer BG 36 H / BS 95, doc
+>    905.868.2 (12/2020), printed p.16** — *"Drilling axis 1,100 mm (without
+>    upper Kelly guide) / 1,400 mm (with)"*, arrow landing on the leader front
+>    face. A foundation kelly rig, NOT this class: cite it for the convention
+>    only, never let 1.40 m migrate onto an RC rig. This model's front-face
+>    equivalent is 0.46 m.
+> 2. **The [E100] letter table is incomplete as transcribed** — A, B, D, E and F
+>    are recorded and **letter C is unaccounted for**. The brochure could not be
+>    reached to find out what C dimensions. Worth one attempt if access returns;
+>    on a lettered GA of this type C is often a working radius or a bore
+>    position, which is exactly the gap above.
 >
 > **Left open on purpose, not guessed:** the machine is built at [E100] SIZE
 > (5.45 m mast, 3.05 m rods, 7.2 m erected against 7.84, 7.6 m long against
