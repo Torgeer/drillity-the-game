@@ -1,0 +1,1566 @@
+{
+  "evidence": "Actual headed GLB work-light bindings and manual-review screenshots",
+  "limitations": [
+    "No FPS, performance, pixel-derived appearance or <=70 draw-count certification.",
+    "System and renderer methods are temporarily paused in this private page only; actual original methods perform settling and rendering.",
+    "Production env-before-rig ordering is retained during settling. Frozen samples explicitly run rig.update(0), then env.update(0), to measure the settled boundary; this does not prove same-frame tracking in motion.",
+    "Transition warnings are preserved separately; steady samples fail work-light diagnostics."
+  ],
+  "sourceBefore": {
+    "src/core/env.js": "89d502ef6dd09e72d66acfb74a0306d337bd75b4afc5f9d59c9369d4f67d9d4d",
+    "src/core/gltfRig.js": "19b35aeca43089649f0e5a5fb35fd1141ce723409c04610008be3ebc099568fc",
+    "src/rig/rigFactory.js": "4a23fea28cc4f45171ded9af6942fcb33ef2d301ff1d9a40211b41dd9cd1d91e",
+    "src/game/data.js": "3c442ae7e9ea4a15773e6225de6f0303acaa33e5f06a7bb4936d74a8e33d0b3b",
+    "src/main.js": "1d2aff5d59df99140e74e1df42a488d472bfcf57f43e9baec02b49e2214b2dfd",
+    "src/core/renderer.js": "7e628334cefd403ed0ad38ea09150a4df9f83d0d2b06b73e56b5a28e33d0b02c",
+    "src/core/contract.js": "a374211146b86c5dbc5ea88eb28a49e0505805fa486d585a1531e810414549b5",
+    "public/models/raisebore.glb": "22107d2d616d1ab64e29de6055deffa26a5f693ecf39fb05c1527bb958f452a5",
+    "public/models/tunnel-jumbo.glb": "4059aaa715b389aa641b5a75256dece9ee48ab342e50b9de7484a9beaf1f6094",
+    "public/models/bolter.glb": "c3a29ca8d6da32eb87f39f8e207ebd3d3aa8da1685f50cb71708d89f0e32ed23",
+    "public/models/longhole-rig.glb": "1ad4ea071c94ec27a72ccf974b41481472a21a6e54945027d31a91639c96fcab",
+    ".bak/underground-light-qa.mjs": "8e21e7de0e76763b3946a7b361f07f787019bf56ba9f1347ced1bf4182f27ef0"
+  },
+  "cases": [
+    {
+      "name": "raisebore",
+      "id": "raisebore",
+      "method": "raise-boring",
+      "lamps": {
+        "L": "table-work-light",
+        "R": "feed-work-light"
+      },
+      "setup": {
+        "previousSource": "glb:crawler-lite",
+        "contractId": "ct-german-site-raise-boring-503j5",
+        "stub": false,
+        "contractMethod": "raise-boring",
+        "rigChangeEvents": [],
+        "source": "glb:raisebore",
+        "warm": {
+          "programs": 57,
+          "ms": 1119.699999999255,
+          "parallel": true,
+          "post": 23,
+          "done": 57,
+          "total": 57,
+          "pending": 0,
+          "retired": 0,
+          "failed": 0,
+          "ready": true,
+          "reason": "ready"
+        },
+        "actualSystemOrder": [
+          "renderer",
+          "assets",
+          "gltfRigs",
+          "env",
+          "geology",
+          "terrain",
+          "rig",
+          "sim",
+          "vfx",
+          "progression",
+          "shopPreview",
+          "audio",
+          "ui"
+        ]
+      },
+      "snapshots": [
+        {
+          "source": "glb:raisebore",
+          "rigId": "raisebore",
+          "method": "raise-boring",
+          "siteMethod": "raise-boring",
+          "underground": "raise-boring",
+          "published": [
+            "table-work-light",
+            "feed-work-light"
+          ],
+          "bindings": [
+            {
+              "side": "L",
+              "name": "table-work-light",
+              "descriptorNode": "b75bd402-7815-447e-8c11-319f45c49e64",
+              "descriptorAim": "90a89ea7-f3c2-4c61-9181-b7f1da21ea39",
+              "mount": [
+                1.9500000476837158,
+                1.6200000047683716,
+                1.25
+              ],
+              "aim": [
+                1.100000023841858,
+                1.2000000476837158,
+                0.6299999952316284
+              ],
+              "light": [
+                1.9500000476837158,
+                1.6200000047683716,
+                1.25
+              ],
+              "target": [
+                1.100000023841858,
+                1.2000000476837158,
+                0.6299999952316284
+              ],
+              "angle": 0.5061454830783556,
+              "expectedAngle": 0.5061454830783556,
+              "distance": 32.4,
+              "expectedDistance": 32.4,
+              "color": 16771520,
+              "expectedColor": 16771520
+            },
+            {
+              "side": "R",
+              "name": "feed-work-light",
+              "descriptorNode": "0f8d65e5-bce7-4a4e-b0f6-9ef9d5d8a9cb",
+              "descriptorAim": "d10ed5e8-d8b6-4bf0-8bae-b5bdd7df96dc",
+              "mount": [
+                0,
+                3.174800047683716,
+                -0.8399999737739563
+              ],
+              "aim": [
+                0,
+                2.174800047683716,
+                -0.28999996185302734
+              ],
+              "light": [
+                0,
+                3.174800047683716,
+                -0.8399999737739563
+              ],
+              "target": [
+                0,
+                2.174800047683716,
+                -0.28999996185302734
+              ],
+              "angle": 0.4014257279586958,
+              "expectedAngle": 0.4014257279586958,
+              "distance": 39.6,
+              "expectedDistance": 39.6,
+              "color": 16771520,
+              "expectedColor": 16771520
+            }
+          ],
+          "fill": {
+            "position": [
+              0,
+              3.174800047683716,
+              -0.8399999737739563
+            ],
+            "target": [
+              0,
+              2.174800047683716,
+              -0.28999996185302734
+            ],
+            "angle": 0.4014257279586958,
+            "distance": 39.6,
+            "color": 16771520
+          },
+          "contextLost": false
+        },
+        {
+          "source": "glb:raisebore",
+          "rigId": "raisebore",
+          "method": "raise-boring",
+          "siteMethod": "raise-boring",
+          "underground": "raise-boring",
+          "published": [
+            "table-work-light",
+            "feed-work-light"
+          ],
+          "bindings": [
+            {
+              "side": "L",
+              "name": "table-work-light",
+              "descriptorNode": "b75bd402-7815-447e-8c11-319f45c49e64",
+              "descriptorAim": "90a89ea7-f3c2-4c61-9181-b7f1da21ea39",
+              "mount": [
+                1.9500000476837158,
+                1.6200000047683716,
+                1.25
+              ],
+              "aim": [
+                1.100000023841858,
+                1.2000000476837158,
+                0.6299999952316284
+              ],
+              "light": [
+                1.9500000476837158,
+                1.6200000047683716,
+                1.25
+              ],
+              "target": [
+                1.100000023841858,
+                1.2000000476837158,
+                0.6299999952316284
+              ],
+              "angle": 0.5061454830783556,
+              "expectedAngle": 0.5061454830783556,
+              "distance": 32.4,
+              "expectedDistance": 32.4,
+              "color": 16771520,
+              "expectedColor": 16771520
+            },
+            {
+              "side": "R",
+              "name": "feed-work-light",
+              "descriptorNode": "0f8d65e5-bce7-4a4e-b0f6-9ef9d5d8a9cb",
+              "descriptorAim": "d10ed5e8-d8b6-4bf0-8bae-b5bdd7df96dc",
+              "mount": [
+                0,
+                3.174800047683716,
+                -0.8399999737739563
+              ],
+              "aim": [
+                0,
+                2.174800047683716,
+                -0.28999996185302734
+              ],
+              "light": [
+                0,
+                3.174800047683716,
+                -0.8399999737739563
+              ],
+              "target": [
+                0,
+                2.174800047683716,
+                -0.28999996185302734
+              ],
+              "angle": 0.4014257279586958,
+              "expectedAngle": 0.4014257279586958,
+              "distance": 39.6,
+              "expectedDistance": 39.6,
+              "color": 16771520,
+              "expectedColor": 16771520
+            }
+          ],
+          "fill": {
+            "position": [
+              0,
+              3.174800047683716,
+              -0.8399999737739563
+            ],
+            "target": [
+              0,
+              2.174800047683716,
+              -0.28999996185302734
+            ],
+            "angle": 0.4014257279586958,
+            "distance": 39.6,
+            "color": 16771520
+          },
+          "contextLost": false
+        },
+        {
+          "source": "glb:raisebore",
+          "rigId": "raisebore",
+          "method": "raise-boring",
+          "siteMethod": "raise-boring",
+          "underground": "raise-boring",
+          "published": [
+            "table-work-light",
+            "feed-work-light"
+          ],
+          "bindings": [
+            {
+              "side": "L",
+              "name": "table-work-light",
+              "descriptorNode": "b75bd402-7815-447e-8c11-319f45c49e64",
+              "descriptorAim": "90a89ea7-f3c2-4c61-9181-b7f1da21ea39",
+              "mount": [
+                1.9500000476837158,
+                1.6200000047683716,
+                1.25
+              ],
+              "aim": [
+                1.100000023841858,
+                1.2000000476837158,
+                0.6299999952316284
+              ],
+              "light": [
+                1.9500000476837158,
+                1.6200000047683716,
+                1.25
+              ],
+              "target": [
+                1.100000023841858,
+                1.2000000476837158,
+                0.6299999952316284
+              ],
+              "angle": 0.5061454830783556,
+              "expectedAngle": 0.5061454830783556,
+              "distance": 32.4,
+              "expectedDistance": 32.4,
+              "color": 16771520,
+              "expectedColor": 16771520
+            },
+            {
+              "side": "R",
+              "name": "feed-work-light",
+              "descriptorNode": "0f8d65e5-bce7-4a4e-b0f6-9ef9d5d8a9cb",
+              "descriptorAim": "d10ed5e8-d8b6-4bf0-8bae-b5bdd7df96dc",
+              "mount": [
+                0,
+                3.174800047683716,
+                -0.8399999737739563
+              ],
+              "aim": [
+                0,
+                2.174800047683716,
+                -0.28999996185302734
+              ],
+              "light": [
+                0,
+                3.174800047683716,
+                -0.8399999737739563
+              ],
+              "target": [
+                0,
+                2.174800047683716,
+                -0.28999996185302734
+              ],
+              "angle": 0.4014257279586958,
+              "expectedAngle": 0.4014257279586958,
+              "distance": 39.6,
+              "expectedDistance": 39.6,
+              "color": 16771520,
+              "expectedColor": 16771520
+            }
+          ],
+          "fill": {
+            "position": [
+              0,
+              3.174800047683716,
+              -0.8399999737739563
+            ],
+            "target": [
+              0,
+              2.174800047683716,
+              -0.28999996185302734
+            ],
+            "angle": 0.4014257279586958,
+            "distance": 39.6,
+            "color": 16771520
+          },
+          "contextLost": false
+        }
+      ],
+      "transitionWarnings": [
+        {
+          "case": "raisebore",
+          "phase": "transition",
+          "text": "[sim] no accepted contract run — starting an unpaid preview; completion cannot award money, XP or reputation."
+        }
+      ],
+      "steadyWarnings": [],
+      "screenshots": [
+        "raisebore-page.png",
+        "raisebore-canvas.png"
+      ]
+    },
+    {
+      "name": "direct-raisebore-to-jumbo",
+      "id": "tunnel-jumbo",
+      "method": "tunnel-jumbo",
+      "lamps": {
+        "L": "boom-l-lamp-0",
+        "R": "boom-r-lamp-0"
+      },
+      "setup": {
+        "previousSource": "glb:raisebore",
+        "contractId": "ct-german-site-tunnel-jumbo-9v4am",
+        "stub": false,
+        "contractMethod": "tunnel-jumbo",
+        "rigChangeEvents": [],
+        "source": "glb:tunnel-jumbo",
+        "warm": {
+          "programs": 58,
+          "ms": 1386.8999999985099,
+          "parallel": true,
+          "post": 24,
+          "done": 58,
+          "total": 58,
+          "pending": 0,
+          "retired": 0,
+          "failed": 0,
+          "ready": true,
+          "reason": "ready"
+        },
+        "actualSystemOrder": [
+          "renderer",
+          "assets",
+          "gltfRigs",
+          "env",
+          "geology",
+          "terrain",
+          "rig",
+          "sim",
+          "vfx",
+          "progression",
+          "shopPreview",
+          "audio",
+          "ui"
+        ]
+      },
+      "snapshots": [
+        {
+          "source": "glb:tunnel-jumbo",
+          "rigId": "tunnel-jumbo",
+          "method": "tunnel-jumbo",
+          "siteMethod": "tunnel-jumbo",
+          "underground": "tunnel-jumbo",
+          "published": [
+            "tram-f-00",
+            "tram-f-01",
+            "tram-f-10",
+            "tram-f-11",
+            "boom-l-lamp-0",
+            "boom-l-lamp-1",
+            "boom-r-lamp-0",
+            "boom-r-lamp-1",
+            "station",
+            "tram-r-0",
+            "tram-r-1"
+          ],
+          "bindings": [
+            {
+              "side": "L",
+              "name": "boom-l-lamp-0",
+              "descriptorNode": "4328857e-aef3-4e10-bcfc-d3cf11a924a7",
+              "descriptorAim": "f087cc16-b414-4fc4-b70c-3fb525954699",
+              "mount": [
+                -0.7442902233471885,
+                1.0800000429153442,
+                -4.429320826228194
+              ],
+              "aim": [
+                -0.79662612655899,
+                0.9800000190734863,
+                -5.427949349114202
+              ],
+              "light": [
+                -0.7442902233471885,
+                1.0800000429153442,
+                -4.429320826228194
+              ],
+              "target": [
+                -0.79662612655899,
+                0.9800000190734863,
+                -5.427949349114202
+              ],
+              "angle": 0.47123889803846897,
+              "expectedAngle": 0.47123889803846897,
+              "distance": 46.800000000000004,
+              "expectedDistance": 46.800000000000004,
+              "color": 16771520,
+              "expectedColor": 16771520
+            },
+            {
+              "side": "R",
+              "name": "boom-r-lamp-0",
+              "descriptorNode": "aeb6732a-4cba-465d-83d5-23a0d7755e5c",
+              "descriptorAim": "10b10b9a-81f3-4249-9bd3-c77745ac846d",
+              "mount": [
+                0.4347149838263943,
+                1.0800000429153442,
+                -4.445544559246972
+              ],
+              "aim": [
+                0.4870509400691191,
+                0.9800000190734863,
+                -5.4441740940232775
+              ],
+              "light": [
+                0.4347149838263943,
+                1.0800000429153442,
+                -4.445544559246972
+              ],
+              "target": [
+                0.4870509400691191,
+                0.9800000190734863,
+                -5.4441740940232775
+              ],
+              "angle": 0.47123889803846897,
+              "expectedAngle": 0.47123889803846897,
+              "distance": 46.800000000000004,
+              "expectedDistance": 46.800000000000004,
+              "color": 16771520,
+              "expectedColor": 16771520
+            }
+          ],
+          "fill": {
+            "position": [
+              0.4347149838263943,
+              1.0800000429153442,
+              -4.445544559246972
+            ],
+            "target": [
+              0.4870509400691191,
+              0.9800000190734863,
+              -5.4441740940232775
+            ],
+            "angle": 0.47123889803846897,
+            "distance": 46.800000000000004,
+            "color": 16771520
+          },
+          "contextLost": false
+        },
+        {
+          "source": "glb:tunnel-jumbo",
+          "rigId": "tunnel-jumbo",
+          "method": "tunnel-jumbo",
+          "siteMethod": "tunnel-jumbo",
+          "underground": "tunnel-jumbo",
+          "published": [
+            "tram-f-00",
+            "tram-f-01",
+            "tram-f-10",
+            "tram-f-11",
+            "boom-l-lamp-0",
+            "boom-l-lamp-1",
+            "boom-r-lamp-0",
+            "boom-r-lamp-1",
+            "station",
+            "tram-r-0",
+            "tram-r-1"
+          ],
+          "bindings": [
+            {
+              "side": "L",
+              "name": "boom-l-lamp-0",
+              "descriptorNode": "4328857e-aef3-4e10-bcfc-d3cf11a924a7",
+              "descriptorAim": "f087cc16-b414-4fc4-b70c-3fb525954699",
+              "mount": [
+                -0.7442902233471885,
+                1.0800000429153442,
+                -4.429320826228194
+              ],
+              "aim": [
+                -0.79662612655899,
+                0.9800000190734863,
+                -5.427949349114202
+              ],
+              "light": [
+                -0.7442902233471885,
+                1.0800000429153442,
+                -4.429320826228194
+              ],
+              "target": [
+                -0.79662612655899,
+                0.9800000190734863,
+                -5.427949349114202
+              ],
+              "angle": 0.47123889803846897,
+              "expectedAngle": 0.47123889803846897,
+              "distance": 46.800000000000004,
+              "expectedDistance": 46.800000000000004,
+              "color": 16771520,
+              "expectedColor": 16771520
+            },
+            {
+              "side": "R",
+              "name": "boom-r-lamp-0",
+              "descriptorNode": "aeb6732a-4cba-465d-83d5-23a0d7755e5c",
+              "descriptorAim": "10b10b9a-81f3-4249-9bd3-c77745ac846d",
+              "mount": [
+                0.4347149838263943,
+                1.0800000429153442,
+                -4.445544559246972
+              ],
+              "aim": [
+                0.4870509400691191,
+                0.9800000190734863,
+                -5.4441740940232775
+              ],
+              "light": [
+                0.4347149838263943,
+                1.0800000429153442,
+                -4.445544559246972
+              ],
+              "target": [
+                0.4870509400691191,
+                0.9800000190734863,
+                -5.4441740940232775
+              ],
+              "angle": 0.47123889803846897,
+              "expectedAngle": 0.47123889803846897,
+              "distance": 46.800000000000004,
+              "expectedDistance": 46.800000000000004,
+              "color": 16771520,
+              "expectedColor": 16771520
+            }
+          ],
+          "fill": {
+            "position": [
+              0.4347149838263943,
+              1.0800000429153442,
+              -4.445544559246972
+            ],
+            "target": [
+              0.4870509400691191,
+              0.9800000190734863,
+              -5.4441740940232775
+            ],
+            "angle": 0.47123889803846897,
+            "distance": 46.800000000000004,
+            "color": 16771520
+          },
+          "contextLost": false
+        },
+        {
+          "source": "glb:tunnel-jumbo",
+          "rigId": "tunnel-jumbo",
+          "method": "tunnel-jumbo",
+          "siteMethod": "tunnel-jumbo",
+          "underground": "tunnel-jumbo",
+          "published": [
+            "tram-f-00",
+            "tram-f-01",
+            "tram-f-10",
+            "tram-f-11",
+            "boom-l-lamp-0",
+            "boom-l-lamp-1",
+            "boom-r-lamp-0",
+            "boom-r-lamp-1",
+            "station",
+            "tram-r-0",
+            "tram-r-1"
+          ],
+          "bindings": [
+            {
+              "side": "L",
+              "name": "boom-l-lamp-0",
+              "descriptorNode": "4328857e-aef3-4e10-bcfc-d3cf11a924a7",
+              "descriptorAim": "f087cc16-b414-4fc4-b70c-3fb525954699",
+              "mount": [
+                -0.7442902233471885,
+                1.0800000429153442,
+                -4.429320826228194
+              ],
+              "aim": [
+                -0.79662612655899,
+                0.9800000190734863,
+                -5.427949349114202
+              ],
+              "light": [
+                -0.7442902233471885,
+                1.0800000429153442,
+                -4.429320826228194
+              ],
+              "target": [
+                -0.79662612655899,
+                0.9800000190734863,
+                -5.427949349114202
+              ],
+              "angle": 0.47123889803846897,
+              "expectedAngle": 0.47123889803846897,
+              "distance": 46.800000000000004,
+              "expectedDistance": 46.800000000000004,
+              "color": 16771520,
+              "expectedColor": 16771520
+            },
+            {
+              "side": "R",
+              "name": "boom-r-lamp-0",
+              "descriptorNode": "aeb6732a-4cba-465d-83d5-23a0d7755e5c",
+              "descriptorAim": "10b10b9a-81f3-4249-9bd3-c77745ac846d",
+              "mount": [
+                0.4347149838263943,
+                1.0800000429153442,
+                -4.445544559246972
+              ],
+              "aim": [
+                0.4870509400691191,
+                0.9800000190734863,
+                -5.4441740940232775
+              ],
+              "light": [
+                0.4347149838263943,
+                1.0800000429153442,
+                -4.445544559246972
+              ],
+              "target": [
+                0.4870509400691191,
+                0.9800000190734863,
+                -5.4441740940232775
+              ],
+              "angle": 0.47123889803846897,
+              "expectedAngle": 0.47123889803846897,
+              "distance": 46.800000000000004,
+              "expectedDistance": 46.800000000000004,
+              "color": 16771520,
+              "expectedColor": 16771520
+            }
+          ],
+          "fill": {
+            "position": [
+              0.4347149838263943,
+              1.0800000429153442,
+              -4.445544559246972
+            ],
+            "target": [
+              0.4870509400691191,
+              0.9800000190734863,
+              -5.4441740940232775
+            ],
+            "angle": 0.47123889803846897,
+            "distance": 46.800000000000004,
+            "color": 16771520
+          },
+          "contextLost": false
+        }
+      ],
+      "transitionWarnings": [],
+      "steadyWarnings": [],
+      "screenshots": [
+        "direct-raisebore-to-jumbo-page.png",
+        "direct-raisebore-to-jumbo-canvas.png"
+      ]
+    },
+    {
+      "name": "rockbolt-bolter",
+      "id": "bolter",
+      "method": "rockbolt",
+      "lamps": {
+        "L": "feed-work-light"
+      },
+      "setup": {
+        "previousSource": "glb:tunnel-jumbo",
+        "contractId": "ct-german-site-rockbolt-5fd37",
+        "stub": false,
+        "contractMethod": "rockbolt",
+        "rigChangeEvents": [],
+        "source": "glb:bolter",
+        "warm": {
+          "programs": 58,
+          "ms": 266.79999999701977,
+          "parallel": true,
+          "post": 24,
+          "done": 58,
+          "total": 58,
+          "pending": 0,
+          "retired": 0,
+          "failed": 0,
+          "ready": true,
+          "reason": "ready"
+        },
+        "actualSystemOrder": [
+          "renderer",
+          "assets",
+          "gltfRigs",
+          "env",
+          "geology",
+          "terrain",
+          "rig",
+          "sim",
+          "vfx",
+          "progression",
+          "shopPreview",
+          "audio",
+          "ui"
+        ]
+      },
+      "snapshots": [
+        {
+          "source": "glb:bolter",
+          "rigId": "bolter",
+          "method": "rockbolt",
+          "siteMethod": "rockbolt",
+          "underground": "rockbolt",
+          "published": [
+            "stair-light",
+            "tram-f1",
+            "tram-f2",
+            "tram-f3",
+            "tram-f4",
+            "tram-r1",
+            "tram-r2",
+            "tram-r3",
+            "tram-r4",
+            "feed-work-light",
+            "roof-work-1",
+            "roof-work-2",
+            "roof-work-3"
+          ],
+          "bindings": [
+            {
+              "side": "L",
+              "name": "feed-work-light",
+              "descriptorNode": "63e74ae5-1058-4805-bad2-544a202ef03c",
+              "descriptorAim": "76185f4f-8ccc-4b62-acf8-2e58d5471c3f",
+              "mount": [
+                -0.2999994800109163,
+                2.976000448530542,
+                3.522680833300486
+              ],
+              "aim": [
+                -0.2999995630586099,
+                3.9760004534086977,
+                2.9726808186965714
+              ],
+              "light": [
+                -0.2999994800109163,
+                2.976000448530542,
+                3.522680833300486
+              ],
+              "target": [
+                -0.2999995630586099,
+                3.9760004534086977,
+                2.9726808186965714
+              ],
+              "angle": 0.5061454830783556,
+              "expectedAngle": 0.5061454830783556,
+              "distance": 28.8,
+              "expectedDistance": 28.8,
+              "color": 16052450,
+              "expectedColor": 16052450
+            }
+          ],
+          "fill": {
+            "position": [
+              3.9648472680424396,
+              2.2680000000000002,
+              2.071614380403941
+            ],
+            "target": [
+              -3.6121746728788704,
+              2.7,
+              -3.4734838609978347
+            ],
+            "angle": 0.56,
+            "distance": 16,
+            "color": 13623551
+          },
+          "contextLost": false
+        },
+        {
+          "source": "glb:bolter",
+          "rigId": "bolter",
+          "method": "rockbolt",
+          "siteMethod": "rockbolt",
+          "underground": "rockbolt",
+          "published": [
+            "stair-light",
+            "tram-f1",
+            "tram-f2",
+            "tram-f3",
+            "tram-f4",
+            "tram-r1",
+            "tram-r2",
+            "tram-r3",
+            "tram-r4",
+            "feed-work-light",
+            "roof-work-1",
+            "roof-work-2",
+            "roof-work-3"
+          ],
+          "bindings": [
+            {
+              "side": "L",
+              "name": "feed-work-light",
+              "descriptorNode": "63e74ae5-1058-4805-bad2-544a202ef03c",
+              "descriptorAim": "76185f4f-8ccc-4b62-acf8-2e58d5471c3f",
+              "mount": [
+                -0.2999994800109163,
+                2.976000448530542,
+                3.522680833300486
+              ],
+              "aim": [
+                -0.2999995630586099,
+                3.9760004534086977,
+                2.9726808186965714
+              ],
+              "light": [
+                -0.2999994800109163,
+                2.976000448530542,
+                3.522680833300486
+              ],
+              "target": [
+                -0.2999995630586099,
+                3.9760004534086977,
+                2.9726808186965714
+              ],
+              "angle": 0.5061454830783556,
+              "expectedAngle": 0.5061454830783556,
+              "distance": 28.8,
+              "expectedDistance": 28.8,
+              "color": 16052450,
+              "expectedColor": 16052450
+            }
+          ],
+          "fill": {
+            "position": [
+              3.9648472680424396,
+              2.2680000000000002,
+              2.071614380403941
+            ],
+            "target": [
+              -3.6121746728788704,
+              2.7,
+              -3.4734838609978347
+            ],
+            "angle": 0.56,
+            "distance": 16,
+            "color": 13623551
+          },
+          "contextLost": false
+        },
+        {
+          "source": "glb:bolter",
+          "rigId": "bolter",
+          "method": "rockbolt",
+          "siteMethod": "rockbolt",
+          "underground": "rockbolt",
+          "published": [
+            "stair-light",
+            "tram-f1",
+            "tram-f2",
+            "tram-f3",
+            "tram-f4",
+            "tram-r1",
+            "tram-r2",
+            "tram-r3",
+            "tram-r4",
+            "feed-work-light",
+            "roof-work-1",
+            "roof-work-2",
+            "roof-work-3"
+          ],
+          "bindings": [
+            {
+              "side": "L",
+              "name": "feed-work-light",
+              "descriptorNode": "63e74ae5-1058-4805-bad2-544a202ef03c",
+              "descriptorAim": "76185f4f-8ccc-4b62-acf8-2e58d5471c3f",
+              "mount": [
+                -0.2999994800109163,
+                2.976000448530542,
+                3.522680833300486
+              ],
+              "aim": [
+                -0.2999995630586099,
+                3.9760004534086977,
+                2.9726808186965714
+              ],
+              "light": [
+                -0.2999994800109163,
+                2.976000448530542,
+                3.522680833300486
+              ],
+              "target": [
+                -0.2999995630586099,
+                3.9760004534086977,
+                2.9726808186965714
+              ],
+              "angle": 0.5061454830783556,
+              "expectedAngle": 0.5061454830783556,
+              "distance": 28.8,
+              "expectedDistance": 28.8,
+              "color": 16052450,
+              "expectedColor": 16052450
+            }
+          ],
+          "fill": {
+            "position": [
+              3.9648472680424396,
+              2.2680000000000002,
+              2.071614380403941
+            ],
+            "target": [
+              -3.6121746728788704,
+              2.7,
+              -3.4734838609978347
+            ],
+            "angle": 0.56,
+            "distance": 16,
+            "color": 13623551
+          },
+          "contextLost": false
+        }
+      ],
+      "transitionWarnings": [],
+      "steadyWarnings": [],
+      "screenshots": [
+        "rockbolt-bolter-page.png",
+        "rockbolt-bolter-canvas.png"
+      ]
+    },
+    {
+      "name": "rockbolt-longhole",
+      "id": "longhole-rig",
+      "method": "rockbolt",
+      "lamps": {
+        "L": "feed-head"
+      },
+      "setup": {
+        "previousSource": "glb:bolter",
+        "contractId": "ct-german-site-rockbolt-46xw4",
+        "stub": false,
+        "contractMethod": "rockbolt",
+        "rigChangeEvents": [],
+        "source": "glb:longhole-rig",
+        "warm": {
+          "programs": 58,
+          "ms": 2,
+          "parallel": true,
+          "post": 24,
+          "done": 58,
+          "total": 58,
+          "pending": 0,
+          "retired": 0,
+          "failed": 0,
+          "ready": true,
+          "reason": "ready"
+        },
+        "actualSystemOrder": [
+          "renderer",
+          "assets",
+          "gltfRigs",
+          "env",
+          "geology",
+          "terrain",
+          "rig",
+          "sim",
+          "vfx",
+          "progression",
+          "shopPreview",
+          "audio",
+          "ui"
+        ]
+      },
+      "snapshots": [
+        {
+          "source": "glb:longhole-rig",
+          "rigId": "longhole-rig",
+          "method": "rockbolt",
+          "siteMethod": "rockbolt",
+          "underground": "rockbolt",
+          "published": [
+            "tram-r-0",
+            "tram-r-1",
+            "spot-l",
+            "spot-r",
+            "stair",
+            "tram-f-0",
+            "tram-f-1",
+            "tram-n-0",
+            "tram-n-1",
+            "boom",
+            "feed-collar",
+            "feed-head"
+          ],
+          "bindings": [
+            {
+              "side": "L",
+              "name": "feed-head",
+              "descriptorNode": "6a2b2381-13e6-4be9-b5a6-2137677e3b57",
+              "descriptorAim": "5ec97a7b-4329-4d4f-b0ec-ef44bf59d156",
+              "mount": [
+                -0.23999999463558197,
+                2.940000057220459,
+                -4.220999717712402
+              ],
+              "aim": [
+                -0.28999999165534973,
+                1.940000057220459,
+                -4.720999717712402
+              ],
+              "light": [
+                -0.23999999463558197,
+                2.940000057220459,
+                -4.220999717712402
+              ],
+              "target": [
+                -0.28999999165534973,
+                1.940000057220459,
+                -4.720999717712402
+              ],
+              "angle": 0.4363323129985824,
+              "expectedAngle": 0.4363323129985824,
+              "distance": 36,
+              "expectedDistance": 36,
+              "color": 16771520,
+              "expectedColor": 16771520
+            }
+          ],
+          "fill": {
+            "position": [
+              3.9648472680424396,
+              2.2680000000000002,
+              2.071614380403941
+            ],
+            "target": [
+              -3.6121746728788704,
+              2.7,
+              -3.4734838609978347
+            ],
+            "angle": 0.56,
+            "distance": 16,
+            "color": 13623551
+          },
+          "contextLost": false
+        },
+        {
+          "source": "glb:longhole-rig",
+          "rigId": "longhole-rig",
+          "method": "rockbolt",
+          "siteMethod": "rockbolt",
+          "underground": "rockbolt",
+          "published": [
+            "tram-r-0",
+            "tram-r-1",
+            "spot-l",
+            "spot-r",
+            "stair",
+            "tram-f-0",
+            "tram-f-1",
+            "tram-n-0",
+            "tram-n-1",
+            "boom",
+            "feed-collar",
+            "feed-head"
+          ],
+          "bindings": [
+            {
+              "side": "L",
+              "name": "feed-head",
+              "descriptorNode": "6a2b2381-13e6-4be9-b5a6-2137677e3b57",
+              "descriptorAim": "5ec97a7b-4329-4d4f-b0ec-ef44bf59d156",
+              "mount": [
+                -0.23999999463558197,
+                2.940000057220459,
+                -4.220999717712402
+              ],
+              "aim": [
+                -0.28999999165534973,
+                1.940000057220459,
+                -4.720999717712402
+              ],
+              "light": [
+                -0.23999999463558197,
+                2.940000057220459,
+                -4.220999717712402
+              ],
+              "target": [
+                -0.28999999165534973,
+                1.940000057220459,
+                -4.720999717712402
+              ],
+              "angle": 0.4363323129985824,
+              "expectedAngle": 0.4363323129985824,
+              "distance": 36,
+              "expectedDistance": 36,
+              "color": 16771520,
+              "expectedColor": 16771520
+            }
+          ],
+          "fill": {
+            "position": [
+              3.9648472680424396,
+              2.2680000000000002,
+              2.071614380403941
+            ],
+            "target": [
+              -3.6121746728788704,
+              2.7,
+              -3.4734838609978347
+            ],
+            "angle": 0.56,
+            "distance": 16,
+            "color": 13623551
+          },
+          "contextLost": false
+        },
+        {
+          "source": "glb:longhole-rig",
+          "rigId": "longhole-rig",
+          "method": "rockbolt",
+          "siteMethod": "rockbolt",
+          "underground": "rockbolt",
+          "published": [
+            "tram-r-0",
+            "tram-r-1",
+            "spot-l",
+            "spot-r",
+            "stair",
+            "tram-f-0",
+            "tram-f-1",
+            "tram-n-0",
+            "tram-n-1",
+            "boom",
+            "feed-collar",
+            "feed-head"
+          ],
+          "bindings": [
+            {
+              "side": "L",
+              "name": "feed-head",
+              "descriptorNode": "6a2b2381-13e6-4be9-b5a6-2137677e3b57",
+              "descriptorAim": "5ec97a7b-4329-4d4f-b0ec-ef44bf59d156",
+              "mount": [
+                -0.23999999463558197,
+                2.940000057220459,
+                -4.220999717712402
+              ],
+              "aim": [
+                -0.28999999165534973,
+                1.940000057220459,
+                -4.720999717712402
+              ],
+              "light": [
+                -0.23999999463558197,
+                2.940000057220459,
+                -4.220999717712402
+              ],
+              "target": [
+                -0.28999999165534973,
+                1.940000057220459,
+                -4.720999717712402
+              ],
+              "angle": 0.4363323129985824,
+              "expectedAngle": 0.4363323129985824,
+              "distance": 36,
+              "expectedDistance": 36,
+              "color": 16771520,
+              "expectedColor": 16771520
+            }
+          ],
+          "fill": {
+            "position": [
+              3.9648472680424396,
+              2.2680000000000002,
+              2.071614380403941
+            ],
+            "target": [
+              -3.6121746728788704,
+              2.7,
+              -3.4734838609978347
+            ],
+            "angle": 0.56,
+            "distance": 16,
+            "color": 13623551
+          },
+          "contextLost": false
+        }
+      ],
+      "transitionWarnings": [],
+      "steadyWarnings": [],
+      "screenshots": [
+        "rockbolt-longhole-page.png",
+        "rockbolt-longhole-canvas.png"
+      ]
+    },
+    {
+      "name": "rockbolt-jumbo",
+      "id": "tunnel-jumbo",
+      "method": "rockbolt",
+      "lamps": {
+        "L": "boom-l-lamp-0"
+      },
+      "setup": {
+        "previousSource": "glb:longhole-rig",
+        "contractId": "ct-german-site-rockbolt-3ebge",
+        "stub": false,
+        "contractMethod": "rockbolt",
+        "rigChangeEvents": [],
+        "source": "glb:tunnel-jumbo",
+        "warm": {
+          "programs": 58,
+          "ms": 1.800000000745058,
+          "parallel": true,
+          "post": 24,
+          "done": 58,
+          "total": 58,
+          "pending": 0,
+          "retired": 0,
+          "failed": 0,
+          "ready": true,
+          "reason": "ready"
+        },
+        "actualSystemOrder": [
+          "renderer",
+          "assets",
+          "gltfRigs",
+          "env",
+          "geology",
+          "terrain",
+          "rig",
+          "sim",
+          "vfx",
+          "progression",
+          "shopPreview",
+          "audio",
+          "ui"
+        ]
+      },
+      "snapshots": [
+        {
+          "source": "glb:tunnel-jumbo",
+          "rigId": "tunnel-jumbo",
+          "method": "rockbolt",
+          "siteMethod": "rockbolt",
+          "underground": "rockbolt",
+          "published": [
+            "tram-f-00",
+            "tram-f-01",
+            "tram-f-10",
+            "tram-f-11",
+            "boom-l-lamp-0",
+            "boom-l-lamp-1",
+            "boom-r-lamp-0",
+            "boom-r-lamp-1",
+            "station",
+            "tram-r-0",
+            "tram-r-1"
+          ],
+          "bindings": [
+            {
+              "side": "L",
+              "name": "boom-l-lamp-0",
+              "descriptorNode": "4328857e-aef3-4e10-bcfc-d3cf11a924a7",
+              "descriptorAim": "f087cc16-b414-4fc4-b70c-3fb525954699",
+              "mount": [
+                -0.7442902233471885,
+                1.0800000429153442,
+                -4.429320826228194
+              ],
+              "aim": [
+                -0.79662612655899,
+                0.9800000190734863,
+                -5.427949349114202
+              ],
+              "light": [
+                -0.7442902233471885,
+                1.0800000429153442,
+                -4.429320826228194
+              ],
+              "target": [
+                -0.79662612655899,
+                0.9800000190734863,
+                -5.427949349114202
+              ],
+              "angle": 0.47123889803846897,
+              "expectedAngle": 0.47123889803846897,
+              "distance": 46.800000000000004,
+              "expectedDistance": 46.800000000000004,
+              "color": 16771520,
+              "expectedColor": 16771520
+            }
+          ],
+          "fill": {
+            "position": [
+              3.9648472680424396,
+              2.2680000000000002,
+              2.071614380403941
+            ],
+            "target": [
+              -3.6121746728788704,
+              2.7,
+              -3.4734838609978347
+            ],
+            "angle": 0.56,
+            "distance": 16,
+            "color": 13623551
+          },
+          "contextLost": false
+        },
+        {
+          "source": "glb:tunnel-jumbo",
+          "rigId": "tunnel-jumbo",
+          "method": "rockbolt",
+          "siteMethod": "rockbolt",
+          "underground": "rockbolt",
+          "published": [
+            "tram-f-00",
+            "tram-f-01",
+            "tram-f-10",
+            "tram-f-11",
+            "boom-l-lamp-0",
+            "boom-l-lamp-1",
+            "boom-r-lamp-0",
+            "boom-r-lamp-1",
+            "station",
+            "tram-r-0",
+            "tram-r-1"
+          ],
+          "bindings": [
+            {
+              "side": "L",
+              "name": "boom-l-lamp-0",
+              "descriptorNode": "4328857e-aef3-4e10-bcfc-d3cf11a924a7",
+              "descriptorAim": "f087cc16-b414-4fc4-b70c-3fb525954699",
+              "mount": [
+                -0.7442902233471885,
+                1.0800000429153442,
+                -4.429320826228194
+              ],
+              "aim": [
+                -0.79662612655899,
+                0.9800000190734863,
+                -5.427949349114202
+              ],
+              "light": [
+                -0.7442902233471885,
+                1.0800000429153442,
+                -4.429320826228194
+              ],
+              "target": [
+                -0.79662612655899,
+                0.9800000190734863,
+                -5.427949349114202
+              ],
+              "angle": 0.47123889803846897,
+              "expectedAngle": 0.47123889803846897,
+              "distance": 46.800000000000004,
+              "expectedDistance": 46.800000000000004,
+              "color": 16771520,
+              "expectedColor": 16771520
+            }
+          ],
+          "fill": {
+            "position": [
+              3.9648472680424396,
+              2.2680000000000002,
+              2.071614380403941
+            ],
+            "target": [
+              -3.6121746728788704,
+              2.7,
+              -3.4734838609978347
+            ],
+            "angle": 0.56,
+            "distance": 16,
+            "color": 13623551
+          },
+          "contextLost": false
+        },
+        {
+          "source": "glb:tunnel-jumbo",
+          "rigId": "tunnel-jumbo",
+          "method": "rockbolt",
+          "siteMethod": "rockbolt",
+          "underground": "rockbolt",
+          "published": [
+            "tram-f-00",
+            "tram-f-01",
+            "tram-f-10",
+            "tram-f-11",
+            "boom-l-lamp-0",
+            "boom-l-lamp-1",
+            "boom-r-lamp-0",
+            "boom-r-lamp-1",
+            "station",
+            "tram-r-0",
+            "tram-r-1"
+          ],
+          "bindings": [
+            {
+              "side": "L",
+              "name": "boom-l-lamp-0",
+              "descriptorNode": "4328857e-aef3-4e10-bcfc-d3cf11a924a7",
+              "descriptorAim": "f087cc16-b414-4fc4-b70c-3fb525954699",
+              "mount": [
+                -0.7442902233471885,
+                1.0800000429153442,
+                -4.429320826228194
+              ],
+              "aim": [
+                -0.79662612655899,
+                0.9800000190734863,
+                -5.427949349114202
+              ],
+              "light": [
+                -0.7442902233471885,
+                1.0800000429153442,
+                -4.429320826228194
+              ],
+              "target": [
+                -0.79662612655899,
+                0.9800000190734863,
+                -5.427949349114202
+              ],
+              "angle": 0.47123889803846897,
+              "expectedAngle": 0.47123889803846897,
+              "distance": 46.800000000000004,
+              "expectedDistance": 46.800000000000004,
+              "color": 16771520,
+              "expectedColor": 16771520
+            }
+          ],
+          "fill": {
+            "position": [
+              3.9648472680424396,
+              2.2680000000000002,
+              2.071614380403941
+            ],
+            "target": [
+              -3.6121746728788704,
+              2.7,
+              -3.4734838609978347
+            ],
+            "angle": 0.56,
+            "distance": 16,
+            "color": 13623551
+          },
+          "contextLost": false
+        }
+      ],
+      "transitionWarnings": [],
+      "steadyWarnings": [],
+      "screenshots": [
+        "rockbolt-jumbo-page.png",
+        "rockbolt-jumbo-canvas.png"
+      ]
+    }
+  ],
+  "failures": [],
+  "warnings": [
+    {
+      "case": "raisebore",
+      "phase": "transition",
+      "text": "[sim] no accepted contract run — starting an unpaid preview; completion cannot award money, XP or reputation."
+    }
+  ],
+  "errors": [],
+  "resourcesFailed": [],
+  "servedSourceForms": {
+    "src/core/env.js": "vite-json-export",
+    "src/core/gltfRig.js": "vite-json-export",
+    "src/rig/rigFactory.js": "vite-json-export",
+    "src/game/data.js": "vite-json-export",
+    "src/main.js": "verbatim",
+    "src/core/renderer.js": "vite-json-export",
+    "src/core/contract.js": "vite-json-export"
+  },
+  "browserStarted": true,
+  "browserClosed": true,
+  "served": {
+    "src/core/env.js": "3911e9a4531d8ee597d0534b409853102e006ecd46fd7d7fa717956c633550ac",
+    "src/core/gltfRig.js": "ee72536681660da912aaddf75bcf47cd893190708f7d1718fbe5a94d0952070a",
+    "src/rig/rigFactory.js": "bf88ab626c0b434a73c971fe28f2c28a25a3433c987403975aba14c92fa2cf43",
+    "src/game/data.js": "13975cb35bbf02f40862b186c2f1e1defcf04dd8425b0769bc905a3c2d356e42",
+    "src/main.js": "875d92f80aa124c0c8da4565f306c8d948a12da588cf00184bb9f7ecaaaa0d13",
+    "src/core/renderer.js": "cef3fcb0f988a9ff98fbc423f51d5da05f0fcb3acb716750914cc12659445d75",
+    "src/core/contract.js": "a374211146b86c5dbc5ea88eb28a49e0505805fa486d585a1531e810414549b5",
+    "public/models/raisebore.glb": "22107d2d616d1ab64e29de6055deffa26a5f693ecf39fb05c1527bb958f452a5",
+    "public/models/tunnel-jumbo.glb": "4059aaa715b389aa641b5a75256dece9ee48ab342e50b9de7484a9beaf1f6094",
+    "public/models/bolter.glb": "c3a29ca8d6da32eb87f39f8e207ebd3d3aa8da1685f50cb71708d89f0e32ed23",
+    "public/models/longhole-rig.glb": "1ad4ea071c94ec27a72ccf974b41481472a21a6e54945027d31a91639c96fcab"
+  },
+  "sourceAfter": {
+    "src/core/env.js": "89d502ef6dd09e72d66acfb74a0306d337bd75b4afc5f9d59c9369d4f67d9d4d",
+    "src/core/gltfRig.js": "19b35aeca43089649f0e5a5fb35fd1141ce723409c04610008be3ebc099568fc",
+    "src/rig/rigFactory.js": "4a23fea28cc4f45171ded9af6942fcb33ef2d301ff1d9a40211b41dd9cd1d91e",
+    "src/game/data.js": "3c442ae7e9ea4a15773e6225de6f0303acaa33e5f06a7bb4936d74a8e33d0b3b",
+    "src/main.js": "1d2aff5d59df99140e74e1df42a488d472bfcf57f43e9baec02b49e2214b2dfd",
+    "src/core/renderer.js": "7e628334cefd403ed0ad38ea09150a4df9f83d0d2b06b73e56b5a28e33d0b02c",
+    "src/core/contract.js": "a374211146b86c5dbc5ea88eb28a49e0505805fa486d585a1531e810414549b5",
+    "public/models/raisebore.glb": "22107d2d616d1ab64e29de6055deffa26a5f693ecf39fb05c1527bb958f452a5",
+    "public/models/tunnel-jumbo.glb": "4059aaa715b389aa641b5a75256dece9ee48ab342e50b9de7484a9beaf1f6094",
+    "public/models/bolter.glb": "c3a29ca8d6da32eb87f39f8e207ebd3d3aa8da1685f50cb71708d89f0e32ed23",
+    "public/models/longhole-rig.glb": "1ad4ea071c94ec27a72ccf974b41481472a21a6e54945027d31a91639c96fcab",
+    ".bak/underground-light-qa.mjs": "8e21e7de0e76763b3946a7b361f07f787019bf56ba9f1347ced1bf4182f27ef0"
+  },
+  "passed": true
+}

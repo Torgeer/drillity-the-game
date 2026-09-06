@@ -647,48 +647,37 @@ const UG_TARGET = {
  * 2200 K sodium. `media` marks the lights the participating medium integrates -
  * the ones that make visible shafts.
  *
- * `follow` is the NAME of a lamp published by ctx.rig.getWorkLights(), not an
- * index into it. Index binding broke the moment a one-lamp machine stood in a
- * drive whose own rig has two: `follow: 1` resolved to undefined in silence and
- * the fill sat at its authored fallback, aimed at a face the machine was not
- * working on. `followAt` is the ordinal fallback for when the machine on the
- * pad is a STAND-IN with differently named lamps - which the harness currently
- * produces for `rockbolt`, where data.js hands back `tunnel-jumbo`.
- *
- * ── THE NAMES WERE WRONG, AND THE ORDINAL FALLBACK HID IT ───────────────────
- *
- * A name binding is only better than an index if the name EXISTS. Three of the
- * four names this table shipped with were never published by any machine in the
- * fleet, and the `followAt` fallback silently caught every one of them — ASTRA
- * §8's "a silent fallback that works is the most expensive kind of failure",
- * for the sixth time in this codebase.
- *
- * Measured off the exported .glb files themselves (mount:/aim: pairs in scene
- * traversal order, i.e. exactly the order `followAt` indexes):
- *
- *   asked for               machine        published?   fell through to
- *   boom-1-work-light       tunnel-jumbo   NO           [0] tram-f-00
- *   boom-2-work-light       tunnel-jumbo   NO           [1] tram-f-01
- *   cradle-work-light       longhole-rig   NO           [0] tram-r-0
- *   feed-work-light         bolter         YES  [9]     —
- *
- * So on two of the three drives the key and the second key were riding TRAMMING
- * LAMPS. The jumbo's are four lamps in a row across the carrier nose, 0.4 m
- * apart, hung on `pivot:articulation` — the frame-steer joint — so "the jumbo's
- * boom-1 lamp travels 0.70 m walking the pattern", written two hundred lines
- * below, was describing a lamp nothing was bound to. The longhole rig's [0] is
- * worse: `tram-r-0` is `moves: false`, on the static rear of the carrier,
- * pointing back down the drive. The one light in the whole rig that is supposed
- * to sweep with the boom sat still, aimed the wrong way, for every underground
- * frame this project has shot.
- *
- * The names below are now the ones the models actually export. `followAt` stays
- * — a stand-in machine is a real case — but a MISS IS NOW LOUD: see the
- * binding loop in updateUnderground(), which names what it asked for and what
- * the machine published instead. Re-check with:
- *
- *     node tools/glbinfo.mjs --parts public/models/<rigId>.glb
+ * `follow` names a work lamp, never a traversal ordinal. The site's method
+ * determines the lighting solve, but it does not identify the machine: rockbolt
+ * also accepts a longhole rig or a jumbo. Resolve the semantic contract below
+ * against the active machine's declared methods and live lamp publisher.
+ * Missing or ambiguous contracts are diagnosed and retain authored light
+ * placement; a tramming lamp is not a substitute for a missing work lamp.
+ * Names are verified against actual GLBs by the dedicated underground binding
+ * gate; use glbinfo --parts when inspecting their authored parent frames.
  */
+const UG_WORK_LIGHTS = {
+  'tunnel-jumbo': ['boom-l-lamp-0', 'boom-r-lamp-0'],
+  longhole: ['feed-head', null],
+  'raise-boring': ['table-work-light', 'feed-work-light'],
+  rockbolt: ['feed-work-light', null],
+};
+
+function workLightContract(spec, lamps, siteMethod) {
+  const methods = Array.isArray(spec?.methods) ? [...new Set(spec.methods)] : [];
+  if (!methods.includes(siteMethod)) return { reason: `active machine does not declare ${siteMethod}` };
+  const candidates = methods.map((id) => UG_WORK_LIGHTS[id]).filter(Boolean);
+  // Keep a sole declared contract even when broken, so its missing lamp names
+  // remain explicit. With alternatives, ANY member identifies a candidate:
+  // a complete generic profile must not hide a broken partial specific one.
+  if (candidates.length === 1) return { names: candidates[0] };
+  const matches = candidates.filter((names) => names.some((name) => name
+    && lamps.some((lamp) => lamp && lamp.name === name)));
+  if (matches.length === 1) return { names: matches[0] };
+  return { reason: matches.length > 1 ? 'ambiguous declared work-light contracts'
+    : 'no identifiable declared work-light contract' };
+}
+
 /**
  * Where terrain.js hangs festoon bulb `i`. ONE definition, called by both
  * sides: env.js picks which bulbs get a real light, terrain.js draws the
@@ -737,17 +726,11 @@ function undergroundRig(u, tier) {
   /* Which of the machine's own lamps each key rides. Names verified against the
      exported models — see the block above; do not edit one without re-running
      `node tools/glbinfo.mjs --parts public/models/<rigId>.glb`. */
-  const keyLamp = u.id === 'tunnel-jumbo' ? 'boom-l-lamp-0'
-    : u.id === 'longhole' ? 'feed-head'
-      : u.id === 'raise-boring' ? 'table-work-light'
-        : 'feed-work-light';
+  const [keyLamp, key2Lamp] = UG_WORK_LIGHTS[u.id];
   /* The second key. Only the two-lamp-on-the-work machines have one to ride:
      the jumbo's other boom, and the raise borer's carriage lamp — which is the
      one that MOVES on that machine (slide:carriage, travel_m 1.71, one full
      stroke per 1.5 m pipe) while the table lamp is bolted to the frame. */
-  const key2Lamp = u.id === 'tunnel-jumbo' ? 'boom-r-lamp-0'
-    : u.id === 'raise-boring' ? 'feed-work-light'
-      : null;
   const twoKey = u.id === 'tunnel-jumbo' || u.id === 'raise-boring';
   /* The second key's OWN working distance, when it is not the key's.
      `cd(L, d)` answers "what power puts radiance L on rock d metres away", so a
@@ -770,7 +753,7 @@ function undergroundRig(u, tier) {
     { name: 'ugFloodL', kind: 'spot', pos: [-W * 0.42, H * 0.55, 1.6], target: keyTarget,
       color: '#FFE9C0', power: cd(UG_TARGET.key, d), dist: Math.max(18, d * 3.4),
       angle: 0.47, penumbra: 0.52, media: 1.9, shadow: 1,
-      follow: keyLamp, followAt: 0 },
+      follow: keyLamp, followSlot: 0 },
     /* The second key. On a jumbo it is the second boom's lamp and on a raise
        borer the carriage lamp, and both really are a second machine light; on
        the one-lamp machines there is nothing to follow, so it becomes the
@@ -796,8 +779,7 @@ function undergroundRig(u, tier) {
       power: cd(twoKey ? UG_TARGET.fill : UG_TARGET.fill * 1.45, d2),
       dist: Math.max(16, d2 * 3.0),
       angle: 0.56, penumbra: 0.62, media: 1.9, shadow: 0,
-      follow: key2Lamp,
-      followAt: key2Lamp ? 1 : null },
+      follow: key2Lamp, followSlot: 1 },
     /* THE WASH - the carrier's own tramming and platform lights, wide and weak,
        thrown forward and down over the invert. This is the light that makes the
        tube read as a tube. Without it the near walls of a 12.6 m heading sit at
@@ -1884,24 +1866,26 @@ export function createEnvironment(ctx) {
   let ugEnvRT = null;
   let capPhase = 0, flick = 0;
   let pendingMethod = null;
-  let workLights = null;           // ctx.rig.getWorkLights(), re-read on demand
+  let workLights = null, workLightSpec = null; // identity only; read active data every update
   let mediaIdx = [];               // ugLights indices the raymarch integrates
 
   /* A declared `follow` name the machine on the pad does not publish, said out
      loud exactly once per (light, name, machine). NOT through warnOnce(): that
      helper carries ONE module-wide `warned` flag, so a PMREM failure anywhere
      would silence this for the rest of the session — which is the same class of
-     bug it is here to report. Cleared on RIG_CHANGE so a new machine gets its
-     own hearing. */
+     bug it is here to report. Publisher/spec identity scopes the warning even
+     after direct setRig() or a late model replacement without RIG_CHANGE. */
   const lampWarned = new Set();
-  function warnLamp(lightName, want, wl) {
-    const key = lightName + '<' + want;
+  const noWorkLights = [];
+  const lampPosition = new THREE.Vector3(), lampTarget = new THREE.Vector3();
+  function warnLamp(lightName, want, wl, reason) {
+    const key = lightName + '<' + want + ':' + reason;
     if (lampWarned.has(key)) return;
     lampWarned.add(key);
-    console.warn(`[env] ${lightName}: no work light named "${want}" on this machine. `
+    console.warn(`[env] ${lightName}: ${reason} for work light "${want}" `
+      + `on ${workLightSpec?.id || 'the active machine'}. `
       + `It publishes [${wl.map((k) => k && k.name).join(', ')}]. `
-      + `Falling back to the ordinal — the beam is on SOME lamp, not the right one. `
-      + 'Fix the name in undergroundRig(), or the model.');
+      + 'Using the authored light placement; no unrelated lamp is substituted.');
   }
 
   const YC = Math.cos(DRIVE_YAW), YS = Math.sin(DRIVE_YAW);
@@ -2289,56 +2273,63 @@ export function createEnvironment(ctx) {
        works. That motion is most of why underground footage looks the way it
        does, so it is read every frame rather than sampled once.
 
-       What each key is bound to, and what carries it — taken off the exported
-       models, not off the intent:
-
-         tunnel-jumbo   boom-l-lamp-0 / boom-r-lamp-0
-                        under slide:boom-?-feed, six joints down from the
-                        carrier: it slews, lifts, telescopes, rolls, swings and
-                        feeds, which is the whole pattern
-         longhole       feed-head
-                        under slide:feed-extend on the boom, i.e. the lamp that
-                        rides the ring
-         rockbolt       feed-work-light
-                        under slide:feedExtend on the bolter's mast
-         raise-boring   table-work-light (key, on the frame at the collar) and
-                        feed-work-light (second key, under slide:carriage,
-                        travel_m 1.71 — one stroke per 1.5 m pipe)
-
-       Every one of those names was verified present with
-       `node tools/glbinfo.mjs --parts public/models/<rigId>.glb`. Three of the
-       four names that stood here before were not, and the fallback below ate
-       the miss without a word — see the block above undergroundRig(). */
-    if (workLights === null && ctx.rig && typeof ctx.rig.getWorkLights === 'function') {
-      try { workLights = ctx.rig.getWorkLights() || []; } catch (e) { workLights = []; }
+       getWorkLights() is allocation-free and belongs to the ACTIVE build.
+       Direct setRig() and rig:model-ready can replace that build without a
+       RIG_CHANGE event, so an event-invalidated cache retains detached lamps
+       indefinitely. Read the publisher and active metadata every update. */
+    const wl = ctx.rig?.getWorkLights?.() || noWorkLights;
+    const rigSpec = ctx.rig?.getSpec?.() || null;
+    if (wl !== workLights || rigSpec !== workLightSpec) {
+      workLights = wl;
+      workLightSpec = rigSpec;
+      lampWarned.clear();
     }
-    const wl = workLights || [];
+    const binding = workLightContract(rigSpec, wl, ug.id);
 
     const n = ugLights.length;
     for (let i = 0; i < n; i++) {
       const e = ugLights[i];
       const l = e.light;
-      /* Bind by NAME, fall back to the ordinal, AND SAY SO WHEN IT FALLS BACK.
-         The ordinal exists because `rockbolt` legitimately accepts three
-         different machines (data.js `rigIds: ['bolter', 'longhole-rig',
-         'tunnel-jumbo']`), and a stand-in's lamps are named for its own
-         geometry: better a beam on a real lamp than a beam in empty air.
-
-         But a fallback that never says anything is how three wrong names
-         survived every review this file has had. The ordinal on a machine that
-         does not publish the wanted name usually resolves to a TRAMMING lamp —
-         they are built first and traverse first on every machine measured — so
-         the failure mode is not "slightly the wrong lamp", it is "the key light
-         is on the front bumper". One line per (light, name) pair, once. */
+      /* Only slots authored to follow a machine do so. In a rockbolt drive
+         the second flood stays the authored platform fill even on a jumbo.
+         Reset every followed slot first: a broken/replaced publisher must not
+         retain another machine's last pose, cone, colour, range or watt trim. */
       let src = null;
+      e.watt = 1;
       if (e.spec.follow) {
-        src = wl.find((k) => k && k.name === e.spec.follow) || null;
-        if (!src && wl.length) warnLamp(e.spec.name, e.spec.follow, wl);
+        toWorld(...e.spec.pos, l.position);
+        toWorld(...e.spec.target, l.target.position);
+        l.angle = e.spec.angle;
+        l.distance = e.spec.dist;
+        l.color.set(e.spec.color);
+        const name = binding.names?.[e.spec.followSlot];
+        const want = name || e.spec.follow;
+        const matches = name ? wl.filter((lamp) => lamp && lamp.name === name) : [];
+        let reason = binding.reason || (!name && 'active contract has no lamp for this followed slot');
+        if (!reason && matches.length !== 1) reason = matches.length
+          ? 'duplicate named lamp descriptors' : 'missing named lamp';
+        if (!reason) {
+          src = matches[0];
+          if (typeof src.node?.getWorldPosition !== 'function'
+            || typeof src.aim?.getWorldPosition !== 'function') {
+            reason = 'missing live mount/aim nodes';
+          } else {
+            src.node.getWorldPosition(lampPosition);
+            src.aim.getWorldPosition(lampTarget);
+            const finite = (v) => Number.isFinite(v.x) && Number.isFinite(v.y) && Number.isFinite(v.z);
+            if (!finite(lampPosition) || !finite(lampTarget)
+              || lampPosition.distanceToSquared(lampTarget) === 0) reason = 'invalid live mount/aim positions';
+          }
+        }
+        if (reason) {
+          src = null;
+          warnLamp(e.spec.name, want, wl, reason);
+        }
+        l.target.updateMatrixWorld();
       }
-      if (!src && e.spec.followAt != null) src = wl[e.spec.followAt] || null;
-      if (src && src.node && src.aim) {
-        src.node.getWorldPosition(l.position);
-        src.aim.getWorldPosition(l.target.position);
+      if (src) {
+        l.position.copy(lampPosition);
+        l.target.position.copy(lampTarget);
         l.target.updateMatrixWorld();
         // the machine's statement about its own lamp, taken as read
         if (src.coneDeg) l.angle = THREE.MathUtils.degToRad(src.coneDeg) * 0.5;
@@ -2350,8 +2341,6 @@ export function createEnvironment(ctx) {
            the same machine carries. */
         if (src.colourHex) l.color.setHex(src.colourHex);
         e.watt = src.wattHint ? clamp(src.wattHint / 70, 0.45, 1.6) : 1;
-      } else {
-        e.watt = 1;
       }
       if (e.spec.cap) {
         // a cap lamp on a crew member: a slow pan and a slow walk, so there is
@@ -2920,10 +2909,6 @@ export function createEnvironment(ctx) {
         const m = p && p.contract && p.contract.methodId;
         if (m !== undefined) pendingMethod = m;
       });
-      // the work-light array identity is per rig build, so drop the cache on a
-      // rig change and re-read it lazily. This handler must NOT switch mode —
-      // see the single-writer note above.
-      ctx.bus.on(EVENTS.RIG_CHANGE, () => { workLights = null; lampWarned.clear(); });
       const s0 = ctx.state && ctx.state.world && ctx.state.world.site;
       const m0 = (ctx.state && ctx.state.contract && ctx.state.contract.methodId)
         || (s0 && s0.methodId) || null;
@@ -3205,8 +3190,8 @@ export default createEnvironment;
       so nothing has to guess it" — arrives here as a lamp. It is the ONLY lamp
       in the fleet declaring neither `cone_deg` nor `range_m` (the other 112 all
       declare both), so it takes LAMP_DEFAULTS and would light whatever it
-      happens to point at, and it sits at ordinal 2, inside the range
-      `followAt` reaches. Harmless today only because `rc` is a surface method.
+      happens to point at. Its ordinal 2 was historically reachable by the
+      removed `followAt` fallback; the current named contract never selects it.
       A gate on "a published lamp that declares no cone" would have caught it.
 
    5. THE LAMP CONTRACT IS CONSUMED, BUT ONLY WHERE A LIGHT FOLLOWS.
