@@ -69,8 +69,8 @@ uses — draw calls are a function of the frustum, not of the target size):
     marine-spread              11              44    27
 
 and against the live method states, `node tools/shoot.mjs --headed --only
-methods` on the same tree and the same afternoon (shots/s0-report.txt — SEE THE
-WARNING BELOW: THAT FILE DOES NOT EXIST AND NEVER HAS), whose
+methods` on the same tree and the same afternoon (shots/s0-report.txt — real, but
+gitignored, so it is in the MAIN checkout and not in any worktree), whose
 surface totals are what the 80 ceiling actually grades:
 
     m16-tunnel-jumbo 89   m06-overburden 86   m08-rc  85   m11-rockbolt 84
@@ -119,30 +119,43 @@ If the number is genuinely wrong, MEASURE IT AGAIN and change it here with the
 measurement written down, the way this one is. Do not raise it because a module
 would like a seventh.
 
-    !!! THE DERIVATION ABOVE DOES NOT SURVIVE CONTACT WITH THE EVIDENCE !!!
+    !!! A WARNING THAT USED TO STAND HERE WAS ITSELF WRONG. READ THIS ONCE. !!!
 
-Checked 2026-09-06 by two independent agents and confirmed by hand:
+On 2026-09-06 this block claimed the budget above rested on nothing. It was
+retracted the same night, and the retraction is kept rather than deleted so the
+claim is not re-derived by the next reader.
 
-  * `shots/s0-report.txt`, cited above and again at `src/world/terrain.js:527`
-    as the measured basis of this ceiling, **DOES NOT EXIST AND HAS NO GIT
-    HISTORY.** It is a citation to nothing — ASTRA §10's `[BR]`-cited-26-times
-    -and-defined-nowhere, applied to the budget every site builder is handed.
+WHAT WAS CLAIMED, AND WHY EACH PART WAS FALSE:
 
-  * "m08-rc 85" is a MISREAD OF AN FPS COLUMN. `shots/post-report.txt` line 80
-    reads `m08-rc  85.9  271  87  21  59`: 85.9 is **fps**, the surface total
-    is **87** and the rig is **59**, not 85 and 57.
+  * "`shots/s0-report.txt` DOES NOT EXIST AND HAS NO GIT HISTORY."
+    It exists: 20,807 bytes, written 2026-09-05 21:25, in the MAIN CHECKOUT.
+    It has no git history because `.gitignore:15` carries `shots/*.txt`, so it
+    is build output by design — and gitignored files are NOT carried into a git
+    worktree. The check was run from a worktree, where the file cannot appear,
+    and "absent here plus no history" was read as "never existed". BOTH facts
+    are explained by the file being correctly ignored. The instrument could not
+    have found it.
 
-  * "EIGHT OF TWENTY-ONE STATES" reproduces as 9, 15 and 19 in three different
-    reports on disk, and never as 8.
+  * "m08-rc 85 is a MISREAD OF AN FPS COLUMN."
+    It is not. `s0-report.txt` reads
+        id      fps   w?  frame  surf  sect  rig
+        m08-rc  57.8   W    265    85    21   57
+    so surf IS 85 and rig IS 57, exactly as cited. The refutation quoted
+    `post-report.txt` — A DIFFERENT RUN, with no `w?` column — where the same
+    machine reads `85.9  271  87  21  59`. One file's fps is 85.9 and the
+    other's surf is 85; that coincidence is the whole error.
 
-**The ceiling of 6 may still be right — the arithmetic below it is sound, and
-`tunnel-portal` landed at exactly 6 without strain.** What is NOT true is that
-it rests on a measurement anyone can check. Treat the 6 as a working limit that
-has held in practice, NOT as a measured result, until somebody re-measures it
-with the GPU lease and writes the real numbers here.
+  * "EIGHT OF TWENTY-ONE reproduces as 9, 15 and 19."
+    Those counts came from other reports. Parsed from `s0-report.txt` itself,
+    the eight over the ceiling reproduce exactly: 89, 86, 85, 84, 83, 83, 83,
+    81.
 
-Do not quietly delete this warning by re-deriving the same 6 from the same
-missing file. `shots/post-report.txt` exists and is readable; start there.
+THE BUDGET ABOVE IS SOUND AND ITS CITATION IS GOOD. Treat the 6 as measured.
+
+THE LESSON, WHICH IS THE REASON THIS IS KEPT: a gitignored file is invisible
+from a worktree, and `git log` on one returns nothing BY CONSTRUCTION. Neither
+absence is evidence. Before calling a citation broken, check the main checkout
+and check `.gitignore` — and say which tree you looked in. `shots/post-report.txt` exists and is readable; start there.
 
     !!! THE WARNING ABOVE IS ITSELF WRONG, ON ALL THREE COUNTS. MEASURED. !!!
 
