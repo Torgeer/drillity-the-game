@@ -267,5 +267,5 @@ for (const result of results) {
     + `string=${s.string?.meshes || 0}/${result.expectedString ? 'needed' : 'unused'} `
     + `surface=${s.surface?.id || '-'} downhole=${s.downhole?.id || '-'} failures=${result.failures.length}`);
 }
-console.log(`AUDIT: ${report.rigs} actual GLBs; ${report.methodPairs} declared rig/method pairs; ${report.failedPairs} pairs with missing/disconnected runtime contributions.`);
+console.log(`AUDIT: ${report.rigs} actual GLBs; ${report.methodPairs} declared rig/method pairs; ${report.failedPairs} failing pairs (${toolSelectionOnly ? 'tool selection only; string alignment not graded' : 'tool selection and generated-string diagnostics'}).`);
 process.exitCode = report.failedPairs ? 1 : 0;
