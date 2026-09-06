@@ -30,6 +30,53 @@ T450XD / T685 exploration rigs; Foremost Explorer / Prospector; Hydco and
 Sandvik DE-series RC packages; plus dealer and auction walkaround photo sets and
 site video of RC rigs working with the cyclone deployed.
 
+!!! PROVENANCE WARNING — THE PROSE IN THIS FILE HAS FAILED THREE REVIEWS !!!
+================================================================================
+Read the CONSTANTS and the GATE. Do not trust the paragraphs that argue why a
+choice was right. On 2026-09-06 the axis repair, its critic and its fix pass
+were each reviewed adversarially. Every pass corrected the previous pass's
+false claims AND INTRODUCED NEW ONES AT ABOUT THE SAME RATE. Roughly 35
+confirmed-false statements across the three, in two independent audits.
+
+WHAT HELD THROUGHOUT, verified four separate times: the geometry. 44
+primitives, 70,912 triangles, W 7.883 x H 7.215 x L 7.857 m, `extensions: none`,
+`tools/check_rc_axis.mjs` 0/0/0 with no obstructions. The relation
+`travel_m = MAST_LEN - 2.598` and its mast table recompute exactly. Those are
+the load-bearing facts and they are sound.
+
+WHAT DID NOT HOLD — confirmed false, verified directly, not relayed:
+  * "no dimensioned GA exists / the brochures are behind 403" -- both false;
+    the header below names two GAs and `curl` with a Referer gets HTTP 200.
+  * BUT the replacement narrative is ALSO unsupported: **no Explorac PDF, page
+    render or trace exists anywhere in this repo or in Downloads.** The vector
+    figures quoted below to 0.001 pt (190.096 / 239.386 / 226.947, "38,837
+    path objects") ARE NOT REPRODUCIBLE BY ANYONE READING THIS FILE. That is
+    the same "citation to nothing" the pass was written to remove.
+  * The scale readings "agree to 0.6 %" -- they are 1.25 % apart.
+  * "226.947 pt x 46.58 = 10 576 = 11 050 x cos 16 deg" -- neither equality
+    holds; the closing angle is 16.93 deg and 16 was back-fitted.
+  * "0.65 m off the machine house, and that volume IS sourced [R16 §A.8]" --
+    the intrusion is 0.02 m, and [R16 §A.8] is this file's citation for
+    `power-air-pack`, an ABOVE-deck box the scope-A mast never reaches. The
+    under-deck house has no source at all. A false citation replaced by another.
+  * "HOLE_DIA 0.124 sits in [E100]'s band" -- the band quoted 60 lines above
+    is 127-165 mm. 124 is BELOW it.
+  * "0.92 m less efficient per metre of stroke" -- that is an absolute
+    dead-height difference; per metre it is 0.748 m.
+  * "4.363 m of mast that never carries the head" -- 7.215 m is the whole-model
+    bounding box, including undercarriage, deck and MAST_FOOT. Not mast.
+
+WORK_AXIS REMAINS `NOT SOURCED`. No OEM publishes the head standoff. Scaling
+was attempted and correctly refused: readings ran 0.16-1.02 m depending on
+which edge you call the mast centreline, which is a choice and not a
+measurement.
+
+**DO NOT ADD MORE JUSTIFICATION PROSE HERE.** Every error in three passes lived
+in the persuasive paragraphs, never in the constants or the gate. If a number
+needs defending, defend it with a committed artifact and a command that
+regenerates it -- the way `research/rigs/source/core-rig/` does.
+================================================================================
+
 DIMENSIONED GENERAL ARRANGEMENTS — FOUND 2026-09-05.  rc-rig.md §8 says "no
 dimensioned general arrangement of any RC rig exists" in what was searched, and
 ASTRA.md §7.5 repeats it.  Both are now out of date: TWO manufacturer brochures

@@ -31,7 +31,15 @@ const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const dep=process.env.THREE_ROOT || resolve(root,'node_modules/three');
 const THREE=await import(pathToFileURL(resolve(dep,'build/three.module.js')));
 const {GLTFLoader}=await import(pathToFileURL(resolve(dep,'examples/jsm/loaders/GLTFLoader.js')));
-const path=resolve(process.argv[2] || resolve(root,'evidence/baseline.glb'));
+/* DEFAULT TO THE SHIPPED MODEL, NOT A PRIVATE BASELINE.
+   This defaulted to `evidence/baseline.glb`, which exists only in the
+   worktree this gate was written in. Committed to the repo and run bare it
+   died with ENOENT before printing anything -- while the document citing it
+   said "re-run from a clean checkout". A gate that cannot run is the same
+   citation-to-nothing it was committed to fix, and a crashing diagnostic is
+   not evidence (see the vibro audit tool, which failed the same way).
+   Pass a path as argv[2] to grade any other export. */
+const path=resolve(process.argv[2] || resolve(root,'public/models/rc-rig.glb'));
 const bytes=readFileSync(path);
 const {json}=parseGLB(bytes);
 const gltf=await new GLTFLoader().parseAsync(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength),'');
