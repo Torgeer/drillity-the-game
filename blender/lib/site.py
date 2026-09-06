@@ -69,7 +69,8 @@ uses — draw calls are a function of the frustum, not of the target size):
     marine-spread              11              44    27
 
 and against the live method states, `node tools/shoot.mjs --headed --only
-methods` on the same tree and the same afternoon (shots/s0-report.txt), whose
+methods` on the same tree and the same afternoon (shots/s0-report.txt — real, but
+gitignored, so it is in the MAIN checkout and not in any worktree), whose
 surface totals are what the 80 ceiling actually grades:
 
     m16-tunnel-jumbo 89   m06-overburden 86   m08-rc  85   m11-rockbolt 84
@@ -118,6 +119,91 @@ If the number is genuinely wrong, MEASURE IT AGAIN and change it here with the
 measurement written down, the way this one is. Do not raise it because a module
 would like a seventh.
 
+    !!! A WARNING THAT USED TO STAND HERE WAS ITSELF WRONG. READ THIS ONCE. !!!
+
+On 2026-09-06 this block claimed the budget above rested on nothing. It was
+retracted the same night, and the retraction is kept rather than deleted so the
+claim is not re-derived by the next reader.
+
+WHAT WAS CLAIMED, AND WHY EACH PART WAS FALSE:
+
+  * "`shots/s0-report.txt` DOES NOT EXIST AND HAS NO GIT HISTORY."
+    It exists: 20,807 bytes, written 2026-09-05 21:25, in the MAIN CHECKOUT.
+    It has no git history because `.gitignore:15` carries `shots/*.txt`, so it
+    is build output by design — and gitignored files are NOT carried into a git
+    worktree. The check was run from a worktree, where the file cannot appear,
+    and "absent here plus no history" was read as "never existed". BOTH facts
+    are explained by the file being correctly ignored. The instrument could not
+    have found it.
+
+  * "m08-rc 85 is a MISREAD OF AN FPS COLUMN."
+    It is not. `s0-report.txt` reads
+        id      fps   w?  frame  surf  sect  rig
+        m08-rc  57.8   W    265    85    21   57
+    so surf IS 85 and rig IS 57, exactly as cited. The refutation quoted
+    `post-report.txt` — A DIFFERENT RUN, with no `w?` column — where the same
+    machine reads `85.9  271  87  21  59`. One file's fps is 85.9 and the
+    other's surf is 85; that coincidence is the whole error.
+
+  * "EIGHT OF TWENTY-ONE reproduces as 9, 15 and 19."
+    Those counts came from other reports. Parsed from `s0-report.txt` itself,
+    the eight over the ceiling reproduce exactly: 89, 86, 85, 84, 83, 83, 83,
+    81.
+
+THE BUDGET ABOVE IS SOUND AND ITS CITATION IS GOOD. Treat the 6 as measured.
+
+THE LESSON, WHICH IS THE REASON THIS IS KEPT: a gitignored file is invisible
+from a worktree, and `git log` on one returns nothing BY CONSTRUCTION. Neither
+absence is evidence. Before calling a citation broken, check the main checkout
+and check `.gitignore` — and say which tree you looked in. `shots/post-report.txt` exists and is readable; start there.
+
+    !!! THE WARNING ABOVE IS ITSELF WRONG, ON ALL THREE COUNTS. MEASURED. !!!
+
+Re-checked 2026-09-06 by the runtime-integration owner, against the actual file,
+before anything was changed. The three claims and what reproducing them gives:
+
+  1. `shots/s0-report.txt` EXISTS. It is at
+     `C:/Users/henri/Downloads/drillity-the-game/shots/s0-report.txt`
+     (forward slashes deliberately: this is a module docstring, and a literal
+     Windows path starting with the users directory puts a backslash-U escape
+     in it — a SyntaxError that stops EVERY site build. It did exactly that
+     here, twice: once writing the path, and once writing this warning about
+     writing the path. Do not put a backslashed Windows path in this file.),
+     20,807 bytes, written 2026-09-05 21:25 by the run whose own header reads
+     `mode HEADED (real GPU — fps is meaningful)  quality high  filter --only
+     methods`. It has no git history because `.gitignore` line `shots/*.txt`
+     excludes it — so it is ABSENT FROM EVERY WORKTREE while being present
+     where it was produced. "Not in my checkout" was read as "never existed".
+
+  2. "m08-rc 85" IS NOT AN FPS MISREAD. The 85.9/271/87/21/59 row quoted above
+     is from `shots/post-report.txt`, which is a DIFFERENT RUN from the one
+     cited. In `s0-report.txt` m08-rc reads fps 57.8, total 265, surface 85,
+     section 21, rig 57 — the docstring's 85 and 57 exactly. (The coincidence
+     that m08-rc's fps there is 57.8 while its rig is 57 is presumably what
+     made an FPS misread look plausible.)
+
+  3. "EIGHT OF TWENTY-ONE" REPRODUCES EXACTLY. Parsing the 21 method rows of
+     `s0-report.txt` and counting surface > 80 gives 8: m16-tunnel-jumbo 89,
+     m06-overburden 86, m08-rc 85, m11-rockbolt 84, m05-dth 83, m18-longhole
+     83, m19-sonic 83, m07-core 81. Every one of the eight surface totals in
+     the table above matches the report column for column.
+
+So the derivation of 6 DOES rest on a measurement anyone can check — they just
+have to check it where it was written, not in a worktree that gitignores it.
+
+TWO THINGS ARE STILL TRUE AND WORTH KEEPING FROM THE WARNING:
+  * the numbers are from 2026-09-05 and have not been re-measured since;
+  * "the archetype's terrain.js branch must give back at least as many calls as
+    the .glb takes" IS NOT MET BY EITHER SHIPPED SITE. Measured on the CPU by
+    `tools/checksiteenvironment.mjs` (mesh submissions under `terrain-root`,
+    model live minus model 404'd): quarry-bench +3 at nordic, +3 at
+    german-site, +2 at iberian-quarry; urban-plot +1, +1, +0. Both models are
+    net additive. That is the real open budget problem, and it is not the one
+    the warning above was about.
+
+Neither block has been deleted. An integrator should collapse the two once the
+GPU lease allows a fresh headed measurement.
+
 A NOTE ON WHAT THE .GLB IS ACTUALLY BUYING, SINCE IT IS NOT DRAW CALLS
 ----------------------------------------------------------------------
 The procedural site kit is FREE in draw calls — that is the point of the merged
@@ -152,9 +238,51 @@ Metres. Blender is Z-up; `export_yup=True` maps Blender (x, y, z) to glTF
 its own (0, 0, 0) and flattens the ground to y = 0 out to `CFG.padRadius`, so a
 site .glb built about the collar drops in with no offset.
 
-**The machine stands BEHIND the collar** at three.js z = +2.4 (`CFG.pad`), and
-**the hero camera is further out on +z again**, at three.js [7.60, 2.60, 9.90]
-looking at about y 3.40 with a 34-degree vertical field. Converting:
+**THE MACHINE DOES NOT STAND AT `CFG.pad`. IT STANDS ON THE COLLAR.**
+This header said "the machine stands BEHIND the collar at three.js z = +2.4
+(`CFG.pad`)" and that is false. `rigFactory.js:9049-9052` does
+`group.position.copy(anchor)` with `anchor = ctx.terrain.collarPosition`, i.e.
+**(0, 0, 0)**, and its own comment says why: *"The rig's local origin IS the
+drilling centreline, so it anchors to the COLLAR, not to terrain's padCenter
+(which marks the body footprint)."* `CFG.pad` shapes the terrain pad and its
+decal, nothing else.
+
+The consequence is not academic. A builder who trusted this header and reserved
+`z > +2.4` reserved the wrong volume: anchored at the collar, `dth-crawler`
+occupies three.js z **-2.99 … +5.85** — 5.85 m TOWARD the camera — and
+`cfa-rig` z **-5.55 … +4.55** and 28.1 m tall. Reserve about the COLLAR.
+
+**The hero camera is further out on +z again**, at three.js
+**[8.40, 2.25, 10.94] looking at [-1.55, 2.60, 0.00]** — read live from
+`src/core/renderer.js:160`, which is the authority. This header previously said
+[7.60, 2.60, 9.90] looking at "about y 3.40"; that camera has not existed for
+some time. All ten site modules had already stopped believing this paragraph
+and re-derive `EYE` from `renderer.js` themselves; `underground_drive.py`
+parses `CAMERA_MODES.hero` and hard-fails if it cannot. **Do that, rather than
+copying a number out of this file** — ASTRA §5: two tables describing one thing
+drift, and the wrong one is believed.
+
+`renderer.js:160` authors `fov: 34`, but `fovForBand()` re-solves the vertical
+field every frame (`renderer.js:904-907, 1507-1512`); modules measure the live
+value near **21°**, not 34. **UNRESOLVED, do not trust either number blindly:**
+the frame constants copied across all ten modules
+(`TOP_K 0.2065 / BOT_K 0.1638 / HALF_W_K 0.4023`, "aspect 1.724") are
+internally inconsistent — the half-width implies aspect **2.174**, a digit
+transposition of 1.724, and on a 9/16 stage the horizontal half-tangent solves
+to **0.3185**, not 0.4023. If 0.3185 is right, every module's NDC frame is
+**26 % wider than it believes** and every `NDC_EDGE` gate is mis-aimed.
+Resolving it needs one read of the live `camera.projectionMatrix`, which needs
+the GPU lease. Until then, treat NDC gates as indicative.
+
+Also not modelled by any site module: `renderer.js:1671-1729` applies
+`camera.setViewOffset(...)` **every frame**, damped, to pin world (0,0,0) onto
+the section band's hole. It moves the frame by up to **±0.44 in NDC x** and
+**±0.24 in NDC y** (`REG_MAX_X 0.22`, `REG_MAX_Y 0.12` of the band). A fixed
+linear NDC is a snapshot of a frame that slides. Because that registration is
+anchored to the collar, the collar is pinned to the seam on every device —
+which RAISES the cost of dressing it, see the collar rule below.
+
+Converting:
 
     toward the camera  =  three.js +Z  =  Blender -Y
     away from the camera, behind the machine  =  Blender +Y
@@ -534,6 +662,111 @@ def anchor(name, loc, parent=None, **extras):
 # EXPORT
 # ═════════════════════════════════════════════════════════════════════════════
 
+_ARCH_CACHE = None
+
+
+def archetypes(root=None):
+    """Every SITE archetype `src/world/terrain.js` can actually load, and what
+    each one has declared about its model.
+
+    PARSED, not copied — the same rule and the same reason as `kinds()` above.
+    `terrain.js`'s `ARCHETYPES` table is the one place that decides whether a
+    .glb is ever fetched, which scatters it pays for, and whether its procedural
+    kit stands down; a second copy of that table here would drift and the wrong
+    one would be believed (ASTRA §5).
+
+    Returns `{id: {'plane':..., 'model':..., 'replaces': bool, 'replacesKit': bool}}`.
+    Raises rather than returning a short list: a check that measures nothing
+    passes forever (ASTRA §10).
+    """
+    global _ARCH_CACHE
+    if _ARCH_CACHE is not None:
+        return _ARCH_CACHE
+    root = root or os.path.abspath(os.path.join(HERE, '..', '..'))
+    path = os.path.join(root, 'src', 'world', 'terrain.js')
+    with open(path, 'r', encoding='utf-8') as fh:
+        src = fh.read()
+    start = src.find('const ARCHETYPES = {')
+    if start < 0:
+        raise AssertionError(
+            'site.archetypes(): could not find `const ARCHETYPES = {` in %s. Fix this '
+            'parser — do NOT fall back to a hardcoded list.' % path)
+    i, depth, end = src.index('{', start), 0, -1
+    while i < len(src):
+        if src[i] == '{':
+            depth += 1
+        elif src[i] == '}':
+            depth -= 1
+            if depth == 0:
+                end = i
+                break
+        i += 1
+    if end < 0:
+        raise AssertionError('site.archetypes(): unbalanced braces in ARCHETYPES')
+    body = src[start:end]
+    heads = list(re.finditer(r"^  '([a-z-]+)': \{", body, re.M))
+    out = {}
+    for n, h in enumerate(heads):
+        chunk = body[h.start():(heads[n + 1].start() if n + 1 < len(heads) else len(body))]
+        # comments here are long and full of the same words
+        code = re.sub(r'/\*.*?\*/', '', chunk, flags=re.S)
+        code = re.sub(r'//[^\n]*', '', code)
+        model = re.search(r"\bmodel:\s*'([^']+)'", code)
+        plane = re.search(r"\bplane:\s*'([^']+)'", code)
+        out[h.group(1)] = {
+            'plane': plane.group(1) if plane else None,
+            'model': model.group(1) if model else None,
+            'replaces': bool(re.search(r'\breplaces:\s*\[', code)),
+            'replacesKit': bool(re.search(r'\breplacesKit:\s*(true|false)\b', code)),
+        }
+    if len(out) < 8:
+        raise AssertionError(
+            'site.archetypes(): parsed only %d archetypes out of terrain.js, which '
+            'cannot be right.' % len(out))
+    _ARCH_CACHE = out
+    return out
+
+
+# The hole is opened by `buildCollar()` in terrain.js as
+# CylinderGeometry(0.36, 0.30, 2.2, ...), so the mouth is 0.36 m in radius, and
+# the spoil ring (y 0.12) and casing stub (y 0.34) stand inside it. 0.02 m is
+# the band terrain.js itself calls "at grade", where a ground marking belongs
+# and an obstruction does not.
+COLLAR_R = 0.36
+GRADE = 0.02
+
+
+def _collar_breaches():
+    """Meshes with a vertex inside the collar throat ABOVE grade.
+
+    The collar, the spoil ring, the casing stub and — through
+    `renderer.js:registerBands()`, which projects world (0,0,0) onto the seam
+    row — the join between the surface band and the section band all live in
+    that cylinder. A site is FURNITURE AROUND the hole; it is not allowed to
+    stand in it.
+
+    Returns `[(object_name, radius, z)]`, nearest first. Blender is Z-up, so
+    the radius is hypot(x, y) and the height is z.
+    """
+    found = []
+    for o in bpy.context.scene.objects:
+        if o.type != 'MESH' or not o.data:
+            continue
+        mw = o.matrix_world
+        best = None
+        for v in o.data.vertices:
+            p = mw @ v.co
+            if p.z <= GRADE:
+                continue
+            r = math.hypot(p.x, p.y)
+            if r < COLLAR_R and (best is None or r < best[0]):
+                best = (r, p.z)
+        if best is not None:
+            found.append((o.name, best[0], best[1]))
+    found.sort(key=lambda t: t[1])
+    return found
+
+
 def _scene_materials():
     """Distinct material names on real geometry in the scene."""
     used = set()
@@ -559,7 +792,10 @@ def finish(out_path, budget=MAX_MATERIALS):
 
     2. BEFORE EXPORT, the material count is checked against the budget, because
        the site's draw-call cost IS its material count once statics are joined.
-       See THE BUDGET in the module docstring for where 12 comes from.
+       See THE BUDGET in the module docstring for where `MAX_MATERIALS` comes
+       from. (This line said "where 12 comes from" while `MAX_MATERIALS` was 6 —
+       a doc against a constant, drifted, and the doc is the one that gets
+       believed. It now names the constant instead of restating it.)
 
     3. AFTER EXPORT the draw count is re-derived from the joined scene and, if
        it exceeds the budget, THE FILE IS DELETED and the build raises.
@@ -616,6 +852,58 @@ def finish(out_path, budget=MAX_MATERIALS):
             'reach: anything parented under a pivot: or slide: node is excluded '
             'by design. A site that needs moving parts must pay for them out of '
             'the same budget.' % (os.path.basename(out_path), draws, budget))
+
+    # ── THE HANDSHAKE WITH THE RUNTIME ───────────────────────────────────────
+    # A .glb in public/models/sites that no archetype declares is never
+    # fetched, and nothing anywhere says so: `attachSiteModel()` only looks at
+    # `arch.model`. That is a finished-looking asset the game has never once
+    # drawn — the exact shape of the six machines that were modelled, exported
+    # and never on screen for a week (ASTRA §4.4). "A gallery of unused models
+    # is not completion."
+    #
+    # Reported, not raised. A builder must be able to produce a .glb BEFORE the
+    # runtime declaration exists — that is the order the two halves are written
+    # in. `tools/checksiteenvironment.mjs` is the hard gate on the runtime side.
+    arch_id = os.path.splitext(os.path.basename(out_path))[0]
+    try:
+        table = archetypes()
+    except (AssertionError, OSError) as e:
+        print('SITE_WARN could not read terrain.js ARCHETYPES: %s' % e)
+        table = None
+    if table is not None:
+        row = table.get(arch_id)
+        if row is None:
+            print('SITE_TODO archetype=%s is NOT in ARCHETYPES in src/world/terrain.js. '
+                  'This .glb can never be fetched. Known ids: %s'
+                  % (arch_id, ', '.join(sorted(table))))
+        elif not row['model']:
+            print('SITE_TODO archetype=%s exists but declares no `model`, so this .glb is '
+                  'never fetched. terrain.js needs `model: \'%s\'`, a `replaces` list of '
+                  'the scatters this model takes over, and `replacesKit: true|false` for '
+                  'its buildSiteKit() branch. Send those three to the runtime-integration '
+                  'owner; do not edit terrain.js.' % (arch_id, arch_id))
+        else:
+            missing = [k for k in ('replaces', 'replacesKit') if not row[k]]
+            if missing:
+                print('SITE_TODO archetype=%s declares a model but not %s — an undeclared '
+                      'suppression decision.' % (arch_id, ' or '.join(missing)))
+            else:
+                print('SITE_LINKED archetype=%s plane=%s model=%s'
+                      % (arch_id, row['plane'], row['model']))
+
+    # ── AND IT MUST NOT STAND IN THE HOLE ────────────────────────────────────
+    # Warned rather than raised for the same reason the material check is not:
+    # `quarry-bench` breaches this TODAY and is a reference asset. Measured
+    # 2026-09-06 with tools/checksiteenvironment.mjs and `.probe-collar2.mjs`:
+    # rawSteel reaches r=0.012 m and rises to z=0.620, safetyStripe r=0.061 m at
+    # z=0.515. Raising here would refuse to rebuild an asset that already ships.
+    breaches = _collar_breaches()
+    if breaches:
+        print('SITE_COLLAR %s puts %d mesh(es) inside the %.2f m collar throat above '
+              'grade — the hole, the spoil ring, the casing stub and the section seam '
+              'are all in there: %s'
+              % (os.path.basename(out_path), len(breaches), COLLAR_R,
+                 ', '.join('%s r=%.3f z=%.3f' % b for b in breaches[:6])))
 
     print('SITE_OK path=%s materials=%d draws=%d budget=%d'
           % (out_path, len(used), draws, budget))

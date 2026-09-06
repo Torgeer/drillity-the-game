@@ -482,7 +482,24 @@ const ARCHETYPES = {
     // Authored compound/road/facades replace the urban kit and its scattered
     // suburban vegetation. Keep the original kit when the export is absent.
     model: 'urban-plot',
-    replaces: ['birch-bark', 'birch-leaves', 'stones', 'tufts', 'scrub'],
+    /* `birch-bark` and `birch-leaves` were in this list and were DEAD: this
+       archetype sets `dress.birch` to 0.14, `dressFor()` drops any scatter
+       under four instances, and the largest birch count in any region is
+       nordic's 14 — 14 x 0.14 x the 1.2 density ceiling is 2.35, so a birch
+       instance is never offered on an urban plot at any quality in any region.
+       Two entries that suppressed nothing and read exactly like three that do
+       (ASTRA §10). MEASURED across seven regions by
+       `tools/checksiteenvironment.mjs`, which now fails on a name nothing
+       offers; removing them changes no geometry. */
+    replaces: ['stones', 'tufts', 'scrub'],
+    /* The whole `urban` branch (terrain.js:2719) — hoarding, gate, wheel wash,
+       carriageway, working platform, nine city blocks, cabins, skips, rebar
+       cages — is what `blender/sites/urban_plot.py` authored, so leaving it on
+       stands the procedural hoarding inside the authored one. Free in draw
+       calls either way; this is a DOUBLE-DRESSING decision, not a budget one.
+       Behaviour is identical to the `kit === 'urban' && !siteModelReady()`
+       test this replaced; only the place the decision is written has moved. */
+    replacesKit: true,
     // NOT SOURCED layout bounds, not an engineered platform specification.
     // The Blender furniture is authored at grade, through the rear facades;
     // suppress the decorative pad crown, but retain the live collar spoil.
@@ -493,6 +510,16 @@ const ARCHETYPES = {
     /* A working strip along an alignment: cleared on the line, untouched a few
        metres either side of it. That contrast IS the archetype. */
     dress: { spruce: 0.45, birch: 0.5, rock: 0.3, stone: 0.6, grass: 0.75, scree: 0.3, scrub: 0.8, ice: 0.5 },
+    model: 'infrastructure-corridor',
+    /* EVIDENCE (tools/glbinfo.mjs, 2026-09-06): 4 primitives,
+       27,052 tris, materials dirt/gravel/paintedSteel/timber, 74.6 x 4.6 x
+       72.1 m, nearest vertex to the collar 8.110 m.
+       `stones` only: the model lays graded fill and spoil along the strip, so
+       the loose stone it covers is its job — but the spruce, birch and scrub a
+       few metres off the line are the CONTRAST this archetype exists for and
+       the model does not reach them. */
+    replaces: ['stones'],
+    replacesKit: true,
   },
   'quarry-bench': {
     kit: 'quarry', plane: 'surface', groundKind: 'gravel', pad: 0, farAmp: 0.8,
@@ -523,6 +550,26 @@ const ARCHETYPES = {
        exists. */
     model: 'quarry-bench',
     replaces: ['outcrops', 'scree', 'stones'],
+    /* The `quarry` branch (terrain.js:4062) is six cones and a berm and its own
+       comment already calls itself "THE FALLBACK, NOT THE SITE". Unchanged
+       behaviour from the `kit === 'quarry' && !siteModelReady()` test.
+
+       MEASURED NET COST, `.probe-netdraws.mjs`, mesh submissions under
+       `terrain-root` with the model live minus the same build with the model
+       404'd:
+
+           quarry-bench @ iberian-quarry   21 -> 23   NET +2   dropped: outcrops stones scree
+           quarry-bench @ nordic           22 -> 25   NET +3   dropped: outcrops stones
+
+       So this model does NOT pay for itself, on either region, and the purse
+       is smaller in `nordic` because `REGIONS.nordic.dress.scree` is 0 and
+       there is no scree instance there to drop. `blender/lib/site.py`'s BUDGET
+       says "the archetype's terrain.js branch must give back at least as many
+       calls as the .glb takes"; measured, it gives back 3 of 6 at best. This
+       is recorded rather than fixed here: closing it means dropping more of
+       what the player sees on a REFERENCE archetype, which is a composition
+       decision for the quarry builder and its critic, not the loader's. */
+    replacesKit: true,
     flatR: 46, flatFalloff: 70,
   },
   'open-pit-bench': {
@@ -533,27 +580,130 @@ const ARCHETYPES = {
     /* The bench floor is 44 m before the first batter stands out of it.
        Everything scattered outside that is inside solid rock. */
     dressMaxR: 40,
+    model: 'open-pit-bench',
+    /* EVIDENCE (tools/glbinfo.mjs, 2026-09-06): 4 primitives,
+       30,944 tris, materials blastedRock/gravel/paintedDark/safetyStripe,
+       629.7 x 131.4 x 642.1 m - the benches ARE the horizon, as the archetype
+       note says. Nearest vertex to the collar 0.497 m, and nothing above grade
+       inside the 0.36 m throat (.probe-collar.mjs).
+       Same evidence class as `quarry-bench`: the model carries authored
+       `blastedRock` over the whole floor and every batter, which is the rock
+       `outcrops`, `scree` and `stones` were standing in for. */
+    replaces: ['outcrops', 'scree', 'stones'],
+    replacesKit: true,
   },
   'tunnel-portal': {
     kit: 'portal', plane: 'surface', groundKind: 'gravel', pad: 10.0, farAmp: 0.9,
     dress: { spruce: 0.5, birch: 0.4, rock: 0.8, stone: 0.9, grass: 0.4, scree: 1.0, scrub: 0.5, ice: 0.6 },
+    model: 'tunnel-portal',
+    /* EVIDENCE (tools/glbinfo.mjs, 2026-09-06): 6 primitives,
+       15,956 tris, materials blastedRock/galvanised/mesh/paintedDark/rawSteel/
+       shotcrete, 46.8 x 9.1 x 51.1 m, nearest vertex to the collar 13.138 m.
+       The authored `blastedRock` face and brow are what the procedural branch
+       built out of 192 `rockMass()` boxes and what the rock scatters dressed;
+       the spruce and birch on the hillside above are not the model's and stay. */
+    replaces: ['outcrops', 'scree', 'stones'],
+    replacesKit: true,
   },
-  'underground-drive': { plane: 'underground' },
+  'underground-drive': {
+    plane: 'underground',
+    model: 'underground-drive',
+    /* EVIDENCE (tools/glbinfo.mjs, 2026-09-06): 4 primitives,
+       6,160 tris, materials paintedDark/rawSteel/rubber/safetyStripe,
+       0.944 x 2.640 x 8.058 m - drive-local furniture, not rock. Nearest
+       vertex to the collar 6.957 m.
+
+       `replaces: []` and it is a real decision, not an omission. The only
+       scatters underground are `drive-muck`, `drive-bolts` and `drive-festoon`
+       (buildDrive()), and this model is none of them - it carries no rock and
+       no rock material at all. Suppressing them would empty the drive.
+
+       `replacesKit: false` because there is no kit to replace: `rebuild()`
+       returns from its underground branch before `buildSiteKit()` is ever
+       called, so the flag would describe nothing.
+
+       THE ONLY ARCHETYPE ON THE UNDERGROUND PLANE. Its model hangs off
+       `driveGroup`, not `root`, so it inherits DRIVE_YAW - see `siteParent()`. */
+    replaces: [],
+    replacesKit: false,
+  },
   'exploration-pad': {
     kit: 'exploration', plane: 'surface', pad: 7.0, farAmp: 1.0,
     /* "a small clearing in whatever the region grows or freezes". The pad is
        cut OUT of the biome, so the biome is left almost untouched around it —
        this is the one surface archetype that keeps nearly all of its region. */
     dress: { spruce: 0.95, birch: 0.95, rock: 0.9, stone: 0.9, grass: 0.9, scree: 0.9, scrub: 0.9, ice: 0.9 },
+    model: 'exploration-pad',
+    /* EVIDENCE (tools/glbinfo.mjs, 2026-09-06): 5 primitives,
+       20,748 tris, materials coreTray/dirt/hose/rockFace/timber, 12.6 x 1.8 x
+       15.0 m, nearest vertex to the collar 5.074 m.
+
+       `replaces: []`, deliberately. This is the ONE surface archetype whose
+       whole point is that the biome is left almost untouched around it - every
+       `dress` multiplier above is 0.9 - and the model is 15 m across, which is
+       inside the pad the scatter is already rejected from. There is nothing for
+       it to take over. It is therefore PURE ADDITION at 5 draw calls, which the
+       net-cost measurement in tools/checksiteenvironment.mjs reports on every
+       run; that is the honest number and it is the builder's and the critic's
+       to answer, not something to hide by dropping trees the model does not
+       replace. */
+    replaces: [],
+    replacesKit: true,
   },
   'well-pad': {
     kit: 'wellpad', plane: 'surface', groundKind: 'gravel', pad: 13.0, farAmp: 0.75,
     /* "a level graded rectangle" — bulldozed flat and kept clear, with the
        region's own country starting again at its edge. */
     dress: { spruce: 0.25, birch: 0.3, rock: 0.35, stone: 0.5, grass: 0.3, scree: 0.5, scrub: 0.55, ice: 0.6 },
+    model: 'well-pad',
+    /* EVIDENCE (tools/glbinfo.mjs, 2026-09-06): 6 primitives,
+       16,736 tris, materials concrete/gravel/paintedDark/paintedSteel/plastic/
+       rawSteel, 82.8 x 9.5 x 98.3 m, nearest vertex to the collar 14.887 m.
+       The archetype note is "a level graded rectangle... bulldozed flat and
+       kept clear", and the model lays that rectangle in authored concrete and
+       gravel, so the loose stone inside it is the model's now. The region's own
+       country starting again at the pad edge is NOT the model's and stays. */
+    replaces: ['stones'],
+    replacesKit: true,
   },
-  'platform-deck': { kit: 'offshore', plane: 'offshore', deck: 'fixed' },
-  'marine-spread': { kit: 'marine', plane: 'offshore', deck: 'mobile' },
+  'platform-deck': {
+    kit: 'offshore', plane: 'offshore', deck: 'fixed',
+    model: 'platform-deck',
+    /* EVIDENCE (tools/glbinfo.mjs, 2026-09-06): 4 primitives,
+       18,480 tris, materials galvanised/paintedSteel/rubber/wornSteel,
+       94.6 x 47.0 x 28.2 m. Nearest vertex to the collar 0.330 m, but NOTHING
+       above grade inside the 0.36 m throat - those are deck-level vertices at
+       y <= 0.02, i.e. plating around the well slot, which is where they belong.
+
+       `replaces: []` because on an offshore plane there is no scatter left to
+       replace: `dressFor()` now returns all-zero counts on a deck as a rule
+       (nothing self-seeds on steel). Empty here is a measured consequence, not
+       an unmade decision.
+
+       WHAT THE MODEL MUST NOT CARRY: the deck plate itself. `buildSpecials()`
+       lays it as a Shape with the well-slot hole cut over the collar
+       (hx 5.4 / hz 4.2 for `deck: 'fixed'`), and that hole is the archetype.
+       `replacesKit` drops the `offshore` KIT branch - the coaming, conductor
+       grid, jacket legs, flare and lifeboats - but never the plate or the sea. */
+    replaces: [],
+    replacesKit: true,
+  },
+  'marine-spread': {
+    kit: 'marine', plane: 'offshore', deck: 'mobile',
+    model: 'marine-spread',
+    /* EVIDENCE (tools/glbinfo.mjs, 2026-09-06): 6 primitives,
+       44,236 tris, materials galvanised/paintedSteel/rawSteel/rubber/
+       safetyStripe/wornSteel, 85.4 x 80.2 x 51.1 m - the tallest site model in
+       the set by a wide margin, which is right for a jack-up's legs. Nearest
+       vertex to the collar 3.994 m, nothing near the moonpool.
+
+       `replaces: []` for the same measured reason as `platform-deck`.
+       `replacesKit: true` drops the `marine` branch - hull sides, transom,
+       drill tower, A-frame, crane - which the model now authors. The moonpool
+       plate and the sea are `buildSpecials()`'s and are untouched. */
+    replaces: [],
+    replacesKit: true,
+  },
 };
 
 /**
@@ -573,8 +723,59 @@ const ARCHETYPES = {
  * real field on every generated contract and is the closest honest proxy for
  * the setting.
  */
-function resolveArchetype(methodId, regionId, applicationId, explicit, data) {
-  if (explicit && ARCHETYPES[explicit]) return explicit;
+function resolveArchetype(methodId, regionId, applicationId, explicit, data, onSubstitute) {
+  /* ── AN ARCHETYPE THAT CANNOT BE BUILT IS NOT AN ARCHETYPE ────────────────
+     `plane: 'underground'` means "this site is a drive", and a drive is built
+     from a spec in `UNDERGROUND` (core/env.js:339) that is keyed by METHOD.
+     There are four such specs — tunnel-jumbo, longhole, rockbolt,
+     raise-boring — so an underground archetype paired with any other method
+     has nowhere to stand.
+
+     THIS IS NOT HYPOTHETICAL. MEASURED with `.probe-arch-mix.mjs` against the
+     real `makeContract()` (game/data.js:5701), 19,200 contracts over all eight
+     regions and levels 1-60:
+
+         527 contracts pair the SURFACE method `core` with `underground-drive`
+         327 iberian-quarry · 122 andes · 78 alpine   (0 other shapes)
+
+     because `core` legitimately declares `underground-drive` in its own
+     archetype list (game/data.js:707 — a core rig set up inside a drive to
+     drill the ore body from within it) and this function honours an explicit
+     `contract.archetype` first.
+
+     What that rendered, measured with `.probe-sites.mjs`: `underground-drive`
+     carries NOTHING but `plane` — no `kit`, no `dress`, no `groundKind`, no
+     `pad`, no `farAmp` — so every one of those 527 contracts fell through to
+     the REGION's untouched biome. At `nordic`: 46 spruce, 14 birch, 260 grass
+     tufts, ground, pad decal and far field, 23 draw calls, with a core rig
+     parked in it. That is the precise fault this whole layer exists to remove
+     ("a foundation job in a city is not a Nordic forest with a different rig
+     parked in it"), and it is the same shape as the raise-boring precedent
+     recorded in core/env.js:416 — `UNDERGROUND['raise-boring']` was undefined,
+     "the whole SURFACE pipeline ran instead", and a raise borer stood on sand
+     under a Sahara sky.
+
+     So: refuse it, SAY SO, and derive a site that can actually be built. This
+     is a substitution, not a fix — the contract asked for a drive and the
+     player gets a surface site. The real fix is a drive spec for `core`, which
+     lives in core/env.js and is not this file's to write; the substitution is
+     reported through `onSubstitute` so a harness grades it rather than a log
+     line nobody reads (ASTRA §10). */
+  const buildable = (id) => {
+    const a = ARCHETYPES[id];
+    if (!a) return false;
+    return a.plane !== 'underground' || !!UNDERGROUND[methodId];
+  };
+
+  if (explicit && ARCHETYPES[explicit]) {
+    if (buildable(explicit)) return explicit;
+    const to = resolveArchetype(methodId, regionId, applicationId, null, data, onSubstitute);
+    onSubstitute?.({ wanted: explicit, used: to, methodId, regionId,
+      reason: `archetype "${explicit}" is plane "${ARCHETYPES[explicit].plane}" and `
+        + `method "${methodId}" has no UNDERGROUND spec (core/env.js), so no drive `
+        + 'can be built for it' });
+    return to;
+  }
   if (UNDERGROUND[methodId]) return 'underground-drive';
 
   /* THE SAME INTERSECTION THE CONTRACT GENERATOR USES.
@@ -601,7 +802,12 @@ function resolveArchetype(methodId, regionId, applicationId, explicit, data) {
         const m = data.getMethod && data.getMethod(methodId);
         ok = (m && m.archetypes) || [];
       }
-      for (const id of ok) if (ARCHETYPES[id]) return id;
+      /* `buildable`, not just `ARCHETYPES[id]`: several methods list
+         `underground-drive` alongside surface archetypes (game/data.js:707,
+         3164, 3201, 3242, 3377), and reaching this line means the method has
+         no drive spec — so an underground id here would be the same
+         unbuildable site the explicit branch above just refused. */
+      for (const id of ok) if (buildable(id)) return id;
     } catch (e) { /* data.js is another agent's file — never let it stop a build */ }
   }
 
@@ -1530,6 +1736,29 @@ export function createTerrain(ctx) {
   /** `arch.dress` is a multiplier table; this is the region's counts through it. */
   const dressFor = () => {
     const D = region.dress;
+    /* NOTHING SELF-SEEDS ON A STEEL DECK, AND IT IS A RULE, NOT A TABLE ENTRY.
+       `platform-deck` and `marine-spread` declare no `dress` of their own, so
+       every scatter count fell straight through to the REGION's. In
+       `north-sea` every count is zero and the fault was invisible; in any land
+       region it is not. MEASURED, `.probe-sites.mjs` at region `nordic`:
+       `platform-deck` and `marine-spread` each built 46 spruce trunks, 46
+       spruce crowns, 14 birch, 22 outcrops, 40 stones and 260 grass tufts —
+       eight InstancedMeshes, eight draw calls — standing at y = 0, which
+       `terrainHeight()` pins to the deck plate. A forest on a drill floor over
+       the North Sea.
+
+       It is not reachable through today's generator — `.probe-arch-mix.mjs`
+       over 19,200 real contracts puts an offshore archetype only in
+       `north-sea` — but `setArchetype()` is public API, an explicit
+       `contract.archetype` bypasses the region filter, and the review harness
+       already drives it directly. Expressed here rather than as two zeroed
+       `dress` tables because it is a property of the PLANE: whatever archetype
+       or region arrives, there is no soil on a deck for anything to grow in. */
+    if (onDeck()) {
+      const none = {};
+      for (const k of Object.keys(D)) none[k] = 0;
+      return none;
+    }
     const m = arch && arch.dress;
     if (!m) return D;
     const out = {};
@@ -1546,6 +1775,33 @@ export function createTerrain(ctx) {
   };
   /** true when the machine stands on a structure over water, not on ground. */
   const onDeck = () => (arch ? arch.plane === 'offshore' : !!region.deck);
+
+  /* ── WHAT A SITE MODEL SUPERSEDES, AND HOW IT IS DECLARED ────────────────
+     Two knobs, and they cost different things:
+
+       `replaces`    named InstancedMeshes. Each one is a REAL draw call, and
+                     this is the only place the model's cost can be paid back
+                     (see addInstances()).
+       `replacesKit` the archetype's own branch of buildSiteKit(). Free in draw
+                     calls — the whole kit merges into 6-7 vertex-coloured
+                     meshes however much goes into it — so this buys nothing
+                     back. It exists because leaving it on DOUBLE-DRESSES the
+                     plot: the .glb's authored hoarding standing in the
+                     procedural one, its plant inside the procedural plant.
+
+     Both are per-archetype and neither has a default. An archetype that
+     declares a `model` and neither of these is not "safe by default" — it is
+     an undeclared decision, and `tools/checksiteenvironment.mjs` fails on it
+     rather than letting one of the two failure modes be picked silently.
+
+     These were two hardcoded `kit === 'urban' && !siteModelReady()` /
+     `kit === 'quarry' && !siteModelReady()` tests before, which meant the
+     decision lived at the branch instead of at the archetype and could not be
+     read off the table at all. */
+  const scatterOffered = new Set();
+  const scatterDropped = new Set();
+  /** True when this archetype's LOADED model supersedes its procedural kit. */
+  const kitSuperseded = () => !!(arch && arch.replacesKit && siteModelReady());
   /** the region's far-field recipe with the archetype's relief multiplier on it */
   const farAmped = (f) => {
     if (!f) return f;
@@ -2610,7 +2866,7 @@ export function createTerrain(ctx) {
        over a forest. What it DOES cost is taken back in ARCHETYPES['urban-plot']
        .dress, which removes the spruce, the birch, the rock and the scree that
        a hoarded plot would never have. */
-    if (kit === 'urban' && !siteModelReady()) {
+    if (kit === 'urban' && !kitSuperseded()) {
       const HX = 21, HZ = 20;                 // the plot: 42 x 40 m inside the hoarding
       const HH = 2.6;                         // hoarding height, above eye line
 
@@ -3953,7 +4209,7 @@ export function createTerrain(ctx) {
        bench. It must never quietly stand in for the model in a review frame —
        `loadSiteModel()` logs every failure with its URL, and `siteModel` on the
        public API says which of the two is on screen. */
-    if (kit === 'quarry' && !siteModelReady()) {
+    if (kit === 'quarry' && !kitSuperseded()) {
       // pale limestone rubble piles + a haul-road berm
       for (let i = 0; i < 6; i++) {
         const a = rand.range(0, TAU), r = rand.range(16, 30);
@@ -4176,8 +4432,21 @@ export function createTerrain(ctx) {
 
        Gated on the model being LIVE, not on it being declared: a fresh clone
        has no `public/models` at all, and there the scatter must still draw. */
+    /* Every name that reaches this function is recorded whether it is dropped
+       or drawn, so a `replaces` entry that matches nothing can be caught. A
+       list of names nobody offers is a suppression that suppresses nothing and
+       reads exactly like one that works — ASTRA §10's "gate over an empty set".
+       MEASURED, `.probe-netdraws.mjs`: `quarry-bench` declares
+       `['outcrops','scree','stones']`, and in `nordic` only TWO of the three
+       are ever built, because `REGIONS.nordic.dress.scree` is 0. The purse a
+       model is paid out of is a function of the REGION as well as the
+       archetype, and before this nothing anywhere could see that. */
+    scatterOffered.add(name);
     if (opts.replaceable !== false && arch && arch.replaces
-        && arch.replaces.includes(name) && siteModelReady()) return null;
+        && arch.replaces.includes(name) && siteModelReady()) {
+      scatterDropped.add(name);
+      return null;
+    }
     const im = new T.InstancedMesh(geo, material, list.length);
     const mtx = new T.Matrix4();
     const q = new T.Quaternion();
@@ -6092,6 +6361,12 @@ export function createTerrain(ctx) {
 
   function disposeDrive() {
     if (!driveGroup) return;
+    /* An underground site model hangs INSIDE `driveGroup`, so this traversal
+       would dispose its geometry and leave `siteNode` pointing at a detached
+       node with dead buffers — a site that is neither in the scene nor
+       disposable, and nothing in the log. Take it out first, through the one
+       function that owns that. */
+    if (siteNode && siteNode.parent === driveGroup) detachSiteModel();
     driveGroup.traverse((o) => { if (o.geometry) o.geometry.dispose(); });
     root.remove(driveGroup);
     driveGroup = null;
@@ -6372,6 +6647,45 @@ export function createTerrain(ctx) {
         }
         if (NAMED_RE.test(o.name || '')) nodes.set(o.name, o);
       });
+      /* ── THE COLLAR ANCHOR, NOW WITH A CONSUMER ────────────────────────
+         `blender/lib/site.py:anchor()` publishes `mount:` empties and the two
+         shipped sites carry four of them (`mount:site-collar`, `-crest`,
+         `-face` with `extras={"face_h":7.5}`, `-plant`). Until this, the
+         `nodes` Map below was built, logged and DROPPED — nothing in `src/`
+         read a single one. That is ASTRA §10's declared-contract-with-no-
+         consumer, and it was live in this file.
+
+         `mount:site-collar` is the one anchor with a checkable meaning: the
+         module's own statement of where it thinks the hole is. The runtime
+         puts the model at (0,0,0) because "the .glb's origin IS the collar",
+         and that has been an ASSUMPTION on every load. Now it is checked
+         against what the file itself says.
+
+         IT IS NOT USED TO RE-OFFSET THE MODEL. Silently correcting a
+         mis-authored origin is the most expensive kind of fix — it removes the
+         symptom and keeps the cause, and the next model inherits the same
+         error with nothing to show for it. The model still lands at (0,0,0)
+         and the disagreement is reported. */
+      const collar = nodes.get('mount:site-collar');
+      let collarOffset = null;
+      if (collar) {
+        collar.updateMatrixWorld(true);
+        const v = collar.getWorldPosition(new T.Vector3());
+        collarOffset = Math.hypot(v.x, v.y, v.z);
+        if (collarOffset > 0.01) {
+          console.warn(`[terrain] site "${id}": its own mount:site-collar sits `
+            + `${collarOffset.toFixed(3)} m from the origin (${v.x.toFixed(3)}, `
+            + `${v.y.toFixed(3)}, ${v.z.toFixed(3)}). The loader places every site at `
+            + '(0,0,0) because blender/lib/site.py declares the origin to BE the '
+            + 'collar, so this model is authored about a different point and will '
+            + 'stand off the hole by that much. It is NOT being re-offset — fix the '
+            + 'module.');
+        }
+      } else {
+        console.warn(`[terrain] site "${id}": no mount:site-collar anchor. The loader `
+          + 'cannot check that this model is authored about the hole; it is being '
+          + 'placed at (0,0,0) on trust.');
+      }
       const ms = Math.round((typeof performance !== 'undefined' ? performance.now() : 0) - t0);
       console.info(`[terrain] site "${id}" ${(buf.byteLength / 1024) | 0} kB · `
         + `${prims} primitives · ${tris | 0} tris · ${nodes.size} named nodes · `
@@ -6384,7 +6698,7 @@ export function createTerrain(ctx) {
         console.warn(`[terrain] site "${id}" contains ${prims} primitives against a `
           + 'budget of 6. See THE BUDGET in blender/lib/site.py.');
       }
-      return { scene, nodes, prims, tris };
+      return { scene, nodes, prims, tris, collarOffset };
     })()
       .then((m) => { assertActive(); siteMasters.set(id, m); siteProblems.delete(id); return m; })
       .catch((e) => {
@@ -6405,14 +6719,71 @@ export function createTerrain(ctx) {
     return p;
   }
 
-  /** Ready geometry may replace procedural content during a synchronous rebuild. */
+  /**
+   * WHICH GROUP THE MODEL HANGS OFF, AND WHY IT IS NOT ALWAYS `root`.
+   *
+   * A surface or offshore site is authored about the collar in world axes, and
+   * `root` is never transformed, so `root` is the right parent and the .glb's
+   * origin lands on the collar. A DRIVE is not: everything underground is
+   * built in drive-local metres inside `driveGroup`, whose single
+   * `rotation.y = DRIVE_YAW` (0.73787 rad = 42.28 deg, core/env.js:306) puts
+   * the tube on the hero camera's bearing. A drive model parented to `root`
+   * would be authored down -Z and rendered 42.28 degrees across its own
+   * chamber — the same class of fault the machines had, and invisible in the
+   * Blender viewport.
+   *
+   * Measured: `grep DRIVE_YAW src/core/env.js src/world/terrain.js` — the only
+   * rotation applied to drive geometry is `driveGroup.rotation.y` at 5636.
+   */
+  function siteParent() {
+    return (arch?.plane === 'underground') ? driveGroup : root;
+  }
+
+  /**
+   * Is the site being built RIGHT NOW the plane this archetype's model was
+   * authored for?
+   *
+   * THE THREE PLANES ARE NOT INTERCHANGEABLE AND THE OLD TEST WAS THE METHOD.
+   * `rebuild()` picks its branch off `ugSpec`, which comes from the METHOD
+   * (`UNDERGROUND[methodId]`, core/env.js:339), while the archetype declares
+   * its own `plane`. The two can disagree — measured, `.probe-arch-mix.mjs`:
+   * over 19,200 contracts from the real `makeContract()` across all eight
+   * regions and levels 1-60, **527 pair the SURFACE method `core` with the
+   * archetype `underground-drive`** (327 iberian-quarry, 122 andes, 78
+   * alpine), because `core` legitimately declares `underground-drive` among
+   * its archetypes (game/data.js:707) and `resolveArchetype()` takes an
+   * explicit `contract.archetype` before it looks at the method.
+   *
+   * So this asks the question the attach actually depends on — "does the group
+   * this model needs exist yet" — rather than trusting either side alone. A
+   * surface model must not attach while a drive is standing (it would hang in
+   * solid rock), and a drive model must not attach when there is no drive.
+   */
+  function sitePlaneMatches() {
+    if (!arch) return false;
+    return arch.plane === 'underground' ? !!(ugSpec && driveGroup) : !ugSpec;
+  }
+
+  /**
+   * Ready geometry may replace procedural content during a synchronous rebuild.
+   *
+   * `!ugSpec` used to be part of this test, which made underground a plane the
+   * site pipeline could not reach at all: `rebuild()`'s drive branch returns
+   * before `attachSiteModel()` and this said "not ready" even if a master was
+   * parsed and waiting. An `underground-drive.glb` would have been fetched,
+   * parsed, logged as loaded, counted in the budget — and never drawn. That is
+   * ASTRA §10's silent fallback exactly. It is now a PLANE test: a drive model
+   * is ready when the drive it hangs in has actually been built.
+   */
   function siteModelReady() {
-    return !!(!disposed && !ugSpec && arch?.model && siteMasters.get(arch.model));
+    if (disposed || !arch?.model || !siteMasters.get(arch.model)) return false;
+    return sitePlaneMatches();
   }
 
   /** Diagnostics describe the attached instance, never just its cached master. */
   function siteModelLive() {
-    return !!(siteModelReady() && siteNode?.parent === root && siteNode.name === `site:${arch.model}`);
+    return !!(siteModelReady() && siteNode?.parent === siteParent()
+      && siteNode.name === `site:${arch.model}`);
   }
 
   /** Free a parsed master, including late parser results after disposal. */
@@ -6429,26 +6800,75 @@ export function createTerrain(ctx) {
     for (const resource of resources) resource.dispose();
   }
 
+  /** Take the attached site out of whatever group is holding it. */
+  function detachSiteModel() {
+    if (!siteNode) return;
+    /* `siteNode.parent`, not `root`: a drive model hangs off `driveGroup`, and
+       `root.remove()` on a node it does not own is a silent no-op that leaves
+       the old site in the scene while `siteNode` is nulled — after which
+       nothing can ever remove it again. */
+    siteNode.parent?.remove(siteNode);
+    disposeTree(siteNode);              // geometry only — the materials are shared
+    siteNode = null;
+  }
+
+  /**
+   * Rebuild-on-arrival is armed ONCE PER LOAD, NOT once per rebuild.
+   *
+   * MEASURED, `.probe-amplify.mjs`: with one fetch held open and twelve region
+   * changes made while it was in flight, the single resolution fired TWELVE
+   * extra full site rebuilds back to back — ground, decal, collar, props,
+   * dressing, far field and specials, twelve times, for one model. The fetch
+   * itself was correctly de-duplicated to one request the whole time; what was
+   * not de-duplicated was the continuation, because `attachSiteModel()` runs at
+   * the tail of every `rebuild()` and registered a fresh `.then(rebuild)` on
+   * the same shared promise each time.
+   *
+   * This is the `mountPreview()` shape (src/ui/components.js:648) in a promise
+   * rather than a rAF: a chain re-armed on a liveness check that is still true.
+   * One entry per id, and `loadSiteModel()` already guarantees one fetch per id.
+   */
+  const siteArmed = new Set();
+
   /** Put the archetype's model in the scene, or start fetching it. */
   function attachSiteModel() {
-    if (siteNode) {
-      root.remove(siteNode);
-      disposeTree(siteNode);            // geometry only — the materials are shared
-      siteNode = null;
-    }
+    detachSiteModel();
     const id = arch && arch.model;
     if (!id) return;
+    /* Wrong plane: no attach AND NO FETCH. A surface archetype whose method has
+       taken the player underground must not pull 2.7 MB it cannot draw, and it
+       must not re-attach the plot it was standing on into the rock of the
+       drive — which is exactly what this function did for one measured build
+       after it started running on the underground path. */
+    if (!sitePlaneMatches()) return;
     const master = siteMasters.get(id);
     if (master === undefined) {
       /* Not fetched yet. rebuild() is synchronous and always will be, so the
          first build of a modelled archetype draws the procedural site and the
-         model lands one rebuild later. Guarded on the archetype still being
-         the same one: a contract can change while a fetch is in flight. */
-      const want = archId;
-      loadSiteModel(id).then((m) => { if (!disposed && m && archId === want) rebuild(); });
+         model lands one rebuild later. */
+      if (!siteArmed.has(id)) {
+        siteArmed.add(id);
+        loadSiteModel(id)
+          /* Re-read the CURRENT archetype's model rather than comparing against
+             an id captured when the fetch started: a contract can change while
+             a fetch is in flight, and what decides whether this result is still
+             wanted is what the site wants NOW. */
+          .then((m) => { if (!disposed && m && arch?.model === id) rebuild(); })
+          .finally(() => { siteArmed.delete(id); });
+      }
       return;
     }
     if (!master) return;                // known failure — procedural kit stands
+
+    const parent = siteParent();
+    /* A drive model with no drive to hang in is not an error to swallow: it is
+       the state `siteModelReady()` already refuses, so reaching here means the
+       two disagree. Say so rather than parenting it to the world. */
+    if (!parent) {
+      console.warn(`[terrain] site "${id}": no parent group for plane `
+        + `"${arch.plane}" — the model is parsed but has nowhere to hang.`);
+      return;
+    }
 
     /* Geometry is CLONED, materials are NOT.
        `Object3D.clone()` shares geometry, and `disposeTree()` disposes it
@@ -6460,8 +6880,12 @@ export function createTerrain(ctx) {
     node.traverse((o) => { if (o.isMesh && o.geometry) o.geometry = o.geometry.clone(); });
     bindSiteMaterials(node, id);
     node.name = `site:${id}`;
-    node.position.set(0, 0, 0);         // the .glb's origin IS the collar
-    root.add(node);
+    /* The .glb's origin IS the collar (blender/lib/site.py, AXES). On the
+       surface and offshore that is world (0,0,0); underground it is the
+       drive-local origin, which `driveGroup` then yaws onto the camera's
+       bearing. Either way the model itself carries no offset. */
+    node.position.set(0, 0, 0);
+    parent.add(node);
     siteNode = node;
   }
 
@@ -6489,6 +6913,12 @@ export function createTerrain(ctx) {
 
   function rebuild() {
     if (disposed) return;
+    /* Per BUILD, not cumulative: the question `siteSuppression` answers is
+       "what did the model actually replace in the site that is on screen now",
+       and a set carried over from the last region would answer a different
+       one. */
+    scatterOffered.clear();
+    scatterDropped.clear();
     purgeMaterials();
     rand = makeRandom(hashStr(regionId) ^ 0x5EED);
     hSeed = (hashStr(regionId) % 997) * 0.37 + 3.1;
@@ -6509,14 +6939,22 @@ export function createTerrain(ctx) {
       propMeshes = [];
       if (signMesh) { root.remove(signMesh); disposeTree(signMesh); signMesh = null; }
       if (farField) { root.remove(farField); farField.geometry.dispose(); farField = null; }
-      /* The surface archetype's model is surface furniture. `attachSiteModel()`
-         only runs on the surface path, so without this a quarry bench would
-         still be standing inside the rock of the drive the player just went
-         into — the same class of fault as the site kit, and invisible from
-         inside a tube until the camera clipped through it. */
-      if (siteNode) { root.remove(siteNode); disposeTree(siteNode); siteNode = null; }
+      /* A SURFACE archetype's model is surface furniture, and without this a
+         quarry bench would still be standing inside the rock of the drive the
+         player just went into — the same class of fault as the site kit, and
+         invisible from inside a tube until the camera clipped through it.
+         `detachSiteModel()` removes from whatever group actually holds it. */
+      detachSiteModel();
       buildSpecials();               // clears the deck / sea / shimmer
       buildDrive();
+      /* AFTER buildDrive(), and it has to be: an underground site model hangs
+         off `driveGroup`, which does not exist until buildDrive() makes it.
+         Before this line the underground plane could not carry a model at all
+         — `attachSiteModel()` ran only on the surface path, so an
+         `underground-drive.glb` would have been fetched, parsed, name-checked,
+         budget-checked, logged as loaded and then never drawn. Nothing would
+         have said so. */
+      attachSiteModel();
       collarPosition.set(CFG.collar.x, 0, CFG.collar.z);
       padCenter.set(CFG.pad.x, 0, CFG.pad.z);
       spoilRing = null; casingStub = null; puddle = null; puddleMat = null;
@@ -6530,11 +6968,14 @@ export function createTerrain(ctx) {
     buildDressing();
     buildFarField();
     buildSpecials();
-    /* LAST, and after buildDressing() on purpose: `addInstances()` asks
-       `siteModelReady()` whether this archetype's model can replace it
-       spends a draw call on scatter the model replaces, and the answer has to
-       be the same for the whole build. Attaching first would be answering it
-       with a node that is not in the scene yet. */
+    /* LAST, and the ordering is a convention rather than a constraint — the
+       previous note here claimed `addInstances()` would answer differently if
+       the model were attached first, and that is not true: `siteModelReady()`
+       tests the parsed MASTER (`siteMasters`), never `siteNode`, so its answer
+       is already identical before and after this line. Only `siteModelLive()`
+       looks at the attached node, and nothing in the build path calls it.
+       Attaching last is still right — it is the one step that can fail on a
+       fresh clone, and everything the fallback needs is already standing. */
     attachSiteModel();
     padCenter.set(CFG.pad.x, terrainHeight(CFG.pad.x, CFG.pad.z), CFG.pad.z);
     collarPosition.set(CFG.collar.x, 0, CFG.collar.z);
@@ -6611,6 +7052,27 @@ export function createTerrain(ctx) {
     rebuild();
   }
 
+  /**
+   * The site the contract asked for could not be built and a different one was
+   * derived. Recorded, warned ONCE per distinct pairing, and readable off the
+   * public API as `archetypeSubstitution`.
+   *
+   * Loud once rather than every frame: `update()` re-resolves the archetype on
+   * every state change, and a warning that repeats sixty times a second is a
+   * warning nobody reads — which is how the six unloaded machines survived a
+   * week (ASTRA §10).
+   */
+  let archSubstitution = null;
+  const substitutionsSeen = new Set();
+  function noteSubstitution(info) {
+    archSubstitution = info;
+    const key = `${info.wanted}->${info.used}@${info.methodId}`;
+    if (substitutionsSeen.has(key)) return;
+    substitutionsSeen.add(key);
+    console.warn(`[terrain] archetype "${info.wanted}" cannot be built here; `
+      + `building "${info.used}" instead. ${info.reason}`);
+  }
+
   function setWeather(name) {
     weatherName = WEATHER[name] ? name : 'clear';
     weather = WEATHER[weatherName];
@@ -6676,8 +7138,12 @@ export function createTerrain(ctx) {
        blank frame can never rebuild the site into the region default. */
     const appId = (c && c.applicationId) || (site && site.applicationId) || null;
     const explicit = (c && c.archetype) || (site && site.archetype) || null;
+    /* Cleared before the resolve, not after: a stale substitution left standing
+       once the contract moves to a buildable site is a diagnostic that lies,
+       and this one exists precisely so a harness can trust it. */
+    archSubstitution = null;
     const aid = (mid || explicit)
-      ? resolveArchetype(mid, regionId, appId, explicit, ctx && ctx.data)
+      ? resolveArchetype(mid, regionId, appId, explicit, ctx && ctx.data, noteSubstitution)
       : archId;
     if (aid !== archId) setArchetype(aid);
 
@@ -6744,6 +7210,7 @@ export function createTerrain(ctx) {
     siteMasters.clear();
     siteKinds.clear();
     siteProblems.clear();
+    siteArmed.clear();
     instanced.length = 0;
     propMeshes = [];
   }
@@ -6779,6 +7246,38 @@ export function createTerrain(ctx) {
       };
     },
     get methodId() { return methodId; },
+    /**
+     * `null`, or `{ wanted, used, methodId, regionId, reason }` when the
+     * contract's declared archetype could not be built and another was derived.
+     *
+     * A harness must be able to tell "the site the contract asked for" from
+     * "the site that is on screen". 527 of 19,200 generated contracts ask for
+     * `underground-drive` with a method that has no drive spec (see
+     * `resolveArchetype`), and before this the substitution was completely
+     * silent — the frame simply showed the region's untouched biome.
+     */
+    get archetypeSubstitution() { return archSubstitution; },
+    /**
+     * What the archetype's `replaces` list actually met on the LAST build.
+     *
+     * `offered` is every scatter name `addInstances()` was asked to build;
+     * `dropped` is the subset the live model suppressed. A name in `replaces`
+     * that is in neither is a declaration that suppresses nothing, and it
+     * reads identically to one that works — which is why it is measured here
+     * instead of being trusted. See `.probe-netdraws.mjs`: `quarry-bench`
+     * declares three names and meets only two of them in `nordic`.
+     */
+    get siteSuppression() {
+      const declared = (arch && arch.replaces) || [];
+      return {
+        declared,
+        offered: [...scatterOffered],
+        dropped: [...scatterDropped],
+        unmatched: declared.filter((n) => !scatterOffered.has(n)),
+        kitDeclared: !!(arch && arch.replacesKit),
+        kitSuperseded: kitSuperseded(),
+      };
+    },
 
     /* extras other systems find useful */
     heightAt,
