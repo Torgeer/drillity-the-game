@@ -1,5 +1,46 @@
 # ASTRA implementation checkpoint — 2026-09-06
 
+## Latest root integration status
+
+Read the current top section of handover.md and the live coordination directory
+before assigning work; the historical batch below predates several integrations.
+Current reviewed commits include 3d919d3 (four optimized/corrected machine source
+exports with current-library comparison), f4e8ad9 (Blender UI atlas assets),
+a3fb994 (bolt selected-length/trial-fit UI, tunnel cycle billing/estimator,
+T45 diameters/alias defaults, sonic oscillator metadata), and 4a6c4ef (QA mute
+URL/scanner correctness). Completed source workstreams have been archived.
+
+The combined CPU suite passed in .bak/integration-cpu-current.log. Additional
+default hero framing and atlas mutation checks passed separately after wiring:
+342 driven poses and 11 corrupt atlas fixtures plus two silent-URL fixtures.
+This does not establish final rendered acceptance or replace the pending full
+build. Existing dist is stale; the audited expected public set is 56 files,
+53,947,705 bytes plus index.html. No obsolete GLB deletion was justified.
+
+Root renderer/geology changes remain uncommitted pending GPU verification.
+Deep profiles now cover their requested extent; unchanged readouts avoid texture
+uploads and font lifecycle invalidates them correctly. Instrument ownership and
+separate grading preserve shared film inputs while removing photographic optics.
+The first ten-case A/B failed because four frozen-repeat cases were not settled;
+a source/target diagnostic found subsequent unchanged frames exact. Strict
+comparison thresholds remain. Footer source sampling was separately corrected
+from488x45 to975x90 at390 CSS px, preserving logical size; new132-case density
+regression passes. Actual candidate recapture is still due, as are resize/quality
+warm-up and hero captures. Do not remove ordinary numeric HUD depth yet.
+
+Claude explicitly reports active environment work on claude/site-environments,
+baseline673f888; eight site modules plus terrain.js/site.py remain reserved to
+that team. New Codex tasks independently own menu atlas adoption, contract
+readiness, and drilling HUD space. Their private previews are not yet integrated.
+Use the actual gpu-owner.txt lease and current per-task requests; do not rely
+on the historical queue or status in the batch narrative below.
+
+Usage at latest wave:29% remaining. At<=5%, finish/checkpoint atomic work,
+finalize handover.md, push reviewed commits to origin codex/astra-improvements,
+verify remote SHA and pause overnight work. No actual push yet; dry-run only.
+
+## Earlier reviewed batch (historical measurements)
+
 Integration branch: `codex/astra-improvements`, starting at `8a1546a`.
 This checkpoint records a measured implementation batch, not an AAA verdict
 or completion of the entire ASTRA queue. The complete build passed after the
