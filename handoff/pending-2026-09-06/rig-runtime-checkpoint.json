@@ -1,0 +1,49 @@
+{
+  "status": "BLOCKED_PREVIEW_DEPENDENCY_ACCESS",
+  "expectedCases": 8,
+  "measuredCases": 0,
+  "measurements": [],
+  "actualRendererDraws": null,
+  "warmHeadedFPS": null,
+  "rig70Verdict": "UNASSESSED",
+  "fps60Verdict": "UNASSESSED",
+  "improvementClaim": false,
+  "sourceRoot": "C:\\Users\\henri\\Downloads\\threads\\drillity-optimized-rig-runtime",
+  "baseline": "763f0a91045e1f3afd5ebeeaaee98af7be6b2810",
+  "freezeSHA256": "1ad2ec565049666b789ff814e4957ba0b066a01e7c289bbab080eb806b49bcb8",
+  "assetHashes": {
+    "public/models/bolter.glb": "c3a29ca8d6da32eb87f39f8e207ebd3d3aa8da1685f50cb71708d89f0e32ed23",
+    "public/models/crawler-th.glb": "58175e8ae042856225b435f9476dca99d94a15048d609973b4cffe0c42ac721d",
+    "public/models/sonic-truck.glb": "f9c5438581f43adbcdd04f8b04ee579c3c4353e45c6f60e289226d6407cc6763",
+    "public/models/tunnel-jumbo.glb": "4059aaa715b389aa641b5a75256dece9ee48ab342e50b9de7484a9beaf1f6094"
+  },
+  "frozenUnchanged": true,
+  "trackedSourceUnchanged": true,
+  "ownedResources": {
+    "serverPID": 41636,
+    "port": 5208,
+    "execSession": 59410,
+    "exitCode": 1,
+    "processAbsent": true,
+    "socketAbsent": true,
+    "browserLaunched": false
+  },
+  "blocker": "esbuild Cannot read directory ../../..: Access is denied, then shared Three.js relative import resolution errors; no retry/escalation/alternate config",
+  "tests": {
+    "syntax": [
+      "tools/checkoptimizedrigruntime.mjs",
+      "tools/serveoptimizedrigruntime.mjs"
+    ],
+    "cpuSampleGateCases": 15,
+    "passed": true
+  },
+  "sourceHashes": {
+    "tools/checkoptimizedrigruntime.mjs": "dded0bc81fced7419fd165798b4561592b2879d8043615f7a98bf7b5b5a7ed36",
+    "tools/serveoptimizedrigruntime.mjs": "f69661be0352d37bbfbd415aac1ede7366e4cbce770ae31bba052528c051bc9d",
+    "research/OPTIMIZED_RIG_RUNTIME.md": "001989286f43be25386b78aaefb981b6b52388f6e498880db3da5196edf5feb1",
+    "research/OPTIMIZED_RIG_RUNTIME_REVIEW.md": "c8844849c684ecef67c82fdf5c49ddc2a7191f67792e7a1d5dd28ec617e00e7e",
+    "research/OPTIMIZED_RIG_RUNTIME_CRITIC.md": "6e13512ec935b3112eede3199a0ba3082fa95429ab5e8cf69fab5f056283c31f"
+  },
+  "patchSHA256": "d9174c81a38bf5981e84deb9ba33b1d14ea17737fec68f05671d7ea8ccd3a987",
+  "review": "Independent initial review and CPU follow-up; final identity/device edits not independently reviewed; no runtime acceptance"
+}

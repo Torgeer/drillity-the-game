@@ -1,0 +1,116 @@
+[
+  {
+    "file": "drilling-view-space.patch",
+    "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\drilling-view-space.patch",
+    "sha256": "643c1d1a93f90a0e379f0d503fd630b4ddb8097589ce881797a741c972792bae",
+    "bytes": 133251
+  },
+  {
+    "file": "drilling-view-space.manifest.json",
+    "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\drilling-view-space.manifest.json",
+    "sha256": "d3017001974f121653a232dc41be04f12499b23cb70e726079b6399ed09338d3",
+    "bytes": 65492
+  },
+  {
+    "file": "drilling-view-space.md",
+    "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\drilling-view-space.md",
+    "sha256": "72bd972c8c6aae121697a665847d9b945748680b552351afdc7a6a6bbfc1a0a1",
+    "bytes": 5942
+  },
+  {
+    "file": "ui-atlas-game-adoption.patch",
+    "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\ui-atlas-game-adoption.patch",
+    "sha256": "39beebd5abe8921a4c3c3487cce6072d83939d3d3f9f6a2baae0ed501f8b8dbf",
+    "bytes": 92918
+  },
+  {
+    "file": "ui-atlas-game-adoption.sources.json",
+    "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\ui-atlas-game-adoption.sources.json",
+    "sha256": "a9a52baa61cf1c57d1236b1c058e2504a7fa1e2427d56d429b66e19b8d9ddf6c",
+    "bytes": 2438
+  },
+  {
+    "file": "ui-atlas-game-adoption.md",
+    "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\ui-atlas-game-adoption.md",
+    "sha256": "72eda5d7ac2dfbc76456b1802e82da0fde2616c72689f774fc0988b353ff9335",
+    "bytes": 2977
+  },
+  {
+    "file": "atlas-adoption-root-review.md",
+    "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\atlas-adoption-root-review.md",
+    "sha256": "ee1a6b192f8b1520efbbb2ff3d6dd82befef5c43e6745a2822f4e9ce4754f394",
+    "bytes": 5676
+  },
+  {
+    "file": "quarry-live-collar.patch",
+    "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\quarry-live-collar.patch",
+    "sha256": "c89337a1070a906cce7ba2c23a1050179472b5caf1fc9e533af11524101d9cba",
+    "bytes": 76744
+  },
+  {
+    "file": "quarry-live-collar-manifest.json",
+    "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\quarry-live-collar-manifest.json",
+    "sha256": "9798f550e4406dd63a073531227e97515e5ac4210b311d3428a0d9bf1898f378",
+    "bytes": 1712
+  },
+  {
+    "file": "quarry-live-collar.md",
+    "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\quarry-live-collar.md",
+    "sha256": "ee3973d9c0b234c66fdbb0790771387be98644b0fbcb4a75b14b82ca0b9de572",
+    "bytes": 5704
+  },
+  {
+    "file": "optimized-rig-runtime.md",
+    "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\optimized-rig-runtime.md",
+    "sha256": "a5ead0e845863550d990a827e91557cefe9a6565d762a99e1d53a0253ce8d8bb",
+    "bytes": 6681
+  },
+  {
+    "file": "rig-runtime-optimized-rig-runtime.patch",
+    "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-optimized-rig-runtime\\.optimized-rig-runtime\\optimized-rig-runtime.patch",
+    "sha256": "d9174c81a38bf5981e84deb9ba33b1d14ea17737fec68f05671d7ea8ccd3a987",
+    "bytes": 45051
+  },
+  {
+    "file": "rig-runtime-source-hashes.json",
+    "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-optimized-rig-runtime\\.optimized-rig-runtime\\source-hashes.json",
+    "sha256": "16fb331e77c6b9ef25806854b1124286c8abaa1f88ec862ded3d411ce2837ccb",
+    "bytes": 724
+  },
+  {
+    "file": "rig-runtime-checkpoint.json",
+    "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-optimized-rig-runtime\\.optimized-rig-runtime\\checkpoint.json",
+    "sha256": "bad1826ee24cdce2a2c8384b0fed4a04f86841e54ea2a89eab62a10a7d3c6bd2",
+    "bytes": 2347
+  },
+  {
+    "file": "rig-runtime-freeze.json",
+    "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-optimized-rig-runtime\\.optimized-rig-runtime\\freeze.json",
+    "sha256": "1ad2ec565049666b789ff814e4957ba0b066a01e7c289bbab080eb806b49bcb8",
+    "bytes": 11127
+  },
+  {
+    "file": "rig-runtime-startup-denial.txt",
+    "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-optimized-rig-runtime\\.optimized-rig-runtime\\startup-denial.txt",
+    "sha256": "37e9a43b1f5b4db6d794b605d1634d8e31fe527497e77b1daf9f3ff420c37fe7",
+    "bytes": 1343
+  },
+  {
+    "file": "quarry-root-preview.mjs",
+    "source": "C:/Users/henri/Downloads/drillity-the-game/.bak/quarry-live-collar-preview.mjs",
+    "sha256": "614f5b733cbdcfa86a0e7a5a92d8f26172b37def9f861753f10ba08aac98dd89",
+    "bytes": 8302
+  },
+  {
+    "file": "quarry-root-final-review.md",
+    "source": "C:/Users/henri/Downloads/threads/drillity-coordination/quarry-root-final-review.md",
+    "sha256": "00910e155666f4c30006c8e90edaf63aee0e5c4d220eec88ce120841baa46fe4",
+    "bytes": 5105
+  },
+  {
+    "file": "quarry-root-preview-report.json",
+    "source": "C:/Users/henri/Downloads/drillity-the-game/shots/quarry-collar-root-preview/report.json",
+    "sha256": "2c97fbd7ce2bfb9c47906255877c67156de515293391cb863a4deed251cf128f",
+    "bytes": 20647
+  }
+]

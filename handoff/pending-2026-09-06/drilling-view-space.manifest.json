@@ -1,0 +1,1549 @@
+{
+  "baseline": "a3fb99412d4996d352e3e95609bb5b3ff8d2752f",
+  "head": "a3fb99412d4996d352e3e95609bb5b3ff8d2752f",
+  "branch": "codex/drilling-view-space",
+  "productionScope": [
+    "src/ui/screens/site.js",
+    "src/ui/styles.css"
+  ],
+  "files": [
+    {
+      "path": "src/ui/screens/site.js",
+      "sha256": "bad773d03fb8c0c9055b84c7668a2e10fd3accddd0bcc6277ea7fc1be1359a3d",
+      "bytes": 126375
+    },
+    {
+      "path": "src/ui/styles.css",
+      "sha256": "7849f13c9a34d27f0beeb563f0e14e7c40055ffc2f103977c54452708a0284c5",
+      "bytes": 124838
+    },
+    {
+      "path": "tools/checkdrillingviewspace.mjs",
+      "sha256": "5b9089a1b01a52ebc776e9e07796afab82da7417fda6c37c8ebffcfb299fab8b",
+      "bytes": 24183
+    },
+    {
+      "path": "tools/fixtures/drilling-view-space.js",
+      "sha256": "faa1a07564358a0e8e23291988d6f025321187e054c88a774c8080aaa160fab0",
+      "bytes": 9869
+    },
+    {
+      "path": "research/drilling-view-space-layout-analysis.md",
+      "sha256": "d37524c9f1a44e56c4c14e05f4401c5792f99a96749f9a668437571bf900af56",
+      "bytes": 25582
+    },
+    {
+      "path": "research/drilling-view-space-measurement.md",
+      "sha256": "e5d9f0b87ca3472e03ff75ba716bc3953c7d73b840249b8e6ee5a02f55d13296",
+      "bytes": 15388
+    }
+  ],
+  "patchSha256": "643c1d1a93f90a0e379f0d503fd630b4ddb8097589ce881797a741c972792bae",
+  "evidence": [
+    {
+      "path": "shots/drilling-view-space-final/baseline-320x568-normal-bolt-beat.png",
+      "sha256": "92ae460012a60ffa7489fd5d6a5e510b5f82c783708682918afe5c1d16a3d6f0",
+      "bytes": 21996
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-320x568-normal-bolt-card.png",
+      "sha256": "b0e3ad1563a4bed5cf11a81818644e41f2df922c416ad6c1bc323451bdd7ab32",
+      "bytes": 18776
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-320x568-normal-bolt-steady.png",
+      "sha256": "4a39c9292ce023e3130227a448d3d6ab78dd308f949646d851b602ee9a9f0771",
+      "bytes": 21359
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-320x568-normal-cpt-card.png",
+      "sha256": "6808f326a6c8051b1941a918d871fcf69d8c22583c46149f1d10fdd60518c917",
+      "bytes": 18932
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-320x568-normal-cpt-steady.png",
+      "sha256": "8563681b07464ea00b9f51ae581ff625ec98daa9c5fc66e9995a2d395d3430a4",
+      "bytes": 22395
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-320x568-normal-oil-steady.png",
+      "sha256": "985c8160551a410fef85b47e70b18ffc04f81ae77e148d620bb6b8d7ef3c06b5",
+      "bytes": 23179
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-320x568-normal-pile-card.png",
+      "sha256": "fad802fc23710ec5897a9bead1bf056817f7b386aa349007dd460a223a0e336f",
+      "bytes": 19796
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-320x568-normal-pile-steady.png",
+      "sha256": "64cacd6a579b167c2625e77636a62ee82ddca46bb5a42d36227627c84f28c271",
+      "bytes": 19960
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-320x568-normal-rc-card.png",
+      "sha256": "cc6c4a87ce35a46a0647be76e2f0e0a50a30b5010b3879e48eeed0567960f204",
+      "bytes": 18442
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-320x568-normal-rc-steady.png",
+      "sha256": "9d0a175dbd26a291ae8161eac01545bebb5ed0b489924a80644d2c95964c9536",
+      "bytes": 19990
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-320x568-normal-rotary-beat-bit-swap.png",
+      "sha256": "0af8a911771a67c54adc89ed12974712fde799d3f9da466e989994d24fc4d9d8",
+      "bytes": 19106
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-320x568-normal-rotary-beat-casing-run.png",
+      "sha256": "e638229f1d0785d42e51f85c441943359540aa3e2f974cf800d1361f452f7780",
+      "bytes": 19818
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-320x568-normal-rotary-beat-rod-add.png",
+      "sha256": "6a92ae631b1259230893a1826f10f2cc8e227bdeb025ea2318e452ae531b2652",
+      "bytes": 24689
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-320x568-normal-rotary-beat-tripping-in.png",
+      "sha256": "a5d381b4799a927d13dec203586839fbc9f90ea6b79bf19e587890f155e4d831",
+      "bytes": 19316
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-320x568-normal-rotary-beat-tripping-out.png",
+      "sha256": "09f9ee9dbd1be69cf7bee3d0a80440c68a5c22cd13f084833163e890395276da",
+      "bytes": 19865
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-320x568-normal-rotary-steady.png",
+      "sha256": "46bc4704393f076790c524ab391287d8273576bdaf52f6ea057388e4749eebca",
+      "bytes": 19714
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-320x844-normal-bolt-beat.png",
+      "sha256": "5873c400351dcbdf11694987f1fa74472cd2d57af0912e134d958457a795559e",
+      "bytes": 24588
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-320x844-normal-bolt-card.png",
+      "sha256": "e39a0369c5aeb24b86e332fc1b5cc3eace7709ac18e983234722ae7ad9b2478f",
+      "bytes": 20261
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-320x844-normal-bolt-steady.png",
+      "sha256": "8b35912a3c11872b03ba3a69f947c9e9cbff3aa8b80c7a4b3131d8161ad87ca0",
+      "bytes": 25009
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-320x844-normal-cpt-card.png",
+      "sha256": "75c0dc5e2aaf3b251fc4d4d2828c4da9e4e9bcf602b0ae420756eed4bfa196bc",
+      "bytes": 20275
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-320x844-normal-cpt-steady.png",
+      "sha256": "b92c426ebac90763e0ce4d1e79bdf82fb7e1af0ff923caae6c38608b55e714c0",
+      "bytes": 25220
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-320x844-normal-oil-steady.png",
+      "sha256": "ae1a605561c45fabae665e20c30c8a0de7458ecad303ff49bbf7481117078d50",
+      "bytes": 26328
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-320x844-normal-pile-card.png",
+      "sha256": "5b7035cdbfe80724e3fc9748f10d83f9cd6af579f9ef6e8069a5593c35e7d61f",
+      "bytes": 21300
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-320x844-normal-pile-steady.png",
+      "sha256": "4187da67b1b4a268eba1d92e567c87c499bb03204956e0f304e2b077cabdd6ba",
+      "bytes": 22442
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-320x844-normal-rc-card.png",
+      "sha256": "d1b4c856c4f852294bd4fb202a7ee8acee1ed3bcf4b6c4739684a717f9599c89",
+      "bytes": 19908
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-320x844-normal-rc-steady.png",
+      "sha256": "260ab26f3df1024f1542d77a84b49c1840a8109c190469ffd27bdb85f1a979a3",
+      "bytes": 23001
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-320x844-normal-rotary-beat-bit-swap.png",
+      "sha256": "7968af44563ee2e4fa6ce5964002c23d92287072fd6fa72c1654f1351b8bb768",
+      "bytes": 21558
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-320x844-normal-rotary-beat-casing-run.png",
+      "sha256": "dd294a0f6abdc51913140cb3339d72e753714fed262bf3ec8d0e15f9b3c63470",
+      "bytes": 22320
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-320x844-normal-rotary-beat-rod-add.png",
+      "sha256": "0fd2cee7618f120b5d8d18a7c725d980f05a07254c0f1612b82809597745fd20",
+      "bytes": 27193
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-320x844-normal-rotary-beat-tripping-in.png",
+      "sha256": "c90ff5f65f8342487815f1c20a3670a88f3f1e7a4f53830a848fcfb3593e5014",
+      "bytes": 21813
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-320x844-normal-rotary-beat-tripping-out.png",
+      "sha256": "cda784e86c92a12575580380bd4dbb6fb37b5bb11c90f970e98c53e488c526dd",
+      "bytes": 22505
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-320x844-normal-rotary-steady.png",
+      "sha256": "3892bf8378c85b57ad67862f1510c082426188a8815393cf84dde82956b95724",
+      "bytes": 22763
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-390x664-normal-bolt-beat.png",
+      "sha256": "cdf6924c9f60c25b3283b346f4323658a9987699aaf044126f5134a4b0dbf858",
+      "bytes": 23174
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-390x664-normal-bolt-card.png",
+      "sha256": "6a19b5d362b41b86d9d93aa9fb9df09136e7a29f24154aa8260f954da065f968",
+      "bytes": 19716
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-390x664-normal-bolt-steady.png",
+      "sha256": "76fef530c91dcdb8ae5ff48bda4b136ca3ab3f0fc1c687784a8d3372f682ac82",
+      "bytes": 22346
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-390x664-normal-cpt-card.png",
+      "sha256": "74b887994df0a6422b7a0f612d54926fef093809210a1f592b3d6720fe1a4758",
+      "bytes": 20253
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-390x664-normal-cpt-steady.png",
+      "sha256": "a9a51c2b33fd6cf7b8aa3cf3115c0bb75f85040ab679f3335d11826d68ffe723",
+      "bytes": 23735
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-390x664-normal-oil-steady.png",
+      "sha256": "8f311913633511af8b9bb2b4e0852b892153c55086414f5e903dfca4a844ddd5",
+      "bytes": 24395
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-390x664-normal-pile-card.png",
+      "sha256": "49696cfd0fdb179c6aa5f16d8ae166abadb4ef57c039c9aa9779ea8aed17cc62",
+      "bytes": 21075
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-390x664-normal-pile-steady.png",
+      "sha256": "63245a7b4a2b7979a5fea0bcb2002cdc6f96c4c2d84faeba6f220652f6066d2b",
+      "bytes": 21363
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-390x664-normal-rc-card.png",
+      "sha256": "f0cab9a90b5a28383691ff36a623b182be2d6b6843f0f004850084d496fb4e77",
+      "bytes": 19698
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-390x664-normal-rc-steady.png",
+      "sha256": "a2df593f7e8bd74e03957837d982c8ba85e3cb54ee9505c93492885ca246039b",
+      "bytes": 21255
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-390x664-normal-rotary-beat-bit-swap.png",
+      "sha256": "0bf4591b76ceafd8d445cbad2ea1c49523871c3901a0cf497a55beb344294303",
+      "bytes": 20500
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-390x664-normal-rotary-beat-casing-run.png",
+      "sha256": "e571c3f09fb318b57843b26767a83105b6ae7f55dac87d7471032080216d7f8c",
+      "bytes": 21195
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-390x664-normal-rotary-beat-rod-add.png",
+      "sha256": "acb37d472a411cb768c673e7c7e01aab6fbceca9c0ea7b47c1a5b1e9f4d0cc6a",
+      "bytes": 26150
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-390x664-normal-rotary-beat-tripping-in.png",
+      "sha256": "9312f78b832686952fbe75bb04278fcd320a8e50d9028b0d7e42cd15f18de94d",
+      "bytes": 20636
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-390x664-normal-rotary-beat-tripping-out.png",
+      "sha256": "376390225be6ef5066e6b20559f61519acf04695c905d1588d55494bacfb8cd5",
+      "bytes": 21187
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-390x664-normal-rotary-steady.png",
+      "sha256": "cce3fe7d27a7cd2c7c55b051d83e6a024b1862d34f93ef670adfee63ca7b5b24",
+      "bytes": 20977
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-390x844-normal-bolt-beat.png",
+      "sha256": "86451740c396988e625a0f8c8225997ab6800a9b5dba65bf10a0f66d60c1a6ac",
+      "bytes": 25637
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-390x844-normal-bolt-card.png",
+      "sha256": "e8d58c8b06ae3a64dc006bbac32a7a97b19b1d0490828ba668f95beb8e1e6833",
+      "bytes": 20826
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-390x844-normal-bolt-steady.png",
+      "sha256": "660231089bd0b587ca8d6f2541f602a7f8dd04f616aa822aa2cbae269f853228",
+      "bytes": 25566
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-390x844-normal-cpt-card.png",
+      "sha256": "778ed285f06e55f4000dbb9acd33f288ec5fcd73fe14be5e98de71850244d51f",
+      "bytes": 21621
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-390x844-normal-cpt-steady.png",
+      "sha256": "167d57cceb249789a9442b81a9b75fc1e5887cda2b3e904c816b1be3e2edd7d9",
+      "bytes": 26350
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-390x844-normal-oil-steady.png",
+      "sha256": "24fb776ab3356b82c69342ca0e4f8ed78e91a22ebe8063603c74550e964d8367",
+      "bytes": 27801
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-390x844-normal-pile-card.png",
+      "sha256": "ea801ab1888a6cd48b26917076894fc6d0cb964b57d4d84cc96b404b39dff39a",
+      "bytes": 22332
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-390x844-normal-pile-steady.png",
+      "sha256": "a302d66e6a660e57621064c92365d3439821112f25b9d8ece9f53748f4b300a4",
+      "bytes": 23423
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-390x844-normal-rc-card.png",
+      "sha256": "423355f03810f6cb7512820d685bffd585a3d477ac23b0406ececda064164e85",
+      "bytes": 20959
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-390x844-normal-rc-steady.png",
+      "sha256": "3153deb4f1d95949a4e0fb397a160cb519d064c5676e6904725a1a510069297b",
+      "bytes": 23975
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-390x844-normal-rotary-beat-bit-swap.png",
+      "sha256": "727fe0922d3c4b99121e2ed3370ba3ef0a82da13c25c01b0d35a8a87b6b935fb",
+      "bytes": 23165
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-390x844-normal-rotary-beat-casing-run.png",
+      "sha256": "d50e3234e285c9cd9bff1023a36486a0417d97109e0f3efe4d0bfff10ace39b1",
+      "bytes": 23573
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-390x844-normal-rotary-beat-rod-add.png",
+      "sha256": "82e48693347a70eeb774237f7099f466750f14d0c2da090edc103c42c0ea4fe8",
+      "bytes": 28478
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-390x844-normal-rotary-beat-tripping-in.png",
+      "sha256": "70b534ff3f4f7e23bb7f5271c2b7a946b0a7a43ce87a19c55eeb1d365c4922f6",
+      "bytes": 22939
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-390x844-normal-rotary-beat-tripping-out.png",
+      "sha256": "36e2a366cb33925246bafa5d13249f3411b1114807b1cc2e6c8499c5bfefc30d",
+      "bytes": 23564
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline-390x844-normal-rotary-steady.png",
+      "sha256": "fc9058bd48eb2760be4570ccf8917185c1121e0acfbcfa3aa847e3c045d67d65",
+      "bytes": 23871
+    },
+    {
+      "path": "shots/drilling-view-space-final/baseline.json",
+      "sha256": "b16dddbe792315a71924a663a58f54f2a2fc5276cc68e1e0cbcf435c920106f2",
+      "bytes": 13794960
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-280x653-normal-bolt-beat.png",
+      "sha256": "e9eabce9ff0823e9e321b9981b3184442521f8e57020c757e431edb6e4c22377",
+      "bytes": 17175
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-280x653-normal-bolt-card.png",
+      "sha256": "e68d5fd7ec34f4be07242cc867fe44d157fd194056c44d3aa2976f59ba04c09f",
+      "bytes": 16899
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-280x653-normal-bolt-steady.png",
+      "sha256": "4b53e893c9cdcb9ca155311ae14a57b6557c5028f3527cd1327088bf96c87024",
+      "bytes": 16658
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-280x653-normal-cable-beat-bailing-run.png",
+      "sha256": "e8f76032148fd69935b8137982957c52918e568ac3c7ece3aed91720e2644e80",
+      "bytes": 21179
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-280x653-normal-cable-steady.png",
+      "sha256": "16ea70069b9dbcbb88dd79822cd9582b695558c2ae25028c5f75c4f6160226b4",
+      "bytes": 14686
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-280x653-normal-cpt-card.png",
+      "sha256": "8924fda5ccad8b5d619ba9c0dad083fefc465e3fd27acee8b89301b0ef85a1a5",
+      "bytes": 17888
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-280x653-normal-cpt-steady.png",
+      "sha256": "7586a5ebf29a1e4cde42aad05a08bd2f97812aefebc1346a36f26c721a329514",
+      "bytes": 16781
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-280x653-normal-jet-steady.png",
+      "sha256": "f15f3f171336b647c7dbb9f0f80e4440fb86a69bf1e4c033ea8a4ab202b4c0bc",
+      "bytes": 14663
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-280x653-normal-longhole-card.png",
+      "sha256": "89b112ed1b53800faa6d38700fb9db8ac779449748bba4cf152b85b9b0826833",
+      "bytes": 16923
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-280x653-normal-longhole-steady.png",
+      "sha256": "e2da658ba2ebab4d09bc8886306876c38efa6a7fed1d92830ff3e82b76cd1ca0",
+      "bytes": 15175
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-280x653-normal-oil-steady.png",
+      "sha256": "076d364926ae610860f92548fb83662a72550ac14ee74624a96a986a29a421b6",
+      "bytes": 18221
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-280x653-normal-pile-card.png",
+      "sha256": "8b0a631ada54685dda217d2cebecc1b64d72e138fa49ad3aaa6c9ce6263be33d",
+      "bytes": 17729
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-280x653-normal-pile-steady.png",
+      "sha256": "a4155f16565c7f6570265aea51272b0572088768c668096bb24ba4f88e317bb6",
+      "bytes": 15582
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-280x653-normal-rc-card.png",
+      "sha256": "6db317ad99885cfaf120e71b7588a6e26ebea8235a604c0cd79de3ee38564a71",
+      "bytes": 17369
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-280x653-normal-rc-steady.png",
+      "sha256": "b8ca92b1801a3360002104129a2eba12ddc37b3df1689f1abdba6f5d810cb6b9",
+      "bytes": 15498
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-280x653-normal-rotary-beat-bit-swap.png",
+      "sha256": "6dc47d0da38ee9045fdccc3e74c6401455bb1571349c86b8a627c40e21d164f8",
+      "bytes": 14971
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-280x653-normal-rotary-beat-casing-run.png",
+      "sha256": "eb5b5e504257658ae2c7e650ed1518d4145a2f4b6928d66932aadef2e7cffa54",
+      "bytes": 15282
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-280x653-normal-rotary-beat-rod-add.png",
+      "sha256": "55637f7a8005b712572219c9cad5f7683de7d6fe4c629ee83034b0ae9cb30192",
+      "bytes": 20160
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-280x653-normal-rotary-beat-tripping-in.png",
+      "sha256": "0a3480ae490ad2e04cc542f0574ddebbfb573572c06966c556ff260a8ca9743a",
+      "bytes": 14572
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-280x653-normal-rotary-beat-tripping-out.png",
+      "sha256": "755caf9cabe0a637f959dc2c6f45c015791f163b057ea41c51a4f463b01ffd09",
+      "bytes": 15070
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-280x653-normal-rotary-steady.png",
+      "sha256": "547ba16803c68fa4c161c34e3789b29f749f13405d31c22853807873a7cadd5f",
+      "bytes": 14552
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-280x653-normal-twoStage-card.png",
+      "sha256": "b695efd199825a5fa7e021a30b91fcdb5dac64dbf7a6bd8ae481102d28089657",
+      "bytes": 17172
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-280x653-normal-twoStage-steady.png",
+      "sha256": "9ce80c86bff112200a51d053f5395521e661b38c2a3154f132f6a337a368b365",
+      "bytes": 14727
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x568-normal-bolt-beat.png",
+      "sha256": "3e99a814db3f2b85fd44f420b535c1c6866a22f7351ea8ca3f650dd1904ec740",
+      "bytes": 18005
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x568-normal-bolt-card.png",
+      "sha256": "ed071a0747c13ace952ce576214130c9835285f9ddb4131c69d5d009ab720225",
+      "bytes": 17655
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x568-normal-bolt-steady.png",
+      "sha256": "a40d61ea33ed2edf865cf791ce8e97f60b91790d7c41e44e337ef42ec69477f6",
+      "bytes": 17646
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x568-normal-cable-beat-bailing-run.png",
+      "sha256": "19f32850d992fb01ec1ff0929229e262681f1dc50b4973be6ec5840666e6d544",
+      "bytes": 21826
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x568-normal-cable-steady.png",
+      "sha256": "6d1cf4a822a2d61a5e670d5dc0e23649624d2b001a693c22dc8be9bf470edbbb",
+      "bytes": 15362
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x568-normal-cpt-card.png",
+      "sha256": "057744d385dba6c72843df42b3e7136980f6dec7373ec73034609a411bb0afb9",
+      "bytes": 18847
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x568-normal-cpt-steady.png",
+      "sha256": "0e24542663bfb1bdee1f1982ceaf63f18075917b189691df5e855e5cf47d5d82",
+      "bytes": 18189
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x568-normal-jet-steady.png",
+      "sha256": "8bdf046eb9d9b761dc135c88f3c7c46b76f50fc334f0245a1191e472e1945eae",
+      "bytes": 15526
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x568-normal-longhole-card.png",
+      "sha256": "fa381384ddc877030841ed032fea9a40660f32d6ca67f6bffd42f54f50689f7f",
+      "bytes": 17533
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x568-normal-longhole-steady.png",
+      "sha256": "ebe1474ec82228185356637312af21eb02e3b7be7f673442052a1b104fc41319",
+      "bytes": 15780
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x568-normal-oil-steady.png",
+      "sha256": "c7dbfe89cf2588b34d6469bf077e5b0ee12ad7e9a240e9985d14c2115077883c",
+      "bytes": 20101
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x568-normal-pile-card.png",
+      "sha256": "4510d2435a651beeda675708487a2e6676d566b152382c015f723418cef95c64",
+      "bytes": 18545
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x568-normal-pile-steady.png",
+      "sha256": "4a962011350351712095a95e63c29fb15908b2500b7603036d3179290b88f313",
+      "bytes": 16120
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x568-normal-rc-card.png",
+      "sha256": "0385d8a94a9eb69c9595cde89dbbcfd5fb6ad7da19a09daa4ff868b9c307f96e",
+      "bytes": 17990
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x568-normal-rc-steady.png",
+      "sha256": "a0e20eaafc5bcdca21d8e9bcee42c3d6997c04313cc8cfd895e321c0b0f230fc",
+      "bytes": 16069
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x568-normal-rotary-beat-bit-swap.png",
+      "sha256": "918700762e2bfee9518221c34d9b2f19da53dd3673ab3a332936dd921a86170d",
+      "bytes": 15559
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x568-normal-rotary-beat-casing-run.png",
+      "sha256": "711f3781fcf5b9ce3ed6fd2675d3422e30f65a0ce86cd9ee1644cd4824cbac4e",
+      "bytes": 16086
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x568-normal-rotary-beat-rod-add.png",
+      "sha256": "29551cc21531dd35c0613ba4ab04383fe62db30250af48b419f828df0152479a",
+      "bytes": 20988
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x568-normal-rotary-beat-tripping-in.png",
+      "sha256": "8577a77b637dced95d76d81ea6a444124f15a669b44699a84351ef599856fe20",
+      "bytes": 15528
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x568-normal-rotary-beat-tripping-out.png",
+      "sha256": "bb261178848a9c2d8702751e3ad5be981949a79e39f73b9c7c9d5af3e21e8bce",
+      "bytes": 16236
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x568-normal-rotary-steady.png",
+      "sha256": "21a11c3d688c3e60a7b23baa3f24e8b971220b7c805fb60ed07dc72e37905486",
+      "bytes": 15724
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x568-normal-twoStage-card.png",
+      "sha256": "3b674cf001bb9ef76a563e6ed083435aa10a43f92e1001db8f4ddf6a7d6067b5",
+      "bytes": 17597
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x568-normal-twoStage-steady.png",
+      "sha256": "5332e044c9c2a67e565dfb941fefec25a46376146c44e415223fa343584fa1e7",
+      "bytes": 15212
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x844-normal-bolt-beat.png",
+      "sha256": "e0eae737408ad016f419f7fc1b4d985cfc2b5db4e048484b559b77cd75a18928",
+      "bytes": 19141
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x844-normal-bolt-card.png",
+      "sha256": "71808e1f0ba918849721663dd152c9dac0cf51e6b0aba30fc63e1307076836b4",
+      "bytes": 18797
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x844-normal-bolt-steady.png",
+      "sha256": "c03d2621ccbbb1b399a3ecc903b9193068404a44f901abfc3c4eb2b9e79f74d6",
+      "bytes": 18772
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x844-normal-cable-beat-bailing-run.png",
+      "sha256": "526738fd514ef52914178f1f3f884bf6be3a4f5e9eeca1fb313e65b40d21c04d",
+      "bytes": 23066
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x844-normal-cable-steady.png",
+      "sha256": "3fe1d50c8e7cd9b46811b3cccfbc6346cd4efbbe4d41335aa4120a195788d851",
+      "bytes": 16443
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x844-normal-cpt-card.png",
+      "sha256": "54b150478ab0aa7aa5655615b2dfd607d23a39578f1c538e9dde769525429f93",
+      "bytes": 20047
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x844-normal-cpt-steady.png",
+      "sha256": "4a1b7b8a4b501f51abba06aee9b526f235a1ae2b3b2f179e958880286d760978",
+      "bytes": 19384
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x844-normal-jet-steady.png",
+      "sha256": "a90972eac8d9d047efec75d7ac1a96fa5d5eb7d4374e075b2683d08840b78003",
+      "bytes": 16628
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x844-normal-longhole-card.png",
+      "sha256": "300f5856dc3f78355e6641014e2647360c59ca51577c5e45df0a19735b9118be",
+      "bytes": 18662
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x844-normal-longhole-steady.png",
+      "sha256": "2fdfe260602ff1824235721de4d8bf64ce65944b8263c0c8bb8bf8da4c1692f6",
+      "bytes": 16899
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x844-normal-oil-steady.png",
+      "sha256": "5b58b8e66b8803aa5dd9b6e4b96dcd5bb38c8cdc3c6fca9d22ce700e9921b3c5",
+      "bytes": 21313
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x844-normal-pile-card.png",
+      "sha256": "edb2ce6fa7e7caf7857d4d1e8357bc1c4664cd4f19c003377a607904051e9ed8",
+      "bytes": 19705
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x844-normal-pile-steady.png",
+      "sha256": "33979b5e386a8d28abc8cdf33712de75575b4b21b1bcbc5d858714cd0bed4949",
+      "bytes": 17258
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x844-normal-rc-card.png",
+      "sha256": "9bc4ab249f5fb28740a0832a60a19af8ba8464f36ce9189b6e8b4a1a5a61cc76",
+      "bytes": 19141
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x844-normal-rc-steady.png",
+      "sha256": "5a081f6d41c656dc29371d4c68379a7df134f5858f75fb13bf27a9a6989ff01d",
+      "bytes": 17195
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x844-normal-rotary-beat-bit-swap.png",
+      "sha256": "416fc0f05af916769798bc80137df7678320b4aeba3b7f367fb447e420d771f4",
+      "bytes": 16663
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x844-normal-rotary-beat-casing-run.png",
+      "sha256": "3ac9fe2016714e219c94c82681a98e12bc99f984560817baaf22686ca204d071",
+      "bytes": 17198
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x844-normal-rotary-beat-rod-add.png",
+      "sha256": "87f19ee76e12365770e2bd2f440ed9fdabf9327f50873a6186a022e5723a4e36",
+      "bytes": 22200
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x844-normal-rotary-beat-tripping-in.png",
+      "sha256": "95e4559693027b62cd0b7d79734096efdaf1e20f0f8b2915e6e6d418d3c3fb9a",
+      "bytes": 16632
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x844-normal-rotary-beat-tripping-out.png",
+      "sha256": "29b5d391bcedc60bfe1e265e73a6d363d18ca542b43cda512b80a2e185af1ace",
+      "bytes": 17348
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x844-normal-rotary-steady.png",
+      "sha256": "361ad8533150309c0b499f6802659e29967a7e5c39b97723089f34607f8fb2e6",
+      "bytes": 16817
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x844-normal-twoStage-card.png",
+      "sha256": "24a78672d17f3fae2b7cfd4d3d99c88f7c5a2cabcb6b0165b655226e9f0e4c74",
+      "bytes": 18739
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-320x844-normal-twoStage-steady.png",
+      "sha256": "35b32850a654ed5d0d9cd883881da5749ea01a812bd48d096e81394f219f8d60",
+      "bytes": 16300
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-375x667-normal-bolt-beat.png",
+      "sha256": "366315bdc9779fa5221d5aa6a4e93ec33262b6c87446a29c28f8ee79b75b3e2e",
+      "bytes": 19818
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-375x667-normal-bolt-card.png",
+      "sha256": "f6cf14f255453e47173c019f2284276b34cc886b1b2efac104a90f389a2a61b7",
+      "bytes": 19224
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-375x667-normal-bolt-steady.png",
+      "sha256": "e1d2ad4b9c23f5a31de6533541f38a19ce7f2eb0c5c951841c8b2cf6bd37dd65",
+      "bytes": 18951
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-375x667-normal-cable-beat-bailing-run.png",
+      "sha256": "08b84b961bdf238ffed30f9c807514e49750aac24fe1450e44426d97e68ea739",
+      "bytes": 23332
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-375x667-normal-cable-steady.png",
+      "sha256": "088ae63c633d70840da2dde0004469eac09afa2a50f3bee430a5afafc867ec86",
+      "bytes": 16978
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-375x667-normal-cpt-card.png",
+      "sha256": "02bf28a0def2615b13ee0afe5c87de2f973e12b1b00e12c2561a7f33c6643b7a",
+      "bytes": 19875
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-375x667-normal-cpt-steady.png",
+      "sha256": "4aa2005553f6f9dc2549de93f33c08a1fac4c42d10d31ac0b5f339b5b3c2be97",
+      "bytes": 18995
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-375x667-normal-jet-steady.png",
+      "sha256": "f2e9e0570650a2c292c11c1bca5ed4039dbeb85da3075f59098bbe34d124d550",
+      "bytes": 17088
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-375x667-normal-longhole-card.png",
+      "sha256": "b6bc6fdfae90ff43a4cfb7fe33dd5d89cc2cdb92fe68394be90357163f247599",
+      "bytes": 19227
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-375x667-normal-longhole-steady.png",
+      "sha256": "99a57ca0088eea00054f2576d0588fcbe657b662d82782f94e005e10c65b8c18",
+      "bytes": 17581
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-375x667-normal-oil-steady.png",
+      "sha256": "efaff719f36331ee842fb1da16a4d11bc7ba1a176d9db81060d7796e5b3a8044",
+      "bytes": 20861
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-375x667-normal-pile-card.png",
+      "sha256": "59ea39000355376c5f86a761e03ba256faa8c8535b1e49ee5199e18e8289cae2",
+      "bytes": 20403
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-375x667-normal-pile-steady.png",
+      "sha256": "9e764a0f2c969802b87946954073b65ce8b2e6a88bf52ddcdeaf862bd6f67a6f",
+      "bytes": 18087
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-375x667-normal-rc-card.png",
+      "sha256": "c272d3e4dc7900450a9f9be447d99a04edddae148a0e7325db42a5f7e31a4aff",
+      "bytes": 19703
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-375x667-normal-rc-steady.png",
+      "sha256": "59402aaab91e37486c8c520f71f55d495115d88e977a07c4afc2d0222776c2dd",
+      "bytes": 17789
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-375x667-normal-rotary-beat-bit-swap.png",
+      "sha256": "c677423d699f72fdc45de5399bb007f08487e49d5681426d3a3708796116b367",
+      "bytes": 16794
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-375x667-normal-rotary-beat-casing-run.png",
+      "sha256": "1aa1da617eb41007e89e2d3b824281adda986c168c6ae5cff31b8712a7bdae69",
+      "bytes": 17540
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-375x667-normal-rotary-beat-rod-add.png",
+      "sha256": "200b234c5f8f720c6df26c26c1cf4dd4f03ed76342b09699562f1de0da2467e0",
+      "bytes": 22410
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-375x667-normal-rotary-beat-tripping-in.png",
+      "sha256": "f34a452eae2a88913bed2f5891062b74cbb6b51893c1533788224ea309b56574",
+      "bytes": 16761
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-375x667-normal-rotary-beat-tripping-out.png",
+      "sha256": "b2706b376a94ebc03c82e3a1f78feb728f022433c7ad87b9129ffc41e9b7492e",
+      "bytes": 17361
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-375x667-normal-rotary-steady.png",
+      "sha256": "d1527d87266ca358b0b8c264099b45df2154329754b7132f899f98366f0fdeda",
+      "bytes": 16854
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-375x667-normal-twoStage-card.png",
+      "sha256": "1967f847b5138ed59adf551fe8d2c364bec5ca4b9c47a49f721c86b420b42940",
+      "bytes": 19231
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-375x667-normal-twoStage-steady.png",
+      "sha256": "34c4e0e1df22f8cdaa08a1799334c279c6ef0d5f5674f165d179929eaeaf6a6d",
+      "bytes": 17026
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x664-normal-bolt-beat.png",
+      "sha256": "7f7253e2b72f59f008063137d7278bb997d1bdb9de6514f2255b2b35afa34359",
+      "bytes": 19401
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x664-normal-bolt-card.png",
+      "sha256": "f9d27cb86e59a4419ffe3984c978b5682e17899140402721af2208fb0db09498",
+      "bytes": 18937
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x664-normal-bolt-steady.png",
+      "sha256": "e36d0777ce7049d065ea3db06c9cf5877ec00ab5ae16e28f0480fe1cf57c73e5",
+      "bytes": 19359
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x664-normal-cable-beat-bailing-run.png",
+      "sha256": "6e05231ffab27529b1b5f4642ea926872e691f161bc6fa9c3b6a414448efd58e",
+      "bytes": 22991
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x664-normal-cable-steady.png",
+      "sha256": "04422e476278948f7fa1572c84571e1c7829b7bf0256a93f6811a294d0e35066",
+      "bytes": 16771
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x664-normal-cpt-card.png",
+      "sha256": "72387312fc1ce0b51811e3fbfdfa8998149b13a8a4e2a4ac45d5cb3482d924a3",
+      "bytes": 19936
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x664-normal-cpt-steady.png",
+      "sha256": "bf40b590fd558ca73aba62077bd273ead6169e76b6f410a50bcc9949bdd184a5",
+      "bytes": 19302
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x664-normal-jet-steady.png",
+      "sha256": "7ce2dc622420a4841b1e3a5e45b934bafd0d47d04dae13189cef5abf8abfbe54",
+      "bytes": 16940
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x664-normal-longhole-card.png",
+      "sha256": "88261a04f21e048f5d6bda5b874f8353409f35828dec7f1700e77d72ea70a0ae",
+      "bytes": 18937
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x664-normal-longhole-steady.png",
+      "sha256": "5f5cf7ada3fff697dc9ea38ecf807544bb73f483173a01bcd45780cf00bf3e06",
+      "bytes": 17272
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x664-normal-oil-steady.png",
+      "sha256": "14dccd35da7164c4d4b771ea5700671116675895af962699f9ee13a511698f0f",
+      "bytes": 21521
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x664-normal-pile-card.png",
+      "sha256": "c190f157c705355e8269a3e8e67c3bdfc739cda9c13c7bdb67ac3afc6832362c",
+      "bytes": 20032
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x664-normal-pile-steady.png",
+      "sha256": "7cd78902eb9c416d01570557ad68e133474d4cdad11547948883e1d5fb6fc0ab",
+      "bytes": 17777
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x664-normal-rc-card.png",
+      "sha256": "1b91c02a10f21933ba9b1fbe8bd78c61e6eaf303920f4ff2e8c28266f42634a0",
+      "bytes": 19454
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x664-normal-rc-steady.png",
+      "sha256": "ebd2257bdfd34bd7954a01cd99ef33daa4f12c6afb1929c3c60b5028962b6882",
+      "bytes": 17555
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x664-normal-rotary-beat-bit-swap.png",
+      "sha256": "3dbf7d646df92283cca00ac7fe4ab53700dc920c9269165931b9a8c6d7829b0c",
+      "bytes": 16747
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x664-normal-rotary-beat-casing-run.png",
+      "sha256": "662cdf180101fc3bfe6b837249ae476ffb72eb06a855f924a60928788eff786b",
+      "bytes": 17515
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x664-normal-rotary-beat-rod-add.png",
+      "sha256": "486c1579f83c0866fccb55ed0de23bb41c9f9cea50533616fc9fa1a7cb4da738",
+      "bytes": 22098
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x664-normal-rotary-beat-tripping-in.png",
+      "sha256": "b71cc77d47c2d349c602153c62f7ed66891a2e67e7099690af8bcb3994986360",
+      "bytes": 16794
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x664-normal-rotary-beat-tripping-out.png",
+      "sha256": "9a6e27420076bf26bdc71714c472bac31f6e90b6a2fe57f28012eb8f75bf46d5",
+      "bytes": 17388
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x664-normal-rotary-steady.png",
+      "sha256": "c670b23e37492930e1ddde6a23ef9e92c9d7cc46c323a527c54eb4a161fa3c3f",
+      "bytes": 17153
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x664-normal-twoStage-card.png",
+      "sha256": "9fe9a7b2d721cbd462964740003cc7cc041c63c10b9ccbfdf5a3d39d41bb035c",
+      "bytes": 18992
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x664-normal-twoStage-steady.png",
+      "sha256": "3b8fb1a1078727139c130c8d842e9543db36aa0ef51058995e6def15be6fa154",
+      "bytes": 16677
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x844-normal-bolt-beat.png",
+      "sha256": "6124e7b0fffd0396bf0786888710cdc6d551273c304ad009871ee4d1f081f287",
+      "bytes": 20629
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x844-normal-bolt-card.png",
+      "sha256": "f7f96bc0b29628e3a3f16949e7476b5f07452b49955b66757471dfa7440a066a",
+      "bytes": 20038
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x844-normal-bolt-steady.png",
+      "sha256": "7258eb4f78f702ef5b008a9225c0d601510cdb3c8e763774718318da3027a8e9",
+      "bytes": 20379
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x844-normal-cable-beat-bailing-run.png",
+      "sha256": "dce940c82bd979dccb8925ce66753666459e251b0eefaedc34de9b904c633113",
+      "bytes": 24657
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x844-normal-cable-steady.png",
+      "sha256": "66b4ac34feb5189fa104a7ae393bcd79a585f3156eef01009cf1034da9165bc5",
+      "bytes": 17859
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x844-normal-cpt-card.png",
+      "sha256": "a2c9ca375f6cf7bf1dbe79f82cc90904168fcc6ceb3d33ed76c718392015ba4b",
+      "bytes": 21509
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x844-normal-cpt-steady.png",
+      "sha256": "3424ffee9f8bb1489a827c82775112c96582e00a80025d775d107b47d048e5ad",
+      "bytes": 20746
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x844-normal-jet-steady.png",
+      "sha256": "082815a1b2f7387e5063963071a77d3584ca71be72fdab74d2de189047ed8ff4",
+      "bytes": 17978
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x844-normal-longhole-card.png",
+      "sha256": "eaa362063562aa81ce24bb0a53ccded64a75b60d328f3331e1ab7369521ddaf6",
+      "bytes": 20127
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x844-normal-longhole-steady.png",
+      "sha256": "8f3debfd87121d0810299cc6ddc06764f21e5288cf0da7536425fc129840a078",
+      "bytes": 18404
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x844-normal-oil-steady.png",
+      "sha256": "399a2ca891e948b18937790d0bbd0ba2591758ea267bbf33166151cca477726a",
+      "bytes": 22482
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x844-normal-pile-card.png",
+      "sha256": "7d0de3dde1de99f9f063094332cfa7d8d44a2c9bd724a621b40bf1780ff4fc6a",
+      "bytes": 20926
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x844-normal-pile-steady.png",
+      "sha256": "eeefcd630fa7ad17148a4f204942a3b63b3dfd16461ef16dde4cfb225b456d1b",
+      "bytes": 18800
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x844-normal-rc-card.png",
+      "sha256": "1ab788d8482f82a312b68b2af86336842b66acae0d022fe1582ee5c994533040",
+      "bytes": 20476
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x844-normal-rc-steady.png",
+      "sha256": "b7a271ddc4f3f1fefba86ad3a0b9aa810571b79be9fabe54fc9fcfa2c21544cc",
+      "bytes": 18509
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x844-normal-rotary-beat-bit-swap.png",
+      "sha256": "b4471a5bbfccbc9c882a20913fba8312ae5a58a8ca573cae0b20ce6ece388d38",
+      "bytes": 18199
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x844-normal-rotary-beat-casing-run.png",
+      "sha256": "211dad9de74fe2a4fbc9ad1fed51948f28263029a4139a9225dc4b9795db9c13",
+      "bytes": 19063
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x844-normal-rotary-beat-rod-add.png",
+      "sha256": "a71ce5d1774e7d3723277ac2de832546a921e82e9fc19dbc631a89c019fab6ab",
+      "bytes": 23750
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x844-normal-rotary-beat-tripping-in.png",
+      "sha256": "db679358a07d60a8e410c18955231d9b49f2cf3e2f11d9d6511da96a2980d98d",
+      "bytes": 18168
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x844-normal-rotary-beat-tripping-out.png",
+      "sha256": "f0e367e33c692b19f8ff8b2fa7abec0d0a282f7fc08dbf95643325ab38c82d8e",
+      "bytes": 18917
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x844-normal-rotary-steady.png",
+      "sha256": "3e9fb8a3bb48a5451f44979d19a7ce3a6548b766a80459989df5ddfe413bc0a5",
+      "bytes": 18273
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x844-normal-twoStage-card.png",
+      "sha256": "73c77704f562b33df0fe7e250d125e92d6f2649173904ec6a7c984bd31131bce",
+      "bytes": 20167
+    },
+    {
+      "path": "shots/drilling-view-space-final/current-390x844-normal-twoStage-steady.png",
+      "sha256": "8b2ff599b1135ed577515e517ce1b2f95dd119eceb26e7eeca2058863fefb806",
+      "bytes": 17742
+    },
+    {
+      "path": "shots/drilling-view-space-final/current.json",
+      "sha256": "02e8bb2513894c85f624831dd4dc2d59d4be0b62d57a420124e99964f0acf404",
+      "bytes": 12258121
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-280x653-normal-bolt-beat-bolt-inspect.png",
+      "sha256": "9939557f84ea582d5955491f861248c3e770d12dd780610d20a4768fbeeebb0d",
+      "bytes": 15463
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-280x653-normal-bolt-beat-bolt-install.png",
+      "sha256": "e9eabce9ff0823e9e321b9981b3184442521f8e57020c757e431edb6e4c22377",
+      "bytes": 17175
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-280x653-normal-bolt-beat-bolt-plate.png",
+      "sha256": "f73f77f58bbe32f4e122a430291ca2225ac1ebb8acd3da5599d65cb802bba4e0",
+      "bytes": 14827
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-280x653-normal-bolt-beat-bolt-ream.png",
+      "sha256": "df1223978afac36b3504ff3979b77c9bea6b8c6be425a495ca89afd790f5b531",
+      "bytes": 15917
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-280x653-normal-bolt-beat-bolt-torque.png",
+      "sha256": "561feb5222585746962cc1c17bd81d66d25e8750f087f70a3612c7a9b5b461a0",
+      "bytes": 15179
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-280x653-normal-bolt-beat-friction-bolt-install.png",
+      "sha256": "4eadee76a98757937ba7da2e2fd0c70ef52a8d85f32d7c9cf15976aab2155ca2",
+      "bytes": 15738
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-280x653-normal-cable-action-bail.png",
+      "sha256": "3eed69999403146258f572e0ec4bb9e4ee48e9fff7f73efb13016a49fc3602de",
+      "bytes": 19848
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-280x653-normal-cable-beat-bail.png",
+      "sha256": "e8f76032148fd69935b8137982957c52918e568ac3c7ece3aed91720e2644e80",
+      "bytes": 21179
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-280x653-normal-cable-beat-bailing-run.png",
+      "sha256": "e8f76032148fd69935b8137982957c52918e568ac3c7ece3aed91720e2644e80",
+      "bytes": 21179
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-280x653-normal-cpt-beat-dissipation.png",
+      "sha256": "1d3df2bd27f28bae54b997600a473c120c9db719677934d5dbad61dbf3e35a5b",
+      "bytes": 16705
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-280x653-normal-longhole-beat-redrill.png",
+      "sha256": "46ecd3212da82a34ab7067e62ff75c0c9a6247272247c0c9ad432dbe9db2db16",
+      "bytes": 15889
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-280x653-normal-longhole-beat-ring-index.png",
+      "sha256": "3625524d2bd673c3954b1f53f3c5b9823d100156d53e84cef686ee4bc79cd57b",
+      "bytes": 20544
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-280x653-normal-oil-well-gaining.png",
+      "sha256": "5efe80973af790d33ac2c9f67ab396e69933f0ddeefa1e65297a63b5eb19e4eb",
+      "bytes": 21358
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-280x653-normal-oil-well-losing.png",
+      "sha256": "f42fae0c6bbabc8206e76039c9e19567017c1a82e38198f625827918e05bbe69",
+      "bytes": 22178
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-280x653-normal-pile-beat-dolly-change.png",
+      "sha256": "a5669fe3c1de7249ca2d4304d9af4523cc7df8e7a8ca3cb40859a08b768cf59c",
+      "bytes": 16121
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-280x653-normal-pile-beat-pitch.png",
+      "sha256": "6d1008cbea925cbf55ec70ba13b0fe8408c05e19a5d9c2ab9653439757d5c433",
+      "bytes": 20458
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-280x653-normal-pile-beat-re-drive.png",
+      "sha256": "b2f21ff0ddfab8d5add5ae3a266fafcfa0587c1d8d0a975650e17dbada54331b",
+      "bytes": 15611
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-280x653-normal-pile-beat-take-set.png",
+      "sha256": "081370c863a512be807da00264166a32133e8a815fbdbe96fc2c85eac60447cd",
+      "bytes": 15322
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-280x653-normal-rc-beat-blow-down.png",
+      "sha256": "259f86b9c3193174eac472ae59faba8a51de39a5f41180bfaf64ed85c46e5a80",
+      "bytes": 15655
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-280x653-normal-rotary-action-casing.png",
+      "sha256": "238b57f5c314be44e1cca8b364a987f648592b56a5d495dec96b0616d6418ea5",
+      "bytes": 14614
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-280x653-normal-rotary-action-idle.png",
+      "sha256": "cb332905e023035ce2241c1004e6b618d49ad7bb493be74936a4d3e2e992f3f8",
+      "bytes": 14557
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-280x653-normal-rotary-action-jam.png",
+      "sha256": "27d41084952915d411874357e6d1e0f010565beef1afb40ace22e10ea8b9e40c",
+      "bytes": 19988
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-280x653-normal-rotary-action-kick.png",
+      "sha256": "e38443784fa06cbd32d95bdef8be76b20e52cadb951d336c199d07d5e67d721d",
+      "bytes": 19026
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-280x653-normal-rotary-action-rod.png",
+      "sha256": "d86cb695b0122e83c76d93148a39261708b10fcf64b5832d1814db5cbd35562b",
+      "bytes": 19751
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-280x653-normal-rotary-action-trip.png",
+      "sha256": "a0477bfbf42a08aea42d640513bcbed1e6cd54249dd9a6f1767838c7188e28ec",
+      "bytes": 14305
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-280x653-normal-rotary-beat-bit-swap.png",
+      "sha256": "6dc47d0da38ee9045fdccc3e74c6401455bb1571349c86b8a627c40e21d164f8",
+      "bytes": 14971
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-280x653-normal-rotary-beat-casing-run.png",
+      "sha256": "d1c33ae9741baefb2076f21b66ff022b76b57e16b93a5b6e01532ee01b8d8f06",
+      "bytes": 15275
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-280x653-normal-rotary-beat-rod-add.png",
+      "sha256": "55637f7a8005b712572219c9cad5f7683de7d6fe4c629ee83034b0ae9cb30192",
+      "bytes": 20160
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-280x653-normal-rotary-beat-tripping-in.png",
+      "sha256": "0a3480ae490ad2e04cc542f0574ddebbfb573572c06966c556ff260a8ca9743a",
+      "bytes": 14572
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-280x653-normal-rotary-beat-tripping-out.png",
+      "sha256": "755caf9cabe0a637f959dc2c6f45c015791f163b057ea41c51a4f463b01ffd09",
+      "bytes": 15070
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-280x653-normal-twoStage-beat-cutter-change.png",
+      "sha256": "68dc42f3b210b397026a322fc3e764d2b778f8e85dec62dc1344d13bea79d6b9",
+      "bytes": 16211
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-320x568-normal-bolt-beat-bolt-inspect.png",
+      "sha256": "ad80dc6b601d7628e69d01eebb98d788a70e331cb597fc908766d272574c1420",
+      "bytes": 16328
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-320x568-normal-bolt-beat-bolt-install.png",
+      "sha256": "3e99a814db3f2b85fd44f420b535c1c6866a22f7351ea8ca3f650dd1904ec740",
+      "bytes": 18005
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-320x568-normal-bolt-beat-bolt-plate.png",
+      "sha256": "cfe078b2fb9d36117ab7c57200c941180911705075b7c70d4a99b3d6e6f9f655",
+      "bytes": 15617
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-320x568-normal-bolt-beat-bolt-ream.png",
+      "sha256": "33fd3c0226dbfd72a6758fd0230acbdea662c2818f4b956de084b0f2371ef554",
+      "bytes": 16706
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-320x568-normal-bolt-beat-bolt-torque.png",
+      "sha256": "e0bfec294e07819bc171fc5fede6d17018a7a16cbaa6fa6eeea78f38abbe21ec",
+      "bytes": 16073
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-320x568-normal-bolt-beat-friction-bolt-install.png",
+      "sha256": "c6cb4c00909b7abc9c239ac720a3a7746a236901e3f7f8ce602fa7d077388bd9",
+      "bytes": 16430
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-320x568-normal-cable-action-bail.png",
+      "sha256": "eebdb93c0aaa1f4935f98e301cde23b05ee11c0ed0e0f520967c13f84a884dca",
+      "bytes": 21143
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-320x568-normal-cable-beat-bail.png",
+      "sha256": "19f32850d992fb01ec1ff0929229e262681f1dc50b4973be6ec5840666e6d544",
+      "bytes": 21826
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-320x568-normal-cable-beat-bailing-run.png",
+      "sha256": "19f32850d992fb01ec1ff0929229e262681f1dc50b4973be6ec5840666e6d544",
+      "bytes": 21826
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-320x568-normal-cpt-beat-dissipation.png",
+      "sha256": "98497d8a2245cd79308516b633f9697e46d643a3b88ec7b1765bbce997ff20d3",
+      "bytes": 17477
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-320x568-normal-longhole-beat-redrill.png",
+      "sha256": "9e704dbc3c40b54637edeb1ef47f47242535eb01d4ace6621ed488c8b279675c",
+      "bytes": 16242
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-320x568-normal-longhole-beat-ring-index.png",
+      "sha256": "3adf78e2d79f9926ae3e90dff6a24164b6b4c1ee2d55f7a10240834a138e757f",
+      "bytes": 21260
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-320x568-normal-oil-well-gaining.png",
+      "sha256": "9a6f51afde46eb30dd3b8051d59b2cdeda1bbf3d5848654013aa4d005f88ec5c",
+      "bytes": 21186
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-320x568-normal-oil-well-losing.png",
+      "sha256": "769389c158b6a3a3a62ef62bd8d14983d10857d51262678f8ffe87bbbc93e102",
+      "bytes": 22085
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-320x568-normal-pile-beat-dolly-change.png",
+      "sha256": "171d27dfd459edef3ad4de6446a80ff3e6706cd36b88f09b46303ef82419be37",
+      "bytes": 16545
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-320x568-normal-pile-beat-pitch.png",
+      "sha256": "991de3ca8e429882084748a635f89e19c08ef03e0490da7f0339db9807333532",
+      "bytes": 21196
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-320x568-normal-pile-beat-re-drive.png",
+      "sha256": "a33be6a8aad671b6b30007d314009ce2c4d4fe50d7c252591dca66eb912b5cee",
+      "bytes": 16265
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-320x568-normal-pile-beat-take-set.png",
+      "sha256": "cb46c2b7f102199d23de7d2483e155d4d43b3d1330bb6021fbc8c9a26ddbe2f9",
+      "bytes": 15992
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-320x568-normal-rc-beat-blow-down.png",
+      "sha256": "0396f4a2266ca7217aff9894ab30b671c2627b08e1b00dcedcfc9d26ce1f044c",
+      "bytes": 16161
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-320x568-normal-rotary-action-casing.png",
+      "sha256": "c60d70bcce9eb9e29288455055a04b6a9c2ed759e2844d8f5e3602bf53adf8ca",
+      "bytes": 15825
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-320x568-normal-rotary-action-idle.png",
+      "sha256": "d9528327fea22469dfeaa8888f8b7f07c7873a7c96ae6999eda772e8c8e96184",
+      "bytes": 15705
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-320x568-normal-rotary-action-jam.png",
+      "sha256": "fbd1bebd33beffc883082aafb43ec31dc734a587c6e3a8b7552f9bfa4b1fb64c",
+      "bytes": 21253
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-320x568-normal-rotary-action-kick.png",
+      "sha256": "7de90207c4c014a03fe506bc0919be2272c9b8b53ed1e85c549c2b05f9c5a6d7",
+      "bytes": 20332
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-320x568-normal-rotary-action-rod.png",
+      "sha256": "25463e93c82992f4d8a61039796781acfebfb5091ec3990e9a242ddffb80c5a9",
+      "bytes": 21346
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-320x568-normal-rotary-action-trip.png",
+      "sha256": "8f76c0d4981899e75a2575ac130fa608e27b83f2524615fd597b15d85fceeb69",
+      "bytes": 15468
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-320x568-normal-rotary-beat-bit-swap.png",
+      "sha256": "918700762e2bfee9518221c34d9b2f19da53dd3673ab3a332936dd921a86170d",
+      "bytes": 15559
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-320x568-normal-rotary-beat-casing-run.png",
+      "sha256": "711f3781fcf5b9ce3ed6fd2675d3422e30f65a0ce86cd9ee1644cd4824cbac4e",
+      "bytes": 16086
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-320x568-normal-rotary-beat-rod-add.png",
+      "sha256": "29551cc21531dd35c0613ba4ab04383fe62db30250af48b419f828df0152479a",
+      "bytes": 20988
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-320x568-normal-rotary-beat-tripping-in.png",
+      "sha256": "d5b60914d2e89abc6e0121ac068f9005ef957320921c540ffc809cb44ad4d70c",
+      "bytes": 15527
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-320x568-normal-rotary-beat-tripping-out.png",
+      "sha256": "bb261178848a9c2d8702751e3ad5be981949a79e39f73b9c7c9d5af3e21e8bce",
+      "bytes": 16236
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-320x568-normal-twoStage-beat-cutter-change.png",
+      "sha256": "e54e73832990c16f9340e7d8fa14939293302a78a7c8e73cf67a461e1a601650",
+      "bytes": 16482
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-390x844-normal-bolt-beat-bolt-inspect.png",
+      "sha256": "1f51348d1b065b5aa5847a29d707755b772d876f1b32b818150e2a0b3833e282",
+      "bytes": 18875
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-390x844-normal-bolt-beat-bolt-install.png",
+      "sha256": "6124e7b0fffd0396bf0786888710cdc6d551273c304ad009871ee4d1f081f287",
+      "bytes": 20629
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-390x844-normal-bolt-beat-bolt-plate.png",
+      "sha256": "1cfdeb0f7049c67126c9b50d284a923180b82df3fb663bae27c737306b759ba7",
+      "bytes": 18147
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-390x844-normal-bolt-beat-bolt-ream.png",
+      "sha256": "338ce07eb35a44e04551595643116433ccc05d222f971a8bd68ba3d4c7ea6168",
+      "bytes": 19255
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-390x844-normal-bolt-beat-bolt-torque.png",
+      "sha256": "eab5550983c9c36bd6672a804e9cd1bb6bc6283b3b7546a4dcb29ce85228b12b",
+      "bytes": 18539
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-390x844-normal-bolt-beat-friction-bolt-install.png",
+      "sha256": "94faf9b524e5ab385890a11f4f8602e22539772bcf96716cc51fff1cb4655f76",
+      "bytes": 19014
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-390x844-normal-cable-action-bail.png",
+      "sha256": "86edde479762e3c178a17272a64a425a268deb6120513d12007f56e4e4b644cc",
+      "bytes": 23541
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-390x844-normal-cable-beat-bail.png",
+      "sha256": "dce940c82bd979dccb8925ce66753666459e251b0eefaedc34de9b904c633113",
+      "bytes": 24657
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-390x844-normal-cable-beat-bailing-run.png",
+      "sha256": "dce940c82bd979dccb8925ce66753666459e251b0eefaedc34de9b904c633113",
+      "bytes": 24657
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-390x844-normal-cpt-beat-dissipation.png",
+      "sha256": "2fd2660208cf2754adcdcc824c8e477a3b09df2aa007668761a43757d353c036",
+      "bytes": 20112
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-390x844-normal-longhole-beat-redrill.png",
+      "sha256": "0280d8548ee907472e77333693b0f4b496b6404b0830708c141fe069c71cd4aa",
+      "bytes": 18849
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-390x844-normal-longhole-beat-ring-index.png",
+      "sha256": "bdaf90f700257bd7acd74a90a798b0e22bcd5f1e618b1dec97a27695f6c585d3",
+      "bytes": 23737
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-390x844-normal-oil-well-gaining.png",
+      "sha256": "04743864f9d7212d5ce63cba6db70333ec015562d618f56ba59d0ba59db1c1d9",
+      "bytes": 24124
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-390x844-normal-oil-well-losing.png",
+      "sha256": "0e03f6ebd00cf62747ffe061a4a3604bf8b212e4f7531e3aa1e70b2c766dd9ec",
+      "bytes": 24751
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-390x844-normal-pile-beat-dolly-change.png",
+      "sha256": "dc0807952f560e0551fc60860ae0448ce9956f8ec78d6cde18d4487e26f34ece",
+      "bytes": 18812
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-390x844-normal-pile-beat-pitch.png",
+      "sha256": "a9075a37b6ac073de16ef37500761e59d72236dfd4b5f9164adef61c1f0bf6c4",
+      "bytes": 23634
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-390x844-normal-pile-beat-re-drive.png",
+      "sha256": "1dc98033e02832ff050a65ecaf03f622d1b68b07e7f65cc7992f68fdc7f5cc99",
+      "bytes": 18711
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-390x844-normal-pile-beat-take-set.png",
+      "sha256": "e984217cd15ca51ed5fa1fb6c4350d0c31fd403ed134f78e9e16a1151e5024fd",
+      "bytes": 18482
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-390x844-normal-rc-beat-blow-down.png",
+      "sha256": "9410a203f4d63e4cfcafbd0efa952cf103ed7fc8fad8e70888098def8c8d0d07",
+      "bytes": 18581
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-390x844-normal-rotary-action-casing.png",
+      "sha256": "7b9591cfadae00e52ca9a547222a009c229432330f671267ea82f12eb4a63765",
+      "bytes": 18337
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-390x844-normal-rotary-action-idle.png",
+      "sha256": "5b978afc8134c27e4d04d1a46baf04783faf097354496c33c6b84e167067ba6f",
+      "bytes": 18250
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-390x844-normal-rotary-action-jam.png",
+      "sha256": "c55d5a7df6a6e68187e7e5c5d4103f47a83b3ed7f4535b57965687eac57d2de0",
+      "bytes": 23899
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-390x844-normal-rotary-action-kick.png",
+      "sha256": "a14f7f8a2d1811257ebe09c9973189f4d9a668b20204cd6d2445cf0c40eece37",
+      "bytes": 22844
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-390x844-normal-rotary-action-rod.png",
+      "sha256": "25ffa538f22b228c203a4a93c908cb628400f2bcf5dea96fc49c4becfd97945f",
+      "bytes": 23756
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-390x844-normal-rotary-action-trip.png",
+      "sha256": "97b4268afd68e5084c8769e9c065e13f5a29e995025ba6d48936b8002afed6e6",
+      "bytes": 18045
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-390x844-normal-rotary-beat-bit-swap.png",
+      "sha256": "b4471a5bbfccbc9c882a20913fba8312ae5a58a8ca573cae0b20ce6ece388d38",
+      "bytes": 18199
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-390x844-normal-rotary-beat-casing-run.png",
+      "sha256": "211dad9de74fe2a4fbc9ad1fed51948f28263029a4139a9225dc4b9795db9c13",
+      "bytes": 19063
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-390x844-normal-rotary-beat-rod-add.png",
+      "sha256": "a71ce5d1774e7d3723277ac2de832546a921e82e9fc19dbc631a89c019fab6ab",
+      "bytes": 23750
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-390x844-normal-rotary-beat-tripping-in.png",
+      "sha256": "db679358a07d60a8e410c18955231d9b49f2cf3e2f11d9d6511da96a2980d98d",
+      "bytes": 18168
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-390x844-normal-rotary-beat-tripping-out.png",
+      "sha256": "f0e367e33c692b19f8ff8b2fa7abec0d0a282f7fc08dbf95643325ab38c82d8e",
+      "bytes": 18917
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current-390x844-normal-twoStage-beat-cutter-change.png",
+      "sha256": "acf5c566f4875875f409acae61d26b8b92c654c5a487c93b9004b053e3f50ccc",
+      "bytes": 18879
+    },
+    {
+      "path": "shots/drilling-view-space-supplementary/current.json",
+      "sha256": "6e833c87da1aa8cc70524e8e66a913c6d1f2fdf98b373cf7bab847ff53863d77",
+      "bytes": 5017432
+    },
+    {
+      "path": "shots/drilling-view-space-maximum-input-final/current-375x844-normal-jet-steady.png",
+      "sha256": "00d49d5497c4a3e97e5443d524ffe072e982761b91fc327ad615417394b52d8b",
+      "bytes": 18684
+    },
+    {
+      "path": "shots/drilling-view-space-maximum-input-final/current-390x844-normal-jet-steady.png",
+      "sha256": "e41891e7455cd5cc94757f120b36270080b9a650bd9cb5ca4b30e40ba6c31e11",
+      "bytes": 19008
+    },
+    {
+      "path": "shots/drilling-view-space-maximum-input-final/current.json",
+      "sha256": "816a232c252c807bbfd6275929f9e7c81086b6bd06e7df4c0fb5b136df1db67c",
+      "bytes": 181292
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "baseline": "37f92a48abfd4ce3a20654359cb869dcd46ba25d",
+  "patch": "../drillity-coordination/quarry-live-collar.patch",
+  "patchSHA256": "c89337a1070a906cce7ba2c23a1050179472b5caf1fc9e533af11524101d9cba",
+  "files": {
+    "blender/sites/quarry_bench.py": "b0b750e43cd08dc3d0ae76f3322ffdc7848161e90d6b4949e78685c74a1705d4",
+    "tools/checkquarrylivecollar.mjs": "80aabff0432262e2802c9c30ee35a173aac5a69084f1e80c9cb1c15ea3bfe445",
+    "tools/checkquarrylivecollar-adversarial.mjs": "06fe1d97e67c079a17212ad86a04e8ceddf36b40012175de42dc1f7d9db7ccf2",
+    "tools/checkquarrylivecollarbrowser.mjs": "d49c291de5eaa26ad0050a39539747cc7ec7d80d738ca2c0cb38efcb77e0b0e5",
+    "tools/verify_quarry_live_collar.py": "d346cff01e7387f2ed863bad8e0624fbb3723ff8d27c9c44fd535dca2002f9d3",
+    "research/sites/quarry-live-collar.md": "8d43bbb3fd8e133c2e298c1f5798b879927aa374d8c7c39078deffaae7eb04c5",
+    "research/sites/quarry-live-collar-repro.md": "f61c06f0076c098f4fbb1473e425eef43f6834fcf8b83078c1fc8ac7e6c09382",
+    "research/sites/quarry-live-collar-implementation.md": "fa363f7e54615b1e26822b25cb64d3445504e62e37c8c0799d64d98a6fd58c5e",
+    "research/sites/quarry-live-collar-critic.md": "6fb5651fe1657527961275940eda777f42d352c64f97ab5d8894c3be04a29137"
+  },
+  "asset": {
+    "path": "public/models/sites/quarry-bench.glb",
+    "sha256": "5b53090ed7c92c89be48e4dcf668a7400634aa62eb3d7b89482c4cfc7db78930",
+    "bytes": 955160
+  },
+  "authoring": {
+    "before": 1030,
+    "after": 1025,
+    "removed": [
+      "flag-4",
+      "flagpin-4",
+      "shot-collar-4-0",
+      "spill-11-4",
+      "stem-4"
+    ]
+  },
+  "actualExport": {
+    "triangles": 13840,
+    "intersections": 0
+  },
+  "renderedAcceptance": false
+}

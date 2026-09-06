@@ -1,0 +1,2 @@
+# Preserve evidence and patch bytes so snapshot SHA256 values survive checkout.
+* -text

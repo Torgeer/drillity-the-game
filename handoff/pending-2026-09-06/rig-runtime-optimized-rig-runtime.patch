@@ -1,0 +1,534 @@
+diff --git a/tools/checkoptimizedrigruntime.mjs b/tools/checkoptimizedrigruntime.mjs
+new file mode 100644
+index 0000000..22e01c2
+--- /dev/null
++++ b/tools/checkoptimizedrigruntime.mjs
+@@ -0,0 +1,180 @@
++#!/usr/bin/env node
++/** Finite CURRENT-asset measurement. Does not start a server or edit production.
++ * --prepare: copy immutable served inputs; --self-test: CPU gate adversaries.
++ * Run: node tools/checkoptimizedrigruntime.mjs --port 5208 --lease ../drillity-coordination/gpu-owner.txt
++ * Serve .optimized-rig-runtime/frozen with private Vite ONLY after exact lease.
++ */
++import { chromium } from 'playwright';
++import { readFileSync, writeFileSync, mkdirSync, readdirSync, statSync, copyFileSync, existsSync } from 'node:fs';
++import { resolve, dirname, relative } from 'node:path';
++import { fileURLToPath } from 'node:url';
++import { createHash } from 'node:crypto';
++import { execFileSync } from 'node:child_process';
++import assert from 'node:assert/strict';
++
++const ROOT=resolve(dirname(fileURLToPath(import.meta.url)),'..');
++const WORK=resolve(ROOT,'.optimized-rig-runtime'), FROZEN=resolve(WORK,'frozen');
++const PLAN=[['bolter','rockbolt'],['crawler-th','top-hammer'],['sonic-truck','sonic'],['tunnel-jumbo','tunnel-jumbo']];
++const EXPECTED={bolter:'c3a29ca8d6da32eb87f39f8e207ebd3d3aa8da1685f50cb71708d89f0e32ed23','crawler-th':'58175e8ae042856225b435f9476dca99d94a15048d609973b4cffe0c42ac721d','sonic-truck':'f9c5438581f43adbcdd04f8b04ee579c3c4353e45c6f60e289226d6407cc6763','tunnel-jumbo':'4059aaa715b389aa641b5a75256dece9ee48ab342e50b9de7484a9beaf1f6094'};
++const args=process.argv.slice(2), flag=(k,d)=>{const i=args.indexOf('--'+k);return i<0?d:args[i+1];};
++const sha=b=>createHash('sha256').update(b).digest('hex');
++const fileSha=p=>sha(readFileSync(p));
++function files(dir){return readdirSync(dir).sort().flatMap(n=>{const p=resolve(dir,n);return statSync(p).isDirectory()?files(p):[p];});}
++function manifest(dir){return Object.fromEntries(files(dir).filter(p=>!p.includes('/node_modules/')&&!p.includes('\\node_modules\\')).map(p=>[relative(dir,p).replaceAll('\\','/'),fileSha(p)]));}
++function json(p,v){writeFileSync(p,JSON.stringify(v,null,2)+'\n');}
++const median=a=>{const s=[...a].sort((a,b)=>a-b);return s.length?s[Math.floor(s.length/2)]:null;};
++export function assessWindow(w,expected){
++  const errors=[];
++  if(w.samples?.length!==expected)errors.push('incomplete observed frames');
++  if(!Array.isArray(w.programsBefore)||!w.programsBefore.length||w.programsBefore.some(id=>!Number.isInteger(id))||new Set(w.programsBefore).size!==w.programsBefore.length)errors.push('missing or invalid shader program evidence');
++  if(JSON.stringify(w.programsBefore)!==JSON.stringify(w.programsAfter))errors.push('program identities changed');
++  if(w.samples?.some(s=>s.visible!=='visible'||!s.focused))errors.push('hidden or unfocused');
++  if(w.samples?.some(s=>s.lost||s.title||!Number.isInteger(s.calls)||s.calls<=0||!Number.isInteger(s.frame)))errors.push('renderer inactive or lost');
++  const dts=(w.samples||[]).slice(1).map(s=>s.dt);
++  if(dts.length!==expected-1||dts.some(d=>!Number.isFinite(d)||d<=0))errors.push('invalid frame intervals');
++  if(dts.some(d=>d>=400))errors.push('background clamp or severe stall');
++  if(w.samples?.slice(1).some((s,i)=>s.frame-w.samples[i].frame!==1))errors.push('not exactly one app frame per callback');
++  return {ok:!errors.length,errors,medianMs:median(dts),fpsMedian:dts.length?1000/median(dts):null,fpsAggregate:dts.length?1000*dts.length/dts.reduce((a,b)=>a+b,0):null,p95Ms:dts.length?[...dts].sort((a,b)=>a-b)[Math.floor(dts.length*.95)]:null,worstMs:dts.length?Math.max(...dts):null,intervals:dts.length};
++}
++if(args.includes('--help')){console.log('CPU only: --prepare | --self-test. Capture: --port 5208 --lease <gpu-owner.txt> [--out <fresh-directory>]. Exact optimized-rig-runtime lease mandatory.');process.exit(0);}
++if(args.includes('--self-test')){
++  const good={programsBefore:[1,2],programsAfter:[1,2],samples:Array.from({length:40},(_,i)=>({dt:16.6,frame:i,calls:50,visible:'visible',focused:true,lost:false,title:false}))};
++  assert.equal(assessWindow(good,40).ok,true);
++  const bad=[x=>x.samples=[],x=>x.samples.pop(),x=>x.programsAfter=[1,3],x=>{x.programsBefore=[];x.programsAfter=[];},x=>{delete x.programsBefore;delete x.programsAfter;},x=>x.samples[9].dt=1000,x=>x.samples[9].frame=7,x=>x.samples[9].calls=0,x=>x.samples[9].calls=Infinity,x=>x.samples[9].lost=true,x=>x.samples[9].title=true,x=>x.samples[9].visible='hidden',x=>x.samples[9].focused=false,x=>x.samples[9].dt=NaN];
++  for(const mutate of bad){const x=structuredClone(good);mutate(x);assert.equal(assessWindow(x,40).ok,false);}
++  console.log(JSON.stringify({passed:true,checks:1+bad.length}));process.exit(0);
++}
++if(args.includes('--prepare')){
++  if(existsSync(FROZEN))throw Error('Frozen source already exists; preserve it and choose a fresh task directory for a new baseline.');
++  mkdirSync(FROZEN,{recursive:true});
++  const inputs=['index.html','package.json','vite.config.js',...files(resolve(ROOT,'src')).map(p=>relative(ROOT,p)),...files(resolve(ROOT,'public')).map(p=>relative(ROOT,p))];
++  const before=Object.fromEntries(inputs.map(p=>[p.replaceAll('\\','/'),fileSha(resolve(ROOT,p))]));
++  for(const p of inputs){const dest=resolve(FROZEN,p);mkdirSync(dirname(dest),{recursive:true});copyFileSync(resolve(ROOT,p),dest);}
++  const copied=manifest(FROZEN);assert.deepEqual(copied,before,'Snapshot must match original inputs exactly');
++  for(const p of inputs)assert.equal(fileSha(resolve(ROOT,p)),before[p.replaceAll('\\','/')],'Inputs changed during snapshot');
++  for(const [id]of PLAN)assert.equal(copied[`public/models/${id}.glb`],EXPECTED[id],'Asset is not the reviewed current export');
++  json(resolve(WORK,'freeze.json'),{created:new Date().toISOString(),baseline:execFileSync('git',['rev-parse','HEAD'],{cwd:ROOT,encoding:'utf8'}).trim(),sourceRoot:ROOT,servedRoot:FROZEN,files:copied,authoring:Object.fromEntries(['bolter','crawler_th','sonic_truck','tunnel_jumbo'].map(id=>['blender/'+id+'.py',fileSha(resolve(ROOT,'blender',id+'.py'))]))});
++  console.log(`Frozen ${inputs.length} files; four exact current export hashes verified.`);process.exit(0);
++}
++for(let i=0;i<args.length;i++){if(!['--port','--lease','--out'].includes(args[i]))throw Error('Unknown argument '+args[i]);i++;}
++const port=Number(flag('port','5208')),lease=resolve(flag('lease',resolve(ROOT,'../drillity-coordination/gpu-owner.txt'))),out=resolve(flag('out',resolve(WORK,'capture')));
++if(!Number.isInteger(port)||port<1024||[5178,5198].includes(port))throw Error('Use a private explicit port');
++const checkLease=()=>assert.equal(readFileSync(lease,'utf8').trim(),'optimized-rig-runtime','Exact GPU lease required');
++checkLease();if(existsSync(out))throw Error('Refusing stale evidence output');mkdirSync(out,{recursive:true});
++const freeze=JSON.parse(readFileSync(resolve(WORK,'freeze.json'),'utf8'));assert.deepEqual(manifest(FROZEN),freeze.files,'Frozen inputs changed');
++const base=`http://127.0.0.1:${port}`;
++const report={created:new Date().toISOString(),baseline:freeze.baseline,sourceRoot:ROOT,servedRoot:FROZEN,harnessSHA256:fileSha(fileURLToPath(import.meta.url)),freeze,expectedCases:8,cases:[],errors:[],warnings:[],requestsFailed:[],httpErrors:[],failures:[],browserClosed:false,limitations:['Current optimized assets only; no matched before/after asset performance comparison.','Desktop system Chrome at mobile CSS viewport; not a physical mid-range phone.','FPS uses unthrottled headed rAF wall intervals with app-frame validation; not GPU timer queries.','Parked QA depth2 state with sim.update suspended and explicit hero camera; simulation CPU cost excluded. No live drilling or all-camera certification.','Rig surface metric includes runtime fitted surface tool/string; excludes shadows, AO, section tooling and post.','Instrumented render wall duration includes actual rendering plus wrappers; wrapper-only overhead is unmeasured. Scratch extra draws and wall duration are separate diagnostics, never subtracted from FPS.']};
++let browser,context,page;
++async function sample(n){return page.evaluate(n=>new Promise(resolve=>{
++  const c=window.__DRILLITY,g=c.renderer.gl,ids=()=>g.info.programs.map(p=>p.id).sort((a,b)=>a-b),w={programsBefore:ids(),samples:[]};let prev,raf,finished=false;
++  const finish=()=>{if(finished)return;finished=true;clearTimeout(timer);cancelAnimationFrame(raf);w.programsAfter=ids();resolve(w);};
++  const timer=setTimeout(()=>{w.timedOut=true;finish();},45000);
++  const tick=()=>{const now=performance.now();w.samples.push({dt:prev===undefined?null:now-prev,frame:c.clock.frame,calls:g.info.render.calls,triangles:g.info.render.triangles,visible:document.visibilityState,focused:document.hasFocus(),lost:g.getContext().isContextLost(),title:c.renderer.titleActive});prev=now;if(w.samples.length===n)finish();else raf=requestAnimationFrame(tick);};raf=requestAnimationFrame(tick);
++}),n);}
++async function warm(first){
++  const shader=await page.evaluate(()=>window.__DRILLITY.renderer.warmShaders());
++  const start=Date.now(),min=first?25000:8000,quiet=first?10000:3000,max=first?120000:45000;
++  let stableAt=start,bestAt=start,prior=null,best=Infinity;const windows=[];
++  while(Date.now()-start<max){const raw=await sample(40),assessment=assessWindow(raw,40);windows.push({elapsedMs:Date.now()-start,raw,assessment});if(!assessment.ok)return {ok:false,shader,windows,reason:'invalid warm observation'};
++    const ids=JSON.stringify(raw.programsAfter);if(ids!==prior){prior=ids;stableAt=Date.now();}if(assessment.medianMs<best*.92){bestAt=Date.now();}best=Math.min(best,assessment.medianMs);
++    if(Date.now()-start>=min&&Date.now()-stableAt>=quiet&&Date.now()-bestAt>=quiet)return {ok:shader.ready===true&&shader.total>0&&shader.done===shader.total&&shader.pending===0&&!shader.failed&&!shader.retired,shader,windows,elapsedMs:Date.now()-start,reason:'bounded shader identity and pace quiet window'};
++    await new Promise(r=>setTimeout(r,250));
++  }return {ok:false,shader,windows,reason:'warm timeout'};
++}
++async function sourceCheck(){
++  const observed={};
++  for(const p of Object.keys(freeze.files).filter(p=>p.startsWith('src/')||p==='index.html')){
++    const response=await fetch(`${base}/${p}?raw`,{signal:AbortSignal.timeout(20000)});if(!response.ok)throw Error('Served source HTTP '+p+' '+response.status);
++    const text=await response.text(),match=text.match(/export default ("(?:[^"\\]|\\.)*")/s);
++    if(!match)throw Error('Cannot verify served raw source '+p);
++    observed[p]=sha(JSON.parse(match[1]));assert.equal(observed[p],freeze.files[p],'Wrong served source '+p);
++  }
++  for(const [id]of PLAN){const r=await fetch(`${base}/models/${id}.glb`,{signal:AbortSignal.timeout(20000)});assert.equal(r.status,200);observed[`public/models/${id}.glb`]=sha(Buffer.from(await r.arrayBuffer()));assert.equal(observed[`public/models/${id}.glb`],EXPECTED[id]);}
++  return observed;
++}
++try{
++  report.servedSource=await sourceCheck();checkLease();
++  browser=await chromium.launch({headless:false,channel:'chrome',args:['--mute-audio','--enable-gpu-rasterization','--ignore-gpu-blocklist']});
++  report.browserVersion=browser.version();const browserCDP=await browser.newBrowserCDPSession();report.systemInfo=await browserCDP.send('SystemInfo.getInfo');report.processes=await browserCDP.send('SystemInfo.getProcessInfo');await browserCDP.detach();
++  for(const quality of ['high','low']){
++    context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true});
++    await context.route('**/@vite/client',r=>r.fulfill({contentType:'application/javascript',body:`export const createHotContext=()=>({on(){},off(){},send(){},accept(){},acceptExports(){},dispose(){},prune(){},decline(){},invalidate(){},data:{}});export function updateStyle(id,content){let s=document.querySelector('style[data-vite-dev-id="'+id+'"]');if(!s){s=document.createElement('style');s.setAttribute('data-vite-dev-id',id);document.head.appendChild(s);}s.textContent=content;}export function removeStyle(){};export function injectQuery(u){return u;}export class ErrorOverlay extends HTMLElement {}`}));
++    page=await context.newPage();page.setDefaultTimeout(180000);
++    page.on('pageerror',e=>report.errors.push(e.message));page.on('console',m=>{if(m.type()==='error')report.errors.push(m.text());if(m.type()==='warning')report.warnings.push(m.text());});
++    page.on('requestfailed',r=>report.requestsFailed.push({url:r.url(),error:r.failure()?.errorText}));page.on('response',r=>{if(r.status()>=400)report.httpErrors.push({url:r.url(),status:r.status()});});
++    await page.goto(`${base}/?quality=${quality}&shot&mute&glb=strict`,{waitUntil:'domcontentloaded'});await page.bringToFront();
++    await page.waitForFunction(()=>window.__DRILLITY?.__qa&&document.querySelector('.menu')&&!document.querySelector('.menu').hidden);
++    for(const [id,method]of PLAN){checkLease();const row={id,method,quality};report.cases.push(row);console.log('START '+id+' '+quality);
++      row.setup=await page.evaluate(async({id,method})=>{
++        const c=window.__DRILLITY,{makeRandom}=await import('/src/core/contract.js');
++        c.rand=makeRandom(1337);await c.__qa.loadModel(id);c.state.garage.rigId=id;
++        if(!c.rig.setRig(id))throw Error('setRig failed '+id);
++        const contract=await c.__qa.startDemoContract({method,region:'german-site',depth:2}),m=c.data.METHODS.find(m=>m.id===method);
++        const originalTarget=contract.targetDepth;contract.targetDepth=Math.min(contract.targetDepth,m.depthRange[1]);contract.seed=1337;
++        c.geology.generateProfile({regionId:contract.regionId,applicationId:contract.applicationId,targetDepth:contract.targetDepth,seed:1337,difficulty:contract.difficulty??2,methodId:contract.methodId,archetype:contract.archetype||null});
++        c.sim.startHole(contract);c.rig.setRig(id);c.rig.setMethod(method);c.sim.debug.setDepth(2);c.geology.setDepth(2);c.sim.update=()=>{};c.state.drill.active=false;
++        c.state.world.timeOfDay=0.34;c.env.setTimeOfDay(0.34);
++        c.renderer.setCameraMode('hero');
++        return {contract:JSON.parse(JSON.stringify(contract)),originalTarget,methodRange:m.depthRange,compatible:m.rigIds.includes(id),rigSource:c.rig.getActiveSourceKey()};
++      },{id,method});
++      // Let public systems apply the stationary state/camera before pinning simulation only.
++      await sample(90);
++      row.state=await page.evaluate(()=>{
++        const c=window.__DRILLITY,r=c.renderer,g=r.gl,gl=g.getContext(),ext=gl.getExtension('WEBGL_debug_renderer_info');
++        c.state.drill.active=false;
++        return {id:c.rig.getRigId(),spec:c.rig.getSpec(),sourceKey:c.rig.getActiveSourceKey(),method:c.state.contract.methodId,sectionMode:c.geology.profileMode,depth:c.state.drill.depth,active:c.state.drill.active,quality:c.quality.id,cameraMode:r.cameraMode,roots:c.rig.group.children.filter(o=>o.visible&&o.userData.spec).map(o=>({name:o.name,id:o.userData.spec.id,source:o.userData.spec.source})),bands:JSON.parse(JSON.stringify(c.bands)),stage:JSON.parse(JSON.stringify(c.stage)),camera:{position:c.camera.position.toArray(),quaternion:c.camera.quaternion.toArray(),projection:c.camera.projectionMatrix.toArray()},dpr:g.getPixelRatio(),buffer:[gl.drawingBufferWidth,gl.drawingBufferHeight],device:{userAgent:navigator.userAgent,hardwareConcurrency:navigator.hardwareConcurrency,deviceMemory:navigator.deviceMemory,vendor:ext?gl.getParameter(ext.UNMASKED_VENDOR_WEBGL):null,renderer:ext?gl.getParameter(ext.UNMASKED_RENDERER_WEBGL):null,version:gl.getParameter(gl.VERSION),contextAttributes:gl.getContextAttributes()},models:c.__qa.models()};
++      });
++      assert.equal(row.setup.compatible,true);assert.ok(!row.setup.contract.__stub,'Real generated contract required');
++      row.warm=await warm(id===PLAN[0][0]);
++      const identity=()=>page.evaluate(()=>{const c=window.__DRILLITY;return {depth:c.state.drill.depth,active:c.state.drill.active,id:c.rig.getRigId(),method:c.state.contract.methodId,simMethod:c.sim.methodId,quality:c.quality.id,sourceKey:c.rig.getActiveSourceKey(),cameraMode:c.renderer.cameraMode,timeOfDay:c.env.timeOfDay,position:c.camera.position.toArray(),quaternion:c.camera.quaternion.toArray(),projection:c.camera.projectionMatrix.toArray()};});
++      row.beforeClean=await identity();
++      row.clean=await sample(120);row.cleanAssessment=assessWindow(row.clean,120);
++      row.afterClean=await identity();
++      row.attribution=await page.evaluate(()=>new Promise((resolve,reject)=>{
++        const c=window.__DRILLITY,r=c.renderer,g=r.gl,oldRender=r.render,oldDirect=g.renderBufferDirect,frames=[];let current;
++        const restore=()=>{clearTimeout(timer);r.render=oldRender;g.renderBufferDirect=oldDirect;};
++        const timer=setTimeout(()=>{restore();resolve(frames);},45000);
++        const belongs=o=>{for(let p=o;p;p=p.parent)if(p===c.rig.group)return true;return false;};
++        g.renderBufferDirect=function(camera,scene,geometry,material,object,group){const before=g.info.render.calls;const t=performance.now();const result=oldDirect.apply(this,arguments);const calls=g.info.render.calls-before;if(current&&calls){const rig=belongs(object),pass=material.isMeshDepthMaterial||material.isMeshDistanceMaterial?'shadow':material.isMeshNormalMaterial?'ao':'surface';current.draws.push({calls,rig,pass,object:object.name,material:material.name,type:material.type,geometry:geometry.id});current.directWallMs+=performance.now()-t;}return result;};
++        r.render=function(dt){current={frame:c.clock.frame,draws:[],directWallMs:0};const t=performance.now();try{oldRender.call(this,dt);current.wallMs=performance.now()-t;current.calls=g.info.render.calls;current.triangles=g.info.render.triangles;frames.push(current);current=null;if(frames.length===40){restore();resolve(frames);}}catch(e){restore();reject(e);}};
++      }));
++      row.scratch=await page.evaluate(()=>{
++        const c=window.__DRILLITY,g=c.renderer.gl,T=c.THREE,info=g.info,rt=new T.WebGLRenderTarget(32,32),old={target:g.getRenderTarget(),auto:g.shadowMap.autoUpdate,needs:g.shadowMap.needsUpdate,visible:c.rig.group.visible,viewport:g.getViewport(new T.Vector4()),scissor:g.getScissor(new T.Vector4()),scissorTest:g.getScissorTest()};
++        const start=performance.now(),one=()=>{info.reset();g.setRenderTarget(rt);g.setViewport(0,0,32,32);g.setScissorTest(false);g.render(c.scene,c.camera);return {calls:info.render.calls,triangles:info.render.triangles};};
++        try{g.shadowMap.autoUpdate=false;g.shadowMap.needsUpdate=false;const surface=one();c.rig.group.visible=false;const withoutRig=one();return {surface,withoutRig,rig:{calls:surface.calls-withoutRig.calls,triangles:surface.triangles-withoutRig.triangles},probeExtraCalls:surface.calls+withoutRig.calls,wallMs:performance.now()-start};}
++        finally{c.rig.group.visible=old.visible;g.shadowMap.autoUpdate=old.auto;g.shadowMap.needsUpdate=old.needs;g.setRenderTarget(old.target);g.setViewport(old.viewport);g.setScissor(old.scissor);g.setScissorTest(old.scissorTest);rt.dispose();}
++      });
++      await sample(3);
++      row.health=await page.evaluate(()=>{
++        const c=window.__DRILLITY,cv=c.renderer.gl.domElement,b=c.bands.surface,s=document.createElement('canvas');s.width=64;s.height=64;const g=s.getContext('2d',{willReadFrequently:true}),dpr=c.renderer.gl.getPixelRatio();g.drawImage(cv,b.x*dpr,b.y*dpr,b.w*dpr,b.h*dpr,0,0,64,64);const p=g.getImageData(0,0,64,64).data,colours=new Set();let min=255,max=0;for(let i=0;i<p.length;i+=4){colours.add(`${p[i]},${p[i+1]},${p[i+2]}`);min=Math.min(min,p[i],p[i+1],p[i+2]);max=Math.max(max,p[i],p[i+1],p[i+2]);}return {colours:colours.size,min,max,contextLost:c.renderer.gl.getContext().isContextLost(),depth:c.state.drill.depth,active:c.state.drill.active,cameraMode:c.renderer.cameraMode,camera:{position:c.camera.position.toArray(),quaternion:c.camera.quaternion.toArray(),projection:c.camera.projectionMatrix.toArray()}};
++      });
++      await page.screenshot({path:resolve(out,`${id}-${quality}.png`),timeout:60000});
++      row.afterCapture=await identity();
++      const rigCalls=row.attribution.map(f=>f.draws.filter(d=>d.rig).reduce((s,d)=>s+d.calls,0));
++      const rigSurface=row.attribution.map(f=>f.draws.filter(d=>d.rig&&d.pass==='surface').reduce((s,d)=>s+d.calls,0));
++      row.summary={fps:row.cleanAssessment.fpsMedian,fpsAggregate:row.cleanAssessment.fpsAggregate,wholeFrameCalls:median(row.clean.samples.map(s=>s.calls)),surfaceCalls:row.scratch.surface.calls,rigSurfaceCalls:row.scratch.rig.calls,actualPipelineRigCalls:median(rigCalls),actualSurfaceRigCalls:median(rigSurface),rigShadowCalls:median(row.attribution.map(f=>f.draws.filter(d=>d.rig&&d.pass==='shadow').reduce((s,d)=>s+d.calls,0))),rigAOCalls:median(row.attribution.map(f=>f.draws.filter(d=>d.rig&&d.pass==='ao').reduce((s,d)=>s+d.calls,0))),instrumentedRenderWallMedianMs:median(row.attribution.map(f=>f.wallMs)),scratchWallMs:row.scratch.wallMs};
++      row.identityValid=[row.beforeClean,row.afterClean,row.afterCapture].every(s=>s.id===id&&s.method===method&&s.simMethod===method&&s.quality===quality&&s.sourceKey===`glb:${id}`&&s.cameraMode==='hero'&&s.depth===2&&s.active===false&&s.timeOfDay===0.34);
++      row.cameraStable=['position','quaternion','projection'].every(k=>row.beforeClean[k].every((v,i)=>Math.abs(v-row.afterClean[k][i])<=1e-6&&Math.abs(v-row.afterCapture[k][i])<=1e-6));
++      row.hardwareRenderer=!!row.state.device.renderer&&!/SwiftShader|llvmpipe|software|Microsoft Basic Render/i.test(row.state.device.renderer);
++      row.matchingQualityContract=quality==='high'||JSON.stringify(report.cases.find(c=>c.id===id&&c.quality==='high')?.setup.contract)===JSON.stringify(row.setup.contract);
++      row.valid=row.warm.ok&&row.cleanAssessment.ok&&row.identityValid&&row.cameraStable&&row.hardwareRenderer&&row.matchingQualityContract&&row.state.sourceKey===`glb:${id}`&&row.state.spec.source==='glb'&&row.state.spec.id===id&&row.state.roots.length===1&&row.state.roots[0].id===id&&row.state.roots[0].source==='glb'&&!row.setup.contract.__stub&&row.health.colours>8&&row.health.max-row.health.min>24&&!row.health.contextLost&&row.scratch.rig.calls>0&&row.attribution.length===40&&row.attribution.every(f=>f.draws.reduce((s,d)=>s+d.calls,0)===f.calls)&&row.summary.actualSurfaceRigCalls===row.scratch.rig.calls;
++      row.gates={rig70:row.valid&&row.scratch.rig.calls<=70,surface80:row.valid&&row.scratch.surface.calls<=80,fps60:row.valid&&row.cleanAssessment.fpsMedian>=60};
++      if(!row.valid)report.failures.push(`${id}/${quality}: invalid measurement`);
++      for(const [gate,pass]of Object.entries(row.gates))if(!pass)report.failures.push(`${id}/${quality}: ${gate} failed`);
++      json(resolve(out,'report.json'),report);console.log(JSON.stringify({id,quality,valid:row.valid,...row.summary,gates:row.gates}));
++    }
++    await context.close();context=null;
++  }
++}catch(e){report.failures.push(e.stack||String(e));console.error(e);}
++finally{
++  if(context)await context.close().catch(e=>report.failures.push('context close '+e));
++  if(browser){await browser.close();report.browserClosed=!browser.isConnected();}
++  report.frozenAfter=manifest(FROZEN);report.frozenUnchanged=JSON.stringify(report.frozenAfter)===JSON.stringify(freeze.files);
++  if(!report.frozenUnchanged)report.failures.push('Frozen source changed');
++  if(report.cases.length!==8||report.cases.some(c=>!c.summary))report.failures.push('Incomplete eight-case coverage');
++  if(report.errors.length||report.requestsFailed.length||report.httpErrors.length)report.failures.push('Browser/resource errors');
++  if(report.warnings.some(w=>/shader|warm-up|SMAA|fallback|stand-in|not built|VALIDATE_STATUS/i.test(w)))report.failures.push('Renderer/source warning');
++  report.passed=report.failures.length===0;json(resolve(out,'report.json'),report);
++}
++console.log(JSON.stringify({passed:report.passed,cases:report.cases.length,failures:report.failures,browserClosed:report.browserClosed}));
++process.exitCode=report.passed?0:1;
+diff --git a/tools/serveoptimizedrigruntime.mjs b/tools/serveoptimizedrigruntime.mjs
+new file mode 100644
+index 0000000..9f80637
+--- /dev/null
++++ b/tools/serveoptimizedrigruntime.mjs
+@@ -0,0 +1,15 @@
++/** Private dev server for the frozen eight-case runtime measurement only.
++ * No production edits or dependency cache writes. Ctrl-C closes owned server.
++ */
++import { createServer } from 'vite';
++import { readFileSync, writeFileSync } from 'node:fs';
++import { resolve, dirname } from 'node:path';
++import { fileURLToPath } from 'node:url';
++const root=resolve(dirname(fileURLToPath(import.meta.url)),'..'),work=resolve(root,'.optimized-rig-runtime');
++const lease=resolve(root,'../drillity-coordination/gpu-owner.txt');
++if(readFileSync(lease,'utf8').trim()!=='optimized-rig-runtime')throw Error('Exact optimized-rig-runtime GPU lease required');
++const server=await createServer({root:resolve(work,'frozen'),configFile:false,base:'./',cacheDir:resolve(work,'vite-cache'),server:{host:'127.0.0.1',port:5208,strictPort:true,watch:{ignored:['**/*']}}});
++await server.listen();
++writeFileSync(resolve(work,'server.json'),JSON.stringify({pid:process.pid,port:5208,root:resolve(work,'frozen'),started:new Date().toISOString()},null,2));
++console.log(`OWNED frozen Vite pid=${process.pid} port=5208`);
++for(const sig of ['SIGINT','SIGTERM'])process.on(sig,async()=>{await server.close();writeFileSync(resolve(work,'server-closed.json'),JSON.stringify({pid:process.pid,closed:new Date().toISOString()}));process.exit(0);});
+diff --git a/research/OPTIMIZED_RIG_RUNTIME.md b/research/OPTIMIZED_RIG_RUNTIME.md
+new file mode 100644
+index 0000000..f511142
+--- /dev/null
++++ b/research/OPTIMIZED_RIG_RUNTIME.md
+@@ -0,0 +1,85 @@
++# Current optimized rigs: runtime measurement checkpoint
++
++Status: **BLOCKED before capture; 0/8 cases measured.** No actual draw-call,
++warm FPS, <=70-per-rig or improvement verdict exists from this task.
++
++Baseline: `763f0a91045e1f3afd5ebeeaaee98af7be6b2810`, branch
++`codex/optimized-rig-runtime`. Only new harness/report/evidence files changed.
++Production, authoring sources and the public/models and node_modules junctions
++were read-only. `ASTRA.md` was read fully; both reviewers received owner §1
++verbatim and reviewed independently without running GPU work.
++
++## Prepared measurement
++
++Eight planned cases at390x844 CSS pixels/deviceScaleFactor2: bolter/rockbolt,
++crawler-th/top-hammer, sonic-truck/sonic and tunnel-jumbo/tunnel-jumbo, each
++high/low. Explicit hero camera, german-site, seeded1337 generated real contract,
++target clamped within method range and geology regenerated consistently, depth2,
++timeOfDay0.34. Simulation updates are suspended for a parked measurement;
++simulation CPU cost is excluded. This is not a live-drilling benchmark.
++
++`tools/checkoptimizedrigruntime.mjs` copies98 served inputs into the retained
++`.optimized-rig-runtime/frozen` snapshot and records SHA256 for every input.
++The four frozen GLB hashes exactly match the current-library corrected exports.
++No dependency junction is added below the frozen root. Vite's private cache is
++outside frozen files and outside the read-only dependency junction.
++
++The intended capture verifies served raw source and model hashes before opening
++headed system Chrome. Clean120-frame rAF observations precede any draw wrapper,
++scratch rerender, pixel readback or screenshot. A real nonempty completed shader
++warm-up batch and bounded program-identity/pace stability are required, with no
++FPS floor in the warm-up definition. The first partial interval is dropped;
++all remaining intervals, app frame IDs, calls, visibility/focus and context
++health are retained. Software renderer evidence invalidates the measurement.
++
++The live renderer's actual draw-counter deltas attribute40 instrumented frames
++by rig ancestry and surface/shadow/AO material pass. All attributed calls must
++sum exactly to the complete frame. A separate32px scratch render follows the
++existing shoot probe: surface minus surface-with-rig-hidden, with shadow updates
++parked and touched target/visibility/viewport/scissor state restored. That rig
++surface metric includes fitted surface tools/strings and is the <=70 budget
++scope. Whole-frame and rig shadow/AO contributions are reported separately.
++Instrumented render wall duration includes rendering and wrappers; wrapper-only
++overhead is unmeasured. Scratch extra draws/wall duration are diagnostic cost,
++never a deduction from FPS or a claimed asset improvement.
++
++The harness is **not browser-validated**. Independent review identified and the
++author corrected the stub assertion, simulator suspension, shader/frame sample
++gates, independent rAF deadlines, wrapper restoration, final-target geology,
++source/device/state identity and timing labels. Remaining review scope includes
++runtime agreement of live attribution with scratch deltas and any browser-only
++setup errors. Preserve failures; do not weaken gates to get a pass.
++
++## Startup denial and closure
++
++After root completed full build79082 and explicitly granted exact lease
++`optimized-rig-runtime`, the sole startup was:
++
++`node tools/serveoptimizedrigruntime.mjs`
++
++It bound127.0.0.1:5208, owned PID41636, tool session59410. Dependency scanning
++then reported `Cannot read directory "../../..": Access is denied.` and
++unresolved relative imports in shared Three.js postprocessing/loaders. This is
++a preview-environment/dependency-resolution blocker, not an observed GLB or
++production-renderer performance failure. No alternate configuration, retry,
++escalation, asset change or browser launch followed.
++
++Ctrl-C closed session59410 (exit1). Subsequent Get-Process41636 and
++Get-NetTCPConnection5208 returned no entries. User5178 and root5198 were untouched.
++The task's request file reports closure; only root changes the lease.
++
++## Delivery and follow-up
++
++The shared `drillity-coordination/optimized-rig-runtime.md` points to the scoped
++patch, source hashes, freeze manifest, raw denial and zero-case measurement
++checkpoint. The frozen assets and worktree are retained. CPU self-test covers
++15 valid/adversarial sample cases; both scripts pass Node syntax checks.
++
++Root/Claude must provide an authorized functioning private preview environment,
++review the final harness and perform the finite8 cases under a renewed exact
++lease. Do not use5178/5198 as a workaround, disable dependency scanning following
++this denial, copy/change the junction, or infer results from primitives. If
++actual gates fail, diagnose the raw state/source/asset cause in a scoped follow-up.
++No historical cold/private-renderer comparator is acceptable. No push, merge,
++deployment, source tuning or archive occurred; root review/integration/runtime
++verification remains required.
+diff --git a/research/OPTIMIZED_RIG_RUNTIME_REVIEW.md b/research/OPTIMIZED_RIG_RUNTIME_REVIEW.md
+new file mode 100644
+index 0000000..653b1b4
+--- /dev/null
++++ b/research/OPTIMIZED_RIG_RUNTIME_REVIEW.md
+@@ -0,0 +1,136 @@
++# Optimized rig runtime — independent harness/data review
++
++Reviewed source baseline: `763f0a9`. This initial review is CPU/source inspection
++only. No browser, server, GPU session, source edit, asset change or performance
++measurement was made by this reviewer.
++
++## Verified case setup
++
++Read ASTRA fully, the original current handover, `tools/shoot.mjs`,
++`tools/checkrigvisual.mjs`, and the current QA bridge/renderer source.
++
++| Rig | Method | Section | Compatible shared region |
++|---|---|---|---|
++| bolter | rockbolt | heading | german-site |
++| crawler-th | top-hammer | vertical | german-site |
++| sonic-truck | sonic | vertical | german-site |
++| tunnel-jumbo | tunnel-jumbo | heading | german-site |
++
++These relationships were independently read from the actual exported
++`src/game/data.js` tables and `methodsForRegion(..., MAX_LEVEL)`. Use explicit
++`hero` camera. The generic rig portrait's moving `orbit` camera can enter rock
++for underground methods and is unsuitable for matched static-camera timing.
++
++`__qa.startDemoContract` asks for `depth + 30` and can deepen the returned
++contract beyond a method's range. At depth 2, tunnel-jumbo can receive a 32 m
++target despite its declared 6–24 m range. Choose or clamp/restart a valid
++deterministic contract and record this intervention. Seed each quality with the
++same contract, requested depth, inputs, world time and explicit camera.
++
++The context exposes a random-generator object as `c.rand`, not `c.makeRandom`.
++Import the existing `makeRandom` export from `src/core/contract.js` to replace
++the QA generator; also retain an explicit contract seed because simulation has
++a wall-clock fallback. Setting only `c.state.drill.active = false` is overwritten
++by `sim.update`, which publishes its internal active state. If simulation update
++is suspended for a parked measurement, disclose that its CPU cost is excluded;
++do not describe that result as live drilling FPS.
++
++Require successful `setRig`, `getActiveSourceKey() === 'glb:' + id`, matching
++`getSpec().id/source`, exactly one visible spec root, matching contract/sim/rig
++method IDs, live site screen and correct section mode. Source keys identify the
++loader selection; separate SHA-256 evidence must identify actual response bytes.
++
++## Measurement scopes and traps
++
++`shoot.mjs:227` measures actual `gl.info.render` counters. Set
++`gl.info.autoReset = false`; production `renderer.render` resets once per frame.
++Whole-frame calls include shadows, AO, both bands, post and the isolated
++instrument pass. Primitive counts are never an alternative to these counters.
++
++The existing scratch probe renders the live surface scene/camera, then hides
++`rig.group` and renders again. Their counter difference is the rig's surface
++contribution with shadow auto-update disabled. It excludes rig shadow/AO
++contributions and is not the whole-frame rig cost. A new WebGLRenderer would
++also change material/program/device state and must not be used.
++
++Scratch renders are extra work, can compile target-specific programs, and
++alter counters. Run them only after clean FPS windows, restore all touched state
++in `finally`, and report attribution overhead separately. If live draw wrappers
++are used, measure a separate instrumented window and retain a clean window.
++
++Use raw rAF intervals, discard the initial partial interval, and retain every
++sample. Record observed application frame increments as well: rAF may continue
++when rendering is stopped. Reject hidden/clamped windows rather than reporting
++the 1 Hz background clamp as a frame-rate failure. Stable program count alone
++does not prove warmth: record program identities, `warmShaders` readiness and
++first-frame/new-program evidence. FPS never comes from the clamped game clock.
++
++Use actual surface band geometry for nonempty pixel checks. The old probe's
++hardcoded top 54% ignores carved HUD space; its alternate alpha condition can
++accept opaque black. Require RGB variation/nonblack coverage and inspect PNGs.
++
++## First harness review
++
++Reviewed the initial `tools/checkoptimizedrigruntime.mjs` draft after its author
++announced it ready. Source snapshot and expected current GLB hashes are explicit;
++eight cases are finite, clean timing precedes attribution, and actual draw deltas
++come from the existing renderer. Production already sets `info.autoReset=false`.
++
++The following corrections were sent to the author before capture:
++
++- Add independent deadlines to page-evaluation frame promises. Playwright's
++  default operation timeout does not bound `page.evaluate`. Attribution must
++  restore both wrappers on success, exception and timeout.
++- Require nonempty finite program identities and positive finite integer draw
++  counters, not just equality of possibly missing arrays. Warm-up must have a
++  nonempty completed batch with zero pending, retired or failed programs.
++- Enforce the measured rig/spec/root identity, quality, method IDs, hero camera,
++  requested depth and parked state through the final capture. Setup promises
++  alone cannot establish the state that was actually timed.
++- Regenerate the geology profile against a deliberately clamped contract target
++  before restarting simulation, retaining method/archetype metadata.
++- Record raw instrumented frame intervals and assess them consistently if a
++  paired probe timing difference is reported. Instrumented render wall time
++  alone includes game render work and is not instrumentation overhead.
++
++The known stub sentinel, simulator suspension and explicit contract seed fixes
++were already acknowledged by the author and are not separate new findings.
++
++## Final source-only checkpoint
++
++Revised harness inspected at SHA-256
++`d897255d7198734def9e52531c2145e3f001f1cb318d714df494e89f8aca8614`.
++`node --check tools/checkoptimizedrigruntime.mjs` passed, and
++`node tools/checkoptimizedrigruntime.mjs --self-test` passed all 15 CPU cases.
++These commands do not start a server or browser.
++
++Verified corrections at this checkpoint:
++
++- Frame and attribution waits now have independent 45 second deadlines.
++  Attribution restores both replaced functions on success, exception and timeout.
++- Samples require nonempty valid unique shader identities, finite positive
++  integer draw calls, integer observed application frames, visible focused
++  frames, and valid unclamped frame intervals.
++- Shader warmth requires a nonempty fully completed batch with no pending,
++  retired or failed programs.
++- Setup regenerates geology using the final target, sets contract seed 1337,
++  suspends simulation update, and fixes world time to 0.34.
++
++The author was still applying final identity/device gates and honest
++instrumentation-cost wording at this hash. Those later edits are not certified
++by this source checkpoint. No runtime acceptance is implied by the CPU tests.
++
++Runtime coverage is **0/8**. The parent reports that the single authorized
++private Vite attempt failed because esbuild was denied access reading parent
++directories and Three's relative imports could not resolve through the shared
++read-only dependency directory. No browser was started. Parent also reports
++owned server PID 41636 / port 5208 / session 59410 closed and verified absent.
++This reviewer did not independently launch or stop those resources. The saved
++server.json records the attempted server provenance; it is not a liveness claim.
++
++No retry, alternate configuration, permission escalation, model modification or
++renderer retuning was attempted by this reviewer. Preserve the frozen inputs,
++failed startup evidence and prepared harness for the root/Claude handoff. Draw
++calls, warm FPS and any improvement remain **unmeasured**. A resumed authorized
++runtime run must complete the eight cases and undergo data review before any
++draw-budget or FPS verdict can be accepted.
+diff --git a/research/OPTIMIZED_RIG_RUNTIME_CRITIC.md b/research/OPTIMIZED_RIG_RUNTIME_CRITIC.md
+new file mode 100644
+index 0000000..37cc79a
+--- /dev/null
++++ b/research/OPTIMIZED_RIG_RUNTIME_CRITIC.md
+@@ -0,0 +1,88 @@
++# Optimized rig runtime: independent performance critique
++
++2026-09-06. Scope: source and methodology review against prepared baseline
++763f0a9. No browser, server, GPU, Blender, or production/asset mutation by this
++reviewer. Read ASTRA, its current checkpoint, handover, live coordination, current
++export and integration reviews, shoot/checkrigvisual and relevant runtime APIs.
++Runtime results remain unreviewed until the parent supplies the bounded capture.
++
++## Evidence the eight cases must establish
++
++- Exactly bolter, crawler-th, sonic-truck and tunnel-jumbo at both high/low,
++  390 by 844 CSS pixels. Record real buffer dimensions and effective pixel ratio;
++  a phone viewport on desktop Chrome is not physical-phone performance.
++- Each current served GLB SHA-256 must equal the file hashed before capture.
++  Record received response bytes/hash, active source key (`glb:<requested id>`),
++  spec id/source, requested rig, method and one visible machine root. Source keys
++  establish source selection, not asset byte identity. GLB primitive count is
++  not an actual draw-call measurement.
++- Record exact runtime, harness, model source/shared-library and asset hashes,
++  Chrome version, launch options, WebGL vendor/renderer and any software fallback.
++  Freeze served source and assets for the run; rehash after capture. Disabled HMR
++  alone cannot prevent a newly fetched resource coming from changed source.
++- Choose compatible methods explicitly. Record the returned QA contract and
++  deterministic RNG setup, including any target-depth extension and `__stub`.
++  `startDemoContract` generates varying contracts and can extend short ones;
++  merely passing equal method/depth does not guarantee equal high/low worlds.
++- Set and read back the camera mode; retain position, projection and matrix data
++  after settling. Counted contributions are for that frustum/state, not a maximum
++  across every machine pose. Underground orbit can frame a rock wall. A nonblank
++  scene alone does not prove visible rig coverage; inspect screenshots and rig
++  visibility/coverage evidence.
++
++## Measurement definitions
++
++`renderer.js` already sets `gl.info.autoReset=false` and resets counters once at
++the start of its whole frame. Whole-frame counters include actual enabled AO,
++scene, shadow and post-chain work. Read these after an ordinary application frame
++and before a diagnostic rerender resets them.
++
++`shoot.mjs` measures a separate surface-scene render into a small scratch target
++with shadow updates parked, then hides `c.rig.group` and subtracts a second
++surface render. This is a valid measured **surface rig contribution for the given
++frustum**, excluding shadows, AO and post-processing. It is not total rig-related
++work across every pipeline pass. Report surface, section and whole-frame numbers
++separately. Verify restoration of target, viewport/scissor, shadow flags and
++visibility even after errors, and require positive rig contribution.
++
++The runtime's `applyTooling` parents generated surface tools/string under the
++active GLB root. Therefore hiding that spec-root does NOT isolate pure imported
++GLB geometry. The documented surface rig budget includes fitted surface tooling.
++Downhole tooling is usually under `geology.boreholeTip`, falling back to
++`rig.sectionGroup`, and belongs to the section render. Do not infer that hiding
++`sectionGroup` necessarily removes it.
++
++FPS must be sampled from ordinary headed unthrottled frame intervals before
++scratch probes, readPixels, screenshots or deliberate render wrappers. Retain raw
++intervals and observed `c.clock.frame` per callback; this is the public app frame
++counter (`main.js`), whereas `gl.info.render.frame` counts internal scene renders.
++Require nonempty observed rendered coverage, positive draw counts, healthy context,
++title inactive and expected live screen. Drop only the initial partial interval;
++retain long gaps as evidence instead of filtering the slowest frames away.
++
++Report median interval/derived FPS plus tail/worst interval and elapsed-window
++throughput. A 40-frame median alone can conceal a hitch. Visibility and focus must
++remain valid during the window; near-one-second intervals trigger the known
++background-clamp diagnosis. Default browser flags, effective quality and desktop
++GPU must be reported; do not market desktop viewport emulation as mobile hardware.
++
++After actual scene/quality setup, record `warmShaders()` driver-readiness result,
++then a bounded stabilization window and no new/replaced program identities during
++FPS sampling. A stable program **count** can conceal simultaneous replacement.
++Count late program changes as incomplete/cold, never performance failure or pass.
++Warmup must not require meeting the FPS threshold; that would warm until passing.
++
++Time probe operations separately as CPU wall duration and record any extra renders.
++That is instrumentation overhead, not GPU timing, and cannot be subtracted from an
++unrelated FPS result. Let normal frames resume after probes before capturing or
++sampling again; do not let a newly compiled diagnostic variant contaminate FPS.
++
++## Allowed verdict
++
++Grade actual rig surface contribution against the unchanged <=70 budget and warm
++FPS against the documented floor. A failed evidence condition means INCOMPLETE,
++not a passing empty set. A measured budget failure needs its exact state, source
++and contribution scope. Diagnose before proposing a follow-up; no source or model
++retuning belongs to this task. No performance improvement claim is possible here
++without a matched current-runtime before/after pair. Historical cold/private
++renderer numbers must not serve as that comparator.

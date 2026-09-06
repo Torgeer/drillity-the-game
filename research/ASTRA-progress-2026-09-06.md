@@ -2,6 +2,19 @@
 
 ## Latest root integration status
 
+### Reserve update — 2026-09-06, 04:08 Stockholm
+
+Live allowance8% remaining. Production/build unchanged since the reviewed full
+build. Four pending deliveries are preserved in `handoff/pending-2026-09-06/`
+as inert WIP patches with hash manifests; no candidate was applied. HUD's final
+862 DOM cases have no layout faults but intended fonts and combined rendering
+remain unverified; atlas is pre-render; optimized-rig runtime is blocked with
+zero GPU cases. Root quarry four-case capture passed automated checks, but root
+and independent image inspection found candidate rocks losing texture relative
+to baseline. Cause unresolved despite matching material definitions; integration
+is deferred. See newest handover.md section. All root browsers closed and GPU
+lease released; root5198 remains live. No push yet,5% shutdown remains mandatory.
+
 ### Current snapshot — 2026-09-06, 03:52 Stockholm
 
 The newer handover.md top section supersedes the older batch below. Full

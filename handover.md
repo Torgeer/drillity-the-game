@@ -1,5 +1,38 @@
 # Drillity handover for Claude
 
+## Reserve checkpoint — 2026-09-06, 04:08 Stockholm
+
+This update supersedes the older statuses below. Live active Codex allowance
+was **8% remaining** at this heartbeat. No new long work was assigned. Reviewed
+production HEAD remains9317284; no production source or generated asset changed
+after the successful full build described below. Actual GitHub push remains due
+at the mandatory orderly shutdown threshold of5%.
+
+Four unintegrated candidate deliveries are now preserved as inert patches and
+hash manifests in `handoff/pending-2026-09-06/`. Read its README before applying
+anything. Their original worktrees, ignored exports and captures are preserved.
+HUD's final862 DOM cases have no layout failures, but intended-font and combined
+renderer verification remain open. Atlas remains pre-render with stale harness
+hashes. Optimized-rig runtime completed no GPU cases: its private dependency
+access failed, its server closed, and no performance claim is supported.
+
+Root quarry capture session14014 completed four baseline/candidate uncased/cased
+cases, zero errors/request failures, browserClosed true. Root inspected all four
+diagnostic images and candidate cased phone image. Removed center dressing is
+visible, but candidate rocks are flat gray while baseline rocks are textured.
+An independent critic confirmed the difference. Both GLBs have the same six
+material definitions and UV attributes; the harness uses separate browser
+contexts per variant, so shared cross-variant disposal is not established.
+**Quarry source/asset integration is deferred until this confound is resolved.**
+Do not claim overall visual acceptance from the passing capture JSON.
+
+Evidence: `shots/quarry-collar-root-preview/report.json` and sibling PNGs;
+author/asset pairing is in the preserved private manifest. The report's source
+map hashes root baseline quarry authoring, because this was a read-only candidate
+asset preview through the existing root server. No private startup denial was
+retried. Root GPU lease was released after browser closure; root5198 is still
+owned/live and user5178 remains untouched. No other candidate was applied.
+
 ## Latest checkpoint — 2026-09-06, 03:50 Stockholm
 
 This section supersedes all historical pending-task descriptions below. Active

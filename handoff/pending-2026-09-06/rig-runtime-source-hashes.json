@@ -1,0 +1,11 @@
+{
+  "baseline": "763f0a91045e1f3afd5ebeeaaee98af7be6b2810",
+  "paths": {
+    "tools/checkoptimizedrigruntime.mjs": "dded0bc81fced7419fd165798b4561592b2879d8043615f7a98bf7b5b5a7ed36",
+    "tools/serveoptimizedrigruntime.mjs": "f69661be0352d37bbfbd415aac1ede7366e4cbce770ae31bba052528c051bc9d",
+    "research/OPTIMIZED_RIG_RUNTIME.md": "001989286f43be25386b78aaefb981b6b52388f6e498880db3da5196edf5feb1",
+    "research/OPTIMIZED_RIG_RUNTIME_REVIEW.md": "c8844849c684ecef67c82fdf5c49ddc2a7191f67792e7a1d5dd28ec617e00e7e",
+    "research/OPTIMIZED_RIG_RUNTIME_CRITIC.md": "6e13512ec935b3112eede3199a0ba3082fa95429ab5e8cf69fab5f056283c31f"
+  },
+  "patchSHA256": "d9174c81a38bf5981e84deb9ba33b1d14ea17737fec68f05671d7ea8ccd3a987"
+}

@@ -1,0 +1,25 @@
+Exact diagnostic excerpts from the sole private startup (tool session59410).
+Command: node tools/serveoptimizedrigruntime.mjs
+Working directory: C:/Users/henri/Downloads/threads/drillity-optimized-rig-runtime
+
+OWNED frozen Vite pid=41636 port=5208
+X [ERROR] Cannot read directory "../../..": Access is denied.
+
+X [ERROR] Could not resolve "./Pass.js"
+    ../../drillity-the-game/node_modules/three/examples/jsm/postprocessing/ShaderPass.js:5:37:
+      5 │ import { Pass, FullScreenQuad } from './Pass.js';
+
+X [ERROR] Could not resolve "../shaders/CopyShader.js"
+    ../../drillity-the-game/node_modules/three/examples/jsm/postprocessing/EffectComposer.js:8:27:
+
+Additional unresolved relative imports observed in the same returned output:
+EffectComposer.js ./ShaderPass.js and ./MaskPass.js
+SMAAPass.js ./Pass.js and ../shaders/SMAAShader.js
+UnrealBloomPass.js ./Pass.js, ../shaders/CopyShader.js and ../shaders/LuminosityHighPassShader.js
+GLTFLoader.js ../utils/BufferGeometryUtils.js
+
+No retry, alternate config, escalation or browser launch occurred.
+Ctrl-C to owned session59410 returned exit_code1.
+Following Get-Process -Id41636 and Get-NetTCPConnection -LocalPort5208 checks
+returned no entries. No claim of a graceful server-close callback file: it was
+absent; closure is established by session exit and process/socket observations.

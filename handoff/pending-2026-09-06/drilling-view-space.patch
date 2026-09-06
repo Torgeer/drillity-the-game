@@ -1,0 +1,1969 @@
+diff --git a/src/ui/screens/site.js b/src/ui/screens/site.js
+index 877354a..43445ac 100644
+--- a/src/ui/screens/site.js
++++ b/src/ui/screens/site.js
+@@ -328,7 +328,7 @@ const UNIT_VIEWS = {
+         ['Re-drills', int(p.redrills)],
+         ['Crown', pct01(1 - n01(tl.wear))],
+       ],
+-      note: 'The toes are surveyed when the ring is fired. Deviation becomes dilution, and you will not see it before then.',
++      note: 'Toes are surveyed at firing; deviation becomes dilution.',
+     }),
+   },
+   bolt: { stamp: (p) => p.boltIndex, card: boltUnitCard },
+@@ -346,8 +346,8 @@ const UNIT_VIEWS = {
+       /* The instrument that can lie, said out loud at the one moment the
+          player can still do something about it. */
+       note: p.founded
+-        ? 'Founded: the toe is far enough into the bearing stratum for that set to mean something.'
+-        : 'The set reads the same whether the toe is bearing or brooming. Only the depth into bearing is honest.',
++        ? 'Founded: enough depth into bearing for a valid set.'
++        : 'The same set can hide brooming. Check depth into bearing.',
+     }),
+   },
+   'probe:spt': {
+@@ -444,7 +444,7 @@ const BEAT_COPY = {
+   mucking:        ['Mucking out', 'Round away'],
+   misfire:        ['Misfire', 'Made safe before the next round'],
+   'trim-blast':   ['Trim blast', 'Bringing the profile back to line'],
+-  'ring-index':   ['Indexing the cradle', 'Round to the next hole in the ring'],
++  'ring-index':   ['Index cradle', 'Next hole in the ring'],
+   redrill:        ['Re-drilling', 'Pulled back — starting the hole again'],
+   'bolt-install': ['Installing the bolt', 'Insert the bolt, then seat the plate'],
+   'bolt-plate':   ['Plating up', 'Tight to the rock'],
+@@ -454,11 +454,11 @@ const BEAT_COPY = {
+   pitch:          ['Pitching the pile', 'Into the leader guides'],
+   'take-set':     ['Taking the set', 'Ten blows, held steady'],
+   'dolly-change': ['Changing the dolly', 'New packing under the helmet'],
+-  're-drive':     ['Re-driving', 'A second pile alongside the rejected one'],
++  're-drive':     ['Re-driving', 'New pile beside the rejected pile'],
+   'spt-drive':    ['SPT drive', 'Release cleanly on the beat'],
+   'clean-out':    ['Cleaning out', 'Fall-in off the base of the hole'],
+   dissipation:    ['Dissipation test', 'Excess pore pressure decaying'],
+-  'blow-down':    ['Blowing the string down', 'Clearing the sample train'],
++  'blow-down':    ['Blowing down', 'Clearing the sample train'],
+   bail:           ['Bailing run', 'Lifting the cuttings out of the hole'],
+   'bailing-run':  ['Bailing run', 'Lifting the cuttings out of the hole'],
+   'cutter-change':['Changing cutters', 'From below, on the reamer head'],
+@@ -625,7 +625,7 @@ export function createSiteScreen(app) {
+   // Numeric depth stays available while the new ruler is under verification.
+   // Its target replaces the elapsed-time cell on these methods to fit phones.
+   const depthCell = C.h('div.sstrip__cell', { hidden: true }, depthKeyEl, depthEl);
+-  const depthDiv = C.h('i.sstrip__div', { hidden: true });
++  const depthDiv = C.h('i.sstrip__div.sstrip__div--career', { hidden: true });
+   const timeDiv = C.h('i.sstrip__div');
+   const timeCell = C.h('div.sstrip__cell', C.h('span.sstrip__k', { text: 'On tools' }), timeEl);
+ 
+@@ -916,7 +916,7 @@ export function createSiteScreen(app) {
+     } else if (killing) {
+       title = 'Shut in'; sub = 'Circulating the influx out and weighting up';
+     } else {
+-      title = 'Underbalanced'; sub = 'The column is not holding the formation back';
++      title = 'Underbalanced'; sub = 'Mud cannot hold back the formation';
+     }
+     return {
+       title, sub,
+@@ -936,26 +936,26 @@ export function createSiteScreen(app) {
+ 
+ 
+   /* ═══ Instrument cluster ═══════════════════════════════════════════════ */
+-  /* 1 border + 8 padding + 92 row + 4 gap + 88 controls + 4 padding = 197px, so
+-   * 191px of the 388px geological section survives (it was 9.5px). Nothing goes
+-   * in here without something else coming out. */
++  /* The gauge and the changing readout share one compact instrument row.
++     Its reserved CSS height also contributes to the unit card's real box. */
+   const gaugeCanvas = C.h('canvas', { 'aria-hidden': 'true' });
+   /* THE NEEDLE IS NOT ALWAYS TORQUE. sim/drilling.js publishes `gauge.axis`
+      with the label, the unit, the normalised value and the value in the
+      gauge's OWN units, because on a driven pile the needle is the SET in mm
+      per blow, on a piezocone it is the PUSH RATE in mm/s, and on the way back
+-     up a raise or home along a bore it is PULL. Same dial, same band, same
+-     groove; the caption and the number under it follow the sim. */
++     up a raise or home along a bore it is PULL. Same track, band and groove;
++     the caption, number and units follow the sim. */
+   const gaugeCap = C.h('span.gaugebox__cap', { text: 'Torque' });
++  const gaugeNumber = C.h('span.gaugebox__value', { text: '0' });
++  const gaugeUnit = C.h('span.gaugebox__unit', { text: '%' });
++  const gaugeReading = C.h('span.gaugebox__reading', gaugeNumber, gaugeUnit);
+   const gaugeBox = C.h('div.gaugebox', {
+     role: 'img',
+     'aria-label': 'Torque gauge with moving sweet-spot band',
+-  }, gaugeCanvas, gaugeCap);
++  }, C.h('div.gaugebox__head', gaugeCap, gaugeReading), gaugeCanvas);
+ 
+-  // The band readout used to be a pill parked at 12 o'clock inside the gauge,
+-  // directly over the arc the sweet spot travels along. It is now the groove
+-  // chip: one mark for one idea — whether you are in the band, and what the
+-  // band is paying. Shape carries it without colour: square out, triangle in.
++  // The groove chip states the band's reward. Shape also states whether the
++  // pointer is in the target: square out, triangle in.
+   const grooveX = C.h('span.groove__x', { text: '1.00×' });
+   const grooveChip = C.h('div.groove', { role: 'status', 'aria-label': 'Off the sweet-spot band' },
+     C.h('i'), grooveX);
+@@ -964,12 +964,11 @@ export function createSiteScreen(app) {
+   const spark = C.Sparkline({ capacity: 72 });
+   spark.el.classList.add('rop__spark');
+   const trend = C.h('div.rop__trend', spark.el);
+-  // Label and trend share a row, with separate bounds. A full-width 30px
+-  // sparkline above the label made the compact rate stack overrun the controls.
++  // Label and trend share a row; value and reward share the next. Each mark
++  // has its own bounds, including on the compact plain instrument row.
+   const ropBox = C.h('div.rop',
+     C.h('div.rop__line', C.h('span.rop__k', { text: 'ROP' }), trend),
+-    ropVal,
+-    grooveChip,
++    C.h('div.rop__reading', ropVal, grooveChip),
+   );
+ 
+   /* ── The beat, INSIDE the cluster ──────────────────────────────────────
+@@ -1094,7 +1093,7 @@ export function createSiteScreen(app) {
+      this screen exists to put under a thumb. It is the one that was measured
+      HARD for the right hand, which is two-thirds of one-handed players. */
+   const actionBtn = reach(C.h('button.actionbtn.actionbtn--ghost', { type: 'button', 'aria-label': 'Contextual action' },
+-    C.h('span.actionbtn__ico', C.Icon('bit', 20)), actLabel, actSub), 'drilling');
++    actLabel, actSub), 'drilling');
+   let actionMode = 'idle';
+   let actionTimer = 0;
+ 
+@@ -1409,37 +1408,13 @@ export function createSiteScreen(app) {
+       fg: t('--rgb-fg', '250 250 250'),
+       border: t('--rgb-border', '40 48 59'),
+       black: t('--rgb-black', '0 0 0'),
+-      // Cached here so the frame loop never reads computed style.
+-      fontBig: '850 19px ' + t('--font-sans', 'sans-serif'),
++      // The driving record still paints its labels in the canvas.
+       fontUnit: '800 11px ' + t('--font-sans', 'sans-serif'),
+     };
+   }
+   const rgba = (trip, a) => `rgb(${trip} / ${a})`;
+ 
+-  /* A 180° sweep, not 200°. The old dial spent 20° of its travel below the
+-     horizon on both sides, which cost vertical space without adding arc: at the
+-     same box height the semicircle carries a 10% larger radius. */
+-  const A0 = Math.PI;
+-  const SWEEP = Math.PI;
+   const REDLINE = 0.86;
+-  /* `const CAP_H = 14` used to live here, as this file's copy of
+-     `.gaugebox__cap`'s height in styles.css. Two numbers describing one thing
+-     (HANDOFF §8B), and they drifted — see the note over `.gaugebox`. The
+-     caption row and the dial are now sized against each other by flexbox and
+-     neither height is written down twice. */
+-
+-  /** roundRect is not in every Safari the game has to run on. */
+-  function roundRectPath(c, x, y, w, h, rr) {
+-    if (typeof c.roundRect === 'function') { c.beginPath(); c.roundRect(x, y, w, h, rr); return; }
+-    const k = Math.min(rr, w / 2, h / 2);
+-    c.beginPath();
+-    c.moveTo(x + k, y);
+-    c.arcTo(x + w, y, x + w, y + h, k);
+-    c.arcTo(x + w, y + h, x, y + h, k);
+-    c.arcTo(x, y + h, x, y, k);
+-    c.arcTo(x, y, x + w, y, k);
+-    c.closePath();
+-  }
+ 
+   /* ASK THE CANVAS HOW BIG IT IS. DO NOT COMPUTE IT.
+      This used to measure `.gaugebox` and subtract a local copy of the caption
+@@ -1461,21 +1436,14 @@ export function createSiteScreen(app) {
+     // Not laid out — the unit card has the instrument row. Keep the last good
+     // size rather than writing a fallback one over it.
+     if (!w || !h) return;
+-    gW = Math.max(80, w);
+-    gH = Math.max(48, h);
++    gW = w;
++    gH = h;
+     gDpr = app.viewport.dpr || window.devicePixelRatio || 1;
+     gaugeCanvas.width = Math.round(gW * gDpr);
+     gaugeCanvas.height = Math.round(gH * gDpr);
+     readTokens();
+   }
+ 
+-  function arc(c, cx, cy, r, a, b, w, style, cap = 'butt') {
+-    c.beginPath();
+-    c.arc(cx, cy, r, a, b);
+-    c.lineWidth = w; c.strokeStyle = style; c.lineCap = cap;
+-    c.stroke();
+-  }
+-
+   const needle = new C.Spring(0, 118, 17);   // real physical lag
+   let bandLo = 0.42, bandHi = 0.58;
+   let inBand = false;
+@@ -1483,33 +1451,32 @@ export function createSiteScreen(app) {
+   /**
+    * The live gauge spec, mirrored straight off `telemetry.gauge`.
+    *
+-   * `num`/`unit` are what goes on the knockout plate at the centre of the
+-   * dial. On torque and pull the honest reading is the normalised percentage
++   * Number and unit occupy the DOM header above the track. On torque and pull
++   * the honest reading is the normalised percentage
+    * of the rig limit; on a set gauge and a push-rate gauge the sim carries
+-   * the value in real units (`real`) and the plate prints THAT, because
++   * the value in real units (`real`) and the header prints THAT, because
+    * "37 %" of a set is not a thing a pile driver has ever read.
+    */
+   const gauge = { axis: 'torque', label: 'TORQUE', unit: '', redline: true, cap: 'Torque' };
+-  /* This frame's raw `telemetry.gauge`, or null with no sim. The plate reads
++  /* This frame's raw `telemetry.gauge`, or null with no sim. The reading uses
+      `real` off it, so it must be the sim's object and not a copy. */
+   let lastGauge = null;
+ 
+-  /** How the plate reads this axis. Nothing here re-derives a sim number. */
++  /** How the reading follows this axis. Nothing re-derives a sim number. */
+   function gaugePlate(g, v) {
+     const axis = (g && g.axis) || 'torque';
+     const real = g ? Number(g.real) : 0;
+-    if (axis === 'set') return [Number.isFinite(real) ? real.toFixed(1) : '—', 'mm'];
++    if (axis === 'set') return [Number.isFinite(real) ? real.toFixed(1) : '—', 'mm/blow'];
+     if (axis === 'push-rate') return [Number.isFinite(real) ? real.toFixed(1) : '—', 'mm/s'];
+     // Torque and pull are both fractions of the machine's limit.
+     return [String(Math.round(clamp(v, 0, 1.25) * 100)), '%'];
+   }
+ 
+-  /** The caption strip under the dial: the label, and the unit when it has one. */
++  /** The axis name; its unit accompanies the numeric reading beside it. */
+   function gaugeCaption(g) {
+     const label = (g && g.label) || 'TORQUE';
+-    const unit = (g && g.unit) || '';
+     const cap = label.charAt(0) + label.slice(1).toLowerCase();
+-    return unit ? `${cap} · ${unit}` : cap;
++    return cap;
+   }
+ 
+   function syncGauge(g) {
+@@ -1521,8 +1488,8 @@ export function createSiteScreen(app) {
+     /* The red line is the RIG LIMIT, and that is a torque idea. A set gauge's
+        danger is at the OTHER end — a vanishing set is refusal, not overload —
+        and the sim does not publish that threshold in normalised units, so the
+-       dial does not draw a rule it would have to invent the position of. The
+-       design-set window is already on the dial as the band, and the blows per
++       track does not draw a rule it would have to invent the position of. The
++       design-set window is already on the track as the band, and the blows per
+        250 mm are on the programme bar against the practical and refusal
+        limits the sim does publish. */
+     gauge.redline = axis === 'torque';
+@@ -1537,131 +1504,52 @@ export function createSiteScreen(app) {
+     c.setTransform(gDpr, 0, 0, gDpr, 0, 0);
+     c.clearRect(0, 0, gW, gH);
+ 
+-    /* The dial sits on its own baseline with the caption strip below it. Both
+-       clearances are real: the 13px band halo must not clip at 12 o'clock, and
+-       the hub must not touch the caption — it used to overlap it by 3px. */
+-    const cx = gW / 2;
+-    const cy = gH - 10;   // gH is the canvas's own height; the caption row is not in it
+-    const r = Math.min(gW / 2 - 8, cy - 7);
+-    const at = (v) => A0 + SWEEP * clamp(v, 0, 1);
+-    const bandW = bandHi - bandLo;
+-
+-    // Track
+-    arc(c, cx, cy, r, A0, A0 + SWEEP, 9, rgba(tokens.black, 0.5), 'round');
+-    arc(c, cx, cy, r, A0, A0 + SWEEP, 7, rgba(tokens.border, 0.95), 'round');
+-
+-    // Ticks, under the marks that matter.
+-    c.strokeStyle = rgba(tokens.fg, 0.34);
+-    c.lineWidth = 1.4;
++    /* A linear instrument retains the moving target, the rig limit and the
++       spring-driven pointer without spending a semicircle's height. Numeric
++       text has its own DOM row, so it cannot mask the target or the pointer.
++       The canvas uses its actual CSS dimensions, including short phones. */
++    const left = 8, right = Math.max(left + 1, gW - 8);
++    const y = gH / 2;
++    const x = (v) => left + (right - left) * clamp(v, 0, 1);
++    const line = (lo, hi, width, color) => {
++      c.beginPath(); c.moveTo(x(lo), y); c.lineTo(x(hi), y);
++      c.lineWidth = width; c.lineCap = 'butt'; c.strokeStyle = color; c.stroke();
++    };
++    line(0, 1, 7, rgba(tokens.border, 0.95));
++    c.strokeStyle = rgba(tokens.fg, 0.34); c.lineWidth = 1;
+     for (let i = 0; i <= 10; i++) {
+-      const a = at(i / 10);
+-      const ca = Math.cos(a), sa = Math.sin(a);
+-      const inner = r - (i % 5 === 0 ? 15 : 12.5);
+-      c.beginPath();
+-      c.moveTo(cx + ca * inner, cy + sa * inner);
+-      c.lineTo(cx + ca * (r - 5.5), cy + sa * (r - 5.5));
+-      c.stroke();
++      const tick = i % 5 === 0 ? 8 : 5;
++      c.beginPath(); c.moveTo(x(i / 10), y - tick);
++      c.lineTo(x(i / 10), y + tick); c.stroke();
+     }
+-
+-    // Redline — the rig's torque limit, and only on the axis that has one.
+-    if (gauge.redline) arc(c, cx, cy, r, at(REDLINE), at(1), 7, rgba(tokens.danger, 0.55));
+-
+-    /* The sweet spot is the whole point of the dial, so it is the most
+-       prominent mark on it: a wide halo, a near-opaque core, a glow when the
+-       needle is inside, and — only when the band is wide enough for the hatch
+-       to read as texture rather than as chopping — the colour-blind hatch. */
+-    arc(c, cx, cy, r, at(bandLo), at(bandHi), 13, rgba(tokens.success, inBand ? 0.34 : 0.22));
++    // A rig-limit redline is only meaningful on the torque axis.
++    if (gauge.redline) line(REDLINE, 1, 7, rgba(tokens.danger, 0.65));
++    line(bandLo, bandHi, 13, rgba(tokens.success, inBand ? 0.34 : 0.22));
++    line(bandLo, bandHi, 7, rgba(tokens.success, inBand ? 0.98 : 0.85));
++    // Hatching keeps the target distinguishable without colour.
+     c.save();
+-    if (inBand) { c.shadowColor = rgba(tokens.success, 0.9); c.shadowBlur = 10; }
+-    arc(c, cx, cy, r, at(bandLo), at(bandHi), 7, rgba(tokens.success, inBand ? 0.98 : 0.85));
+-    c.restore();
+-    if (bandW > 0.22) {
+-      c.save();
+-      c.strokeStyle = rgba(tokens.black, 0.45);
+-      c.lineWidth = 1.6;
+-      const steps = Math.max(2, Math.round(bandW * 22));
+-      for (let i = 1; i < steps; i++) {
+-        const a = at(bandLo + bandW * (i / steps));
+-        const ca = Math.cos(a), sa = Math.sin(a);
+-        c.beginPath();
+-        c.moveTo(cx + ca * (r - 3.4), cy + sa * (r - 3.4));
+-        c.lineTo(cx + ca * (r + 3.4), cy + sa * (r + 3.4));
+-        c.stroke();
+-      }
+-      c.restore();
++    c.beginPath(); c.rect(x(bandLo), y - 3.5, x(bandHi) - x(bandLo), 7); c.clip();
++    c.strokeStyle = rgba(tokens.black, 0.55); c.lineWidth = 1;
++    for (let xx = x(bandLo) - 7; xx < x(bandHi); xx += 5) {
++      c.beginPath(); c.moveTo(xx, y + 3.5); c.lineTo(xx + 7, y - 3.5); c.stroke();
+     }
++    c.restore();
+ 
+     const v = clamp(torque, 0, 1);
+     const over = !!(gauge.redline && v > REDLINE);
+-
+-    /* ── ONE VALUE, STATED TWICE, AND THAT IS THE INSTRUMENT ──────────────
+-       Rubric 7a: state any value once. This dial used to state `v` FOUR times
+-       in a 150x86 box — a coloured value arc at r-8.5, the needle, the hub
+-       ring tinted by the same colour, and the numeral on the plate. Two of
+-       those are gone.
+-
+-       The arc was the clearest duplicate: a second angular reading of exactly
+-       what the needle already points at, drawn 8.5 px inside it. The hub tint
+-       was a fourth, encoding band state — which the sweet-spot band itself
+-       already says by going near-opaque and glowing when `inBand`, and which
+-       the groove chip says again in words.
+-
+-       What is left is one instrument, not two readings: the NEEDLE gives the
+-       value's position relative to the band and the redline, and the NUMERAL
+-       gives the figure. Neither is legible without the other — a bare dial
+-       cannot be read to a number, and a bare number has no band.
+-
+-       Every other mark on the face is a different quantity: the tick ring is
+-       the scale, the redline arc is the limit, the green band is the target.
+-       The one signal that survives is the needle going red past the limit,
+-       because that states a LIMIT BREACH, not the value. One mark, one job. */
+-
+-    // Needle — the value's position
+-    const na = at(needle.value);
+-    const nc = Math.cos(na), ns = Math.sin(na);
+-    c.save();
+-    c.shadowColor = rgba(tokens.black, 0.8);
+-    c.shadowBlur = 6; c.shadowOffsetY = 1;
+-    c.beginPath();
+-    c.moveTo(cx - nc * 9, cy - ns * 9);
+-    c.lineTo(cx + nc * (r - 3), cy + ns * (r - 3));
+-    c.lineWidth = 2.6; c.lineCap = 'round';
++    const px = x(needle.value);
+     c.strokeStyle = over ? rgba(tokens.danger, 0.98) : rgba(tokens.fg, 0.97);
+-    c.stroke();
+-    c.restore();
+-
+-    // Hub — the needle's pivot, and nothing else. It carries no reading.
+-    c.beginPath(); c.arc(cx, cy, 7.5, 0, Math.PI * 2);
+-    c.fillStyle = rgba(tokens.black, 0.85); c.fill();
+-    c.lineWidth = 1.5; c.strokeStyle = rgba(tokens.fg, 0.28); c.stroke();
+-
+-    /* Readout. The needle used to stroke straight through the numerals; it now
+-       passes UNDER a knockout plate. One label for one quantity: the unit is
+-       folded into the value and the caption below the dial names the axis.
+-       On a set or push-rate gauge the number is the sim's own `gauge.real`,
+-       in its own units — a pile driver reads mm per blow, never a percent. */
+-    const [plateNum, plateUnit] = gaugePlate(lastGauge, v);
+-    c.font = tokens.fontBig;
+-    const wNum = c.measureText(plateNum).width;
+-    c.font = tokens.fontUnit;
+-    const wUnit = c.measureText(plateUnit).width;
+-    const wTot = wNum + 3 + wUnit;
+-    const plateW = Math.min(gW - 12, wTot + 18);
+-    const plateH = 24;
+-    const plateY = cy - 12 - plateH;
+-    c.fillStyle = rgba(tokens.black, 0.72);
+-    roundRectPath(c, cx - plateW / 2, plateY, plateW, plateH, 7);
+-    c.fill();
+-
+-    c.textAlign = 'left'; c.textBaseline = 'middle';
+-    const tx = cx - wTot / 2;
+-    const ty = plateY + plateH / 2 + 0.5;
+-    c.font = tokens.fontBig;
+-    c.fillStyle = rgba(tokens.fg, 0.97);
+-    c.fillText(plateNum, tx, ty);
+-    c.font = tokens.fontUnit;
+-    c.fillStyle = rgba(tokens.fg, 0.72);
+-    c.fillText(plateUnit, tx + wNum + 3, ty);
++    c.lineWidth = 2;
++    c.beginPath(); c.moveTo(px, y - 10); c.lineTo(px, y + 10); c.stroke();
++    c.fillStyle = c.strokeStyle;
++    c.beginPath(); c.moveTo(px - 4, y - 11); c.lineTo(px + 4, y - 11);
++    c.lineTo(px, y - 7); c.closePath(); c.fill();
++
++    const [value, unit] = gaugePlate(lastGauge, v);
++    if (gaugeNumber.textContent !== value) gaugeNumber.textContent = value;
++    if (gaugeUnit.textContent !== unit) gaugeUnit.textContent = unit;
++    const spoken = `${gaugeCap.textContent}: ${value} ${unit}; ${inBand ? 'in' : 'off'} the sweet-spot band`;
++    if (gaugeBox.getAttribute('aria-label') !== spoken) gaugeBox.setAttribute('aria-label', spoken);
+   }
+ 
+   /* ═══ Sweet-spot normalisation — the sim may report any of these ═══════ */
+@@ -1696,10 +1584,11 @@ export function createSiteScreen(app) {
+    * measured CSS pixels of `--hud-top` and `--hud-dock`, and the dock's
+    * height depends on the method — see `.sitedock--plain` — which is exactly
+    * why this is published rather than hardcoded. `LAYOUT.chromeTop` /
+-   * `chromeBottom` in core/contract.js carry the same two numbers as
+-   * fractions for a consumer that has no live screen to ask.
++   * `chromeBottom` in core/contract.js are separate fallback fractions for
++   * a consumer that has no live HUD; this pixel measurement is authoritative
++   * while the site screen is mounted.
+    *
+-   * Called twice per run, never per frame.
++   * Called on mount and resize, never per frame.
+    *
+    * ── offsetHeight, NOT getBoundingClientRect ─────────────────────────────
+    * `.screen.is-entering` runs `@keyframes screen-in`, which starts at
+@@ -1722,11 +1611,9 @@ export function createSiteScreen(app) {
+     const prev = ctx.hud;
+     if (prev && prev.top === top && prev.bottom === bottom) return;
+     ctx.hud = { top, bottom };
+-    /* Nothing consumes this yet, and re-laying the composer out costs a
+-       render-target reallocation — so the nudge is opt-in. core/renderer.js
+-       sets `usesHudChrome = true` when `computeLayout()` starts reading
+-       `ctx.hud`, and only then does a change of chrome height re-derive the
+-       bands. Until it does, this function writes one small object and stops. */
++    /* Re-laying the composer out costs a render-target reallocation, so only
++       a renderer that declares `usesHudChrome` is resized here. Its layout
++       consumes these measured pixels before deriving the two bands. */
+     if (ctx.renderer && ctx.renderer.usesHudChrome
+       && typeof ctx.renderer.resize === 'function' && app.viewport) {
+       try { ctx.renderer.resize(app.viewport.w, app.viewport.h, app.viewport.dpr); }
+@@ -1984,8 +1871,8 @@ export function createSiteScreen(app) {
+     const copy = BEAT_COPY[kind];
+     if (!copy) return null;
+     if (kind === 'bolt-install' && b && b.data) {
+-      if (b.data.type === 'resin') return ['Resin bolt curing', 'Spin, stop, hold — in that order'];
+-      if (b.data.type === 'friction') return ['Driving the friction bolt', 'Insert the bolt, then seat the plate'];
++      if (b.data.type === 'resin') return ['Resin cure', 'Spin, stop, hold — in that order'];
++      if (b.data.type === 'friction') return ['Friction bolt', 'Insert the bolt, then seat the plate'];
+     }
+     return copy;
+   }
+@@ -2109,9 +1996,11 @@ export function createSiteScreen(app) {
+   const b2d = blowCanvas.getContext('2d');
+   let bW = 196, bH = 60, bDpr = 1, blowKey = '';
+   function resizeBlow() {
+-    const r = blowCanvas.getBoundingClientRect();
+-    bW = Math.max(60, Math.round(r.width || 196));
+-    bH = Math.max(24, Math.round(r.height || 60));
++    const w = blowCanvas.offsetWidth;
++    const h = blowCanvas.offsetHeight;
++    if (!w || !h) return;
++    bW = w;
++    bH = h;
+     bDpr = app.viewport.dpr || window.devicePixelRatio || 1;
+     blowCanvas.width = Math.round(bW * bDpr);
+     blowCanvas.height = Math.round(bH * bDpr);
+@@ -2130,7 +2019,23 @@ export function createSiteScreen(app) {
+     const rec = Array.isArray(prog.blowLog) ? prog.blowLog : [];
+     const key = `${rec.length}:${rec.length ? rec[rec.length - 1].blowsPer250 : 0}:${bW}x${bH}`;
+     if (key === blowKey) return;
+-    blowKey = key;
++    const gap = 2;
++    const COL_MAX = 14;         // a bar, never a wall
++    const fit = Math.max(4, Math.floor((bW + gap) / (COL_MAX + gap)));
++    const rows = rec.slice(-Math.max(fit, 8));
++    if (rows.length) {
++      const capTxt = rows.some((r) => r.incrementMm <= 25)
++        ? `Blows / 25 mm · toe ${num(rows[rows.length - 1].toM, 2)} m`
++        : `Blows / 250 mm · toe ${num(rows[rows.length - 1].toM, 1)} m`;
++      if (blowCap.textContent !== capTxt) {
++        blowCap.textContent = capTxt;
++        // A wrapped caption changes the remaining chart height. Measure its
++        // final layout before drawing, only when that caption actually changes.
++        resizeBlow();
++      }
++    }
++    // Caption wrapping can resize the chart, so cache its final dimensions.
++    blowKey = `${rec.length}:${rec.length ? rec[rec.length - 1].blowsPer250 : 0}:${bW}x${bH}`;
+ 
+     const c = b2d;
+     c.setTransform(bDpr, 0, 0, bDpr, 0, 0);
+@@ -2143,10 +2048,6 @@ export function createSiteScreen(app) {
+       return;
+     }
+ 
+-    const gap = 2;
+-    const COL_MAX = 14;         // a bar, never a wall
+-    const fit = Math.max(4, Math.floor((bW + gap) / (COL_MAX + gap)));
+-    const rows = rec.slice(-Math.max(fit, 8));
+     const practical = Number(prog.practicalBlows) || 135;
+     const refusal = Number(prog.refusalBlows) || 248;
+     /* Scaled on the refusal limit, so the two rules do not move under the
+@@ -2183,10 +2084,6 @@ export function createSiteScreen(app) {
+       x -= colW + gap;
+     }
+ 
+-    const capTxt = rows.some((r) => r.incrementMm <= 25)
+-      ? `Blows / 25 mm · toe ${num(rows[rows.length - 1].toM, 2)} m`
+-      : `Blows / 250 mm · toe ${num(rows[rows.length - 1].toM, 1)} m`;
+-    if (blowCap.textContent !== capTxt) blowCap.textContent = capTxt;
+   }
+ 
+   let blowOn = false;
+@@ -2240,16 +2137,20 @@ export function createSiteScreen(app) {
+        properties of the METHOD and fixed for the whole run —
+        `availableActions()` keys off the programme and `method.wellControl` —
+        so this is not a state a run can enter or leave, and the two bands
+-       cannot move while the player is drilling. Fifteen of the twenty-one
+-       methods are plain, and they get those 38px of 3D back. */
++       cannot move while the player is drilling. A plain method reserves no
++       auxiliary row, leaving more DOM space available for the scene. */
+     if (!dockLocked && simTel) {
+       dockLocked = true;
+       const plain = !simTel.well && !(Array.isArray(simTel.actions) && simTel.actions.length);
++      // A two-pass run has a unit summary but no action rail. Reserve its
++      // card at mount rather than enlarging the dock when the pass completes.
++      dock.classList.toggle('sitedock--units', !!UNIT_VIEWS[pkey]);
+       if (dock.classList.contains('sitedock--plain') !== plain) {
+         dock.classList.toggle('sitedock--plain', plain);
+-        requestAnimationFrame(() => { resizeGauge(); sizeSpark(); if (blowOn) resizeBlow(); });
+       }
+-      requestAnimationFrame(publishChrome);
++      // Both capabilities can change the row height, including when delayed
++      // telemetry adds a unit card while the retained dock remains plain.
++      requestAnimationFrame(() => { resizeGauge(); sizeSpark(); if (blowOn) resizeBlow(); publishChrome(); });
+     }
+ 
+     /* The method decides what the three controls are called (GAMEDESIGN §7).
+diff --git a/src/ui/styles.css b/src/ui/styles.css
+index 380491a..34e51d5 100644
+--- a/src/ui/styles.css
++++ b/src/ui/styles.css
+@@ -123,18 +123,18 @@
+      else on it lives INSIDE one of the two, which is what makes it impossible
+      for an element to cover a band or to move the split.
+ 
+-       --hud-top   51 content + 1 border  =  52 + the top safe area
+-       --hud-dock  1 border + 9 top + 82 inst + 4 + 32 aux + 4 + 72 ctl
+-                   + a 56px footer with clear outer corners    =  260
+-                   (224 on a method with no auxiliary row — see --dock-base)
++       --hud-top   status content, progress rules and the top safe area
++       --hud-dock  border, padding, instrument and optional auxiliary rows,
++                   controls, gaps and the footer's thumb/safe-area reserve
+ 
+      The auxiliary row is 0px on every method the sim gives neither a
+      programme nor a mud column — `.sitedock--plain` takes it out, and the
+      site screen decides that ONCE, at mount, never during a run.
+ 
+-     core/contract.js `LAYOUT.chromeTop` / `chromeBottom` carry the same two
+-     numbers as fractions for core/renderer.js, so the scissored bands can be
+-     inset out from under them. Change one, change the other.
++     `.site` and `.sitedock` define the actual compact row sizes below. The
++     screen publishes measured offsetHeight values through `ctx.hud`, which
++     the renderer consumes. Core layout fractions are separate fallbacks,
++     not a second authority for this live DOM reservation.
+ 
+      ── THE DOCK IS NOW A SUM OF NAMED PARTS, NOT A WRITTEN-DOWN TOTAL ──────
+      `227px` was a hand-added total, and `.sitedock--plain`'s `189px` was a
+@@ -169,8 +169,8 @@
+      a home-indicator inset. The existing reach floor remains the minimum. */
+   --hud-top:  calc(var(--sa-t) + 52px);
+ 
+-  /* The dock's rows, and the reserve under them. Tiers below override these
+-     three heights and nothing else. */
++  /* Fallback row values. The site-scoped rules below derive the current
++     compact layout from its rows and native touch/safe-area reserve. */
+   --dock-inst: 82px;   /* the gauge and one readout */
+   --dock-aux:  var(--touch); /* native action targets keep their full 44px row */
+   --dock-ctl:  72px;   /* three sliders and the one primary action */
+@@ -830,7 +830,15 @@ canvas { display: block; }
+    `LAYOUT.chromeBottom` in core/contract.js carry the same two numbers for
+    core/renderer.js, so the scissored bands can be inset to match.
+    ═══════════════════════════════════════════════════════════════════════════ */
+-.site { pointer-events: none; }
++.site {
++  pointer-events: none;
++  container: site-hud / inline-size;
++  /* Portrait instruments keep the same usable size on tall phones. These
++     are screen-local layout dimensions, not machine measurements. */
++  --hud-top: calc(var(--sa-t) + 40px);
++  --dock-inst: 72px;
++  --dock-ctl: 68px;
++}
+ .site > * { pointer-events: auto; }
+ 
+ /* The 3D's own rows. Empty by construction — putting anything in one is the
+@@ -872,7 +880,7 @@ canvas { display: block; }
+ .sstrip__face:not([hidden]) { animation: face-in var(--dur-2) both var(--curve-enter); }
+ @keyframes face-in { from { opacity: 0; } to { opacity: 1; } }
+ 
+-.sstrip__cell { display: flex; flex-direction: column; justify-content: center; gap: 3px; min-width: 0; }
++.sstrip__cell { display: flex; flex-direction: column; justify-content: center; gap: 2px; min-width: 0; }
+ .sstrip__cell--grow { flex: 1 1 auto; }
+ /* `display: flex` beats the UA's `[hidden] { display: none }`, so the strip's
+    third cell — hidden on every method whose progress the section band's own
+@@ -881,12 +889,12 @@ canvas { display: block; }
+    with two rules against each other. */
+ .sstrip__cell[hidden], .sstrip__div[hidden] { display: none; }
+ .sstrip__k {
+-  font-size: var(--t-2xs); line-height: 1; font-weight: 800;
++  font-size: var(--t-2xs); line-height: 1.4; font-weight: 800;
+   letter-spacing: var(--tr-label); text-transform: uppercase;
+   color: var(--c-fg-dim); white-space: nowrap;
+ }
+ .sstrip__v {
+-  font-size: var(--t-sm); line-height: 1.1; font-weight: 800;
++  font-size: var(--t-sm); line-height: 1.25; font-weight: 800;
+   font-variant-numeric: tabular-nums; letter-spacing: var(--tr-tight); white-space: nowrap;
+ }
+ .sstrip__v em { font-style: normal; color: var(--c-fg-dim); font-weight: 600; }
+@@ -941,12 +949,12 @@ canvas { display: block; }
+ .sstrip__alert .sstrip__ico { flex: none; display: grid; place-items: center; color: currentColor; }
+ .sstrip__ab { min-width: 0; flex: 1 1 auto; }
+ .sstrip__at {
+-  font-size: var(--t-sm); line-height: 1.1; font-weight: 850;
++  font-size: var(--t-sm); line-height: 1.4; font-weight: 850;
+   letter-spacing: var(--tr-label); text-transform: uppercase; color: currentColor;
+   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+ }
+ .sstrip__as {
+-  font-size: var(--t-2xs); line-height: 1.2; font-weight: 600; color: var(--c-fg-muted);
++  font-size: var(--t-2xs); line-height: 1.4; font-weight: 600; color: var(--c-fg-muted);
+   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+ }
+ .sstrip.is-alert         { background: linear-gradient(180deg, rgb(var(--rgb-danger)  / .22), var(--c-bg-deep) 76%); }
+@@ -1011,14 +1019,22 @@ canvas { display: block; }
+    ~14px of margin against the arc. `--reach-floor` in :root carries the
+    derivation; `npm run check:reach` is the gate. */
+ .sitedock {
++  /* Recompute the sum here: the plain variant changes the instrument row.
++     Four pixels of clearance also leave room for a focused control's ring. */
++  --dock-base: calc(6px + var(--dock-inst) + var(--s-1) + var(--dock-ctl) + var(--dock-floor));
++  --hud-dock: calc(var(--dock-base) + var(--s-1) + var(--dock-aux));
+   position: relative; overflow: hidden;
+   flex: none; height: var(--hud-dock);
+   display: flex; flex-direction: column; gap: var(--s-1);
+   /* The footer occupies the reserved padding; it does not add another row
+      to the instrument/controls sum or cover either 3D band. */
+-  padding: 9px var(--s-3) var(--dock-floor);
++  padding: 5px var(--s-3) var(--dock-floor);
+   background: var(--c-bg-deep);
+   border-top: 1px solid rgb(var(--rgb-border) / .9);
++  /* The reduced-motion rule sets a duration on every element. With the
++     default transition-property:all that briefly animated this fixed dock's
++     height, causing publishChrome to read the previous method's reservation. */
++  transition-property: none;
+   /* `animation: dock-in` — an 18px slide and a fade on mount — used to be
+      here. Nothing physically moved: the dock is chrome at a fixed height in a
+      reserved row, and it was sliding because entrances look expensive. Motion
+@@ -1036,52 +1052,57 @@ canvas { display: block; }
+    this variant states a SUBTRACTION rather than a second total. The 189px
+    that used to stand here was a hand-added copy that no tier ever updated. */
+ .sitedock--plain {
++  --dock-inst: 56px;
+   --dock-aux: 0px;
+   --hud-dock: var(--dock-base);
+ }
+ .sitedock--plain .dock__aux { display: none; }
++/* The current unit-card consumer without an auxiliary row is a two-pass
++   programme. Its three outcomes and full note need their own stable reserve. */
++.sitedock--plain.sitedock--units { --dock-inst: 88px; }
+ 
+ /* The two rows the unit card covers, wrapped so the card has something real to
+    be the size of. It is `position: relative` for exactly that reason — see
+    `.unitcard`. Its own height is the sum of its children, so it is correct on
+-   `--dock-aux: 34px` and on the plain dock where `.dock__aux` is display:none
++   an auxiliary touch row and on the plain dock where `.dock__aux` is display:none
+    and contributes neither height nor gap. */
+ .dock__top  { position: relative; flex: none; display: flex; flex-direction: column; gap: var(--s-1); }
+ .dock__inst { flex: none; height: var(--dock-inst); display: flex; gap: var(--s-3); align-items: stretch; }
+ .dock__aux  { flex: none; height: var(--dock-aux); display: flex; align-items: center; gap: var(--s-2); }
+-.dock__ctl  { flex: none; height: var(--dock-ctl); display: flex; gap: var(--s-2); align-items: stretch; }
+-
+-/* The gauge is the game. It gets the width, the radius and the row.
+-
+-   ── THE CAPTION AND THE DIAL CANNOT OVERLAP, BY CONSTRUCTION ──────────────
+-   The caption began as an absolutely-positioned label over the bottom 11px of
+-   the dial. It was then given its own row, and the canvas was sized to "the
+-   box minus a CAP_H constant" that site.js kept a copy of — two numbers
+-   describing one thing (HANDOFF §8B), and they drifted: the box is 86px and
+-   the harness measured a 75px canvas against a 14px caption, 89px of content
+-   in an 86px box, so the caption sat 2px into the needle.
+-
+-   Neither number exists any more. The caption is a fixed row and the canvas
+-   takes WHAT IS LEFT — `flex: 1 1 0` against `min-height: 0` — so the sum is
+-   the box height whatever either one is, and the media queries below can
+-   change the box height without a matching edit anywhere in the JS.
+-
+-   The canvas must therefore never be given an inline width/height STYLE:
+-   site.js sets only the backing-store attributes, from the size flex gave it.
+-   Setting the style back would restore the two-numbers problem. */
++.dock__ctl  { flex: none; height: var(--dock-ctl); display: flex; gap: var(--s-1); align-items: stretch; }
++/* These are layout and canvas-sizing boxes, not animated controls. The
++   universal reduced-motion duration must not create implicit size transitions
++   that leave a canvas backing store sized to the previous programme row. */
++.siteband, .dock__top, .dock__inst, .dock__aux, .dock__ctl,
++.gaugebox, .site canvas { transition-property: none; }
++
++/* A linear target track keeps the whole sweet-spot instrument visible in a
++   short row. The numeric reading and caption occupy a separate DOM header;
++   the canvas gets the remaining height from flexbox. site.js sizes only its
++   backing store, from the actual laid-out canvas, never a second height. */
+ .gaugebox {
+   /* Height is the instrument row's, by reference — not a copy of it. */
+-  position: relative; flex: none; width: 150px; height: var(--dock-inst);
++  position: relative; flex: none; width: 45%; max-width: 170px; height: var(--dock-inst);
+   display: flex; flex-direction: column;
+ }
+ .gaugebox canvas { flex: 1 1 0; min-height: 0; width: 100%; display: block; }
++.gaugebox__head {
++  flex: none; min-height: 24px;
++  display: flex; align-items: center; justify-content: space-between; gap: 4px;
++}
++.gaugebox__reading { display: inline-flex; align-items: baseline; gap: 3px; white-space: nowrap; }
++.gaugebox__value {
++  font-size: var(--t-sm); line-height: 1.4; font-weight: 850;
++  font-variant-numeric: tabular-nums;
++}
++.gaugebox__unit { font-size: var(--t-2xs); line-height: 1.4; font-weight: 700; color: var(--c-fg-dim); }
+ /* Baseline text bounds were 15px high inside a 14px row. The caption's
+    18px line box reserves the whole glyph, reducing the canvas accordingly. */
+ .gaugebox__cap {
+   position: static; flex: none; height: 18px;
+-  display: flex; align-items: center; justify-content: center;
++  display: flex; align-items: center; justify-content: flex-start;
+   font-size: var(--t-2xs); line-height: 18px; font-weight: 800;
+-  letter-spacing: var(--tr-label); text-transform: uppercase; color: var(--c-fg-dim);
++  letter-spacing: .03em; text-transform: uppercase; color: var(--c-fg-dim); white-space: nowrap;
+ }
+ 
+ /* ONE readout slot beside the gauge, with three possible occupants and never
+@@ -1091,8 +1112,8 @@ canvas { display: block; }
+ .readouts { flex: 1 1 auto; min-width: 0; position: relative; }
+ .readouts > * { position: absolute; inset: 0; }
+ 
+-/* The rate. Flat on the dock — no card, no border, no second background.
+-   Label and trend share a row; value and groove have their own lines. */
++/* The rate. Label and trend share the first row; value and groove share the
++   second. The two-row readout fits the shortest plain instrument row. */
+ .rop {
+   display: flex; flex-direction: column; justify-content: center; gap: var(--s-1);
+   padding: 0;
+@@ -1107,9 +1128,10 @@ canvas { display: block; }
+ }
+ .rop__v {
+   position: relative; flex: 1 1 auto;
+-  font-size: var(--t-2xl); font-weight: 850; font-variant-numeric: tabular-nums;
+-  letter-spacing: var(--tr-hero); line-height: 1.35;
++  font-size: var(--t-lg); font-weight: 850; font-variant-numeric: tabular-nums;
++  letter-spacing: var(--tr-tight); line-height: 1.35; white-space: nowrap;
+ }
++.rop__reading { display: flex; align-items: center; justify-content: space-between; gap: 4px; min-width: 0; }
+ .rop__u { font-size: var(--t-2xs); font-weight: 700; color: var(--c-fg-muted); margin-left: 3px; }
+ 
+ /* The groove chip — the ONE place success green is allowed on this screen,
+@@ -1148,22 +1170,23 @@ canvas { display: block; }
+    the rule along its foot is the only mark it makes. */
+ .beat {
+   --p: 0;
+-  display: flex; flex-direction: column; justify-content: center; gap: 3px;
+-  padding: 0 0 11px;
++  display: flex; flex-direction: column; justify-content: center; gap: 2px;
++  padding: 0 0 4px;
+ }
+ .beat__hd { display: flex; align-items: baseline; gap: var(--s-2); }
++.beat__hd, .beat__s, .beat__steps { flex: none; }
+ .beat__t {
+   flex: 1 1 auto; min-width: 0;
+-  font-size: var(--t-sm); line-height: 1.1; font-weight: 850;
++  font-size: var(--t-sm); line-height: 1.25; font-weight: 850;
+   letter-spacing: var(--tr-label); text-transform: uppercase; color: var(--c-fg);
+-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
++  white-space: normal;
+ }
+ .beat__left {
+   flex: none; font-size: var(--t-2xs); font-weight: 800;
+   font-variant-numeric: tabular-nums; color: var(--c-fg-dim);
+ }
+ .beat__s {
+-  font-size: var(--t-2xs); line-height: var(--lh-snug); font-weight: 600;
++  font-size: var(--t-2xs); line-height: 1.4; font-weight: 600;
+   color: var(--c-fg-muted);
+   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+ }
+@@ -1180,7 +1203,7 @@ canvas { display: block; }
+ }
+ .beat__step.is-done { color: var(--c-fg-muted); }
+ .beat__step.is-on { background: rgb(var(--rgb-amber) / .22); color: var(--c-amber-hot); }
+-.beat__rule { position: absolute; left: 0; right: 0; bottom: 11px; height: 2px; background: rgb(var(--rgb-fg) / .08); }
++.beat__rule { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: rgb(var(--rgb-fg) / .08); }
+ .beat__rule i {
+   position: absolute; inset: 0; background: var(--c-amber);
+   -webkit-clip-path: inset(0 calc(100% - var(--p) * 100%) 0 0);
+@@ -1200,11 +1223,11 @@ canvas { display: block; }
+    one method the driving record IS the rate readout and it takes the slot —
+    one increment per column, deepest at the right, the two limit rules across
+    it. It is not an extra card and it is not on the render. */
+-.blowchart { display: flex; flex-direction: column; gap: 2px; padding: 0 0 11px; }
++.blowchart { display: flex; flex-direction: column; gap: 2px; padding: 0; }
+ .blowchart canvas { flex: 1 1 auto; min-height: 0; width: 100%; display: block; }
+ .blowchart__cap {
+   flex: none;
+-  font-size: var(--t-2xs); line-height: 1; font-weight: 800;
++  font-size: var(--t-2xs); line-height: 1.4; font-weight: 800;
+   letter-spacing: var(--tr-label); text-transform: uppercase; color: var(--c-fg-dim);
+ }
+ 
+@@ -1224,7 +1247,7 @@ canvas { display: block; }
+ .railbtn {
+   flex: 0 1 auto; min-width: var(--touch); min-height: var(--touch);
+   display: inline-flex; align-items: center; justify-content: center;
+-  padding: 0 var(--s-3);
++  padding: 0 var(--s-1);
+   border-radius: var(--r-sm);
+   background: rgb(var(--rgb-fg) / .07);
+   color: var(--c-steel-soft);
+@@ -1233,9 +1256,9 @@ canvas { display: block; }
+ /* Reserve the complete native hit box in layout. The previous pseudo-element
+    extended a 30–34px row over its neighbours and borrowed their hit area. */
+ .railbtn__l {
+-  font-size: var(--t-2xs); line-height: 1.1; font-weight: 850;
++  font-size: var(--t-2xs); line-height: 1.3; font-weight: 850;
+   letter-spacing: var(--tr-label); text-transform: uppercase;
+-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
++  white-space: normal; text-align: center;
+   transition: transform var(--dur-2) var(--curve-release);
+ }
+ .railbtn.is-pressed .railbtn__l { transform: scale(.95); transition-duration: var(--motion-d1); transition-timing-function: var(--curve-press); }
+@@ -1264,9 +1287,17 @@ canvas { display: block; }
+    — the margin is the decision, and the inputs are on the results screen.
+    The kick itself arrives in the strip, like every other hazard. */
+ .wellstrip { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: var(--s-2); }
+-.pit { --g: 0; --l: 0; flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: var(--s-2); }
++.dock__aux:has(> .wellstrip:not([hidden])) .actrail { flex: 0 0 120px; }
++.dock__aux:has(> .wellstrip:not([hidden])) .railbtn { flex: 1 1 0; }
++.pit {
++  --g: 0; --l: 0; flex: 1 1 auto; min-width: 0;
++  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px;
++}
++.pit__k { grid-column: 1; grid-row: 1; }
++.pit__s { grid-column: 2; grid-row: 1; justify-self: end; }
++.pit__track { grid-column: 1 / -1; grid-row: 2; }
+ .pit__k, .wnum__k {
+-  flex: none; font-size: var(--t-2xs); line-height: 1; font-weight: 800;
++  flex: none; font-size: var(--t-2xs); line-height: 1.4; font-weight: 800;
+   letter-spacing: var(--tr-label); text-transform: uppercase; color: var(--c-fg-dim);
+ }
+ .pit__track {
+@@ -1290,13 +1321,13 @@ canvas { display: block; }
+           clip-path: inset(0 0 0 calc(100% - var(--l) * 100%));
+ }
+ .pit__s {
+-  flex: none; font-size: var(--t-2xs); line-height: 1; font-weight: 800;
++  flex: none; font-size: var(--t-2xs); line-height: 1.4; font-weight: 800;
+   letter-spacing: var(--tr-label); text-transform: uppercase; color: var(--c-fg-dim);
+ }
+ .pit.is-gaining .pit__s { color: var(--c-danger-soft); }
+ .pit.is-losing .pit__s { color: var(--c-steel-soft); }
+ 
+-.wnum { flex: none; display: flex; align-items: center; gap: 5px; padding-left: var(--s-2); }
++.wnum { flex: none; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+ .wnum__v {
+   font-size: var(--t-sm); line-height: 1; font-weight: 800;
+   font-variant-numeric: tabular-nums; letter-spacing: var(--tr-tight); color: var(--c-fg); white-space: nowrap;
+@@ -1313,17 +1344,21 @@ canvas { display: block; }
+ /* ═══ CONTROLS ═══════════════════════════════════════════════════════════
+    Three sliders and one action, and that is the whole of what a player acts
+    on in the next three seconds. */
+-.controls__sliders { display: flex; gap: var(--s-2); flex: 1 1 auto; min-width: 0; }
++.controls__sliders { display: flex; gap: var(--s-1); flex: 1 1 auto; min-width: 0; }
++.site .vsl__head { height: 16px; }
++.site .vsl__name, .site .vsl__val { line-height: 1.4; }
++.site .vsl__track { min-height: 48px; }
+ .actionbtn {
+-  flex: none; width: 88px;
++  flex: none; width: 80px;
+   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+   border-radius: var(--r-sm);
+   background: rgb(var(--rgb-fg) / .07);
+   transition: transform var(--dur-2) var(--curve-release), background var(--dur-3) var(--curve-swap), box-shadow var(--dur-3) var(--curve-swap);
+ }
+-.actionbtn.is-pressed { transform: scale(.95); }
++.actionbtn > * { transition: transform var(--dur-2) var(--curve-release); }
++.actionbtn.is-pressed > * { transform: scale(.95); transition-duration: var(--motion-d1); transition-timing-function: var(--curve-press); }
+ .actionbtn__l { font-size: var(--t-sm); font-weight: 850; letter-spacing: var(--tr-label); text-transform: uppercase; text-align: center; line-height: 1.4; }
+-.actionbtn__s { font-size: var(--t-2xs); font-weight: 600; color: var(--c-fg-dim); text-align: center; padding: 0 5px; line-height: 1.4; }
++.actionbtn__s { font-size: var(--t-2xs); font-weight: 600; color: var(--c-fg-dim); text-align: center; padding: 0 5px; line-height: 1.3; }
+ /* The single accent, doing its single job: THIS is the thing to press. */
+ .actionbtn--amber  { background: linear-gradient(180deg, var(--c-amber-hot), var(--c-amber)); color: var(--c-amber-deep); box-shadow: 0 0 22px rgb(var(--rgb-amber) / .34); }
+ .actionbtn--amber .actionbtn__s { color: rgb(var(--rgb-black) / .62); }
+@@ -1333,7 +1368,6 @@ canvas { display: block; }
+ .actionbtn--ghost  { color: var(--c-fg-muted); }
+ .actionbtn--ghost .actionbtn__l { color: var(--c-fg-muted); }
+ .actionbtn.is-urgent { animation: pulse-urgent calc(var(--motion-d6) * 2) infinite var(--curve-swap); }
+-.actionbtn__ico { color: currentColor; opacity: .9; }
+ .actionbtn:focus-visible { outline: 2px solid rgb(var(--rgb-amber) / .9); outline-offset: 2px; }
+ @keyframes pulse-urgent {
+   0%, 100% { filter: brightness(1); }
+@@ -1382,7 +1416,7 @@ canvas { display: block; }
+    too, where `.dock__aux` is display:none and this formula had to know it. */
+ .unitcard {
+   position: absolute; z-index: 2; inset: 0;
+-  display: flex; flex-direction: column; justify-content: center; gap: 4px;
++  display: flex; flex-direction: column; justify-content: center; gap: 2px;
+   padding-left: var(--s-3);
+   background: var(--c-bg-deep);
+   border-left: 2px solid var(--c-fg-dim);
+@@ -1407,7 +1441,7 @@ canvas { display: block; }
+ .unitcard--warn { border-left-color: var(--c-warning); }
+ .unitcard--bad  { border-left-color: var(--c-danger); }
+ .unitcard__t {
+-  font-size: var(--t-sm); line-height: 1.15; font-weight: 850;
++  font-size: var(--t-sm); line-height: 1.4; font-weight: 850;
+   letter-spacing: var(--tr-label); text-transform: uppercase; color: var(--c-fg);
+   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+ }
+@@ -1415,12 +1449,18 @@ canvas { display: block; }
+ .unitcard--warn .unitcard__t { color: var(--c-warning); }
+ .unitcard--bad  .unitcard__t { color: var(--c-danger-soft); }
+ .unitcard__rows { display: flex; align-items: flex-start; gap: var(--s-3); min-width: 0; }
+-.ucell { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
++.ucell { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 0; }
+ /* Three outcomes can have unequal captions ("Bit" beside "Trial range").
+    Use their actual content widths before sharing the remaining row space. */
+ .unitcard__rows:has(> .ucell:nth-child(3):not([hidden])):not(:has(> .ucell:nth-child(4):not([hidden]))) > .ucell {
+   flex-basis: auto;
+ }
++/* Four outcomes need two columns to preserve captions and measured values.
++   The permanent programme row reserves this card's full 120px height. */
++.unitcard__rows:has(> .ucell:nth-child(4):not([hidden])) {
++  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
++  gap: 2px var(--s-3); flex: none;
++}
+ .ucell__k {
+   /* Inter's 14px text bounds at 11px size exceed the old 11px line box. */
+   font-size: var(--t-2xs); line-height: 1.4; font-weight: 800;
+@@ -1428,7 +1468,7 @@ canvas { display: block; }
+   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+ }
+ .ucell__v {
+-  font-size: var(--t-sm); line-height: 1.15; font-weight: 800;
++  font-size: var(--t-sm); line-height: 1.4; font-weight: 800;
+   font-variant-numeric: tabular-nums; letter-spacing: var(--tr-tight); color: var(--c-fg);
+   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+ }
+@@ -1844,33 +1884,15 @@ canvas { display: block; }
+   }
+ }
+ 
+-/* Short viewports: give the 3D more room by trimming the dock. A tier now
+-   changes the ROW HEIGHTS and nothing else — `--hud-dock` and `--dock-base`
+-   in :root add them up, so a tier can no longer carry a stale total (this one
+-   did: it declared 203px, and `.sitedock--plain`'s 189px was never restated
+-   here at all, so a plain dock on a short viewport claimed 189px around 167px
+-   of rows and the renderer inset 22px of band that nothing covered).
+-
+-   --reach-floor does NOT scale with the viewport. The thumb is the same size
+-   on a small phone, and the arc is anchored to the bottom edge, so a short
+-   screen buys its 3D back out of the rows and never out of the floor. */
++/* Short viewports retain the same site row heights and thumb reserve. The
++   slider head's tracking tightens to preserve its semantic label. */
+ @media (max-height: 680px) {
+-  :root { --dock-inst: 72px; --dock-ctl: 68px; }
+-  .gaugebox { width: 134px; }
+   .vsl__track { min-height: 48px; }    /* the 44px touch floor still clears */
+-  /* --stage-w is capped at half the height, so a short viewport is a narrow
+-     one: at ~64px per slider head the longest semantic labels (ROTATION,
+-     CONCRETE, WITHDRAW, CLEANING — all 8 characters) need the tracking back
+-     to fit without clipping. */
++  /* Preserve the longer semantic labels at narrow slider widths. */
+   .vsl__name { letter-spacing: .06em; }
+-  .rop__v { font-size: var(--t-xl); }
+   /* No .unitcard height here: it is inset:0 against .dock__top and follows the
+      rows automatically. This override was a third copy of the same sum. */
+ }
+-@media (min-height: 900px) {
+-  :root { --dock-inst: 94px; --dock-ctl: 84px; }
+-  /* .gaugebox and .unitcard need no override — both follow the row. */
+-}
+ 
+ /* ═══════════════════════════════════════════════════════════════════════════
+    Controls used by the settings sheet and a few screen-local bits
+@@ -1929,7 +1951,6 @@ canvas { display: block; }
+ }
+ 
+ .pcard__stats { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+-.actionbtn__ico { display: grid; place-items: center; opacity: .9; }
+ .famgrid { grid-template-columns: 1fr; }
+ .crumb.is-link { position: relative; cursor: pointer; }
+ .crumb.is-link::after { content: ''; position: absolute; left: -5px; right: -5px; top: 50%; height: var(--touch); transform: translateY(-50%); }
+@@ -1997,10 +2018,29 @@ canvas { display: block; }
+ }
+ /* A short phone is still a portrait phone. Preserve its full 320px width;
+    the old 2:1 stage cap reduced it to 284px and truncated HAMMER. */
+-.ui-stage.is-site { width: min(100vw, max(320px, calc(100vh * .5)), 520px); }
+-@media (max-width: 360px) {
++.ui-stage.is-site {
++  width: min(100vw, max(320px, calc(100vh * .5)), 520px);
++  /* Reduced motion must not animate structural width before canvas sizing. */
++  transition-property: none;
++}
++/* The site can be narrower than its viewport on a letterboxed phone. */
++@container site-hud (width < 390px) {
+   /* The slider fill and aria-valuenow carry input amount; the label gets its
+      whole row instead of repeating the amount as a competing tiny number. */
+   .site .vsl__val { display: none; }
+   .site .vsl__name { letter-spacing: 0; }
+ }
++@container site-hud (max-width: 300px) {
++  /* At 280px the career ornament crowded actual job progress. The status
++     strip keeps the depth/target or programme count and the running clock. */
++  .site .sstrip__lvl, .site .sstrip__cell--grow, .site .sstrip__div--career { display: none; }
++  .site .sstrip__steady { justify-content: space-between; }
++  /* Full control words fit more naturally in lower case on this narrow
++     screen. The native target and the accessible semantic name stay intact. */
++  .site .vsl__name { text-transform: lowercase; }
++  .site .gaugebox { width: 50%; }
++  .site .rop__reading { flex-wrap: wrap; }
++  .site .beat__t { letter-spacing: .03em; }
++  .site .sitedock--plain:not(.sitedock--units) { --dock-inst: 72px; }
++  .site .dock__aux:has(> .wellstrip:not([hidden])) .actrail { flex-basis: 96px; }
++}
+diff --git a/tools/checkdrillingviewspace.mjs b/tools/checkdrillingviewspace.mjs
+new file mode 100644
+--- /dev/null
++++ b/tools/checkdrillingviewspace.mjs
+@@ -0,0 +1,139 @@
++#!/usr/bin/env node
++// CPU DOM proof only. No WebGL, renderer, models, GPU lease or FPS claim.
++import assert from 'node:assert/strict';
++import { build } from 'esbuild';
++import { chromium } from 'playwright';
++import { createServer } from 'node:http';
++import { readFile, writeFile, mkdir, rename } from 'node:fs/promises';
++import { execFileSync } from 'node:child_process';
++import { createHash } from 'node:crypto';
++import { resolve, relative, dirname, sep } from 'node:path';
++import { fileURLToPath } from 'node:url';
++import { ENUMERATE } from '../.hudqa/enumerate.js';
++const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
++const args=process.argv.slice(2), option=(n,d)=>args.includes(n)?args[args.indexOf(n)+1]:d;
++const tag=option('--tag','current'),baseline=option('--baseline','a3fb994'),out=resolve(root,option('--out','shots/drilling-view-space'));
++const input01=Number(option('--input01','0.5'));assert(Number.isFinite(input01)&&input01>=0&&input01<=1,'--input01 must be between0 and1');
++const hash=b=>createHash('sha256').update(b).digest('hex');
++const sourceHashes={},errors=[],requests=[],sourceCache=new Map();
++const reachSource=await readFile(resolve(root,'tools/checkreach.mjs'),'utf8');
++const reachStart=reachSource.indexOf('const W = 390'),reachEnd=reachSource.indexOf("if (argv.includes('--self-test'))");
++assert(reachStart>=0&&reachEnd>reachStart,'Actual reach assessor missing');
++const assessReach=new Function(reachSource.slice(reachStart,reachEnd)+';return assessTargets;')();
++const source=async path=>{
++  const rel=relative(root,path).split(sep).join('/');
++  if(sourceCache.has(rel))return sourceCache.get(rel);
++  const data=tag==='baseline'&&rel.startsWith('src/')?execFileSync('git',['show',baseline+':'+rel],{cwd:root,maxBuffer:16*1024*1024}):await readFile(path);
++  sourceHashes[rel]=hash(data);const text=data.toString('utf8');sourceCache.set(rel,text);return text;
++};
++const shell=await source(resolve(root,'src/ui/shell.js'));
++const extract=(name,next)=>{const a=shell.indexOf('  function '+name+'('),b=shell.indexOf(next,a);assert(a>=0&&b>a,'Missing production '+name);return shell.slice(a,b);};
++const close=extract('closeOverlay','  /**');
++const confirm=extract('confirm','  /* ── The app facade');
++const keyboard=extract('onKey','  /* ── System interface');
++const bundle=await build({absWorkingDir:root,tsconfigRaw:{},entryPoints:[resolve(root,'tools/fixtures/drilling-view-space.js')],bundle:true,format:'esm',write:false,outdir:resolve(root,'.unused-fixture-output'),loader:{'.png':'dataurl'},logLevel:'silent',plugins:[{name:'frozen-source-and-real-confirmation',setup(b){
++  b.onResolve({filter:/^fixture:confirmation$/},()=>({path:'confirmation',namespace:'fixture'}));
++  b.onLoad({filter:/.*/,namespace:'fixture'},()=>({loader:'js',contents:`export function makeConfirmation(C,DUR,dur,overlayEl,getReduced){let overlayStack=[],current=null;const PARENT={};const back=()=>{throw Error('Unexpected fixture back')};let reduced=getReduced();${close}${confirm}${keyboard}window.addEventListener('keydown',onKey);return{confirm(o){reduced=getReduced();return confirm(o)},dispose(){window.removeEventListener('keydown',onKey)}}}`}));
++  b.onResolve({filter:/^(data:|https?:)/},a=>({path:a.path,external:true}));
++  b.onResolve({filter:/^three$/},()=>({path:resolve(root,'node_modules/three/build/three.module.js'),namespace:'actual-source'}));
++  b.onResolve({filter:/^three\//},a=>({path:resolve(root,'node_modules',a.path),namespace:'actual-source'}));
++  b.onResolve({filter:/.*/},a=>({path:resolve(a.importer?dirname(a.importer):root,a.path),namespace:'actual-source'}));
++  b.onLoad({filter:/.*/,namespace:'actual-source'},async a=>({contents:a.path.endsWith('.png')?await readFile(a.path):await source(a.path),loader:a.path.endsWith('.png')?'dataurl':a.path.endsWith('.css')?'css':'js',resolveDir:dirname(a.path)}));
++}}]});
++const js=bundle.outputFiles.find(f=>f.path.endsWith('.js')).contents,css=bundle.outputFiles.find(f=>f.path.endsWith('.css')).contents;
++await mkdir(out,{recursive:true});
++const fontLink=(await readFile(resolve(root,'index.html'),'utf8')).match(/<link[^>]+href="https:\/\/fonts.googleapis.com\/css2[^>]+>/)?.[0]||'';
++const server=createServer((req,res)=>{if(req.url==='/fixture.js'){res.setHeader('Content-Type','text/javascript');res.end(js);}else if(req.url==='/fixture.css'){res.setHeader('Content-Type','text/css');res.end(css);}else if(req.url==='/favicon.ico'){res.writeHead(204);res.end();}else{res.setHeader('Content-Type','text/html');res.end(`<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1">${fontLink}<link rel="stylesheet" href="/fixture.css"><script type="module" src="/fixture.js"></script>`);}});
++const report={tag,baseline,head:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),evidence:'Actual production site DOM, styles, components and extracted shell confirmation; synthetic telemetry. CPU headless Chrome with GPU/WebGL disabled. DOM opportunity is not actual rendered visible3D. No FPS.',sourceHashes,fixtureHashes:{runner:hash(await readFile(fileURLToPath(import.meta.url))),fixture:hash(await readFile(resolve(root,'tools/fixtures/drilling-view-space.js'))),enumerator:hash(ENUMERATE)},cases:[],errors,requests,failures:[]};
++let browser;
++const snapshot=()=>{
++ const rect=e=>{const r=e.getBoundingClientRect();return{x:r.x,y:r.y,w:r.width,h:r.height}};
++ const visible=e=>{for(let p=e;p;p=p.parentElement){const cs=getComputedStyle(p);if(cs.display==='none'||cs.visibility==='hidden'||Number(cs.opacity)<.02)return false;}return e.getBoundingClientRect().width>0;};
++ const stage=document.querySelector('.ui-stage'),site=document.querySelector('.screen--site'),strip=site.querySelector('.sstrip'),dock=site.querySelector('.sitedock');
++ const bands=[...site.querySelectorAll('.siteband')].map(rect),sr=rect(stage),area=bands.reduce((s,r)=>s+r.w*r.h,0);
++ const controls=[...site.querySelectorAll('button,input,[role="slider"],[tabindex]')].filter(e=>visible(e)&&getComputedStyle(e).pointerEvents!=='none'&&!e.disabled).map(e=>({...rect(e),class:e.className,label:e.getAttribute('aria-label')||e.textContent.trim(),tag:e.tagName,reach:e.closest('[data-reach]')?.dataset.reach,leave:e.matches('.site__leave'),disabled:e.getAttribute('aria-disabled'),font:getComputedStyle(e).font}));
++ const text=[],textClip=[];for(const e of site.querySelectorAll('*')){if(!visible(e))continue;for(const n of e.childNodes){if(n.nodeType!==3||!n.textContent.trim())continue;const r=document.createRange();r.selectNodeContents(n);const cs=getComputedStyle(e),rects=[...r.getClientRects()].map(q=>({x:q.x,y:q.y,w:q.width,h:q.height}));text.push({class:e.className,text:n.textContent.trim(),fontFamily:cs.fontFamily,fontSize:cs.fontSize,fontWeight:cs.fontWeight,lineHeight:cs.lineHeight,rects});for(let p=e;p&&site.contains(p);p=p.parentElement){const ps=getComputedStyle(p),pr=p.getBoundingClientRect();for(const q of rects){const xClips=ps.overflowX!=='visible',yClips=ps.overflowY!=='visible';if(xClips&&(q.x<pr.left-1||q.x+q.w>pr.right+1)||yClips&&(q.y<pr.top-1||q.y+q.h>pr.bottom+1))textClip.push({class:e.className,text:n.textContent.trim(),ancestor:p.className,glyph:q,clip:{x:pr.x,y:pr.y,w:pr.width,h:pr.height}});}}}}
++ const textLineOverlap=[];for(const t of text)for(let i=0;i<t.rects.length;i++)for(let j=i+1;j<t.rects.length;j++){const a=t.rects[i],b=t.rects[j];if(Math.abs(a.y-b.y)>1&&Math.min(a.x+a.w,b.x+b.w)-Math.max(a.x,b.x)>1&&Math.min(a.y+a.h,b.y+b.h)-Math.max(a.y,b.y)>1)textLineOverlap.push({class:t.class,text:t.text,first:a,second:b});}
++ const published={...window.fixture.app.ctx.hud},hudWrites=window.fixture.app.ctx.hudWrites,sliderTracks=[...site.querySelectorAll('.vsl__track')].filter(visible).map(rect),canvases=[...site.querySelectorAll('canvas')].filter(visible).map(c=>({class:c.parentElement.className,css:rect(c),backing:{w:c.width,h:c.height},dpr:window.fixture.app.viewport.dpr}));
++ return {viewport:{w:innerWidth,h:innerHeight},stage:sr,strip:rect(strip),dock:rect(dock),bands,published,hudWrites,canvases,domOpportunityStagePct:area/(sr.w*sr.h)*100,domOpportunityViewportPct:area/(innerWidth*innerHeight)*100,controls,sliderTracks,text,textClip,textLineOverlap,cardCells:[...site.querySelectorAll('.ucell')].filter(visible).length,cardVisible:visible(site.querySelector('.unitcard')),fontFaces:[...document.fonts].map(f=>({family:f.family,status:f.status,weight:f.weight})),reduced:matchMedia('(prefers-reduced-motion:reduce)').matches,bodyScroll:{w:document.documentElement.scrollWidth,h:document.documentElement.scrollHeight}};
++};
++const fail=(condition,message)=>{if(!condition){report.failures.push(message);console.error('FAIL '+message);}};
++try{
++ await new Promise(r=>server.listen(0,'127.0.0.1',r));
++ browser=await chromium.launch({channel:'chrome',headless:true,args:['--disable-gpu','--disable-webgl','--disable-software-rasterizer','--mute-audio']});
++ const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:1,isMobile:true,hasTouch:true});
++ const page=await context.newPage();
++ page.on('pageerror',e=>errors.push({kind:'page',message:e.message}));page.on('console',m=>{if(m.type()==='error')errors.push({kind:'console',message:m.text()});});page.on('requestfailed',r=>requests.push({url:r.url(),failure:r.failure()}));
++ await page.addInitScript(()=>{const original=HTMLCanvasElement.prototype.getContext;window.webglAttempts=[];HTMLCanvasElement.prototype.getContext=function(type,...rest){if(/webgl/i.test(type)){window.webglAttempts.push(type);throw Error('DOM fixture forbids WebGL');}return original.call(this,type,...rest);};});
++ await page.goto(`http://127.0.0.1:${server.address().port}/?shot&mute`,{waitUntil:'networkidle',timeout:60000});await page.waitForFunction(()=>window.fixture,{timeout:30000});await page.evaluate(()=>document.fonts.ready);
++ const families=(await page.evaluate(()=>window.fixture.cases.map(c=>c[0]))).filter(f=>!args.includes('--smoke')||['rotary','cable','rc','bolt','pile','cpt','oil','jet'].includes(f)).filter(f=>!args.includes('--families')||option('--families','').split(',').includes(f));
++ const cards=await page.evaluate(()=>window.fixture.cardFamilies);
++ const beatFamilies={rotary:['tripping-out','tripping-in','bit-swap','casing-run','rod-add'],jumbo:['boom-setup','charging','firing','mucking','misfire','trim-blast'],longhole:['ring-index','redrill'],bolt:['bolt-install','bolt-plate','bolt-torque','bolt-ream','bolt-inspect'],pile:['pitch','take-set','dolly-change','re-drive'],spt:['spt-drive','clean-out'],cpt:['dissipation'],rc:['blow-down'],cable:['bail','bailing-run'],twoStage:['cutter-change']};
++ const actionFamilies={rotary:['idle','rod','jam','kick','casing','trip'],cable:['bail'],jumbo:['beat'],spt:['release']};
++ if(args.includes('--supplementary')){
++  const siteSource=await source(resolve(root,'src/ui/screens/site.js')),start=siteSource.indexOf('const BEAT_COPY = '),end=siteSource.indexOf('\n};',start);
++  assert(start>=0&&end>start,'Production beat vocabulary missing');const actual=new Function('return ('+siteSource.slice(start+'const BEAT_COPY = '.length,end+2)+');')();
++  assert.deepEqual(Object.values(beatFamilies).flat().sort(),Object.keys(actual).sort(),'Supplementary states must cover every actual BEAT_COPY key');
++  const actualActions=await page.evaluate(()=>Object.keys(window.fixture.actionLabels));assert.deepEqual(Object.values(actionFamilies).flat().sort(),actualActions.sort(),'Supplementary states must cover every actual SITE_ACTIONS key');
++ }
++ const viewports=args.includes('--viewports')?option('--viewports','').split(',').map(s=>s.split('x').map(Number)):args.includes('--quick')||args.includes('--smoke')?[[390,844],[320,568]]:[[320,568],[390,844],[390,664],[280,653],[360,640],[393,852],[430,932],[375,667],[320,844]];
++ const modesFor=family=>(args.includes('--supplementary')?[...(beatFamilies[family]||[]).map(k=>'beat:'+k),...(actionFamilies[family]||[]).map(k=>'action:'+k),...(family==='oil'?['well:gaining','well:losing']:[]),...(family==='bolt'?['beat-friction:bolt-install']:[])]:['steady',...(cards.includes(family)?['card']:[]),...(family==='bolt'?['beat']:[]),...(family==='rotary'?['beat:rod-add','beat:tripping-out','beat:tripping-in','beat:bit-swap','beat:casing-run']:[]),...(family==='cable'?['beat:bailing-run']:[]),...(family==='percussive'?['hazard']:[])]).filter(m=>!args.includes('--only-modes')||option('--only-modes','').split(',').includes(m));
++ for(const [width,height] of viewports){await page.setViewportSize({width,height});for(const reduced of [false,true]){await page.emulateMedia({reducedMotion:reduced?'reduce':'no-preference'});for(const family of families){for(const mode of modesFor(family)){
++  const name=`${width}x${height}-${reduced?'reduced':'normal'}-${family}-${mode.replaceAll(':','-')}`;
++  const subject=await page.evaluate(([f,m,r,input01])=>window.fixture.mount(f,m,r,{input01}),[family,mode,reduced,input01]);
++  const measurement=await page.evaluate(`(${ENUMERATE})({})`),geometry=await page.evaluate(snapshot);
++  const row={name,subject,measurement,geometry};report.cases.push(row);
++  if(width===390&&height===844){row.reach=assessReach(geometry.controls.map(c=>({...c,cls:c.class,isLeave:c.leave})));for(const failure of row.reach.failures)fail(false,`${name}: existing checkreach ${failure}`);}
++  fail(measurement.painted>20&&measurement.targets>=3,`${name}: empty/incomplete subject`);
++  fail(measurement.overlaps===0,`${name}: overlaps ${measurement.overlapList.join('; ')}`);
++  fail(measurement.clipped.length===0,`${name}: clipped ${measurement.clipped.join('; ')}`);
++  fail(geometry.textClip.length===0,`${name}: glyph clipping ${[...new Set(geometry.textClip.map(c=>c.class+' in '+c.ancestor+' '+c.text))].join('; ')}`);
++  fail(geometry.textLineOverlap.length===0,`${name}: same-text line boxes overlap ${JSON.stringify(geometry.textLineOverlap)}`);
++  fail(measurement.onBand3D.length===0,`${name}: painted UI on scene spacers ${measurement.onBand3D.join('; ')}`);
++  fail(measurement.smallTargets.length===0,`${name}: inaccessible ${measurement.smallTargets.join('; ')}`);
++  fail(geometry.controls.every(c=>c.w>=44&&c.h>=44),`${name}: native target below44 ${geometry.controls.filter(c=>c.w<44||c.h<44).map(c=>c.class+' '+c.w+'x'+c.h).join('; ')}`);
++  fail(geometry.sliderTracks.length===3&&geometry.sliderTracks.every(t=>t.w>=44&&t.h>=44),`${name}: actual slider pointer track below44`);
++  const mismatchedCanvases=geometry.canvases.filter(c=>Math.abs(c.backing.w-c.css.w*c.dpr)>1||Math.abs(c.backing.h-c.css.h*c.dpr)>1);
++  fail(mismatchedCanvases.length===0,`${name}: 2D canvas backing differs from actual CSS/DPR ${JSON.stringify(mismatchedCanvases)}`);
++  fail(geometry.controls.filter(c=>c.leave&&c.tag==='BUTTON'&&c.reach==='drilling').length===1,`${name}: required leave missing/disabled/exempted`);
++  fail(Math.abs(geometry.published.top-geometry.strip.h)<1&&Math.abs(geometry.published.bottom-geometry.dock.h)<1,`${name}: published chrome differs`);
++  if(mode==='card')fail(geometry.cardVisible&&geometry.cardCells===({rc:4,jumbo:4,longhole:4,bolt:3,pile:4,cpt:4,spt:4,twoStage:3})[family],`${name}: expected three/four-cell card missing`);
++  if(mode.startsWith('action:'))fail(await page.evaluate(k=>document.querySelector('.actionbtn__l').textContent===window.fixture.actionLabels[k],mode.slice(7)),`${name}: expected primary action absent`);
++  if(subject.actions&&mode!=='card')fail(geometry.controls.filter(c=>c.class.includes('railbtn')).length===subject.actions,`${name}: actions missing`);
++  if((mode==='steady'||mode.startsWith('action:'))&&[320,390].includes(width)&&['rotary','bolt','oil','cpt'].includes(family)){
++   row.held=[];const buttons=page.locator('.screen--site button:visible');
++   for(let i=0;i<await buttons.count();i++){const button=buttons.nth(i),before=await button.boundingBox();await button.dispatchEvent('pointerdown',{pointerId:91,clientX:before.x+before.width/2,clientY:before.y+before.height/2});await page.waitForTimeout(45);const held=await button.boundingBox(),probe=await page.evaluate(`(${ENUMERATE})({})`);row.held.push({before,held,overlaps:probe.overlapList});fail(held.width>=44&&held.height>=44&&Math.abs(held.width-before.width)<.01&&Math.abs(held.height-before.height)<.01,`${name}: pressed native bounds changed`);fail(probe.overlaps===0,`${name}: pressed overlap ${probe.overlapList.join('; ')}`);await button.dispatchEvent('pointercancel',{pointerId:91});}
++  }
++  if([280,320,375,390].includes(width)&&!reduced&&['rotary','cable','rc','bolt','pile','oil','cpt','twoStage','longhole','jet'].includes(family))await page.screenshot({path:resolve(out,tag+'-'+name+'.png')});
++ }
++ }console.log(tag,width+'x'+height,reduced?'reduced':'normal','cases='+report.cases.length,'failures='+report.failures.length);}}
++ await page.setViewportSize({width:390,height:844});await page.evaluate(()=>window.fixture.mount('rotary','steady',false));
++ const cdp=await context.newCDPSession(page);await cdp.send('DOM.enable');await cdp.send('CSS.enable');const dom=await cdp.send('DOM.getDocument');
++ report.resolvedFonts=[];for(const selector of ['.sstrip__v','.vsl__name','.rop__v']){const {nodeId}=await cdp.send('DOM.querySelector',{nodeId:dom.root.nodeId,selector});report.resolvedFonts.push({selector,...await cdp.send('CSS.getPlatformFontsForNode',{nodeId})});}
++ const initial=await page.evaluate(()=>structuredClone(window.fixture.effects));
++ await page.locator('.site__leave').click();await page.getByRole('alertdialog',{name:'Leave the hole?'}).waitFor();await page.waitForTimeout(50);
++ report.confirmation={initial,defaultFocus:await page.evaluate(()=>document.activeElement.textContent.trim()),pending:await page.evaluate(()=>structuredClone(window.fixture.effects))};
++ await page.keyboard.press('Escape');await page.waitForTimeout(450);report.confirmation.escape=await page.evaluate(()=>({effects:structuredClone(window.fixture.effects),focus:document.activeElement.className,scene:window.fixture.app.state.scene}));
++ await page.locator('.site__leave').click();await page.getByRole('button',{name:'Keep drilling',exact:true}).click();await page.waitForTimeout(450);report.confirmation.cancel=await page.evaluate(()=>({effects:structuredClone(window.fixture.effects),scene:window.fixture.app.state.scene}));
++ await page.locator('.site__leave').click();await page.getByRole('button',{name:'Abandon',exact:true}).click();await page.waitForTimeout(450);report.confirmation.abandon=await page.evaluate(()=>({effects:structuredClone(window.fixture.effects),scene:window.fixture.app.state.scene}));
++ fail(report.confirmation.defaultFocus==='Keep drilling','confirmation default focus');fail(report.confirmation.escape.effects.aborts.length===0&&report.confirmation.cancel.effects.aborts.length===0,'cancel/Escape aborted');fail(report.confirmation.abandon.effects.aborts.length===1&&report.confirmation.abandon.scene==='contracts','confirm did not abort exactly once');
++ await page.emulateMedia({reducedMotion:'reduce'});await page.evaluate(()=>window.fixture.mount('rotary','steady',true));
++ await page.locator('.site__leave').click();await page.getByRole('alertdialog',{name:'Leave the hole?'}).waitFor();await page.waitForTimeout(50);
++ report.reducedConfirmation={defaultFocus:await page.evaluate(()=>document.activeElement.textContent.trim())};await page.keyboard.press('Escape');await page.waitForTimeout(100);report.reducedConfirmation.escape=await page.evaluate(()=>({focus:document.activeElement.className,scene:window.fixture.app.state.scene,aborts:window.fixture.effects.aborts.length}));
++ await page.locator('.site__leave').click();await page.getByRole('button',{name:'Keep drilling',exact:true}).click();await page.waitForTimeout(100);report.reducedConfirmation.cancel=await page.evaluate(()=>({scene:window.fixture.app.state.scene,aborts:window.fixture.effects.aborts.length}));
++ await page.locator('.site__leave').click();await page.getByRole('button',{name:'Abandon',exact:true}).click();await page.waitForTimeout(100);report.reducedConfirmation.abandon=await page.evaluate(()=>({scene:window.fixture.app.state.scene,aborts:window.fixture.effects.aborts.length}));
++ fail(report.reducedConfirmation.defaultFocus==='Keep drilling'&&report.reducedConfirmation.escape.scene==='site'&&report.reducedConfirmation.escape.aborts===1&&report.reducedConfirmation.cancel.aborts===1&&report.reducedConfirmation.abandon.aborts===2&&report.reducedConfirmation.abandon.scene==='contracts','Reduced confirmation behavior');
++ await page.emulateMedia({reducedMotion:'no-preference'});await page.evaluate(()=>{document.documentElement.style.setProperty('--sa-t','47px');document.documentElement.style.setProperty('--sa-b','34px');});await page.evaluate(()=>window.fixture.mount('rc','steady',false));
++ report.safeArea={injected:{top:47,bottom:34},geometry:await page.evaluate(snapshot),measurement:await page.evaluate(`(${ENUMERATE})({})`)};
++ report.safeArea.reach=assessReach(report.safeArea.geometry.controls.map(c=>({...c,cls:c.class,isLeave:c.leave})));
++ const safeLeave=report.safeArea.geometry.controls.find(c=>c.leave);fail(safeLeave&&safeLeave.y+safeLeave.h<=844-34,'Leave overlaps safe area');fail(report.safeArea.measurement.overlaps===0&&report.safeArea.measurement.clipped.length===0&&report.safeArea.measurement.smallTargets.length===0,'Safe area layout');fail(report.safeArea.geometry.controls.every(c=>c.w>=44&&c.h>=44),'Safe area native targets');fail(report.safeArea.reach.failures.length===0,'Safe area reach');fail(Math.abs(report.safeArea.geometry.published.bottom-report.safeArea.geometry.dock.h)<1,'Safe area chrome mismatch');
++ await page.evaluate(()=>{document.documentElement.style.removeProperty('--sa-t');document.documentElement.style.removeProperty('--sa-b');});
++ report.delayedTelemetry=[];
++ for(const family of ['rotary','twoStage'])for(const reduced of [false,true]){await page.emulateMedia({reducedMotion:reduced?'reduce':'no-preference'});await page.evaluate(([family,reduced])=>window.fixture.mount(family,'steady',reduced,{delayedTelemetry:true,noExplicitResize:true}),[family,reduced]);const geometry=await page.evaluate(snapshot);report.delayedTelemetry.push({family,reduced,geometry});fail(geometry.canvases.every(c=>Math.abs(c.backing.w-c.css.w*c.dpr)<=1&&Math.abs(c.backing.h-c.css.h*c.dpr)<=1),`${family}/${reduced}: delayed-telemetry canvas backing mismatch`);fail(Math.abs(geometry.published.bottom-geometry.dock.h)<1,`${family}/${reduced}: delayed-telemetry published chrome mismatch`);}
++ report.webglAttempts=await page.evaluate(()=>window.webglAttempts);fail(report.webglAttempts.length===0,'WebGL attempted');fail(errors.length===0,'Browser errors');fail(families.length>0&&report.cases.length>0&&report.cases.length===viewports.length*2*families.reduce((s,f)=>s+modesFor(f).length,0),'Incomplete/empty case matrix');
++ report.intendedFontsLoaded=report.resolvedFonts.some(r=>r.fonts.some(f=>f.familyName==='Inter'));
++ fail(report.intendedFontsLoaded,'Intended Inter font not proved; fallback-only layout evidence');
++ report.passed=report.failures.length===0;report.summary={cases:report.cases.length,failures:report.failures.length,overlaps:report.cases.reduce((s,c)=>s+c.measurement.overlaps,0),horizontalClips:report.cases.reduce((s,c)=>s+c.measurement.clipped.length,0),glyphClips:report.cases.reduce((s,c)=>s+c.geometry.textClip.length,0),smallTargets:report.cases.reduce((s,c)=>s+c.measurement.smallTargets.length,0),stageOpportunityPct:[Math.min(...report.cases.map(c=>c.geometry.domOpportunityStagePct)),Math.max(...report.cases.map(c=>c.geometry.domOpportunityStagePct))],viewportOpportunityPct:[Math.min(...report.cases.map(c=>c.geometry.domOpportunityViewportPct)),Math.max(...report.cases.map(c=>c.geometry.domOpportunityViewportPct))]};
++ console.log(JSON.stringify(report.summary));
++}catch(e){report.fatal=String(e.stack||e);report.passed=false;console.error(e);}finally{await browser?.close();if(server.listening)await new Promise(r=>server.close(r));await writeFile(resolve(out,tag+'.json.tmp'),JSON.stringify(report,null,2));await rename(resolve(out,tag+'.json.tmp'),resolve(out,tag+'.json'));}
++if(!report.passed)process.exitCode=1;
+diff --git a/tools/fixtures/drilling-view-space.js b/tools/fixtures/drilling-view-space.js
+new file mode 100644
+--- /dev/null
++++ b/tools/fixtures/drilling-view-space.js
+@@ -0,0 +1,94 @@
++import { createSiteScreen } from '../../src/ui/screens/site.js';
++import * as C from '../../src/ui/components.js';
++import * as game from '../../src/game/data.js';
++import { useGameData, SITE_ACTIONS } from '../../src/ui/screens/catalog.js';
++import { DUR, dur } from '../../src/core/motion.js';
++import { fmtMoney } from '../../src/core/contract.js';
++import '../../src/ui/styles.css';
++import { makeConfirmation } from 'fixture:confirmation';
++
++// No renderer or simulation is imported. The real catalogue transitively imports
++// static tool definitions; no geometry builders or asset loaders are called.
++// Synthetic telemetry is passed through production screen and components.
++useGameData(game);
++const root = C.h('div.ui-root', C.h('div.ui-letterbox'));
++const stage = C.h('div.ui-stage.is-site');
++const screens = C.h('div.screens');
++const overlayEl = C.h('div.overlays');
++stage.append(screens, overlayEl); root.append(stage); document.body.append(root);
++let reduced = false, screen = null, app = null, telemetry = null;
++let ownedFrame=0,lastFrame=performance.now();
++// The production main loop clamps dt to [0,1/15] (src/main.js). Run the
++// actual screen every browser frame while fixtures settle or await input.
++function frame(now){const dt=Math.max(0,Math.min((now-lastFrame)/1000,1/15));lastFrame=now;if(screen?.el.isConnected)screen.update(dt);ownedFrame=requestAnimationFrame(frame);}
++ownedFrame=requestAnimationFrame(frame);
++const effects = { aborts: [], nav: [], inputs: [], actions: [] };
++const confirmation = makeConfirmation(C, DUR, dur, overlayEl, () => reduced);
++const programmes = {
++  rc: {kind:'rc', bagsCut:1, lastBag:{index:1,fromM:0,toM:1,massKg:15.12,recovery01:.91,contam01:.02,rating:'good'}},
++  jumbo: {kind:'jumbo',roundIndex:1,holesDone:8,holesPerRound:12,roundsFired:0,pull01:.92,overbreak:.08,halfBarrel01:.74,advanceM:3.1},
++  longhole: {kind:'longhole',holeIndex:2,holesTotal:12,ring:3,holeLengthM:12.5,redrills:1},
++  bolt: {kind:'rockbolt',boltIndex:2,boltsTotal:40,boltType:'friction',anchorageBasis:'game-fit-score-not-pull-test',diameterFit:'supported',bitGaugeMm:35,bitTrialRangeMm:[32,37],installs:[{index:1,type:'friction',anchorageBasis:'game-fit-score-not-pull-test',diameterFit:'supported',bitGaugeMm:35}]},
++  pile: {kind:'driven-pile',blows:47,blowsPer250:43,designSetMm:3,toeDepthM:12.35,bearingPenM:.6,bearingPenRequiredM:1.1,setTaken:false,founded:false,refused:false,blowLog:[{toM:12,blowsPer250:38,incrementMm:250}]},
++  cpt: {kind:'cpt',pushRateMmS:20,dissipations:0,readings:420,inTolerance01:.94,inclinationDeg:1.2,coneDamage01:.05,rotationLocked:true,flushLocked:true,lockNote:'No rotation or circulating fluid on this sounding'},
++  spt: {kind:'spt',testIndex:1,lastTest:{index:1,depthM:6.45,N:19,N60:17.5,energyRatio:.63,sampleQuality01:.82,areaRatio:1.1}},
++  twoStage: {kind:'two-stage',stage:1,stageName:'Pilot',passM:43,passTargetM:120,reverse:false},
++};
++const cases = [
++  ['rotary','rotary-kelly'],['auger','auger'],['percussive','dth'],['core','core'],['sonic','sonic'],['oil','oil-rotary'],['hdd','hdd'],['cfa','cfa'],['jet','jet-grouting'],['cable','cable-tool'],
++  ['rc','rc'],['jumbo','tunnel-jumbo'],['longhole','longhole'],['bolt','rockbolt'],['pile','driven-pile'],['cpt','site-investigation'],['spt','site-investigation'],['twoStage','raise-boring'],
++];
++function step(dt=.13) { screen.update(dt); }
++async function settle() { await new Promise(requestAnimationFrame); await new Promise(requestAnimationFrame); }
++async function mount(family, mode='steady', motion=false, options={}) {
++  if(screen) {screen.unmount();screen.destroy();screen.el.remove();}
++  reduced=motion;root.classList.toggle('reduced-motion',reduced);
++  const mid=cases.find(c=>c[0]===family)?.[1];
++  const method=game.METHODS.find(m=>m.id===mid);
++  if(!method) throw Error('Fixture method missing '+family+' '+mid);
++  telemetry={methodId:mid,method:{kind:family==='percussive'?'hammer':family},depth:12.3,target:100,timeSec:234,torque:.57,rop:48.4,wear:.08,heat:.2,stability:.95,active:true,wob:.5,rpm:.5,flush:.5,returns:1,hasDrillString:true,phase:'drilling',progress01:.123,hazards:[],actions:[],programme:structuredClone(programmes[family]||null)};
++  if(family==='oil') {telemetry.well={overbalanceSg:.12,influx01:0};telemetry.actions=[{id:'shutIn',label:'SHUT IN'},{id:'lcmPill',label:'LCM PILL'}];}
++  if(family==='rc') telemetry.actions=[{id:'blowDown',label:'BLOW DOWN'}];
++  if(family==='jumbo') telemetry.actions=[{id:'shortRound',label:'SHORTEN ROUND'}];
++  if(family==='longhole') telemetry.actions=[{id:'redrill',label:'RE-DRILL'}];
++  if(family==='bolt') telemetry.actions=[{id:'torqueTest',label:'TORQUE TEST'},{id:'reamHole',label:'REAM HOLE'},{id:'inspectSlot',label:'READ THE SLOT'}];
++  if(family==='pile') telemetry.actions=[{id:'takeSet',label:'TAKE THE SET'},{id:'changeDolly',label:'CHANGE DOLLY'}];
++  if(family==='cpt') telemetry.actions=[{id:'dissipation',label:'DISSIPATION TEST'},{id:'terminate',label:'TERMINATE'}];
++  if(family==='spt') telemetry.actions=[{id:'strike',label:'RELEASE'},{id:'cleanOut',label:'CLEAN OUT'}];
++  telemetry.gauge=family==='pile'?{axis:'set',label:'SET',unit:'mm/blow',real:3,max:30,value:.5,display:.5}:family==='cpt'?{axis:'push-rate',label:'PUSH RATE',unit:'mm/s',real:20,max:34,value:.588,display:.588}:family==='twoStage'?{axis:'pull',label:'PULL',unit:'',real:.7,max:1.25,value:.7,display:.7}:{axis:'torque',label:'TORQUE',unit:'',real:.57,max:1.25,value:.57,display:.57};
++  const state={scene:'site',player:{money:123456,level:60},settings:{reducedMotion:reduced},world:{regionId:'nordic',strata:[]},drill:{active:true,depth:12.3,target:100,wob:.5,rpm:.5,flush:.5}};
++  if(options.input01!==undefined)for(const key of ['wob','rpm','flush']){telemetry[key]=options.input01;state.drill[key]=options.input01;}
++  const contract={id:'fixture-'+family,methodId:mid,regionId:'nordic',targetDepth:100,title:'DOM fixture'};state.contract=contract;
++  const bus={emit(){},on(){return()=>{};}};
++  let telemetryReady=!options.delayedTelemetry;
++  const sim={active:true,getTelemetry:()=>telemetryReady?telemetry:null,getSweetSpot:()=>[.45,.65],getForecast:()=>[],abortHole:reason=>{effects.aborts.push(reason);state.drill.active=false;},setInput:(k,v)=>effects.inputs.push([k,v]),pulse:(...v)=>effects.actions.push(v)};
++  const ctx={state,bus,sim,game,hudWrites:[]};let hudValue;
++  Object.defineProperty(ctx,'hud',{get(){return hudValue;},set(v){hudValue=v;const d=screens.querySelector('.sitedock'),cs=d?getComputedStyle(d):null;ctx.hudWrites.push({time:performance.now(),value:{...v},class:d?.className,height:d?.offsetHeight,cssHeight:cs?.height,transitionProperty:cs?.transitionProperty,transitionDuration:cs?.transitionDuration});}});
++  app={C,state,ctx,bus,fmtMoney,viewport:{w:innerWidth,h:innerHeight,dpr:1},get reducedMotion(){return reduced;},haptic(){},strataFor:()=>[],confirm:confirmation.confirm,nav:scene=>{effects.nav.push(scene);state.scene=scene;}};
++  screen=createSiteScreen(app);screen.el.classList.add('screen','screen--site');screens.append(screen.el);screen.mount({contract});step();await settle();telemetryReady=true;if(!options.noExplicitResize)screen.resize();step();await settle();
++  if(mode==='card') {
++    const p=telemetry.programme;if(!p)throw Error('No card programme '+family);
++    const stamp={rc:'bagsCut',jumbo:'roundsFired',longhole:'holeIndex',bolt:'boltIndex',cpt:'dissipations',spt:'testIndex',twoStage:'stage'}[family];
++    if(family==='pile')p.setTaken=true;else p[stamp]++;
++    step();await settle();
++  }
++  if(mode.startsWith('beat')) {const kind=mode.split(':')[1]||(family==='bolt'?'bolt-install':'rod-add'),boltType=mode.startsWith('beat-friction')?'friction':'resin';telemetry.phase=kind;telemetry.beat=['tripping-out','tripping-in','bit-swap','casing-run'].includes(kind)?null:{kind,dur:4,t:1,hasWindow:['boom-setup','ring-index','pitch','rod-add','bail','bailing-run'].includes(kind),data:{type:boltType}};telemetry.actions=telemetry.actions.map(a=>({...a,enabled:false}));if(kind==='rod-add')telemetry.rodAdd={hit:false,missed:false};if(family==='bolt'){telemetry.programme.boltType=boltType;telemetry.programme.installStage='gel';}if(family==='cable')telemetry.hasDrillString=false;step();await settle();}
++  if(mode.startsWith('action:')) {
++    const action=mode.slice(7);
++    if(['rod','bail'].includes(action)){telemetry.phase='rod-add';telemetry.rodAdd={hit:false,missed:false};telemetry.hasDrillString=action!=='bail';}
++    if(action==='beat')telemetry.beat={kind:'boom-setup',hasWindow:true,hit:false,dur:4,t:1};
++    if(action==='release')telemetry.beat={kind:'spt-drive',hasWindow:false,dur:4,t:1};
++    if(action==='jam')telemetry.jam={state:'bound',bind01:.6};
++    if(action==='kick'){telemetry.flags={lostCirculation:true};telemetry.kickReady=true;}
++    if(action==='casing'){telemetry.canCase=true;telemetry.casingOn=false;telemetry.stability=.2;}
++    if(action==='trip')telemetry.wear=.95;
++    step();await settle();
++  }
++  if(mode==='hazard') {screen.onCavity({depth:12.3,height:1.5});step();await settle();}
++  if(mode==='well:gaining'){Object.assign(telemetry.well,{overbalanceSg:-.06,influx01:.1,flowing:true});step();await settle();}
++  if(mode==='well:losing'){Object.assign(telemetry.well,{overbalanceSg:-.06,columnLevel01:.7});step();await settle();}
++  await settle();await new Promise(r=>setTimeout(r,650));
++  window.__DRILLITY=ctx;
++  return {family,mode,method:mid,input01:telemetry.wob,programme:telemetry.programme?.kind||null,actions:telemetry.actions.filter(a=>a.enabled!==false).length};
++}
++window.fixture={cases,actionLabels:Object.fromEntries(Object.entries(SITE_ACTIONS).map(([k,v])=>[k,v.label])),cardFamilies:Object.keys(programmes),mount,effects,step,get app(){return app;},get screen(){return screen;},get telemetry(){return telemetry;},dispose(){cancelAnimationFrame(ownedFrame);screen?.destroy();confirmation.dispose();}};
+diff --git a/research/drilling-view-space-layout-analysis.md b/research/drilling-view-space-layout-analysis.md
+new file mode 100644
+--- /dev/null
++++ b/research/drilling-view-space-layout-analysis.md
+@@ -0,0 +1,424 @@
++# Drilling scene space: independent layout analysis
++
++Baseline: `a3fb994`, private `codex/drilling-view-space`, 2026-09-06.
++Ownership: this report only. No production files, gates, renderer, models or
++assets edited. No browser or GPU session launched by this worker.
++
++Current verdict: the final 612-case fixture passes its layout, native-target,
++interaction and canvas checks at the final source hashes recorded below.
++Available DOM-stage scene space is 48.24–75.32%, with paired gains of 0–70px
++and no measured regression. Intended-font validation and actual rendered-scene
++visibility remain unproved; 82% was not achieved. The supplementary 246 cases
++and four maximum-input cases also pass their layout checks at the same hashes.
++
++## Evidence and limits
++
++Read ASTRA.md in full, GAMEDESIGN.md, CRITIQUE finding 9, the current ASTRA
++checkpoint, shared root-coordinator.md and usage-shutdown.md, site.js, relevant
++site CSS including its final overrides, and the HUD enumeration/reach tools.
++This initial section is **source arithmetic, not a browser measurement**.
++Actual DOM fixture/image findings are recorded below. No FPS,
++rendered ruler readability, combined renderer validation or 82% success is
++claimed.
++
++The earlier 45.4–67.3% values reported by root come from ENUMERATE's
++`split.stagePct`: the summed heights of two empty `.siteband` DOM spacers
++divided by `.ui-stage` height. This is available scene space within the DOM
++layout. It does not inspect rendered pixels or even renderer scissor bounds.
++
++## Baseline height account
++
++With zero safe-area insets, the source has a 52px top strip and a 56px bottom
++reserve containing a 44px native Leave hole button. The dock is:
++
++`10px border/top padding + instrument + 4px gap + controls + 56px reserve`
++
++Programme/well methods add `44px auxiliary row + 4px gap`. No touch-size
++allowance is borrowed from a neighbouring row. The source-derived results are:
++
++| Viewport | Instrument / controls | Plain dock | Programme dock | Plain DOM opportunity | Programme DOM opportunity |
++|---|---:|---:|---:|---:|---:|
++| 320×568 | 72 / 68 | 210 | 258 | 53.87% | 45.42% |
++| 390×844 | 82 / 72 | 224 | 272 | 67.30% | 61.61% |
++| 320×844 | 82 / 72 | 224 | 272 | 67.30% | 61.61% |
++| 360×740 | 82 / 72 | 224 | 272 | 62.70% | 56.22% |
++| 412×915 | 94 / 84 | 248 | 296 | 67.21% | 61.97% |
++| 280×640 | 72 / 68 | 210 | 258 | 59.06% | 51.56% |
++
++Values are calculated from baseline tokens and zero insets, not observations
++that text fits those layouts. Narrow/tall cases deliberately expose geometry
++outside the two headline phones. A safe-area bottom inset above 4px increases
++the footer beyond 56px under its existing max() expression.
++
++## Recommended implementation direction
++
++Keep the stacked regions, three stable control positions, bottom reserve,
++native action rail and leave confirmation. Replace the tall semicircular gauge
++with a horizontal scale that retains the actual numeric value, method units,
++sweet-spot window, live cursor and applicable limit. Compact the neighbouring
++rate/beat/drive-record slot rather than removing it. Reduce the status strip
++while preserving ordinary numeric depth and target until root verifies the
++actual rendered ruler. Avoid increasing instrument/control heights simply
++because a phone is tall: extra height is most useful to the scene.
++
++The source worker's initial direction is 40px status, 48px plain instrument,
++64px programme instrument and 68px controls. With the retained 56px reserve
++and existing padding/gaps that predicts a 186px plain dock and 250px programme
++dock. These are candidates, not approved or measured final dimensions.
++
++Two further small savings worth checking are 36px status and top padding
++9→5px. Current steady-strip line boxes total 28.3px (11 + 3 + 14.3); its alert
++lines total 27.5px. This suggests that a 36px strip may fit, but font glyph
++bounds must decide. A 5px top padding leaves four pixels for a 2px focus outline
++plus its 2px offset. Neither suggestion justifies clipping or smaller text.
++
++The 64px programme row also protects the multi-line resin beat. A 48px
++programme instrument would provide a 96px unitcard region with its auxiliary
++row; the card's two-line note, title and one row of values require approximately
++84px from current line boxes. It may fit, but text width can force additional
++lines and the resin beat can still require more height. Any different reserve
++must be stable per method, never toggle on a live card or beat.
++
++Four equal columns are not a safe assumption on narrow phones. The production
++pile card includes `3.0 mm/blow`, `0.60 / 1.10 m` and `Into bearing`; jumbo has
++`Half-barrel`, SPT has `Energy ratio`, and CPT has `Inclination`. A two-by-two
++grid at existing typography requires approximately 120px including title,
++two 32.35px cell rows, a 4px row gap, two 4px content gaps and a 28.16px
++two-line note. If measured text cannot fit four columns, the programme reserve
++must accommodate this geometry. Do not preserve a nominal height by clipping
++outcomes, shrinking the 11px font floor or undoing caption line-height 1.4.
++The existing unequal-width three-cell rule remains necessary for the bolt
++trial-fit card.
++
++The independent fixture review identified two coverage gaps to correct before
++acceptance: synthetic telemetry initially omitted `gauge`, causing pile/CPT to
++exercise fallback TORQUE rather than SET / PUSH RATE; and some synthetic action
++labels were shorter than production labels, with the friction bolt's third
++action absent. These were sent to the measurement worker. Production gauge
++units and action strings must be exercised. Dropping the gauge caption unit
++also requires retaining `mm/blow` in the pile's numeric reading; `mm` alone
++loses the per-blow dimension previously present in the caption. This was sent
++to the source worker.
++
++## Why larger apparent savings fail
++
++Removing the footer while leaving sliders at the bottom changes their reach.
++The source's existing derivation requires the outer control centres roughly
++90px above the bottom edge. A 68px control row above 56px reserve provides
++exactly 90px. Moving Leave into the instrument row does not itself replace this
++reserve. The current reach gate scores centres; this does not prove every
++point of each rectangle is within a thumb arc.
++
++Moving Leave into `.dock__inst` also hides it whenever showUnit() marks that
++row `is-taken`. The exit must remain accessible during cards. Moving the
++instrument rows below the controls could reuse them as the reach reserve, but
++then card takeover, escape placement and every action's reach need a separate
++coherent layout. Putting a 128px Leave beside three rail actions in the narrow
++row cannot be assumed to fit. No such rearrangement is accepted here.
++
++An 82% clean vertical scene share allows only 102.24px of total chrome at
++568px height and 151.92px at 844px. Under the retained short-phone topology,
++68px controls + 56px reserve + a proposed 40px status already consume 164px,
++before instruments, auxiliary actions, gaps or padding. This is a **conditional
++bound for this retained layout**, not proof that every possible HUD is
++incompatible with 82%. Even deleting the entire instrument row while keeping
++the other programme rows and 40px status yields at most 60.21% at 320×568 and
++72.75% at 390×844 using their baseline control heights. Deleting required
++instrumentation is not a proposed solution.
++
++## Renderer integration request
++
++Use the final site-specific CSS override when comparing widths:
++`.ui-stage.is-site { width: min(100vw, max(320px, calc(100vh * .5)), 520px) }`.
++At 320×568 the DOM site is therefore 320px wide, **not 284px**. The latter
++calculation overlooks the override and is invalid for this screen.
++
++The source contracts still differ at other sizes: at 375×667 the DOM site is
++333.5px wide while renderer `STAGE_ASPECT_MAX = 9/16` gives a 375px stage.
++At 320×844, CSS retains the 844px viewport height while renderer
++`STAGE_ASPECT_MIN = 9/19.5` gives a rounded 320×693 stage at y=76. Its
++resolveChrome() subtracts letterbox area before reserving HUD heights. For the
++baseline programme dock this predicts render bands at y=76..572, 496px high,
++versus DOM spacers y=52..572, 520px high. The corresponding viewport-height
++shares are 58.77% and 61.61%. These remain source forecasts requiring actual
++renderer measurements. The 30% minimum-scene clamp does not activate here.
++
++Root should verify the actual integration renderer against the final measured
++HUD top/bottom, widths, safe areas and narrow/tall cases. Record renderer stage,
++both scissors and their intersection with the viewport, then subtract the
++union of actual opaque UI occlusion. Capture the matched renderer/HUD hashes
++and actual model identities. Any stage-contract correction belongs to the
++renderer/global-layout owner and is not part of this worker's scope. The
++private HEAD has the older hero camera; its images cannot validate root's new
++uncommitted hero/instrument renderer or rendered ruler.
++
++## Initial actual DOM fixture visual review
++
++The measurement worker generated `shots/drilling-view-space/baseline.json` and
++an initial `current.json`. Their explicit scope is actual production DOM,
++styles, components and extracted confirmation against synthetic telemetry,
++with GPU/WebGL disabled. CDP resolved Segoe UI Black / Segoe UI fallback faces;
++the intended Google fonts were unavailable. These images contain a blank scene
++region, so no claim about actual 3D rendering follows.
++
++This worker inspected both baseline RC-card PNGs at 320×568 and 390×844, and
++the initial candidate's plain rotary and RC-card PNGs at both sizes, plus its
++320×568 resin beat and pile card. Files use the names
++`{baseline,current}-{width}x{height}-normal-{family}-{mode}.png` in that folder.
++
++The horizontal instrument is coherent and the ordinary numeric depth/target,
++status and Leave hole remain readable in these candidate images. However,
++the initial candidate **does not pass visual review**:
++
++- Narrow RC still displays `RECOV…`, confirmed independently of the clipping
++  report. The 390px RC card displays the full caption.
++- The narrow pile card ellipsises the set, design-set and into-bearing values;
++  this conceals the quantities needed to interpret the result.
++- The resin title truncates and the three-action rail displays fragments such
++  as `TORQUE …`, `REAM …` and `READ THE…`.
++
++The initial actual fixture reproduces source-predicted baseline clipping:
++RC Recovery is 70px in a 62px cell, pile Design value is 83px in 62px and
++Into bearing is 100px in 62px. The baseline run has 108 cases and 143 reported
++failures; the initial candidate has 108 cases and 78 failures. The candidate's
++49.65–73.70% DOM opportunity interval is an improvement in reserved geometry,
++not an acceptable final result while these failures remain.
++
++The initial instrument screenshot also pictures a transient spring pointer
++well below its 57% number because the synthetic fixture waited wall-clock time
++without an ordinary continuous screen.update loop. The measurement worker was
++asked to advance realistic update steps before final screenshots. This does
++not undermine box geometry, but those initial images cannot prove steady
++instrument agreement. All findings were sent to source, measurement and root.
++Final candidate results may supersede these initial capture files; consult
++their recorded source/fixture hashes and final report before reusing numbers.
++
++## Expanded source review and candidate geometry
++
++The expanded final baseline in `shots/drilling-view-space-final/baseline.json`
++contains 612 cases across nine viewports and both motion modes. Its actual
++DOM-stage opportunity interval is 45.4225–67.8112%, superseding the earlier
++108-case interval for that expanded matrix. It reports 1,661 failed assertions,
++1,608 enumerated overlaps, 494 horizontal clipping findings and 3,528 glyph
++clipping findings; the categories overlap and are not independent defect
++counts. No native small-target finding was recorded. This remains baseline
++DOM/fallback-font evidence, not a current renderer verdict.
++
++Reviewed the complete production diff again after the measured fixes. The final
++candidate keeps 40px status, 68px controls, the existing 56px minimum footer,
++44px auxiliary targets and 5px top padding plus the 1px dock border. Instrument
++height is 56px for plain methods, 72px with auxiliary actions, and 88px for
++unit-card methods without an auxiliary row. At viewport widths ≤300px ordinary
++plain methods reserve 72px so both beat heading and instruction can wrap.
++
++The zero-inset height account is now `6 + instrument + 4 + 68 + 56`, plus
++`4 + 44` for the auxiliary row. This gives 190px plain, 254px auxiliary, and
++222px no-auxiliary unit docks; narrow plain is 206px. Derived final DOM scene
++opportunity and the change from the corresponding baseline are:
++
++| Viewport | Plain | With auxiliary row | Unit card without auxiliary row |
++|---|---:|---:|---:|
++| 320×568 | 59.51% (+5.63 pp) | 48.24% (+2.82 pp) | 53.87% (unchanged) |
++| 390×844 | 72.75% (+5.45 pp) | 65.17% (+3.55 pp) | 68.96% (+1.66 pp) |
++| 280×653 | 62.33% (+2.45 pp) | 54.98% (+2.45 pp) | 59.88% (unchanged) |
++| 390×664 | 65.36% (+4.82 pp) | 55.72% (+2.41 pp) | 60.54% (unchanged) |
++| 375×667 | 65.52% (+4.80 pp) | 55.92% (+2.40 pp) | 60.72% (unchanged) |
++| 320×844 | 72.75% (+5.45 pp) | 65.17% (+3.55 pp) | 68.96% (+1.66 pp) |
++| 430×932 | 75.32% (+7.51 pp) | 68.45% (+5.79 pp) | 71.89% (+4.08 pp) |
++
++These source calculations agree with the corresponding matching final fixture
++cases, checked independently after completion. At 390×664 the DOM site is only
++332px wide, and at
++375×667 it is 333.5px wide: viewport-area share is therefore smaller than the
++table's DOM-stage-height share. The renderer integration limitations above
++remain. Safe-area insets also consume additional space.
++
++The final topology still cannot provide 82% on the tested phones. With even
++the entire instrument row hypothetically deleted, its retained 40px status,
++68px controls, 56px footer and 10px padding/gap sum already require 174px;
++the auxiliary row adds another 48px. Thus the conditional no-instrument upper
++bound is 69.37% plain / 60.92% auxiliary at 568px, or 79.38% / 73.70% at
++844px. Required instruments cannot actually be deleted, so these deliberately
++optimistic bounds exceed the candidate's real available area.
++
++Source review found no production scope expansion: the modified unprefixed
++instrument/card/action selectors have site-only consumers. Numeric depth and
++target, programme progress, method control semantics, full unit outcomes and
++Leave hole confirmation are retained. The narrowest tier removes only the
++noninteractive balance/level decoration; it retains depth/target or programme
++progress and the programme clock. The removed primary-action icon duplicated
++its retained label/instruction. Gauge set units now correctly retain mm/blow;
++push-rate remains mm/s. The four-cell grid uses two columns, the unequal-width
++three-cell rule remains and caption line-height 1.4 is unchanged. Press motion
++affects button contents rather than changing the native target rectangle.
++
++The new no-auxiliary unit reservation exposed one lifecycle edge during this
++review: changing only `sitedock--units` could change height without entering the
++old `plain changed` sizing branch. The source worker fixed this by scheduling
++gauge/spark/drive-record sizing and chrome publication together after both
++capability decisions. This was reviewed in the actual file; the delayed-first-
++telemetry path was requested as an additional fixture, without the fixture's
++explicit screen.resize masking it. Oil Gaining with a negative margin at
++280/320 was also requested because its label is wider than the steady state.
++
++The 246-case supplementary pass at intermediate hashes `f256fd62…` /
++`928386e2…` exposed additional long beat/alert text and recorded 34 failures
++(including browser/font failures). This worker inspected 15 of its matching
++320/390/280 PNGs: pile set and CPT push-rate units, oil gaining/losing with
++negative margin, resin/friction beats, tripping/bailing, RC blow-down, re-drive
++and the kill-feed action. The compact metric/action arrangement was readable;
++the friction/RC headings and re-drive/underbalanced instructions visibly
++clipped. The CPT countdown had a measured 1.25px separation from its heading:
++crowded but not an overlap. These were provisional images, not accepted final
++proof or a finding about actual 3D.
++
++The source worker addressed those failures with full-meaning shorter copy,
++larger alert line boxes, and explicit nonanimated layout/canvas boxes to avoid
++implicit size transitions under the universal reduced-motion duration rule.
++The geometric row heights above did not change. Source review of that batch
++found no additional functional or ownership regression.
++
++Reviewed copycheck SHA-256 after that batch (raw working-file bytes): site.js
++`da6ac8218ff5e3ee812df8425cb5595dcb2fb8d5c5d7640c72a1b05c2ea900f3`, styles.css
++`ea8b4a3827aa90ce2db4a9b79ed9b89bb4467aec330a7f7519ee6aca62086331`.
++Any later source change requires matching evidence before visual acceptance.
++
++## Matching focused copycheck
++
++`shots/drilling-view-space-copycheck/current.json` completed 36 cases at the
++copycheck hashes above: six corrected states at 280×653, 320×568 and
++390×844, each in normal and reduced motion. It records zero enumerated
++overlaps, horizontal clips, glyph clips or small native targets. Its only two
++failed gates are browser resource errors and inability to prove intended Inter
++font rendering. Thus this is accepted focused **fallback-font DOM** evidence;
++the expanded 612-case matrix had not yet completed at that checkpoint.
++
++Independent image review of the matching 280px friction-bolt, re-drive,
++RC blow-down and oil-losing screenshots, plus 320px friction and 390px
++oil-losing, confirms that the previously clipped titles/instructions and
++underbalanced warning are now fully visible. The compact gauge value and
++units, negative mud margin, pit state and separate auxiliary actions remain
++readable. The narrow text is dense but the reviewed information is distinct
++and complete. Ring index was measured but not in the PNG capture whitelist:
++its 280px title uses two lines, its countdown remains separate, and the full
++"Next hole in the ring" instruction occupies one measured line with no clip
++or overlap. This last judgement is based on JSON geometry, not image review.
++
++The ensuing expanded run exposed a separate width-breakpoint defect at
++390×664: the DOM stage is 332px wide, yet the existing viewport-based 360px
++rule retains slider amounts and ellipsises the label to `ROTAT… 50`. This
++worker independently confirmed it in the actual PNG. The focused copycheck
++did not include that aspect ratio and therefore did not cover this defect.
++A site-width container query was requested to apply the already measured
++narrow label treatment without changing stage width, native target geometry
++or control semantics. Expanded acceptance was withheld until that correction
++and a matching measurement run. The completed 612-case run at this rejected
++snapshot is preserved in `shots/drilling-view-space-before-stage-fix/current.json`:
++229 failed assertions, 116 horizontal clips, 120 glyph clips, zero overlaps
++and zero small targets. Its measured DOM-stage opportunity is
++48.2394–75.3219%; viewport-area opportunity is 47.4359–75.3219%.
++
++That run also detects a pile chart backing-size mismatch and third-line note
++clipping on 280px pile/longhole cards. This worker independently inspected the
++280px pile PNG and confirmed the note ends "Only the depth into…", hiding the
++outcome lesson. Shorter full-meaning pile/longhole notes were suggested to the
++source worker; reducing caption line-height or retaining the ellipsis is not
++accepted. The implementation worker additionally identified an unverified
++maximum-input risk: label width plus `100` may exceed the slider head even
++where `50` fits. A bounded measurement at actual 375/390px site widths was
++requested before choosing the final container-query threshold.
++
++## Boundary follow-up and final source identity
++
++The 90-case boundary run at site.js `8c6d156a…` / CSS `1640450b…`
++(`shots/drilling-view-space-boundary/current.json`) confirms the site-container
++query fixes the 332px-stage label problem and the shortened pile/longhole notes
++fit at 280px. The chart caption resize removes its backing-store mismatch.
++Independent images confirm complete 280px pile note text and the full ROTATION
++label at 390×664. Maximum input `100` reveals WITHDRAW at actual 375px stage
++width still needs 67px in a 63px slot; the same actual 390px stage passes.
++The run records four layout assertions for this single issue across both
++motion modes, plus the two browser/font failures.
++
++The pile caption was also reviewed beyond ancestor clipping. Its actual
++390×844 Range rectangles are y=644,h=15 and y=655,h=15, a 4px same-element
++interline overlap. The PNG appears dense; an actual ink collision was not
++claimed. The source worker raised its line-height from 1 to 1.4, leaving the
++instrument row unchanged and allowing the chart canvas to use the remaining
++height. The first container-query breakpoint is now `width < 390px`, covering
++the measured failing width and the intervening widths up to the proven
++passing endpoint. The ≤300px treatment remains a site-width query. No global
++stage geometry, native control geometry or numerical gauge unit changed.
++
++The matching 30-case follow-up in
++`shots/drilling-view-space-boundary-final/current.json` at site.js `8c6d156a…`
++and CSS `7849f13c…` has zero overlap, clipping, interline or canvas failures;
++only the browser/font gates remain failed. The 390×844 pile caption now has
++15px Range boxes at y=637.21875 and y=652.609375, leaving 0.390625px between
++them instead of overlapping. Maximum-input WITHDRAW fits under the corrected
++width treatment.
++
++A subsequent source-only cache correction restores the early unchanged-record
++return before chart slicing/caption work and stores the final dimensions after
++caption resizing. Reviewed this actual final batch and its raw SHA-256:
++
++- site.js: `bad773d03fb8c0c9055b84c7668a2e10fd3accddd0bcc6277ea7fc1be1359a3d`
++- styles.css: `7849f13c9a34d27f0beeb563f0e14e7c40055ffc2f103977c54452708a0284c5`
++
++No additional semantic or ownership regression was found in this batch.
++The source-derived height table remains unchanged. The preceding rejected
++snapshots are retained as the evidence for the fixes and must not be treated
++as this batch's proof.
++
++## Final main-matrix verdict
++
++Independently read `shots/drilling-view-space-final/current.json` after atomic
++completion and verified its site.js and CSS hashes equal the final identities
++above. All 612 cases have zero enumerated overlaps, horizontal clips, glyph
++clips, small native targets, interline/canvas or interaction gate failures.
++The two remaining failed gates are browser resource errors and unproved
++intended Inter rendering. This is a bounded fallback-font DOM layout pass,
++not an overall clean environment or actual-renderer pass.
++
++The measured available DOM-stage share is 48.2394–75.3219%; available
++viewport-area share is 47.4359–75.3219%. Independently paired every case with
++the matching baseline by name: gains are 0–70px, or 0–7.5107 percentage points,
++with no measured regression. This verifies the conditional height table,
++including the honest unchanged no-auxiliary unit-card cases on short phones.
++
++Independent inspection of refreshed final-run images covers 320px pile set
++and its separated two-line chart caption, RC/longhole four-cell cards;
++390px CPT push-rate and RC card; and 280px longhole/pile cards and an ordinary
++tripping beat with depth/target. Full quantities, units, captions and outcome
++notes are legible in these actual PNGs. Earlier focused image reviews cover
++the narrow oil warning and corrected beat copy; the supplementary exact-source
++verification below confirms their final geometry.
++
++Independently read the completed 246-case
++`shots/drilling-view-space-supplementary/current.json` and four-case
++`shots/drilling-view-space-maximum-input-final/current.json`. Both record the
++same final site.js/CSS hashes and zero layout, native-target, interline,
++interaction or canvas failures. The supplementary run covers all 29 authored
++beats, nine actions, two well states and the friction variant across three
++widths and both motion modes. The maximum-input run confirms the long control
++label at 375/390px with value 100 in both motion modes. Each report retains
++the same two browser/font failures. Together with the main matrix this is
++862 exact-source fixture cases, with no added claim about untested telemetry
++values or real-user thumb reach.
++
++The large blank region in these CPU-only images is scene opportunity. It is
++not rendered drilling. The actual GPU/ruler/opaque-occlusion integration
++request above remains open, as does intended-font proof. No 82%, FPS or
++real-machine scene visibility claim follows from these fixtures.
++
++## Baseline source identity
++
++SHA-256 values from `git show a3fb994:<path>` bytes:
++
++| Source | SHA-256 |
++|---|---|
++| site.js | fd7395f927f490b97a7c21c79c6e09c485434492f13dffb242c31ef0bb0be2cf |
++| styles.css | 52e4f7d1d9f707f0065203a88404490e76cbeb4533ad693ad022b0a1d4ce6dc0 |
++| renderer.js | 15ae234c0f8d6f881dc7a2a866c374991fa3c2d7098e3a5daba7e8d1854821ec |
++| .hudqa/enumerate.js | 06e65c3365cbca62d6d73c971b69ed60193208d873c8932c01052f5c406bc214 |
++| tools/checkreach.mjs | b2ed62799645d037fff6b16cd8576a375b7f5f24a9834890084044891a9cb7f6 |
+diff --git a/research/drilling-view-space-measurement.md b/research/drilling-view-space-measurement.md
+new file mode 100644
+--- /dev/null
++++ b/research/drilling-view-space-measurement.md
+@@ -0,0 +1,257 @@
++# Drilling view space — independent DOM measurement
++
++Status: final 612-case candidate matrix, 246 supplementary cases and four
++maximum-input cases complete on matching frozen source. Each report retains
++the two font/network failures. This report is not a renderer,
++performance, intended-font, or 82% acceptance claim.
++
++## Instrument
++
++`tools/checkdrillingviewspace.mjs` builds a dedicated fixture from the actual
++`createSiteScreen`, components, catalogue and CSS. Baseline production sources
++come from `git show a3fb994:<path>`; current production sources are frozen in
++memory for one run and identified by SHA-256. The fixture supplies synthetic
++telemetry. Its owned animation loop executes the actual screen continuously
++with the production main loop's 0–1/15 second dt clamp.
++All captured cases use DPR 1. Screenshot geometry and 2D instrument drawing
++come from that same continuously updated fixture state.
++
++Chrome runs headless with `--disable-gpu --disable-webgl
++--disable-software-rasterizer`; WebGL context requests are rejected and recorded.
++No renderer is instantiated and no model assets are loaded. The catalogue's
++transitive static tool definitions are bundled, but no geometry builder runs.
++
++The unmodified `.hudqa/enumerate.js` measures painted overlap, horizontal text
++clipping, hit testing and the scene spacer regions. Additional measurements
++record native control bounds, the actual pointer-sensitive slider tracks,
++text Range boxes against clipping ancestors, CSS/font metrics, the published
++`ctx.hud` insets, visible 2D canvas backing dimensions and source hashes.
++Distinct lines in one text node are also compared for intersecting Range
++boxes; this found a caption defect the separate-node overlap enumerator missed.
++Existing `checkreach.mjs` assessment code is extracted and executed unchanged
++at its native 390×844 viewport. Other viewport control positions are reported;
++no scaled physiological reach model is invented.
++
++The confirmation tests execute the exact production shell's `confirm`,
++`closeOverlay` and overlay Escape handler, with the actual DOM components.
++Normal and reduced motion test safe default focus, Escape/cancel retaining the
++run, focus return, and one abort/navigation only after explicit confirmation.
++The renderer, simulation and navigation destination are mocked boundaries.
++
++## Coverage and retained limitations
++
++The main final matrix covers 320×568, 390×844, 390×664, 280×653, 360×640,
++393×852, 430×932, 375×667 and 320×844, normal and reduced motion, 18 method
++control/programme families, eight programme unit-card families, and selected
++plain-method beats: 612 cases. Cards include three and four cells.
++
++The supplementary fixture enumerates every actual `BEAT_COPY` key and every
++actual `SITE_ACTIONS` key, checks those sets against production source, and
++supplies matching family contexts. It also tests gaining/losing well states
++with a negative pressure margin and the friction-specific bolt-install copy:
++41 supplementary states × three viewports × two motion modes = 246 cases.
++Safe-area injection uses top 47 px and bottom
++34 px at 390×844. These are explicit test inputs, not a device measurement.
++
++The HTML uses the real `index.html` Google Fonts link. This environment denies
++that network request with `net::ERR_NETWORK_ACCESS_DENIED`. CDP proves the
++measured glyphs use Segoe UI Black / Segoe UI fallback faces. No fonts were
++invented, downloaded by an alternate route, or substituted into production.
++Intended Inter layout validation remains incomplete, and the runner
++returns failure for that missing evidence even if its geometry checks pass.
++Oswald is requested by the real page link but is not used by the sampled site
++text; its absence is not a separate invented site-font requirement.
++
++## Baseline measured
++
++`shots/drilling-view-space-final/baseline.json` completed 612 cases using the
++continuous production HUD update loop. DOM scene opportunity spans
++45.4225–67.8112% of the actual stage and 45.3846–67.8112% of the viewport.
++The 320×568 and 390×844 cases reproduce the prior 45.4225–67.2986% envelope.
++
++The stage calculation uses the real `.ui-stage.is-site` CSS, including the
++existing baseline minimum 320 px width rule. A 320×568 site therefore has a
++320 px stage; the generic `--stage-w` 284 px cap does not override the site
++rule. Letterbox gutters are excluded from viewport scene opportunity.
++
++Baseline fallback-font measurements found 1,608 painted overlap pairs,
++494 horizontal clipped labels and 3,528 text Range/ancestor clip records
++across those cases; these are repeated per-state records, not distinct bugs.
++There were no undersized hit targets. The full baseline fails on these layout
++findings, some reduced-motion HUD inset mismatches, and unavailable webfonts.
++
++The baseline and final runner hashes differ. The 612 named main-matrix
++geometry cases remain comparable; later runner/fixture additions cover 2D
++canvas backing size, delayed first telemetry, and the supplementary
++friction/well states. Those additions are candidate-only checks, not claimed
++as measurements of the recorded baseline. Raw report hashes retain this
++distinction.
++
++## Final main matrix
++
++The final candidate completed the same 612 case names as the recorded
++baseline; an exact ordered-name comparison passed. Its only two reported
++failures are the denied Google Fonts request/browser error and the missing
++proof of Inter. There are no JavaScript page errors or WebGL attempts.
++
++| Recorded main-matrix measure | Baseline | Candidate |
++| --- | ---: | ---: |
++| Painted overlap pairs | 1,608 | 0 |
++| Horizontal clipped labels | 494 | 0 |
++| Text Range / ancestor clip records | 3,528 | 0 |
++| Undersized enumerated targets | 0 | 0 |
++| Stage scene-opportunity envelope | 45.42–67.81% | 48.24–75.32% |
++| Whole-viewport opportunity envelope | 45.38–67.81% | 47.44–75.32% |
++
++Additional candidate checks found zero same-text line intersections, native
++controls/tracks below 44 px, painted UI on scene spacer bands, hit-test
++failures, or published-inset mismatches. The 68 native-size reach cases pass
++the existing 390×844 assessor. All 120 held-button samples across 32 states
++retain their native dimensions and remain free of painted overlaps.
++
++Every visible 2D canvas matches its CSS size × DPR within 1 px rounding
++tolerance. Four delayed-first-telemetry probes pass without an explicit
++screen resize. Injected safe-area layout, native targets, reach and published
++chrome pass. Normal/reduced confirmation both default to Keep drilling,
++retain the run on Escape/cancel, return focus, and abort/navigate exactly once
++on confirmation.
++
++The final supplementary sweep completed all 246 cases with zero geometry,
++interline, native-target, reach, published-inset or canvas failures. It covers
++all 29 `BEAT_COPY` keys, all nine `SITE_ACTIONS` keys, the friction-install
++variant and gaining/losing well states at 320×568, 390×844 and 280×653 in both
++motion modes. The final four maximum-input cases supply input01=1 for jet at
++375×844 and 390×844, both motion modes; full WITHDRAW labels fit. These two
++reports retain only the same font/network failures as the main run.
++
++## Findings that changed the candidate
++
++- Four-cell outcome cards clipped labels such as Half-barrel, Into bearing,
++  Inclination and Energy ratio. The compact implementation now gives those
++  cards two rows while preserving three-cell fitting and caption line-height
++  1.4.
++- The oil pit state collided with its pressure margin. Three friction-bolt
++  action labels and long generic beat text also needed measured fitting.
++- The existing reduced-motion universal `transition-duration:1ms` rule gives
++  previously unanimated elements an implicit transition because their default
++  transition property is `all`. Instrumented `ctx.hud` writes observed a plain
++  dock publishing 254 px while its class already said plain, then settling to
++  182 px with no later publication. Scoped `transition-property:none` on the
++  dock was verified to publish the final 182 px in both motion modes. This was
++  a real measured lifecycle defect, not a measurement waiver.
++- Raw text Range boxes exposed vertical clipping from 11 px slider label
++  boxes around 15 px fallback font metrics and 14.94 px outcome value/title
++  boxes around 17 px metrics. Site-scoped line-height and spacing changes
++  removed those failures in the verified 320/390 refinement states.
++- After the dock publication fix, reduced motion still sized a plain gauge
++  canvas to a transient 48 px backing height while its CSS height settled to
++  32 px; the no-auxiliary two-stage card had a 48 px backing against 64 px CSS.
++  Removing structural height transitions from the site rows, gauge box and
++  canvases fixed these measured mismatches. The probe also releases first
++  telemetry after mounting, without calling `screen.resize`, and checks both
++  motion modes. Interactive control/state motion remains outside that fix.
++- The complete beat sweep found narrow friction-install, blow-down,
++  cradle-indexing and replacement-pile text exceeding their reserved boxes.
++  Compact copy and alert line-height changes passed all 36 affected cases at
++  280×653, 320×568 and 390×844 before the full candidate run.
++- The first complete candidate sweep exposed viewport-based slider rules that
++  missed letterboxed stages: 390×664 has a 332 px site stage, and 375×667 has
++  a 333.5 px stage. Their input numbers competed with full control names,
++  clipping ROTATION, CLEANING, WITHDRAW, HAMMER and CADENCE. A separate
++  maximum-input probe is required because the rendered `100` is wider than
++  the main matrix's `50`.
++- The pile blow chart measured its initial one-line caption, then added toe
++  depth and wrapped the caption. This left a 59 px backing canvas in a 48 px
++  CSS box. The first viewport-resize case also retained a prior-width gauge
++  backing size; that is reported as an isolated fixture lifecycle finding,
++  without claiming the real app's resize dispatcher was executed.
++
++## Render integration boundary
++
++DOM opportunity is the area of the two unpainted site spacer rectangles.
++It is an upper opportunity for a renderer using the same stage and chrome;
++it is not evidence that the actual renderer draws visible scene pixels there.
++Opaque chrome and side gutters are never counted as visible 3D.
++
++This private branch has the older camera/renderer from baseline `a3fb994`.
++The parent's uncommitted hero/instrument renderer has not been captured by this
++fixture. Its stage width, chrome clamp, band seam, readability and actual
++unoccluded rendered scene must be checked after integration. No combined
++renderer/HUD proof and no FPS result are claimed here.
++
++## Before/after reserved DOM space
++
++These percentages measure scene spacer opportunity, with identical state names
++and stage rules. The compact status strip is 40 px versus 52 px. The ordinary
++dock is 190 px, the auxiliary-programme dock 254 px, and the no-auxiliary
++two-stage card dock 222 px; safe-area inputs add their explicit reserves.
++
++| Viewport / state | Stage width | Stage opportunity before → after | Whole viewport before → after |
++| --- | ---: | ---: | ---: |
++| 320×568 ordinary rotary | 320 px | 53.87% → 59.51% | 53.87% → 59.51% |
++| 320×568 RC programme | 320 px | 45.42% → 48.24% | 45.42% → 48.24% |
++| 320×568 two-stage card | 320 px | 53.87% → 53.87% | 53.87% → 53.87% |
++| 390×844 ordinary rotary | 390 px | 67.30% → 72.75% | 67.30% → 72.75% |
++| 390×844 RC programme | 390 px | 61.61% → 65.17% | 61.61% → 65.17% |
++| 390×844 two-stage card | 390 px | 67.30% → 68.96% | 67.30% → 68.96% |
++| 375×667 ordinary rotary | 333.5 px | 60.72% → 65.52% | 54.00% → 58.27% |
++| 375×667 RC programme | 333.5 px | 53.52% → 55.92% | 47.60% → 49.73% |
++| 320×844 ordinary rotary | 320 px | 67.30% → 72.75% | 67.30% → 72.75% |
++| 320×844 RC programme | 320 px | 61.61% → 65.17% | 61.61% → 65.17% |
++
++The two-stage card on the shortest phone gains no scene area: its preserved
++three-cell outcome needs the larger stable instrument reserve. The narrow
++280 px ordinary dock also reserves an additional 16 px for complete beat copy.
++This implementation does not reach 82% on either primary phone.
++
++## Source identity
++
++Hashes are SHA-256 of the exact bytes frozen for the run; the JSON files also
++record every other bundled production input and the unchanged enumerator.
++
++| Input | Baseline recorded run | Final candidate |
++| --- | --- | --- |
++| `src/ui/screens/site.js` | `fd7395f927f490b97a7c21c79c6e09c485434492f13dffb242c31ef0bb0be2cf` | `bad773d03fb8c0c9055b84c7668a2e10fd3accddd0bcc6277ea7fc1be1359a3d` |
++| `src/ui/styles.css` | `52e4f7d1d9f707f0065203a88404490e76cbeb4533ad693ad022b0a1d4ce6dc0` | `7849f13c9a34d27f0beeb563f0e14e7c40055ffc2f103977c54452708a0284c5` |
++| Runner | `3aa6b3306ad93716ed068118ee374fb5a084aeecc8eaad68559c1acd263e9175` | `5b9089a1b01a52ebc776e9e07796afab82da7417fda6c37c8ebffcfb299fab8b` |
++| Fixture | `ab57d32ac76a44059badea008161b872c3b1e8d1a53b87ba43d39afa6ef431d0` | `faa1a07564358a0e8e23291988d6f025321187e054c88a774c8080aaa160fab0` |
++
++The final runner adds immediate failure reporting, exact three/four-cell card
++assertions, a rejection for an empty case matrix, same-text line intersections,
++and the optional maximum-input probe. Its default 612 case names and synthetic
++input values match the recorded baseline. The 30-case
++`drilling-view-space-boundary-final` report uses the earlier pre-cache-fix JS
++hash `8c6d156a…`; it is diagnostic typography evidence, not a final-JS match.
++
++## Reproduction
++
++```powershell
++Set-Location C:\Users\henri\Downloads\threads\drillity-drilling-view-space
++node tools/checkdrillingviewspace.mjs --tag baseline --out shots/drilling-view-space-final
++node tools/checkdrillingviewspace.mjs --tag current --out shots/drilling-view-space-final
++node tools/checkdrillingviewspace.mjs --tag current --supplementary --viewports 320x568,390x844,280x653 --out shots/drilling-view-space-supplementary
++node tools/checkdrillingviewspace.mjs --tag current --families jet --only-modes steady --viewports 375x844,390x844 --input01 1 --out shots/drilling-view-space-maximum-input-final
++```
++
++Re-running the baseline with the final runner also executes its later added
++assertions. The saved baseline's failure count belongs to the recorded earlier
++runner hash; its 612 geometry cases are the comparison used above.
++
++The runner closes its owned browser and HTTP server in `finally`, then writes
++each JSON report through a temporary file and rename. Earlier quick/refinement
++reports are diagnostic snapshots; the final directory and matching source
++hashes identify the deliverable evidence.
++
++Final evidence folders, each containing `current.json` and matching PNGs:
++
++- `shots/drilling-view-space-final` (also contains the recorded `baseline.json`
++  and baseline PNGs).
++- `shots/drilling-view-space-supplementary`.
++- `shots/drilling-view-space-maximum-input-final`.
++
++All three final JSON reports were checked for the exact final site, CSS and
++runner hashes and the same two expected font failures. The owned browser and
++HTTP server closed successfully before each atomic final report was written;
++no measurement browser or service remains running. Runner and fixture are
++frozen. The diagnostic `before-stage-fix` and `boundary-final` folders are
++retained for the failure history and are not final acceptance evidence.

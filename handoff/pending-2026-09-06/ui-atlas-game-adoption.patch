@@ -1,0 +1,1542 @@
+diff --git a/src/ui/blender-atlas.css b/src/ui/blender-atlas.css
+index e3bda07..228962e 100644
+--- a/src/ui/blender-atlas.css
++++ b/src/ui/blender-atlas.css
+@@ -181,3 +181,82 @@
+   :where([data-blender-ui]) .bui-meter::before { display: none; }
+   :where([data-blender-ui]) .bui-meter__fill { background: Highlight; forced-color-adjust: none; }
+ }
++
++/* Production is explicitly opted in per native button. The stronger scope
++ * defeats .btn/.tabs__b sizing, surfaces and hitbox scale regardless of import
++ * order. Runtime geometry/foreground values come only from the manifest.
++ * The earlier class-only demo contract remains unchanged. */
++[data-blender-ui] button[data-bui-button].bui-button {
++  width: var(--bui-native-width);
++  height: var(--bui-native-height);
++  min-height: 44px;
++  max-width: 100%;
++  min-width: 44px;
++  padding: var(--bui-native-pad-top) var(--bui-native-pad-right) var(--bui-native-pad-bottom) var(--bui-native-pad-left);
++  background: transparent;
++  border: 0;
++  box-shadow: none;
++  opacity: 1;
++  transform: none;
++  transition: none;
++  color: var(--bui-foreground-normal);
++}
++[data-blender-ui] button[data-bui-button].bui-button .bui-button__label {
++  display: inline-flex;
++  align-items: center;
++  justify-content: center;
++  gap: .5em;
++  width: max-content;
++  max-width: none;
++  min-width: 0;
++}
++[data-blender-ui] button[data-bui-button].bui-button .bui-button__label > * { min-width: 0; overflow-wrap: anywhere; }
++[data-blender-ui] button[data-bui-button].bui-button .bui-button__label > svg { flex: none; }
++[data-blender-ui] button[data-bui-button].bui-button:is(:active, .is-pressed, [aria-pressed='true']):not(:disabled):not(.is-disabled) {
++  --bui-face: var(--bui-button-neutral-pressed);
++  color: var(--bui-foreground-pressed);
++}
++[data-blender-ui] button[data-bui-button].bui-button--accent:is(:active, .is-pressed, [aria-pressed='true']):not(:disabled):not(.is-disabled) { --bui-face: var(--bui-button-accent-pressed); }
++[data-blender-ui] button[data-bui-button].bui-button--compact:is(:active, .is-pressed, [aria-pressed='true']):not(:disabled):not(.is-disabled) { --bui-face: var(--bui-button-compact-neutral-pressed); }
++[data-blender-ui] button[data-bui-button].bui-button--compact.bui-button--accent:is(:active, .is-pressed, [aria-pressed='true']):not(:disabled):not(.is-disabled) { --bui-face: var(--bui-button-compact-accent-pressed); }
++[data-blender-ui] button[data-bui-button].bui-button:is(:disabled, .is-disabled) {
++  --bui-face: var(--bui-button-neutral-disabled);
++  color: var(--bui-foreground-disabled);
++  cursor: not-allowed;
++}
++[data-blender-ui] button[data-bui-button].bui-button--accent:is(:disabled, .is-disabled) { --bui-face: var(--bui-button-accent-disabled); }
++[data-blender-ui] button[data-bui-button].bui-button--compact:is(:disabled, .is-disabled) { --bui-face: var(--bui-button-compact-neutral-disabled); }
++[data-blender-ui] button[data-bui-button].bui-button--compact.bui-button--accent:is(:disabled, .is-disabled) { --bui-face: var(--bui-button-compact-accent-disabled); }
++[data-blender-ui] button[data-bui-button].bui-button.is-pressed:not(:disabled):not(.is-disabled) .bui-button__label {
++  transform: translateY(1px);
++  transition-duration: var(--motion-d1);
++  transition-timing-function: var(--curve-press);
++}
++[data-blender-ui] button[data-bui-button].bui-button:is(:disabled, .is-disabled) .bui-button__label { transform: none; }
++[data-blender-ui] button[data-bui-button].bui-button:focus-visible {
++  outline: 2px solid #fafafa;
++  outline-offset: 3px;
++  box-shadow: 0 0 0 5px #0d1219;
++}
++[data-blender-ui] button[data-bui-button].bui-button.bui-text-fit-fallback {
++  width: auto;
++  height: auto;
++  min-height: 44px;
++  padding: 10px 12px;
++  border: 1px solid #6fb6c7;
++  background: #161c26;
++  color: #fafafa;
++}
++[data-blender-ui]:not([data-atlas-ready='true']) button[data-bui-button].bui-button::before { display: none; }
++[data-blender-ui] button[data-bui-button].bui-button.bui-text-fit-fallback .bui-button__label {
++  width: auto;
++  max-width: 100%;
++  white-space: normal;
++}
++[data-blender-ui] button[data-bui-button].bui-button.bui-text-fit-fallback:is(:disabled, .is-disabled) { color: #96a0ae; border-color: #465363; }
++[data-blender-ui] button[data-bui-button].bui-button.bui-text-fit-fallback:is(:active, .is-pressed, [aria-pressed='true']):not(:disabled):not(.is-disabled) { color: #fafafa; border-color: #f59e0b; box-shadow: inset 0 0 0 2px #f59e0b; }
++[data-blender-ui] button[data-bui-button].bui-button.bui-text-fit-fallback:is(:active, .is-pressed, [aria-pressed='true']):not(:disabled):not(.is-disabled):focus-visible { box-shadow: inset 0 0 0 2px #f59e0b, 0 0 0 5px #0d1219; }
++@media (forced-colors: active) {
++  [data-blender-ui] button[data-bui-button].bui-button { border: 1px solid ButtonText; color: ButtonText; }
++  [data-blender-ui] button[data-bui-button].bui-button:is(:disabled, .is-disabled) { color: GrayText; }
++}
+diff --git a/src/ui/screens/menu.js b/src/ui/screens/menu.js
+index b7062eb..f0fb95a 100644
+--- a/src/ui/screens/menu.js
++++ b/src/ui/screens/menu.js
+@@ -4,9 +4,13 @@
+  */
+ import { SCENES, EVENTS } from '../../core/contract.js';
+ import { roleAt, regionInfo, methodInfo } from './catalog.js';
++import { mountBlenderAtlas } from '../blender-atlas.js';
++import './menu-atlas.css';
+ 
+ export function createMenuScreen(app) {
+   const { C, state, fmtMoney } = app;
++  let menuAtlas = null;
++  const settingsAtlases = new Set();
+ 
+   /* ── Player card ──────────────────────────────────────────────────────── */
+   const lvlLabel = C.h('span.pcard__lvl', { text: '1' }, C.h('small', { text: 'LVL' }));
+@@ -39,12 +43,25 @@ export function createMenuScreen(app) {
+ 
+   const nav = C.h('div.menu__nav',
+     playBtn,
+-    C.Button({ label: 'Career', kind: 'ghost', icon: 'cert', onTap: () => app.nav(SCENES.CAREER) }),
+-    C.Button({ label: 'iMarket', kind: 'ghost', icon: 'cart', onTap: () => app.nav(SCENES.SHOP) }),
+-    C.Button({ label: 'Garage', kind: 'ghost', icon: 'garage', onTap: () => app.nav(SCENES.GARAGE) }),
+-    C.Button({ label: 'Settings', kind: 'ghost', icon: 'settings', onTap: openSettings }),
++    atlasNavButton({ label: 'Career', kind: 'ghost', icon: 'cert', onTap: () => app.nav(SCENES.CAREER) }),
++    atlasNavButton({ label: 'iMarket', kind: 'ghost', icon: 'cart', onTap: () => app.nav(SCENES.SHOP) }),
++    atlasNavButton({ label: 'Garage', kind: 'ghost', icon: 'garage', onTap: () => app.nav(SCENES.GARAGE) }),
++    atlasNavButton({ label: 'Settings', kind: 'ghost', icon: 'settings', onTap: openSettings }),
+   );
+ 
++  function atlasNavButton(options) {
++    const button = C.Button(options);
++    const label = C.h('span.bui-button__label');
++    // Keep the existing icon and live label together in the measured safe area.
++    while (button.firstChild) label.appendChild(button.firstChild);
++    button.appendChild(label);
++    button.dataset.buiButton = 'neutral';
++    button.dataset.buiSize = 'standard';
++    // The slot exposes the actual grid-cell width to the consumer. At narrow
++    // widths the fixed authored face must fall back, rather than overflow it.
++    return C.h('div.menu__atlas-slot', button);
++  }
++
+   /* The hero sits on the live 3D, and the 3D moves. `.menu::before` alone is a
+      linear top scrim: by the time it reaches "THE GAME" it has faded to about
+      half strength, and in the Nordic Forest camera that line lands on a lit
+@@ -81,7 +98,7 @@ export function createMenuScreen(app) {
+   /* ── Settings sheet ───────────────────────────────────────────────────── */
+   function openSettings() {
+     const s = state.settings || (state.settings = {});
+-    const body = C.h('div', { style: { display: 'flex', 'flex-direction': 'column', gap: '20px' } });
++    const body = C.h('div.menu-preferences', { style: { display: 'flex', 'flex-direction': 'column', gap: '20px' } });
+ 
+     body.appendChild(C.h('div',
+       C.h('p.label', { text: 'Graphics quality' }),
+@@ -134,22 +151,42 @@ export function createMenuScreen(app) {
+       ),
+     ));
+ 
+-    const sh = app.sheet({ title: 'Settings', sub: 'Drillity I The Game', body });
++    let atlas = null;
++    const sh = app.sheet({
++      title: 'Settings', sub: 'Drillity I The Game', body,
++      onClose: () => {
++        atlas?.dispose({ preserveAppearance: true });
++        settingsAtlases.delete(atlas);
++        atlas = null;
++      },
++    });
++    // sheet() attaches the body synchronously; only then can labels be measured.
++    atlas = mountBlenderAtlas(body);
++    settingsAtlases.add(atlas);
+     return sh;
+   }
+ 
+   function Segmented(values, active, onPick) {
+-    const wrap = C.h('div.tabs', { style: { margin: '8px 0 0' } });
++    const wrap = C.h('div.tabs.menu-preferences__quality', {
++      role: 'group', 'aria-label': 'Graphics quality',
++    });
+     const btns = values.map((v) => {
+-      const b = C.h(`button.tabs__b${v === active ? '.is-active' : ''}`, { type: 'button', text: v[0].toUpperCase() + v.slice(1) });
++      const b = C.h(`button.tabs__b${v === active ? '.is-active' : ''}`, {
++        type: 'button', 'aria-pressed': v === active ? 'true' : 'false',
++        'data-bui-button': v === active ? 'accent' : 'neutral', 'data-bui-size': 'compact',
++      }, C.h('span.bui-button__label', { text: v[0].toUpperCase() + v.slice(1) }));
+       C.tap(b, () => {
+-        for (const x of btns) x.classList.remove('is-active');
+-        b.classList.add('is-active');
++        for (const x of btns) {
++          const selected = x === b;
++          x.classList.toggle('is-active', selected);
++          x.setAttribute('aria-pressed', selected ? 'true' : 'false');
++          x.dataset.buiButton = selected ? 'accent' : 'neutral';
++        }
+         onPick(v);
+       });
+       return b;
+     });
+-    C.append(wrap, btns);
++    C.append(wrap, btns.map((button) => C.h('div.menu-preferences__quality-slot', button)));
+     return wrap;
+   }
+ 
+@@ -214,8 +251,11 @@ export function createMenuScreen(app) {
+       (role && !region && !method) ? C.Pill('Content unavailable', 'danger') : null,
+     ]);
+ 
+-    playBtn.querySelector('.btn__label').textContent =
+-      state.drill && state.drill.active ? 'Resume Hole' : (state.contract ? 'Continue' : 'Play');
++    const playLabel = state.drill && state.drill.active ? 'Resume Hole' : (state.contract ? 'Continue' : 'Play');
++    // This full-width action can carry dynamic labels that do not fit the
++    // frozen atlas sizes. Its existing large native button stays readable.
++    playBtn.querySelector('.btn__label').textContent = playLabel;
++    playBtn.setAttribute('aria-label', playLabel);
+   }
+ 
+   return {
+@@ -226,15 +266,31 @@ export function createMenuScreen(app) {
+       moneyRoll.setInstant(false);
+       C.stagger(el.querySelectorAll('.menu__nav > *'));
+       el.querySelector('.menu__nav').classList.add('stagger');
++      if (menuAtlas) menuAtlas.refresh();
++      else menuAtlas = mountBlenderAtlas(el);
+     },
+     update(dt) { moneyRoll.step(dt); },
+-    unmount() { el.querySelector('.menu__nav').classList.remove('stagger'); },
++    unmount() {
++      el.querySelector('.menu__nav').classList.remove('stagger');
++      menuAtlas?.dispose({ preserveAppearance: true });
++      menuAtlas = null;
++    },
++    // Shell disposal calls destroy(), including for retained hidden screens.
++    destroy() {
++      menuAtlas?.dispose();
++      menuAtlas = null;
++      for (const atlas of settingsAtlases) atlas.dispose();
++      settingsAtlases.clear();
++    },
+     onMoney() { refresh(); },
+     onXP() { refresh(); },
+     onLevelUp() { refresh(); },
+     onUnlock() { refresh(); },
+     onRegion() { refresh(); },
+     onRig() { refresh(); },
+-    resize() {},
++    resize() {
++      menuAtlas?.refresh();
++      for (const atlas of settingsAtlases) atlas.refresh();
++    },
+   };
+ }
+diff --git a/src/ui/blender-atlas.js b/src/ui/blender-atlas.js
+new file mode 100644
+--- /dev/null
++++ b/src/ui/blender-atlas.js
+@@ -0,0 +1,300 @@
++/** Opt-in DOM consumer for the frozen Blender atlas. Geometry, safe regions and
++ * foregrounds come from the deployed manifest; CSS motion remains the generated
++ * Blender authority. One owner per root; dispose before removing that root.
++ */
++import './motion.css';
++import './blender-atlas.css';
++
++const mounts = new WeakMap();
++const preserved = new WeakMap();
++const manifests = new Map();
++const images = new Map();
++const selector = 'button[data-bui-button]';
++const ownClasses = ['bui-button', 'bui-button--compact', 'bui-button--accent', 'bui-text-fit-fallback'];
++const states = ['normal', 'pressed', 'disabled'];
++// Operational timeout, not an authored motion duration or physical claim.
++const LOAD_TIMEOUT = 10000;
++const assert = (condition, message) => { if (!condition) throw new Error(message); };
++const positive = (value) => Number.isInteger(value) && value > 0;
++const rect = (value) => value && Number.isInteger(value.x) && value.x >= 0
++  && Number.isInteger(value.y) && value.y >= 0 && positive(value.width) && positive(value.height);
++const contains = (outer, inner) => inner.x + inner.width <= outer.width && inner.y + inner.height <= outer.height;
++const spriteId = (size, variant, state = 'normal') => `button-${size === 'compact' ? 'compact-' : ''}${variant}${state === 'normal' ? '' : `-${state}`}`;
++
++function validateManifest(manifest) {
++  assert(manifest?.schemaVersion === 1 && Array.isArray(manifest.sprites) && manifest.sprites.length, 'Invalid atlas manifest');
++  const a1 = manifest.atlases?.['1x'], a2 = manifest.atlases?.['2x'];
++  for (const atlas of [a1, a2]) {
++    assert(atlas && /^[a-zA-Z0-9_-]+(?:@2x)?\.png$/.test(atlas.file), 'Invalid atlas filename');
++    assert(positive(atlas.width) && positive(atlas.height), 'Invalid atlas dimensions');
++  }
++  assert(a2.width === a1.width * 2 && a2.height === a1.height * 2, 'Invalid atlas density');
++  const sprites = new Map();
++  for (const sprite of manifest.sprites) {
++    assert(/^[a-z][a-z0-9-]*$/.test(sprite.id) && !sprites.has(sprite.id), 'Invalid or duplicate atlas sprite');
++    assert(positive(sprite.native?.width) && positive(sprite.native?.height) && rect(sprite.atlas), 'Invalid sprite dimensions');
++    assert(sprite.atlas.width === sprite.native.width && sprite.atlas.height === sprite.native.height && contains(a1, sprite.atlas), 'Sprite outside atlas');
++    for (const previous of sprites.values()) {
++      const a = previous.atlas, b = sprite.atlas;
++      assert(a.x + a.width <= b.x || b.x + b.width <= a.x || a.y + a.height <= b.y || b.y + b.height <= a.y, 'Overlapping atlas sprites');
++    }
++    sprites.set(sprite.id, sprite);
++  }
++  for (const size of ['standard', 'compact']) for (const variant of ['neutral', 'accent']) {
++    let normal;
++    for (const state of states) {
++      const sprite = sprites.get(spriteId(size, variant, state));
++      assert(sprite?.role === 'button' && sprite.state === state, 'Missing button state');
++      assert(sprite.native.width >= 44 && sprite.native.height >= 44, 'Button below project target floor');
++      assert(rect(sprite.safeText) && contains(sprite.native, sprite.safeText), 'Invalid button text-safe region');
++      assert(/^#[a-fA-F0-9]{6}$/.test(sprite.recommendedForeground), 'Invalid button foreground');
++      if (normal) assert(JSON.stringify(sprite.native) === JSON.stringify(normal.native)
++        && JSON.stringify(sprite.safeText) === JSON.stringify(normal.safeText), 'Button state geometry differs');
++      else normal = sprite;
++    }
++  }
++  return { manifest, sprites };
++}
++
++function singleflight(cache, key, create) {
++  if (!cache.has(key)) {
++    const pending = Promise.resolve().then(create);
++    cache.set(key, pending);
++    pending.catch(() => { if (cache.get(key) === pending) cache.delete(key); });
++  }
++  return cache.get(key);
++}
++
++function loadManifest(base, view) {
++  const url = new URL('manifest.json', base).href;
++  return singleflight(manifests, url, async () => {
++    const controller = new AbortController();
++    const timer = setTimeout(() => controller.abort(), LOAD_TIMEOUT);
++    try {
++      const response = await view.fetch(url, { signal: controller.signal });
++      assert(response.ok, `Atlas manifest HTTP ${response.status}`);
++      return validateManifest(await response.json());
++    } finally { clearTimeout(timer); }
++  });
++}
++
++function loadImage(base, atlas, view) {
++  const url = new URL(atlas.file, base).href;
++  return singleflight(images, `${url}|${atlas.width}x${atlas.height}`, () => new Promise((resolve, reject) => {
++    const image = new view.Image();
++    let settled = false;
++    const finish = (error) => {
++      if (settled) return;
++      settled = true;
++      clearTimeout(timer);
++      image.onload = image.onerror = null;
++      if (error) { image.removeAttribute('src'); reject(error); }
++      else resolve({ url, image }); // Keep the decoded sheet reusable across menu/sheet mounts.
++    };
++    const timer = setTimeout(() => finish(new Error('Atlas image load timed out')), LOAD_TIMEOUT);
++    image.onerror = () => finish(new Error('Atlas image unavailable'));
++    image.onload = async () => {
++      try {
++        if (image.decode) await image.decode();
++        assert(image.naturalWidth === atlas.width && image.naturalHeight === atlas.height, 'Atlas decoded dimensions differ from manifest');
++        finish();
++      } catch (error) { finish(error); }
++    };
++    image.src = url;
++  }));
++}
++
++/** ready resolves false on asset failure/disposal; it never rejects. refresh is
++ * also an explicit retry after failure. Observer updates do not retry a broken
++ * asset on every DOM change. No handlers/ARIA/game state are replaced.
++ */
++export function mountBlenderAtlas(root, { baseUrl = import.meta.env?.BASE_URL ?? './' } = {}) {
++  assert(root?.ownerDocument?.defaultView && root.querySelectorAll, 'Atlas needs a DOM root');
++  if (mounts.has(root)) return mounts.get(root);
++  const doc = root.ownerDocument, view = doc.defaultView;
++  const base = new URL('ui/blender/', new URL(baseUrl, doc.baseURI));
++  const previous = preserved.get(root);
++  preserved.delete(root);
++  const originals = previous?.originals || new Map(), buttons = previous?.buttons || new Map(), watched = new Set();
++  let disposed = false, version = 0, frame = 0, loaded, density, densityMedia, controller, pending;
++  let requestedDensity;
++  const remember = (element, key, value, read, write) => {
++    let entries = originals.get(element);
++    if (!entries) originals.set(element, entries = new Map());
++    if (!entries.has(key)) entries.set(key, { value: read(), read, write });
++    entries.get(key).last = value;
++    if (read() !== value) write(value);
++  };
++  const attr = (element, name, value) => remember(element, name, value,
++    () => element.getAttribute(name), (next) => next === null ? element.removeAttribute(name) : element.setAttribute(name, next));
++  const style = (element, name, value) => remember(element, `style:${name}`, value,
++    () => element.style.getPropertyValue(name), (next) => next === '' ? element.style.removeProperty(name) : element.style.setProperty(name, next));
++  const restore = (element) => {
++    for (const { value, last, read, write } of originals.get(element)?.values() || []) if (read() === last) write(value);
++    originals.delete(element);
++    const classes = buttons.get(element);
++    if (classes) for (const [name, had] of classes) element.classList.toggle(name, had);
++    buttons.delete(element);
++  };
++  const observe = () => mutations?.observe(root, { subtree: true, childList: true, characterData: true, attributes: true,
++    attributeFilter: ['data-bui-button', 'data-bui-size', 'class', 'style', 'aria-pressed', 'disabled', 'hidden'] });
++  const ownWrite = (fn) => {
++    mutations?.disconnect();
++    try { fn(); } finally { if (!disposed) observe(); }
++  };
++  const resize = view.ResizeObserver ? new view.ResizeObserver(() => schedule()) : null;
++  const mutations = view.MutationObserver ? new view.MutationObserver((records) => {
++    // A menu also contains animated balance/statistics. Only opt-in controls,
++    // their ancestors and insertion/removal of opt-in controls can affect fit.
++    const related = (node) => node && (node.closest?.(selector) || node.querySelector?.(selector));
++    if (records.some((record) => {
++      const target = record.target.nodeType === 3 ? record.target.parentElement : record.target;
++      if (record.type === 'characterData') return !!target?.closest?.(selector);
++      if (related(target) || target === root && record.type === 'attributes') return true;
++      return [...(record.addedNodes || []), ...(record.removedNodes || [])].some(related);
++    })) schedule();
++  }) : null;
++
++  function fit() {
++    if (disposed) return;
++    ownWrite(() => {
++      const present = new Set(root.querySelectorAll(selector));
++      for (const button of buttons.keys()) if (!present.has(button)) restore(button);
++      const nextWatched = new Set([root]);
++      for (const button of present) {
++        if (!buttons.has(button)) buttons.set(button, ownClasses.map((name) => [name, button.classList.contains(name)]));
++        button.classList.add('bui-button');
++        const size = button.dataset.buiSize || 'standard', variant = button.dataset.buiButton;
++        button.classList.toggle('bui-button--compact', size === 'compact');
++        button.classList.toggle('bui-button--accent', variant === 'accent');
++        const label = [...button.children].find((child) => child.classList.contains('bui-button__label'));
++        nextWatched.add(button);
++        if (button.parentElement) nextWatched.add(button.parentElement);
++        if (label) nextWatched.add(label);
++        const sprite = loaded?.sprites.get(spriteId(size, variant));
++        const valid = sprite && ['standard', 'compact'].includes(size) && label
++          && button.children.length === 1 && [...(button.childNodes || button.children)]
++            .every((child) => child === label || !child.textContent?.trim());
++        button.classList.add('bui-text-fit-fallback');
++        if (!valid) continue;
++        const { native, safeText } = sprite;
++        for (const [name, value] of Object.entries({ width: native.width, height: native.height,
++          'safe-width': safeText.width, 'safe-height': safeText.height, 'pad-top': safeText.y,
++          'pad-right': native.width - safeText.x - safeText.width, 'pad-bottom': native.height - safeText.y - safeText.height, 'pad-left': safeText.x })) {
++          style(button, `--bui-native-${name}`, `${value}px`);
++        }
++        for (const state of states) style(button, `--bui-foreground-${state}`, loaded.sprites.get(spriteId(size, variant, state)).recommendedForeground);
++        if (!density || !button.isConnected || !button.getClientRects().length) continue;
++        button.classList.remove('bui-text-fit-fallback');
++        const range = doc.createRange();
++        range.selectNodeContents(label);
++        const text = range.getBoundingClientRect(), bounds = label.getBoundingClientRect(), box = button.getBoundingClientRect();
++        const parent = button.parentElement;
++        const parentStyle = parent && view.getComputedStyle(parent);
++        const available = parent ? parent.clientWidth - (parseFloat(parentStyle.paddingLeft) || 0) - (parseFloat(parentStyle.paddingRight) || 0) : native.width;
++        // Include the wrapper's icon boxes and gaps as well as glyph ink; a
++        // range alone can miss replaced SVG contents. Never shrink/crop art.
++        const fits = Math.max(text.width, bounds.width, label.scrollWidth) <= safeText.width + .01
++          && Math.max(text.height, bounds.height, label.scrollHeight) <= safeText.height + .01
++          && Math.abs(box.width - native.width) < .1 && Math.abs(box.height - native.height) < .1
++          && available >= native.width;
++        button.classList.toggle('bui-text-fit-fallback', !fits);
++      }
++      for (const node of watched) if (!nextWatched.has(node)) { resize?.unobserve(node); watched.delete(node); }
++      for (const node of nextWatched) if (!watched.has(node)) { resize?.observe(node); watched.add(node); }
++    });
++  }
++
++  function schedule() {
++    if (disposed || frame) return;
++    frame = view.requestAnimationFrame(() => {
++      frame = 0;
++      fit();
++      if (requestedDensity !== currentDensity()) void refresh();
++    });
++  }
++  const currentDensity = () => view.devicePixelRatio > 1 ? '2x' : '1x';
++  function watchDensity() {
++    densityMedia?.removeEventListener('change', densityChange);
++    densityMedia = view.matchMedia?.(`(resolution: ${view.devicePixelRatio || 1}dppx)`);
++    densityMedia?.addEventListener('change', densityChange);
++  }
++  function densityChange() { watchDensity(); schedule(); }
++
++  function refresh() {
++    if (disposed) return Promise.resolve(false);
++    const selected = currentDensity();
++    if (pending?.selected === selected) return pending.promise;
++    requestedDensity = selected;
++    const ticket = ++version;
++    const promise = update(selected, ticket).finally(() => { if (pending?.promise === promise) pending = undefined; });
++    pending = { selected, promise };
++    return promise;
++  }
++
++  async function update(selected, ticket) {
++    try {
++      const data = await loadManifest(base, view);
++      const sheet = await loadImage(base, data.manifest.atlases[selected], view);
++      if (disposed || ticket !== version) return false;
++      loaded = data;
++      density = selected;
++      ownWrite(() => {
++        const native = data.manifest.atlases['1x'];
++        style(root, '--bui-atlas-image', `url("${sheet.url}")`);
++        style(root, '--bui-atlas-size', `${native.width}px ${native.height}px`);
++        for (const sprite of data.sprites.values()) style(root, `--bui-${sprite.id}`, `${-sprite.atlas.x}px ${-sprite.atlas.y}px`);
++        attr(root, 'data-atlas-ready', 'true');
++        attr(root, 'data-atlas-density', selected);
++        attr(root, 'data-atlas-error', null);
++      });
++      fit();
++      return true;
++    } catch (error) {
++      if (disposed || ticket !== version) return false;
++      density = undefined;
++      ownWrite(() => {
++        attr(root, 'data-atlas-ready', 'false');
++        attr(root, 'data-atlas-density', null);
++        attr(root, 'data-atlas-error', error.message || 'Atlas unavailable');
++      });
++      fit();
++      return false;
++    }
++  }
++
++  function dispose({ preserveAppearance = false } = {}) {
++    if (disposed) return;
++    disposed = true;
++    version++;
++    view.cancelAnimationFrame(frame);
++    resize?.disconnect();
++    mutations?.disconnect();
++    densityMedia?.removeEventListener('change', densityChange);
++    view.removeEventListener('resize', schedule);
++    view.visualViewport?.removeEventListener('resize', schedule);
++    doc.fonts?.removeEventListener('loadingdone', schedule);
++    // Screens/sheets start their exit animation before DOM removal. Their owner
++    // may freeze the current decoration while releasing every active observer.
++    if (preserveAppearance) preserved.set(root, { originals, buttons });
++    else {
++      for (const element of [...originals.keys(), ...buttons.keys()]) restore(element);
++      originals.clear();
++      buttons.clear();
++    }
++    watched.clear();
++    mounts.delete(root);
++  }
++
++  attr(root, 'data-blender-ui', '');
++  attr(root, 'data-atlas-ready', 'false');
++  fit();
++  view.addEventListener('resize', schedule);
++  view.visualViewport?.addEventListener('resize', schedule);
++  doc.fonts?.addEventListener('loadingdone', schedule);
++  doc.fonts?.ready.then(schedule, () => {});
++  watchDensity();
++  controller = { ready: refresh(), refresh, dispose };
++  mounts.set(root, controller);
++  return controller;
++}
+diff --git a/src/ui/screens/menu-atlas.css b/src/ui/screens/menu-atlas.css
+new file mode 100644
+--- /dev/null
++++ b/src/ui/screens/menu-atlas.css
+@@ -0,0 +1,31 @@
++/* Menu-only layout for opt-in Blender faces. The manifest and atlas consumer
++ * own native art dimensions; these gaps are authored UI spacing, NOT SOURCED
++ * machine dimensions. A separate grid slot makes available width measurable. */
++.menu .menu__nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
++.menu__atlas-slot,
++.menu-preferences__quality-slot {
++  display: flex;
++  align-items: flex-start;
++  justify-content: center;
++  min-width: 0;
++}
++.menu__atlas-slot .bui-text-fit-fallback,
++.menu-preferences__quality-slot .bui-text-fit-fallback { width: 100%; }
++
++/* Four compact faces use two rows so every native target fits on narrow
++ * phones, and the measured text fallback can grow without hiding a label. */
++.menu-preferences .menu-preferences__quality {
++  display: grid;
++  grid-template-columns: repeat(2, minmax(0, 1fr));
++  gap: var(--s-2);
++  margin: var(--s-2) 0 0;
++  padding: 0;
++  border: 0;
++  border-radius: 0;
++  background: none;
++}
++.menu-preferences__quality [aria-pressed='true'] .bui-button__label {
++  text-decoration: underline;
++  text-decoration-thickness: 2px;
++  text-underline-offset: 3px;
++}
+diff --git a/tools/check-blender-atlas-consumer.mjs b/tools/check-blender-atlas-consumer.mjs
+new file mode 100644
+--- /dev/null
++++ b/tools/check-blender-atlas-consumer.mjs
+@@ -0,0 +1,248 @@
++#!/usr/bin/env node
++/** CPU lifecycle/resource-contract probes. Synthetic DOM measurements are NOT
++ * SOURCED layout evidence: the separate real-menu browser review owns that.
++ * No browser/GPU, package install, asset edit or build wiring is required.
++ */
++import assert from 'node:assert/strict';
++import { readFileSync } from 'node:fs';
++
++const source = readFileSync(new URL('../src/ui/blender-atlas.js', import.meta.url), 'utf8');
++assert.match(source, /import '\.\/motion\.css'/);
++assert.match(source, /import '\.\/blender-atlas\.css'/);
++const { mountBlenderAtlas } = await import(`data:text/javascript;base64,${Buffer.from(source.replace(/^import '\.\/[^']+\.css';\r?\n/gm, '')).toString('base64')}`);
++const manifest = JSON.parse(readFileSync(new URL('../public/ui/blender/manifest.json', import.meta.url), 'utf8'));
++const normal = manifest.sprites.find((sprite) => sprite.id === 'button-neutral');
++const deferred = () => { let resolve, reject; const promise = new Promise((yes, no) => { resolve = yes; reject = no; }); return { promise, resolve, reject }; };
++let serial = 0, passed = 0;
++const turn = async () => { for (let i = 0; i < 12; i++) await Promise.resolve(); };
++function events(target = {}) {
++  const listeners = new Map();
++  return Object.assign(target, {
++    addEventListener(type, fn) { if (!listeners.has(type)) listeners.set(type, new Set()); listeners.get(type).add(fn); },
++    removeEventListener(type, fn) { listeners.get(type)?.delete(fn); },
++    emit(type) { for (const fn of listeners.get(type) || []) fn(); },
++    listenerCount() { return [...listeners.values()].reduce((count, set) => count + set.size, 0); },
++  });
++}
++function environment(options = {}) {
++  const records = { fetches: [], imageUrls: [], decodes: 0, observers: [], medias: [], frames: new Map() };
++  let frameId = 0;
++  const view = events({ devicePixelRatio: 1 });
++  view.visualViewport = events();
++  view.requestAnimationFrame = (fn) => { records.frames.set(++frameId, fn); return frameId; };
++  view.cancelAnimationFrame = (id) => records.frames.delete(id);
++  view.getComputedStyle = () => ({ paddingLeft: '0px', paddingRight: '0px' });
++  view.matchMedia = () => { const media = events(); records.medias.push(media); return media; };
++  class Observer {
++    constructor(fn) { this.fn = fn; this.nodes = new Set(); records.observers.push(this); }
++    observe(node) { this.nodes.add(node); }
++    unobserve(node) { this.nodes.delete(node); }
++    disconnect() { this.nodes.clear(); }
++  }
++  view.ResizeObserver = Observer;
++  view.MutationObserver = Observer;
++  view.fetch = async (url) => {
++    records.fetches.push(url);
++    if (options.fetchWait) await options.fetchWait.promise;
++    if (options.fetchError) throw new Error('offline');
++    return { ok: options.httpStatus === undefined, status: options.httpStatus || 200,
++      json: async () => structuredClone(options.manifest || manifest) };
++  };
++  view.Image = class {
++    set src(url) {
++      records.imageUrls.push(url);
++      const atlas = (options.manifest || manifest).atlases[url.includes('@2x') ? '2x' : '1x'];
++      this.naturalWidth = options.badDimensions ? atlas.width + 1 : atlas.width;
++      this.naturalHeight = atlas.height;
++      queueMicrotask(() => options.imageError ? this.onerror?.() : this.onload?.());
++    }
++    async decode() { records.decodes++; if (options.imageWait) await options.imageWait.promise; if (options.decodeError) throw new Error('decode failed'); }
++    removeAttribute() {}
++  };
++  const fontsReady = deferred();
++  const doc = { defaultView: view, baseURI: `https://example.test/probe-${++serial}/nested/route`,
++    fonts: events({ ready: fontsReady.promise }),
++    createRange() { let label; return { selectNodeContents(node) { label = node; }, getBoundingClientRect() { return { width: label.textWidth, height: label.textHeight }; } }; } };
++  class Element {
++    constructor(classes = []) {
++      this.ownerDocument = doc; this.attrs = new Map(); this.children = []; this.isConnected = true;
++      this.clientWidth = normal.native.width * 2;
++      const values = new Set(classes), properties = new Map();
++      this.classList = { contains: (name) => values.has(name), add: (name) => values.add(name), remove: (name) => values.delete(name),
++        toggle(name, on = !values.has(name)) { if (on) values.add(name); else values.delete(name); return on; } };
++      this.style = { getPropertyValue: (name) => properties.get(name) || '', setProperty: (name, value) => properties.set(name, value), removeProperty: (name) => properties.delete(name) };
++      this.dataset = new Proxy({}, { get: (_, name) => this.getAttribute(`data-${name.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`) });
++    }
++    getAttribute(name) { return this.attrs.get(name) ?? null; }
++    setAttribute(name, value) { this.attrs.set(name, value); }
++    removeAttribute(name) { this.attrs.delete(name); }
++    querySelectorAll() { return this.controls || []; }
++    getClientRects() { return this.isConnected ? [this.getBoundingClientRect()] : []; }
++    getBoundingClientRect() {
++      if (this.classList.contains('bui-button__label')) return { width: this.inkWidth, height: this.inkHeight };
++      return { width: parseFloat(this.style.getPropertyValue('--bui-native-width')) || normal.native.width,
++        height: parseFloat(this.style.getPropertyValue('--bui-native-height')) || normal.native.height };
++    }
++  }
++  const makeRoot = () => {
++    const root = new Element(); root.controls = [];
++    root.addButton = () => {
++      const button = new Element(['btn']), label = new Element(['bui-button__label']);
++      button.setAttribute('data-bui-button', 'neutral');
++      button.parentElement = new Element();
++      button.children = [label];
++      Object.assign(label, { inkWidth: 70, inkHeight: 24, textWidth: 60, textHeight: 16, scrollWidth: 70, scrollHeight: 24 });
++      root.controls.push(button);
++      return { button, label, parent: button.parentElement };
++    };
++    return root;
++  };
++  const flush = async () => {
++    await turn();
++    for (const [id, fn] of [...records.frames]) { records.frames.delete(id); fn(); }
++    await turn();
++  };
++  return { records, view, doc, makeRoot, options, fontsReady, flush };
++}
++async function test(name, run) {
++  await run();
++  passed++;
++  console.log(`PASS ${name}`);
++}
++await test('configured deployment base, opt-in only, shared manifest/decode and idempotent mount', async () => {
++  const env = environment(), a = env.makeRoot(), b = env.makeRoot();
++  const { button } = a.addButton(); b.addButton();
++  const first = mountBlenderAtlas(a, { baseUrl: '/deployed/game/' });
++  const second = mountBlenderAtlas(b, { baseUrl: '/deployed/game/' });
++  assert.equal(mountBlenderAtlas(a), first);
++  assert.equal(first.refresh(), first.ready, 'same pending density must not cancel initial ready');
++  assert.equal(await first.ready, true); assert.equal(await second.ready, true);
++  assert.deepEqual(env.records.fetches, ['https://example.test/deployed/game/ui/blender/manifest.json']);
++  assert.deepEqual(env.records.imageUrls, ['https://example.test/deployed/game/ui/blender/ui-atlas.png']);
++  assert.equal(env.records.decodes, 1);
++  assert.equal(a.dataset.atlasReady, 'true'); assert.equal(a.dataset.atlasDensity, '1x');
++  assert.equal(button.style.getPropertyValue('--bui-native-width'), `${normal.native.width}px`);
++  assert.equal(button.style.getPropertyValue('--bui-foreground-normal'), normal.recommendedForeground);
++  assert.equal(button.classList.contains('bui-text-fit-fallback'), false);
++  first.dispose(); second.dispose();
++  assert.equal(a.getAttribute('data-blender-ui'), null); assert.equal(button.classList.contains('bui-button'), false);
++  assert.equal(button.classList.contains('btn'), true);
++});
++await test('safe area includes text ink, icon boxes, parent width and vertical enlargement', async () => {
++  const env = environment(), root = env.makeRoot(), { button, label, parent } = root.addButton();
++  const control = mountBlenderAtlas(root);
++  await control.ready;
++  label.inkWidth = normal.safeText.width + 1;
++  await control.refresh(); assert.equal(button.classList.contains('bui-text-fit-fallback'), true, 'icon/wrapper overflow');
++  label.inkWidth = 70; label.textWidth = normal.safeText.width + 1;
++  await control.refresh(); assert.equal(button.classList.contains('bui-text-fit-fallback'), true, 'glyph overflow');
++  label.textWidth = 60; label.textHeight = normal.safeText.height + 1;
++  await control.refresh(); assert.equal(button.classList.contains('bui-text-fit-fallback'), true, '200% text fixture');
++  label.textHeight = 16; parent.clientWidth = normal.native.width - 1;
++  await control.refresh(); assert.equal(button.classList.contains('bui-text-fit-fallback'), true, 'native face cannot shrink');
++  parent.clientWidth = normal.native.width;
++  await control.refresh(); assert.equal(button.classList.contains('bui-text-fit-fallback'), false);
++  control.dispose();
++});
++await test('font/resize/label observers remeasure and dispose releases every observer/listener/frame', async () => {
++  const env = environment(), root = env.makeRoot(), { button, label } = root.addButton();
++  const control = mountBlenderAtlas(root); await control.ready;
++  label.textWidth = normal.safeText.width * 2;
++  env.doc.fonts.emit('loadingdone'); await env.flush();
++  assert.equal(button.classList.contains('bui-text-fit-fallback'), true);
++  label.textWidth = 50;
++  env.records.observers.find((o) => o.nodes.has(root)).fn(); await env.flush();
++  assert.equal(button.classList.contains('bui-text-fit-fallback'), false);
++  env.view.emit('resize');
++  control.dispose();
++  assert.equal(env.records.frames.size, 0);
++  assert.ok(env.records.observers.every((o) => o.nodes.size === 0));
++  assert.equal(env.view.listenerCount() + env.view.visualViewport.listenerCount() + env.doc.fonts.listenerCount(), 0);
++  assert.ok(env.records.medias.every((m) => m.listenerCount() === 0));
++  assert.equal(await control.refresh(), false);
++  env.fontsReady.resolve(); await env.flush(); assert.equal(env.records.frames.size, 0);
++});
++await test('DPR transition decodes only selected sheet, reuses prior density, retains native CSS geometry', async () => {
++  const env = environment(), root = env.makeRoot(), { button } = root.addButton();
++  const control = mountBlenderAtlas(root); await control.ready;
++  const width = button.style.getPropertyValue('--bui-native-width');
++  env.view.devicePixelRatio = 2; env.records.medias.at(-1).emit('change'); await env.flush();
++  await control.refresh();
++  assert.equal(root.dataset.atlasDensity, '2x');
++  assert.equal(button.style.getPropertyValue('--bui-native-width'), width);
++  assert.equal(env.records.imageUrls.length, 2);
++  env.view.devicePixelRatio = 1; await control.refresh();
++  assert.equal(env.records.imageUrls.length, 2); assert.equal(root.dataset.atlasDensity, '1x');
++  control.dispose();
++});
++for (const [name, option] of [['HTTP failure', { httpStatus: 404 }], ['network failure', { fetchError: true }],
++  ['image failure', { imageError: true }], ['decode failure', { decodeError: true }], ['dimension mismatch', { badDimensions: true }]]) {
++  await test(`${name} leaves a readable fallback and permits explicit retry`, async () => {
++    const env = environment(option), root = env.makeRoot(), { button } = root.addButton();
++    const control = mountBlenderAtlas(root);
++    assert.equal(await control.ready, false);
++    assert.equal(root.dataset.atlasReady, 'false'); assert.ok(root.dataset.atlasError);
++    assert.equal(button.classList.contains('bui-text-fit-fallback'), true);
++    for (const key of Object.keys(option)) delete option[key];
++    assert.equal(await control.refresh(), true); assert.equal(root.dataset.atlasError, null);
++    control.dispose();
++  });
++}
++for (const [name, corrupt] of [
++  ['schema', (m) => { m.schemaVersion = 9; }],
++  ['unsafe filename', (m) => { m.atlases['1x'].file = '../other.png'; }],
++  ['density', (m) => { m.atlases['2x'].width++; }],
++  ['missing button state', (m) => { m.sprites = m.sprites.filter((s) => s.id !== 'button-neutral-disabled'); }],
++  ['out of atlas', (m) => { m.sprites[0].atlas.x = m.atlases['1x'].width; }],
++  ['overlap', (m) => { m.sprites[1].atlas = { ...m.sprites[0].atlas }; }],
++  ['safe area', (m) => { m.sprites[0].safeText.width = m.sprites[0].native.width + 1; }],
++  ['state drift', (m) => { m.sprites.find((s) => s.id === 'button-neutral-disabled').safeText.x++; }],
++  ['foreground', (m) => { m.sprites[0].recommendedForeground = 'transparent'; }],
++]) {
++  await test(`reject malformed manifest: ${name}`, async () => {
++    const bad = structuredClone(manifest); corrupt(bad);
++    const env = environment({ manifest: bad }), root = env.makeRoot(); root.addButton();
++    const control = mountBlenderAtlas(root);
++    assert.equal(await control.ready, false); assert.equal(env.records.imageUrls.length, 0);
++    control.dispose();
++  });
++}
++await test('late completion cannot mutate disposed root or its replacement mount', async () => {
++  const imageWait = deferred(), env = environment({ imageWait }), root = env.makeRoot(); root.addButton();
++  const old = mountBlenderAtlas(root); await turn(); old.dispose();
++  const next = mountBlenderAtlas(root); imageWait.resolve();
++  assert.equal(await old.ready, false); assert.equal(await next.ready, true);
++  assert.equal(root.dataset.atlasReady, 'true'); assert.equal(env.records.imageUrls.length, 1);
++  next.dispose();
++});
++await test('preserveAppearance freezes exit appearance while releasing runtime ownership', async () => {
++  const env = environment(), root = env.makeRoot(), { button } = root.addButton();
++  const control = mountBlenderAtlas(root); await control.ready;
++  control.dispose({ preserveAppearance: true });
++  assert.equal(root.dataset.atlasReady, 'true'); assert.equal(button.classList.contains('bui-button'), true);
++  assert.ok(env.records.observers.every((o) => !o.nodes.size));
++  const next = mountBlenderAtlas(root); assert.notEqual(next, control); await next.ready; next.dispose();
++  assert.equal(root.getAttribute('data-blender-ui'), null, 'final disposal restores the original root across preserved remount');
++  assert.equal(button.classList.contains('bui-button'), false);
++});
++await test('unrelated menu statistics mutations do not schedule control measurements', async () => {
++  const env = environment(), root = env.makeRoot(); root.addButton();
++  const control = mountBlenderAtlas(root); await control.ready;
++  const mutation = env.records.observers[1];
++  mutation.fn([{ type: 'characterData', target: { nodeType: 3, parentElement: { closest: () => null } } }]);
++  assert.equal(env.records.frames.size, 0);
++  mutation.fn([{ type: 'characterData', target: { nodeType: 3, parentElement: { closest: () => root.controls[0] } } }]);
++  assert.equal(env.records.frames.size, 1);
++  await env.flush(); control.dispose();
++});
++await test('removal restores owned styles and invalid label markup remains flat', async () => {
++  const env = environment(), root = env.makeRoot(), { button } = root.addButton();
++  const control = mountBlenderAtlas(root); await control.ready;
++  button.childNodes = [...button.children, { textContent: 'Outside label' }];
++  await control.refresh(); assert.equal(button.classList.contains('bui-text-fit-fallback'), true, 'unmeasured visible text cannot use art');
++  button.children = []; await control.refresh(); assert.equal(button.classList.contains('bui-text-fit-fallback'), true);
++  root.controls = []; await control.refresh(); assert.equal(button.classList.contains('bui-button'), false);
++  assert.equal(button.style.getPropertyValue('--bui-native-width'), '');
++  control.dispose();
++});
++console.log(`Blender atlas consumer CPU PASS: ${passed} cases. Synthetic geometry only; no rendered-layout claim.`);
+diff --git a/tools/check-ui-atlas-game-smoke.mjs b/tools/check-ui-atlas-game-smoke.mjs
+new file mode 100644
+--- /dev/null
++++ b/tools/check-ui-atlas-game-smoke.mjs
+@@ -0,0 +1,102 @@
++#!/usr/bin/env node
++/** Actual-game menu adoption smoke. Run against a served integration checkout
++ * with its matching GLBs. This does not start a server or measure FPS.
++ * node tools/check-ui-atlas-game-smoke.mjs --url http://127.0.0.1:5178/ --lease root-integration
++ */
++import assert from 'node:assert/strict';
++import { mkdir, readFile, writeFile } from 'node:fs/promises';
++import { resolve } from 'node:path';
++import { chromium } from 'playwright';
++
++const args = process.argv.slice(2);
++function option(name, fallback) {
++  const i = args.indexOf(name);
++  if (i < 0) return fallback;
++  assert.ok(args[i + 1] && !args[i + 1].startsWith('--'), `Missing ${name} value`);
++  return args[i + 1];
++}
++const lease = option('--lease', 'ui-atlas-adoption');
++const leaseFile = option('--lease-file', 'C:/Users/henri/Downloads/threads/drillity-coordination/gpu-owner.txt');
++const url = new URL(option('--url', 'http://127.0.0.1:5178/'));
++url.searchParams.set('quality', 'low');
++url.searchParams.set('shot', '');
++url.searchParams.set('glb', 'strict');
++const out = resolve(option('--out', 'shots/ui-atlas-game-smoke'));
++const report = { passed: false, scope: 'Actual game menu/preferences integration smoke; no FPS, AAA or general accessibility verdict', url: url.href, lease, cases: [], errors: [], warnings: [], atlasResponses: [], browserClosed: false };
++async function checkLease() { assert.equal((await readFile(leaseFile, 'utf8')).trim(), lease, 'Explicit GPU lease required'); }
++await checkLease();
++await mkdir(out, { recursive: true });
++let browser;
++try {
++  browser = await chromium.launch({ channel: 'chrome', headless: false, args: ['--mute-audio'] });
++  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
++  const page = await context.newPage();
++  page.on('pageerror', error => report.errors.push(error.message));
++  page.on('console', msg => { if (msg.type() === 'warning') report.warnings.push(msg.text()); });
++  page.on('response', response => { if (response.url().includes('/ui/blender/')) report.atlasResponses.push({ url: response.url(), status: response.status() }); });
++  await page.goto(url.href, { waitUntil: 'domcontentloaded', timeout: 180000 });
++  await page.waitForFunction(() => {
++    const menu = document.querySelector('.menu:not([hidden])');
++    return window.__DRILLITY?.__qa && menu && !menu.classList.contains('is-entering') && menu.getBoundingClientRect().width > 0;
++  }, null, { timeout: 240000 });
++  report.game = await page.evaluate(() => ({
++    scene: window.__DRILLITY.state.scene,
++    rigId: window.__DRILLITY.state.garage.rigId,
++    source: window.__DRILLITY.rig.getActiveSourceKey(),
++    contextLost: window.__DRILLITY.renderer.gl.getContext().isContextLost(),
++  }));
++  assert.match(report.game.source, /^glb:/, 'Actual loaded Blender rig required');
++  assert.equal(report.game.contextLost, false);
++  const menu = page.locator('.menu:not([hidden])');
++  await page.waitForFunction(() => document.querySelector('.menu:not([hidden]) [data-atlas-ready="true"], .menu:not([hidden])[data-atlas-ready="true"]'));
++  await page.evaluate(() => document.fonts.ready);
++  for (const [width, height] of [[390, 844], [320, 568]]) {
++    await checkLease();
++    await page.setViewportSize({ width, height });
++    await page.waitForTimeout(350);
++    const controls = await menu.locator('button[data-bui-button]').evaluateAll(buttons => buttons.map(button => {
++      const rect = button.getBoundingClientRect();
++      const face = getComputedStyle(button, '::before');
++      return { label: button.getAttribute('aria-label') || button.textContent.trim(), x: rect.x, y: rect.y, width: rect.width, height: rect.height, fallback: button.classList.contains('bui-text-fit-fallback'), image: face.backgroundImage, paint: face.display, scopeReady: button.closest('[data-blender-ui]')?.dataset.atlasReady };
++    }));
++    assert.ok(controls.length >= 4, 'Nonempty production adoption required');
++    for (const button of controls) {
++      assert.ok(button.width >= 44 && button.height >= 44, `Native target: ${button.label}`);
++      assert.ok(button.x >= -0.5 && button.x + button.width <= width + 0.5, `Horizontal fit: ${button.label}`);
++    }
++    if (width === 390) assert.ok(controls.some(button => !button.fallback && button.paint !== 'none' && button.image !== 'none' && button.scopeReady === 'true'), 'At least one decoded real menu face must paint');
++    report.cases.push({ width, height, controls });
++    await page.screenshot({ path: resolve(out, `menu-${width}.png`) });
++  }
++  await page.setViewportSize({ width: 390, height: 844 });
++  await menu.getByRole('button', { name: 'Settings', exact: true }).press('Enter');
++  const settings = page.getByRole('dialog', { name: 'Settings', exact: true });
++  await settings.waitFor();
++  await page.waitForFunction(() => [...document.querySelectorAll('.sheet button[data-bui-button]')].some(button => button.closest('[data-blender-ui]')?.dataset.atlasReady === 'true' && !button.classList.contains('bui-text-fit-fallback')));
++  await settings.getByRole('button', { name: 'Low', exact: true }).press('Enter');
++  assert.equal(await page.evaluate(() => window.__DRILLITY.state.settings.quality), 'low');
++  const reducedSwitch = settings.getByRole('switch', { name: 'Reduced motion', exact: true });
++  if (await reducedSwitch.getAttribute('aria-checked') !== 'true') await reducedSwitch.press('Enter');
++  await page.waitForFunction(() => document.querySelector('.ui-root').classList.contains('reduced-motion'));
++  await page.screenshot({ path: resolve(out, 'settings-reduced.png') });
++  await settings.getByRole('button', { name: 'Close', exact: true }).press('Enter');
++  await settings.waitFor({ state: 'detached' });
++  await menu.getByRole('button', { name: 'Career', exact: true }).press('Enter');
++  await page.waitForFunction(() => window.__DRILLITY.state.scene === 'career');
++  await page.evaluate(() => window.__DRILLITY.ui.show('menu'));
++  await page.waitForFunction(() => document.querySelector('.menu:not([hidden]) [data-atlas-ready="true"], .menu:not([hidden])[data-atlas-ready="true"]'));
++  assert.equal(report.errors.length, 0, 'Actual game page errors');
++  assert.ok(report.atlasResponses.some(response => response.url().endsWith('manifest.json') && response.status === 200), 'Production manifest response');
++  assert.ok(report.atlasResponses.some(response => /ui-atlas(?:@2x)?\.png$/.test(response.url()) && response.status === 200), 'Production image response');
++  report.passed = true;
++} catch (error) {
++  report.failure = error.stack || String(error);
++  process.exitCode = 1;
++} finally {
++  if (browser) {
++    try { await browser.close(); report.browserClosed = true; }
++    catch (error) { report.cleanupFailure = String(error); report.passed = false; process.exitCode = 1; }
++  }
++  await writeFile(resolve(out, 'report.json'), JSON.stringify(report, null, 2));
++}
++console.log(JSON.stringify(report, null, 2));
+diff --git a/tools/ui-atlas-adoption-review/check.mjs b/tools/ui-atlas-adoption-review/check.mjs
+new file mode 100644
+--- /dev/null
++++ b/tools/ui-atlas-adoption-review/check.mjs
+@@ -0,0 +1,247 @@
++import { chromium } from 'playwright';
++import { readFile, writeFile, mkdir } from 'node:fs/promises';
++import { createHash } from 'node:crypto';
++import { fileURLToPath } from 'node:url';
++import assert from 'node:assert/strict';
++
++const directory = new URL('./evidence/', import.meta.url);
++const url = 'http://127.0.0.1:5201/menu-review/';
++const ownerFile = 'C:/Users/henri/Downloads/threads/drillity-coordination/gpu-owner.txt';
++assert.equal((await readFile(ownerFile, 'utf8')).trim(), 'ui-atlas-adoption', 'Exact shared GPU lease required');
++await mkdir(directory, { recursive:true });
++const manifest = JSON.parse(await readFile(new URL('../../public/ui/blender/manifest.json', import.meta.url), 'utf8'));
++const report = { evidence:'Actual production menu and shell DOM only. No renderer, GLB, FPS, whole-game or general accessibility verdict.', cases:[], checks:[], errors:[], browserClosed:false };
++function check(condition, name, detail) { report.checks.push({name, pass:!!condition, detail}); if (!condition) console.log('FAIL ' + name + ' ' + JSON.stringify(detail)); }
++function equalRect(a, b) { return ['width','height'].every(key => Math.abs(a[key] - b[key]) < .2); }
++const browser = await chromium.launch({channel:'chrome',headless:false,args:['--mute-audio']});
++async function newPage(width=390,height=844,dpr=1,assetMode=null) {
++  const context = await browser.newContext({viewport:{width,height},deviceScaleFactor:dpr,isMobile:true,hasTouch:true});
++  const page = await context.newPage();
++  const requests=[]; const localErrors=[];
++  page.on('pageerror', e => { localErrors.push(e.message); report.errors.push(e.message); });
++  page.on('request', r => { if (r.url().includes('/ui/blender/')) requests.push(r.url()); });
++  let release, reached;
++  const seen = new Promise(resolve => { reached=resolve; });
++  if (assetMode) {
++    const image = assetMode.includes('image');
++    const target = image ? '**/ui/blender/*.png' : '**/ui/blender/manifest.json';
++    await context.route(target, async route => {
++      reached();
++      if (assetMode.startsWith('delayed')) { await new Promise(resolve => { release=resolve; }); await route.continue(); }
++      else if (assetMode.startsWith('missing')) await route.fulfill({status:404,body:'review intentional missing asset'});
++      else await route.fulfill({status:200,contentType:image?'image/png':'application/json',body:image?'not a PNG':'{"schemaVersion":42,"sprites":[]}'});
++    });
++  }
++  await page.goto(url,{waitUntil:'domcontentloaded'});
++  await page.waitForFunction(() => window.review && document.querySelector('.menu:not([hidden])'));
++  await page.waitForFunction(() => !document.querySelector('.menu').classList.contains('is-entering'));
++  return {context,page,requests,localErrors,seen,release:()=>release?.()};
++}
++async function settle(page) { await page.evaluate(() => document.fonts.ready); await page.waitForTimeout(250); }
++async function measurements(page, scope) {
++  return page.evaluate(({manifest,scope}) => {
++    const root = document.querySelector(scope);
++    const rect = element => { const r=element.getBoundingClientRect(); return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom}; };
++    const controls=[...root.querySelectorAll('[data-bui-button]')].map(button => {
++      const bounds=rect(button); const label=button.querySelector('.bui-button__label'); const labelBounds=rect(label);
++      const style=getComputedStyle(button), face=getComputedStyle(button,'::before');
++      const atlasRoot=button.closest('[data-blender-ui]');
++      const size=button.dataset.buiSize;
++      const id='button-' + (size==='compact'?'compact-':'') + button.dataset.buiButton;
++      const sprite=manifest.sprites.find(s=>s.id===id);
++      const fallback=button.classList.contains('bui-text-fit-fallback');
++      const safe=sprite?{x:bounds.x+sprite.safeText.x,y:bounds.y+sprite.safeText.y,width:sprite.safeText.width,height:sprite.safeText.height}:null;
++      const range=document.createRange(); range.selectNodeContents(label); const ink=range.getBoundingClientRect();
++      return {text:button.textContent.trim(),class:button.className,rect:bounds,label:labelBounds,ink:{x:ink.x,y:ink.y,width:ink.width,height:ink.height},safe,native:sprite?.native,fallback,ready:atlasRoot?.dataset.atlasReady,density:atlasRoot?.dataset.atlasDensity,disabled:button.disabled,pressed:button.getAttribute('aria-pressed'),font:style.font,fontLoaded:document.fonts.check('600 13px Inter'),face:{display:face.display,image:face.backgroundImage,size:face.backgroundSize,position:face.backgroundPosition,width:face.width,height:face.height},outline:style.outline,transition:getComputedStyle(label).transitionDuration,transform:getComputedStyle(label).transform,labelClipped:label.scrollWidth>label.clientWidth+1,scrollWidth:button.scrollWidth,clientWidth:button.clientWidth};
++    });
++    const overlaps=[];
++    for(let i=0;i<controls.length;i++) for(let j=i+1;j<controls.length;j++) {
++      const a=controls[i].rect,b=controls[j].rect;
++      if(Math.min(a.right,b.right)-Math.max(a.x,b.x)>.5&&Math.min(a.bottom,b.bottom)-Math.max(a.y,b.y)>.5)overlaps.push([controls[i].text,controls[j].text]);
++    }
++    const menuSections=scope==='.menu'?[...root.querySelectorAll('.menu__hero,.pcard,.menu__nav,.menu__ver')].map(el=>({class:el.className,...rect(el)})):[];
++    const sectionOverlaps=[];
++    for(let i=0;i<menuSections.length;i++)for(let j=i+1;j<menuSections.length;j++) {
++      const a=menuSections[i],b=menuSections[j];
++      if(Math.min(a.right,b.right)-Math.max(a.x,b.x)>.5&&Math.min(a.bottom,b.bottom)-Math.max(a.y,b.y)>.5)sectionOverlaps.push([a.class,b.class]);
++    }
++    return {scope,viewport:{width:innerWidth,height:innerHeight,dpr:devicePixelRatio},root:rect(root),controls,overlaps,menuSections,sectionOverlaps,documentOverflow:document.documentElement.scrollWidth>innerWidth+1};
++  },{manifest,scope});
++}
++async function capture(page,name,scope) {
++  const measurement=await measurements(page,scope);
++  await page.screenshot({path:fileURLToPath(new URL(name+'.png',directory))});
++  report.cases.push({name,...measurement});
++  check(measurement.controls.length>0,name+' measures real adopted controls');
++  check(!measurement.overlaps.length,name+' no adopted overlap',measurement.overlaps);
++  check(!measurement.documentOverflow,name+' no document horizontal overflow');
++  check(!measurement.sectionOverlaps.length,name+' menu sections do not overlap',measurement.sectionOverlaps);
++  for(const c of measurement.controls) {
++    check(c.rect.width>=43.9&&c.rect.height>=43.9,name+' native >=44 '+c.text,c.rect);
++    check(!c.labelClipped&&c.scrollWidth<=c.clientWidth+1,name+' readable label '+c.text,c);
++    check(c.rect.x>=measurement.root.x-.5&&c.rect.right<=measurement.root.right+.5,name+' adopted control inside scope width '+c.text,c.rect);
++    if(scope==='.menu')check(c.rect.y>=measurement.root.y-.5&&c.rect.bottom<=measurement.root.bottom+.5,name+' adopted menu control in viewport '+c.text,c.rect);
++    if(!c.fallback) {
++      check(c.ready==='true'&&c.face.image.includes('/menu-review/ui/blender/')&&c.face.display!=='none',name+' decoded face visible '+c.text,c.face);
++      check(equalRect(c.rect,c.native),name+' unstretched native face '+c.text,c.rect);
++      check(c.ink.x>=c.safe.x-.3&&c.ink.y>=c.safe.y-.3&&c.ink.x+c.ink.width<=c.safe.x+c.safe.width+.3&&c.ink.y+c.ink.height<=c.safe.y+c.safe.height+.3,name+' text and icon inside authored safe area '+c.text,{ink:c.ink,lineBox:c.label,safe:c.safe});
++    } else check(c.face.display==='none',name+' fallback suppresses art '+c.text,c.face);
++  }
++  return measurement;
++}
++try {
++  for(const [width,height,dpr] of [[320,568,1],[390,844,1],[430,932,1],[390,844,2]]) {
++    const {page,context,requests}=await newPage(width,height,dpr);
++    await page.waitForFunction(()=>document.querySelector('.menu').dataset.atlasReady==='true');
++    await settle(page);
++    const name=`${width}x${height}-${dpr}x`;
++    await capture(page,name+'-menu','.menu');
++    const initialImageRequests=requests.filter(u=>u.endsWith('.png')).length;
++    for(const [kind,label] of [['play','Play'],['continue','Continue'],['resume','Resume Hole']]) {
++      await page.evaluate(kind=>window.review.playState(kind),kind); await settle(page);
++      const play=page.locator('.menu__nav > .btn');
++      check((await play.textContent()).trim()===label,name+' full dynamic '+label);
++      check(await play.getAttribute('aria-label')===label,name+' accessible dynamic '+label);
++    }
++    await page.getByRole('button',{name:'Settings',exact:true}).click(); await settle(page);
++    await page.waitForFunction(()=>document.querySelector('.menu-preferences').dataset.atlasReady==='true');
++    await capture(page,name+'-settings','.menu-preferences');
++    await page.evaluate(()=>window.review.textScale(2)); await settle(page);
++    await capture(page,name+'-settings-200text','.menu-preferences');
++    await page.keyboard.press('Escape'); await page.waitForFunction(()=>!document.querySelector('.sheet'));
++    await capture(page,name+'-menu-200text','.menu');
++    check(requests.filter(u=>u.endsWith('manifest.json')).length===1,name+' manifest reused across mounts',requests);
++    check(initialImageRequests>0&&requests.filter(u=>u.endsWith('.png')).length===initialImageRequests,name+' image requests unchanged across later mounts',requests);
++    await page.evaluate(()=>window.review.shutdown()); await context.close();
++  }
++
++  const main=await newPage(); const {page,context,requests}=main;
++  await page.waitForFunction(()=>document.querySelector('.menu').dataset.atlasReady==='true'); await settle(page);
++  await page.keyboard.press('Tab');
++  await page.getByRole('button',{name:'Career',exact:true}).focus();
++  const career=page.getByRole('button',{name:'Career',exact:true}); const before=await career.boundingBox();
++  // C.tap activates on keydown. Exercise the combined CSS state separately,
++  // then verify actual keyboard navigation without delaying past dismissal.
++  await career.evaluate(el=>el.classList.add('is-pressed'));
++  const pressed=await capture(page,'keyboard-focus-plus-pressed-class-menu','.menu');
++  check(equalRect(before,await career.boundingBox()),'pressed class preserves native target');
++  check(pressed.controls[0].outline.includes('2px'),'keyboard focus has visible outline',pressed.controls[0].outline);
++  await career.evaluate(el=>el.classList.remove('is-pressed'));
++  await page.keyboard.down('Space');
++  const leaving=await page.locator('.menu').evaluate(el=>({hasAtlas:el.hasAttribute('data-blender-ui'),ready:el.dataset.atlasReady,rects:[...el.querySelectorAll('[data-bui-button]')].map(b=>({width:b.offsetWidth,height:b.offsetHeight}))}));
++  check(leaving.hasAtlas&&leaving.ready==='true','menu dismissal retains painted atlas',leaving);
++  await page.keyboard.up('Space'); await page.waitForFunction(()=>window.review.ui.currentScene==='career');
++  await page.evaluate(()=>window.review.show('menu')); await settle(page);
++  const onceObservers=await page.evaluate(()=>window.review.observerCounts());
++  for(let i=0;i<5;i++) await page.evaluate(()=>window.review.show('menu'));
++  await settle(page);
++  check(await page.locator('.menu [data-bui-button]').count()===4,'repeated show retains exactly four controls');
++  check(JSON.stringify(onceObservers)===JSON.stringify(await page.evaluate(()=>window.review.observerCounts())),'repeated show does not multiply observers',onceObservers);
++  await page.getByRole('button',{name:'Career',exact:true}).evaluate(el=>{el.disabled=true;el.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));});
++  check(await page.evaluate(()=>window.review.ui.currentScene)==='menu','disabled production control blocks activation');
++  await page.getByRole('button',{name:'Career',exact:true}).evaluate(el=>el.disabled=false);
++  await page.evaluate(()=>{window.review.confirmResult=null;window.review.ui.confirm({title:'Review reset confirmation',message:'An isolated confirmation behavior check.',destructive:true,confirmLabel:'Reset'}).then(value=>window.review.confirmResult=value);});
++  await page.getByRole('alertdialog',{name:'Review reset confirmation'}).waitFor();
++  await page.waitForFunction(()=>document.activeElement?.textContent.trim()==='Cancel');
++  await page.keyboard.press('Enter');
++  await page.waitForFunction(()=>window.review.confirmResult===false&&!document.querySelector('.modal'));
++  check(true,'shared destructive confirmation defaults to Cancel and resolves false');
++  await page.getByRole('button',{name:'Settings',exact:true}).click(); await settle(page);
++  const low=page.getByRole('button',{name:'Low',exact:true}); const lowBefore=await low.boundingBox();
++  await page.mouse.move(lowBefore.x+lowBefore.width/2,lowBefore.y+lowBefore.height/2); await page.mouse.down();
++  await capture(page,'pointer-pressed-quality','.menu-preferences');
++  check(equalRect(lowBefore,await low.boundingBox()),'actual pointer press preserves native target');
++  await page.mouse.up();
++  check(await page.evaluate(()=>window.review.state.settings.quality)==='low','actual pointer release picks quality');
++  for(const quality of ['Low','Medium','High','Auto']) {
++    await page.getByRole('button',{name:quality,exact:true}).focus(); await page.keyboard.press('Space');
++    check(await page.evaluate(()=>window.review.state.settings.quality)===quality.toLowerCase(),'quality keyboard writes '+quality);
++    check(await page.locator('.menu-preferences [aria-pressed="true"]').count()===1,'quality exclusive pressed '+quality);
++  }
++  await page.getByRole('switch',{name:'Reduced motion',exact:true}).click(); await settle(page);
++  check(await page.locator('.ui-root').evaluate(el=>el.classList.contains('reduced-motion')),'game reduced motion reaches shell');
++  let reduced=await measurements(page,'.menu-preferences'); check(reduced.controls.every(c=>c.transition==='0s'&&c.transform==='none'),'game reduced motion stops face translation',reduced.controls);
++  await page.getByRole('switch',{name:'Reduced motion',exact:true}).click(); await page.emulateMedia({reducedMotion:'reduce'}); await settle(page);
++  reduced=await measurements(page,'.menu-preferences'); check(reduced.controls.every(c=>c.transition==='0s'&&c.transform==='none'),'OS reduced motion stops face translation',reduced.controls);
++  await page.emulateMedia({reducedMotion:'no-preference'}); await settle(page);
++  await page.getByRole('slider',{name:'Effects',exact:true}).evaluate(el=>{el.value='37';el.dispatchEvent(new Event('input',{bubbles:true}));});
++  check(await page.evaluate(()=>window.review.state.settings.sfx)===.37,'Effects preference behavior retained');
++  await page.getByRole('slider',{name:'Music',exact:true}).evaluate(el=>{el.value='21';el.dispatchEvent(new Event('input',{bubbles:true}));});
++  check(await page.evaluate(()=>window.review.state.settings.music)===.21,'Music preference behavior retained');
++  await page.getByRole('button',{name:'Close',exact:true}).click();
++  const dismiss=await page.locator('.menu-preferences').evaluate(el=>({hasAtlas:el.hasAttribute('data-blender-ui'),ready:el.dataset.atlasReady,widths:[...el.querySelectorAll('[data-bui-button]')].map(b=>b.offsetWidth)}));
++  check(dismiss.hasAtlas&&dismiss.ready==='true','settings dismissal retains painted atlas',dismiss);
++  await page.waitForFunction(()=>!document.querySelector('.sheet'));
++  const withoutProbeObservers=await page.evaluate(()=>window.review.observerCounts());
++  await page.evaluate(()=>window.review.mountProbe()); await settle(page);
++  let probe=await capture(page,'probe-disabled-long-label','#review-probe');
++  check(probe.controls[1].disabled&&probe.controls[1].face.position.includes('-'),'disabled native button face');
++  check(probe.controls[2].fallback,'long dynamic label uses readable fallback');
++  await page.locator('#review-probe button').first().evaluate(el=>el.querySelector('span').textContent='A much longer changed label that cannot fit'); await settle(page);
++  probe=await measurements(page,'#review-probe'); check(probe.controls[0].fallback,'mutation remeasures dynamic label');
++  await page.locator('#review-probe button').first().evaluate(el=>el.querySelector('span').textContent='Fit'); await settle(page);
++  probe=await measurements(page,'#review-probe'); check(!probe.controls[0].fallback,'label shortening restores native face');
++  await page.locator('#review-probe button').first().evaluate(el=>{el.style.fontSize='38px';document.fonts.dispatchEvent(new Event('loadingdone'));}); await settle(page);
++  probe=await measurements(page,'#review-probe'); check(probe.controls[0].fallback,'font-size change remeasures live label');
++  await page.locator('#review-probe button').first().evaluate(el=>el.style.removeProperty('font-size')); await settle(page);
++  await page.locator('#review-probe').evaluate(el=>el.style.width='60px'); await settle(page);
++  probe=await measurements(page,'#review-probe'); check(probe.controls.every(c=>c.fallback),'parent resize falls back');
++  await page.locator('#review-probe').evaluate(el=>el.style.removeProperty('width')); await settle(page);
++  const cdp=await context.newCDPSession(page);
++  await cdp.send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:2,mobile:true});
++  await page.evaluate(()=>window.dispatchEvent(new Event('resize')));
++  await page.waitForFunction(()=>document.querySelector('#review-probe').dataset.atlasDensity==='2x');
++  check(await page.evaluate(()=>devicePixelRatio)===2,'live density switch selects decoded 2x');
++  check(requests.filter(u=>u.endsWith('ui-atlas@2x.png')).length===1,'2x singleflight between active roots',requests);
++  await page.evaluate(()=>window.review.disposeProbe());
++  check(JSON.stringify(withoutProbeObservers)===JSON.stringify(await page.evaluate(()=>window.review.observerCounts())),'probe disposal detaches observers',withoutProbeObservers);
++  await page.getByRole('button',{name:'Settings',exact:true}).click(); await settle(page);
++  await page.evaluate(()=>window.review.recreate()); await settle(page);
++  await page.waitForFunction(()=>document.querySelector('.menu')?.dataset.atlasReady==='true');
++  check(await page.locator('.ui-root').count()===1,'shell recreate has one root');
++  check(await page.locator('.sheet').count()===0,'shell destroy with open settings removes sheet');
++  check(JSON.stringify(onceObservers)===JSON.stringify(await page.evaluate(()=>window.review.observerCounts())),'shell destroy with open settings detaches old observers',await page.evaluate(()=>window.review.observerCounts()));
++  check(requests.filter(u=>u.endsWith('manifest.json')).length===1,'shell recreate reuses manifest');
++  await page.evaluate(()=>window.review.shutdown());
++  check(Object.values(await page.evaluate(()=>window.review.observerCounts())).every(n=>n===0),'final shell disposal detaches all observers');
++  await context.close();
++
++  for(const mode of ['missing-manifest','corrupt-manifest','missing-image','corrupt-image','delayed-manifest','delayed-image']) {
++    const test=await newPage(390,844,1,mode);
++    await test.seen;
++    if(!mode.startsWith('delayed')) await test.page.waitForFunction(()=>document.querySelector('.menu').dataset.atlasError);
++    await settle(test.page);
++    const m=await capture(test.page,mode,'.menu');
++    check(m.controls.every(c=>c.fallback),'asset '+mode+' fails readably');
++    check(m.controls.every(c=>c.ready!=='true'),'asset '+mode+' never falsely ready');
++    if(mode.startsWith('delayed')) {
++      test.release(); await test.page.waitForFunction(()=>document.querySelector('.menu').dataset.atlasReady==='true'); await settle(test.page);
++      await capture(test.page,mode+'-recovered','.menu');
++    } else {
++      await test.context.unrouteAll({behavior:'wait'});
++      await test.page.evaluate(()=>window.review.show('menu'));
++      await test.page.waitForFunction(()=>document.querySelector('.menu').dataset.atlasReady==='true'); await settle(test.page);
++      check((await measurements(test.page,'.menu')).controls.some(c=>!c.fallback),'asset '+mode+' explicit remount retries successfully');
++    }
++    await test.page.getByRole('button',{name:'Career',exact:true}).click();
++    await test.page.waitForFunction(()=>window.review.ui.currentScene==='career');
++    check(true,'asset '+mode+' retains navigation');
++    await test.page.evaluate(()=>window.review.shutdown()); await test.context.close();
++  }
++  for(const mode of ['delayed-manifest','delayed-image']) {
++    const test=await newPage(390,844,1,mode); await test.seen;
++    await test.page.evaluate(()=>window.review.shutdown()); test.release(); await test.page.waitForTimeout(400);
++    check(await test.page.locator('.ui-root').count()===0,mode+' completion after destroy does not revive DOM');
++    check(Object.values(await test.page.evaluate(()=>window.review.observerCounts())).every(n=>n===0),mode+' completion after destroy leaves no active observer');
++    await test.context.close();
++  }
++} catch(error) { report.fatal=error.stack; console.error(error); }
++finally {
++  await browser.close(); report.browserClosed=true;
++  const paths=['src/ui/screens/menu.js','src/ui/screens/menu-atlas.css','src/ui/blender-atlas.js','src/ui/blender-atlas.css','src/ui/styles.css','src/ui/shell.js','src/ui/components.js','public/ui/blender/manifest.json','tools/ui-atlas-adoption-review/harness.js','tools/ui-atlas-adoption-review/check.mjs'];
++  report.sources={}; for(const path of paths) report.sources[path]=createHash('sha256').update(await readFile(new URL('../../'+path,import.meta.url))).digest('hex');
++  report.passed=!report.fatal&&!report.errors.length&&report.checks.length>0&&report.checks.every(c=>c.pass);
++  await writeFile(new URL('report.json',directory),JSON.stringify(report,null,2)+'\n');
++}
++console.log(JSON.stringify({passed:report.passed,checks:report.checks.length,failed:report.checks.filter(c=>!c.pass).map(c=>c.name),fatal:report.fatal,browserClosed:report.browserClosed}));
++if(!report.passed)process.exitCode=1;
+diff --git a/tools/ui-atlas-adoption-review/harness.js b/tools/ui-atlas-adoption-review/harness.js
+new file mode 100644
+--- /dev/null
++++ b/tools/ui-atlas-adoption-review/harness.js
+@@ -0,0 +1,104 @@
++// Actual production shell, screens, components, content and styles. No renderer,
++// simulation or GLB loader is instantiated: this is explicitly menu DOM evidence.
++import { createUI } from '../../src/ui/shell.js';
++import { createGameState, createBus, EVENTS } from '../../src/core/contract.js';
++import * as game from '../../src/game/data.js';
++import { mountBlenderAtlas } from '../../src/ui/blender-atlas.js';
++
++async function start() {
++const observed = { ResizeObserver: new Map(), MutationObserver: new Map() };
++for (const kind of Object.keys(observed)) {
++  const Native = window[kind];
++  window[kind] = class extends Native {
++    constructor(callback) { super(callback); observed[kind].set(this, new Set()); }
++    observe(target, options) { observed[kind].get(this).add(target); return super.observe(target, options); }
++    unobserve(target) { observed[kind].get(this).delete(target); return super.unobserve(target); }
++    disconnect() { observed[kind].get(this).clear(); return super.disconnect(); }
++  };
++}
++function observerCounts() { return Object.fromEntries(Object.entries(observed).map(([kind,instances]) => [kind,[...instances.values()].filter(targets=>targets.size).length])); }
++const state = createGameState();
++const bus = createBus();
++const events = [];
++for (const kind of [EVENTS.SCENE_CHANGE, EVENTS.QUALITY_CHANGE, EVENTS.HAPTIC]) {
++  bus.on(kind, value => events.push({ kind, value }));
++}
++const ctx = { uiRoot: document.querySelector('#ui'), state, bus, game };
++let ui = createUI(ctx);
++await ui.init();
++ui.setLoadingProgress(1);
++ui.update(1);
++ui.show('menu');
++function resize() { ui.resize(innerWidth, innerHeight, devicePixelRatio); }
++window.addEventListener('resize', resize);
++resize();
++let running = true;
++let previous = performance.now();
++function tick(now) {
++  if (!running) return;
++  ui.update(Math.min(.1, (now - previous) / 1000));
++  previous = now;
++  requestAnimationFrame(tick);
++}
++requestAnimationFrame(tick);
++let probe = null;
++let probeConsumer = null;
++const tokenStyle = getComputedStyle(document.documentElement);
++const originalTextTokens = new Map([...tokenStyle].filter(name => /^--t-/.test(name)).map(name => [name, tokenStyle.getPropertyValue(name).trim()]));
++const controlType = new WeakMap();
++window.review = {
++  state, events,
++  observerCounts,
++  get ui() { return ui; },
++  show(scene) { ui.show(scene); },
++  playState(kind) {
++    state.drill.active = kind === 'resume';
++    state.contract = kind === 'continue' ? { id: 'review-existing-contract' } : null;
++    ui.show('menu');
++  },
++  textScale(multiplier) {
++    // Snapshot the actual consumer sizes before changing the game's type tokens.
++    // This is a text enlargement exercise, not CSS/page zoom or a second scale.
++    for (const button of document.querySelectorAll('[data-bui-button]')) {
++      if (!controlType.has(button)) {
++        const computed = getComputedStyle(button);
++        controlType.set(button, {fontSize:parseFloat(computed.fontSize),lineHeight:parseFloat(computed.lineHeight)});
++      }
++    }
++    for (const [name, original] of originalTextTokens) {
++      if (!/^\d+(?:\.\d+)?px$/.test(original)) throw Error('Review requires a resolved pixel type token: ' + name);
++      document.documentElement.style.setProperty(name, parseFloat(original) * multiplier + 'px');
++    }
++    for (const button of document.querySelectorAll('[data-bui-button]')) {
++      const original = controlType.get(button);
++      button.style.fontSize = original.fontSize * multiplier + 'px';
++      if (Number.isFinite(original.lineHeight)) button.style.lineHeight = original.lineHeight * multiplier + 'px';
++    }
++    resize();
++  },
++  async recreate() {
++    ui.dispose();
++    ui = createUI(ctx);
++    await ui.init(); ui.setLoadingProgress(1); ui.update(1); ui.show('menu'); resize();
++  },
++  async mountProbe(options = {}) {
++    this.disposeProbe();
++    probe = document.createElement('div');
++    probe.id = 'review-probe'; probe.style.cssText = 'position:fixed;inset:60px 16px auto;z-index:1000;display:flex;flex-wrap:wrap;gap:12px;background:#0d1219;padding:20px;';
++    for (const [text, size] of [['Fit', 'compact'], ['Disabled', 'standard'], ['A deliberately long dynamic gameplay label', 'standard']]) {
++      const button = document.createElement('button'); button.type = 'button';
++      button.dataset.buiButton = 'neutral'; button.dataset.buiSize = size;
++      const label = document.createElement('span'); label.className = 'bui-button__label'; label.textContent = text; button.append(label);
++      if (text === 'Disabled') button.disabled = true;
++      probe.append(button);
++    }
++    document.body.append(probe);
++    probeConsumer = mountBlenderAtlas(probe, options);
++    return probeConsumer.ready;
++  },
++  refreshProbe() { return probeConsumer?.refresh(); },
++  disposeProbe() { probeConsumer?.dispose(); probeConsumer = null; probe?.remove(); probe = null; },
++  shutdown() { this.disposeProbe(); running = false; window.removeEventListener('resize', resize); ui.dispose(); },
++};
++}
++start().catch(error => { console.error(error); window.reviewError = error.stack; });
+diff --git a/tools/ui-atlas-adoption-review/index.html b/tools/ui-atlas-adoption-review/index.html
+new file mode 100644
+--- /dev/null
++++ b/tools/ui-atlas-adoption-review/index.html
+@@ -0,0 +1,14 @@
++<!doctype html>
++<html lang="en">
++<head>
++  <meta charset="utf-8">
++  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
++  <title>Actual menu atlas adoption review</title>
++  <link rel="icon" href="data:,">
++  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600;700&display=swap">
++</head>
++<body>
++  <div id="app"><div id="ui"></div></div>
++  <script type="module" src="./harness.js"></script>
++</body>
++</html>
+diff --git a/tools/ui-atlas-adoption-review/serve.mjs b/tools/ui-atlas-adoption-review/serve.mjs
+new file mode 100644
+--- /dev/null
++++ b/tools/ui-atlas-adoption-review/serve.mjs
+@@ -0,0 +1,16 @@
++import { createServer, build, preview } from 'vite';
++import config from './vite.config.mjs';
++if (process.argv.includes('--build')) {
++  await build({ ...config, configFile: false });
++} else {
++  const server = process.argv.includes('--preview')
++    ? await preview({ ...config, configFile:false, preview:{host:'127.0.0.1',port:5201,strictPort:true} })
++    : await createServer({ ...config, configFile:false });
++  if (server.listen) await server.listen();
++  server.printUrls();
++  for (const signal of ['SIGINT','SIGTERM']) process.on(signal, async () => {
++    if (server.close) await server.close();
++    else await new Promise(resolve => server.httpServer.close(resolve));
++    process.exit(0);
++  });
++}
+diff --git a/tools/ui-atlas-adoption-review/vite.config.mjs b/tools/ui-atlas-adoption-review/vite.config.mjs
+new file mode 100644
+--- /dev/null
++++ b/tools/ui-atlas-adoption-review/vite.config.mjs
+@@ -0,0 +1,23 @@
++import { defineConfig } from 'vite';
++import { fileURLToPath } from 'node:url';
++const root = fileURLToPath(new URL('.', import.meta.url));
++const repo = fileURLToPath(new URL('../../', import.meta.url));
++export default defineConfig({
++  root, base: '/menu-review/',
++  publicDir: fileURLToPath(new URL('../../public', import.meta.url)),
++  cacheDir: fileURLToPath(new URL('./.vite-cache', import.meta.url)),
++  optimizeDeps: { noDiscovery: true, include: [] },
++  server: { host: '127.0.0.1', port: 5201, strictPort: true, hmr: false, watch: { ignored: ['**/*'] }, fs: { allow: [repo] } },
++  build: { outDir: fileURLToPath(new URL('./dist', import.meta.url)), copyPublicDir: false, emptyOutDir: true },
++  plugins: [{
++    name: 'isolated-menu-atlas-public-only', apply: 'build',
++    async generateBundle() {
++      const { readdir, readFile } = await import('node:fs/promises');
++      const directory = new URL('../../public/ui/blender/', import.meta.url);
++      for (const name of await readdir(directory)) {
++        if (!/\.(json|png)$/.test(name)) continue;
++        this.emitFile({type:'asset', fileName:'ui/blender/' + name, source:await readFile(new URL(name, directory))});
++      }
++    },
++  }],
++});
+diff --git a/research/ui-atlas-adoption.md b/research/ui-atlas-adoption.md
+new file mode 100644
+--- /dev/null
++++ b/research/ui-atlas-adoption.md
+@@ -0,0 +1,107 @@
++# Production menu adoption of the Blender UI atlas
++
++Baseline: `f4e8ad98efe20c2e68643570b4ee007f93e0f780`, private branch
++`codex/ui-atlas-game-adoption`. This slice adopts the already reviewed frozen
++atlas; it does not regenerate or extend the art.
++
++## Production changes
++
++`src/ui/screens/menu.js` explicitly adopts four navigation controls: Career,
++iMarket, Garage and Settings. Each keeps its existing DOM button, icon, live
++label, tap handler and destination. The graphics-quality preference adopts four
++compact controls, with mutually exclusive `aria-pressed` state and an underline
++on the selected label. Switches and audio sliders retain their existing behavior.
++
++The main Play action retains its existing full-width, 56px layout. Its full
++`Play`, `Continue` and `Resume Hole` labels remain in the DOM, and its accessible
++name now follows the visible label. There is no global Button replacement.
++
++`src/ui/screens/menu-atlas.css` supplies menu-only grid slots. A slot exposes the
++available width to the consumer; a face that cannot fit uses the readable flat
++fallback. Quality controls use two rows. Authored spacing is UI design, not a
++physical machine specification (`NOT SOURCED`).
++
++## Reusable opt-in contract
++
++```js
++import { mountBlenderAtlas } from './blender-atlas.js';
++
++// Attach root first. Each opted-in native button has exactly one direct label
++// wrapper containing both its existing icon and live label.
++button.dataset.buiButton = 'neutral'; // or 'accent'
++button.dataset.buiSize = 'standard'; // or 'compact'
++// <button ...><span class="bui-button__label">...</span></button>
++const atlas = mountBlenderAtlas(root);
++await atlas.ready; // true only after validation and selected image decode
++// false leaves a readable fallback. refresh() is an explicit failure retry.
++await atlas.refresh();
++atlas.dispose();
++```
++
++The module imports the existing Blender motion stylesheet and scoped atlas
++stylesheet. Native dimensions, safe regions, foregrounds and sprite coordinates
++are read from the manifest. Production selectors override existing button
++surface/press scaling only for explicit `data-bui-button` controls. State styles
++cover native disabled, existing tap classes, pointer active, selected and focus.
++Both the OS motion preference and the shell's live reduced-motion class apply.
++
++The default deployment base is Vite's `BASE_URL`, resolved against the document
++base URI. The optional `baseUrl` is the **deployment directory**, not the atlas
++directory; the consumer appends `ui/blender/`. Successful manifests are shared
++by absolute URL, and decoded images by URL and expected dimensions. Failures
++are evicted so an explicit refresh/remount can retry. Shared in-flight requests
++are bounded by a ten-second operational timeout, and are not cancelled by the
++departure of one consumer while another may still need them.
++
++Text fitting measures live glyph bounds, the combined icon/label wrapper,
++scroll bounds and the available parent width. Oversized labels, enlarged text,
++invalid label markup and unavailable assets use a wrapping DOM fallback. No
++face is stretched, cropped, or reduced below the authored native target. Font
++completion, relevant label/style mutations, resize and display-density changes
++schedule remeasurement. Unrelated player statistics do not schedule a refit.
++
++Mounting the same root again returns its existing controller. Disposal cancels
++the controller's queued frame and disconnects its observers and font/resize/DPR
++listeners; late shared completion cannot mutate a disposed root. Menu unmount
++and sheet close use `dispose({preserveAppearance:true})`: the final decoration
++stays visible through the shell's existing dismissal animation while runtime
++work stops. A weak ownership snapshot permits later remount and complete
++restoration. Menu `destroy()` also disposes open settings controllers when the
++shell itself is torn down.
++
++## Verification and integration boundary
++
++- `node tools/check-blender-atlas-consumer.mjs`: 22 CPU cases pass. Geometry in
++  these cases is synthetic; this result is not rendered-layout evidence.
++- `node tools/check-ui-atlas.mjs --self-test`: frozen atlas gate passes; eleven
++  intentionally corrupt fixtures are rejected.
++- `node tools/ui-atlas-adoption-review/serve.mjs --build`: actual menu/shell
++  harness builds. It instantiates the production UI, components and content,
++  with no renderer, simulation or model loader instance.
++- An independent HTTP check of the built `/menu-review/` subpath matched all
++  35 public atlas/manifest files byte for byte and served its compiled entry
++  JavaScript and CSS. Report: `shots/ui-atlas-adoption/build-http.json`.
++- Headed review and its source hashes are recorded separately in
++  `research/ui-atlas-adoption-review.md` when complete. GPU ownership must
++  explicitly name `ui-atlas-adoption` before that harness runs.
++
++Root owns package and production build wiring. No build configuration change is
++needed to load this opt-in consumer: `menu.js` imports it, it imports its CSS,
++and the existing public-asset emitter already emits `public/ui/blender/**`.
++Recommended CPU gate addition is `node tools/check-blender-atlas-consumer.mjs`;
++retain the existing atlas export gate. No package script was edited here.
++
++The private worktree has no game models. Root must run the actual-game smoke
++against its served integration checkout after applying/reviewing the patch:
++
++```powershell
++node tools/check-ui-atlas-game-smoke.mjs --url http://127.0.0.1:5178/ --lease root-integration --out shots/ui-atlas-game-smoke
++```
++
++Replace the URL and lease with the actual served base and explicitly granted
++owner. The smoke verifies the active rig's actual `glb:` source, live context,
++production atlas responses, menu/settings faces, preferences and navigation.
++The task root has syntax-checked this script; a full-game result is pending root
++integration. Root also retains the complete build/artifact check. Neither the
++isolated DOM evidence nor this menu smoke establishes FPS, an AAA verdict or a
++general accessibility verdict.
+diff --git a/research/ui-atlas-adoption-review.md b/research/ui-atlas-adoption-review.md
+new file mode 100644
+--- /dev/null
++++ b/research/ui-atlas-adoption-review.md
+@@ -0,0 +1,54 @@
++# Actual menu atlas adoption review
++
++Review workspace: `drillity-ui-atlas-game-adoption`, baseline `f4e8ad9`.
++
++The isolated harness imports the production `createUI` shell, which imports the
++actual `createMenuScreen`, components, styles, and other screen factories. State
++and catalogue content come from `createGameState`, `createBus`, and `game/data.js`.
++No renderer, simulation or GLB loader is instantiated. This can establish menu
++DOM integration and lifecycle behavior; it cannot establish whole-game render
++quality, FPS, a general accessibility pass, or an AAA verdict.
++
++## Reproduction
++
++The existing dependency junction is read only. No packages are installed and no
++package/build wiring is modified. Port 5201 must be free. The headed checker
++refuses to launch unless the shared `gpu-owner.txt` exactly names
++`ui-atlas-adoption`; obtain the parent task's explicit delegation as well.
++
++```powershell
++node tools/ui-atlas-adoption-review/serve.mjs --build
++node tools/ui-atlas-adoption-review/serve.mjs --preview
++node tools/ui-atlas-adoption-review/check.mjs
++```
++
++The production harness is served under `/menu-review/`. Its isolated output
++copies only the atlas public directory, not game models. The full shell also
++causes the existing dynamically imported tooling code to be emitted; it is not
++executed by these menu checks. The page uses the production Google Fonts link;
++the report records whether Inter is available during each measurement.
++
++## Current evidence status
++
++CPU syntax checks and the isolated Vite production build pass. The initial
++harness used a top-level await incompatible with Vite's default targets; moving
++its startup into an async function fixed that harness issue. No production
++target setting was changed.
++
++Headed execution remains pending an explicit GPU lease. Prepared cases cover
++320/390/430 CSS pixels, 1x/2x density, measured 200% text enlargement, full dynamic
++Play labels, keyboard and pointer behavior, native target and safe-region
++geometry, missing/corrupt/delayed assets and explicit recovery, live density and
++font/parent-size changes, repeated mounts, settings disposal and shell disposal
++while loading. The text fixture doubles the actual computed typography tokens
++and adopted control sizes; it is not a full-page zoom test.
++
++The report will be written to
++`tools/ui-atlas-adoption-review/evidence/report.json`, together with screenshots
++and SHA-256 source hashes. Existing atlas authoring evidence is untouched.
++
++Source review of the parent's actual-game smoke found one fixture assumption:
++the reduced-motion check blindly toggled an existing saved preference. The
++parent made that operation conditional on its current checked state. The smoke
++requires the full integration checkout and matching GLBs and is not executed
++from this private harness.

@@ -1,0 +1,959 @@
+{
+  "evidence": "Headed actual gameplay plus isolated actual site/live-collar geometry with diagnostic camera and lighting. No FPS or engineering clearance claim.",
+  "baselineSHA256": "61a93902888f54b9913fdda690f308008dae8a80cb5b2b2e10208e4d219428dd",
+  "candidateSHA256": "5b53090ed7c92c89be48e4dcf668a7400634aa62eb3d7b89482c4cfc7db78930",
+  "sources": {
+    "blender/sites/quarry_bench.py": "a791c5a64c156497ef758205cf0cae2bb7c175d80b9259e759ea69dda0b38b91",
+    "blender/lib/site.py": "40774bca7ae636f35695d475d8549057f5c5230f5e7ecbef10676641f9d3a1dc",
+    "blender/lib/rig.py": "b162741a7e6f032a3a3e817e4b33125069f70b9ed7d3f54a8cddaf371d7a8ed5",
+    "src/world/terrain.js": "ff23ce1428b84e4d95dbfad5caa097dbdb97b548f55e07544345fe9f08318cf5",
+    "src/core/renderer.js": "7e628334cefd403ed0ad38ea09150a4df9f83d0d2b06b73e56b5a28e33d0b02c",
+    "src/core/assets.js": "e48553e9a9f5333fe58dcf3786b247f071fdd222615638dd136499ed99a83ed3"
+  },
+  "cases": [
+    {
+      "name": "baseline-uncased",
+      "siteModel": {
+        "wanted": "quarry-bench",
+        "model": "quarry-bench",
+        "procedural": false,
+        "problem": null,
+        "drawCalls": 6
+      },
+      "collarPosition": [
+        0,
+        0,
+        0
+      ],
+      "cased": false,
+      "stubVisible": false,
+      "rigSource": "glb",
+      "registration": {
+        "x": 63.17725834261612,
+        "y": -0.30532850775633713,
+        "active": true,
+        "collarErrPx": -0.000014846636908316668,
+        "groundErrPx": -0.00006140079555072564
+      },
+      "fonts": [
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald Fallback",
+          "status": "loaded"
+        }
+      ],
+      "contextLost": false
+    },
+    {
+      "name": "baseline-cased",
+      "siteModel": {
+        "wanted": "quarry-bench",
+        "model": "quarry-bench",
+        "procedural": false,
+        "problem": null,
+        "drawCalls": 6
+      },
+      "collarPosition": [
+        0,
+        0,
+        0
+      ],
+      "cased": true,
+      "stubVisible": true,
+      "rigSource": "glb",
+      "registration": {
+        "x": 63.1772165310531,
+        "y": -0.3054630548624978,
+        "active": true,
+        "collarErrPx": -0.000006797797659885418,
+        "groundErrPx": -0.000019414936632933255
+      },
+      "fonts": [
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald Fallback",
+          "status": "loaded"
+        }
+      ],
+      "contextLost": false
+    },
+    {
+      "name": "candidate-uncased",
+      "siteModel": {
+        "wanted": "quarry-bench",
+        "model": "quarry-bench",
+        "procedural": false,
+        "problem": null,
+        "drawCalls": 6
+      },
+      "collarPosition": [
+        0,
+        0,
+        0
+      ],
+      "cased": false,
+      "stubVisible": false,
+      "rigSource": "glb",
+      "registration": {
+        "x": 63.176673887996905,
+        "y": -0.30661796050449647,
+        "active": true,
+        "collarErrPx": -0.00003515290216427047,
+        "groundErrPx": -0.00011014783544288642
+      },
+      "fonts": [
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald Fallback",
+          "status": "loaded"
+        }
+      ],
+      "contextLost": false
+    },
+    {
+      "name": "candidate-cased",
+      "siteModel": {
+        "wanted": "quarry-bench",
+        "model": "quarry-bench",
+        "procedural": false,
+        "problem": null,
+        "drawCalls": 6
+      },
+      "collarPosition": [
+        0,
+        0,
+        0
+      ],
+      "cased": true,
+      "stubVisible": true,
+      "rigSource": "glb",
+      "registration": {
+        "x": 63.17659748142751,
+        "y": -0.30684214984483055,
+        "active": true,
+        "collarErrPx": -0.0000023521208163401752,
+        "groundErrPx": -0.000006434939346544599
+      },
+      "fonts": [
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald Fallback",
+          "status": "loaded"
+        }
+      ],
+      "contextLost": false
+    }
+  ],
+  "errors": [],
+  "requestsFailed": [],
+  "warnings": [
+    {
+      "variant": "baseline",
+      "message": "[sim] no accepted contract run — starting an unpaid preview; completion cannot award money, XP or reputation."
+    },
+    {
+      "variant": "candidate",
+      "message": "[sim] no accepted contract run — starting an unpaid preview; completion cannot award money, XP or reputation."
+    }
+  ],
+  "failures": [],
+  "browserClosed": true,
+  "passed": true,
+  "visualAcceptance": "Pending human/agent image inspection; successful capture alone is not visual acceptance."
+}

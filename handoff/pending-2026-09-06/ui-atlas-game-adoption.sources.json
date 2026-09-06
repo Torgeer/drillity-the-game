@@ -1,0 +1,72 @@
+{
+  "status": "CPU checkpoint; rendered review pending explicit GPU lease",
+  "baseline": "f4e8ad98efe20c2e68643570b4ee007f93e0f780",
+  "patchSha256": "39beebd5abe8921a4c3c3487cce6072d83939d3d3f9f6a2baae0ed501f8b8dbf",
+  "files": [
+    {
+      "path": "src/ui/blender-atlas.css",
+      "bytes": 12141,
+      "sha256": "6fa494f2887f849de4fbf35c6d460a6af378778ddbe979373bdbb04bc442e72a"
+    },
+    {
+      "path": "src/ui/screens/menu.js",
+      "bytes": 13447,
+      "sha256": "5687cdc9e05dae4b5e156698075742dfb9c7412dd83311c27acc01a95bda34ff"
+    },
+    {
+      "path": "src/ui/blender-atlas.js",
+      "bytes": 15552,
+      "sha256": "28916a09aa8913a47e6d2a584417b8a898facc9df7931a5787d6c0ea91fcd65e"
+    },
+    {
+      "path": "src/ui/screens/menu-atlas.css",
+      "bytes": 1112,
+      "sha256": "529ee31fd3d3eb8731da4345db7fe8599b243fcc73a16cb5fed0bf434b376a19"
+    },
+    {
+      "path": "tools/check-blender-atlas-consumer.mjs",
+      "bytes": 15681,
+      "sha256": "b3ea53c9378776361247089aef5001687c4a30813c012a3b7838b36b60351143"
+    },
+    {
+      "path": "tools/check-ui-atlas-game-smoke.mjs",
+      "bytes": 6957,
+      "sha256": "0912df777824b1455796a08155b9b751a6167e2cdc3f554fd82f29a943c98cc7"
+    },
+    {
+      "path": "tools/ui-atlas-adoption-review/check.mjs",
+      "bytes": 21942,
+      "sha256": "704d6a057f1cb06334b849e25a30179c47405b22ece0b2e33fc1cd4af944a7a4"
+    },
+    {
+      "path": "tools/ui-atlas-adoption-review/harness.js",
+      "bytes": 5057,
+      "sha256": "9e7c4e8ea027829608ddac60d9e2bb2473af7c52bb1fbb28ae3c7621ffa381dc"
+    },
+    {
+      "path": "tools/ui-atlas-adoption-review/index.html",
+      "bytes": 516,
+      "sha256": "bb4d2361d58ff38af91474b89e598bbd1eafc2e68f838f0feca51c040d1d085b"
+    },
+    {
+      "path": "tools/ui-atlas-adoption-review/serve.mjs",
+      "bytes": 699,
+      "sha256": "5d6147b287172c54b2acb85b3e93328e073f1f72764b58bf9fa04f7589825624"
+    },
+    {
+      "path": "tools/ui-atlas-adoption-review/vite.config.mjs",
+      "bytes": 1196,
+      "sha256": "3bb0656e01b95158765b8762e5624c2ff82e7c0f3eb4dfc07c064adf1c83165b"
+    },
+    {
+      "path": "research/ui-atlas-adoption.md",
+      "bytes": 6033,
+      "sha256": "40e509a10bc15a84c12d2a1c08182914bee0656d649bd424b5fb68425445be0e"
+    },
+    {
+      "path": "research/ui-atlas-adoption-review.md",
+      "bytes": 2796,
+      "sha256": "b6e640c41f60a8940fcad1f5c5126dfdc32046a116933336cb65b12ef50db4bc"
+    }
+  ]
+}

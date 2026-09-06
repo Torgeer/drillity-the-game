@@ -1,0 +1,1330 @@
+diff --git a/blender/sites/quarry_bench.py b/blender/sites/quarry_bench.py
+index 07ba519..6a2702a 100644
+--- a/blender/sites/quarry_bench.py
++++ b/blender/sites/quarry_bench.py
+@@ -527,17 +527,28 @@ def build_shot():
+         # pattern would say the machine has nothing to do.
+         return not (j == ROWS - 1 and i > HOLES - 4)
+ 
+-    at, _ = S.pattern(
++    at, collars = S.pattern(
+         'shot', HOLES, ROWS, BURDEN, SPACING, S.MAT_GRAVEL,
+         origin=(0.0, 0.0, 0.0), yaw=yaw,
+         collar_r=0.34, seed=3.0, drilled=drilled)
+ 
++    # The exact origin is the LIVE hole: terrain.js CFG.collar/buildCollar()
++    # owns its throat, cuttings and casing, and attachSiteModel() places this
++    # asset at that same origin. No clearance dimension is being invented.
++    # pattern() emits capped cylinders, despite calling them dust "rings";
++    # discard this one and leave its entry in `at` so every other hole keeps
++    # its original k-based stemming and flag variation.
++    live_collar = at.index((0.0, 0.0))
++    S.bpy.data.objects.remove(collars[live_collar], do_unlink=True)
++
+     # ── the stemming on each collared hole ──────────────────────────────────
+     # [OSMRE-BLAST]: stemming is "sized crushed stone or drill cuttings", and
+     # 0.7 x burden is its "good first approximation". A charged hole shows as a
+     # cone of chippings pushed back over the collar; the depth is what STEM
+     # names, and it is below ground, so what is visible is the surplus.
+     for k, (px, py) in enumerate(at):
++        if k == live_collar:
++            continue                       # the player is drilling this hole
+         if S.rnd(k * 2.7, 1.0) < 0.45:
+             continue                       # not every hole is loaded yet
+         r = 0.42 + S.rnd(k * 5.3, 2.0) * 0.16
+@@ -548,6 +559,8 @@ def build_shot():
+     # §A.4 photograph: "each flagged". Part V of [HSE-L118] independently
+     # requires "flags or notices" for the danger zone. A pin and a marker.
+     for k, (px, py) in enumerate(at):
++        if k == live_collar:
++            continue                       # no static pin/flag in live casing
+         S.tube('flagpin-%d' % k, 0.012, 0.62, S.MAT_STEEL,
+                loc=(px, py, 0.0), sides=4)
+         S.box('flag-%d' % k, (0.017, 0.20, 0.13), S.MAT_HAZARD,
+@@ -652,8 +665,15 @@ def build_bench():
+         d = 7.0 + S.rnd(i * 2.7, 21.0) * 20.0
+         a = (S.rnd(i * 4.7, 22.0) - 0.5) * 18.0
+         px, py = on_axis(d, a)
+-        S.rubble('spill-%d' % i, (px, py, 0.22), (1.5, 1.4, 0.55),
+-                 S.MAT_ROCK, block=0.45, n=5, seed=300.0 + i, yaw=yaw)
++        spill = S.rubble('spill-%d' % i, (px, py, 0.22), (1.5, 1.4, 0.55),
++                         S.MAT_ROCK, block=0.45, n=5, seed=300.0 + i, yaw=yaw)
++        # Exact seeded scatter identity: exported spill-11-4 crosses the live
++        # throat owned by terrain.js buildCollar(). See the actual-triangle
++        # evidence in research/sites/quarry-live-collar-implementation.md.
++        # Remove only that opaque block; retain every other seeded rock and
++        # introduce no engineering clearance dimension.
++        if i == 11:
++            S.bpy.data.objects.remove(spill[4], do_unlink=True)
+ 
+ 
+ # ═════════════════════════════════════════════════════════════════════════════
+diff --git a/tools/checkquarrylivecollar.mjs b/tools/checkquarrylivecollar.mjs
+new file mode 100644
+index 0000000..1ab1c2b
+--- /dev/null
++++ b/tools/checkquarrylivecollar.mjs
+@@ -0,0 +1,209 @@
++/**
++ * CPU regression for quarry dressing inside the live collar work envelope.
++ * Usage: node tools/checkquarrylivecollar.mjs [--asset path.glb] [--terrain path.js]
++ *        [--json report.json] [--self-test]
++ *
++ * glbinfo is the sole dimension ruler. Its parser/measure validate every asset
++ * before the runtime GLTFLoader exposes actual triangle vertices for collision
++ * classification. No local AABB approximation, copied POSITION reader, browser,
++ * GPU, geometry-name dependency or engineering clearance is involved.
++ *
++ * The protected envelope is the live throat's opening disk swept from collar
++ * grade to the top of its casing stub. Both come from the actual buildCollar
++ * source. This is an authored runtime ownership contract, NOT a safety distance
++ * or a sourced real-world bore diameter. A source shape change fails loudly.
++ * Surface intersection is tested after exact clipping to the vertical interval;
++ * large cap triangles crossing the bore are caught even with every vertex outside.
++ */
++import assert from 'node:assert/strict';
++import { readFileSync, writeFileSync } from 'node:fs';
++import { resolve } from 'node:path';
++import { fileURLToPath } from 'node:url';
++import { createHash } from 'node:crypto';
++import { Vector3 } from 'three';
++import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
++import { parseGLB, measure } from './glbinfo.mjs';
++
++const repo = fileURLToPath(new URL('../', import.meta.url));
++const sha256 = (data) => createHash('sha256').update(data).digest('hex');
++// Numerical comparison tolerance only, not additional physical clearance.
++const EPS = 1e-9;
++
++export function collarContract(source) {
++  const matches = [...source.matchAll(/function buildCollar\(\)\s*\{/g)];
++  assert.equal(matches.length, 1, 'Expected exactly one live buildCollar definition');
++  const start = matches[0].index;
++  const end = source.indexOf('root.add(collarGroup);', start);
++  assert.ok(end > start, 'Cannot locate live collar attachment');
++  const body = source.slice(start, end);
++  const num = '(-?(?:\\d+(?:\\.\\d*)?|\\.\\d+))';
++  function one(re, name) {
++    const found = [...body.matchAll(re)];
++    assert.equal(found.length, 1, `Cannot uniquely read live ${name}`);
++    return found[0].slice(1).map(Number);
++  }
++  const throat = one(new RegExp('const throat = new T\\.Mesh\\(\\s*new T\\.CylinderGeometry\\(\\s*' + num + ',\\s*' + num + ',\\s*' + num + ',', 'g'), 'throat');
++  const casing = one(new RegExp('casingStub = new T\\.Mesh\\(\\s*new T\\.CylinderGeometry\\(\\s*' + num + ',\\s*' + num + ',\\s*' + num + ',', 'g'), 'casing');
++  const [casingY] = one(new RegExp('casingStub\\.position\\.y\\s*=\\s*' + num + '\\s*;', 'g'), 'casing Y');
++  assert.match(body, /collarGroup\.position\.copy\(collarPosition\)/);
++  assert.match(source, /collarPosition\s*=\s*CFG\.collar\.clone\(\)/);
++  assert.match(source, /collar:\s*new THREE\.Vector3\(0,\s*0,\s*0\)/,
++    'Collar origin contract changed; review the site anchor before widening this gate');
++  const contract = { radius: throat[0], yMin: 0, yMax: casingY + casing[2] / 2,
++    provenance: 'src/world/terrain.js buildCollar(): throat radius, collarPosition grade, casingStub top',
++    meaning: 'Live throat opening swept from collar grade to casing-stub top; authored ownership, not engineering clearance' };
++  assert.ok([contract.radius, contract.yMax].every((v) => Number.isFinite(v) && v > 0));
++  return contract;
++}
++
++function clipY(poly, boundary, keepAbove) {
++  const result = [];
++  for (let i = 0; i < poly.length; i++) {
++    const a = poly[i], b = poly[(i + 1) % poly.length];
++    const ai = keepAbove ? a[1] >= boundary : a[1] <= boundary;
++    const bi = keepAbove ? b[1] >= boundary : b[1] <= boundary;
++    if (ai) result.push(a);
++    if (ai !== bi) {
++      const t = (boundary - a[1]) / (b[1] - a[1]);
++      result.push([a[0] + t * (b[0] - a[0]), boundary, a[2] + t * (b[2] - a[2])]);
++    }
++  }
++  return result;
++}
++
++function segmentDistance2(a, b) {
++  const dx = b[0] - a[0], dz = b[2] - a[2];
++  const length2 = dx * dx + dz * dz;
++  const t = length2 ? Math.max(0, Math.min(1, -(a[0] * dx + a[2] * dz) / length2)) : 0;
++  return (a[0] + t * dx) ** 2 + (a[2] + t * dz) ** 2;
++}
++
++export function triangleIntersectsEnvelope(triangle, c) {
++  let poly = clipY(triangle, c.yMin, true);
++  if (!poly.length) return false;
++  poly = clipY(poly, c.yMax, false);
++  if (!poly.length) return false;
++  let inside = false;
++  for (let i = 0; i < poly.length; i++) {
++    const a = poly[i], b = poly[(i + 1) % poly.length];
++    if (segmentDistance2(a, b) <= c.radius ** 2 + EPS) return true;
++    if ((a[2] > 0) !== (b[2] > 0)
++      && 0 < a[0] + (b[0] - a[0]) * (-a[2]) / (b[2] - a[2])) inside = !inside;
++  }
++  return inside;
++}
++
++export async function inspectAsset(path, contract) {
++  const bytes = readFileSync(path), { json: g, bin } = parseGLB(bytes);
++  assert.ok(!(g.skins?.length || g.animations?.length), 'Static quarry gate cannot classify skins or animations');
++  for (const node of g.nodes || []) {
++    assert.ok(node.skin === undefined && node.weights === undefined, 'Static quarry gate cannot classify skin/morph weights');
++    assert.ok(!node.extensions?.EXT_mesh_gpu_instancing, 'Static quarry gate cannot classify GPU instances');
++  }
++  for (const mesh of g.meshes || []) {
++    assert.ok(mesh.weights === undefined, 'Static quarry gate cannot classify mesh morph weights');
++    for (const prim of mesh.primitives || []) {
++      assert.ok(!prim.targets?.length, 'Static quarry gate cannot classify morph targets');
++    }
++  }
++  const measured = measure(g, bin);
++  assert.ok(!measured.empty && measured.unreadable.length === 0,
++    `glbinfo could not measure complete asset: ${measured.unreadable.join('; ')}`);
++  for (const mesh of g.meshes || []) for (const prim of mesh.primitives || []) {
++    assert.equal(prim.mode ?? 4, 4, 'Triangle-only quarry export expected; cannot skip other primitive modes');
++  }
++  const gltf = await new GLTFLoader().parseAsync(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength), '');
++  gltf.scene.updateMatrixWorld(true);
++  const byMaterial = {}, witnesses = [];
++  let vertices = 0, triangles = 0, intersectingTriangles = 0, interiorVertices = 0, meshes = 0;
++  const v = new Vector3();
++  gltf.scene.traverse((object) => {
++    if (!object.isMesh) return;
++    meshes++;
++    assert.ok(object.visible, 'Hidden mesh in export requires explicit review');
++    const geom = object.geometry, pos = geom.attributes.position, indices = geom.index;
++    assert.ok(pos?.count > 0, 'Actual runtime mesh has no position vertices');
++    const material = object.material;
++    assert.ok(!Array.isArray(material) && material?.name, 'Expected one named material per runtime quarry mesh');
++    assert.ok(!material.transparent && material.opacity === 1, 'Unexpected transparent quarry material needs separate contract review');
++    const points = [];
++    for (let i = 0; i < pos.count; i++) {
++      v.fromBufferAttribute(pos, i).applyMatrix4(object.matrixWorld);
++      assert.ok([v.x, v.y, v.z].every(Number.isFinite));
++      points.push([v.x, v.y, v.z]);
++      vertices++;
++      if (v.y >= contract.yMin && v.y <= contract.yMax
++        && v.x ** 2 + v.z ** 2 <= contract.radius ** 2 + EPS) interiorVertices++;
++    }
++    const count = indices?.count ?? pos.count;
++    assert.equal(count % 3, 0, 'Incomplete triangle topology');
++    const counts = byMaterial[material.name] ||= { triangles: 0, intersectingTriangles: 0 };
++    for (let i = 0; i < count; i += 3) {
++      const tri = [0, 1, 2].map((k) => points[indices ? indices.getX(i + k) : i + k]);
++      triangles++; counts.triangles++;
++      if (triangleIntersectsEnvelope(tri, contract)) {
++        intersectingTriangles++; counts.intersectingTriangles++;
++        if (witnesses.length < 12) witnesses.push({ mesh: object.name, material: material.name, triangleIndex: i / 3, vertices: tri });
++      }
++    }
++  });
++  assert.ok(meshes > 0 && vertices > 0 && triangles > 0, 'Measured nothing; this is a failure');
++  return { asset: resolve(path), assetSha256: sha256(bytes), byteLength: bytes.length,
++    contract, meshes, vertices, triangles, interiorVertices, intersectingTriangles, byMaterial, witnesses,
++    passed: intersectingTriangles === 0,
++    evidence: 'CPU classification of actual exported triangle vertices; no rendered/GPU acceptance' };
++}
++
++export function selfTest() {
++  const c = { radius: 0.36, yMin: 0, yMax: 0.715 };
++  // Fixture values exercise the algorithm, never author production dimensions.
++  const cases = [
++    ['crossing cap with no vertex inside', [[-1, .1, -1], [1, .1, -1], [0, .1, 1]], true],
++    ['remote triangle whose AABB includes origin', [[-.6, .1, 1], [1, .1, -.6], [1, .1, 1]], true],
++    ['AABB false-positive control', [[-.1, .1, 1], [1, .1, -.1], [1, .1, 1]], false],
++    ['above slab', [[-1, 1, -1], [1, 1, -1], [0, 1, 1]], false],
++    ['below slab', [[-1, -.1, -1], [1, -.1, -1], [0, -.1, 1]], false],
++    ['vertical edge crosses bore', [[-.1, -1, 0], [.1, -1, 0], [.1, 1, 0]], true],
++    ['Y clipping removes distant crossing', [[0, -10, 0], [10, .1, 0], [10, .2, 1]], false],
++    ['vertex inside', [[0, .5, 0], [1, .5, 0], [0, .5, 1]], true],
++    ['grade contact', [[-.1, 0, -.1], [.1, 0, -.1], [0, 0, .1]], true],
++    ['top contact', [[-.1, .715, -.1], [.1, .715, -.1], [0, .715, .1]], true],
++    ['radial tangent', [[.36, .2, 0], [1, .2, 0], [.36, .3, 0]], true],
++    ['outside tangent', [[.361, .2, 0], [1, .2, 0], [.361, .3, 0]], false],
++  ];
++  for (const [label, triangle, expected] of cases) {
++    assert.equal(triangleIntersectsEnvelope(triangle, c), expected, label);
++    assert.equal(triangleIntersectsEnvelope([...triangle].reverse(), c), expected, `${label}: winding`);
++  }
++  return { cases: cases.length, assertions: cases.length * 2 };
++}
++
++async function main() {
++  const args = process.argv.slice(2), options = {};
++  for (let i = 0; i < args.length; i++) {
++    if (args[i] === '--self-test') { options.selfTest = true; continue; }
++    assert.ok(['--asset', '--terrain', '--json'].includes(args[i]), `Unknown argument ${args[i]}`);
++    assert.ok(args[i + 1] && !args[i + 1].startsWith('--'), `Missing value for ${args[i]}`);
++    options[args[i].slice(2)] = args[++i];
++  }
++  const checks = selfTest();
++  if (options.selfTest && !options.asset) {
++    console.log(`PASS quarry live-collar collision self-test: ${checks.cases} cases / ${checks.assertions} assertions`);
++    return;
++  }
++  const terrainPath = options.terrain ?? resolve(repo, 'src/world/terrain.js');
++  const source = readFileSync(terrainPath, 'utf8');
++  const report = await inspectAsset(options.asset ?? resolve(repo, 'public/models/sites/quarry-bench.glb'), collarContract(source));
++  report.terrain = resolve(terrainPath); report.terrainSha256 = sha256(readFileSync(terrainPath));
++  report.gateSha256 = sha256(readFileSync(fileURLToPath(import.meta.url)));
++  report.rulerSha256 = sha256(readFileSync(resolve(repo, 'tools/glbinfo.mjs')));
++  report.selfTest = checks;
++  if (options.json) writeFileSync(options.json, JSON.stringify(report, null, 2) + '\n');
++  console.log(JSON.stringify(report, null, 2));
++  console.log(`${report.passed ? 'PASS' : 'FAIL'} quarry live collar: ${report.intersectingTriangles}/${report.triangles} actual triangles intersect the live work envelope`);
++  if (!report.passed) process.exitCode = 1;
++}
++
++if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
++  main().catch((error) => { console.error(`FAIL quarry live collar: ${error.stack || error}`); process.exitCode = 1; });
++}
+diff --git a/tools/checkquarrylivecollar-adversarial.mjs b/tools/checkquarrylivecollar-adversarial.mjs
+new file mode 100644
+index 0000000..7d5702b
+--- /dev/null
++++ b/tools/checkquarrylivecollar-adversarial.mjs
+@@ -0,0 +1,85 @@
++/** Independent adversarial tests; no dimensions are measured here.
++ * All physical validation goes through the production regression's glbinfo
++ * parse/measure path. Fixture coordinates only exercise collision classification.
++ * Temporary fixtures are retained under the printed task-specific temp folder.
++ */
++import assert from 'node:assert/strict';
++import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
++import { tmpdir } from 'node:os';
++import { join } from 'node:path';
++import { collarContract, inspectAsset, triangleIntersectsEnvelope } from './checkquarrylivecollar.mjs';
++
++const temp = mkdtempSync(join(tmpdir(), 'drillity-quarry-collar-critic-'));
++const contract = collarContract(readFileSync(new URL('../src/world/terrain.js', import.meta.url), 'utf8'));
++const results = [];
++function glb(json, binary) {
++  const text = Buffer.from(JSON.stringify(json));
++  const j = Buffer.alloc(Math.ceil(text.length / 4) * 4, 32); text.copy(j);
++  const b = Buffer.alloc(Math.ceil(binary.length / 4) * 4); binary.copy(b);
++  const out = Buffer.alloc(12 + 8 + j.length + 8 + b.length);
++  out.writeUInt32LE(0x46546c67, 0); out.writeUInt32LE(2, 4); out.writeUInt32LE(out.length, 8);
++  out.writeUInt32LE(j.length, 12); out.writeUInt32LE(0x4e4f534a, 16); j.copy(out, 20);
++  const offset = 20 + j.length;
++  out.writeUInt32LE(b.length, offset); out.writeUInt32LE(0x004e4942, offset + 4); b.copy(out, offset + 8);
++  return out;
++}
++function fixture(points = [[2, .1, 0], [3, .1, 0], [2, .1, 1]]) {
++  const values = new Float32Array(points.flat()), binary = Buffer.from(values.buffer);
++  const json = { asset: { version: '2.0' }, scene: 0, scenes: [{ nodes: [0] }],
++    nodes: [{ name: 'static:fixture', mesh: 0 }], materials: [{ name: 'gravel' }],
++    meshes: [{ primitives: [{ attributes: { POSITION: 0 }, material: 0 }] }],
++    buffers: [{ byteLength: binary.length }], bufferViews: [{ buffer: 0, byteLength: binary.length }],
++    accessors: [{ bufferView: 0, componentType: 5126, count: points.length, type: 'VEC3',
++      min: [Math.min(...points.map(p => p[0])), Math.min(...points.map(p => p[1])), Math.min(...points.map(p => p[2]))],
++      max: [Math.max(...points.map(p => p[0])), Math.max(...points.map(p => p[1])), Math.max(...points.map(p => p[2]))] }] };
++  return { json, binary };
++}
++async function check(name, expected, mutate = () => {}, points) {
++  const f = fixture(points); mutate(f);
++  const path = join(temp, name + '.glb'); writeFileSync(path, glb(f.json, f.binary));
++  let actual, detail;
++  try { const r = await inspectAsset(path, contract); actual = r.passed ? 'clear' : 'blocked'; detail = { triangles: r.triangles, interiorVertices: r.interiorVertices, intersectingTriangles: r.intersectingTriangles }; }
++  catch (e) { actual = 'rejected'; detail = e.message; }
++  results.push({ name, expected, actual, passed: actual === expected, detail });
++}
++
++await check('clear-actual-triangle', 'clear');
++await check('cap-interior-no-contained-vertices', 'blocked', () => {}, [[-2, .1, -2], [2, .1, -2], [0, .1, 2]]);
++await check('vertical-slab-crossing', 'blocked', () => {}, [[-.1, -2, 0], [.1, -2, 0], [.1, 2, 0]]);
++await check('empty-scene', 'rejected', f => { f.json.scenes[0].nodes = []; });
++await check('empty-mesh', 'rejected', f => { f.json.meshes[0].primitives = []; });
++await check('missing-position', 'rejected', f => { delete f.json.meshes[0].primitives[0].attributes.POSITION; });
++await check('zero-vertex-accessor', 'rejected', f => { f.json.accessors[0].count = 0; });
++await check('unattached-no-position', 'rejected', f => { f.json.meshes.push({ primitives: [{ attributes: {} }] }); });
++await check('sparse-position', 'rejected', f => { f.json.accessors[0].sparse = { count: 1 }; });
++await check('compressed-position', 'rejected', f => { f.json.extensionsUsed = ['KHR_draco_mesh_compression']; });
++await check('nonfinite-position', 'rejected', f => { f.binary.writeFloatLE(NaN, 0); });
++await check('truncated-position-storage', 'rejected', f => { f.json.bufferViews[0].byteLength = 12; });
++await check('unmeasured-line-mode', 'rejected', f => { f.json.meshes[0].primitives[0].mode = 1; });
++await check('partial-triangle-topology', 'rejected', f => { f.json.accessors[0].count = 2; });
++await check('transparent-mesh', 'rejected', f => { f.json.materials[0].alphaMode = 'BLEND'; });
++await check('unnamed-material', 'rejected', f => { delete f.json.materials[0].name; });
++await check('transformed-to-collar', 'blocked', f => { f.json.nodes[0].translation = [-2, 0, 0]; });
++await check('morph-target-unexamined', 'rejected', f => {
++  f.json.meshes[0].weights = [1];
++  f.json.meshes[0].primitives[0].targets = [{ POSITION: 1 }];
++  const delta = Buffer.from(new Float32Array([-2, 0, 0, -2, 0, 0, -2, 0, 0]).buffer);
++  f.json.bufferViews.push({ buffer: 0, byteOffset: f.binary.length, byteLength: delta.length });
++  f.json.accessors.push({ bufferView: 1, componentType: 5126, count: 3, type: 'VEC3', min: [-2, 0, 0], max: [-2, 0, 0] });
++  f.binary = Buffer.concat([f.binary, delta]); f.json.buffers[0].byteLength = f.binary.length;
++});
++
++// Analytic independent boundary samples: all six vertex permutations must agree.
++let permutationAssertions = 0;
++for (const [triangle, expected] of [
++  [[[-2, .2, -2], [2, .2, -2], [0, .2, 2]], true],
++  [[[.5, -.5, 0], [.5, 1, 0], [2, .2, 1]], false],
++  [[[-1, -.5, 0], [1, -.5, 0], [0, 1, 0]], true],
++]) {
++  for (const perm of [[0,1,2], [0,2,1], [1,0,2], [1,2,0], [2,0,1], [2,1,0]]) {
++    assert.equal(triangleIntersectsEnvelope(perm.map(i => triangle[i]), contract), expected);
++    permutationAssertions++;
++  }
++}
++console.log(JSON.stringify({ temp, fixtureCases: results.length, permutationAssertions, passed: results.every(r => r.passed), results }, null, 2));
++process.exitCode = results.every(r => r.passed) ? 0 : 1;
+diff --git a/tools/checkquarrylivecollarbrowser.mjs b/tools/checkquarrylivecollarbrowser.mjs
+new file mode 100644
+index 0000000..dbeaeb0
+--- /dev/null
++++ b/tools/checkquarrylivecollarbrowser.mjs
+@@ -0,0 +1,103 @@
++/** Headed quarry collar evidence; exact GPU lease required.
++ * node tools/checkquarrylivecollarbrowser.mjs --port 5207
++ * Baseline/root assets are read-only. Candidate quarry is served from this checkout.
++ * Native game screenshots and isolated diagnostic renders are labelled separately.
++ * No FPS, clearance, or whole-game visual-quality certification.
++ */
++import assert from 'node:assert/strict';
++import { chromium } from 'playwright';
++import { readFileSync, mkdirSync, writeFileSync } from 'node:fs';
++import { createHash } from 'node:crypto';
++import { resolve } from 'node:path';
++
++const args = process.argv.slice(2);
++const flag = (name, fallback) => { const i=args.indexOf('--'+name); return i<0?fallback:args[i+1]; };
++const root = resolve(flag('root', '../../drillity-the-game'));
++const out = resolve(flag('out', 'shots/quarry-live-collar'));
++const lease = resolve(flag('lease', '../drillity-coordination/gpu-owner.txt'));
++const hash = bytes => createHash('sha256').update(bytes).digest('hex');
++const checkLease = () => assert.equal(readFileSync(lease,'utf8').trim(), 'quarry-live-collar', 'Exact GPU grant required');
++const sourceFiles = ['blender/sites/quarry_bench.py','blender/lib/site.py','blender/lib/rig.py','src/world/terrain.js','src/core/renderer.js','src/core/assets.js'];
++const baseline = readFileSync(resolve(root, 'public/models/sites/quarry-bench.glb'));
++const candidate = readFileSync(resolve('public/models/sites/quarry-bench.glb'));
++assert.notEqual(hash(baseline),hash(candidate),'Candidate must differ from original negative control');
++checkLease();
++mkdirSync(out,{recursive:true});
++const report = { evidence:'Headed actual gameplay plus isolated actual site/live-collar geometry with diagnostic camera and lighting. No FPS or engineering clearance claim.',
++  baselineSHA256:hash(baseline),candidateSHA256:hash(candidate),
++  sources:Object.fromEntries(sourceFiles.map(p=>[p,hash(readFileSync(p))])),cases:[],errors:[],requestsFailed:[],warnings:[],failures:[] };
++let browser;
++try {
++  browser = await chromium.launch({headless:false,channel:'chrome',args:['--mute-audio','--enable-gpu-rasterization','--ignore-gpu-blocklist']});
++  for (const variant of ['baseline','candidate']) {
++    checkLease();
++    const context = await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,reducedMotion:'reduce'});
++    // Serve read-only generated inputs without exporting/copying unrelated models.
++    await context.route('**/models/**/*.glb', async route => {
++      const path = new URL(route.request().url()).pathname;
++      assert.match(path,/^\/models\/(?:sites\/)?[a-z0-9-]+\.glb$/);
++      const quarry = path === '/models/sites/quarry-bench.glb';
++      const bytes = quarry ? (variant==='baseline'?baseline:candidate) : readFileSync(resolve(root,'public'+path));
++      await route.fulfill({status:200,contentType:'model/gltf-binary',body:bytes});
++    });
++    const page=await context.newPage();
++    page.on('pageerror',e=>report.errors.push({variant,message:e.message}));
++    page.on('console',m=>{if(m.type()==='error')report.errors.push({variant,message:m.text()});if(m.type()==='warning')report.warnings.push({variant,message:m.text()});});
++    page.on('requestfailed',r=>report.requestsFailed.push({variant,url:r.url(),error:r.failure()?.errorText}));
++    page.on('response',r=>{if(r.status()>=400)report.errors.push({variant,status:r.status(),url:r.url()});});
++    await page.goto('http://127.0.0.1:'+flag('port','5207')+'/?quality=high&shot&mute',{waitUntil:'domcontentloaded'});
++    await page.waitForFunction(()=>window.__DRILLITY?.__qa&&document.querySelector('.menu')&&!document.querySelector('.menu').hidden,null,{timeout:180000});
++    await page.evaluate(async()=>{
++      const c=window.__DRILLITY,{makeRandom}=await import('/src/core/contract.js');
++      c.rand=makeRandom(1904); c.sim.update=()=>{};
++      await c.__qa.loadModel('dth-crawler');
++      await c.__qa.startDemoContract({method:'dth',depth:0});
++      // Controlled quarry fixture: actual public terrain state, not a new app contract.
++      c.state.contract.archetype='quarry-bench'; c.terrain.setArchetype('quarry-bench');
++      c.state.drill.active=false;c.state.garage.rigId='dth-crawler';c.rig.setRig('dth-crawler');
++    });
++    await page.waitForFunction(()=>window.__DRILLITY.terrain.siteModel.model==='quarry-bench',null,{timeout:60000});
++    await page.evaluate(async()=>{await window.__DRILLITY.renderer.warmShaders();await new Promise(r=>{let n=0;const f=()=>++n>=80?r():requestAnimationFrame(f);requestAnimationFrame(f);});});
++    for(const cased of [false,true]) {
++      checkLease();
++      await page.evaluate(cased=>{const c=window.__DRILLITY;c.geology.setCasingDepth(cased?1:0);c.terrain.update(0,c.state);},cased);
++      const name=variant+'-'+(cased?'cased':'uncased');
++      const result=await page.evaluate(async({cased})=>{
++        const c=window.__DRILLITY,T=c.THREE,site=c.terrain.root.getObjectByName('site:quarry-bench'),collar=c.terrain.root.getObjectByName('collar');
++        if(!site||!collar)throw Error('Missing actual loaded site or live collar');
++        // Set via the actual public casing API; verify the actual live node.
++        const stub=collar.children.find(o=>o.geometry?.parameters?.radiusTop===0.34&&o.geometry?.parameters?.height===0.75);
++        if(!stub||stub.visible!==cased)throw Error('Actual casing visibility did not follow geology API');
++        const source=c.rig.getSpec().source;
++        if(source!=='glb')throw Error('Rig fallback, not requested actual asset');
++        const native=c.renderer.captureFrame();
++        const scene=new T.Scene();scene.background=new T.Color(0x353b41);
++        scene.add(site.clone(true),collar.clone(true));
++        scene.add(new T.HemisphereLight(0xffffff,0x59616b,2.0));
++        const key=new T.DirectionalLight(0xffffff,3.0);key.position.set(3,5,4);scene.add(key);
++        // Authored diagnostic view only; these are not site clearance dimensions.
++        const camera=new T.PerspectiveCamera(40,c.renderer.gl.domElement.width/c.renderer.gl.domElement.height,0.05,100);
++        camera.position.set(1.6,1.5,2.1);camera.lookAt(0,0.25,0);
++        const gl=c.renderer.gl,size=gl.getSize(new T.Vector2()),viewport=gl.getViewport(new T.Vector4()),scissor=gl.getScissor(new T.Vector4()),scissorTest=gl.getScissorTest(),target=gl.getRenderTarget();
++        let diagnostic;
++        try{gl.setRenderTarget(null);gl.setScissorTest(false);gl.setViewport(0,0,size.x,size.y);gl.clear();gl.render(scene,camera);diagnostic=gl.domElement.toDataURL('image/png');}
++        finally{gl.setRenderTarget(target);gl.setViewport(viewport);gl.setScissor(scissor);gl.setScissorTest(scissorTest);c.renderer.render(0);}
++        return {native,diagnostic,siteModel:c.terrain.siteModel,collarPosition:c.terrain.collarPosition.toArray(),cased,stubVisible:stub.visible,rigSource:source,registration:c.renderer.registration,
++          fonts:[...document.fonts].map(f=>({family:f.family,status:f.status})),contextLost:gl.getContext().isContextLost()};
++      },{cased});
++      for(const kind of ['native','diagnostic']) { assert.match(result[kind],/^data:image\/png;base64,/);writeFileSync(resolve(out,name+'-'+kind+'.png'),Buffer.from(result[kind].split(',')[1],'base64'));delete result[kind]; }
++      report.cases.push({name,...result});
++      await page.screenshot({path:resolve(out,name+'-phone.png')});
++      console.log(name+' actualModel='+result.siteModel.model+' stubVisible='+result.stubVisible);
++    }
++    await context.close();
++  }
++}catch(error){report.failures.push(error.stack||String(error));}
++finally{
++  if(browser){await browser.close();report.browserClosed=true;}
++  report.passed=report.cases.length===4&&!report.errors.length&&!report.requestsFailed.length&&!report.failures.length&&report.cases.every(c=>!c.contextLost);
++  report.visualAcceptance='Pending human/agent image inspection; successful capture alone is not visual acceptance.';
++  writeFileSync(resolve(out,'report.json'),JSON.stringify(report,null,2));
++}
++console.log(JSON.stringify({cases:report.cases.length,passed:report.passed,errors:report.errors.length,requestsFailed:report.requestsFailed.length,failures:report.failures,browserClosed:report.browserClosed}));
++process.exitCode=report.passed?0:1;
+diff --git a/tools/verify_quarry_live_collar.py b/tools/verify_quarry_live_collar.py
+new file mode 100644
+index 0000000..ba0bbb6
+--- /dev/null
++++ b/tools/verify_quarry_live_collar.py
+@@ -0,0 +1,196 @@
++"""Compare actual prejoin Blender objects and export the live-collar correction.
++
++Blender --background --threads 2 --python-exit-code 1 --python tools/verify_quarry_live_collar.py
++Reads the frozen baseline from Git without changing it. Writes only this
++checkout's public/models/sites/quarry-bench.glb and .bak/quarry-live-collar/.
++This is a geometry equality regression/export fixture, not a dimensional CLI;
++use tools/glbinfo.mjs to measure the emitted actual-vertex fixtures.
++"""
++import hashlib
++import json
++import os
++from pathlib import Path
++import subprocess
++import sys
++import types
++
++import bpy
++
++ROOT = Path(__file__).resolve().parents[1]
++SOURCE = 'blender/sites/quarry_bench.py'
++BASELINE = '37f92a48abfd4ce3a20654359cb869dcd46ba25d'
++OUT = ROOT / '.bak' / 'quarry-live-collar'
++OUT.mkdir(parents=True, exist_ok=True)
++CENTER_REMOVED = {'shot-collar-4-0', 'stem-4', 'flagpin-4', 'flag-4'}
++REMOVED = CENTER_REMOVED | {'spill-11-4'}
++PAYLOADS = {}
++
++
++def sha(data):
++    return hashlib.sha256(data).hexdigest()
++
++
++def load(code, name):
++    module = types.ModuleType(name)
++    module.__file__ = str(ROOT / SOURCE)
++    exec(compile(code, module.__file__, 'exec'), module.__dict__)
++    return module
++
++
++def author(module):
++    module.S.reset()
++    module.build_highwall()
++    module.build_shot()
++    module.build_bench()
++    module.build_plant()
++    module.build_anchors()
++    bpy.context.view_layer.update()
++
++
++def signature(obj):
++    """Exact data comparison; computes no bounds or dimensional conclusion."""
++    data = {'type': obj.type, 'matrix': [list(row) for row in obj.matrix_world],
++            'parent': obj.parent.name if obj.parent else None,
++            'extras': {key: obj[key] for key in obj.keys()}}
++    if obj.type == 'MESH':
++        mesh = obj.data
++        data['vertices'] = [list(v.co) for v in mesh.vertices]
++        data['edges'] = [list(edge.vertices) for edge in mesh.edges]
++        data['polygons'] = [(list(p.vertices), p.material_index, p.use_smooth)
++                            for p in mesh.polygons]
++        data['materials'] = [mat.name if mat else None for mat in mesh.materials]
++        data['uv'] = {uv.name: [list(v.uv) for v in uv.data]
++                      for uv in mesh.uv_layers}
++        data['colors'] = {a.name: [list(v.color) for v in a.data]
++                          for a in mesh.color_attributes}
++        data['modifiers'] = [modifier.type for modifier in obj.modifiers]
++        assert not obj.modifiers, 'Unexamined modifier in ' + obj.name
++    else:
++        assert obj.type == 'EMPTY', 'Unexamined object type: ' + obj.type
++    digest = sha(json.dumps(data, sort_keys=True).encode())
++    PAYLOADS[digest] = data
++    return digest
++
++
++def snapshot():
++    return {obj.name: signature(obj) for obj in bpy.context.scene.objects}
++
++
++def require_no_center_parts(objects):
++    present = sorted(REMOVED.intersection(objects))
++    if present:
++        raise AssertionError('Live collar still has authored dressing: ' + ', '.join(present))
++
++
++baseline_bytes = subprocess.check_output(['git', 'show', BASELINE + ':' + SOURCE], cwd=ROOT)
++candidate_bytes = (ROOT / SOURCE).read_bytes()
++before = load(baseline_bytes.decode('utf-8'), 'quarry_live_collar_baseline')
++author(before)
++before_objects = snapshot()
++assert REMOVED.issubset(before_objects), 'Baseline does not reproduce all five offending objects'
++
++# Keep the actual individual center meshes for the single approved ruler.
++bpy.ops.object.select_all(action='DESELECT')
++for name in CENTER_REMOVED:
++    bpy.data.objects[name].select_set(True)
++center_fixture = OUT / 'baseline-center-authored.glb'
++bpy.ops.export_scene.gltf(filepath=str(center_fixture), export_format='GLB',
++                         export_apply=True, export_yup=True, use_selection=True,
++                         export_cameras=False, export_lights=False, export_extras=True)
++
++negative_controls = []
++try:
++    require_no_center_parts(before_objects)
++except AssertionError as failure:
++    negative_controls.append({'case': 'unchanged baseline', 'rejected': True,
++                              'reason': str(failure)})
++else:
++    raise AssertionError('Baseline negative control silently passed')
++
++# Unchanged-source controls for Blender bevel UV arithmetic. Different reset
++# histories produced one-ULP changes in crusher body/hopper UVs. Record five
++# actual original-plant builds; no tolerance or geometry exception is applied.
++repeat_plant = {}
++for attempt in range(5):
++    before.S.reset()
++    before.build_plant()
++    bpy.context.view_layer.update()
++    for name, digest in snapshot().items():
++        repeat_plant.setdefault(name, []).append(digest)
++
++after = load(candidate_bytes.decode('utf-8'), 'quarry_live_collar_candidate')
++author(after)
++after_objects = snapshot()
++require_no_center_parts(after_objects)
++assert before_objects.keys() - after_objects.keys() == REMOVED
++assert not after_objects.keys() - before_objects.keys(), 'Unexpected new objects'
++changed = [name for name, value in after_objects.items() if before_objects[name] != value]
++if changed:
++    (OUT / 'unexpected-object-deltas.json').write_text(json.dumps({
++        name: {'before': PAYLOADS[before_objects[name]], 'after': PAYLOADS[after_objects[name]]}
++        for name in changed}, indent=2), encoding='utf-8')
++uv_controls = {}
++for name in changed:
++    first, candidate = PAYLOADS[before_objects[name]], PAYLOADS[after_objects[name]]
++    assert {k: v for k, v in first.items() if k != 'uv'} == {
++        k: v for k, v in candidate.items() if k != 'uv'}, 'Non-UV data changed: ' + name
++    assert name in repeat_plant, 'UV changed outside unchanged-source plant controls: ' + name
++    controls = [first] + [PAYLOADS[digest] for digest in repeat_plant[name]]
++    assert after_objects[name] in {before_objects[name], *repeat_plant[name]}, (
++        'Complete UV payload differs from every actual unchanged-source control: ' + name)
++    assert all({k: v for k, v in p.items() if k != 'uv'} == {
++        k: v for k, v in first.items() if k != 'uv'} for p in controls)
++    assert first['uv'].keys() == candidate['uv'].keys()
++    deltas = []
++    for layer, values in first['uv'].items():
++        assert len(values) == len(candidate['uv'][layer])
++        for index, pair in enumerate(values):
++            for component, value in enumerate(pair):
++                other = candidate['uv'][layer][index][component]
++                observed = sorted({p['uv'][layer][index][component] for p in controls})
++                assert other in observed, 'UV differs from every actual unchanged-source control: ' + name
++                if value != other:
++                    deltas.append({'layer': layer, 'loop': index, 'component': component,
++                                   'before': value, 'after': other, 'delta': other - value,
++                                   'observed_original_values': observed})
++    uv_controls[name] = {'original_repeated_signatures': repeat_plant[name],
++                         'component_deltas': deltas,
++                         'max_abs_uv_delta': max((abs(d['delta']) for d in deltas), default=0)}
++assert len(after_objects) > 0, 'Empty candidate'
++for name in sorted(REMOVED):
++    try:
++        require_no_center_parts({**after_objects, name: before_objects[name]})
++    except AssertionError as failure:
++        negative_controls.append({'case': 'reinsert ' + name, 'rejected': True,
++                                  'reason': str(failure)})
++    else:
++        raise AssertionError('Reinserted center object passed: ' + name)
++
++export_path = ROOT / 'public' / 'models' / 'sites' / 'quarry-bench.glb'
++export_path.parent.mkdir(parents=True, exist_ok=True)
++after.S.finish(str(export_path))
++assert (ROOT / SOURCE).read_bytes() == candidate_bytes, 'Source changed during export'
++report = {
++    'scope': 'Actual authored prejoin data equality; no rendered acceptance or dimensional clearance claim',
++    'baseline_commit': BASELINE,
++    'baseline_source_sha256': sha(baseline_bytes),
++    'candidate_source_sha256': sha(candidate_bytes),
++    'shared_source_sha256': {p: sha((ROOT / p).read_bytes()) for p in
++                             ['blender/lib/site.py', 'blender/lib/rig.py', 'src/world/terrain.js']},
++    'baseline_object_count': len(before_objects), 'candidate_object_count': len(after_objects),
++    'removed_exactly': sorted(REMOVED), 'unchanged_objects': len(after_objects),
++    'bit_exact_surviving_objects': len(after_objects) - len(changed),
++    'changed_noncenter_objects': changed,
++    'uv_same_source_controls': uv_controls,
++    'non_uv_data_exactly_equal': True,
++    'before_objects': before_objects, 'after_objects': after_objects,
++    'negative_controls': negative_controls,
++    'asset': str(export_path), 'asset_sha256': sha(export_path.read_bytes()),
++    'center_fixture': str(center_fixture), 'center_fixture_sha256': sha(center_fixture.read_bytes()),
++}
++report_path = OUT / 'authoring-report.json'
++report_path.write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
++print('QUARRY_LIVE_COLLAR_PASS ' + json.dumps({key: report[key] for key in
++      ['baseline_object_count', 'candidate_object_count', 'removed_exactly',
++       'unchanged_objects', 'candidate_source_sha256', 'asset_sha256']}))
++print('QUARRY_LIVE_COLLAR_REPORT=' + str(report_path))
+diff --git a/research/sites/quarry-live-collar.md b/research/sites/quarry-live-collar.md
+new file mode 100644
+index 0000000..9dfc2d5
+--- /dev/null
++++ b/research/sites/quarry-live-collar.md
+@@ -0,0 +1,115 @@
++# Quarry live collar correction
++
++Baseline: `37f92a48abfd4ce3a20654359cb869dcd46ba25d` on private branch
++`codex/quarry-live-collar`. Production scope is `blender/sites/quarry_bench.py`
++and its matching generated private quarry GLB. Root integration is separate.
++
++**Final CPU result: PASS. Rendered acceptance: PENDING.** The actual matching
++export has zero intersecting triangles out of13,840, with27,030 vertices
++measured. The final authoring comparison removes exactly5 of1,030 objects;
++all1,025 survivors are bit-identical, including UV data. Other23 pattern
++positions,59 scatter blocks and the earlier conveyors remain unchanged.
++
++Candidate source SHA256:
++`b0b750e43cd08dc3d0ae76f3322ffdc7848161e90d6b4949e78685c74a1705d4`.
++Candidate GLB SHA256:
++`5b53090ed7c92c89be48e4dcf668a7400634aa62eb3d7b89482c4cfc7db78930`.
++GLB size955,160 bytes;6 primitives and4 named site anchors. The previous export
++was961,304 bytes and13,936 triangles. These are file/geometry counts, not FPS.
++
++The original source explicitly places one shot hole at the live collar. Its
++helper emits a capped cuttings cylinder, then the module places stemming,
++a pin and a flag there. The correction reserves that exact pattern position
++for terrain.js's live throat/cuttings/casing, retaining the original pattern
++list so every other hole keeps its deterministic index and variations.
++
++Independent actual-export analysis found one additional opaque scatter block,
++`spill-11-4`, intersecting the same throat. Its isolated actual Blender export
++accounts for exactly the five rock triangles not explained by the four center
++objects. Remove only that block; preserve the other 59 spill blocks. No new
++engineering clearance number, physical dimension or material is introduced.
++
++## Evidence categories
++
++- Source: exact original module, shared helpers and live `buildCollar()`.
++- Authored geometry: actual prejoin Blender objects, including independent
++  center and spill fixtures; survivor comparison covers the whole site.
++- Exported geometry: `tools/glbinfo.mjs` parses/measures actual vertices.
++  The dedicated gate classifies actual transformed triangles after clipping
++  against the live grade-to-casing-top interval. It also catches triangles
++  crossing the throat with all three vertices outside it.
++- Rendered evidence: **pending**. No rendered acceptance or FPS claim.
++
++Original root GLB SHA256:
++`61a93902888f54b9913fdda690f308008dae8a80cb5b2b2e10208e4d219428dd`.
++It has 6 primitives, 13,936 triangles, 961,304 bytes and 65 intersecting
++triangles: gravel36, rawSteel12, safetyStripe12 and blastedRock5. The actual
++center fixture contributes60; the independently exported spill fixture5.
++
++The radius/height used by the regression come from the current runtime throat
++and casing. They define ownership of a drawn opening, not a real-world safety
++distance or a sourced blasthole diameter. Existing unrelated site dimensions
++and provenance gaps are not recertified by this change.
++
++The source supports intersecting opaque geometry. It does not establish the
++earlier reported z-fighting: the puddle plane is inside the cuttings solid,
++not coplanar with its horizontal caps. The helper uses base-origin cylinders,
++so the actual flagpin top is0.62m; a centered-cylinder inference was withdrawn.
++
++## Verification commands
++
++Run from the private checkout, using the installed Blender executable:
++
++```powershell
++& 'C:/Program Files/Blender Foundation/Blender 5.2/blender.exe' --background --threads 2 --python-exit-code 1 --python tools/verify_quarry_live_collar.py
++node tools/glbinfo.mjs --parts public/models/sites/quarry-bench.glb
++node tools/checkquarrylivecollar.mjs --json .bak/quarry-live-collar/candidate-collision.json
++node tools/checkquarrylivecollar.mjs --asset C:/Users/henri/Downloads/drillity-the-game/public/models/sites/quarry-bench.glb --json .bak/quarry-live-collar/root-baseline-collision.json
++node tools/checkquarrylivecollar-adversarial.mjs
++```
++
++The original root asset is a negative control and must exit1. The source
++regression reads the immutable baseline from Git and writes only private
++outputs. `--python-exit-code 1` is necessary: Blender otherwise returned0
++after a Python assertion during the first preservation check.
++
++An earlier check found one repeated Blender artifact: the unchanged
++crusher-hopper differed in20 UV components by one float32 ULP. Three resets
++of the unchanged plant source reproduced the exact same alternate UV data.
++Another run found8 one-ULP UV differences on crusher-body. Geometry/topology/
++material/transforms remained exact. The verifier now requires exact geometry
++and accepts only a complete UV signature measured in an unchanged-source
++control; it does not introduce a numeric tolerance or alter either crusher
++object. **The final successful run used no alternate signature at all:**
++all1,025 complete survivor signatures equal their baseline counterparts.
++The recorded failed runs remain as evidence of Blender UV repeatability limits.
++
++## Render queue and limits
++
++`tools/checkquarrylivecollarbrowser.mjs` is prepared for four headed states:
++baseline/candidate, each uncased/cased. It separately labels normal gameplay
++screenshots and isolated actual site/live-collar diagnostic renders with
++authored diagnostic camera/lighting. Capture success itself is not acceptance;
++the images must be opened and inspected.
++
++It requires exact GPU lease `quarry-live-collar`. This task never received
++that lease and launched no browser/GPU capture. The attempted private Vite
++startup failed before binding because esbuild was denied directory access
++(`Cannot read directory "../../..": Access is denied`). No escalation,
++permission change, alternate-config workaround or preview retry was attempted.
++The GPU request/checkpoint is in the sibling drillity-coordination directory.
++
++After a permitted preview is available and the exact lease is granted:
++
++```powershell
++node tools/checkquarrylivecollarbrowser.mjs --port 5207
++```
++
++No full build, player-facing visual acceptance, integration, push or archive is
++claimed. User5178 and root5198 were untouched. Source-only, authored and actual
++exported evidence remains useful independently of the queued rendered review.
++
++Detailed independent evidence: `quarry-live-collar-repro.md`,
++`quarry-live-collar-implementation.md`, and `quarry-live-collar-critic.md`.
++Final source/asset hashes and verification result are delivered in the live
++coordination checkpoint alongside the scoped patch.
+diff --git a/research/sites/quarry-live-collar-repro.md b/research/sites/quarry-live-collar-repro.md
+new file mode 100644
+index 0000000..f7d9a27
+--- /dev/null
++++ b/research/sites/quarry-live-collar-repro.md
+@@ -0,0 +1,163 @@
++# Quarry live collar — independent source and exported-geometry reproduction
++
++2026-09-06. Private checkout baseline `37f92a48abfd4ce3a20654359cb869dcd46ba25d`.
++Root source and generated assets were read-only inputs. No browser, GPU render,
++server, material, terrain, shared Blender helper or other site's source was
++changed by this reproduction.
++
++## Finding and scope
++
++The root quarry GLB contains opaque authored dressing in the live collar work
++space. The source initially identified four center shot objects; actual triangle
++inspection found a fifth obstruction, the single rock block `spill-11-4`.
++The extra rock was reported before a source or export pass was claimed. Root
++authorized its narrow removal after the named Blender fixture independently
++confirmed its identity. Other shot holes and all other spill blocks must survive.
++
++This is an authored-runtime ownership correction. It introduces no engineering
++clearance or real-world bore-diameter assertion. The protected envelope comes
++from `src/world/terrain.js`: `CFG.collar` is the origin; `buildCollar()` authors a
++throat with top radius 0.36 and a casing stub of height 0.75 centered at 0.34.
++The gate sweeps that throat-opening disk from grade to the casing top,
++`0.34 + 0.75 / 2 = 0.715`. These are the game's existing visual geometry values,
++not newly sourced physical dimensions.
++
++## Source evidence, kept distinct from measured vertices
++
++- `build_shot()` calls `S.pattern()` with origin `(0, 0, 0)`. The front row has
++  nine positions; column 4 is exactly the origin and returned index 4.
++- `blender/lib/site.py:pattern()` describes a ring but calls `tube()`: the center
++  `shot-collar-4-0` is a **capped cylinder**, not an annulus. It starts at height
++  0.005 and is 0.06 high.
++- The deterministic stemming and flag loops also dress index 4. `stem-4` is a
++  solid gravel cylinder, `flagpin-4` is a steel pin, and `flag-4` is its marker.
++- `rig.py:tube()` translates the primitive by half its length before placement;
++  its origin is its **base**. Therefore the 0.62-long flag pin reaches height
++  0.62. An initial centered-cylinder inference was explicitly withdrawn after
++  reading that helper; it is not a finding.
++- The extra blasted-rock geometry comes from `build_bench()`'s `spill` loop.
++  `.bak/quarry-live-collar/record_spill.py` executes the exact AST-selected
++  `rnd`, `rubble`, `on_axis`, constants and spill loop with a recording `box`.
++  It records all 60 authored blocks and identifies `spill-11-4` near the collar.
++  This is an authored-parameter trace, not a second vertex/dimension ruler.
++
++The source positions make overlap plausible but do not themselves prove the
++shipped bytes. The next section uses the actual GLB and actual named Blender
++fixture exports supplied by the implementation worker.
++
++## Actual exported geometry
++
++`tools/checkquarrylivecollar.mjs` first validates each asset using the existing
++`parseGLB()` and `measure()` from `tools/glbinfo.mjs`. The real Three GLTFLoader
++then exposes triangle topology and world-space vertices for collision
++classification. There is no local AABB collision shortcut or duplicated POSITION
++decoder. A triangle is clipped to the live vertical interval, then its projected
++polygon and edges are tested against the throat disk. This catches cap triangles
++whose interiors cross the collar even when every vertex lies outside the disk.
++
++| Actual asset | Vertices | Triangles | Vertices inside envelope | Intersecting triangles | CLI exit |
++|---|---:|---:|---:|---:|---:|
++| Root `quarry-bench.glb` | 27,204 | 13,936 | 105 | 65 | 1 |
++| Four named baseline center objects | 150 | 84 | 102 | 60 | 1 |
++| Five named `spill-11` blocks | 120 | 60 | 3 | 5 | 1 |
++| Final private quarry export | 27,030 | 13,840 | 0 | 0 | 0 |
++
++Root intersections split as gravel 36, rawSteel 12, safetyStripe 12,
++blastedRock 5. The four named center meshes account for the first 60; all five
++rock intersections in the separate fixture belong to `static:spill-11-4`,
++triangles 0, 1, 2, 3 and 10. The other four blocks in that fixture are clear.
++The two fixture counts exactly account for all 65 root intersections and all
++105 root vertices inside the envelope. Fixture versus merged-root coordinates
++have small floating-point differences from Blender joining/export transforms;
++the classification is independently performed on each file's actual vertices.
++
++The named fixture establishes object attribution that material-merged shipping
++nodes cannot retain. `tools/glbinfo.mjs` remains the sole dimension ruler; the
++collision gate reports triangle classifications, not a replacement dimension
++table. The implementation report owns full prejoin preservation and source/export
++matching; those checks must pass separately.
++
++## Regression and controls
++
++The gate's 12 synthetic algorithm cases run in both windings: 24 assertions,
++including an interior-only cap hit, an AABB false-positive control, vertical
++clipping, grade/top contact, and tangent/outside cases. The independent critic's
++18 malformed/transformed/real-GLB fixture cases and 18 triangle permutations
++pass. The critic first reproduced a morph-weight false pass: the narrow static
++exporter gate now rejects morphs, skins, animation and GPU instancing explicitly
++instead of pretending to classify unexamined deformation.
++
++Missing/empty/unreadable, compressed, sparse, nonfinite and incomplete geometry
++fail. The actual root asset and the baseline center fixture are negative controls
++and exit **1** under the same contract as the candidate. The controls were rerun
++after the gate's final deformation rejection change. They were not relabeled as
++success merely because their failure was expected.
++
++## Reproduction
++
++Run from the private checkout:
++
++```powershell
++node tools/checkquarrylivecollar.mjs --self-test
++node tools/checkquarrylivecollar-adversarial.mjs
++node tools/glbinfo.mjs C:/Users/henri/Downloads/drillity-the-game/public/models/sites/quarry-bench.glb
++node tools/checkquarrylivecollar.mjs --asset C:/Users/henri/Downloads/drillity-the-game/public/models/sites/quarry-bench.glb --terrain C:/Users/henri/Downloads/drillity-the-game/src/world/terrain.js --json .bak/quarry-live-collar/root-baseline-collision.json
++node tools/checkquarrylivecollar.mjs --asset .bak/quarry-live-collar/baseline-center-authored.glb --json .bak/quarry-live-collar/baseline-center-collision.json
++node tools/checkquarrylivecollar.mjs --asset .bak/quarry-live-collar/spill-11-authored.glb --json .bak/quarry-live-collar/spill-11-collision.json
++python .bak/quarry-live-collar/record_spill.py
++node tools/checkquarrylivecollar.mjs --json .bak/quarry-live-collar/candidate-collision.json
++```
++
++The three baseline/fixture collision commands intentionally fail. JSON files and
++matching logs preserve exact witnesses, paths, hashes, counts and methodology.
++
++## Provenance
++
++SHA-256:
++
++| Input | SHA-256 |
++|---|---|
++| Root original quarry source, raw bytes | `a791c5a64c156497ef758205cf0cae2bb7c175d80b9259e759ea69dda0b38b91` |
++| Root actual quarry GLB | `61a93902888f54b9913fdda690f308008dae8a80cb5b2b2e10208e4d219428dd` |
++| Final private quarry source | `b0b750e43cd08dc3d0ae76f3322ffdc7848161e90d6b4949e78685c74a1705d4` |
++| Final private quarry GLB | `5b53090ed7c92c89be48e4dcf668a7400634aa62eb3d7b89482c4cfc7db78930` |
++| Root and private live terrain source | `ff23ce1428b84e4d95dbfad5caa097dbdb97b548f55e07544345fe9f08318cf5` |
++| Sole ruler `tools/glbinfo.mjs` | `057bb6c89e0e8d974e2182b5db758e37c10b2254c3cd18409e8a097fab17cc11` |
++| Collision gate `tools/checkquarrylivecollar.mjs` | `80aabff0432262e2802c9c30ee35a173aac5a69084f1e80c9cb1c15ea3bfe445` |
++| Four-center named Blender fixture | `6294201e52ca560b913b1fb9d9d493413fed8a1ae10ef44428fe102711d22dab` |
++| Five-spill named Blender fixture | `97059471e442a44c68770feb27dfc183baf5534dcb443c5edf2822f8ccdd9cc8` |
++
++Root reports `site.py` raw bytes differ from private baseline only by newline
++format, with no `git diff --no-index` content difference; `rig.py` raw hashes
++match. This report does not treat a root historical export as automatically
++reproducible from a candidate without the independent source/export checks.
++
++## Rendered evidence and remaining acceptance
++
++No rendered findings are claimed here. In particular, the original description
++of a duplicate cylinder intersecting the puddle does **not** prove z-fighting:
++its side crosses the puddle plane and its top is at a different height. No pixel
++artifact, runtime draw call, FPS or player-visible improvement follows from this
++CPU test alone. The parent owns rendered evidence under the shared GPU lease.
++
++## Final candidate CPU acceptance
++
++The final matching private GLB passes: **zero intersecting triangles and zero
++vertices inside the live envelope**, among 13,840 triangles / 27,030 vertices.
++The six material primitives remain; total reduction is 96 triangles / 174
++exported vertices / 6,144 bytes. These are file/geometry counts, not GPU savings.
++`candidate-collision.json` and its log preserve the positive control. The root
++baseline was immediately rerun under the same frozen gate and still exits 1
++with its 65 intersections. Root also independently reproduced the candidate's
++zero-hit result against the identical asset hash.
++
++I read `authoring-report.json` and independently compared its frozen source and
++asset hashes to the files and the collision report. They match exactly. Its
++actual prejoin comparison records 1,030 original objects and 1,025 candidate
++objects, with precisely `flag-4`, `flagpin-4`, `shot-collar-4-0`, `stem-4`, and
++`spill-11-4` removed. All **1,025 survivors are bit-exact**, including UVs, in
++the final run. The earlier unchanged-source hopper UV variation did not recur
++in that final comparison; no alternate-UV acceptance branch was needed.
++
++CPU acceptance is complete. Rendered visual acceptance remains the parent's
++separate GPU-lease responsibility; this report supplies no rendered claim.
+diff --git a/research/sites/quarry-live-collar-implementation.md b/research/sites/quarry-live-collar-implementation.md
+new file mode 100644
+index 0000000..259baaf
+--- /dev/null
++++ b/research/sites/quarry-live-collar-implementation.md
+@@ -0,0 +1,121 @@
++# Quarry live-collar dressing correction
++
++2026-09-06. Private baseline `37f92a48abfd4ce3a20654359cb869dcd46ba25d`.
++Source scope: `blender/sites/quarry_bench.py` only. Shared site/rig libraries,
++terrain, renderer, materials, other sites and the earlier conveyor correction
++remain unedited. No engineering clearance dimension was introduced.
++
++## Reproduced cause and correction
++
++`terrain.js` supplies the live `CFG.collar` at the origin and `buildCollar()`
++owns its throat, cuttings and casing. `attachSiteModel()` places the quarry GLB
++at that same origin. `S.pattern()` places original index 4 there; its alleged
++dust ring is actually a capped cylinder. Removed `shot-collar-4-0`, `stem-4`,
++`flagpin-4` and `flag-4`. The complete original `at` ordering stays intact, so
++all other holes retain their keyed stemming/flag choices. No hole was reindexed.
++
++Independent inspection of the actual original joined GLB also found five
++`blastedRock` triangles crossing the live throat. An actual Blender fixture
++made by the original `build_bench()` identified all five as `spill-11-4`;
++the other four blocks in that fixture had zero intersections. Removed that
++single deterministic scatter block and retained the other 59 spill blocks.
++The spill sizes remain inherited authored geometry, **NOT SOURCED** engineering
++dimensions. The exclusion follows the existing live throat ownership contract.
++
++The root GLB contained 13,936 triangles. Its collision gate failed on 65 actual
++triangles: 60 from the four center pieces and five from `spill-11-4`.
++The four center meshes contain 84 triangles total; the separate five-block
++spill fixture contains 60 total. These are exported triangle findings, not an
++AABB inference. See `quarry-live-collar-repro.md` for the independent
++gate's provenance and algorithm controls.
++
++## Authoring preservation and inherited UV limitation
++
++`tools/verify_quarry_live_collar.py` loads the exact baseline through read-only
++`git show`, builds baseline and candidate in Blender, and compares actual
++prejoin vertices, topology, transforms, parents, materials, vertex colors,
++UVs and anchors. Only the five named objects may disappear; zero new objects
++may appear. The original baseline and individual object reinsertion controls
++must fail. The emitted private asset uses the candidate's own `S.finish()`.
++
++Early runs correctly refused to claim complete byte equality. Unchanged
++`build_plant()` repeated three times reproduced exactly the same 20 hopper
++UV component differences observed in the first full comparison, each
++`5.960464477539063e-8` (one float32 ULP). A later reset history moved the
++difference to eight crusher-body UV components, each `2.9802322387695312e-8`.
++Vertices, topology, transforms and materials remained exactly equal. No
++production plant code or numeric tolerance was changed. The final run collects
++five actual unchanged-source plant controls. Any UV acceptance is stated
++separately from exact geometry preservation and the original raw asset hash.
++
++**Final run passed with no UV exception:** 1,030 baseline objects became 1,025;
++all 1,025 survivors were bit-exact, including UVs. Only the five listed objects
++were removed. Actual counts were 24→23 shot collars, 24→23 pins, 24→23 flags,
++12→11 stems and 60→59 spill blocks; both conveyors retained all ten named
++objects each. All six negative controls rejected the offending geometry.
++`authoring-report.json` records every before/after object signature.
++`authoring-full-payload-postcheck.json` independently verifies the full-payload
++criterion; the final run required no alternate control payload at all.
++The verifier now also requires a complete original control signature on any
++future UV-variation branch, preventing acceptance of an unobserved mixture of
++individually observed component values. That added branch did not need to run
++for this successful final export.
++
++Diagnostic evidence is preserved in `.bak/quarry-live-collar/`:
++`hopper-repeat-probe.json`, `probe_hopper.py`,
++`unexpected-object-deltas.json`, `baseline-center-authored.glb`,
++`spill-11-authored.glb`, and the independent collision JSON reports.
++
++## Reproduction
++
++From the private checkout (PowerShell):
++
++```powershell
++& 'C:/Program Files/Blender Foundation/Blender 5.2/blender.exe' --background --threads 2 --python-exit-code 1 --python tools/verify_quarry_live_collar.py
++node tools/glbinfo.mjs --parts public/models/sites/quarry-bench.glb
++node tools/checkquarrylivecollar.mjs --asset public/models/sites/quarry-bench.glb --json .bak/quarry-live-collar/candidate-collision.json
++node tools/glbinfo.mjs .bak/quarry-live-collar/baseline-center-authored.glb
++node tools/glbinfo.mjs --parts .bak/quarry-live-collar/spill-11-authored.glb
++```
++
++`--python-exit-code 1` matters: Blender otherwise returned process exit 0 for
++the first failed Python assertion. No dimension tool was added; the fixture
++exports use `tools/glbinfo.mjs` for actual vertex bounds.
++
++## Frozen source and final artifact status
++
++Candidate source SHA-256:
++`b0b750e43cd08dc3d0ae76f3322ffdc7848161e90d6b4949e78685c74a1705d4`.
++Original on-disk source SHA-256:
++`a791c5a64c156497ef758205cf0cae2bb7c175d80b9259e759ea69dda0b38b91`.
++Original root GLB SHA-256:
++`61a93902888f54b9913fdda690f308008dae8a80cb5b2b2e10208e4d219428dd`.
++
++Candidate GLB SHA-256:
++`5b53090ed7c92c89be48e4dcf668a7400634aa62eb3d7b89482c4cfc7db78930`.
++It is 955,160 bytes, 13,840 actual triangles, six primitives/materials, ten
++exported nodes and zero images. The 96-triangle reduction is exactly the five
++removed objects. `glbinfo.mjs --parts` measures actual vertex bounds
++71.370 × 16.268 × 54.654 m; this is an asset extent, not a sourced quarry size.
++Six primitives are an asset draw-call floor, not measured runtime draws/FPS.
++The independent actual-triangle gate passes with **0/13,840** intersections
++and zero of 27,030 vertices inside the live throat/casing envelope. The exact
++original root GLB remains a failing negative control: **65/13,936**, exit 1.
++Evidence: `.bak/quarry-live-collar/candidate-collision.json` and
++`root-baseline-collision.json`. Root independently repeated the candidate gate
++and checked all 1,025 survivor hashes and six authoring negatives.
++
++Baseline Git-source SHA-256 (LF representation):
++`6de66e13a7cacf60b5b9259e59f2044f86a0033c727fc339e296df6f09e7bb16`.
++Original disk source uses different line endings. Shared-input SHA-256 values:
++
++- `blender/lib/site.py`: `ba59e6817f1eaf55c71624967ce90ade45145c6186205a9ebab21c47e8d24172`
++- `blender/lib/rig.py`: `b162741a7e6f032a3a3e817e4b33125069f70b9ed7d3f54a8cddaf371d7a8ed5`
++- `src/world/terrain.js`: `ff23ce1428b84e4d95dbfad5caa097dbdb97b548f55e07544345fe9f08318cf5`
++- `authoring-report.json`: `4a72a106f2f93c9bb0e9daf7cc5c24197d0e71f71baa7f58d02d86939f418cc0`
++
++The final Blender session exited 0 after the successful export; `git diff
++--check` passed. Only private output paths were written. No render,
++warm GPU performance, overall site framing or visual acceptance is claimed.
++The GPU lease was never granted to this implementation worker. No headed
++browser, render, user/root server change, root asset write or integration ran.
+diff --git a/research/sites/quarry-live-collar-critic.md b/research/sites/quarry-live-collar-critic.md
+new file mode 100644
+index 0000000..d2071b6
+--- /dev/null
++++ b/research/sites/quarry-live-collar-critic.md
+@@ -0,0 +1,229 @@
++# Quarry live-collar independent critique
++
++Status: **PASS for the scoped source correction and matching actual export.**
++All 1,025 surviving authored objects are bit-exact in the final build. The final
++asset has zero triangle intersections with the live-collar ownership envelope.
++**Rendered acceptance remains pending; no image was available to this critic.**
++This report distinguishes source, actual exported vertices, and images. No
++rendered acceptance is implied by source or CPU results.
++
++## Scope and authorities
++
++Read original `ASTRA.md` in full, original `handover.md`, and live
++`drillity-coordination/root-coordinator.md` / `claude-sites.md`. Production is
++read-only for this critic. The reviewed baseline is
++`37f92a48abfd4ce3a20654359cb869dcd46ba25d` in the private quarry checkout.
++`tools/glbinfo.mjs` is the only dimension reader used.
++
++The actual code contract is `terrain.js`'s `CFG.collar = (0,0,0)`,
++`buildCollar()` positioning the live group there, and `attachSiteModel()`
++positioning its clone at `(0,0,0)`. The matching `mount:site-collar` is authored
++at the origin. No engineering clearance radius is established or introduced
++by this correction.
++
++## Independently checked source findings
++
++`site.py` reexports `tube = R.tube`. `rig.py:181` uses
++`primitive_cylinder_add(...)` and translates the mesh by half its length,
++making `loc` its base, not its midpoint. `site.py:482`'s `pattern()` calls that
++primitive even though its prose calls the results dust rings. They are capped
++cylinders, not annuli.
++
++The baseline center is the fifth generated point (index 4, grid i=4,j=0).
++Three rows of nine with the existing final-row omissions produce 24 generated
++points. The four center objects are `shot-collar-4-0`, `stem-4`, `flagpin-4`,
++and `flag-4`.
++
++Claude's broad overlap finding is supported; two wordings need precision:
++
++- The dust cylinder is authored from y=0.005 to y=0.065 after Y-up export;
++  the live transparent puddle plane is at y=0.03. This is intersecting geometry,
++  not proof that surfaces are coplanar or that visible z-fighting occurs.
++- The pin is authored from y=0 to y=0.62. Its top is below the live casing
++  stub's top y=0.715; the flag extends from y=0.515 to y=0.645. The source
++  supports static dressing inside the casing volume. It does not establish a
++  flag visibly growing above the casing.
++
++These are existing authored/runtime dimensions, not externally certified
++engineering figures. Actual-vertex verification is recorded separately below.
++
++## Candidate source review
++
++The diff reads `S.pattern()`'s returned objects, locates the existing exact
++origin, removes that one dust cylinder, and skips that existing index in both
++the stemming and flag loops. It retains the entire `at` list and therefore the
++original indices used by `S.rnd`. It introduces no physical dimension and
++leaves `build_plant()` and its corrected conveyor support/drum formulas intact.
++Removing a point from `at` instead would change every subsequent keyed random
++variation; this candidate avoids that defect.
++
++The initial candidate source SHA-256 is
++`54c42a1d8987f7744aeeed0aca2e3a1bf54226354a2e663630808830e2904027`.
++The original root source SHA-256 is
++`a791c5a64c156497ef758205cf0cae2bb7c175d80b9259e759ea69dda0b38b91`.
++Raw filesystem/Git source hashes can differ by line endings; exact hash
++provenance is retained rather than conflated.
++
++## Original exported asset
++
++Command, run from the private checkout:
++
++```powershell
++node tools/glbinfo.mjs --parts C:/Users/henri/Downloads/drillity-the-game/public/models/sites/quarry-bench.glb
++```
++
++Original asset SHA-256:
++`61a93902888f54b9913fdda690f308008dae8a80cb5b2b2e10208e4d219428dd`.
++The actual root GLB is measurable and nonempty: 6 primitives, 13,936 triangles,
++10 nodes, no images, six materials. The four center names are absent after
++static merging; name-only checks on the shipped GLB cannot detect their geometry.
++Actual bounds reported by the approved ruler: x −57.765..13.604,
++y −1.600..14.668, z −39.379..15.275 (metres, display rounded to 0.001).
++These overall bounds alone prove nothing about a local collar obstruction.
++
++## Acceptance boundary
++
++The actual-vertex, preservation, negative-control and malformed-asset checks
++below are complete. A zero center-vertex count alone would be insufficient
++because a large triangle can span the whole hole; the accepted gate checks
++triangle interiors too. The parent's exact-lease images still require
++inspection before visual acceptance. This critic launched no browser, GPU
++render, or server, and makes no FPS, final gameplay appearance, whole-site
++collision or engineering-clearance claim.
++
++## Independent actual-vertex and regression results
++
++The source_repro worker's actual Blender center fixture was read independently
++with `parseGLB()` and `measure()` from `tools/glbinfo.mjs`, not a second ruler.
++The four meshes are measurable with zero unreadable primitives. Their exported
++Y extents confirm the source interpretation: flag 0.514999986..0.644999981,
++pin 0..0.620000005, dust cylinder 0.00499999989..0.06499999855, and stemming
++0..0.179255635. The stemming's x/z extents are ±0.527554154.
++
++Independently rerunning `inspectAsset()` against the original root GLB gives
++65 intersecting triangles: gravel 36, rawSteel 12, safetyStripe 12, and
++**blastedRock 5**. The additional rock finding is real. Triangles 8664, 8665,
++8666 and 8674 contain the actual transformed vertex
++`[0.1894971726389869, 0.3545374870300293, 0.13720865710186025]`, which lies
++inside the source-derived disk/slab. Triangle 8667 crosses grade into that
++disk even though none of its three vertices is inside it. Therefore a
++vertex-only gate would undercount this exact shipping obstruction.
++
++The worker traced this rock to the existing `build_bench()` spill loop's
++`spill-11-4`. I read the extraction script and independently measured its actual
++Blender fixture through glbinfo. Its x bounds are
++0.189492269..0.679633634; y −0.042518697..0.402039699;
++z −0.081551851..0.362638147. Small float differences versus the joined root
++mesh do not change the robust inside-volume witness. Removing this one
++confirmed overlapping decorative rock is within the same narrow live-collar
++dressing correction; moving the spill pile or inventing a safe distance is
++unnecessary. A candidate removing only the four originally reported objects
++must not be declared clear.
++
++Run the independent test:
++
++```powershell
++node tools/checkquarrylivecollar-adversarial.mjs
++```
++
++The first run passed 17 of 18 fixture cases and all 18 vertex-permutation
++assertions. It exposed a real false pass: a nonzero weighted morph target moved
++a clear base triangle into the collar while the gate tested only base POSITION.
++The gate author fixed this by refusing morph weights/targets, skins, animation
++and GPU instancing in this static-site audit. No second geometry implementation
++was added. My fresh rerun passed **18 of 18 fixture cases and 18 permutation
++assertions**, including the original reproducer. Empty scenes/meshes, missing
++POSITION (including an unattached bad mesh), zero count, sparse/compressed or
++nonfinite vertices, truncated storage, lines, incomplete triangle topology,
++transparent and unnamed materials all fail. A large cap and a vertical
++triangle crossing the protected slab are both caught with zero contained
++vertices. A transformed mesh is tested in its actual world transform.
++
++The gate's region is explicitly the live throat disk swept from grade to the
++top of the live casing stub. This is a local runtime-ownership regression, not
++an engineering clearance or whole-site collision certification. No further
++broad synthetic testing is required for the delivered static candidate.
++
++## Unchanged-source hopper control
++
++The initial complete prejoin equality test failed on `crusher-hopper`. I read
++the saved full before/after payloads and the separate `probe_hopper.py` source
++and its three unchanged-source build results. The complete object's only
++different field is UV data: 20 scalar components differ by exactly
++±5.960464477539063e-8. All non-UV fields are exactly equal. The baseline UV
++payload equals the first unchanged-source control exactly; the candidate UV
++payload equals the second and third controls exactly.
++
++This establishes an existing Blender repeated-build UV variation; it does
++not justify a general geometric tolerance. The final equality test should
++accept only the two observed complete UV payloads for that object, while
++retaining exact geometry, topology, transform, material and other data checks.
++The actual source diff leaves `build_plant()` unchanged. The evidence is in
++`.bak/quarry-live-collar/unexpected-object-deltas.json` and
++`.bak/quarry-live-collar/hopper-repeat-probe.json`, with the reproducible probe
++alongside them.
++
++A later full build exposed the same class of variation in `crusher-body`:
++the new delta artifact contains only that object's UV field, with eight scalar
++differences of exactly ±2.9802322387695312e-8. I independently checked those
++payloads. The implementation is collecting a bounded set of unchanged-source
++plant controls before its final export. The acceptance rule remains whole
++observed payload equality, with all non-UV fields required exact. If an unseen
++UV variant remains, the export can establish exact geometry preservation but
++must disclose unresolved UV determinism rather than claim every payload equal.
++
++## Final frozen candidate verification
++
++I independently read the final authoring report, recomputed its production and
++asset hashes, checked all recorded shared-source hashes, compared its complete
++before/after signature maps, and ran `inspectAsset()` on the matching private
++GLB. All checks passed. The actual final build has **no UV variation at all**:
++`changed_noncenter_objects = []`, `uv_same_source_controls = {}` and all
++**1,025 survivor signatures equal the full original signatures exactly**.
++The UV issues above describe earlier failed authoring attempts only; no UV
++exception was exercised in the delivered artifact. The final verifier also
++requires full-signature control membership before its component checks.
++
++| Check | Final result |
++|---|---|
++| Authored objects | 1,030 → 1,025 |
++| Removed exactly | `flag-4`, `flagpin-4`, `shot-collar-4-0`, `spill-11-4`, `stem-4` |
++| Surviving objects bit-exact | 1,025 / 1,025 |
++| Unexpected new objects | 0 |
++| Authored negative controls | Original baseline plus each of five reinsertions rejected |
++| Actual exported meshes | 6 |
++| Actual exported vertices | 27,030 |
++| Actual exported triangles | 13,840 |
++| Triangles intersecting live envelope | 0 (original root: 65) |
++| Export size | 955,160 bytes |
++
++The exact survivor comparison covers all other pattern holes and their keyed
++random variations, all remaining 59 spill blocks, and the earlier conveyor
++support/drum corrections. The final source diff introduces only the confirmed
++fifth rock removal beyond the initial four-object correction, with its actual
++source/vertex provenance cited beside that removal.
++
++Final source SHA-256:
++`b0b750e43cd08dc3d0ae76f3322ffdc7848161e90d6b4949e78685c74a1705d4`.
++
++Final private GLB SHA-256:
++`5b53090ed7c92c89be48e4dcf668a7400634aa62eb3d7b89482c4cfc7db78930`.
++
++The complete bound from the approved ruler is x
++−57.765350341796875..13.60430793892004, y
++−1.600000023841858..14.667548179626465, z
++−39.37867784500122..15.275319099961735. These are actual vertex extrema,
++not independently sourced physical dimensions.
++
++Reproduce the final CPU audit from the private checkout:
++
++```powershell
++node tools/checkquarrylivecollar.mjs --asset public/models/sites/quarry-bench.glb
++node tools/checkquarrylivecollar-adversarial.mjs
++node tools/glbinfo.mjs --parts public/models/sites/quarry-bench.glb
++```
++
++The authoring/export command is recorded in the implementation report and in
++`tools/verify_quarry_live_collar.py`. No additional expensive export was run by
++this critic. No production source outside the assigned quarry module was
++changed by this task, and this critic modified only its dedicated report/test.
