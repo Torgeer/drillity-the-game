@@ -1,49 +1,99 @@
 # Drillity handover for Claude
 
-## Latest checkpoint — 2026-09-06, 03:24 Stockholm
+## Latest checkpoint — 2026-09-06, 03:50 Stockholm
 
-This section supersedes historical status below. Live active Codex usage was
-19% remaining at this wave; the <=5% graceful shutdown remains mandatory.
-Reviewed HEAD is beedaaf: authoritative contract readiness and focus recovery,
-60 actual-DOM browser states/218 assertions/234 native controls >=44px. That
-task is integrated and archived. QA used fallback fonts and reduced motion.
-4a6c4ef and 83b2347 also landed after the prior snapshot.
+This section supersedes all historical pending-task descriptions below. Active
+Codex usage was11% remaining at the latest wave. At<=5%, orderly checkpoint,
+handoff, ordinary GitHub push/verification and heartbeat pause remain mandatory.
+No actual push yet. Reviewed source HEAD before this document update: f7207e8.
 
-Root renderer/geology/main and dedicated gates remain uncommitted pending final
-graphics acceptance. Retired-program polling no longer queries deleted handles.
-Post warmup now follows actual enabled SMAA/Bloom/Grade destinations; 1557 new
-CPU assertions pass. Latest headed resize/quality lifecycle report is
-shots/instrument-lifecycle-postfix/report.json: all six cases pass, no new
-first-frame programs, zero repeated-frame differences, browser closed. Earlier
-late MeshDepth observations did not recur in this run; no shadow fix was made.
-Instrument A/B now requires bounded exact frozen convergence before comparisons;
-no thresholds are relaxed and no retries occur after comparison toggles.
-This recapture and the 12-case hero capture remain in progress/pending.
+**Full npm run build passed**, session79082, log
+`.bak/integration-build-final.log`:50 CPU gate invocations, headed reach, Vite
+and artifact audit. One inline game script,19 shipped rigs,56 public assets,
+53,947,705 external bytes, no teststub; index about2,933.75kB. Only QA harness/docs
+changed afterward, with syntax and haptic-silence checks passing. Root original
+production changes are committed; remaining untracked captures are evidence,
+including deliberate historical failures. GLBs remain ignored generated outputs.
 
-The vibro containment candidate is preserved in coordination/vibro-start-guard.md
-and four scoped patches: shared equipment support + simulator, final readiness
-preflight, corrected legacy test expectation, and site recovery. Author13 and
-independent10 CPU cases pass. Integrate together: simulator-only refusal allowed
-a mobilisation charge before failure. Actual site recovery verification is now
-being prepared. This contains a false impact simulation; it does not implement
-vibration physics. Original checkout has not received these patches yet.
+### Newly completed integrations
 
-New task01a0743c-4fc7-7543-9e67-0f617cbdcc64 delivered underground light bindings
-in drillity-underground-light-bindings, baseline beedaaf. Actual GLB CPU tests
-reproduce stale cached lamp descriptors and wrong rockbolt alternative binding;
-29 cases plus25 independent cases/209 assertions pass. Root review is active;
-rendered proof and integration remain due. No lighting geometry was retuned.
+- beedaaf: authoritative contract readiness and focus recovery;60 actual-DOM
+  states/218 assertions/234 native >=44px controls. That task is archived.
+  Evidence used fallback fonts/reduced motion, not an overall gameplay verdict.
+- 37f92a4: hero framing, complete geology profiles/readout caching, denser footer
+  texture and isolated instrument grading. Post warmup now follows actual enabled
+  SMAA/Bloom/Grade targets, and readiness polling skips retired handles and reports
+  counters honestly.10 headed instrument A/B cases pass after bounded exact
+  preconvergence (3-5 draws); no comparison threshold changes or post-toggle
+  retries.6 resize/quality cases have no late programs or repeated-frame changes.
+ 12 hero captures verify top/side margins and registration on six actual GLBs.
+  These do not certify FPS, unobstructed models, full-shadow coverage or AAA.
+  Prior depth-program increments did not recur; their disappearance is not a
+  proven shadow-cause diagnosis. Geology task archived.
+- 763f0a9: underground lights consume the current rig's live semantic lamp
+  contract, including legal rockbolt alternatives.54 CPU cases and5 actual-game
+  cases pass; zero steady binding warnings, no geometry/light retuning. Previous
+  descriptors could remain stale indefinitely after direct/same-ID model swaps.
+  Same-frame pose lag is outside scope. Task archived.
+- 38dd193: unsupported vibratory equipment refuses before mobilisation/attempt
+  writes rather than secretly using impact physics. Accepted/restored jobs return
+  to Garage with a warning, retain the job, then Continue after fitting impact.
+  Continue's visible and accessible labels agree.13 author+10 critic+6 existing
+  impact tests pass. Actual DOM recovery passes6 cases at390x844 and6 at320x568,
+  full/reduced motion, no extra charge or errors/resources failed. This is
+  containment, not vibratory physics. f7207e8 preserves small-phone QA and makes
+  external source selection use the requested simulator/helper consistently.
+- e635ad7: reviewed CPU gates wired into build; headed/browser QA remains separate.
+- 9085600: measured21-method rate inventory (9,369 checks) and bounded naming
+  research. The old jumbo bit-bonus defect is explicitly historical/resolved;
+  current fixture settles30h with both bits. No rate retuning or legal naming
+  clearance claimed. Historical vibro reproducer is excluded from current gates.
 
-Claude remains active on its reserved site branch. Its checkpoint flags a
-pre-existing quarry authored plug/collar over the live borehole and stale site
-framing assumptions; these are source/analytic findings, not yet root-confirmed
-rendered failures. Claude did not edit the reference quarry module. Preserve
-this finding for follow-up. HUD candidate is still correcting measured clipping
-and backing-size faults; intended-font access remains denied in that task.
-Menu atlas adoption remains waiting on approval externally, with its patch saved.
+### Current work awaiting integration
 
-GPU owner is instrument-grade. Root QA server5198 remains live; user server5178
-is untouched. Full build/artifact verification and actual GitHub push remain due.
+All worktrees are under `C:/Users/henri/Downloads/threads/`; read the matching
+coordination checkpoint and fresh hashes before applying any patch.
+
+| Task | Private worktree / status |
+|---|---|
+|01a07416-0442-7090-b0c1-abd53d5fce6b|drillity-drilling-view-space: actual-DOM612-case HUD matrix still correcting measured clipping/backing-size faults; private intended-font access denied. No final layout/82% acceptance.|
+|01a0740d-b430-73c1-9493-d88b63b21439|drillity-ui-atlas-game-adoption: pre-render13-file patch saved; app waiting on approval. No bypass. Consumer/menu candidate not integrated.|
+|01a07457-0a59-7251-86b2-3b07b6a66e50|drillity-quarry-live-collar, codex/quarry-live-collar, baseline37f92a4: narrow existing quarry center-dressing correction, tests/export still under review; private Vite denied before binding, no browser.|
+|01a0745d-464e-7d92-a02b-c9dfb236599f|drillity-optimized-rig-runtime, baseline763f0a9: bounded actual draw/warm FPS verification for four optimized rigs; harness preparing, GPU lease granted, no measured pass yet.|
+|Claude|drillity-claude-sites, claude/site-environments, baseline673f888: eight new sites and site loading/library reserved. Nothing integrated in root yet; review narrow package/gate proposals separately.|
+
+HUD/atlas merges MUST retain root's site recovery catch and menu Continue/aria
+fixes. Do not copy their older whole files. Re-run combined UI recovery afterward.
+Claude's current checkpoint flags source/analytic site visibility problems and
+stale framing assumptions; current hero camera/registration are the authority.
+Quarry follow-up independently measured65 actual triangles intersecting the live
+throat disk, including one deterministic scatter block as well as center-hole
+dressing. No rendered quarry acceptance yet; do not substitute bounding-box or
+source-only proof. Matching private export and unrelated-geometry equality matter.
+
+### Visual evidence and remaining scope
+
+Root inspected current PD55/CFA hero,320 instrument, underground longhole/rockbolt
+and320 Garage warning images. Tall mast tops and footer/depth labels are visible;
+the small-phone warning fits and explains the action. Foreground site props can
+still occlude rigs (HDD), and the old HUD still consumes substantial screen area.
+This batch does not meet the entire design brief. Current visual notes belong in
+`coordination/current-visual-brief.md` when delivered; old CRITIQUE observations
+need reproduction rather than automatic acceptance.
+
+Passing JSON evidence is tracked at shots/instrument-grade-converged/report.json,
+shots/instrument-lifecycle-postfix/report.json,
+shots/underground-light-bindings-verified/report.json and
+research/HERO_CAMERA_GPU_MEASUREMENTS.json. PNGs and detailed private QA evidence
+remain local in their corresponding capture/worktree directories. Older failed
+reports are preserved, not rewritten as passes. No fleet FPS result yet.
+
+All root GPU/CPU browsers closed. Root QA server5198 remains live; user5178 is
+untouched and must never be stopped. GPU lease currently optimized-rig-runtime;
+check its exact file and owner's closure before transfer. The full build used
+user5178 only after its served source matched root; it did not stop that server.
+Read coordination/shutdown-inventory.md for paths/resources, refreshing its older
+snapshot before the final stop. Final pushed SHA and WIP/asset handoff remain due.
 
 **Status: live working draft, not the final shutdown snapshot.** Updated during
 the 2026-09-06 build. The final version must record the exact pushed commit,
