@@ -77,8 +77,8 @@ Root inspected current PD55/CFA hero,320 instrument, underground longhole/rockbo
 and320 Garage warning images. Tall mast tops and footer/depth labels are visible;
 the small-phone warning fits and explains the action. Foreground site props can
 still occlude rigs (HDD), and the old HUD still consumes substantial screen area.
-This batch does not meet the entire design brief. Current visual notes belong in
-`coordination/current-visual-brief.md` when delivered; old CRITIQUE observations
+This batch does not meet the entire design brief. Current visual notes are in
+`research/CURRENT_VISUAL_BRIEF.md`; old CRITIQUE observations
 need reproduction rather than automatic acceptance.
 
 Passing JSON evidence is tracked at shots/instrument-grade-converged/report.json,

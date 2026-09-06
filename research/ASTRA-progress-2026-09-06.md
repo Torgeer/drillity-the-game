@@ -2,6 +2,46 @@
 
 ## Latest root integration status
 
+### Current snapshot — 2026-09-06, 03:52 Stockholm
+
+The newer handover.md top section supersedes the older batch below. Full
+`npm run build` passed:50 CPU gate invocations, headed reach, Vite and artifact
+audit. One inline script,19 rigs,56 public assets/53,947,705 external bytes,
+no teststub. The ordinary source tree is now committed; local generated assets
+and diagnostic/failed-run evidence remain preserved separately.
+
+37f92a4 integrates renderer/geology/hero work after independent review and
+10 instrument A/B,6 quality/resize and12 hero captures. Bounded exact initial
+convergence controls the A/B, without threshold relaxation or post-toggle retries.
+Late depth-program increments did not recur; no separate shadow fix or proven
+cause is claimed. Footers/depth are visible in inspected small-phone images.
+Geology task is archived. 763f0a9 integrates current-rig underground light binding
+after54 CPU and5 actual-game cases; that task is archived too.
+
+38dd193 contains unsupported vibratory-equipment refusal before charge/attempt,
+visible Garage recovery and Continue/accessibility fixes. It preserves paid jobs
+and existing impact physics.6 actual-DOM cases pass at each of390x844 and320x568;
+f7207e8 records the smaller-phone QA/source-selection correction. This does not
+implement vibratory physics. 9085600 adds current rate/naming research with old
+defects explicitly historical; e635ad7 wires reviewed gates into the build.
+
+HUD-space, menu-atlas, quarry center clearance, optimized-rig runtime measurements
+and Claude's eight environments remain separate unfinished work. Preserve root's
+site recovery/menu hunks in later merges. Quarry preview startup and private HUD
+fonts have actual access boundaries; do not bypass them or call their visual
+checks passed. Actual fleet FPS/<=70-rig budget verification is still pending.
+Read CURRENT_VISUAL_BRIEF.md for observed composition and UI issues; passing
+engineering gates do not establish the whole game's design quality.
+
+Live active Codex pool now10% remaining. Avoid new long assignments; collect
+frequent checkpoints. At<=5%, finish atomic writes, preserve unfinished outputs,
+finalize Claude handover, push the reviewed branch normally and verify remote SHA,
+pause heartbeat and stop. No actual push yet; the remote feature branch did not
+exist at the read-only preflight. Root GPU browsers are closed; optimized-rig-
+runtime has the current lease. Root5198 remains live; user5178 is untouched.
+
+### Previous checkpoint (historical)
+
 Read the current top section of handover.md and the live coordination directory
 before assigning work; the historical batch below predates several integrations.
 Current reviewed commits include 3d919d3 (four optimized/corrected machine source
