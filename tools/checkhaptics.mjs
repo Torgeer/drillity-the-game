@@ -546,7 +546,47 @@ if (stormRun.ch.stats.dropped === 0) {
 // 7c — every script that drives the game must mute the browser AND the game.
 // Seven probes once lacked --mute-audio and played the game out loud on the
 // owner's machine while they were working. This is the gate against the eighth.
+function hasMuteQueryFlag(source) {
+  let found = false;
+  const property = (node) => node?.type === 'MemberExpression'
+    ? (node.computed ? node.property?.value : node.property?.name) : undefined;
+  walkAst(parseAst(source), (node) => {
+    // Retain literal/template URL support, but comments are not executable
+    // evidence. This remains a source contract, not a control-flow proof.
+    const text = node.type === 'Literal' ? node.value
+      : node.type === 'TemplateElement' ? node.value.raw : undefined;
+    if (typeof text === 'string' && /[?&](shot|mute)\b/.test(text)) found = true;
+    // A URL object's searchParams setter is the equivalent spelling used by
+    // harnesses which preserve deployment paths and other query parameters.
+    if (node.type === 'CallExpression' && property(node.callee) === 'set'
+      && property(node.callee.object) === 'searchParams' && node.arguments.length >= 2
+      && node.arguments[0].type === 'Literal'
+      && ['shot', 'mute'].includes(node.arguments[0].value)) found = true;
+  });
+  return found;
+}
 {
+  const muteFixtures = [
+    ['literal URL', "page.goto('http://localhost:5178/?shot');", true],
+    ['template URL', 'page.goto(`http://localhost:${port}/?quality=low&mute`);', true],
+    ['shot setter', "url.searchParams.set('shot', ''); page.goto(url.href);", true],
+    ['mute setter', 'url.searchParams.set("mute", "true");', true],
+    ['computed setter', "url['searchParams']['set']('shot', '');", true],
+    ['comment query', "// page.goto('http://localhost:5178/?shot');", false],
+    ['comment setter', "/* url.searchParams.set('mute', ''); */", false],
+    ['string containing setter', 'const example = "url.searchParams.set(\'mute\', \'\')";', false],
+    ['unrelated setter', "style.set('mute', '');", false],
+    ['different query flag', "url.searchParams.set('quality', 'low');", false],
+    ['delete is not set', "url.searchParams.delete('shot');", false],
+    ['read is not set', "url.searchParams.has('mute');", false],
+    ['dynamic flag not established', "url.searchParams.set(flag, '');", false],
+    ['incomplete setter', "url.searchParams.set('mute');", false],
+    ['no query', "page.goto('http://localhost:5178/');", false],
+  ];
+  for (const [name, source, expected] of muteFixtures) {
+    if (hasMuteQueryFlag(source) !== expected) fail(`silence scanner fixture: ${name}`);
+  }
+  const failuresBeforeScan = fails.length;
   const scripts = [];
   const walk = (dir, depth) => {
     for (const e of readdirSync(dir)) {
@@ -581,16 +621,18 @@ if (stormRun.ch.stats.dropped === 0) {
     if (!src.includes('--mute-audio')) {
       fail(`silence: ${rel} drives the game without --mute-audio`);
     }
-    if (!/[?&](shot|mute)\b/.test(src)) {
-      fail(`silence: ${rel} drives the game without ?shot or ?mute — ` +
-           `it is relying on --mute-audio alone, and audio.js's own mute never engages`);
-    }
+    try {
+      if (!hasMuteQueryFlag(src)) fail(`silence: ${rel} has no executable shot/mute query evidence ` +
+        `(literal URL or URL searchParams.set); game-side silence is not established`);
+    } catch (error) { fail(`silence: ${rel} could not be parsed: ${error.message}`); }
   }
   if (checked < 10) {
     fail(`silence: only ${checked} game-driving scripts found. The scan has broken, ` +
          `and a gate over an empty set passes forever.`);
   }
-  note(`${checked} scripts drive the game; all mute both the browser and the game.`);
+  const scanFailures = fails.length - failuresBeforeScan;
+  note(`${muteFixtures.length} silence scanner fixtures checked; ${checked} game-driving scripts checked; ` +
+    (scanFailures ? `${scanFailures} silence check failure(s).` : 'all carry browser and game mute evidence.'));
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

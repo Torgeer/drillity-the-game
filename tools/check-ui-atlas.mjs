@@ -20,6 +20,14 @@ const LEASE = 'C:/Users/henri/Downloads/threads/drillity-coordination/gpu-owner.
 const args = process.argv.slice(2);
 function option(name, fallback) { const index = args.indexOf(name); return index === -1 ? fallback : args[index + 1]; }
 const output = resolve(ROOT, option('--out', 'tools/ui-atlas-demo/evidence'));
+function silentReviewUrl(value) {
+  const url = new URL(value);
+  // Caller-supplied sound overrides shot/mute in the game's audio predicate.
+  // Keep this isolated review silent even if it is pointed at a game base.
+  url.searchParams.delete('sound');
+  url.searchParams.set('mute', '');
+  return url.href;
+}
 const ids = [
   'button-neutral', 'button-accent', 'button-neutral-pressed', 'button-accent-pressed',
   'button-neutral-disabled', 'button-accent-disabled', 'badge-neutral', 'badge-ready',
@@ -152,6 +160,8 @@ async function browserCheck(summary) {
       server = await createServer({ ...config, configFile: false });
       await server.listen(); url = 'http://127.0.0.1:5196/';
     }
+    url = silentReviewUrl(url);
+    report.url = url;
     assert.equal(readFileSync(LEASE, 'utf8').trim(), 'ui-atlas', 'GPU lease changed before browser launch');
     browser = await chromium.launch({ channel: 'chrome', headless: false, args: ['--mute-audio', '--disable-background-timer-throttling'] });
     for (const [width, density] of [[320, 1], [390, 1], [390, 2], [430, 1]]) {
@@ -322,6 +332,14 @@ try {
   const manifest = JSON.parse(readFileSync(resolve(ASSET_DIR, 'manifest.json'), 'utf8'));
   const summary = validate(manifest); sourceContract();
   if (args.includes('--self-test')) {
+    for (const input of ['http://127.0.0.1:5196/', 'http://127.0.0.1:5196/subpath/?sound&quality=low#review']) {
+      const before = new URL(input), after = new URL(silentReviewUrl(input));
+      assert.ok(after.searchParams.has('mute') && !after.searchParams.has('sound'), 'effective review URL must engage game silence');
+      assert.equal(after.pathname, before.pathname, 'retain deployed review path');
+      assert.equal(after.hash, before.hash, 'retain fragment');
+      assert.equal(after.searchParams.get('quality'), before.searchParams.get('quality'), 'retain unrelated query parameters');
+    }
+    summary.silentUrlFixtures = 2;
     const fixtures = [
       ['empty manifest', (m) => { m.sprites = []; }],
       ['missing sprite', (m) => { m.sprites.pop(); }],
