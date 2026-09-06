@@ -22,7 +22,7 @@
     "qa:visual": "node tools/shoot.mjs --headed",
     "blender": "npm run blender:rigs && npm run blender:sites",
     "blender:rigs": "call \"C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe\" --background --python blender/build.py --",
-    "blender:sites": "call \"C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe\" --background --python blender/sites/quarry_bench.py && call \"C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe\" --background --python blender/sites/urban_plot.py",
+    "blender:sites": "call \"C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe\" --background --python blender/sites/quarry_bench.py && call \"C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe\" --background --python blender/sites/urban_plot.py && call \"C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe\" --background --python blender/sites/infrastructure_corridor.py && call \"C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe\" --background --python blender/sites/open_pit_bench.py && call \"C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe\" --background --python blender/sites/tunnel_portal.py && call \"C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe\" --background --python blender/sites/underground_drive.py && call \"C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe\" --background --python blender/sites/exploration_pad.py && call \"C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe\" --background --python blender/sites/well_pad.py && call \"C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe\" --background --python blender/sites/platform_deck.py && call \"C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe\" --background --python blender/sites/marine_spread.py",
     "check:reach": "node tools/checkreach.mjs",
     "models:pack": "node tools/glbpack.mjs",
     "models:check": "node tools/glbpack.mjs --check",
@@ -32,7 +32,8 @@
     "qa:rigvisual": "node tools/checkrigvisual.mjs",
     "qa:ui": "node tools/checkuimotion.mjs",
     "check:sites": "node tools/checksiteenvironment.mjs",
-    "check:rigmetadata": "node tools/checkrigmetadata.mjs"
+    "check:rigmetadata": "node tools/checkrigmetadata.mjs",
+    "check:siteassets": "node tools/checksites.mjs"
   },
   "dependencies": {
     "three": "0.169.0"
