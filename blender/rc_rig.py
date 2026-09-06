@@ -43,15 +43,33 @@ carry a dimensioned three-view of a TRACKED RC exploration rig.
             transport   11 100 L x 3 450 W x 4 640 H mm
             mast erected 90 deg              11 220 mm
             mast at 45 deg                    8 050 mm
+            working length                    8 800 mm
+            mast total length, incl. jib boom 11 050 mm ; mast dump 1 950 mm
+            drilling angle range              45 to 90 deg
             track shoe / grouser                500 mm
-            feed stroke                       7 680 mm ; pullback 220 kN
-            operating weight       46 500 kg (GMM) ; min 35 100 kg
+            jack: 640 mm clearance, 330 mm pad, 150 mm track clearance
+            feed travel                       7 680 mm ; pullback 220 kN
+            feed force (restricted)             75 kN
+            hole range                    150-200 mm (5.9-7.9 in)
+            spindle thread 114 mm 4.5 in-IF ; slipstable max opening 296 mm
+            GMM 46 500 kg ; operating mass 36 200 kg ; min 35 100 kg
             engine 522 kW ; compressor 555 l/s @ 35 bar (1 250 cfm @ 510 psi)
             rods 6 m (20 ft), OD 4-1/2 in (114.3 mm), 50 in the rack
+          PAGINATION: the file is FIVE sheets carrying EIGHT printer-spread
+          pages.  Logical p.7 is the RIGHT half of physical page index 3
+          (clip 595.275,0,1190.55,841.89); there is no physical index 6.
           Its mast on p.7 is unmistakably an OPEN LATTICE with diagonal web
           bracing between two chords, full length.  That settles rc-rig.md
           §9.A: for a big tracked RC rig the lattice truss this file builds is
           RIGHT, and it is now sourced to a manufacturer drawing.
+          THE p.7 THREE-VIEW IS PURE VECTOR — 38 837 path objects, no embedded
+          raster, so it can be measured to any precision the drawing holds.
+          IT IS THE SAME MACHINE AS [MET p.22]: that page is captioned
+          "Explorac 235" and rc-rig.md §1 records it.  Measured off it, mast
+          fore/aft silhouette depth 0.95-1.00 m (20.45-21.43 pt across five
+          clean heights, at 46.29-46.87 mm/pt).
+          It carries NO dimension to the drill axis — see the working-axis
+          block below for the full attempt and why it was refused.
 
   [E100]  Epiroc Explorac 100, doc 9868 0018 01f (2022-10), brochure p.7
           lettered GA with the letter table on p.6.
@@ -63,14 +81,27 @@ carry a dimensioned three-view of a TRACKED RC exploration rig.
             D transport height, max             2 980 mm
             E transport length                  7 730 mm
             F transport width  2 240 mm w/o rod rack / 2 800 mm with
+            C transport dimension               2 740 mm
             weight 14 400 kg ; feed travel 4 400 mm ; rods 3 m, OD 114.3 mm
+            second rod option OD 101.6 mm (4 in)
+            hole diameter                 127-165 mm (5-6.5 in) ; depth 250 m
           Same page: "Shipping dimensions 7 800 x 3 000 x 2 300 mm".  Its mast
           is a CLOSED BOX feed beam — so lattice-vs-box splits by size class,
           and both answers are sourced.
+          LETTER C RESOLVED 2026-09-06 (rc-rig.md §8 left it open and hoped it
+          was a working radius or a bore position): C = 2 740 mm and it is a
+          TRANSPORT dimension, in the transport block with D, E and F.  It is
+          not a bore dimension.  Text also: "a mechanized breakout table is
+          fitted as standard which guides and locks rods hydraulically", and a
+          rod rack holding up to 30 rods, positionable rear or side.
 
 WHAT THAT MEANS FOR THIS MODEL, MEASURED NOT ASSUMED
 ----------------------------------------------------
-`node tools/glbinfo.mjs public/models/rc-rig.glb` reports 7.883 x 7.214 x 7.606.
+`node tools/glbinfo.mjs public/models/rc-rig.glb` reports 7.883 x 7.215 x 7.857.
+(That third figure was 7.606 when this paragraph was written and 7.214 was a
+transcription slip for 7.215; the working-axis repair took the length to 7.857
+and this line was not updated with it.  Re-measured 2026-09-06 on the shipped
+export.)
 `--parts` and a per-primitive sweep put the MACHINE inside x = +/-1.561 (over
 the deployed jacks; BODY_W is 2.42), and the drill floor / mast / deck all
 inside that.  So the machine itself is 3.12 m over jacks — squarely between
@@ -89,7 +120,8 @@ reported as a cross-file need, not bodged here by deleting good geometry.
 
 NOT RESOLVED, recorded rather than guessed: this machine is built at
 [E100] SIZE (mast 5.45 m, 3.05 m rods, 7.2 m tall erected against [E100]'s
-7.84 m and 7.6 m long against its 7.73 m transport length — both inside 9 %)
+7.84 m and 7.857 m long against its 7.73 m transport length — within 8 % and
+2 % respectively; the length figure was 7.6 m before the working-axis repair)
 but with [E235] FEATURES (open lattice mast, on-board power-and-air pack sized
 on [R16 §A.8]'s "roughly 1000 cfm at 500 psi").  Those two belong to different
 size classes.  Committing to [E235] means re-scaling the whole machine by ~1.45
@@ -144,15 +176,115 @@ simply never been put on it. So:
 Measured against the previous export with `tools/glbinfo.mjs`: 44 primitives
 (unchanged, budget 70), 70,912 triangles (+108, the split table), width and
 height unchanged, length 7.608 -> 7.857 m because the drill floor had to reach
-the bore. `tools/check_rc_axis.mjs`, unmodified, goes from 0.7900002 m of
-perpendicular miss and two obstructing triangle hits to 0.0 and none.
+the bore. `tools/check_rc_axis.mjs` — Codex's fixture, logic and 1e-5 m
+tolerance unmodified — goes from 0.7900002 m of perpendicular miss and two
+obstructing triangle hits to 0.0 and none, and IS NOW IN THIS REPOSITORY.
+It was cited here for a day while living only in the private worktree
+`threads/drillity-rc-axis`, which made the headline verification of this repair
+un-rerunnable by anyone reading the file. Committed 2026-09-06 with only its
+two dependency paths adapted; run it with
 
-NOT SOURCED and stated as such: the two head standoffs that make up WORK_AXIS.
-An exhaustive search of the local catalogue library found no dimensioned GA of
-any RC rig, and both Epiroc Explorac brochures are behind HTTP 403. Where OEMs
-publish this at all they publish drill-axis-to-mast-FRONT-FACE, never to the
-structural centre — e.g. Bauer BG 36 H doc 905.868.2 p.16, "Drilling axis
-1,100 mm / 1,400 mm". This machine's equivalent front-face figure is 0.46 m.
+    node tools/check_rc_axis.mjs public/models/rc-rig.glb        # exits 0
+
+Note what each tool is for: `glbinfo.mjs` is the ONLY dimension ruler
+(ASTRA.md §5). The transmission check is `check_rc_axis.mjs`'s assert on
+`KHR_materials_transmission`, and independently `glbinfo` reporting
+`extensions: none` — a glTF material cannot carry transmission without that
+extension. `glbinfo` does not print a transmission column and never did.
+
+WORK_AXIS IS NOT SOURCED — AND HERE IS WHAT WAS ACTUALLY TRIED, 2026-09-06
+---------------------------------------------------------------------------
+This block used to read: "An exhaustive search of the local catalogue library
+found no dimensioned GA of any RC rig, and both Epiroc Explorac brochures are
+behind HTTP 403." BOTH HALVES WERE FALSE, and the contradiction was 100 lines
+above in this same file, which names two dimensioned GAs with their URLs. That
+is the worst kind of defect this project can ship: an unsourced number defended
+by a false claim that no source exists. Corrected in full:
+
+  * **The brochures are not behind 403.** `Invoke-WebRequest` with only a
+    browser User-Agent gets 403; `curl` with `Referer` + `Sec-Fetch-Dest/Mode/
+    Site` gets **HTTP 200** on both, 2 022 709 B and 930 680 B. It was a
+    request-header problem, not an access wall. Both are now read.
+  * **[MET p.22] — the photograph this whole model is shaped from — IS the
+    Epiroc Explorac 235**, captioned so on the page, and rc-rig.md §1 says so.
+    It is the SAME MACHINE as [E235] p.7's dimensioned three-view. Nobody had
+    connected the primary shape reference to the primary dimension reference.
+  * **[E235] p.7 is pure VECTOR** — 38 837 path objects, no embedded raster, so
+    there is no resolution ceiling. (Logical p.7 is the right half of physical
+    page index 3: the file is five sheets carrying eight printer-spread pages,
+    which is why an earlier attempt at "page index 6" found nothing.)
+  * **The drawing IS to scale, and that was verified**, by taking arrowhead TIPS
+    off the vector rather than dimension-line ends:
+        8 800 mm  over 190.096 pt  ->  46.293 mm/pt
+       11 220 mm  over 239.386 pt  ->  46.870 mm/pt      agree to 0.6 %
+    The third callout, 11 050 mm, reads 48.69 mm/pt and looks like a 4 % error.
+    It is not: the spec table on p.6 gives *"Mast — Total length, including jib
+    boom — 11 050 mm"*, and the GA draws it as the HORIZONTAL projection of the
+    lowered mast. 226.947 pt at 46.58 mm/pt = 10 576 mm = 11 050 x cos 16 deg.
+    All three callouts close.
+  * **[E100] p.7 IS resolution-limited, and here is that number too.** Its GA
+    is three embedded PNG rasters with the dimension lines baked into the
+    pixels; only the letters A-F are live text. The working side elevation is
+    **362 x 431 px** drawn into 260.29 x 310.19 pt, and tracing the baked-in
+    lines gives B: 315 px = 6 120 mm -> 19.43 mm/px and A: 401 px = 7 840 mm ->
+    19.55 mm/px. The transport elevation (445 x 190) gives E: 417 px =
+    7 730 mm -> 18.54 mm/px. So ~19.5 mm of real rig per source pixel, +/-20 to
+    40 mm of intrinsic error before any judgement about which edge is a
+    centreline. The original commit message's "362x431 bitmap at ~20 mm/px,
+    which brackets the setback to 0.25-0.75 m: too wide to quote" was CORRECT,
+    which makes it stranger that this file then said no GA existed at all.
+  * **AND THE DRAWING STILL DOES NOT DIMENSION THE DRILL AXIS.** Every callout
+    on p.7 is an envelope or a component figure — 11 220 / 8 050 erected
+    heights, 11 050 mast length, 8 800 working length, 3 450 width, 11 100 x
+    4 640 transport, and a detail balloon giving 500 mm shoe, 640 / 330 /
+    150 mm jack clearances. Traced on the vector, the two dimensions nearest
+    the drilling end have their arrowhead TIPS at x 972.506 and 1009.215 pt,
+    and their extension lines run up into WHITE SPACE beside the machine's
+    envelope extremes; neither lands on a centreline. rc-rig.md
+    §8's "Neither GA dimensions the rotary head's standoff from the mast" was
+    right — it was the reason given for it that was wrong.
+  * **Scaling it off the illustration anyway was attempted and is refused.**
+    p.7's working elevation is a shaded 3-D render of a PARKED machine: no
+    string in the hole, no bit, no centreline. Picking a "mast centreline" out
+    of it means choosing between the structural chords, the front rails, the
+    carriage and the parked head, and at 46.6 mm/pt one POINT of that choice is
+    47 mm of answer. Readings taken this way ranged from 0.16 m (slip-table
+    centre against the silhouette centre) to 1.02 m (the forward extension line
+    against the same centre) — a 6x spread. That is a choice, not a measurement, and
+    [ASTRA.md §1.1] says an admitted gap beats a plausible number.
+
+  WHAT THE GA DID SETTLE, and it is worth having:
+    - **[E235] mast fore/aft silhouette depth = 0.95-1.00 m**, measured on the
+      vector at 20.45-21.43 pt across, at five clean heights between the parked
+      head and the telescope joint, at 46.29-46.87 mm/pt.  Call it 0.97 +/-
+      0.03 m; the spread is the drawing's, not the scale's.  That
+      is the first sourced mast cross-section dimension for this class in this
+      project's record, against rc-rig.md §8's "Still NOT SOURCED ... for any
+      machine in the class".
+    - Its slenderness is therefore 11 050 / 0.97 = **11.4 : 1** (11.0-11.6 over
+      the depth spread), not the 8.5 : 1
+      that rc-rig.md §3b measured off the photograph OF THE SAME MACHINE. A
+      raked three-quarter studio shot makes the mast read ~34 % deeper than it
+      is. See MAST_D below — this is why that ratio's claim is withdrawn.
+    - **[E100] letter C = 2 740 mm, a TRANSPORT dimension.** rc-rig.md §8 left
+      letter C unaccounted for and hoped it was "a working radius or a bore
+      position, which is exactly the gap above". It is not. That door is shut.
+    - Size class, sharper than before: **[E235] drills 150-200 mm holes** with a
+      114 mm 4.5" IF spindle, 7 680 mm feed travel, 45-90 deg mast, 46 500 kg
+      GMM / 36 200 kg operating. **[E100] drills 127-165 mm** with 114.3 and
+      101.6 mm rods to 250 m. This model's HOLE_DIA 0.124 and ROD_OD 0.1143
+      sit in [E100]'s band and below [E235]'s. [E100] also publishes "a
+      mechanized breakout table is fitted as standard which guides and locks
+      rods hydraulically" — the assembly at the mast foot here.
+
+Where OEMs publish a bore-to-mast figure at all they publish drill-axis-to-mast
+FRONT FACE, never to the structural centre. The one located instance is Bauer
+BG 36 H / BS 95, doc 905.868.2 (12/2020) printed p.16, "Drilling axis 1,100 mm
+(without upper Kelly guide) / 1,400 mm (with)". CITE IT FOR THE CONVENTION ONLY:
+it is a foundation KELLY rig, not this class, and this machine's own front-face
+figure of 0.46 m is 2.4x to 3.0x SMALLER than those numbers — so it is not
+corroboration, and 1.40 m must never migrate onto an RC rig. Those two caveats
+are rc-rig.md §8's own and were dropped when this comment was written.
 See research/rigs/rc-axis-repair.md for the full evidence and the open items.
 """
 
@@ -207,10 +339,27 @@ HOLE_DIA = 0.124       # 124 mm, one of the two standard RC hole sizes [R02 §A2
 #   overall silhouette width         = 0.73 x standing height
 DECK_Z = 2.30          # deck plate top. DERIVED, not sourced (§8 item 5).
 MAST_LEN = 5.45        # built VERTICAL; the game rakes it on pivot:mast.
-MAST_W = 0.58          # across the machine (X)
-MAST_D = 0.66          # fore/aft (Y). 5.45 / 0.64 = 8.5 : 1 [MET p.22 §3b] — the
-                       # one ratio that is held exactly, because §5 makes the
-                       # long thin open truss an identification cue.
+MAST_W = 0.58          # across the machine (X). NOT SOURCED — rc-rig.md §8
+                       # "Still NOT SOURCED: mast cross-section (width x depth)
+                       # for any machine in the class".
+MAST_D = 0.66          # fore/aft (Y). NOT SOURCED IN METRES, and the tag this
+                       # line used to carry ([MET p.22 §3b], no gap mark) was
+                       # too strong. What §3b sources is the RATIO 8.5 : 1, off
+                       # a photograph; rc-rig.md §8 says flatly that the mast
+                       # cross-section is "Still NOT SOURCED" for any machine in
+                       # the class. A sourced ratio times an unsourced length
+                       # (MAST_LEN) is an unsourced metre value.
+                       # The old comment also did not match its own constant:
+                       # it wrote "5.45 / 0.64 = 8.5 : 1" while the constant is
+                       # 0.66, which is 8.26 : 1. The RATIO is the cue §5 asks
+                       # for and 8.26 : 1 still reads as the long thin open
+                       # truss, so the geometry is kept; only the claim of an
+                       # exactly-held sourced figure is withdrawn.
+                       # CONSEQUENCE, stated because it is easy to miss: MAST_D
+                       # is the first term of WORK_AXIS below, so ALL THREE of
+                       # its terms are NOT SOURCED, not just the two labelled
+                       # there. WORK_AXIS is a coherent SUM of authored offsets
+                       # — that is its whole defence — and not a sourced length.
 MAST_FOOT = 1.15       # mast foot pin height above ground
 DRILL_FLOOR = 1.50     # the lower working floor at the mast foot, reached from
                        # the deck by four steps
@@ -229,11 +378,25 @@ DRILL_FLOOR = 1.50     # the lower working floor at the mast foot, reached from
 # Web cross-check, and it is the first absolute scale anyone has had for this
 # class: a published crawler RC rig of the same capability (JCDrill JRC1200,
 # 90-400 mm holes, 13 t) gives shipping 7550 x 2260 x 2700 mm, 300 mm ground
-# clearance, 3400 mm FEED STROKE and 4 / 4.5 m pipe. A 3.4 m stroke needs a mast
-# of about 5.4 m once the head, the crown and the foot clamp are taken out —
-# which is what MAST_LEN already was, derived independently from the rod. The
+# clearance, 3400 mm FEED STROKE and 4 / 4.5 m pipe. The
 # same source is why BODY_W came down from 2.55 to 2.42: 2260 mm shipping width
 # plus the handrails.
+#
+# CORRECTED 2026-09-06. This paragraph used to end "a 3.4 m stroke needs a mast
+# of about 5.4 m once the head, the crown and the foot clamp are taken out —
+# which is what MAST_LEN already was". That was an estimate, and the working-
+# axis repair replaced it with an exact relation without deleting it, so the
+# file carried two statements 0.6 m apart. The exact one, from build_head():
+#
+#     bottom of travel  mast-local 2.098   FIXED — the rod-guide top plus the
+#                                          author's 50 mm, plus HEAD_DROP.
+#                                          Does not move with MAST_LEN.
+#     top of travel     MAST_LEN - 0.50    CARR_HI rides the mast top up.
+#     travel_m          MAST_LEN - 2.598   5.45 - 2.598 = 2.852, as exported.
+#
+# So a 3.4 m stroke needs MAST_LEN 5.998, not 5.4. MAST_LEN 5.45 is NOT
+# derived from the JRC1200 stroke and never was; it is the DECK_Z-and-ratio
+# figure at the top of this block, and it remains NOT SOURCED.
 # ── THE WORKING AXIS.  Read this before changing any number in this block ────
 # The drill string does NOT run down the mast's structural centreline, and the
 # file used to assume it did: `pivot:mast`, the rod guide, the breakout table
@@ -260,7 +423,8 @@ DRILL_FLOOR = 1.50     # the lower working floor at the mast foot, reached from
 # the file previously got wrong. The two components below are NOT SOURCED as
 # published mounting dimensions; they are preserved unchanged from the shipped
 # model rather than re-guessed, because a plausible new number would be worse
-# than the admitted gap (§1.1). See research/rigs/rc-axis-repair.md.
+# than the admitted gap [ASTRA.md §1.1, "no guessing"]. See
+# research/rigs/rc-axis-repair.md.
 GUIDE_Z = 0.66               # rod guide, mast-local. Top of the foot stack, and
                              # therefore what the head's down-stop clears.
 HEAD_SWING_STANDOFF = 0.30   # NOT SOURCED — swing-pin boss off the mast face
@@ -270,9 +434,24 @@ WORK_AXIS = MAST_D / 2 + HEAD_SWING_STANDOFF + HEAD_SPINDLE_OFF     # 0.79
 # MAST_Y keeps the value HOLE_Y used to carry, so the mast, the fabricated nose
 # that carries its foot, the deck, the machine house and every hose route are
 # untouched by this repair — only the bore and the parts that touch the string
-# move. build_deck() cites [MET p.22, rc-rig.md §4.7] for "the fabricated nose
-# that carries the mast foot out past the track front", and that is the sourced
-# relationship this choice preserves.
+# move.
+#
+# WHY THIS END STAYS PUT, CORRECTED 2026-09-06. This block used to justify the
+# choice with build_deck()'s citation of rc-rig.md §4.7 for "the fabricated
+# nose that carries the mast foot out past the track front". THAT CITATION
+# CANNOT CARRY IT. §4.7 says only *"the drill centre is off the front of the
+# machine, forward of the tracks"* — `grep -i "nose\|mast foot"` finds neither
+# word in it — and that sentence is satisfied by BOTH candidate scopes, since
+# both put the BORE forward of the tracks. A source that cannot tell two
+# options apart is not a reason to pick one.
+#
+# The real reason is a measurement, and it stands on its own: moving the mast
+# back to -2.06 instead (scope A) puts the lattice at Y -2.39..-1.73, through
+# `deck-plate` (-2.30..2.35) and into `house-front` (-1.81..-1.75). It costs a
+# slot in the deck and roughly 0.65 m off the front of the machine house — and
+# that house volume IS sourced, it is [R16 §A.8]'s on-board ~1000 cfm at 500
+# psi pack. Scope B moves no sourced structure at all. See
+# research/rigs/rc-axis-repair.md §3 for the rest of the evidence.
 MAST_Y = -2.85         # mast foot pin, 0.70 m forward of the track nose (-2.15)
 HOLE_Y = MAST_Y - WORK_AXIS   # -3.64. DERIVED from the head, never typed: the
                        # bore is wherever the spindle is. 1.49 m forward of the
@@ -632,14 +811,27 @@ def build_deck():
     # covers both. The front plate and front kick keep the 0.60 m and 0.78 m of
     # standing room ahead of the hole they were authored with: those two are
     # PRESERVED, not re-chosen, because preserving an existing number beats
-    # inventing a new one (§1.1). Measured, not estimated: the front plate moves
-    # forward exactly WORK_AXIS (0.79 m), the floor's own length grows 1.70 ->
-    # 2.39 m because its rear stays at the mast foot, and the MACHINE's overall
+    # inventing a new one [ASTRA.md §1.1]. Measured, not estimated: the front
+    # plate moves forward exactly WORK_AXIS (0.79 m), the floor's own length
+    # grows 1.70 -> 2.39 m because its rear stays at the mast foot, and the
+    # MACHINE's overall
     # bound grows 249 mm — from 7.608 to 7.857 m — because other geometry
     # already reached further forward than the old floor did. That is the cost
     # of the repair and it is measured, not hidden.
     OPEN_Y0 = HOLE_Y - 0.40          # working opening, front — clear of the bore
-    OPEN_Y1 = MAST_Y + 0.30          # working opening, rear — clear of the hood
+    # OPEN_Y1: rear edge of the working opening. THE "clear of the hood" NOTE
+    # THIS CARRIED WAS WRONG and is removed rather than left standing.
+    # `mast-foot-hood` is (MAST_W+0.16, MAST_D+0.20, 0.42) at the mast foot, so
+    # it spans Y -3.280..-2.420 and Z 1.140..1.560. This edge lands at -2.550,
+    # and `drill-floor-rear` runs -2.550..-2.150 at Z 1.475..1.525 — so 130 mm
+    # of hood sits inside the rear floor plate. That overlap is PRE-EXISTING
+    # and unchanged in metres: before the repair this plate was at HOLE_Y+0.50
+    # with HOLE_Y = -2.85, which is numerically the same place it is now. Only
+    # the false annotation was new. Left as measured, not fixed blind: pulling
+    # the edge back to -2.42 would shorten the floor the repair had to lengthen
+    # and it is not what this pass was asked to change.
+    OPEN_Y1 = MAST_Y + 0.30          # working opening, rear. NOT clear of the
+                                     # hood — 130 mm of overlap, see above.
     open_mid = (OPEN_Y0 + OPEN_Y1) / 2
     floor_y0, floor_y1 = HOLE_Y - 0.80, MAST_Y + 0.70
     box('drill-floor-front', (2.10, 0.40, 0.05), MAT_DARK,
@@ -888,6 +1080,40 @@ def build_mast():
     pv['axis'] = 'x'
     # -19 deg is the reference photograph's rake, leaning back over the deck;
     # +90 is the head swing from vertical for fan drilling [MIN p.13].
+    # [E235 p.6] publishes "Drilling angle range 45 to 90 deg" for the same
+    # machine — i.e. up to 45 deg off vertical — so this 19 deg is inside the
+    # sourced envelope, and the +92 end overruns published vertical by 2 deg.
+    #
+    # ── `mount:hole` IS DEFINED AT ZERO RAKE. Decided and recorded 2026-09-06,
+    # because the file asserted an invariant it can only hold in one pose.
+    # `mount:hole` is built at the SCENE ROOT (`empty(NODE_MOUNT, 'hole', None,
+    # (0, HOLE_Y, 0))`), so it does NOT rotate with this pivot, while
+    # `mount:tool` hangs off it through slide:carriage. Raking the mast
+    # therefore moves the spindle off the declared bore, by construction, and
+    # no choice of HOLE_Y can prevent that:
+    #
+    #     rake      spindle world Y     miss vs bore   (mount:tool at rest)
+    #       0 deg        -3.640            0.000       <- built and shipped pose
+    #     -19 deg        -2.933            0.707
+    #
+    # For completeness, and because it is the more interesting number: the
+    # PRE-REPAIR file measured 0.083 m at -19 deg and 0.790 at 0 deg. Its error
+    # happened to cancel at -21.2 deg (tan a = -WORK_AXIS / 2.04), which is
+    # within 2 deg of this photograph rake — so at the rake in the reference
+    # photograph the old arrangement looked nearly right. It was not: the mast
+    # is BUILT VERTICAL, the model ships vertical, and at the shipped pose the
+    # old miss was the full 0.790 m.
+    #
+    # THE DECISION: HOLE_Y is the bore AT ZERO RAKE — "where the spindle is
+    # when the mast is vertical" — and not a pose-independent invariant. Two
+    # reasons, both checkable. (1) It matches the machine: a real rig that
+    # rakes its mast re-spots so the bit is over the collar; the collar does
+    # not follow the mast. (2) `range_deg` has ZERO consumers in `src/` today
+    # (`grep -rn "range_deg" src/` is empty), so nothing rakes this mast at
+    # runtime and the invariant is exercised only at 0. If anything ever does
+    # drive this pivot, `mount:hole` must be re-derived per rake, or the mast
+    # must be made to rake about the BORE rather than about its foot pin.
+    # Recorded here rather than left as a passing number at one angle.
     pv['range_deg'] = [-19.0, 92.0]
     hw, hd = MAST_W / 2, MAST_D / 2
     L = MAST_LEN
@@ -962,16 +1188,48 @@ def build_mast():
     # and -0.05 — inside the lattice footprint, gripping a rod that was not
     # there, while the head turned one 0.79 m in front of them. On [MET p.22]
     # the clamp/breakout assembly stands clearly proud of the mast on the
-    # working face, which is what -WORK_AXIS puts it back to. Their offsets
-    # RELATIVE TO EACH OTHER are unchanged: the rams stay 0.20 m ahead of the
-    # jaws they drive, exactly as authored.
+    # working face, which is what -WORK_AXIS puts it back to.
+    #
+    # CORRECTED 2026-09-06. This comment used to claim their offsets RELATIVE
+    # TO EACH OTHER were unchanged. They are not. Three of the four moved by
+    # -0.740 and the fourth by -0.790:
+    #
+    #     before     after            shift
+    #     -0.05   -> -WORK_AXIS       -0.740   breakout-table
+    #     -0.05   -> -WORK_AXIS       -0.740   clamp-jaw (both levels)
+    #     -0.25   -> -WORK_AXIS-0.20  -0.740   clamp-ram (both levels)
+    #      0.00   -> -WORK_AXIS       -0.790   rod-guide
+    #
+    # The RAM-TO-JAW relationship is what was actually preserved: the rams are
+    # still 0.20 m ahead of the jaws they drive. What changed is that the rod
+    # guide used to sit 50 mm BEHIND the jaws and the table, and is now
+    # CONCENTRIC with them. That is the correct end state — a guide, a holding
+    # clamp and a breakout table all pass the same string and belong on one
+    # centre — but it is a change, and calling it "unchanged" hid the only
+    # relative motion in the group.
     #
     # The table is built as a SPLIT PAIR rather than one solid box. A breakout
     # table has to pass the string; off-axis nobody noticed it had no bore, and
     # on-axis a solid plate would be steel across the hole. Split tables are the
-    # real idiom and this costs 12 triangles in a material already drawn. The
-    # 0.20 m bore passes the 124 mm bit and the 114.3 mm rod [R02 §A2]; it is
-    # NOT SOURCED as a table dimension, it is sized off the string it must pass.
+    # real idiom. COST, CORRECTED: +108 triangles, not the 12 first written
+    # here. One box becomes two, and a BEVELLED box is 108 triangles against a
+    # plain box's 12 — this file says so itself at the track shoes (L~460). The
+    # measured export moved 70,804 -> 70,912, which is that +108 exactly and
+    # nothing else. No extra draw call: same material, same bucket.
+    #
+    # NOT CONNECTED TO ANYTHING, AND MEASURED: the table's rear face stands at
+    # mast-local -0.48 and the nearest mast structure, `mast-foot-hood`, has
+    # its front face at -0.43 — a 50 mm air gap, with no bracket modelled. Off
+    # axis the table interpenetrated the mast foot, so it read as bolted in;
+    # on axis it is clean and floating. The only geometry it still touches is
+    # `drill-floor-side`, which it overlaps by 15 mm in Z across a 60 mm band
+    # in X. It is parented to `pivot:mast`, so it does at least rake with the
+    # mast — but a bracket from the hood out to the table is missing geometry
+    # this repair created and did not supply. Recorded, not bodged: adding a
+    # fabrication here is new authored steel, it is not what was asked for, and
+    # it must not be invented into a file whose rule is that gaps get admitted.
+    # The 0.20 m bore passes the 124 mm bit and the 114.3 mm rod [R02 §A2]; it
+    # is NOT SOURCED as a table dimension, it is sized off the string it passes.
     TABLE_BORE = 0.20
     half = (0.92 - TABLE_BORE) / 2
     for sx in (-1, 1):
@@ -1122,10 +1380,45 @@ def build_head(pv):
     # string was not. 2.85 m is the first stroke this machine has published that
     # it can actually execute. It is now SHORT of one rod — 3.05 m, itself NOT
     # SOURCED; [R02 §A2, citing BL-RC p.6] publishes 1.5 / 3 / 6 m pipe, so even
-    # the sourced 3 m does not fit. Resolving that means growing the mast or
-    # shortening the rods, which is the size-class decision this module's header
-    # already records as unresolved and rc-rig.md §9.F says must be made FIRST.
-    # It is reported, not silently absorbed into a fudged clearance.
+    # the sourced 3 m does not fit.
+    #
+    # WHAT IT WOULD TAKE, WRITTEN DOWN RATHER THAN CALLED UNRESOLVABLE.
+    # The bottom stop below is FIXED at mast-local 2.098 — it is the rod-guide
+    # top, the 50 mm, and HEAD_DROP, none of which depends on mast length. The
+    # top stop is MAST_LEN - 0.50 (see CARR_HI). So the stroke tracks the mast
+    # one-for-one and the whole question is one line of arithmetic:
+    #
+    #     travel_m = MAST_LEN - 2.598          5.45 - 2.598 = 2.852 today
+    #
+    #     to swallow                       needs MAST_LEN     mast grows by
+    #     ---------------------------------------------------------------
+    #     3.00 m pipe   [R02 §A2, BL-RC p.6]      5.598           +148 mm
+    #     3.05 m ROD_LEN (this game, NOT SOURCED) 5.648           +198 mm
+    #     3.40 m stroke (JRC1200 web check)       5.998           +548 mm
+    #     4.40 m feed travel [E100 p.6]           6.998         +1 548 mm
+    #
+    # **+198 mm of mast restores a one-rod stroke.** That is a 3.6 % change to
+    # MAST_LEN, and MAST_LEN is NOT SOURCED — so it costs no source to move it.
+    # It is not made here because it is the owner's call and because [E100]
+    # publishes a SOURCED 4.40 m feed travel for a 14 400 kg machine with the
+    # same 114.3 mm rod OD this file already uses (ROD_OD matches [E100 p.6]
+    # exactly), which would want +1 548 mm and a taller machine everywhere.
+    # Growing the mast to 5.648 buys the game's rod; growing it to 6.998 buys
+    # the sourced [E100] stroke and commits the size class. Either is a
+    # decision; neither is a guess. The unresolvable framing this block used to
+    # carry was wrong: the arithmetic is right here.
+    #
+    # ONE CONSEQUENCE WORTH SEEING BEFORE CHOOSING, and it is a real finding.
+    # The model's erected height is 7.215 m (glbinfo) for 2.852 m of stroke —
+    # 4.363 m of mast that never carries the head. [E100 pp.6-7] gets 4.400 m of
+    # travel inside a 7.840 m erected height, i.e. 3.440 m of dead height. THIS
+    # MAST IS 0.92 m LESS EFFICIENT PER METRE OF STROKE THAN THE MACHINE IT IS
+    # SIZED AGAINST. Taking MAST_LEN to 6.998 for the [E100] stroke would put
+    # this machine at roughly 8.76 m erected — TALLER than the 7.84 m [E100]
+    # publishes for that same stroke. So "commit to [E100]" is not just a mast
+    # length: the dead height has to come out too, and it lives in MAST_FOOT
+    # (1.15), the 2.05 m carriage offset and the guide stack. Recorded, not
+    # acted on — every one of those numbers is load-bearing elsewhere.
     HEAD_DROP = 1.36                     # mount:tool below the carriage centre:
                                          # pvh +0.10, spindle -0.80, sub -0.66
     STACK_TOP = GUIDE_Z + 0.028          # mast-local, rod-guide outer top
@@ -1139,6 +1432,30 @@ def build_head(pv):
     # `mount:` lamps, where it is a spotlight THROW in metres. Two different
     # meanings under one name is how this went unnoticed.)
     CARR_LO = (STACK_TOP + 0.05) + HEAD_DROP - (MAST_LEN - 2.05)   # -1.302
+    # CARR_HI: top of travel, carriage-local. PRESERVED from the shipped model,
+    # not re-chosen — and its derivation is restored here because the repair
+    # diff deleted the old one and left a bare literal.
+    #
+    # 1.55 is exactly "the carriage centre stops 0.50 m below the mast top":
+    #     (MAST_LEN - 0.50) - (MAST_LEN - 2.05) = 1.55, for any MAST_LEN.
+    # That is the form the constant is really in, and it is why the stroke
+    # table above tracks MAST_LEN one-for-one.
+    #
+    # THE OLD JUSTIFICATION WAS FALSE AND IS NOT RESTORED. It read "the
+    # carriage rides the rails, which stop 0.45 m short of the mast top".
+    # `mast-rail` is built (0.055, 0.10, L - 0.10) at z = L/2 + 0.02, so it
+    # spans mast-local 0.070..5.420 — it stops 0.03 m short of the mast top,
+    # not 0.45. Computed from the constants in this file, at CARR_HI the top
+    # `carriage-roller` centre sits at 5.250 and its outer surface at 5.305:
+    #     rail top          5.420   115 mm of rail left above the roller — OK
+    #     wear-stripe top   5.220   the roller overruns the polished stripe
+    #                               by 85 mm at full up-travel
+    # `mast-rail-wear` is built L - 0.50 long, i.e. sized for a carriage that
+    # stops 0.25 m lower than this one does. That is a COSMETIC mismatch on a
+    # 20 mm-wide stripe, not a mechanism fault, and it is left alone rather
+    # than fixed blind: it is pre-existing, it changes no bound and no
+    # triangle count, and nothing in the repair caused it. Whoever next edits
+    # the mast needs the stripe to reach mast-local 5.305 instead of 5.220.
     CARR_HI = 1.55                       # carriage-local, top of travel
     sl['travel_m'] = CARR_HI - CARR_LO   # 2.852 m of stroke — see above
     # Absolute exported-parent Y is Blender mast-local Z; extras stay literal.
@@ -1314,6 +1631,25 @@ def build_rod_handling(pv):
             tube('rod-box-end', ROD_OD / 2 + 0.013, 0.17, MAT_STEEL,
                  loc=(xo, ry0 - 0.15, z), rot=(-math.pi / 2, 0, 0), sides=10)
 
+    # THE ARM DOES NOT REACH THE BORE, AND THE REPAIR MADE THAT WORSE. Measured
+    # 2026-09-06, in mast-local XY, from the constants on these lines:
+    #   pivot at (0.43, 0.16); gripper at arm-local (1.46, 0.35), so the swing
+    #   radius is 1.501 m and the gripper's own bearing is +13.5 deg.
+    #   Over `range_deg` [0, 155] the gripper sweeps bearings 13.5..168.5 deg.
+    #   The bore lies at bearing -114.3 deg from the pivot, 1.043 m away.
+    #     closest approach, at the 155 deg limit   1.627 m   (was 1.138 m)
+    #   That is 43 % WORSE than before the working-axis repair, and the repair
+    #   note reported only the flattering half of it: what improved is the
+    #   RADIAL mismatch |1.501 - pivot-to-bore|, 1.042 -> 0.458 m. The bore is
+    #   now inside the arm's radius and outside its declared sweep.
+    # It never reached in either configuration, so this is not a regression the
+    # repair introduced — but it is a real cost of moving the bore forward and
+    # it is written down here instead of only in the good direction.
+    # NOT FIXED BLIND. Reaching the bore needs the sweep to run the other way
+    # (about -128 deg, was -173 deg) or on to +232 deg, and 155 -> 232 deg is a
+    # mechanism decision about which side the arm serves the hole from, not a
+    # number to nudge. `range_deg` has no consumers in src/ today, so nothing
+    # animates it yet; whoever wires rod handling decides this.
     arm = empty(NODE_PIVOT, 'rod-arm', pv, (MAST_W / 2 + 0.14, 0.16, 1.70))
     arm['axis'] = 'z'
     arm['range_deg'] = [0.0, 155.0]

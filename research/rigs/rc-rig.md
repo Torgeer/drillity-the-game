@@ -467,7 +467,9 @@ place RC differs sharply from every other rig in the game:
 > means lattice.
 >
 > **What the model measures against that, verified per primitive, not assumed.**
-> `glbinfo` reports 7.883 x 7.214 x 7.606. The MACHINE lies inside
+> `glbinfo` reports 7.883 x 7.215 x 7.857 (re-measured 2026-09-06; this line
+> read 7.883 x 7.214 x 7.606, from before the working-axis repair took the
+> length to 7.857). The MACHINE lies inside
 > x = +/-1.561 — 3.12 m over the deployed jacks, between [E100]'s 2.80 and
 > [E235]'s 3.45, and **not too wide**. The 7.883 m bounding box is the site
 > spread: the free-standing cyclone stand, the calico bag rows, the chip trays
@@ -476,43 +478,100 @@ place RC differs sharply from every other rig in the game:
 > blender-side lever for it, because `src/core/gltfRig.js` derives `prep.size`
 > and `prep.radius` from the whole scene graph with no exclusion.
 >
-> ### STILL NOT SOURCED after both GAs — 2026-09-06
+> ### STILL NOT SOURCED after both GAs — 2026-09-06, REWRITTEN THE SAME DAY
 >
-> **Neither GA dimensions the rotary head's standoff from the mast, and neither
-> places the bore relative to the carrier.** A sweep of the whole local
-> catalogue library found no dimensioned GA of any RC rig, and both Epiroc PDFs
-> now return **HTTP 403** (as do `pdf.directindustry.com`, `neemba.com`,
-> `machinecatalogic.com`, `anyflip.com`). The transcriptions above are all
-> anybody has.
+> **Conclusion unchanged: neither GA dimensions the rotary head's standoff from
+> the mast, and neither places the bore relative to the carrier.** Everything
+> this note said about *why* was wrong, and is replaced. What it said:
 >
-> Two findings worth keeping:
+> > *"A sweep of the whole local catalogue library found no dimensioned GA of
+> > any RC rig, and both Epiroc PDFs now return HTTP 403 … The transcriptions
+> > above are all anybody has."*
 >
-> 1. **OEMs never publish drill-axis to mast structural CENTRE-PLANE.** Where
->    the dimension appears at all it is drill-axis to mast **FRONT FACE**, or
->    drill-axis to **slew centre** ("reach" / "working radius"). The one located
->    published instance of the front-face form is **Bauer BG 36 H / BS 95, doc
->    905.868.2 (12/2020), printed p.16** — *"Drilling axis 1,100 mm (without
->    upper Kelly guide) / 1,400 mm (with)"*, arrow landing on the leader front
->    face. A foundation kelly rig, NOT this class: cite it for the convention
->    only, never let 1.40 m migrate onto an RC rig. This model's front-face
->    equivalent is 0.46 m.
-> 2. **The [E100] letter table is incomplete as transcribed** — A, B, D, E and F
->    are recorded and **letter C is unaccounted for**. The brochure could not be
->    reached to find out what C dimensions. Worth one attempt if access returns;
->    on a lettered GA of this type C is often a working radius or a bore
->    position, which is exactly the gap above.
+> The first clause contradicts the table immediately above it, which is a
+> transcription of two dimensioned GAs. The second is a request-header problem
+> mistaken for an access wall. Corrected, with the work actually done:
+>
+> 1. **The brochures are reachable.** `Invoke-WebRequest` with only a browser
+>    User-Agent gets 403; `curl` sending `Referer` plus `Sec-Fetch-Dest/Mode/
+>    Site` gets **HTTP 200** on both (2 022 709 B and 930 680 B). Both read.
+> 2. **`Mineral Exploration Tooling` p.22 IS the Explorac 235** — captioned so
+>    on the page, and §1 of this document already recorded it. The primary
+>    SHAPE reference and the primary DIMENSION reference are **the same
+>    machine**, which nobody had noticed, which is why nobody had tried scaling
+>    the standoff off a drawing of the rig in the photograph.
+> 3. **[E235] p.7 is pure vector** (38 837 paths, no raster, no resolution
+>    ceiling) and **it is genuinely to scale**: 8 800 mm over 190.096 pt =
+>    46.293 mm/pt and 11 220 mm over 239.386 pt = 46.870 mm/pt, agreeing to
+>    0.6 % when measured arrowhead-tip to arrowhead-tip. The third callout,
+>    11 050 mm, reads 4 % off because it is the *mast's own total length
+>    including jib boom* (p.6) drawn as the horizontal projection of the
+>    lowered mast: 226.947 pt × 46.58 = 10 576 mm = 11 050 × cos 16°.
+> 4. **And it still carries no dimension to the drill axis.** Every callout is
+>    an envelope or a component figure — erected heights, mast length, working
+>    and transport lengths, width, plus a balloon giving 500 mm shoe and
+>    640 / 330 / 150 mm jack clearances. Traced on the vector, the two
+>    dimensions nearest the drilling end have their arrowhead tips at x =
+>    972.506 and 1009.215 pt and their extension lines run up into white space
+>    beside the envelope extremes; neither lands on a centreline.
+> 5. **Scaling it off the illustration was attempted and refused.** The working
+>    elevation is a shaded render of a PARKED machine — no string, no bit, no
+>    centreline. Choosing "the mast centreline" means choosing between chords,
+>    front rails, carriage and parked head, and at 46.6 mm/pt one POINT of that
+>    choice is 47 mm of answer. Readings ran 0.16 m to 1.02 m depending on the choice — a
+>    6× spread. A choice, not a measurement. See `rc-axis-repair.md` §6.2.
+>
+> **What the GAs DID settle:**
+>
+> - **[E235] mast fore/aft silhouette depth 0.95–1.00 m** — 20.45–21.43 pt
+>    across, read at five clean heights, at 46.29–46.87 mm/pt. Call it 0.97 ±
+>    0.03 m. Partly closes the "mast cross-section" gap below — depth only, and
+>    only for the [E235] size class.
+> - **Its slenderness is 11 050 / 0.97 = 11.4 : 1** (11.0–11.6 across the depth
+>    spread), against the **8.5 : 1**
+>    §3b measured off the photograph **of the same machine**. A raked
+>    three-quarter studio shot reads the mast about 34 % deeper than it is.
+>    §3b's slenderness ratio should be treated as a photographic impression,
+>    not a proportion to hold; `blender/rc_rig.py` has withdrawn its claim that
+>    the ratio is "held exactly".
+> - **[E100] letter C = 2 740 mm, a TRANSPORT dimension**, listed with D, E and
+>    F. This note hoped C might be "a working radius or a bore position, which
+>    is exactly the gap above". It is not. Gap still open, door now shut.
+> - **Size class, sharper.** [E235]: holes **150–200 mm**, spindle 114 mm
+>    4.5"-IF, feed travel 7 680 mm, drilling angle 45–90°, slipstable max
+>    opening 296 mm, GMM 46 500 / operating 36 200 / min 35 100 kg. [E100]:
+>    holes **127–165 mm**, rods 114.3 and 101.6 mm OD, depth 250 m, "a
+>    mechanized breakout table … fitted as standard which guides and locks rods
+>    hydraulically", 30-rod positionable rack. The model's 124 mm hole and
+>    114.3 mm rod sit in [E100]'s band, **below** [E235]'s.
+>
+> **The Bauer comparator, with its caveats, because they get dropped when this
+> is summarised.** Where a bore-to-mast figure is published at all it is
+> drill-axis to mast **FRONT FACE**, or drill-axis to **slew centre** ("reach" /
+> "working radius"). Nobody publishes drill-axis to mast structural
+> centre-plane. The one located instance of the front-face form is **Bauer
+> BG 36 H / BS 95, doc 905.868.2 (12/2020), printed p.16** — *"Drilling axis
+> 1,100 mm (without upper Kelly guide) / 1,400 mm (with)"*, arrow landing on the
+> leader front face. **A foundation kelly rig, NOT this class**: cite it for the
+> convention only, never let 1.40 m migrate onto an RC rig. This model's
+> front-face equivalent is 0.46 m — **2.4× to 3.0× SMALLER** than those
+> figures, so it is not corroboration of anything.
 >
 > **Left open on purpose, not guessed:** the machine is built at [E100] SIZE
-> (5.45 m mast, 3.05 m rods, 7.2 m erected against 7.84, 7.6 m long against
+> (5.45 m mast, 3.05 m rods, 7.2 m erected against 7.84, 7.857 m long against
 > 7.73) but with [E235] FEATURES (open lattice mast, on-board power-and-air
 > pack). Those belong to different size classes. Committing to [E235] means
 > re-scaling by ~1.45 and going to 6 m rods; committing to [E100] means tearing
 > out the lattice this document asked for. That is a design decision with real
 > consequences either way and it is not made here.
 >
-> **Still NOT SOURCED:** mast cross-section (width x depth) for any machine in
-> the class — no manufacturer publishes it; track gauge as distinct from
-> overall width; cyclone STAND height (barrel diameter and body height are
+> **Still NOT SOURCED:** mast cross-section WIDTH for any machine in the class
+> — no manufacturer publishes it, and a side elevation cannot show it. (Mast
+> **depth** is no longer in this list: 0.97 ± 0.03 m, measured off [E235] p.7's
+> vector at 46.3–46.9 mm/pt — see the block above. It is the [E235] size class,
+> so it does not transfer to this model's [E100]-size mast without the
+> size-class decision being made first.) Also still NOT SOURCED: track gauge as
+> distinct from overall width; cyclone STAND height (barrel diameter and body height are
 > published, e.g. Multi-Power PI at 27.5 in barrel / 36 in body for 1 150 CFM,
 > which is the right band for a 1 250 cfm rig).
 

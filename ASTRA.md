@@ -23,7 +23,7 @@ server on port 5178 must never be stopped.**
 | part | roughly | what is actually true |
 |---|---|---|
 | Content | 95 % | 21 methods · 19 rigs · 260 items · 8 regions · 10 sites · 60 levels. Complete in shape. The gap is 17 uncleared marque prefixes and a handful of unsourced constants. |
-| Machines | 95 % | All 19 modelled from sourced drawings, exported, loading, under budget. `rc-rig`'s 0.79 m spindle-to-hole-axis error is the one real defect. |
+| Machines | 96 % | All 19 exported, loading, under budget. **"From sourced drawings" overstates it for `rc-rig`**, whose head standoff no OEM publishes — its `WORK_AXIS` is `NOT SOURCED` and says so. Its 0.79 m spindle-to-hole-axis error is FIXED (2026-09-06): it was never a missing dimension but the sum of three offsets already in the file. |
 | Places | 85 % | Ten sites built, wired, gated. None had been seen in a frame as of this morning. |
 | Simulation | 70 % | Deep and method-specific, but **CFA has no pumping/withdrawal programme**, **vibro borrows impact physics**, and rate has three different definitions. |
 | HUD / UI | 45 % | **The weakest part, and the part the player stares at.** 3D measures 45.4–67.3 % of screen against an ~82 % brief. The only exit from a job is a 30 × 30 px button in the worst corner. The contract board — the first real decision in the game — truncates five strings and offers no decision. |
