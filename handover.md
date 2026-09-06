@@ -1,5 +1,50 @@
 # Drillity handover for Claude
 
+## Latest checkpoint — 2026-09-06, 03:24 Stockholm
+
+This section supersedes historical status below. Live active Codex usage was
+19% remaining at this wave; the <=5% graceful shutdown remains mandatory.
+Reviewed HEAD is beedaaf: authoritative contract readiness and focus recovery,
+60 actual-DOM browser states/218 assertions/234 native controls >=44px. That
+task is integrated and archived. QA used fallback fonts and reduced motion.
+4a6c4ef and 83b2347 also landed after the prior snapshot.
+
+Root renderer/geology/main and dedicated gates remain uncommitted pending final
+graphics acceptance. Retired-program polling no longer queries deleted handles.
+Post warmup now follows actual enabled SMAA/Bloom/Grade destinations; 1557 new
+CPU assertions pass. Latest headed resize/quality lifecycle report is
+shots/instrument-lifecycle-postfix/report.json: all six cases pass, no new
+first-frame programs, zero repeated-frame differences, browser closed. Earlier
+late MeshDepth observations did not recur in this run; no shadow fix was made.
+Instrument A/B now requires bounded exact frozen convergence before comparisons;
+no thresholds are relaxed and no retries occur after comparison toggles.
+This recapture and the 12-case hero capture remain in progress/pending.
+
+The vibro containment candidate is preserved in coordination/vibro-start-guard.md
+and four scoped patches: shared equipment support + simulator, final readiness
+preflight, corrected legacy test expectation, and site recovery. Author13 and
+independent10 CPU cases pass. Integrate together: simulator-only refusal allowed
+a mobilisation charge before failure. Actual site recovery verification is now
+being prepared. This contains a false impact simulation; it does not implement
+vibration physics. Original checkout has not received these patches yet.
+
+New task01a0743c-4fc7-7543-9e67-0f617cbdcc64 delivered underground light bindings
+in drillity-underground-light-bindings, baseline beedaaf. Actual GLB CPU tests
+reproduce stale cached lamp descriptors and wrong rockbolt alternative binding;
+29 cases plus25 independent cases/209 assertions pass. Root review is active;
+rendered proof and integration remain due. No lighting geometry was retuned.
+
+Claude remains active on its reserved site branch. Its checkpoint flags a
+pre-existing quarry authored plug/collar over the live borehole and stale site
+framing assumptions; these are source/analytic findings, not yet root-confirmed
+rendered failures. Claude did not edit the reference quarry module. Preserve
+this finding for follow-up. HUD candidate is still correcting measured clipping
+and backing-size faults; intended-font access remains denied in that task.
+Menu atlas adoption remains waiting on approval externally, with its patch saved.
+
+GPU owner is instrument-grade. Root QA server5198 remains live; user server5178
+is untouched. Full build/artifact verification and actual GitHub push remain due.
+
 **Status: live working draft, not the final shutdown snapshot.** Updated during
 the 2026-09-06 build. The final version must record the exact pushed commit,
 remaining WIP and stopped processes after the usage shutdown procedure.
