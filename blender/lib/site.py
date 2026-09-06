@@ -94,9 +94,22 @@ The allowance, solved on the archetype this pipeline was proved on:
 The site is already spending every call it has. So:
 
     THE NUMBER: **6 materials per site .glb**, and `finish()` enforces it —
-    AND the archetype's terrain.js branch must give back at least as many
-    calls as the .glb takes, by dropping the procedural geometry the .glb
+    AND the archetype's terrain.js branch should give back as many of those
+    calls as it honestly can, by dropping the procedural geometry the .glb
     now carries.
+
+    READ "SHOULD" AND "HONESTLY" LITERALLY. This clause said "MUST give back
+    at least as many calls as the .glb takes", and it has never once been met:
+    all ten archetypes are net additive, the five with the longest `replaces`
+    lists included (the figures are under WHAT IS STILL OPEN below). On three
+    archetypes it CANNOT be met — there is no scatter on an offshore deck and
+    none of the drive's three scatters is rock the underground model carries —
+    so as an absolute it made a rule that some archetypes could only satisfy
+    by lying. As an obligation to pay what can be paid, it is right, and it is
+    enforced where it can be measured: `tools/checksiteenvironment.mjs` A/Bs
+    every archetype against a live terrain build and holds each to the worst
+    figure it has ever measured, so the overspend cannot grow unnoticed. What
+    a `.glb` costs is a real number; a non-empty list is not a proxy for it.
 
 Why 6 and not 3 or 12:
   - It is what can be paid for. On `quarry-bench` the authored rock in the .glb
@@ -119,90 +132,170 @@ If the number is genuinely wrong, MEASURE IT AGAIN and change it here with the
 measurement written down, the way this one is. Do not raise it because a module
 would like a seventh.
 
-    !!! A WARNING THAT USED TO STAND HERE WAS ITSELF WRONG. READ THIS ONCE. !!!
+    !!! TWO WARNINGS USED TO STAND HERE, CONTRADICTING EACH OTHER. SETTLED. !!!
 
-On 2026-09-06 this block claimed the budget above rested on nothing. It was
-retracted the same night, and the retraction is kept rather than deleted so the
-claim is not re-derived by the next reader.
+On 2026-09-06 a block appeared here claiming the budget above rested on nothing;
+a second block the same night refuted it on all three counts; both were left in
+place with a note saying an integrator should collapse them once someone could
+re-measure. That is done, and it needed no GPU: the dispute was never about a
+draw call, it was about whether a file exists.
 
-WHAT WAS CLAIMED, AND WHY EACH PART WAS FALSE:
+RE-CHECKED 2026-09-06 by the runtime-integration owner, in the tree where the
+file was produced, before any of this was changed. THE REFUTATION IS CORRECT ON
+ALL THREE COUNTS AND THE BUDGET'S CITATION IS GOOD:
 
-  * "`shots/s0-report.txt` DOES NOT EXIST AND HAS NO GIT HISTORY."
-    It exists: 20,807 bytes, written 2026-09-05 21:25, in the MAIN CHECKOUT.
-    It has no git history because `.gitignore:15` carries `shots/*.txt`, so it
-    is build output by design — and gitignored files are NOT carried into a git
-    worktree. The check was run from a worktree, where the file cannot appear,
-    and "absent here plus no history" was read as "never existed". BOTH facts
-    are explained by the file being correctly ignored. The instrument could not
-    have found it.
+  * `shots/s0-report.txt` EXISTS. 20,807 bytes, written 2026-09-05 21:25, at
+    C:/Users/henri/Downloads/drillity-the-game/shots/s0-report.txt (forward
+    slashes deliberately: this is a module docstring, and a literal Windows
+    path starting with the users directory puts a backslash-U escape in it - a
+    SyntaxError that stops EVERY site build. It did exactly that here, twice.
+    Do not put a backslashed Windows path in this file.) Its own header reads
+    `mode HEADED (real GPU - fps is meaningful)  quality high  filter --only
+    methods`. It has NO GIT HISTORY because `.gitignore` carries `shots/*.txt`,
+    so it is build output by design - and gitignored files are not carried into
+    a git worktree. "Absent in my checkout plus no history" was read as "never
+    existed"; both facts are explained by the file being correctly ignored, and
+    the instrument could not have found it. THE LESSON, which is why any of
+    this is kept: a gitignored file is invisible from a worktree and `git log`
+    on one returns nothing BY CONSTRUCTION. Neither absence is evidence. Say
+    which tree you looked in before calling a citation broken.
 
-  * "m08-rc 85 is a MISREAD OF AN FPS COLUMN."
-    It is not. `s0-report.txt` reads
-        id      fps   w?  frame  surf  sect  rig
-        m08-rc  57.8   W    265    85    21   57
-    so surf IS 85 and rig IS 57, exactly as cited. The refutation quoted
-    `post-report.txt` — A DIFFERENT RUN, with no `w?` column — where the same
-    machine reads `85.9  271  87  21  59`. One file's fps is 85.9 and the
-    other's surf is 85; that coincidence is the whole error.
+  * "m08-rc 85 is a MISREAD OF AN FPS COLUMN" is false. In s0-report.txt that
+    row reads fps 57.8, total 265, surface 85, section 21, rig 57 - the 85 and
+    the 57 cited above, exactly. The claim quoted `shots/post-report.txt`,
+    A DIFFERENT AND EARLIER RUN (2026-09-04, no warm column), where the same
+    machine reads 85.9 / 271 / 87 / 21 / 59. One file's fps is 85.9 and the
+    other's surface is 85; that coincidence is the whole error.
 
-  * "EIGHT OF TWENTY-ONE reproduces as 9, 15 and 19."
-    Those counts came from other reports. Parsed from `s0-report.txt` itself,
-    the eight over the ceiling reproduce exactly: 89, 86, 85, 84, 83, 83, 83,
-    81.
+  * "EIGHT OF TWENTY-ONE" reproduces exactly. Parsing the 21 method rows and
+    counting surface > 80 gives 8: m16-tunnel-jumbo 89, m06-overburden 86,
+    m08-rc 85, m11-rockbolt 84, m05-dth 83, m18-longhole 83, m19-sonic 83,
+    m07-core 81.
 
-THE BUDGET ABOVE IS SOUND AND ITS CITATION IS GOOD. Treat the 6 as measured.
+WHAT IS STILL OPEN, AND IT IS NOT WHAT THE WARNING WAS ABOUT:
 
-THE LESSON, WHICH IS THE REASON THIS IS KEPT: a gitignored file is invisible
-from a worktree, and `git log` on one returns nothing BY CONSTRUCTION. Neither
-absence is evidence. Before calling a citation broken, check the main checkout
-and check `.gitignore` — and say which tree you looked in. `shots/post-report.txt` exists and is readable; start there.
+  1. THE NUMBERS IN THIS DOCSTRING'S TABLE ARE STILL THE 2026-09-05 RUN, BUT
+     A GPU RUN THE NEXT DAY HAS RE-MEASURED THE BAND AND MOVED IT. See
+     `research/sites/_gpu-verdict.md`, taken under the `claude-gpu` lease on an
+     RTX 4070, headed, warm, iPhone 13 Pro viewport. Two things changed:
 
-    !!! THE WARNING ABOVE IS ITSELF WRONG, ON ALL THREE COUNTS. MEASURED. !!!
+       * THE METHOD BREACHES ARE FOUR, NOT EIGHT, AND THEY ARE DIFFERENT ONES.
+         m03-top-hammer 88, m06-overburden 85, m14-driven-pile 82,
+         m20-jet-grouting 82. Of the s0 eight, only m06-overburden is still
+         over. m16-tunnel-jumbo is now 77, m11-rockbolt 73, m18-longhole 70,
+         m08-rc 69, m05-dth 78, m19-sonic 60, m07-core 72. The s0 citation is
+         accurate for the day it was taken - the GPU agent read the same file
+         and reproduced its rows - but ITS LIST IS STALE and "eight of
+         twenty-one" should not be re-quoted as a present-tense fact.
+       * THE ALLOWANCE ARITHMETIC ABOVE SUBTRACTS THE WRONG RIG. It uses
+         "worst rig that stands on a quarry bench (m08-rc, measured) -57". On
+         the GPU the worst rig that stands on a quarry bench is `crawler-th`
+         at 60, and `top-hammer` is a quarry-bench method. THE SITE'S
+         ALLOWANCE IS 3 CALLS SMALLER THAN THIS HEADER COMPUTES: 14, not 17,
+         and `quarry-bench` spends 20 against it. The 6-material ceiling is
+         still the right shape of answer - the premise "there is no headroom
+         to spend" was confirmed, with `quarry-bench` at 88 and
+         `tunnel-portal` at 92, both of them already over BEFORE their model
+         loads (85 and 88 with the .glb blocked). The subtraction under it
+         wants re-solving against the machine that actually turns up.
 
-Re-checked 2026-09-06 by the runtime-integration owner, against the actual file,
-before anything was changed. The three claims and what reproducing them gives:
+     THE TABLE ITSELF HAS NOT BEEN REDONE and the two runs are not
+     interchangeable: the GPU site pass ran against a `dist/` snapshot while
+     four agents were editing, and its own report says so. Do not merge the
+     two sets of figures into one table.
 
-  1. `shots/s0-report.txt` EXISTS. It is at
-     `C:/Users/henri/Downloads/drillity-the-game/shots/s0-report.txt`
-     (forward slashes deliberately: this is a module docstring, and a literal
-     Windows path starting with the users directory puts a backslash-U escape
-     in it — a SyntaxError that stops EVERY site build. It did exactly that
-     here, twice: once writing the path, and once writing this warning about
-     writing the path. Do not put a backslashed Windows path in this file.),
-     20,807 bytes, written 2026-09-05 21:25 by the run whose own header reads
-     `mode HEADED (real GPU — fps is meaningful)  quality high  filter --only
-     methods`. It has no git history because `.gitignore` line `shots/*.txt`
-     excludes it — so it is ABSENT FROM EVERY WORKTREE while being present
-     where it was produced. "Not in my checkout" was read as "never existed".
+  2. "THE ARCHETYPE'S terrain.js BRANCH MUST GIVE BACK AT LEAST AS MANY CALLS
+     AS THE .GLB TAKES" IS MET BY NO ARCHETYPE, INCLUDING THE FIVE WITH THE
+     LONGEST `replaces` LISTS. Measured on the CPU by
+     `tools/checksiteenvironment.mjs` (mesh submissions under `terrain-root`,
+     model live minus model 404'd), worst of nordic / german-site /
+     iberian-quarry, with the model's own primitive count beside it:
 
-  2. "m08-rc 85" IS NOT AN FPS MISREAD. The 85.9/271/87/21/59 row quoted above
-     is from `shots/post-report.txt`, which is a DIFFERENT RUN from the one
-     cited. In `s0-report.txt` m08-rc reads fps 57.8, total 265, surface 85,
-     section 21, rig 57 — the docstring's 85 and 57 exactly. (The coincidence
-     that m08-rc's fps there is 57.8 while its rig is 57 is presumably what
-     made an FPS misread look plausible.)
+         urban-plot              3 names  5 prims  NET +1
+         open-pit-bench          3 names  4 prims  NET +2
+         infrastructure-corridor 1 name   4 prims  NET +3
+         quarry-bench            3 names  6 prims  NET +3
+         tunnel-portal           3 names  6 prims  NET +4
+         platform-deck           []       4 prims  NET +4
+         exploration-pad         []       5 prims  NET +5
+         well-pad                1 name   6 prims  NET +5
+         marine-spread           []       6 prims  NET +6
+         underground-drive       []       4 prims  NET +4  (measured separately;
+             checksiteenvironment skips it, because a surface A/B is meaningless
+             on a plane whose rebuild() returns before any surface builder runs)
 
-  3. "EIGHT OF TWENTY-ONE" REPRODUCES EXACTLY. Parsing the 21 method rows of
-     `s0-report.txt` and counting surface > 80 gives 8: m16-tunnel-jumbo 89,
-     m06-overburden 86, m08-rc 85, m11-rockbolt 84, m05-dth 83, m18-longhole
-     83, m19-sonic 83, m07-core 81. Every one of the eight surface totals in
-     the table above matches the report column for column.
+     ALL TEN ARE NET ADDITIVE. `net = prims - scatters actually dropped`, and
+     what is actually dropped is a function of the REGION as well as the
+     archetype (nordic has no scree, so quarry-bench meets two of its three
+     names there).
 
-So the derivation of 6 DOES rest on a measurement anyone can check — they just
-have to check it where it was written, not in a worktree that gitignores it.
+     CONFIRMED ON THE GPU, BY A DIFFERENT INSTRUMENT, THE SAME DAY. The list
+     above was CPU-only when it was written and said so. `research/sites/
+     _gpu-verdict.md` §1 then measured the same quantity headed and warm on an
+     RTX 4070, by a different A/B - every `models/sites/*.glb` request aborted
+     at the network layer for the "kit" pass, loaded normally for the "glb"
+     pass - and got:
 
-TWO THINGS ARE STILL TRUE AND WORTH KEEPING FROM THE WARNING:
-  * the numbers are from 2026-09-05 and have not been re-measured since;
-  * "the archetype's terrain.js branch must give back at least as many calls as
-    the .glb takes" IS NOT MET BY EITHER SHIPPED SITE. Measured on the CPU by
-    `tools/checksiteenvironment.mjs` (mesh submissions under `terrain-root`,
-    model live minus model 404'd): quarry-bench +3 at nordic, +3 at
-    german-site, +2 at iberian-quarry; urban-plot +1, +1, +0. Both models are
-    net additive. That is the real open budget problem, and it is not the one
-    the warning above was about.
+         the model's own cost   MATCHES ON ALL TEN. `own`, taken by hiding the
+                                `site:<id>` node, equals the module's material
+                                count every time: 4, 5 or 6. That is this
+                                file's "one draw call per material per site
+                                .glb" holding exactly, measured rather than
+                                asserted.
+         the net                MATCHES ON EIGHT OF TEN. The two that differ
+                                differ by 1 in opposite directions -
+                                urban-plot +2 there against +1 here,
+                                open-pit-bench +1 there against +2 here -
+                                because the two probes did not stand in the
+                                same regions, which is the region dependence
+                                stated in the paragraph above.
 
-Neither block has been deleted. An integrator should collapse the two once the
-GPU lease allows a fresh headed measurement.
+     Two instruments written by different agents against different scene
+     graphs, one on the CPU and one with the GPU bound, landing on the same
+     numbers. Treat ALL TEN ARE NET ADDITIVE as measured, not as a CPU
+     estimate. This is the REAL open budget problem. It was for a while
+     enforced by a rule in `tools/checksites.mjs` that failed any archetype
+     whose `replaces` was empty - which sorted archetypes by whether they had
+     written a list, not by what anything cost, and was unsatisfiable on the
+     offshore plane where no scatter is offered at all. That rule is retired;
+     the derivation is in `src/world/terrain.js` under THE EMPTY-LIST RULE, and
+     the cost is now graded where it is measured, against a live build.
+
+  3. THE 80 CEILING'S EVIDENCE IS SURFACE-PLANE EVIDENCE, AND THE TABLE ABOVE
+     DOES NOT SAY SO. Of the eight states over it, THREE ARE UNDERGROUND
+     (m16-tunnel-jumbo, m11-rockbolt, m18-longhole are the only drives in the
+     set - `terrain.js:resolveArchetype` forces `underground-drive` for any
+     method with a drive spec) and five are surface. NONE IS OFFSHORE: no
+     s0 row is in `north-sea`, which is the only region an offshore archetype
+     appears in, so the phrase "already over its ceiling in eight of twenty-one
+     states" has never been evidence about `platform-deck` or `marine-spread`.
+     The only offshore figures anywhere are this docstring's own: surface
+     totals of 43 and 44, the two LOWEST of the nine and ~36 under the ceiling.
+     The underground three ARE counted in the surface column - shoot.mjs's
+     surface number is the whole scene - but that column is then a tube of rock
+     with no sky, no ground plane, no vegetation and no far field in it.
+
+     THE GPU RE-MEASUREMENT MAKES THIS SHARPER, NOT WEAKER. In
+     `research/sites/_gpu-verdict.md` §3 the four states now over 80 are
+     m03-top-hammer, m06-overburden, m14-driven-pile and m20-jet-grouting -
+     ALL FOUR SURFACE. Every drive has come back under: m16-tunnel-jumbo 77,
+     m11-rockbolt 73, m18-longhole 70. So today NONE of the over-ceiling
+     states is underground and NONE is offshore; the ceiling's whole evidence
+     base is surface-plane. Its §1 also puts `underground-drive` at surface 77
+     with the model and 73 without, and `platform-deck` at 43 - the lowest of
+     the ten. Whatever is true of a modelled site on the surface band, the
+     sentence "already over its ceiling in eight of twenty-one states" has
+     never once described the two planes it was used to fail.
+
+  4. AN INACCURACY IN THIS FILE'S OWN CITATION, CORRECTED. The table above says
+     its numbers were taken "the same per-band attribution `tools/shoot.mjs`
+     uses". They are not the same. `shoot.mjs:296-307` renders the WHOLE main
+     scene for the surface number and toggles only `c.rig.group` to split the
+     rig out; it never hides `ctx.terrain.root`. The `site` column here
+     plausibly came from a separate terrain-root toggle, but the `surface
+     total` column is shoot.mjs's untouched whole-scene count, and equating the
+     two methods is wrong. The NUMBERS are unaffected; the sentence describing
+     how they were taken is not.
 
 A NOTE ON WHAT THE .GLB IS ACTUALLY BUYING, SINCE IT IS NOT DRAW CALLS
 ----------------------------------------------------------------------
@@ -262,19 +355,92 @@ parses `CAMERA_MODES.hero` and hard-fails if it cannot. **Do that, rather than
 copying a number out of this file** — ASTRA §5: two tables describing one thing
 drift, and the wrong one is believed.
 
-`renderer.js:160` authors `fov: 34`, but `fovForBand()` re-solves the vertical
-field every frame (`renderer.js:904-907, 1507-1512`); modules measure the live
-value near **21°**, not 34. **UNRESOLVED, do not trust either number blindly:**
-the frame constants copied across all ten modules
-(`TOP_K 0.2065 / BOT_K 0.1638 / HALF_W_K 0.4023`, "aspect 1.724") are
-internally inconsistent — the half-width implies aspect **2.174**, a digit
-transposition of 1.724, and on a 9/16 stage the horizontal half-tangent solves
-to **0.3185**, not 0.4023. If 0.3185 is right, every module's NDC frame is
-**26 % wider than it believes** and every `NDC_EDGE` gate is mis-aimed.
-Resolving it needs one read of the live `camera.projectionMatrix`, which needs
-the GPU lease. Until then, treat NDC gates as indicative.
+`renderer.js:161` authors `fov: 34` for the hero camera, and `fovForBand()`
+(`renderer.js:1161-1165`) re-solves the VERTICAL field every frame precisely so
+that the HORIZONTAL one never moves. **RESOLVED 2026-09-06 by reading the live
+`camera.projectionMatrix` on the GPU** — headed Chrome bound to the discrete
+NVIDIA RTX 4070 Laptop GPU (ANGLE D3D11), `quality=high`, warm, 21 method
+states against three stage aspects. The answer is that **`HALF_W_K` IS NOT ONE
+NUMBER. It is a function of the STAGE, and 0.4023 is not a value it can take:**
 
-Also not modelled by any site module: `renderer.js:1671-1729` applies
+    HALF_W_K = tan(hero_fov / 2) * stage.w / (stage.h * LAYOUT.surfaceHeight)
+
+which is `tan(17°) * refBandAspect` exactly as `renderer.js:1353` composes it.
+`computeLayout()` letterboxes the viewport into a stage clamped between
+`STAGE_ASPECT_MIN 9/19.5` and `STAGE_ASPECT_MAX 9/16` (`renderer.js:28-29`,
+`1314-1317`), so the whole reachable range is three digits wide:
+
+    stage                        refBandAspect   solved     MEASURED (settled)
+    9/16           405 x 720            1.0417   0.31847    0.31845 - 0.31876
+    iPhone 13 Pro  390 x 844            0.8557   0.26162    0.26150 - 0.26185
+    9/19.5 floor   390 x 845            0.8547   0.26131    0.26132 - 0.26145
+
+The matrix itself — `dth`, 390x844, hero, warm, registration live:
+
+    projectionMatrix.elements = [ 3.8222247, 0,         0,          0,
+                                  0,         4.8555949, 0,          0,
+                                  0.3239795, 0.0867073, -1.0002000, -1,
+                                  0,         0,         -0.5000500, 0 ]
+    HALF_W_K = 1/e[0]        = 0.261628
+    TOP_K    = (1+e[9])/e[5] = 0.223805
+    BOT_K    = (1-e[9])/e[5] = 0.188091
+
+**0.4023 IS REFUTED.** Under the hero camera it would need a stage aspect of
+0.711, and `computeLayout()` cannot make one wider than 0.5625. What it IS, to
+within 0.65 %, is the camera BEFORE `updateSurfaceCamera()` has ever run: the
+constructor's `fov 42` (`renderer.js:1099`) on a 9/16 stage measures
+**0.399653**, and this run caught that state repeatedly whenever a matrix was
+read before the fov spring had left its initial value. That is the most
+probable provenance of 0.4023 — a projection matrix read on a stage that had
+not yet entered hero mode. It is a hypothesis about how the number was made,
+not a measurement of anyone's intent.
+
+**0.3185 IS RIGHT, BUT ONLY FOR A 9/16 STAGE** — the WIDEST stage the game can
+show. Every phone taller than 9/16 gets a NARROWER frame, and that is every
+phone this game targets: the harness's own device is 9/19.49. **Author against
+the NARROWEST reachable frame, `HALF_W_K = 0.2613`**; geometry sized to 0.3185
+sits up to 22 % outside the frame on a tall phone.
+
+**`TOP_K` AND `BOT_K` ARE NOT CONSTANTS AT ALL.** `TOP_K + BOT_K` is
+`2 * HALF_W_K / bandAspect`, and `bandAspect` moves with the HUD chrome, which
+differs from screen to screen: 390x456 (no chrome), 390x307 and 390x281 were
+all measured on the SAME device in the SAME run, giving vertical fields of
+34.00°, 23.27° and 21.35°. The authored pair sums to 0.3703, which belongs to a
+band aspect of 1.413 — a 390x276 band no current screen produces, which is why
+"the modules measure 21°" was true when it was written and is not true now.
+Derive the vertical half-extent from the LIVE band; never copy it. And the
+TOP/BOT asymmetry is not composition either: it is the `setViewOffset`
+registration described below, live and damped.
+
+MODULES AFFECTED — each read to confirm, not inferred:
+  * `well_pad.py:1364-1371` — the `NDC_EDGE 0.85` gate divides by
+    `half_width(dist)`. At 0.4023 against a true 0.2613 it under-reports NDC x
+    by 1.54x, so furniture passing at 0.85 actually reaches about 1.31 —
+    OUTSIDE the frame. The gate is presently permitting the exact thing it was
+    written to stop.
+  * `underground_drive.py:517, 1321` — `x_limit()` places the laydown at
+    `KEEP_NDC_X * HALF_W_K * dist_at(z)`, so the strip is ~54 % wider in world
+    metres than the NDC column it was composed for.
+  * `quarry_bench.py:585, 592, 600, 652` — four `k * half_width(d)` placements,
+    each a fraction of frame width.
+  * `infrastructure_corridor.py:1298` — the vanishing-point assertion
+    `tan(TURN) / HALF_W_K` is solved from it and moves with it.
+  * `open_pit_bench.py:1332-1375` — haul-road placement and its `EDGE_LIMIT`
+    clamp; this module already documents that it was composed to survive either
+    value, and that claim now has a number to be checked against.
+  * NOT affected: `tunnel_portal.py` (defines `half_width` and never calls it),
+    and `exploration_pad.py`, `marine_spread.py`, `platform_deck.py` and
+    `urban_plot.py`, which carry no frame constants at all.
+
+Re-solving those five is the site modules' own work and not this file's. The
+measurement, the harness that took it and the reasoning are in
+`research/sites/_gpu-verdict.md`.
+
+Also not modelled by any site module: `renderer.js:1991-2036` (`registerBands`,
+`setViewOffset` at 2035 — the citation here read 1671-1729, which
+`research/sites/_gpu-verdict.md` §4 flagged as stale and asked the owner of
+this paragraph to correct; re-checked against renderer.js before changing it,
+not taken on the report's word) applies
 `camera.setViewOffset(...)` **every frame**, damped, to pin world (0,0,0) onto
 the section band's hole. It moves the frame by up to **±0.44 in NDC x** and
 **±0.24 in NDC y** (`REG_MAX_X 0.22`, `REG_MAX_Y 0.12` of the band). A fixed

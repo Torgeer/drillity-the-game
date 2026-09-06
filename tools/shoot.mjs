@@ -30,7 +30,7 @@
  *
  * Usage:
  *   node tools/shoot.mjs --headed                 # everything (required flag here)
- *   node tools/shoot.mjs --headed --only ui       # ui | methods | rigs
+ *   node tools/shoot.mjs --headed --only ui       # ui | methods | rigs | sites
  *   node tools/shoot.mjs --headed m-dth r-bolter  # substring filter on shot id
  *   node tools/shoot.mjs --headed --tag r4        # prefix every file
  *   node tools/shoot.mjs --list                   # print the plan, shoot nothing
@@ -64,7 +64,7 @@ const URL_ = `${BASE}${BASE.includes('?') ? '&' : '?'}quality=${QUALITY}&shot`;
 const TAG = flag('tag', '');
 const HEADED = has('headed');
 const LIST_ONLY = has('list');
-const GROUP = (flag('only', '') || '').toLowerCase();   // ui | methods | rigs
+const GROUP = (flag('only', '') || '').toLowerCase();   // ui | methods | rigs | sites
 
 /* Positional filters — substrings matched against shot ids.
  *
@@ -517,6 +517,23 @@ function pageIdentity() {
     simActive: !!(c && c.sim && c.sim.active),
     contractMethodId: c && c.state && c.state.contract && c.state.contract.methodId,
     regionId: c && c.state && c.state.world && c.state.world.regionId,
+    /* WHICH SITE IS ACTUALLY ON SCREEN — the .glb or the procedural fallback.
+       terrain.js publishes this tripwire for exactly one reason (its own
+       comment at the getter): the site loader has a GOOD fallback, and a good
+       fallback is how six machines were modelled, exported and never once
+       drawn for a week (ASTRA §4.4, §10). Without this, a method frame that
+       photographed the procedural kit is indistinguishable in the report from
+       one that photographed the model, and every site draw-call number here
+       would be unattributable. `model` is a string ONLY when the .glb is in
+       the scene; `problem` carries the reason when it is not. */
+    site: (() => {
+      const s = c && c.terrain && c.terrain.siteModel;
+      if (!s) return null;
+      const sub = c.terrain.archetypeSubstitution;
+      return { wanted: s.wanted, model: s.model, procedural: s.procedural,
+               problem: s.problem || null, prims: s.drawCalls,
+               substituted: sub ? { wanted: sub.wanted, used: sub.used, reason: sub.reason } : null };
+    })(),
     profileMode: c && c.geology && c.geology.profileMode,
     depth: t ? +(t.depth || 0).toFixed(2) : null,
     rop: t ? +(t.rop || 0).toFixed(3) : null,
@@ -1115,6 +1132,119 @@ function rigShot(r) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   SITES — the PLACE the machine stands in
+   ═══════════════════════════════════════════════════════════════════════════
+
+   Until 2026-09-06 this harness could not address a site at all: the plan
+   groups were `ui | methods | rigs` and `grep -c archetype` was 0. Ten site
+   environments shipped, and the only numbers anyone had for them were CPU
+   mesh-submission counts taken with no GPU bound.
+
+   WHY THIS IS A GROUP AND NOT A COLUMN ON THE METHOD SHOTS. A method state
+   shows whatever archetype `resolveArchetype()` derives for it, so nine of the
+   ten archetypes are reachable only by accident and `platform-deck` (north-sea,
+   `oil-rotary` only) is essentially unreachable. Addressing the archetype
+   directly is the only way to get one frame per PLACE.
+
+   THE PLAN IS ENUMERATED FROM data.js, NOT LISTED HERE. `METHODS[].archetypes`
+   is the one table; a second copy in this file would drift and the wrong one
+   would be believed (ASTRA §5). `pageArchetypePlan()` takes the union and pairs
+   each archetype with a method that legitimately offers it.
+
+   THE FALLBACK IS THE WHOLE RISK. `terrain.js` fetches the .glb and silently
+   draws a procedural kit when it cannot — the exact shape of the bug that left
+   six machines unrendered for a week (ASTRA §4.4). So `verify()` here fails a
+   shot whose `terrain.siteModel.model` is not the archetype asked for. A frame
+   of the fallback must never be filed as a frame of the model. */
+
+/** Enumerate archetype -> a method that offers it, from the live content table. */
+function pageArchetypePlan() {
+  const d = window.__DRILLITY && window.__DRILLITY.data;
+  const byArch = new Map();
+  for (const m of ((d && d.METHODS) || [])) {
+    for (const a of (m.archetypes || [])) {
+      if (!byArch.has(a)) byArch.set(a, []);
+      byArch.get(a).push(m.id);
+    }
+  }
+  return [...byArch.entries()].map(([arch, methodIds]) => ({ arch, methodIds }));
+}
+
+/** One live frame per site archetype, with the model proven to be on screen. */
+export function siteShot(s) {
+  return {
+    id: `s${pad2(s.__i)}-${s.arch}`,
+    group: 'sites',
+    subject: s.arch,
+    label: `${s.arch}`,
+    settle: 900,
+    async setup(page) {
+      /* WHICH METHOD TO STAND THE SITE UNDER, decided by trying rather than by
+         a table. `resolveArchetype()` REFUSES an underground archetype for a
+         method with no drive spec in core/env.js and silently derives a surface
+         site instead — 527 of 19,200 generated contracts do exactly that with
+         `core` + `underground-drive`. Guessing the right pairing here would be
+         a second table that drifts (ASTRA §5), so the candidates are tried in
+         order and the first one the runtime accepts wins. If none is accepted,
+         the substitution itself is the result and `verify()` fails the shot. */
+      const tried = [];
+      for (const methodId of s.methodIds) {
+        const m = s.methods[methodId];
+        if (!m) continue;
+        const seed = await page.evaluate(pageSeedMethod, m);
+        this.__seed = seed || {};
+        this.__methodId = methodId;
+        await page.evaluate((a) => {
+          /* Force the archetype AFTER seeding: startDemoContract() picks its
+             own, and terrain.js re-resolves from `state.contract` and
+             `state.world.site` every frame, so BOTH have to carry it or the
+             next frame reverts to the region default. */
+          const c = window.__DRILLITY;
+          if (c.state.contract) c.state.contract.archetype = a;
+          c.state.world = c.state.world || {};
+          c.state.world.site = c.state.world.site || {};
+          c.state.world.site.archetype = a;
+        }, s.arch);
+        /* Wait for the fetch+parse to LAND or to FAIL — never a fixed sleep.
+           A timeout is itself the finding, so it is recorded, not swallowed. */
+        this.__landed = await page.waitForFunction((a) => {
+          const t = window.__DRILLITY.terrain;
+          return !!(t && t.siteModel && (t.siteModel.model === a || t.siteModel.problem));
+        }, s.arch, { timeout: 20_000 }).then(() => true).catch(() => false);
+        const state = await page.evaluate(() => {
+          const t = window.__DRILLITY.terrain;
+          const sub = t && t.archetypeSubstitution;
+          return { model: t && t.siteModel ? t.siteModel.model : null, substituted: sub ? sub.reason : null };
+        }).catch(() => ({ model: null, substituted: null }));
+        tried.push(`${methodId}${state.model === s.arch && !state.substituted ? ' ✓' : state.substituted ? ' — substituted' : ' — not loaded'}`);
+        if (state.model === s.arch && !state.substituted) break;
+      }
+      this.__tried = tried;
+      await drive(page, 10, 120);
+    },
+    verify(id, met) {
+      const site = id.site || {};
+      return [
+        [`site model "${s.arch}" is in the scene`, site.model === s.arch],
+        ['not the procedural fallback', site.procedural === false],
+        ['archetype was not substituted', !site.substituted],
+        ['screen is site', id.liveScreen === 'site'],
+        ['frame is not black', !!met && !!met.canvas && !met.canvas.error && met.canvas.surface.max > 24],
+        ['GL context alive', !met || met.ctxLost !== true],
+      ];
+    },
+    extra() {
+      const e = { archetype: s.arch, asMethod: this.__methodId || null, methodsTried: this.__tried };
+      if (this.__landed === false) e.notes = ['site model neither loaded nor reported a problem within 20s'];
+      if (this.__seed && this.__seed.notes && this.__seed.notes.length) {
+        e.notes = [...(e.notes || []), ...this.__seed.notes];
+      }
+      return e;
+    },
+  };
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    RUN
    ═══════════════════════════════════════════════════════════════════════════ */
 let BROWSER = null;
@@ -1315,16 +1445,57 @@ const run = async () => {
   }
   const shootableRigs = rigs.filter((r) => content.buildable.includes(r.renderId));
 
+  /* SITES. Enumerated from the same live table as the methods, then paired with
+     a method that offers the archetype. An archetype whose only methods are
+     absent from data.js is a SKIP with a reason, never a silent hole — a plan
+     that quietly shrinks is the "gate over an empty set" of ASTRA §10. */
+  const archPlan = await page.evaluate(pageArchetypePlan).catch(() => []);
+  const sites = [];
+  for (const a of archPlan) {
+    /* Underground-capable methods first: an underground archetype is REFUSED
+       for a method with no drive spec, and trying those first turns a certain
+       substitution into a first-try hit. Order only — the runtime still
+       decides, in siteShot.setup(). */
+    const cand = a.methodIds
+      .filter((id) => methods.some((x) => x.id === id))
+      .sort((x, y) => (UNDERGROUND.has(y) ? 1 : 0) - (UNDERGROUND.has(x) ? 1 : 0));
+    if (!cand.length) { skipped.push({ kind: 'site', id: a.arch, why: `no method in data.js offers this archetype (wants one of ${a.methodIds.join(', ') || 'none'})` }); continue; }
+    const byId = {};
+    for (const id of cand) byId[id] = methods.find((x) => x.id === id);
+    sites.push({ arch: a.arch, methodIds: cand, methods: byId, __i: sites.length + 1 });
+  }
+  sites.forEach((s, i) => { s.__i = i + 1; });
+
+  /* ── A GATE OVER AN EMPTY SET PASSES FOREVER (ASTRA §10) ────────────────
+     CRITIQUE.md §8 named this hole and it was still open: the coverage line
+     below prints "Every id in the manifest and every rig in data.js has a
+     frame in this run" whenever nothing was SKIPPED — including the run where
+     `pageContent()` threw, `methods` and `rigs` are both [], `readManifest()`
+     swallowed its own failure so `MANIFEST.methods` is [] too, and therefore
+     nothing could be skipped. Zero methods and zero rigs then satisfied the
+     claim, and `assessQaRun()` never sees `methods` or `rigs` at all, so the
+     run could grade PASS on the eleven hardcoded UI shots alone.
+
+     The fix stays inside this file rather than changing the grader's contract:
+     an empty content table is pushed as a SKIP, and `assessQaRun()` already
+     turns every skip into `incomplete` — so the run comes out INCOMPLETE
+     (exit 2), never PASS. Measured nothing is now a failure, everywhere. */
+  if (!methods.length) skipped.push({ kind: 'coverage', id: 'methods', why: 'data.js exposed ZERO methods — this run cannot be a coverage round' });
+  if (!rigs.length) skipped.push({ kind: 'coverage', id: 'rigs', why: 'data.js exposed ZERO rigs — this run cannot be a coverage round' });
+  if (!archPlan.length) skipped.push({ kind: 'coverage', id: 'sites', why: 'data.js exposed ZERO site archetypes — this run cannot be a coverage round' });
+  if (!MANIFEST.methods.length) skipped.push({ kind: 'coverage', id: 'manifest', why: `${MANIFEST.source || 'the method manifest'} listed no ids, so nothing could be graded as missing` });
+
   const plan = [
     ...UI_SHOTS,
     ...methods.map(methodShot),
     ...shootableRigs.map(rigShot),
+    ...sites.map(siteShot),
   ];
   const wanted = selectCapturePlan(plan, { group: GROUP, filters: only, listOnly: LIST_ONLY });
 
   process.stdout.write(
     `plan: ${methods.length} methods · ${shootableRigs.length}/${rigs.length} rigs · ` +
-    `${UI_SHOTS.length} UI states  →  ${wanted.length} shots\n`);
+    `${sites.length} sites · ${UI_SHOTS.length} UI states  →  ${wanted.length} shots\n`);
   if (skipped.length) {
     process.stdout.write(`SKIPPED ${skipped.length}:\n` +
       skipped.map((s) => `  ${s.kind} ${s.id} — ${s.why}`).join('\n') + '\n');
@@ -1575,12 +1746,27 @@ export function writeReport({ results, logs, content, methods, rigs, skipped: pl
   const mShots = shot.filter((r) => r.group === 'methods');
   const rShots = shot.filter((r) => r.group === 'rigs');
   const uShots = shot.filter((r) => r.group === 'ui');
+  const sShots = shot.filter((r) => r.group === 'sites');
   L.push('── COVERAGE ────────────────────────────────────────────────────────────');
   L.push(`methods    ${mShots.length}/${methods.length} photographed` +
          (plannedSkips.filter((s) => s.kind === 'method').length ? `  ·  ${plannedSkips.filter((s) => s.kind === 'method').length} MISSING FROM data.js` : ''));
   L.push(`rigs       ${rShots.length}/${rigs.length} photographed` +
          (skipped.filter((s) => s.kind === 'rig').length ? `  ·  ${skipped.filter((s) => s.kind === 'rig').length} unbuildable` : ''));
-  L.push(`UI states  ${uShots.length}`);
+  L.push(`sites      ${sShots.length} archetypes photographed` +
+         (skipped.filter((s) => s.kind === 'site').length ? `  ·  ${skipped.filter((s) => s.kind === 'site').length} unreachable` : ''));
+  const onFallback = sShots.filter((r) => r.ident && r.ident.site && r.ident.site.procedural);
+  if (onFallback.length) {
+    L.push(`           ${onFallback.length} of those show the PROCEDURAL FALLBACK, not the .glb: ` +
+           onFallback.map((r) => `${r.subject}${r.ident.site.problem ? ' (' + r.ident.site.problem + ')' : ''}`).join(', '));
+  }
+  /* The same question, asked of every OTHER frame that stands on a site: a
+     method or rig portrait taken over the fallback is a picture of the
+     procedural kit filed under the model's name. */
+  const otherFallback = [...mShots, ...rShots].filter((r) => r.ident && r.ident.site && r.ident.site.wanted && r.ident.site.procedural);
+  if (otherFallback.length) {
+    L.push(`           ${otherFallback.length} method/rig frame(s) also stand on the fallback: ` +
+           otherFallback.map((r) => r.id).join(' '));
+  }
   L.push(`manifest   ${MANIFEST.source || 'none found'} lists ${MANIFEST.methods.length} method ids`);
   if (unlisted.length) L.push(`           in data.js but NOT in the manifest (photographed anyway): ${unlisted.join(', ')}`);
   L.push('');
@@ -1593,8 +1779,12 @@ export function writeReport({ results, logs, content, methods, rigs, skipped: pl
     L.push(`   run was FILTERED (${GROUP ? '--only ' + GROUP : ''}${only.length ? ' ' + only.join(' ') : ''}) — it is not a coverage round.`);
     L.push('');
   } else {
-    L.push('── COULD NOT PHOTOGRAPH: nothing. Every id in the manifest and every rig');
-    L.push('   in data.js has a frame in this run.');
+    /* This claim is only true over a NON-EMPTY set. An empty content table now
+       lands in `skipped` above (see the plan builder), so reaching this branch
+       means there really were ids to cover — but say the counts out loud so a
+       reader can check the claim instead of trusting the sentence. */
+    L.push(`── COULD NOT PHOTOGRAPH: nothing. All ${methods.length} method ids in the manifest,`);
+    L.push(`   all ${rigs.length} rigs in data.js and all ${sShots.length} site archetypes have a frame in this run.`);
     L.push('');
   }
 

@@ -6,6 +6,50 @@ for reviewed fixes, fresh measurements and active workstreams. The owner rules
 below remain in force. Historical gate results and open findings below must be
 reproduced against the current code before being treated as current failures.
 
+---
+
+## STATE OF THE PROJECT — 2026-09-06 midday. READ THIS BEFORE THE REST.
+
+**Two AIs work this repo in parallel.** OpenAI Codex on `codex/astra-improvements`;
+Claude on `claude/merge-astra-sites`, which is Codex's line **merged with ten
+Blender site environments** and the only branch where both exist. **`master` is
+stale — nothing has been merged into it.** The owner routes between the two;
+there is no live channel. The shared GPU lease is
+`Downloads/threads/drillity-coordination/gpu-owner.txt`; **the owner's dev
+server on port 5178 must never be stopped.**
+
+### Where it stands, by part — a judgement, with what it rests on
+
+| part | roughly | what is actually true |
+|---|---|---|
+| Content | 95 % | 21 methods · 19 rigs · 260 items · 8 regions · 10 sites · 60 levels. Complete in shape. The gap is 17 uncleared marque prefixes and a handful of unsourced constants. |
+| Machines | 95 % | All 19 modelled from sourced drawings, exported, loading, under budget. `rc-rig`'s 0.79 m spindle-to-hole-axis error is the one real defect. |
+| Places | 85 % | Ten sites built, wired, gated. None had been seen in a frame as of this morning. |
+| Simulation | 70 % | Deep and method-specific, but **CFA has no pumping/withdrawal programme**, **vibro borrows impact physics**, and rate has three different definitions. |
+| HUD / UI | 45 % | **The weakest part, and the part the player stares at.** 3D measures 45.4–67.3 % of screen against an ~82 % brief. The only exit from a job is a 30 × 30 px button in the worst corner. The contract board — the first real decision in the game — truncates five strings and offers no decision. |
+| Verification | 40 % | The gates are thorough and green, but **until 2026-09-06 nothing had ever been measured in a running frame.** There is still no fleet FPS result. |
+| Ship readiness | 55 % | Builds clean to one 2.81 MB `dist/index.html` plus streaming models. Three branches diverging, nothing merged to `master`. |
+
+**The one-paragraph verdict, and `research/CRITIQUE.md` reached it independently:
+the research, the domain model and the instrumentation are better than the
+game.** What is built is deep and mostly right. What is thin is the layer the
+player touches, and the evidence that any of it performs.
+
+### The rule this file taught that turned out to be wrong
+
+`blender/lib/site.py` said a modelled archetype **MUST** give back at least as
+many draw calls as its `.glb` takes. Measured on 2026-09-06: **it has never once
+been met**, on any of the ten, including the five with the longest `replaces`
+lists — and on three archetypes it **cannot** be, because an offshore deck has
+no scatter to drop. As an absolute it made a rule some archetypes could only
+satisfy by lying. It is now an obligation to pay what can honestly be paid,
+enforced where it can be measured — `tools/checksiteenvironment.mjs` A/Bs each
+archetype against a live terrain build and holds it to the worst figure ever
+measured, so overspend cannot grow unnoticed. **A non-empty list was never a
+proxy for a draw call.**
+
+---
+
 **For whoever picks this up next, in any tool, with no access to the
 conversation that produced it.** Written 2026-09-05, at the end of a long
 multi-agent day, at the moment every agent was stopped so the project could be

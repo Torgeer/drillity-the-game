@@ -462,6 +462,79 @@ const REGIONS = {
    every one of the 21 method shots, i.e. terrain.js is ~29 of the 141-181
    surface total and the machines are the rest. Nothing here may move that.
 
+   ── THE EMPTY-LIST RULE: `replaces: []` IS AN ANSWER, NOT A GAP ───────────
+   `tools/checksites.mjs` used to FAIL any archetype that loaded a model and
+   did not declare a NON-EMPTY `replaces`, on the reasoning quoted above: a
+   .glb costs draw calls, the kit is free, so the model must give calls back.
+   The premise is sound. The test was not, on three separate counts, all of
+   them measured on 2026-09-06 on this tree.
+
+   1. A NON-EMPTY LIST NEVER ONCE ACHIEVED WHAT THE RULE ASKS FOR.
+      `tools/checksiteenvironment.mjs` A/Bs every archetype — mesh
+      submissions under `terrain-root` with the model live minus the same
+      build with the model 404'd — over nordic / german-site /
+      iberian-quarry. Worst case of the three, with the model's own primitive
+      count beside it:
+
+          urban-plot              3 names   5 prims   NET +1
+          infrastructure-corridor 1 name    4 prims   NET +3
+          quarry-bench            3 names   6 prims   NET +3
+          open-pit-bench          3 names   4 prims   NET +2
+          tunnel-portal           3 names   6 prims   NET +4
+          well-pad                1 name    6 prims   NET +5
+          exploration-pad         []        5 prims   NET +5
+          platform-deck           []        4 prims   NET +4
+          marine-spread           []        6 prims   NET +6
+
+      EVERY ONE IS NET ADDITIVE. Not one archetype pays its model back, and
+      the five that declare the longest lists are additive too. So the test
+      graded a DECLARATION and called it a budget; it separated the four
+      archetypes at the bottom from the five above them without separating
+      anything that costs differently. `net = prims - scatters actually
+      dropped`, and the purse is a function of the REGION as well (nordic has
+      no scree, so quarry-bench meets two of its three names there).
+
+   2. ON THE OFFSHORE PLANE THE RULE IS UNSATISFIABLE, AND THIS FILE'S OWN
+      SIBLING RULE PROVES IT. `dressFor()` returns all-zero counts on a deck
+      as a rule (see it, above) — nothing self-seeds on steel — so
+      `addInstances()` is never called at all. MEASURED over the same seven
+      regions `checksiteenvironment.mjs` walks (nordic, german-site,
+      iberian-quarry, alpine, andes, arctic, sahara), `siteSuppression.offered`
+      for `platform-deck` and for `marine-spread` is THE EMPTY SET: 0 names,
+      21 builds. Meanwhile BOTH gates fail a `replaces` entry that names a
+      scatter nothing offers (checksites.mjs, and checksiteenvironment.mjs's
+      "every `replaces` name is a scatter that is really offered"), because a
+      name that suppresses nothing reads exactly like one that works. So one
+      rule required these two archetypes to name a scatter and another
+      forbade every name they could have used. That is not a data problem.
+
+   3. WHERE IT IS SATISFIABLE IT IS DESTRUCTIVE, BECAUSE `replaces` IS
+      ALL-OR-NOTHING OVER THE WHOLE DISC. It drops an entire InstancedMesh,
+      out to 60 m+, to buy one draw call. On `exploration-pad`, measured
+      across seven regions, of every scatter instance built only 0-12 fall
+      inside the model's XZ footprint at all (nordic 12, german-site 3,
+      iberian-quarry 5, andes 4, sahara 0, arctic 2, alpine 5). In nordic,
+      `replaces: ['stones']` would save ONE draw call and delete 43 stones,
+      42 of which the model does not stand on. Underground, the three drive
+      scatters are real and replaceable (`offered = drive-muck drive-bolts
+      drive-festoon`, measured) but `underground-drive.glb` carries
+      paintedDark / rawSteel / rubber / safetyStripe and no rock at all, so
+      naming any of them would delete the muck pile, the bolt plates or the
+      lighting festoon that the model does not author.
+
+   THE RULE, AS IT NOW STANDS AND AS `checksites.mjs` NOW GRADES IT:
+     * `replaces` and `replacesKit` must both be DECLARED on any archetype
+       with a `model`. An omission is an undeclared decision and stays a hard
+       failure — that is the real failure mode the old test was reaching for.
+     * `replaces: []` is a legal answer and must carry its reason in the
+       entry, as all four below do.
+     * every NAME in a non-empty list must be a scatter something really
+       offers. Unchanged.
+     * THE COST ITSELF IS GRADED WHERE IT IS MEASURED, by
+       `tools/checksiteenvironment.mjs`'s per-archetype net-cost ceilings —
+       not by counting entries in a list. checksites.mjs prints each model's
+       draw cost beside its declaration so the number is never invisible.
+
    `kit`        which branch of buildSiteKit() dresses the plot
    `plane`      'surface' | 'offshore' | 'underground' — mirrors SITE_ARCHETYPES
    `dress`      per-scatter multipliers on REGIONS[].dress, default 1
@@ -529,16 +602,21 @@ const ARCHETYPES = {
        `blender/sites/quarry_bench.py`. The filename is the archetype id
        verbatim, the same contract the machines are under (ASTRA §4.4).
 
-       `replaces` is the other half of it and is NOT optional. A site .glb
-       costs ONE DRAW CALL PER MATERIAL, while the procedural site kit is free
-       — it merges into a 6-mesh vertex-coloured pool however much goes into
-       it. So a .glb is pure addition, and the surface band is ALREADY over
-       its ceiling of 80 in eight of twenty-one method states with no .glb on
-       any site (measured, shots/s0-report.txt). An archetype that loads a
-       model must therefore give the calls back, and these three are what this
-       model actually replaces: its highwall, muckpile, windrow and floor
-       debris are the same rock these instanced scatters were standing in for,
-       authored instead of sprinkled. See THE BUDGET in blender/lib/site.py.
+       DECLARING `replaces` is NOT optional. DECLARING IT NON-EMPTY IS NOT THE
+       RULE, and a gate that demanded that was wrong for a year — see THE
+       EMPTY-LIST RULE below, and `tools/checksites.mjs`, which used to fail
+       four archetypes for a list they had all deliberately declared empty.
+
+       The cost model is real: a site .glb costs ONE DRAW CALL PER MATERIAL,
+       while the procedural site kit is free — it merges into a 6-mesh
+       vertex-coloured pool however much goes into it. So a .glb is pure
+       addition, and the surface band is ALREADY over its ceiling of 80 in
+       eight of twenty-one method states with no .glb on any site (measured,
+       shots/s0-report.txt). An archetype that loads a model SHOULD give the
+       calls back, and these three are what this model actually replaces: its
+       highwall, muckpile, windrow and floor debris are the same rock these
+       instanced scatters were standing in for, authored instead of sprinkled.
+       See THE BUDGET in blender/lib/site.py.
 
        `flatR` is the bench floor. [F] research/16 §A.4 / [HSE-L118] Reg 13:
        benches are "designed, constructed and maintained so as to allow
@@ -613,10 +691,24 @@ const ARCHETYPES = {
        0.944 x 2.640 x 8.058 m - drive-local furniture, not rock. Nearest
        vertex to the collar 6.957 m.
 
-       `replaces: []` and it is a real decision, not an omission. The only
-       scatters underground are `drive-muck`, `drive-bolts` and `drive-festoon`
-       (buildDrive()), and this model is none of them - it carries no rock and
-       no rock material at all. Suppressing them would empty the drive.
+       `replaces: []` and it is a real decision, not an omission. MEASURED at
+       iberian-quarry / nordic / andes on method `rockbolt`:
+       `siteSuppression.offered` is exactly `drive-muck drive-bolts
+       drive-festoon`, so three replaceable scatters DO exist down here and
+       `addInstances()` would honour a name put in this list. This model is
+       none of them - its four materials are paintedDark, rawSteel, rubber and
+       safetyStripe, no rock and no rock material at all - so naming one would
+       delete the muck pile, the bolt plates or the lighting festoon that
+       nothing replaces. Suppressing them would empty the drive.
+
+       THE NET COST IS +4 in all three regions (13 meshes under `terrain-root`
+       with the model 404'd, 17 with it live), against the model's 4
+       primitives - i.e. every call it takes, it keeps. That is the honest
+       number and it is recorded here because `checksiteenvironment.mjs`'s
+       net-cost A/B deliberately skips this archetype (a surface A/B is
+       meaningless on a plane with no surface build), so nothing else prints
+       it. For scale, this file's own drive note measures 13-15 draw calls for
+       the whole drive against a surface site's 16-25.
 
        `replacesKit: false` because there is no kit to replace: `rebuild()`
        returns from its underground branch before `buildSiteKit()` is ever
@@ -640,13 +732,29 @@ const ARCHETYPES = {
 
        `replaces: []`, deliberately. This is the ONE surface archetype whose
        whole point is that the biome is left almost untouched around it - every
-       `dress` multiplier above is 0.9 - and the model is 15 m across, which is
-       inside the pad the scatter is already rejected from. There is nothing for
-       it to take over. It is therefore PURE ADDITION at 5 draw calls, which the
-       net-cost measurement in tools/checksiteenvironment.mjs reports on every
-       run; that is the honest number and it is the builder's and the critic's
-       to answer, not something to hide by dropping trees the model does not
-       replace. */
+       `dress` multiplier above is 0.9.
+
+       A SENTENCE THAT USED TO STAND HERE WAS ARITHMETICALLY FALSE, and it is
+       corrected rather than deleted because it is the kind that gets
+       re-derived. It read "the model is 15 m across, which is inside the pad
+       the scatter is already rejected from". It is not: `pad` is 7.0 m and the
+       model reaches 20.90 m from the collar (measured live, x -14.95..2.11,
+       z -14.61..2.60), while the nearest scatter instance measured in any
+       region is a tuft at r 5.61 m. The footprints DO overlap.
+
+       THE MEASUREMENT THAT ACTUALLY CARRIES THE DECISION is how much scatter
+       falls inside that footprint, and it is almost none. Instances under the
+       model's XZ box, seven regions: nordic 12 (10 tufts, 1 stone, 1 outcrop
+       of 24+43+281 built), german-site 3, iberian-quarry 5, andes 4, sahara 0,
+       arctic 2, alpine 5. `replaces` drops a whole InstancedMesh out to 60 m+,
+       so `replaces: ['stones']` in nordic would buy one draw call by deleting
+       43 stones the model stands on ONE of. There is nothing here for it to
+       take over.
+
+       It is therefore PURE ADDITION at 5 draw calls (measured NET +5 in all
+       three A/B regions, tools/checksiteenvironment.mjs); that is the honest
+       number and it is the builder's and the critic's to answer, not something
+       to hide by dropping trees the model does not replace. */
     replaces: [],
     replacesKit: true,
   },
@@ -678,7 +786,14 @@ const ARCHETYPES = {
        `replaces: []` because on an offshore plane there is no scatter left to
        replace: `dressFor()` now returns all-zero counts on a deck as a rule
        (nothing self-seeds on steel). Empty here is a measured consequence, not
-       an unmade decision.
+       an unmade decision — and the measurement is that `siteSuppression.offered`
+       is THE EMPTY SET over all seven regions the gates walk, i.e.
+       `addInstances()` is never called once on this plane. Any name in this
+       list would be a suppression that suppresses nothing, which both gates
+       fail. See THE EMPTY-LIST RULE at the head of this table. Net cost is a
+       flat +4, region-invariant, which is itself the evidence: on land the
+       "without" count moves 19-25 with the biome, and here it is 14 in every
+       region because there is no biome to move.
 
        WHAT THE MODEL MUST NOT CARRY: the deck plate itself. `buildSpecials()`
        lays it as a Shape with the well-slot hole cut over the collar
@@ -697,10 +812,19 @@ const ARCHETYPES = {
        the set by a wide margin, which is right for a jack-up's legs. Nearest
        vertex to the collar 3.994 m, nothing near the moonpool.
 
-       `replaces: []` for the same measured reason as `platform-deck`.
+       `replaces: []` for the same measured reason as `platform-deck`: offered
+       is the empty set in all seven regions, net cost a region-invariant +6.
+
        `replacesKit: true` drops the `marine` branch - hull sides, transom,
        drill tower, A-frame, crane - which the model now authors. The moonpool
-       plate and the sea are `buildSpecials()`'s and are untouched. */
+       plate and the sea are `buildSpecials()`'s and are untouched.
+
+       THAT SENTENCE WAS TRUE OF THE INTENT AND FALSE OF THE CODE UNTIL
+       2026-09-06. `kitSuperseded()` had only two consumers, `urban` and
+       `quarry`, so this flag dropped nothing and the procedural 11.55 m drill
+       tower stood on the collar through whatever rig was there. Fixed at the
+       branch (terrain.js `if (kit === 'marine' && !kitSuperseded())`), where
+       the measurement is written down. */
     replaces: [],
     replacesKit: true,
   },
@@ -1797,7 +1921,52 @@ export function createTerrain(ctx) {
      These were two hardcoded `kit === 'urban' && !siteModelReady()` /
      `kit === 'quarry' && !siteModelReady()` tests before, which meant the
      decision lived at the branch instead of at the archetype and could not be
-     read off the table at all. */
+     read off the table at all.
+
+     ── `replacesKit` HAS FEWER CONSUMERS THAN IT HAS DECLARERS. OPEN. ──────
+     Moving the decision to the table did not move the ENFORCEMENT with it.
+     Nine archetypes declare `replacesKit: true`; `kitSuperseded()` is
+     consulted by three of their branches — `urban`, `quarry` and `marine`.
+     Unguarded: `corridor`, `pit`, `portal`, `exploration`, `wellpad`,
+     `offshore`. NO LINE NUMBERS HERE ON PURPOSE: the last write-up of this
+     branch set cited terrain.js:3546-3591 and those lines had moved 256 down
+     by the time anyone followed them. `tools/checksites.mjs` prints the live
+     line for every unguarded branch on every run; read it there.
+
+     (`german`, and the `desert`/`mine` halves of two of those tests, are
+     REGION kits: `siteKit()` is `arch.kit || region.kit`, so a region kit is
+     only reached when the archetype declares none, and the only archetype
+     without a `kit` is `underground-drive`, whose `replacesKit` is false.
+     Guarding them would be a no-op. That is why the list is six, not eight.)
+
+     Each unguarded branch draws its procedural furniture ON TOP of a live
+     .glb — the exact double-dressing this flag exists to prevent. It costs
+     nothing in draw calls (the kit merges into the pool either way) and
+     everything in composition. `tools/checksites.mjs` now WARNs on each one
+     by name; it does not FAIL, because closing one means deciding that a
+     specific model really does author what a specific branch draws, and that
+     is the archetype builder's and its critic's call, not the loader's — the
+     same reason quarry-bench's net overspend is recorded rather than fixed.
+
+     HOW BAD EACH ONE IS, MEASURED — procedural vertices standing in the
+     collar column (|x| <= 4, |z| <= 4, y > 0.6) with the model live, against
+     what the model itself puts there:
+
+         platform-deck   proc 5025   model    0   <- the conductor/tree grid
+         marine-spread   proc 1017   model    0   <- FIXED, was the tower
+         every other     proc  233   model 0-222  <- the common floor, i.e.
+                                                     these branches put
+                                                     nothing over the collar
+
+     So of the six left, only `offshore` reaches the machine. Its 5 025
+     vertices are the Christmas-tree grid on 2.4 m slot spacing, and
+     `blender/sites/platform_deck.py` authors a well bay of its own
+     (`build_well_bay()`), so the two are probably the same objects twice —
+     but `platform-deck.glb` measures ZERO vertices in that column, so
+     guarding the branch might instead leave the well bay bare. NOT RESOLVED
+     HERE: it needs one look at a frame, and no frame could be taken without
+     the GPU lease. The other five are cosmetic double-dressing away from the
+     collar and are safe to leave until someone can see them. */
   const scatterOffered = new Set();
   const scatterDropped = new Set();
   /** True when this archetype's LOADED model supersedes its procedural kit. */
@@ -1809,6 +1978,41 @@ export function createTerrain(ctx) {
     return k === 1 ? f : { ...f, amp: f.amp * k, forest: f.forest * Math.min(1, k + 0.25) };
   };
   const siteKit = () => (arch && arch.kit) || region.kit || null;
+  /**
+   * What the METHOD standing here circulates: 'air' | 'water' | 'mud' | 'none'.
+   *
+   * WHY THE SITE NEEDS THIS AT ALL. `flushMedium` appeared 0 times in this
+   * file (measured, `grep -c`) while the `wellpad` branch below drew a mud
+   * system — tanks, a shaker plate and a pipe run — on EVERY well pad. Seven
+   * methods stand on `well-pad` (game/data.js `METHODS[].archetypes`, walked
+   * live rather than transcribed): auger `none`, cable-tool `water`,
+   * site-investigation `water`, dth `air`, overburden `air`, oil-rotary `mud`,
+   * sonic `water`. **ONE of the seven circulates mud**, and the other six were
+   * shown the plant for it. `blender/sites/well_pad.py:61-63` refuses the same
+   * objects for the same reason and says so — "THIS FILE SHIPS ONLY WHAT IS
+   * TRUE OF ALL SEVEN METHODS. No mud tanks. No shale shaker." — so the .glb
+   * abstained and the procedural branch overrode the abstention.
+   *
+   * DERIVED FROM `methodId`, NOT READ OFF THE CONTRACT. `state.contract` is
+   * cleared at settlement from inside the HOLE_COMPLETE dispatch while the
+   * site is still on screen (see the long note in `update()`), so a site that
+   * read `contract.flushMedium` would re-dress itself under the results
+   * screen. `methodId` already holds its last good value through that, and
+   * `ctx.data` already resolves it — `resolveArchetype()` takes the same
+   * `ctx.data` for the same reason (never an import: main.js resolves data.js
+   * before any system is constructed).
+   *
+   * Null when nothing can be resolved — a fresh boot, the menu, or a harness
+   * with no `data`. Callers must treat null as "unknown", never as "no mud":
+   * an unknown method drawing no plant is the same silent-fallback failure as
+   * a mud method drawing none.
+   */
+  const flushMedium = () => {
+    const d = ctx && ctx.data;
+    if (!d || typeof d.getMethod !== 'function' || !methodId) return null;
+    try { return (d.getMethod(methodId) || {}).flushMedium || null; }
+    catch (e) { return null; } // data.js is another agent's file — never stop a build
+  };
   let weatherName = 'clear';
   let weather = WEATHER.clear;
   let rand = makeRandom(0xC0FFEE);
@@ -3807,13 +4011,43 @@ export function createTerrain(ctx) {
       for (const [ox, oz] of [[1.62, 0], [-1.62, 0], [0, 1.62], [0, -1.62]]) {
         put(box(T, ox ? 0.24 : 3.5, 0.42, ox ? 3.5 : 0.24, ox, 0.21, oz), 0x9C9A93, 'slab');
       }
-      // water and mud tanks, and the shale shaker/pipe run between them
+      /* ── WATER, AND MUD ONLY WHERE MUD IS CIRCULATED ──────────────────────
+         This loop ran three times unconditionally and drew a mud system on
+         every well pad. MEASURED (game/data.js, walked live): seven methods
+         stand on `well-pad` and exactly ONE of them circulates mud —
+         `oil-rotary`. auger runs `none`, dth and overburden run `air`,
+         cable-tool, site-investigation and sonic run `water`. Six of seven
+         were given tanks, a shaker deck and a suction line for a fluid they
+         never make. `blender/sites/well_pad.py:61-63` had already refused
+         exactly these objects, in these words: "THIS FILE SHIPS ONLY WHAT IS
+         TRUE OF ALL SEVEN METHODS. No mud tanks. No shale shaker." — so the
+         model abstained and this branch put them back.
+
+         The WATER tank stays on every pad: all seven need water on site (six
+         of them flush with it and the seventh, `auger`, still needs it), and
+         well_pad.py DOES author a 500 bbl water tank, so a pad without one
+         would disagree with its own model. The two dark tanks, the shaker
+         deck and the suction line are the mud system and are drawn only when
+         `flushMedium()` says `mud`.
+
+         `null` — a boot frame or a harness with no `data` — draws water only.
+         That is the conservative half: an unknown method with no mud plant is
+         a pad missing furniture, while an unknown method WITH one is the
+         false claim this change exists to remove. Free either way: the whole
+         kit merges into the vertex-coloured pool, so this is composition, not
+         budget. */
+      const mud = flushMedium() === 'mud';
       for (let i = 0; i < 3; i++) {
+        if (i !== 1 && !mud) continue;              // i === 1 is the water tank
         const c = at(-13.0, -2.0 + i * 3.6, 0.06);
         put(c(box(T, 6.4, 2.3, 2.9, 0, 1.20, 0)), i === 1 ? 0x35708c : 0x4B525A, 'paint');
         put(c(box(T, 6.5, 0.12, 3.0, 0, 2.40, 0)), 0x3B4148, 'metal');
-        put(c(box(T, 0.9, 0.9, 0.06, 2.4, 1.35, 1.48)), 0x2B5C74, 'paint');
-        put(c(cyl(T, 0.10, 0.10, 3.4, 8, 3.3, 1.9, 0, 0, 0, Math.PI / 2)), 0x8E969E, 'metal');
+        // the shaker deck and its suction line are mud plant even on the water
+        // tank's own skid — a water tank does not shake cuttings out of water
+        if (mud) {
+          put(c(box(T, 0.9, 0.9, 0.06, 2.4, 1.35, 1.48)), 0x2B5C74, 'paint');
+          put(c(cyl(T, 0.10, 0.10, 3.4, 8, 3.3, 1.9, 0, 0, 0, Math.PI / 2)), 0x8E969E, 'metal');
+        }
       }
       // pipe racks
       for (let k = 0; k < 2; k++) {
@@ -3878,7 +4112,54 @@ export function createTerrain(ctx) {
          the stern A-frame     and the armoured umbilical on its traction winch
                                — how the frame gets over the side.
          the bulwark           a working deck is inside a hull, not a raft. */
-    if (kit === 'marine') {
+    /* `!kitSuperseded()` IS LOAD-BEARING HERE AND WAS MISSING. MEASURED.
+       `ARCHETYPES['marine-spread']` has declared `replacesKit: true` since it
+       was written, and its own comment says the flag "drops the `marine`
+       branch - hull sides, transom, drill tower, A-frame, crane - which the
+       model now authors". Only `urban` and `quarry` ever consulted the flag,
+       so on `marine-spread` it was a declared contract with no consumer
+       (ASTRA §10) and this branch drew on top of a live model.
+
+       WHAT THAT PUT ON THE SCREEN, measured in the live root at `north-sea`
+       with `marine-spread.glb` loaded and `siteSuppression.kitSuperseded`
+       reporting `true`: 1 017 procedural vertices inside the collar column
+       (|x| <= 4, |z| <= 4, y > 0.6), against ZERO from the model. The tower
+       below is 7.86 x 11.55 x 6.60 m standing on the collar, and the `// head
+       frame` box at the end of it is a SOLID 7.2 x 0.5 x 6.6 m slab at
+       y 11.05..11.55.
+       `core-rig` measures 12.265 m tall with a plan of x -1.440..1.450,
+       z -4.967..1.680 (tools/glbinfo.mjs) — its whole footprint is inside that
+       slab and its mast passes through the slab's y band. `oil-derrick`
+       (x +/-9.596, y -0.300..67.406) contains the ENTIRE tower.
+
+       And the model is not a second tower — it is no tower at all: the .glb
+       contributes zero vertices in the collar column, because
+       `blender/sites/marine_spread.py:93-96` says in as many words that "the
+       drill mast belongs to the MACHINE and is not built here — which is also
+       why the procedural `kit === 'marine'` branch has to be gated off when
+       this model is live: it draws an 11 m drill tower with its legs at
+       +/-3.3 m, straight through whatever rig is standing over the moonpool."
+       The module abstained on the strength of a gate that did not exist. So
+       the failure was never "two towers": it was the wrong tower, and the only
+       one. All three methods that stand here (`site-investigation`, `core`,
+       `oil-rotary` — game/data.js) anchor at the collar
+       (`rigFactory.js:9054-9055`), so all three stood inside it.
+
+       This buys back no draw calls — the whole kit merges into the 6-7 mesh
+       vertex-coloured pool either way (see `replaces` vs `replacesKit` at the
+       head of this file). It is a composition fix, not a budget one, and the
+       net cost should still measure +6.
+
+       NOT YET SEEN IN A FRAME. `research/sites/_gpu-verdict.md` shot
+       `marine-spread` the same day (site pass, `kit` 58 / `glb` 64 / net +6,
+       144.9 fps warm) but against a `dist/` snapshot built BEFORE this line
+       changed, so no GPU frame yet exists of the deck without the tower. The
+       fix is measured on the CPU — 1 017 procedural vertices in the collar
+       column before, 233 after, which is the same floor every other archetype
+       sits at, and the tallest procedural vertex over the collar falls from
+       11.550 m to 1.060 m. With the model 404'd it is 955 and 11.550 again,
+       so the fallback is untouched. Someone with the lease should look at it. */
+    if (kit === 'marine' && !kitSuperseded()) {
       for (let i = -3; i <= 3; i++) put(box(T, 24, 0.34, 0.44, 0, -0.28, i * 4.0), 0x3d464e, 'metal');
       /* THE BULWARK. Without it the deck is a rectangle floating over open
          water with a hard edge — shots/b0-marine-spread.png reads as a raft,
@@ -7029,9 +7310,19 @@ export function createTerrain(ctx) {
   function setMethod(id) {
     const next = id || null;
     if (next === methodId) return;
+    /* THE SITE KIT NOW READS THE METHOD, SO THE METHOD MUST BE ABLE TO REBUILD
+       IT. This used to rebuild ONLY when the underground spec changed, which
+       was right while the kit depended on nothing but the archetype. It is not
+       right now: `dth` and `oil-rotary` are both `well-pad` (game/data.js), so
+       switching between them changes neither `ugSpec` nor `archId`, and the
+       mud plant `flushMedium()` gates below would have been whatever the
+       PREVIOUS method wanted — a stale frame that reads exactly like a correct
+       one. A rebuild is cheap at this rate: the method changes once per job. */
+    const wasFlush = flushMedium();
     methodId = next;
     const want = UNDERGROUND[next] || null;
-    const changed = (want && want.id) !== (ugSpec && ugSpec.id);
+    const changed = (want && want.id) !== (ugSpec && ugSpec.id)
+      || flushMedium() !== wasFlush;
     ugSpec = want;
     if (changed) rebuild();
   }

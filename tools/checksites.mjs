@@ -37,6 +37,22 @@
  * for a file that reached the directory some other way (a hand-copy under the
  * right name is exactly what hid the machine bug for a week).
  *
+ * THE SUPPRESSION KNOBS, AND A RULE THIS FILE GOT WRONG. `replaces` and
+ * `replacesKit` are how an archetype says what its .glb takes over. This gate
+ * used to FAIL any modelled archetype whose `replaces` was not NON-EMPTY, and
+ * that rule was retired on 2026-09-06 after three measurements: a non-empty
+ * list never once made an archetype net-neutral (all nine are additive, the
+ * longest lists included); on the offshore plane no scatter is offered at all,
+ * so the rule demanded a name that this same file's next check would reject;
+ * and where it could be satisfied it deleted a whole 60 m disc of scatter to
+ * buy one call. What is graded now is that the decision is DECLARED — an
+ * omission is still a hard failure — that every name in a list is real, that
+ * a `replacesKit: true` actually has a consumer in terrain.js, and that the
+ * gross cost is PRINTED beside the declaration. The NET cost is enforced by
+ * `tools/checksiteenvironment.mjs`, which measures it against a live terrain
+ * build; a static gate cannot count a draw call and must not pretend to. The
+ * full derivation is in `src/world/terrain.js` under THE EMPTY-LIST RULE.
+ *
  * TRANSMISSION. Measured at +65 to +81 draw calls, independent of object size,
  * because three.js re-renders the whole opaque list into a transmission target.
  * One cab window doubled the entire fleet's cost. Found three separate times in
@@ -134,6 +150,24 @@ const TERRAIN = join(ROOT, 'src/world/terrain.js');
    rather than restate it in prose. A hardcoded claim inside a gate is the same
    bug wearing a lab coat. */
 const TERRAIN_SRC = existsSync(TERRAIN) ? readFileSync(TERRAIN, 'utf8') : '';
+/** terrain.js with every comment blanked to spaces and every newline kept.
+ *
+ * ONE COPY, USED BY EVERY CHECK THAT SEARCHES FOR CODE, because two of them
+ * blanking comments two different ways is the drift this file exists to stop
+ * (ASTRA §5). Blanking rather than deleting keeps offsets and therefore line
+ * numbers exactly terrain.js's own.
+ *
+ * WHY COMMENTS MUST GO. The `kitSuperseded()` search below asks whether a
+ * branch is guarded, and the guarded branches now carry comments that QUOTE
+ * their own condition — `if (kit === 'marine' && !kitSuperseded())` appears in
+ * prose three times. Against the raw text a comment describing a fix would
+ * satisfy a check looking for the fix, which is `check:haptics` printing a
+ * claim about code that had already changed under it (ASTRA §10). */
+const TERRAIN_CODE = TERRAIN_SRC
+  .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+  .replace(/(^|[^:'"\\])\/\/[^\n]*/g, (m, p) => p + ' '.repeat(m.length - p.length));
+/** Is this kit's branch of buildSiteKit() gated on `kitSuperseded()`? */
+const kitBranches = (kit) => [...TERRAIN_CODE.matchAll(new RegExp(`if \\(kit === '${kit}'([^)]*)\\)`, 'g'))];
 const archetypes = new Map();
 if (!existsSync(TERRAIN)) {
   FAIL('src/world/terrain.js is missing; site models cannot be verified at all.');
@@ -158,12 +192,36 @@ if (!existsSync(TERRAIN)) {
             else if (body[k] === '}' && --d === 0) { j = k; break; }
           }
           const text = body.slice(entry.lastIndex - 1, j + 1);
+          /* `replaces` IS AN ARRAY OR IT IS ABSENT, AND THIS READER MUST BE
+             ABLE TO TELL THOSE APART. It could not. The old expression was
+
+                 (/\breplaces\s*:\s*\[([^\]]*)\]/.exec(text) || [])[1] || null
+
+             and on `replaces: []` the regex MATCHES, capture 1 is the empty
+             string, and `'' || null` is null — the identical value it returns
+             when the key is not there at all. Four archetypes declare
+             `replaces: []` on purpose, each with its reason written beside it,
+             and this gate failed all four with the words "declares no
+             `replaces:`" — a statement about the file that was not true of the
+             file (ASTRA §10: a hardcoded claim inside a gate is the same bug
+             wearing a lab coat). `tools/checksiteenvironment.mjs` has always
+             parsed this correctly (`Array.isArray(a.replaces)`); the two gates
+             had drifted and the wrong one was believed (ASTRA §5).
+
+             Now: `null` means ABSENT, `[]` means DECLARED EMPTY, and the
+             checks below grade the difference. */
+          const rawReplaces = /\breplaces\s*:\s*\[([^\]]*)\]/.exec(text);
+          const rawKit = /\breplacesKit\s*:\s*(true|false)\b/.exec(text);
           archetypes.set(m[2], {
             id: m[2],
             text,
             model: (/\bmodel\s*:\s*(['"])([^'"]+)\1/.exec(text) || [])[2] || null,
             plane: (/\bplane\s*:\s*(['"])([^'"]+)\1/.exec(text) || [])[2] || null,
-            replaces: (/\breplaces\s*:\s*\[([^\]]*)\]/.exec(text) || [])[1] || null,
+            kit: (/\bkit\s*:\s*(['"])([^'"]+)\1/.exec(text) || [])[2] || null,
+            replaces: rawReplaces
+              ? rawReplaces[1].split(',').map((s) => s.trim().replace(/^['"]|['"]$/g, '')).filter(Boolean)
+              : null,
+            replacesKit: rawKit ? rawKit[1] === 'true' : null,
           });
           i = j; continue;
         }
@@ -372,25 +430,78 @@ for (const [id, a] of archetypes) {
       + `blender/sites/${a.model.replace(/-/g, '_')}.py to build it. The model is `
       + 'then whatever happens to be on disk, from a source nobody can rebuild.');
   }
-  if (!a.replaces || !a.replaces.trim()) {
-    FAIL(`archetype "${id}" loads a site model and declares no \`replaces:\`. `
-      + 'terrain.js says in its own comment that this is NOT optional: the '
-      + 'procedural kit is free in draw calls and a .glb is not, so a modelled '
-      + 'archetype that gives nothing back is pure addition to a surface band '
-      + 'that is already over its ceiling of 80 in eight of twenty-one states.');
-  } else {
-    /* AND THE NAMES IN IT MUST BE REAL. `addInstances()` returns null only when
-       `arch.replaces.includes(name)`, so a `replaces` entry that matches no
-       scatter gives back exactly nothing — and it reads like a saving. That is
-       the declared-contract-with-no-consumer pattern (ASTRA §10) applied to a
-       draw-call budget, which is the one place in this project where a
-       plausible-looking zero is most expensive. */
-    for (const q of a.replaces.split(',').map((s) => s.trim().replace(/^['"]|['"]$/g, '')).filter(Boolean)) {
-      if (!scatterNames.has(q) && ![...scatterNames].some((s) => s.endsWith('-') && q.startsWith(s))) {
-        FAIL(`archetype "${id}" declares replaces: "${q}", and no addInstances() call in `
-          + 'src/world/terrain.js is named that. It gives back ZERO draw calls while '
-          + `reading as a saving. Known scatters: ${[...scatterNames].sort().join(', ')}.`);
-      }
+  /* ── THE SUPPRESSION KNOBS MUST BE DECLARED. THE LIST MAY BE EMPTY. ──────
+     THIS RULE USED TO BE "the list must be NON-EMPTY", and it was wrong. It
+     failed exactly four archetypes — underground-drive, exploration-pad,
+     platform-deck, marine-spread — every one of which declares `replaces: []`
+     with its reason written beside it, and it failed them with the words
+     "declares no `replaces:`", which was false about all four (the reader
+     above could not tell `[]` from absent; see the note there).
+
+     Three measurements retired it. All taken 2026-09-06 on this tree:
+
+     1. A NON-EMPTY LIST NEVER ONCE BOUGHT THE MODEL BACK. The net-cost A/B in
+        `tools/checksiteenvironment.mjs` — meshes under `terrain-root` with the
+        model live minus the same build 404'd — is ADDITIVE for all nine
+        surface/offshore archetypes: urban-plot +1, open-pit-bench +2,
+        infrastructure-corridor +3, quarry-bench +3, tunnel-portal +4,
+        platform-deck +4, exploration-pad +5, well-pad +5, marine-spread +6.
+        The five with the longest `replaces` lists are additive too. So this
+        test sorted archetypes by whether they had written a list, not by what
+        anything cost, and the rule it cited ("must give the calls back") was
+        met by NONE of them, listed or not.
+
+     2. ON THE OFFSHORE PLANE IT WAS UNSATISFIABLE, AND THE CHECK IMMEDIATELY
+        BELOW IS WHY. `dressFor()` returns all-zero counts on a deck, so
+        `addInstances()` is never called there: `siteSuppression.offered` for
+        `platform-deck` and `marine-spread` is the EMPTY SET over all seven
+        regions the gates walk (21 builds each, measured). Any name they could
+        have written would be a suppression that suppresses nothing — the very
+        thing the loop below fails, and that `checksiteenvironment.mjs` fails
+        again against a live build. One rule demanded a name; another forbade
+        every name available. That is a broken rule, not broken data.
+
+     3. WHERE IT WAS SATISFIABLE IT WAS DESTRUCTIVE. `replaces` drops a whole
+        InstancedMesh out to 60 m+ to buy one draw call. On `exploration-pad`,
+        0-12 scatter instances per region fall inside the model's footprint at
+        all; in nordic `replaces: ['stones']` would delete 43 stones to save
+        one call, 42 of them nowhere near the model. Underground, the three
+        drive scatters exist but the model carries no rock, so naming one
+        empties the drive.
+
+     WHAT IS GRADED NOW: that the decision is DECLARED (an omission is an
+     undeclared decision and stays a hard failure — that is what the old rule
+     was really reaching for); that every NAME in a non-empty list is real;
+     and that the COST is visible, printed below beside the model's own
+     primitive count. The cost is ENFORCED where it is measured against a live
+     build, by `tools/checksiteenvironment.mjs`'s per-archetype net ceilings.
+     A static gate cannot measure a draw call and must not pretend to. */
+  if (a.replaces === null) {
+    FAIL(`archetype "${id}" loads a site model and does not declare \`replaces:\` at all. `
+      + 'A .glb costs one draw call per material and `addInstances()` is the ONLY place '
+      + 'that cost can be paid back, so which scatters the model takes over is a real '
+      + 'decision — and omitting it is an undeclared decision, not a safe default. '
+      + '`replaces: []` IS a legal answer (four archetypes give it, with reasons); '
+      + 'no answer is not. See THE EMPTY-LIST RULE at the head of ARCHETYPES.');
+  }
+  if (a.replacesKit === null) {
+    FAIL(`archetype "${id}" loads a site model and does not declare \`replacesKit:\`. `
+      + 'Leaving the procedural kit on double-dresses the plot — the .glb\'s authored '
+      + 'hoarding standing inside the procedural one; turning it off can empty the '
+      + 'plot. Both are wrong by accident and only one is right on purpose. State '
+      + 'which. (checksiteenvironment.mjs asserts the same thing against a live build.)');
+  }
+  /* AND THE NAMES IN IT MUST BE REAL. `addInstances()` returns null only when
+     `arch.replaces.includes(name)`, so a `replaces` entry that matches no
+     scatter gives back exactly nothing — and it reads like a saving. That is
+     the declared-contract-with-no-consumer pattern (ASTRA §10) applied to a
+     draw-call budget, which is the one place in this project where a
+     plausible-looking zero is most expensive. */
+  for (const q of a.replaces || []) {
+    if (!scatterNames.has(q) && ![...scatterNames].some((s) => s.endsWith('-') && q.startsWith(s))) {
+      FAIL(`archetype "${id}" declares replaces: "${q}", and no addInstances() call in `
+        + 'src/world/terrain.js is named that. It gives back ZERO draw calls while '
+        + `reading as a saving. Known scatters: ${[...scatterNames].sort().join(', ')}.`);
     }
   }
   if (a.plane === 'underground') {
@@ -420,6 +531,74 @@ for (const [id, a] of archetypes) {
     }
   }
   expected.set(a.model, { archetype: id, module: modules.get(a.model) });
+}
+
+/* ── DOES `replacesKit: true` HAVE A CONSUMER? MEASURED, PER BRANCH. ────────
+   `replacesKit` is read in exactly one place — `kitSuperseded()` — and that
+   function is only useful if the archetype's own branch of `buildSiteKit()`
+   calls it. For nine archetypes that declared `true`, only TWO branches did.
+   The other seven drew their procedural furniture ON TOP of a live .glb, which
+   is precisely the double-dressing the flag exists to prevent, and nothing
+   anywhere said so: `checksiteenvironment.mjs` asserts that the flag is
+   DECLARED and that `siteSuppression.kitSuperseded` agrees with it, never that
+   a branch OBEYS it. A declared contract with no consumer (ASTRA §10), and it
+   had a measured consequence — `marine-spread` stood an 11.55 m procedural
+   drill tower on the collar, through the mast of whatever rig was there, while
+   `blender/sites/marine_spread.py:93-96` omitted its own tower explicitly
+   BECAUSE it believed this branch "has to be gated off when this model is
+   live". The module abstained on the strength of a gate that did not exist.
+
+   WARN, NOT FAIL, and the distinction is deliberate. Closing one of these
+   means deciding that a specific .glb really does author what a specific
+   procedural branch draws, and that is a composition judgement belonging to
+   the archetype's builder and its critic — the same reason quarry-bench's net
+   overspend is recorded in terrain.js rather than fixed by the loader. What
+   this check guarantees is that the gap is COUNTED and NAMED on every run
+   instead of being invisible, which is how it survived to nine declarers. */
+{
+  /* MEASURE EVERY BRANCH FIRST, THEN JUDGE, so the warning can name the
+     branches that ARE guarded instead of carrying a list in its own text. The
+     hardcoded version of that sentence read "as `urban`, `quarry` and `marine`
+     do" and, the first time `marine` was the branch being warned about, it
+     told the reader to copy the file it was complaining about. Small, and
+     exactly the shape of the `check:haptics` bug (ASTRA §10): a claim inside a
+     gate that the gate does not re-derive. */
+  const looked = [];
+  for (const [id, a] of archetypes) {
+    if (!a.model || a.replacesKit !== true || !a.kit) continue;
+    /* `kit === 'wellpad'` and `kit === 'desert'` share one `if`, so search for
+       this archetype's kit anywhere in a condition, then read the WHOLE
+       condition to see whether `kitSuperseded()` is in it. */
+    const hits = kitBranches(a.kit);
+    if (!hits.length) {
+      FAIL(`archetype "${id}" declares kit: "${a.kit}" and src/world/terrain.js has no `
+        + `\`if (kit === '${a.kit}'\` branch in buildSiteKit(). Either the kit name is a `
+        + 'typo — in which case the archetype is dressed by nothing and the plot is bare '
+        + '— or this reader has gone stale. Fix whichever it is.');
+      continue;
+    }
+    looked.push({
+      id, kit: a.kit,
+      line: TERRAIN_CODE.slice(0, hits[0].index).split('\n').length,
+      guarded: hits.some((h) => h[1].includes('kitSuperseded')),
+    });
+  }
+  const gated = looked.filter((x) => x.guarded);
+  const example = gated.length
+    ? `as \`${gated.map((x) => x.kit).join('`, `')}\` already do`
+    : 'nothing in this file does it yet, so copy the shape from `kitSuperseded()` itself';
+  for (const x of looked.filter((y) => !y.guarded)) {
+    WARN(`archetype "${x.id}" declares \`replacesKit: true\`, but its branch `
+      + `\`if (kit === '${x.kit}'…)\` at src/world/terrain.js:${x.line} never calls `
+      + '`kitSuperseded()`, so the flag suppresses nothing and the procedural kit draws '
+      + `ON TOP of the live .glb. Either guard the branch — \`&& !kitSuperseded()\`, ${example} `
+      + '— or set `replacesKit: false` and say in the archetype why double-dressing is '
+      + 'right there. A flag with no consumer is not a safe default; it reads exactly '
+      + 'like one that works (ASTRA §10).');
+  }
+  count('replacesKit branches that really consult kitSuperseded()', gated.length,
+    `of ${looked.length} archetypes that declare the flag`
+    + (gated.length ? ` — gated: ${gated.map((x) => x.kit).join(' ')}` : ''));
 }
 
 if (count('archetypes that declare a site model', expected.size) === 0) {
@@ -898,6 +1077,38 @@ if (rows.length) {
   console.log('');
   console.log('draws/budget is PRIMITIVES/DISTINCT MATERIALS against the module budget.');
   console.log('All bounds are glbinfo.measure() — every vertex transformed (ASTRA §5).');
+
+  /* ── WHAT EACH MODEL COSTS, BESIDE WHAT IT HANDS BACK ────────────────────
+     The rule this gate enforces is that the decision is DECLARED, not that
+     the list is long (see THE SUPPRESSION KNOBS above). That is only honest
+     if the number the old rule was reaching for is still on the screen, so
+     it is printed here: one draw call per distinct material, against the
+     scatters the archetype gives up. `replaces: []` costs the model's full
+     price and this table says so in figures rather than leaving it to a
+     comment. The NET figure — what it costs after the terrain build actually
+     runs — is measured against a live build by
+     `tools/checksiteenvironment.mjs`; this column is the gross. */
+  console.log('');
+  console.log('archetype                 costs  gives back                                  kit');
+  for (const r of rows.sort((a, b) => a.id.localeCompare(b.id))) {
+    const a = archetypes.get(r.id);
+    if (!a) continue;
+    const gives = a.replaces === null ? 'UNDECLARED'
+      : a.replaces.length ? a.replaces.join(' ')
+        : '[] (declared empty — see the archetype)';
+    const kit = a.replacesKit === null ? 'UNDECLARED'
+      : a.replacesKit === false ? 'kept'
+        /* THE SAME READER THE WARN ABOVE USES, deliberately: this column and
+           that warning are one fact, and two readers of one fact drift until
+           the wrong one is believed (ASTRA §5). */
+        : (a.kit && kitBranches(a.kit).some((h) => h[1].includes('kitSuperseded'))
+          ? 'dropped' : 'DECLARED, NOT GATED');
+    console.log(r.id.padEnd(24) + String(r.mats).padStart(6) + '  ' + gives.padEnd(44) + kit);
+  }
+  console.log('');
+  console.log('costs is DISTINCT MATERIALS = the model\'s draw calls. gives back is `replaces`.');
+  console.log('Neither column is the net cost: tools/checksiteenvironment.mjs measures that');
+  console.log('against a live terrain build, and every archetype is net ADDITIVE today.');
 }
 
 console.log('');
