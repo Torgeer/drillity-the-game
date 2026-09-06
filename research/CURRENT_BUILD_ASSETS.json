@@ -1,0 +1,295 @@
+{
+  "capturedAt": "2026-09-06T02:25:41.310Z",
+  "sourceCommit": "4e6e9a31f9e05e04d1c202a17cb0830f59e1c4aa",
+  "buildCommand": "npm run build",
+  "buildSession": 79902,
+  "buildLog": ".bak/integration-build-quarry.log",
+  "note": "Verified local build inventory. Generated assets remain ignored; rebuild from reviewed scripts. This records bytes, not fleet performance.",
+  "files": [
+    {
+      "path": "index.html",
+      "bytes": 2939268,
+      "sha256": "aaf09eb7b7e2ab1d6c4d6df31829ef16a5cb6321a2a011695f2d6f3068949385"
+    },
+    {
+      "path": "models/bolter.glb",
+      "bytes": 2323400,
+      "sha256": "c3a29ca8d6da32eb87f39f8e207ebd3d3aa8da1685f50cb71708d89f0e32ed23"
+    },
+    {
+      "path": "models/cable-percussion.glb",
+      "bytes": 1010480,
+      "sha256": "f68d71596f4dc0ec2b66929629bba85525f6e8ccb0fbf71f8e5f1c44b8ed6106"
+    },
+    {
+      "path": "models/cfa-rig.glb",
+      "bytes": 4513780,
+      "sha256": "a10c16b3071c96926077271c1d8785637951989d082d9a3f5e1f5e2bf4bf7b35"
+    },
+    {
+      "path": "models/core-rig.glb",
+      "bytes": 1385768,
+      "sha256": "7c4dd62969d71a1a6e30275fa870b14797b6fd6175e43d10260f474077a0e768"
+    },
+    {
+      "path": "models/cpt-unit.glb",
+      "bytes": 1895224,
+      "sha256": "f7858631bba0ead922fe04563813b829b6de3d3376714ee2c1306afce4bab0cb"
+    },
+    {
+      "path": "models/crawler-lite.glb",
+      "bytes": 2542536,
+      "sha256": "527c787a56415e70ad95ff8516c3886c9fc07fa4f4fcf750f9e2e175c06ef646"
+    },
+    {
+      "path": "models/crawler-th.glb",
+      "bytes": 2300536,
+      "sha256": "58175e8ae042856225b435f9476dca99d94a15048d609973b4cffe0c42ac721d"
+    },
+    {
+      "path": "models/dth-crawler.glb",
+      "bytes": 4115852,
+      "sha256": "f0c5f8d6fd1c0238ee776336871e6698e5e078be2e4fe06daccacfc215232133"
+    },
+    {
+      "path": "models/foundation-bg.glb",
+      "bytes": 4491784,
+      "sha256": "9d91db06bd51226cab57200c04886aed43388d17056762040b1ec5adc6ba8331"
+    },
+    {
+      "path": "models/hdd-rig.glb",
+      "bytes": 2813316,
+      "sha256": "5207f3018a23d7fbc0507e7d569c6198a5cd864f920c4ed229ccf3e012adec11"
+    },
+    {
+      "path": "models/longhole-rig.glb",
+      "bytes": 1258704,
+      "sha256": "1ad4ea071c94ec27a72ccf974b41481472a21a6e54945027d31a91639c96fcab"
+    },
+    {
+      "path": "models/oil-derrick.glb",
+      "bytes": 3297364,
+      "sha256": "43d3275ae9355bd5afeff9a09db18b74f40a1870ddb0668a6a1ee8c7e874323a"
+    },
+    {
+      "path": "models/pd55.glb",
+      "bytes": 4780416,
+      "sha256": "e43cd487927282f9a591b0edf11f36a83a43ae7f7917763d88ed2c9f1f17201d"
+    },
+    {
+      "path": "models/piling-leader.glb",
+      "bytes": 2013892,
+      "sha256": "6a96b56031e3f8f05214940ed746de27dac9543382d51e505b543cd366daa5bd"
+    },
+    {
+      "path": "models/raisebore.glb",
+      "bytes": 2334416,
+      "sha256": "22107d2d616d1ab64e29de6055deffa26a5f693ecf39fb05c1527bb958f452a5"
+    },
+    {
+      "path": "models/rc-rig.glb",
+      "bytes": 4730188,
+      "sha256": "39ea72abd3f6d575158fe84f5ce4e81a047d1cfce63e9ba646f79812df70d0b3"
+    },
+    {
+      "path": "models/si-rig.glb",
+      "bytes": 1519272,
+      "sha256": "17730b4a958137a6890eee86115972811a4a1aebfacd8548be2360092bb4b729"
+    },
+    {
+      "path": "models/sites/quarry-bench.glb",
+      "bytes": 955160,
+      "sha256": "5b53090ed7c92c89be48e4dcf668a7400634aa62eb3d7b89482c4cfc7db78930"
+    },
+    {
+      "path": "models/sites/urban-plot.glb",
+      "bytes": 2754112,
+      "sha256": "de46c2afb4049230c32a23e39ef0ad28512a2cc3b1ec6520e9f73f2f709675e3"
+    },
+    {
+      "path": "models/sonic-truck.glb",
+      "bytes": 1180620,
+      "sha256": "f9c5438581f43adbcdd04f8b04ee579c3c4353e45c6f60e289226d6407cc6763"
+    },
+    {
+      "path": "models/tunnel-jumbo.glb",
+      "bytes": 1335616,
+      "sha256": "4059aaa715b389aa641b5a75256dece9ee48ab342e50b9de7484a9beaf1f6094"
+    },
+    {
+      "path": "ui/blender/badge-neutral.png",
+      "bytes": 1055,
+      "sha256": "161541af3af58810da8003ecb4e7246209ca67f4b9732d62bbd90ba765ec45c6"
+    },
+    {
+      "path": "ui/blender/badge-neutral@2x.png",
+      "bytes": 4115,
+      "sha256": "7c2a57d7ac212f1b6aa6524a627d5dc973177d3b6894d41241e3a0940c6fc176"
+    },
+    {
+      "path": "ui/blender/badge-ready.png",
+      "bytes": 1232,
+      "sha256": "a58736ad5c379e642e6dca8536ad947b32ed8de1c80fd5469e8d53af3dfee40b"
+    },
+    {
+      "path": "ui/blender/badge-ready@2x.png",
+      "bytes": 5353,
+      "sha256": "be94ed0f63d463f27102eff34cf9b5d3560111e6ef960ee8ea2a73b09a22f1fd"
+    },
+    {
+      "path": "ui/blender/badge-warning.png",
+      "bytes": 1360,
+      "sha256": "3ff5d5f3b09e9734809c0792769b7ff7008009ad4213ad394f61aea4ebeeb552"
+    },
+    {
+      "path": "ui/blender/badge-warning@2x.png",
+      "bytes": 5281,
+      "sha256": "82a51c73a2815aef9068d3eb7df072f0d9bf65e20b5a3bc51db1a15ec2b84a4c"
+    },
+    {
+      "path": "ui/blender/button-accent-disabled.png",
+      "bytes": 2194,
+      "sha256": "4740d4f445f752cfe3f130a87b65ac22a66fc267f4d5d40ea06d9dd543afc8dc"
+    },
+    {
+      "path": "ui/blender/button-accent-disabled@2x.png",
+      "bytes": 9439,
+      "sha256": "874083a88f91a3b35b8e25ca515f8820c70dbb6a8cca2ab7fa7116b39de3045a"
+    },
+    {
+      "path": "ui/blender/button-accent-pressed.png",
+      "bytes": 3574,
+      "sha256": "39f7735fb106b63483de1866056250ed38fffd981820b592087a63e71321f44e"
+    },
+    {
+      "path": "ui/blender/button-accent-pressed@2x.png",
+      "bytes": 16375,
+      "sha256": "5cf982cbaea6d685749314bb9f1160273602da9e6dfe2e726863edab262d11ee"
+    },
+    {
+      "path": "ui/blender/button-accent.png",
+      "bytes": 3105,
+      "sha256": "edd1992b05212be9670d0b89f216d563748a54ef8df9cf12535ad419da96d7c8"
+    },
+    {
+      "path": "ui/blender/button-accent@2x.png",
+      "bytes": 14663,
+      "sha256": "7dbbcd465e9efa29ead1a2022c95d09d83bd1a322d32784d8b19d740d5607154"
+    },
+    {
+      "path": "ui/blender/button-compact-accent-disabled.png",
+      "bytes": 1606,
+      "sha256": "5e1b6d1f8a80fb0255ab8057fae2495d382e9a194cddb3a3982bbb5e14c62862"
+    },
+    {
+      "path": "ui/blender/button-compact-accent-disabled@2x.png",
+      "bytes": 6350,
+      "sha256": "87bea59575812cecc08199e1612b2050f157f374cbf80423120d41e7f858d5e5"
+    },
+    {
+      "path": "ui/blender/button-compact-accent-pressed.png",
+      "bytes": 2515,
+      "sha256": "09f3b5e58db1e9ecb3a54104377b75f1ae73b31207c072649fc8a759b9a7e53c"
+    },
+    {
+      "path": "ui/blender/button-compact-accent-pressed@2x.png",
+      "bytes": 10817,
+      "sha256": "ac799d8eaf9fcb2a0404605d9dd61d239b989a6aa7d4b6db2a9a4b326666af47"
+    },
+    {
+      "path": "ui/blender/button-compact-accent.png",
+      "bytes": 2094,
+      "sha256": "3be62fbe5bbca59d6df73b8f2f50e0f59a4460128249ab10117b2840e064da8c"
+    },
+    {
+      "path": "ui/blender/button-compact-accent@2x.png",
+      "bytes": 9564,
+      "sha256": "058939e7f5b3a068e85eb7637c748b75691d86be1299149c2b1260deb0efbe3a"
+    },
+    {
+      "path": "ui/blender/button-compact-neutral-disabled.png",
+      "bytes": 1606,
+      "sha256": "5e1b6d1f8a80fb0255ab8057fae2495d382e9a194cddb3a3982bbb5e14c62862"
+    },
+    {
+      "path": "ui/blender/button-compact-neutral-disabled@2x.png",
+      "bytes": 6350,
+      "sha256": "87bea59575812cecc08199e1612b2050f157f374cbf80423120d41e7f858d5e5"
+    },
+    {
+      "path": "ui/blender/button-compact-neutral-pressed.png",
+      "bytes": 1962,
+      "sha256": "b534d42244bd42ed93898c2873ab680d13e4c85aab05d5de0bd4ccf84732fb09"
+    },
+    {
+      "path": "ui/blender/button-compact-neutral-pressed@2x.png",
+      "bytes": 8175,
+      "sha256": "7c98943611e100918e0f92eb47a41f13b0a39c47bbe5dfb28823ebded077342c"
+    },
+    {
+      "path": "ui/blender/button-compact-neutral.png",
+      "bytes": 1888,
+      "sha256": "0d1d86225cc76ae6773d367238ce1385ba6dd065b739281563a183b4fdaf1afc"
+    },
+    {
+      "path": "ui/blender/button-compact-neutral@2x.png",
+      "bytes": 7532,
+      "sha256": "361ac37e7b18b6da6a52949870e8b370819d07cb8816d95ee7f26bab2ab2dd15"
+    },
+    {
+      "path": "ui/blender/button-neutral-disabled.png",
+      "bytes": 2194,
+      "sha256": "4740d4f445f752cfe3f130a87b65ac22a66fc267f4d5d40ea06d9dd543afc8dc"
+    },
+    {
+      "path": "ui/blender/button-neutral-disabled@2x.png",
+      "bytes": 9439,
+      "sha256": "874083a88f91a3b35b8e25ca515f8820c70dbb6a8cca2ab7fa7116b39de3045a"
+    },
+    {
+      "path": "ui/blender/button-neutral-pressed.png",
+      "bytes": 2566,
+      "sha256": "c17d55b4ee6bf27363bbbe45e5e60c4c405b46a37e834cfb326ebba7696319da"
+    },
+    {
+      "path": "ui/blender/button-neutral-pressed@2x.png",
+      "bytes": 11920,
+      "sha256": "5f6fe664849310c3999c25247a497715e51f0bf66b2f37d8ca134dfcfb827acf"
+    },
+    {
+      "path": "ui/blender/button-neutral.png",
+      "bytes": 2568,
+      "sha256": "0a890af90d5704958c401ba04b588eda814603ffa2033dcf1784be31327fc8d5"
+    },
+    {
+      "path": "ui/blender/button-neutral@2x.png",
+      "bytes": 11390,
+      "sha256": "158afd6cc707626626b8ebdd427fd3c84e330d327a0967e6d7b3e6176f7a5716"
+    },
+    {
+      "path": "ui/blender/manifest.json",
+      "bytes": 27937,
+      "sha256": "19c256bae84742a4a231584aefbc885c6f95813bcffa0261262d0875b7fad3f0"
+    },
+    {
+      "path": "ui/blender/meter-backing.png",
+      "bytes": 2240,
+      "sha256": "5d938a74042bdd74d8b44c909114a960d81b28ae7d3a3dd92b55de750f70c899"
+    },
+    {
+      "path": "ui/blender/meter-backing@2x.png",
+      "bytes": 9626,
+      "sha256": "fec8e591a551d2de6a74cf1b0b6f2d19c512103adbc9be5a39e40ad5577e284e"
+    },
+    {
+      "path": "ui/blender/ui-atlas.png",
+      "bytes": 32819,
+      "sha256": "d47d03644865648c8485c052b26ef38ee13f35bdc55709c60d4799263ba253f9"
+    },
+    {
+      "path": "ui/blender/ui-atlas@2x.png",
+      "bytes": 148221,
+      "sha256": "ac05d0f6b6647f3d2e5017fdda7ef911b09e58d10eab07a86b3db206df8e0d9f"
+    }
+  ]
+}

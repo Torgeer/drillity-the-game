@@ -1,0 +1,20 @@
+{
+  "capturedAt": "2026-09-06T02:25:41.424Z",
+  "status": "Unintegrated later worktree bytes; no browser acceptance",
+  "files": [
+    {
+      "path": "atlas-later-wip/tools/ui-atlas-adoption-review/check.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-ui-atlas-game-adoption\\tools\\ui-atlas-adoption-review\\check.mjs",
+      "previousSha256": "704d6a057f1cb06334b849e25a30179c47405b22ece0b2e33fc1cd4af944a7a4",
+      "sha256": "4d45dc37c869dbce1c3f8f1d65e843f75a9da32134fb1aa54153cc0cb692833d",
+      "bytes": 22302
+    },
+    {
+      "path": "atlas-later-wip/tools/ui-atlas-adoption-review/vite.config.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-ui-atlas-game-adoption\\tools\\ui-atlas-adoption-review\\vite.config.mjs",
+      "previousSha256": "3bb0656e01b95158765b8762e5624c2ff82e7c0f3eb4dfc07c064adf1c83165b",
+      "sha256": "c7a569bd499bb8703aaa8468f0868b9c910ab4039b4870ee2f7ba71356dc2fdd",
+      "bytes": 1891
+    }
+  ]
+}

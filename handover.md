@@ -1,5 +1,25 @@
 # Drillity handover for Claude
 
+## Handoff inventory update — 2026-09-06, 04:24 heartbeat
+
+`research/CURRENT_BUILD_ASSETS.json` records hashes and byte counts for all57
+built files from reviewed source commit4e6e9a3: one shell and56 public assets.
+Every external asset was compared byte-for-byte with its public input. These
+hashes help Claude check the ignored generated outputs against the current
+passing build; they do not substitute for rebuilding source or runtime checks.
+
+Two atlas harness/config files changed after its original13-file patch and are
+now preserved in `handoff/pending-2026-09-06/atlas-later-wip/`, with exact hashes.
+All four atlas production files still match its original inventory. Keep both
+the original patch and these later WIP copies; neither has rendered acceptance.
+
+Final source review of the blocked rig-performance harness found a false-fail
+condition: it demands `timeOfDay === 0.34`, but the frozen environment setter's
+normalization returns `0.3400000000000001`. Root reproduced this arithmetic.
+Correct the harness against the actual environment contract before attempting
+its runtime cases. Its existing sample tests do not cover that identity check.
+The dependency-access boundary and zero-of-eight runtime result still apply.
+
 ## Quarry integration update — 2026-09-06, 04:14 heartbeat
 
 This supersedes the quarry DEFER verdict below and in the historical pending

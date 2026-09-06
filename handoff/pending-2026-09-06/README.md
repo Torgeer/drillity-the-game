@@ -13,6 +13,13 @@ locations. Original worktrees and additional images/generated assets remain
 under `C:/Users/henri/Downloads/threads/`; no worktree was deleted.
 Local attributes preserve snapshot line endings so recorded hashes survive Git.
 
+Later atlas WIP is preserved separately in `atlas-later-wip/`, with its own
+`atlas-later-wip-manifest.json`. Exactly two files differ from the original
+13-file inventory: the isolated review checker and its Vite config. All four
+production files still match that inventory. These copies are unintegrated
+review inputs and have no browser acceptance; their imports/paths refer to
+their original worktree layout. The original patch remains unchanged.
+
 | Candidate | Remaining work |
 |---|---|
 | HUD space | Six-path patch against a3fb994. 862 synthetic-telemetry actual-DOM cases have no reported layout faults, but intended-font access failed and combined current-renderer verification remains due. Preserve newer root site recovery hunks. The reported 48.24–75.32% is DOM scene opportunity, not accepted rendered visibility. |
