@@ -17,6 +17,16 @@ and server closed. This validates current integrated screens, not the separate
 unmerged HUD-space or menu-atlas candidates. Those future merges must retain the
 recovery catch and menu label/navigation fixes and rerun this gate.
 
+A further6/6 CPU-DOM cases pass at320x568 against all current-root production
+imports. Warning bounds x34..286/y475.5..552 and complete text fit on screen;
+root inspected the saved warning image. Real recovery still starts one impact
+attempt without another mobilisation charge. No errors or failed resources;
+browser/server closed. The optional --width/--height harness arguments preserve
+390x844 defaults. Its --source-root now also selects simulation/helper from the
+requested root instead of silently importing a private copy. Private report:
+`../threads/drillity-vibro-start-guard/.qa-vibro-recovery/small-phone/report.json`.
+The unqualified root390 runs already used root sources; their validity is intact.
+
 ## Original candidate review (historical)
 
 2026-09-06. CPU Chrome DOM verification of current integration source with exact

@@ -14,11 +14,13 @@ const own = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const arg = (key, fallback) => {const i=process.argv.indexOf('--'+key);return i<0?fallback:process.argv[i+1];};
 const root = resolve(arg('source-root', own));
 const out = resolve(arg('out', '.qa-vibro-recovery/current'));
+const width = Number(arg('width',390)), height = Number(arg('height',844));
+assert.ok(Number.isInteger(width)&&width>0&&Number.isInteger(height)&&height>0,'Viewport width and height must be positive integers');
 const overrides = new Map([
  ['src/ui/screens/site.js',resolve(arg('site-source',root+'/src/ui/screens/site.js'))],
  ['src/game/progression.js',resolve(arg('progression-source',root+'/src/game/progression.js'))],
- ['src/sim/drilling.js',resolve(own,'src/sim/drilling.js')],
- ['src/game/equipment-support.js',resolve(own,'src/game/equipment-support.js')],
+ ['src/sim/drilling.js',resolve(root,'src/sim/drilling.js')],
+ ['src/game/equipment-support.js',resolve(root,'src/game/equipment-support.js')],
 ]);
 if(arg('menu-source',null))overrides.set('src/ui/screens/menu.js',resolve(arg('menu-source')));
 const used = new Map();
@@ -102,7 +104,7 @@ try{
  const port=server.httpServer.address().port;
  browser=await chromium.launch({channel:'chrome',headless:true,args:['--disable-gpu','--disable-webgl','--mute-audio']});
  for(const reduced of [true,false]){
-  const context=await browser.newContext({viewport:{width:390,height:844},reducedMotion:reduced?'reduce':'no-preference'});
+  const context=await browser.newContext({viewport:{width,height},reducedMotion:reduced?'reduce':'no-preference'});
   const page=await context.newPage();
   page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
   page.on('requestfailed',r=>network.push({url:r.url(),error:r.failure()?.errorText}));
@@ -121,7 +123,7 @@ try{
    await toast.waitFor({state:'visible'});
    record.warning=await toast.evaluate(el=>{const r=el.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(el);const t=range.getBoundingClientRect();return {text:el.innerText,role:el.parentElement.getAttribute('role'),live:el.parentElement.getAttribute('aria-live'),box:{x:r.x,y:r.y,right:r.right,bottom:r.bottom},textBox:{x:t.x,y:t.y,right:t.right,bottom:t.bottom},font:getComputedStyle(el).fontFamily,fontFaces:[...document.fonts].map(f=>({family:f.family,status:f.status}))};});
    assert.equal(record.warning.role,'status');assert.equal(record.warning.live,'polite');
-   assert.ok(record.warning.box.x>=0&&record.warning.box.right<=390&&record.warning.box.bottom<=844);
+   assert.ok(record.warning.box.x>=0&&record.warning.box.right<=width&&record.warning.box.bottom<=height);
    assert.ok(record.warning.textBox.x>=record.warning.box.x&&record.warning.textBox.right<=record.warning.box.right&&record.warning.textBox.bottom<=record.warning.box.bottom,'Entire actionable warning fits its visible box');
    record.save=await page.evaluate(()=>window.checkSave());assert.deepEqual(record.save,{saved:true,storage:true});
    await page.screenshot({path:resolve(out,kind+'-'+reduced+'-refused.png')});
@@ -152,7 +154,7 @@ finally{
  if(errors.length&&!failure)failure='Browser errors: '+JSON.stringify(errors);
  if(network.length&&!failure)failure='Failed resources: '+JSON.stringify(network);
  if(cases.length!==6&&!failure)failure='Incomplete recovery matrix: '+cases.length+'/6';
- const report={scope:'CPU DOM navigation; GPU/WebGL disabled, no renderer or intended-font/AAA claim',cases,hashes,overrides:Object.fromEntries(overrides),errors,network,lifecycle,failure};
+ const report={scope:'CPU DOM navigation; GPU/WebGL disabled, no renderer or intended-font/AAA claim',viewport:{width,height},cases,hashes,overrides:Object.fromEntries(overrides),errors,network,lifecycle,failure};
  writeFileSync(resolve(out,'report.json'),JSON.stringify(report,null,2)+'\n');
  console.log(JSON.stringify({cases:cases.length,failure,lifecycle,network,report:resolve(out,'report.json')},null,2));
  if(failure)process.exitCode=1;
