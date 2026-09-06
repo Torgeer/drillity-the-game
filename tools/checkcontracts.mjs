@@ -6,6 +6,7 @@
  *   node tools/checkcontracts.mjs --self-test
  *   node tools/checkcontracts.mjs 5184 --headed
  *   node tools/checkcontracts.mjs 5184 --headed --gpu-owner <coordination/gpu-owner.txt>
+ *   node tools/checkcontracts.mjs 5204 --headed --gpu-lease contract-readiness
  *
  * Headed rendering requires the shared GPU slot. Ports 5176/5178 are forbidden.
  * This is a production-DOM fixture, not a WebGL, FPS or full-game boot test.
@@ -17,6 +18,7 @@ import { createServer } from 'vite';
 import { mkdir, writeFile, readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
+import { createHash } from 'node:crypto';
 import assert from 'node:assert/strict';
 import productionConfig from '../vite.config.js';
 
@@ -36,6 +38,9 @@ if (ownerArg >= 0 && (!args[ownerArg + 1] || args[ownerArg + 1].startsWith('--')
 // The prepared task worktree has a sibling coordination directory; an
 // integration checkout elsewhere supplies the same lease file explicitly.
 const GPU_OWNER = resolve(ROOT, ownerArg >= 0 ? args[ownerArg + 1] : '../drillity-coordination/gpu-owner.txt');
+const leaseArg = args.indexOf('--gpu-lease');
+const GPU_LEASE = leaseArg >= 0 ? args[leaseArg + 1] : 'contract-board';
+if (!['contract-board', 'contract-readiness'].includes(GPU_LEASE)) throw new Error('Use an exact contract-board or contract-readiness GPU lease.');
 
 /** Verdict fixtures exercise the gate's failures without starting a browser. */
 function layoutFailures(result) {
@@ -129,10 +134,12 @@ async function setupFixture() {
       regionEvents: [...regionEvents], saved: localStorage.getItem(SAVE_KEY), scene: ui.currentScene };
   }
   function generated(methodId, regionId = 'nordic') {
-    const rng = K.makeRandom(64007);
-    for (let i = 0; i < 2000; i++) {
-      const c = D.makeContract(regionId, 60, rng);
-      if (c.methodId === methodId) return c;
+    for (const candidate of regionId ? [regionId] : D.REGIONS.map((r) => r.id)) {
+      const rng = K.makeRandom(64007);
+      for (let i = 0; i < 2000; i++) {
+        const c = D.makeContract(candidate, 60, rng);
+        if (c.methodId === methodId) return c;
+      }
     }
     throw new Error(`Fixture cannot produce real ${methodId} contract in ${regionId}`);
   }
@@ -296,11 +303,17 @@ async function measureTargetAccess(selector) {
   return { targets: controls.length, issues };
 }
 
+async function sourceHashes() {
+  return Object.fromEntries(await Promise.all([
+    'src/game/progression.js', 'src/ui/screens/contracts.js', 'src/ui/screens/contracts.css', 'tools/checkcontracts.mjs',
+  ].map(async (path) => [path, createHash('sha256').update(await readFile(resolve(ROOT, path))).digest('hex')])));
+}
+const verifiedSources = await sourceHashes();
 let browser;
 let server;
 try {
   const gpuOwner = (await readFile(GPU_OWNER, 'utf8')).trim();
-  if (gpuOwner !== 'contract-board') throw new Error(`GPU owner is ${JSON.stringify(gpuOwner)}, not contract-board. No browser started.`);
+  if (gpuOwner !== GPU_LEASE) throw new Error(`GPU owner is ${JSON.stringify(gpuOwner)}, not ${GPU_LEASE}. No browser started.`);
   // Import the existing JS config directly. Vite's config-bundling discovery
   // otherwise probes parent directories unavailable in the task sandbox.
   server = await createServer({ ...productionConfig, configFile: false,
@@ -309,7 +322,7 @@ try {
     server: { port, strictPort: true, host: '127.0.0.1' }, logLevel: 'error' });
   await server.listen();
   // Recheck immediately before launch: server startup cannot reserve the slot.
-  if ((await readFile(GPU_OWNER, 'utf8')).trim() !== 'contract-board') throw new Error('GPU grant changed during startup. No browser started.');
+  if ((await readFile(GPU_OWNER, 'utf8')).trim() !== GPU_LEASE) throw new Error('GPU grant changed during startup. No browser started.');
   browser = await chromium.launch({ channel: 'chrome', headless: false, args: ['--mute-audio'] });
   for (const size of VIEWPORTS) {
     const context = await browser.newContext({ viewport: size, deviceScaleFactor: 1, reducedMotion: 'reduce' });
@@ -398,6 +411,8 @@ try {
           const metres = c.metres || c.targetDepth * Math.max(1, c.holes || 1);
           const rate = `€${(c.payout / metres).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / m`;
           const text = el.textContent;
+          const readinessIcons = [...el.querySelectorAll('.contract-card__readiness svg')].filter(q.isRendered);
+          if (readinessIcons.length !== 1) errors.push(`${c.id}: expected one visible readiness icon, found ${readinessIcons.length}`);
           for (const [name, expected] of [['method', method], ['title', c.title], ['pay', `€${Math.round(c.payout).toLocaleString('en-GB')}`],
             ['rate', rate], ['constraint', c.constraint?.label],
             ['estimated hours', `${Number(c.estimatedHours).toFixed(1)} h`], ['deadline', `${c.deadlineHours} h`],
@@ -491,7 +506,9 @@ try {
 
     await page.evaluate(async () => {
       const q = window.contractQA;
-      await q.remount([{ ...q.raw[0], id: 'qa-level-lock', level: 60 }]);
+      // Method unlock level is the production rule; a decorative contract.level
+      // override was only enforced by the former duplicated UI lock logic.
+      await q.remount([{ ...q.generated('dth'), id: 'qa-level-lock' }]);
     });
     await layout('level-locked');
     await page.locator(CARD).focus();
@@ -541,7 +558,7 @@ try {
       await page.locator(`${BOARD} select`).selectOption(sort);
       const sorted = await page.evaluate((id) => {
         const q = window.contractQA;
-        const locked = (c) => (c.level ?? q.D.getMethod(c.methodId).unlockLevel ?? 1) > q.state.player.level;
+        const locked = (c) => !q.ctx.progression.previewContract(c).ok;
         const keys = { pay: (c) => c.payout, rate: (c) => c.payout / (c.metres || c.targetDepth * c.holes),
           quick: (c) => -(c.estimatedHours || c.deadlineHours), deep: (c) => c.targetDepth };
         const expected = [...q.mixed].sort((a, b) => Number(locked(a)) - Number(locked(b)) || keys[id](b) - keys[id](a)).map((c) => c.id);
@@ -581,6 +598,76 @@ try {
     await scrollEnd('certificate-details-end', SHEET);
     await closeSheet();
 
+    // Readiness uses the real public API. Each refusal remains inspectable,
+    // and merely rendering/updating the board must not attempt acceptance.
+    for (const kind of ['depth', 'unknown-rating', 'funding']) {
+      const readiness = await page.evaluate(async (kind) => {
+        const q = window.contractQA;
+        const foreign = q.D.REGIONS.find((r) => r.id !== 'nordic'
+          && r.applications.some((id) => q.D.getMethod('auger').applications.includes(id)));
+        let c = kind === 'funding' ? q.generated('auger', foreign.id)
+          : kind === 'depth' ? q.generated('cfa', null) : q.generated('auger');
+        if (kind === 'depth') c = { ...c, targetDepth: q.D.rigDepthCapacity('cfa-rig', 'cfa') + 0.01 };
+        if (kind === 'unknown-rating') c = { ...c, targetDepth: 1 };
+        q.readinessContract = { ...c, id: `qa-readiness-${kind}` };
+        await q.remount([q.readinessContract], {
+          player: { level: 60, money: kind === 'funding' ? 0 : 1e8, certs: q.D.CERTS.map((c) => c.id) },
+          unlocked: { methods: q.D.METHODS.map((m) => m.id), regions: q.D.REGIONS.map((r) => r.id),
+            rigs: kind === 'funding' ? q.D.RIGS.map((r) => r.id) : ['cfa-rig'] },
+          garage: { rigId: kind === 'funding' ? 'crawler-lite' : 'cfa-rig' },
+        });
+        const before = JSON.stringify(q.snap());
+        for (let i = 0; i < 25; i++) q.ui.update(0, q.state);
+        const result = q.ctx.progression.previewContract(q.readinessContract);
+        return { result, unchanged: before === JSON.stringify(q.snap()), calls: q.apiCalls.length,
+          text: document.querySelector('.contract-card').textContent,
+          header: document.querySelector('.contracts-board .shead__s').textContent,
+          locked: document.querySelector('.contract-card').classList.contains('is-locked') };
+      }, kind);
+      check(!readiness.result.ok && readiness.unchanged && readiness.calls === 0 && readiness.locked
+        && readiness.text.includes(readiness.result.reason) && readiness.header.includes('0 ready'),
+      `${size.width}: ${kind} readiness shows the actual refusal without state/save/API mutation`, readiness);
+      if (kind === 'funding') check(readiness.result.mobilisation > 0 && /need.*more/.test(readiness.result.reason),
+        `${size.width}: mobilisation refusal includes the current shortfall`, readiness.result);
+      await layout(`readiness-${kind}`);
+      await page.locator(CARD).click();
+      check(await page.locator(`${SHEET} button:disabled`).count() === 1
+        && (await page.locator(SHEET).textContent()).includes(readiness.result.reason),
+      `${size.width}: ${kind} details expose refusal and disable acceptance`);
+      await layout(`readiness-${kind}-details`, SHEET);
+      if (kind === 'funding') {
+        const refreshed = await page.evaluate(() => {
+          const q = window.contractQA, card = document.querySelector('.contract-card');
+          const focused = document.activeElement;
+          q.state.player.money = 1e8;
+          const before = JSON.stringify(q.snap());
+          q.ui.update(0, q.state);
+          const result = q.ctx.progression.previewContract(q.readinessContract);
+          return { result, unchanged: before === JSON.stringify(q.snap()),
+            sameCard: card === document.querySelector('.contract-card'), sameFocus: focused === document.activeElement,
+            text: document.querySelector('.contracts-detail').textContent,
+            disabled: document.querySelectorAll('.contracts-detail button:disabled').length };
+        });
+        check(refreshed.result.ok && refreshed.unchanged && refreshed.sameCard && refreshed.sameFocus && refreshed.disabled === 0
+          && refreshed.text.includes(`€${Math.round(refreshed.result.mobilisation).toLocaleString('en-GB')}`),
+        `${size.width}: open details refresh funded readiness without replacing focus or mutating state`, refreshed);
+        await layout('readiness-funded-live', SHEET);
+        await page.getByRole('button', { name: 'Accept contract', exact: true }).focus();
+        const blockedFocus = await page.evaluate(() => {
+          const q = window.contractQA;
+          q.state.player.money = 0; q.ui.update(0, q.state);
+          return { inside: !!document.activeElement?.closest('.contracts-detail'),
+            disabled: document.querySelectorAll('.contracts-detail button:disabled').length };
+        });
+        check(blockedFocus.inside && blockedFocus.disabled === 1,
+          `${size.width}: losing readiness keeps keyboard focus in the dialog`, blockedFocus);
+        await page.keyboard.press('Tab');
+        check(await page.evaluate(() => !!document.activeElement?.closest('.contracts-detail')),
+          `${size.width}: keyboard remains contained after readiness disables acceptance`);
+      }
+      await closeSheet();
+    }
+
     await page.evaluate(async () => {
       const q = window.contractQA;
       await q.remount([], { player: { level: 1 } });
@@ -601,24 +688,40 @@ try {
       q.state.garage.rigId = 'qa-no-owned-rig';
       q.state.unlocked.rigs = [];
       q.failedBefore = JSON.stringify({ state: q.state, saved: q.snap().saved });
+      // No frame/update between the mutation and activation: stale rendered
+      // readiness cannot replace the actual acceptance API's live recheck.
+      const button = [...document.querySelectorAll('.contracts-detail button')].find((el) => el.textContent === 'Accept contract');
+      if (!button || button.disabled) throw new Error('No live accept action for genuine refusal probe');
+      button.focus();
+      button.click();
     });
-    await page.getByRole('button', { name: 'Accept contract', exact: true }).click();
     const refused = await page.evaluate(() => {
       const q = window.contractQA;
       return { calls: q.apiCalls, accepted: q.accepted,
         unchanged: q.failedBefore === JSON.stringify({ state: q.state, saved: q.snap().saved }),
-        sheet: !!document.querySelector('.contracts-detail:not(.is-out)'), text: document.querySelector('.contracts-detail')?.textContent };
+        sheet: !!document.querySelector('.contracts-detail:not(.is-out)'), text: document.querySelector('.contracts-detail')?.textContent,
+        focusInside: !!document.activeElement?.closest('.contracts-detail') };
     });
     check(refused.calls.length === 1 && refused.calls[0].result.ok === false && refused.accepted.length === 0
       && refused.unchanged && refused.sheet && refused.text.includes(refused.calls[0].result.reason),
     `${size.width}: real API refusal leaves state/save intact and explains the failure in detail`, refused);
+    check(refused.focusInside, `${size.width}: real API refusal preserves dialog keyboard focus`);
     await layout('accept-refused', SHEET);
-    await closeSheet();
-    await page.evaluate(() => {
+    const recovered = await page.evaluate(() => {
       const q = window.contractQA;
       q.state.garage = q.restoreGarage;
       q.state.unlocked = q.restoreUnlocked;
+      const before = JSON.stringify(q.snap());
+      q.ui.update(0, q.state);
+      return { unchanged: before === JSON.stringify(q.snap()),
+        status: document.querySelector('.contracts-detail__status').textContent,
+        errorHidden: document.querySelector('.contracts-detail__error').hidden,
+        disabled: document.querySelectorAll('.contracts-detail button:disabled').length };
     });
+    check(recovered.unchanged && recovered.status.includes('Ready') && recovered.errorHidden && recovered.disabled === 0,
+      `${size.width}: restored ownership clears obsolete refusal while preserving state and ready action`, recovered);
+    await layout('accept-recovered', SHEET);
+    await closeSheet();
     await page.locator(CARD).first().click();
     await page.evaluate(() => {
       const button = [...document.querySelectorAll('.contracts-detail button')].find((el) => el.textContent === 'Accept contract');
@@ -644,10 +747,13 @@ try {
 } finally {
   await browser?.close();
   await server?.close();
+  const resources = { browserClosed: !!browser && !browser.isConnected(), serverClosed: !!server && !server.httpServer?.listening };
+  check(resources.browserClosed && resources.serverClosed, 'owned browser and fixture server closed', resources);
+  check(JSON.stringify(verifiedSources) === JSON.stringify(await sourceHashes()), 'source stayed frozen throughout browser verification');
   await writeFile(resolve(out, 'report.json'), JSON.stringify({ mode: 'headed production DOM fixture',
     limitations: ['No WebGL renderer, simulation loop or FPS measurement.', 'System fallback fonts; no remote font fetch.',
       'Desktop Chrome viewports with reduced motion; safe-area CSS values are zero.'],
-    port, baseline, checks, findings }, null, 2));
+    port, baseline, resources, sourceHashes: verifiedSources, checks, findings }, null, 2));
 }
 const fail = checks.filter((r) => !r.ok);
 if (!findings.length) { console.error('FAIL: measured no layout states'); process.exitCode = 1; }

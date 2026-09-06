@@ -3,7 +3,7 @@
  * displayed rate divides it by the whole job's metres. Economy owns settlement.
  */
 import { SCENES, groundSwatch } from '../../core/contract.js';
-import { allMethods, allRegions, methodInfo, regionInfo, certInfo } from './catalog.js';
+import { allMethods, allRegions, methodInfo, regionInfo, certInfo, rigInfo } from './catalog.js';
 import './contracts.css';
 
 /** Higher keys sort first. Keep the original four orderings. */
@@ -37,6 +37,8 @@ function scopeOf(c) {
 export function createContractsScreen(app) {
   const { C, state } = app;
   let filterMethod = 'all', filterRegion = 'all', sortId = 'pay';
+  let cardViews = [], detailView = null;
+  const previewErrors = new WeakSet();
 
   // Shared tap handles pointer/keyboard events. Also accept the native click
   // used by assistive technology; ordinary pointer clicks already ran on tap.
@@ -77,14 +79,45 @@ export function createContractsScreen(app) {
   const methodName = (id) => namedOr(methodInfo(id), id).name;
   const regionName = (id) => namedOr(regionInfo(id), id).name;
 
-  function lockReason(c) {
-    const player = state.player || {}, unlocked = state.unlocked || {};
-    if ((player.level || 1) < (c.level || 1)) return `Reach level ${c.level}`;
-    if (unlocked.methods && !unlocked.methods.includes(c.method)) return `Unlock ${methodName(c.method)}`;
-    if (unlocked.regions && !unlocked.regions.includes(c.region)) return `Unlock ${regionName(c.region)}`;
-    const missing = (c.certs || []).filter((id) => !(player.certs || []).includes(id));
-    if (missing.length) return `Needs ${missing.map((id) => certInfo(id)?.name || id).join(' + ')}`;
-    return null;
+  function previewContract(contract) {
+    const progression = app.ctx.progression;
+    if (typeof progression?.previewContract !== 'function') {
+      return { ok: false, reason: 'Contract readiness is unavailable. Please try again.' };
+    }
+    try {
+      const result = progression.previewContract(contract);
+      previewErrors.delete(contract);
+      return result?.ok === true ? result
+        : { ...result, ok: false, reason: result?.reason || 'This contract is currently unavailable.' };
+    } catch (error) {
+      if (!previewErrors.has(contract)) console.error('[ui] progression.previewContract', error);
+      previewErrors.add(contract);
+      return { ok: false, reason: 'Contract readiness could not be checked. Please try again.' };
+    }
+  }
+  const readinessKey = (check) => JSON.stringify([check.ok, check.reason, check.rigId, check.mobilisation]);
+  const rigName = (id) => namedOr(rigInfo(id), id).name;
+  const mobilisationText = (check) => Number.isFinite(check.mobilisation)
+    ? `Mobilisation · ${moneyStr(check.mobilisation)}` : '';
+  const readinessText = (check) => check.ok
+    ? ['Ready now', check.rigId ? rigName(check.rigId) : '', mobilisationText(check)].filter(Boolean).join(' · ')
+    : check.reason;
+  function updateCount(checks) {
+    const ready = checks.filter((check) => check.ok).length;
+    const label = checks.length ? `${ready} ready${ready < checks.length ? ` · ${checks.length - ready} unavailable` : ''}` : 'Job board';
+    if (headerSub && headerSub.textContent !== label) headerSub.textContent = label;
+  }
+  function refreshReadiness() {
+    // Reuse the displayed contracts: asking the board provider to regenerate
+    // here could consume randomness. Only changed facts touch existing nodes;
+    // live status updates never rebuild/reorder cards or replace the dialog.
+    const checks = new Map();
+    for (const view of cardViews) {
+      const check = previewContract(view.contract);
+      checks.set(view.contract, check); view.refresh(check);
+    }
+    updateCount([...checks.values()]);
+    if (detailView) detailView.refresh(checks.get(detailView.contract) || previewContract(detailView.contract));
   }
   function groundSummary(strata) {
     if (!strata?.length) return 'Profile not surveyed';
@@ -134,9 +167,6 @@ export function createContractsScreen(app) {
     show(reset, active.length > 0);
     const shown = rowsFor(filterMethod, filterRegion);
     show(sortControl, shown.length > 1); sortSelect.value = sortId;
-    const locked = shown.filter((c) => lockReason(c)).length;
-    if (headerSub) headerSub.textContent = shown.length
-      ? `${shown.length - locked} open${locked ? ` · ${locked} locked` : ''}` : 'Job board';
   }
   function setFilter(kind, id) {
     if (kind === 'method') filterMethod = id; else filterRegion = id;
@@ -162,7 +192,10 @@ export function createContractsScreen(app) {
   }
   function buildList() {
     C.clear(list);
+    cardViews = [];
     const rows = rowsFor(filterMethod, filterRegion);
+    const checks = new Map(rows.map((c) => [c, previewContract(c)]));
+    updateCount([...checks.values()]);
     if (!rows.length) {
       list.appendChild(app.contracts().length
         ? C.Empty('No contracts match', 'Clear filters to see the whole board.')
@@ -170,9 +203,9 @@ export function createContractsScreen(app) {
       return;
     }
     const sort = SORTS.find((entry) => entry.id === sortId) || SORTS[0];
-    rows.sort((a, b) => Number(!!lockReason(a)) - Number(!!lockReason(b)) || sort.key(b) - sort.key(a));
+    rows.sort((a, b) => Number(!checks.get(a).ok) - Number(!checks.get(b).ok) || sort.key(b) - sort.key(a));
     const titles = disambiguate(rows), fragment = document.createDocumentFragment();
-    for (const c of rows) fragment.appendChild(makeCard(c, titles.get(c.id) || c.title));
+    for (const c of rows) fragment.appendChild(makeCard(c, titles.get(c.id) || c.title, checks.get(c)));
     list.appendChild(fragment); list.classList.add('stagger'); C.stagger(list.children);
   }
   function metric(label, value, extraClass = '') {
@@ -180,18 +213,22 @@ export function createContractsScreen(app) {
       C.h('span.contract-card__label', { text: label }),
       C.h('span.contract-card__value', { text: value }));
   }
-  function makeCard(c, title) {
-    const locked = lockReason(c), method = methodName(c.method), region = regionName(c.region);
+  function makeCard(c, title, initialCheck) {
+    const method = methodName(c.method), region = regionName(c.region);
     const scope = `${scopeOf(c)} · ${lengthStr(metresOf(c))} total${c.holeDia ? ` · Ø${c.holeDia}\u00a0mm` : ''}`;
     const constraint = c.constraint?.label || 'Not specified';
     const deadline = c.deadlineH > 0 ? `${c.deadlineH} h` : 'Not provided';
+    const readyIcon = C.Icon('check', 14), blockedIcon = C.Icon('lock', 14);
+    const readinessLabel = C.h('span');
+    const readiness = C.h('span.contract-card__readiness', readyIcon, blockedIcon, readinessLabel);
+    const accessibleTerms = `${title}, ${method}, ${region}, ${scope}, quoted pay ${moneyStr(c.payout)}, estimated ${estimateStr(c.estimatedHours)}, deadline ${deadline}, ${constraint}`;
     const card = C.h('button.contract-card', {
       type: 'button', dataset: { contractId: c.id },
-      'aria-label': `${title}, ${method}, ${region}, ${scope}, quoted pay ${moneyStr(c.payout)}, estimated ${estimateStr(c.estimatedHours)}, deadline ${deadline}, ${constraint}${locked ? `, locked: ${locked}` : ''}`,
       onclick: (event) => { app.haptic?.('light'); openDetail(c, title, event.currentTarget); },
     },
     C.h('span.contract-card__method', { text: method }),
     C.h('span.contract-card__title', { text: title }),
+    readiness,
     C.h('span.contract-card__context', { text: `${c.client} · ${region}` }),
     C.h('span.contract-card__context', { text: c.application }),
     C.h('span.contract-card__metrics',
@@ -201,9 +238,19 @@ export function createContractsScreen(app) {
     C.h('span.contract-card__scope', { text: scope }),
     C.h('span.contract-card__constraint', { text: `Constraint · ${constraint}` }),
     C.h('span.contract-card__deadline', { text: `Deadline · ${deadline}` }),
-    C.h('span.contract-card__ground', { text: `Ground · ${groundSummary(app.strataFor(c))}` }),
-    locked ? C.h('span.contract-card__lock', C.Icon('lock', 14), C.h('span', { text: locked })) : null);
-    if (locked) card.classList.add('is-locked');
+    C.h('span.contract-card__ground', { text: `Ground · ${groundSummary(app.strataFor(c))}` }));
+    let previous;
+    const refresh = (check) => {
+      const key = readinessKey(check);
+      if (key === previous) return;
+      previous = key;
+      card.classList.toggle('is-locked', !check.ok);
+      readiness.classList.toggle('contract-card__lock', !check.ok);
+      readyIcon.toggleAttribute('hidden', !check.ok); blockedIcon.toggleAttribute('hidden', check.ok);
+      readinessLabel.textContent = readinessText(check);
+      card.setAttribute('aria-label', `${accessibleTerms}, ${check.ok ? '' : 'unavailable: '}${readinessText(check)}`);
+    };
+    cardViews.push({ contract: c, refresh }); refresh(initialCheck);
     return card;
   }
 
@@ -213,7 +260,7 @@ export function createContractsScreen(app) {
     return `linear-gradient(180deg, ${colors[0]}, ${colors[1]})`;
   }
   function openDetail(c, title = c.title, opener = document.activeElement) {
-    const locked = lockReason(c);
+    const initialCheck = previewContract(c);
     const method = methodName(c.method), region = namedOr(regionInfo(c.region), c.region);
     const strata = app.strataFor(c);
     const ucs = strata.length ? Math.max(0, ...strata.map((s) => s.ucs || 0)) : null;
@@ -224,14 +271,20 @@ export function createContractsScreen(app) {
       C.h('span.cdetail__lname', { text: stratum.name }),
       C.h('span.cdetail__ldepth', { text: `${stratum.top.toFixed(1)}–${stratum.bottom.toFixed(1)} m` })));
     const certRows = (c.certs || []).map((id) => {
-      const cert = certInfo(id), held = (state.player?.certs || []).includes(id);
-      return C.h('div.certcard' + (held ? '.is-held' : ''),
-        C.h('span.certcard__ico', C.Icon(held ? 'check' : 'lock', 18)),
+      const cert = certInfo(id);
+      // Readiness owns validity (including expiry). These rows identify the
+      // required credentials without making a second claim about eligibility.
+      return C.h('div.certcard',
         C.h('div.certcard__b', C.h('p.certcard__t', { text: cert?.name || id }),
-          C.h('p.certcard__s', { text: held ? 'Held' : `Not held · ${cert?.issuer || 'required'}` })));
+          C.h('p.certcard__s', { text: ['Required', cert?.issuer].filter(Boolean).join(' · ') })));
     });
     const failure = C.h('p.contracts-detail__error', { role: 'alert', hidden: true });
+    const readinessLabel = C.h('p.contracts-detail__status');
+    const readinessTerms = C.h('p.cdetail__brief');
+    const readiness = C.h('div.contracts-detail__readiness', { role: 'status', 'aria-live': 'polite', 'aria-atomic': 'true' },
+      C.SectionTitle('Current readiness'), readinessLabel, readinessTerms);
     const body = C.h('div.contracts-detail__body',
+      readiness,
       C.h('div', C.SectionTitle('Job terms'), C.h('dl.specs',
         C.SpecRow('Quoted pay · whole job', moneyStr(c.payout)),
         C.SpecRow('Quoted pay / total m', rateStr(c)),
@@ -263,18 +316,22 @@ export function createContractsScreen(app) {
         c.bonus?.quality > 0 ? C.h('p.cdetail__brief', { text: 'Quality bonus portions follow work grade: B earns 25%, A 60% and S 100% of the component, before payout modifiers.' }) : null,
         c.reputationReward ? C.h('p.cdetail__brief', { text: 'Grade, skills and role also affect reputation earned.' }) : null),
       certRows.length ? C.h('div', C.SectionTitle('Required certifications'), ...certRows) : null,
-      locked ? C.h('div.contract-card__lock', C.Icon('lock', 14), C.h('span', { text: locked })) : null,
       failure);
-    let accepting = false;
-    const accept = action({ label: locked ? 'Locked' : 'Accept contract',
-      kind: locked ? 'quiet' : 'amber', disabled: !!locked, haptic: 'heavy',
+    let accepting = false, failureReadiness = null;
+    const close = action({ label: 'Close', kind: 'quiet', onTap: () => sheet.close() });
+    const accept = action({ label: 'Accept contract',
+      kind: 'amber', disabled: !initialCheck.ok, haptic: 'heavy',
       onTap: () => {
         if (accepting) return;
-        accepting = true; accept.disabled = true;
+        const hadFocus = document.activeElement === accept;
+        accepting = true; setAcceptDisabled(true);
         const result = acceptContract(c);
         if (!result.ok) {
+          failureReadiness = null;
           failure.hidden = false; failure.textContent = result.reason;
-          accepting = false; accept.disabled = !!locked; app.haptic?.('fail');
+          accepting = false; refreshReadiness(); app.haptic?.('fail');
+          failureReadiness = previous;
+          if (hadFocus && !accept.disabled) accept.focus();
           failure.scrollIntoView({ block: 'nearest' });
           return;
         }
@@ -284,8 +341,40 @@ export function createContractsScreen(app) {
         app.nav(SCENES.SITE, { contract: accepted });
       },
     });
+    function setAcceptDisabled(disabled) {
+      // Chromium can leave focus on a disabled button until the next Tab,
+      // which then escapes the dialog. Move it while the old focus is known.
+      const hadFocus = document.activeElement === accept;
+      if (accept.disabled !== disabled) accept.disabled = disabled;
+      if (disabled && hadFocus) close.focus();
+    }
+    let previous;
+    const refresh = (check) => {
+      const key = readinessKey(check);
+      // An acceptance attempt can disable the button without changing the
+      // preview facts (e.g. an API exception), so restore it independently.
+      setAcceptDisabled(accepting || !check.ok);
+      // Preserve the real acceptance error on the failing click. Once live
+      // facts change, its historical refusal no longer describes readiness.
+      if (failureReadiness !== null && failureReadiness !== key) {
+        failure.hidden = true; failure.textContent = ''; failureReadiness = null;
+      }
+      if (key === previous) return;
+      previous = key;
+      const label = check.ok ? 'Accept contract' : 'Currently unavailable';
+      accept.querySelector('.btn__label').textContent = label;
+      accept.setAttribute('aria-label', label);
+      accept.classList.toggle('btn--amber', check.ok);
+      accept.classList.toggle('btn--quiet', !check.ok);
+      readiness.classList.toggle('is-unavailable', !check.ok);
+      readinessLabel.textContent = check.ok ? 'Ready to accept now' : check.reason;
+      readinessTerms.textContent = [check.rigId ? `Rig · ${rigName(check.rigId)}` : '', mobilisationText(check)].filter(Boolean).join(' · ');
+      readinessTerms.hidden = !readinessTerms.textContent;
+    };
     const sheet = app.sheet({ title, sub: `${region.name} · ${method}`, body,
-      actions: [action({ label: 'Close', kind: 'quiet', onTap: () => sheet.close() }), accept] });
+      actions: [close, accept],
+      onClose: () => { if (detailView?.sheet === sheet) detailView = null; } });
+    detailView = { contract: c, refresh, sheet }; refresh(initialCheck);
     sheet.el.classList.add('contracts-detail'); sheet.returnFocus = opener;
     sheet.el.querySelector('.sheet__x')?.addEventListener('click', (event) => {
       if (event.detail === 0) sheet.close();
@@ -307,8 +396,6 @@ export function createContractsScreen(app) {
   function acceptContract(contract) {
     // Progression validates ownership, charges mobilisation, publishes the run
     // and emits its events. UI failure never navigates or writes game state.
-    const locked = lockReason(contract);
-    if (locked) return { ok: false, reason: locked };
     const progression = app.ctx.progression;
     if (typeof progression?.acceptContract !== 'function') return { ok: false, reason: 'Contract acceptance is unavailable. Please try again.' };
     try {
@@ -322,7 +409,6 @@ export function createContractsScreen(app) {
   }
 
   return { el, mount() { buildFilters(); buildList(); },
-    unmount() { list.classList.remove('stagger'); }, update() {}, resize() {},
-    onUnlock() { buildFilters(); buildList(); }, onLevelUp() { buildFilters(); buildList(); },
-    onCert() { buildFilters(); buildList(); } };
+    unmount() { list.classList.remove('stagger'); detailView = null; }, update: refreshReadiness, resize() {},
+    onUnlock: refreshReadiness, onLevelUp: refreshReadiness, onCert: refreshReadiness };
 }

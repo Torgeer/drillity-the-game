@@ -766,10 +766,12 @@ export function createProgression(ctx) {
 
   /* ── contracts ───────────────────────────────────────────────────────── */
   /**
-   * Accept a contract: check certificates and rig, charge mobilisation, and
-   * open a run accumulator that the per-hole settlements write into.
+   * Read current acceptance readiness without selecting a rig, creating career
+   * state, charging money, allocating a run or publishing events. Keep every
+   * acceptance rule here so a board preview cannot drift from the real action.
+   * The result contains only detached scalar facts, never a mutable rig record.
    */
-  function acceptContract(contract) {
+  function preflightContract(contract) {
     if (changingContract || run || state.contract) return { ok: false, reason: 'Finish or abandon the active contract first' };
     if (!contract || typeof contract !== 'object' || Array.isArray(contract)) return { ok: false, reason: 'No contract' };
     const method = getMethod(contract.methodId);
@@ -815,9 +817,24 @@ export function createProgression(ctx) {
     const rig = able.find((r) => r.id === state.garage.rigId) || able[0];
     const from = currentCareer?.lastRegionId || state.world.regionId;
     const mobilisation = travelCost(from, contract.regionId, { rigId: rig.id, skills: skills() });
-    if (!canAfford(mobilisation)) return { ok: false, reason: `Mobilisation costs ${mobilisation}` };
+    if (!canAfford(mobilisation)) {
+      return {
+        ok: false,
+        reason: `Mobilisation costs €${mobilisation}; need €${Math.ceil(mobilisation - state.player.money)} more`,
+        mobilisation, rigId: rig.id,
+      };
+    }
+    return { ok: true, reason: '', mobilisation, rigId: rig.id };
+  }
 
-    return changeContract(() => openContract(contract, rig, mobilisation));
+  /** A fresh read-only readiness snapshot; it reserves neither funds nor a rig. */
+  function previewContract(contract) { return preflightContract(contract); }
+
+  /** Accept only after rechecking live state, then publish the complete run. */
+  function acceptContract(contract) {
+    const check = preflightContract(contract);
+    if (!check.ok) return check;
+    return changeContract(() => openContract(contract, getRig(check.rigId), check.mobilisation));
   }
 
   function openContract(contract, rig, mobilisation) {
@@ -1875,7 +1892,7 @@ export function createProgression(ctx) {
     unlock, spendSkillPoint, canSpendSkillPoint, skillRank, skillCost, getEffects,
 
     // contracts
-    acceptContract, beginHole, abandonContract, completeHole, rescueContract, isBroke,
+    previewContract, acceptContract, beginHole, abandonContract, completeHole, rescueContract, isBroke,
     settlementForCompletion,
 
     // world

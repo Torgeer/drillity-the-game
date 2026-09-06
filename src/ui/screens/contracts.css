@@ -197,16 +197,20 @@ select.contracts-board__sort {
   font-weight: 600;
 }
 
-.contract-card__lock {
+.contract-card__readiness {
   display: flex;
   align-items: flex-start;
   gap: var(--s-2);
   padding-top: var(--s-2);
   border-top: 1px solid var(--hair);
-  color: var(--c-warning);
+  color: var(--c-fg-muted);
   font-size: var(--t-sm);
   font-weight: 650;
 }
+
+.contract-card__readiness > svg { flex: none; margin-top: 2px; }
+.contract-card__readiness > span { min-width: 0; overflow-wrap: anywhere; }
+.contract-card__lock { color: var(--c-warning); }
 
 .contracts-board .contract-card.is-locked { border-style: dashed; }
 
@@ -268,6 +272,23 @@ select.contracts-board__sort {
   min-width: 0;
   overflow-wrap: anywhere;
 }
+
+.contracts-detail__readiness {
+  display: grid;
+  gap: var(--s-2);
+  min-width: 0;
+  padding: var(--s-3);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+}
+.contracts-detail__status {
+  color: var(--c-fg);
+  font-size: var(--t-sm);
+  font-weight: 650;
+  line-height: var(--lh-body);
+}
+.contracts-detail__readiness.is-unavailable { border-color: var(--c-warning); }
+.contracts-detail__readiness.is-unavailable .contracts-detail__status { color: var(--c-warning); }
 
 .contracts-detail .sheet__actions {
   flex: none;
