@@ -1,5 +1,90 @@
 # Drillity handover for Claude
 
+## Morning handoff — 2026-09-06, 08:14 Stockholm
+
+**This section supersedes the historical status entries below.** Overnight
+assignments are stopped because the scheduled 08:00 cutoff has passed. The live
+Codex pool still has 6% remaining; no reset was used. Reviewed source and WIP
+snapshots are committed through `ecee64b` before this documentation update.
+This handoff is being committed for ordinary publication to
+`origin/codex/astra-improvements`; the final push SHA/verification receipt goes
+in the shared coordination checkpoint after the push succeeds. Do not read the
+older "no push yet" entries as current status after that receipt exists.
+
+### What is ready
+
+The latest full `npm run build` passed (session 79902,
+`.bak/integration-build-quarry.log`): CPU checks including the new quarry gates,
+headed reach checks, Vite and artifact audit. It contains 19 rigs, 56 public
+assets and one inline game script. All 57 built-file SHA256 hashes were checked
+again at shutdown against `research/CURRENT_BUILD_ASSETS.json`: zero mismatches.
+There have been no production changes since that build. Generated GLBs, dist
+and raw captures stay preserved locally; Python sources remain authoritative.
+GitHub source alone does not include those ignored generated outputs.
+
+Reviewed work includes rig optimization and metadata/tool corrections, contract
+readiness, progression/save fixes, hero framing, geology readouts, instrument
+grading/warmup, current-rig underground lamps, and guarded recovery from
+unsupported vibratory equipment. The quarry's five decorative objects over the
+live borehole are removed, with 1,025 survivors unchanged and zero candidate
+triangle intersections with the measured live envelope. Detailed commits,
+commands, provenance and limitations follow below.
+
+### Preserved unfinished work
+
+Read `handoff/pending-2026-09-06/README.md` before applying its inert patches.
+All 19 original snapshot files passed their manifest hash check at shutdown.
+Later atlas files and the rig-harness identity correction have separate hash
+manifests and apply-order instructions. The historical quarry DEFER is resolved
+and its fix is already integrated; do not apply that candidate a second time.
+
+| Workstream | Task / worktree under C:/Users/henri/Downloads/threads | Current state |
+|---|---|---|
+| HUD | `01a07416-0442-7090-b0c1-abd53d5fce6b` / `drillity-drilling-view-space` | Idle, resources closed. 862 DOM cases pass layout/control checks; intended fonts and integrated 3D visibility remain unverified, 82% target unmet. Not integrated. |
+| Atlas adoption | `01a0740d-b430-73c1-9493-d88b63b21439` / `drillity-ui-atlas-game-adoption` | Still waiting on an app approval. Stop instruction delivered at shutdown, but execution of that instruction is not confirmed. No listener on 5201, no GPU lease. Original patch and later checker/config copies preserved; no rendered acceptance. |
+| Rig runtime measurements | `01a0745d-464e-7d92-a02b-c9dfb236599f` / `drillity-optimized-rig-runtime` | Idle, server closed. Dependency access denial blocked capture: 0/8 runtime cases. Later identity-only harness fix passes 19 CPU checks; device/state validation gaps remain. Not integrated. |
+
+All three root sub-agents have completed their assignments and own no running
+resources. The GPU lease is empty. Shutdown listener inspection found only the
+user's 5178 server/PID 30152 among 5178/5198/5201/5208; the root QA server is
+closed. No worktree, untracked evidence or ignored asset was deleted. Atlas is
+not archived because its verification is unfinished; no denied operation was
+retried or approved. There is no callable task-stop API here, so do not mistake
+the queued stop instruction for a confirmed stopped app task.
+
+### Claude's parallel branch and immediate priorities
+
+Claude retains the eight new site environments in `drillity-claude-sites`,
+branch `claude/site-environments`, observed HEAD
+`8c7eeee307272ae1b8079b196f5e6d976c9aa298`. Its baseline was `673f888`; site
+delivery commit `aaf61f0` and correction `8c7eeee` exist. Uncommitted
+`src/world/terrain.js`, `tools/checksiteenvironment.mjs` and nine `.probe-*.mjs`
+files remain in that worktree. They are Claude-owned and were not merged or
+published by Codex. Its separate usage allowance is unaffected by this stop.
+
+**Correction to the older Claude checkpoint:** the claim that
+`shots/s0-report.txt` does not exist, and its related budget refutation, were
+retracted in `8c7eeee`. Root independently confirmed the 20,807-byte file exists
+in the main checkout and is ignored. A missing ignored file in a private
+worktree does not establish a broken citation. Read the retraction before
+reusing the older audit's conclusions.
+
+Continue the existing 20-worker allocation in `CLAUDE_PARALLEL.md`, preserving
+ownership. First finish actual site loading/replacement, including the
+underground attachment path, and inspect real gameplay against the current
+camera and rig origin. Verify standing-volume/collar clearance, curves and
+platform crane occlusion. Historical reports are leads, not current failures.
+Then review HUD and atlas candidates against current root site/menu recovery
+hunks; never copy their older whole files over those fixes. Complete runtime
+rig measurement only when the dependency boundary is resolved legitimately.
+
+Read `research/CURRENT_VISUAL_BRIEF.md` for the observed dense HUD, site/rig
+occlusion, dark underground chassis and pile readout questions. Ready-state
+quarry textures now match; loading presentation remains a separate issue.
+Passing build/limited capture cases do not establish fleet FPS or overall AAA
+visual acceptance. Final task/resource/publication receipt is in
+`C:/Users/henri/Downloads/threads/drillity-coordination/root-coordinator.md`.
+
 ## Later harness WIP — 2026-09-06, 04:55 heartbeat
 
 The saved performance harness's time-of-day false failure is now corrected in

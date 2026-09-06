@@ -2,6 +2,16 @@
 
 ## Latest root integration status
 
+### Morning stop — 2026-09-06, 08:14 Stockholm
+
+Overnight work stopped at the scheduled morning cutoff with 6% Codex allowance
+remaining. See the top of `handover.md` for the final integrated state, preserved
+HUD/atlas/runtime candidates, actual task/resource status, Claude branch and
+publication receipt location. Latest full build remains passing; all 57 output
+hashes and all 19 original WIP snapshot hashes were rechecked without mismatch.
+Atlas still waits on an app approval despite a delivered stop instruction; it
+has no GPU grant or listening preview server. No new assignments were made.
+
 ### Quarry update — 2026-09-06, 04:14 heartbeat
 
 Quarry geometry is integrated after resolving the apparent texture regression:
