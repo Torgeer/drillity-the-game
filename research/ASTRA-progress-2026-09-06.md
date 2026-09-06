@@ -2,6 +2,19 @@
 
 ## Latest root integration status
 
+### Quarry update — 2026-09-06, 04:14 heartbeat
+
+Quarry geometry is integrated after resolving the apparent texture regression:
+the capture had not waited for procedural texture generation. A bounded actual
+queue wait reached26/26 ready sets, zero pending/failed tasks; candidate rock
+texture returned with the same source/asset bytes. Four cases passed and root/
+independent image review approved the narrow borehole correction. Five authored
+objects removed, all1,025 survivors identical, zero actual exported triangles
+inside the live envelope. New quarry CPU gates are wired into check:sites.
+See newest handover and research/sites/quarry-live-collar-integration.md for
+final build verification; older DEFER notes below are historical. No texture-
+loading runtime change or performance claim. Other pending tracks unchanged.
+
 ### Reserve update — 2026-09-06, 04:08 Stockholm
 
 Live allowance8% remaining. Production/build unchanged since the reviewed full

@@ -1,0 +1,1419 @@
+{
+  "evidence": "Headed actual gameplay plus isolated actual site/live-collar geometry with diagnostic camera and lighting. No FPS or engineering clearance claim.",
+  "baselineSHA256": "61a93902888f54b9913fdda690f308008dae8a80cb5b2b2e10208e4d219428dd",
+  "candidateSHA256": "5b53090ed7c92c89be48e4dcf668a7400634aa62eb3d7b89482c4cfc7db78930",
+  "sources": {
+    "blender/sites/quarry_bench.py": "a791c5a64c156497ef758205cf0cae2bb7c175d80b9259e759ea69dda0b38b91",
+    "blender/lib/site.py": "40774bca7ae636f35695d475d8549057f5c5230f5e7ecbef10676641f9d3a1dc",
+    "blender/lib/rig.py": "b162741a7e6f032a3a3e817e4b33125069f70b9ed7d3f54a8cddaf371d7a8ed5",
+    "src/world/terrain.js": "ff23ce1428b84e4d95dbfad5caa097dbdb97b548f55e07544345fe9f08318cf5",
+    "src/core/renderer.js": "7e628334cefd403ed0ad38ea09150a4df9f83d0d2b06b73e56b5a28e33d0b02c",
+    "src/core/assets.js": "e48553e9a9f5333fe58dcf3786b247f071fdd222615638dd136499ed99a83ed3"
+  },
+  "cases": [
+    {
+      "name": "baseline-uncased",
+      "siteModel": {
+        "wanted": "quarry-bench",
+        "model": "quarry-bench",
+        "procedural": false,
+        "problem": null,
+        "drawCalls": 6
+      },
+      "collarPosition": [
+        0,
+        0,
+        0
+      ],
+      "cased": false,
+      "stubVisible": false,
+      "rigSource": "glb",
+      "registration": {
+        "x": 63.177268370044466,
+        "y": -0.3053496359606723,
+        "active": true,
+        "collarErrPx": -0.0000056797622178805796,
+        "groundErrPx": -0.000016097713350649023
+      },
+      "fonts": [
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald Fallback",
+          "status": "loaded"
+        }
+      ],
+      "contextLost": false
+    },
+    {
+      "name": "baseline-cased",
+      "siteModel": {
+        "wanted": "quarry-bench",
+        "model": "quarry-bench",
+        "procedural": false,
+        "problem": null,
+        "drawCalls": 6
+      },
+      "collarPosition": [
+        0,
+        0,
+        0
+      ],
+      "cased": true,
+      "stubVisible": true,
+      "rigSource": "glb",
+      "registration": {
+        "x": 63.17725909761214,
+        "y": -0.3053752307618645,
+        "active": true,
+        "collarErrPx": -0.0000013097587228116936,
+        "groundErrPx": -0.000003522782140608083
+      },
+      "fonts": [
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald Fallback",
+          "status": "loaded"
+        }
+      ],
+      "contextLost": false
+    },
+    {
+      "name": "candidate-uncased",
+      "siteModel": {
+        "wanted": "quarry-bench",
+        "model": "quarry-bench",
+        "procedural": false,
+        "problem": null,
+        "drawCalls": 6
+      },
+      "collarPosition": [
+        0,
+        0,
+        0
+      ],
+      "cased": false,
+      "stubVisible": false,
+      "rigSource": "glb",
+      "registration": {
+        "x": 63.17761424938556,
+        "y": -0.30458821750850684,
+        "active": true,
+        "collarErrPx": -1.8829382497642655e-12,
+        "groundErrPx": -4.3940406868614446e-12
+      },
+      "fonts": [
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald Fallback",
+          "status": "loaded"
+        }
+      ],
+      "contextLost": false
+    },
+    {
+      "name": "candidate-cased",
+      "siteModel": {
+        "wanted": "quarry-bench",
+        "model": "quarry-bench",
+        "procedural": false,
+        "problem": null,
+        "drawCalls": 6
+      },
+      "collarPosition": [
+        0,
+        0,
+        0
+      ],
+      "cased": true,
+      "stubVisible": true,
+      "rigSource": "glb",
+      "registration": {
+        "x": 63.177614249382934,
+        "y": -0.3045882175152302,
+        "active": true,
+        "collarErrPx": -3.339550858072471e-13,
+        "groundErrPx": -7.970846205296311e-13
+      },
+      "fonts": [
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald Fallback",
+          "status": "loaded"
+        }
+      ],
+      "contextLost": false
+    }
+  ],
+  "errors": [],
+  "requestsFailed": [],
+  "warnings": [
+    {
+      "variant": "baseline",
+      "message": "[sim] no accepted contract run — starting an unpaid preview; completion cannot award money, XP or reputation."
+    },
+    {
+      "variant": "candidate",
+      "message": "[sim] no accepted contract run — starting an unpaid preview; completion cannot award money, XP or reputation."
+    }
+  ],
+  "failures": [],
+  "textureReadiness": [
+    {
+      "variant": "baseline",
+      "before": {
+        "stats": {
+          "materials": 35,
+          "textures": 78,
+          "sets": 26,
+          "setsReady": 17,
+          "pools": {
+            "hero": {
+              "usedMB": 19.7,
+              "floorMB": 9.4,
+              "freeMB": 0
+            },
+            "stratum": {
+              "usedMB": 0,
+              "floorMB": 15.6,
+              "freeMB": 14.9
+            },
+            "ground": {
+              "usedMB": 18.7,
+              "floorMB": 9.4,
+              "freeMB": 0
+            },
+            "general": {
+              "usedMB": 24.7,
+              "floorMB": 10.1,
+              "freeMB": 0
+            }
+          },
+          "decals": 0,
+          "dataTextures": 0,
+          "strata": 0,
+          "bytesApprox": 66125798,
+          "megabytes": 63.1,
+          "budgetMB": 88,
+          "peakMB": 63.1,
+          "pending": 9,
+          "slices": {
+            "count": 948,
+            "maxMs": 14.1,
+            "avgMs": 7.5,
+            "overFrameBudget": 0
+          },
+          "built": 17,
+          "failed": 0,
+          "tier": "high",
+          "anisotropy": 16,
+          "viewport": {
+            "w": 390,
+            "h": 844,
+            "dpr": 2
+          }
+        },
+        "materials": [
+          {
+            "mesh": "static:blastedRock",
+            "kind": [
+              "blastedRock"
+            ],
+            "name": "drillity:blastedRock",
+            "map": true,
+            "normalMap": true,
+            "setReady": [
+              {
+                "family": "blastedRock",
+                "ready": true,
+                "res": {
+                  "a": 128,
+                  "n": 64,
+                  "o": 32
+                }
+              }
+            ]
+          },
+          {
+            "mesh": "static:gravel",
+            "kind": [
+              "gravel"
+            ],
+            "name": "drillity:gravel",
+            "map": true,
+            "normalMap": true,
+            "setReady": [
+              {
+                "family": "gravel",
+                "ready": true,
+                "res": {
+                  "a": 512,
+                  "n": 512,
+                  "o": 256
+                }
+              }
+            ]
+          },
+          {
+            "mesh": "static:paintedDark",
+            "kind": [
+              "paintedDark"
+            ],
+            "name": "drillity:paintedDark",
+            "map": true,
+            "normalMap": true,
+            "setReady": [
+              {
+                "family": "paintedDark",
+                "ready": false,
+                "res": {
+                  "a": 128,
+                  "n": 64,
+                  "o": 32
+                }
+              }
+            ]
+          },
+          {
+            "mesh": "static:rawSteel",
+            "kind": [
+              "rawSteel"
+            ],
+            "name": "drillity:rawSteel",
+            "map": true,
+            "normalMap": true,
+            "setReady": [
+              {
+                "family": "rawSteel",
+                "ready": true,
+                "res": {
+                  "a": 512,
+                  "n": 512,
+                  "o": 256
+                }
+              }
+            ]
+          },
+          {
+            "mesh": "static:rubber",
+            "kind": [
+              "rubber"
+            ],
+            "name": "drillity:rubber",
+            "map": true,
+            "normalMap": true,
+            "setReady": [
+              {
+                "family": "rubber",
+                "ready": false,
+                "res": {
+                  "a": 128,
+                  "n": 64,
+                  "o": 32
+                }
+              }
+            ]
+          },
+          {
+            "mesh": "static:safetyStripe",
+            "kind": [
+              "safetyStripe"
+            ],
+            "name": "drillity:safetyStripe",
+            "map": true,
+            "normalMap": true,
+            "setReady": [
+              {
+                "family": "safetyStripe",
+                "ready": true,
+                "res": {
+                  "a": 512,
+                  "n": 512,
+                  "o": 256
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "materials": 35,
+        "textures": 78,
+        "sets": 26,
+        "setsReady": 26,
+        "pools": {
+          "hero": {
+            "usedMB": 19.7,
+            "floorMB": 9.4,
+            "freeMB": 0
+          },
+          "stratum": {
+            "usedMB": 0,
+            "floorMB": 15.6,
+            "freeMB": 14.9
+          },
+          "ground": {
+            "usedMB": 18.7,
+            "floorMB": 9.4,
+            "freeMB": 0
+          },
+          "general": {
+            "usedMB": 24.7,
+            "floorMB": 10.1,
+            "freeMB": 0
+          }
+        },
+        "decals": 0,
+        "dataTextures": 0,
+        "strata": 0,
+        "bytesApprox": 66125798,
+        "megabytes": 63.1,
+        "budgetMB": 88,
+        "peakMB": 63.1,
+        "pending": 0,
+        "slices": {
+          "count": 990,
+          "maxMs": 14.1,
+          "avgMs": 7.4,
+          "overFrameBudget": 0
+        },
+        "built": 26,
+        "failed": 0,
+        "tier": "high",
+        "anisotropy": 16,
+        "viewport": {
+          "w": 390,
+          "h": 844,
+          "dpr": 2
+        }
+      }
+    },
+    {
+      "variant": "candidate",
+      "before": {
+        "stats": {
+          "materials": 35,
+          "textures": 78,
+          "sets": 26,
+          "setsReady": 10,
+          "pools": {
+            "hero": {
+              "usedMB": 19.7,
+              "floorMB": 9.4,
+              "freeMB": 0
+            },
+            "stratum": {
+              "usedMB": 0,
+              "floorMB": 15.6,
+              "freeMB": 14.9
+            },
+            "ground": {
+              "usedMB": 18.7,
+              "floorMB": 9.4,
+              "freeMB": 0
+            },
+            "general": {
+              "usedMB": 24.7,
+              "floorMB": 10.1,
+              "freeMB": 0
+            }
+          },
+          "decals": 0,
+          "dataTextures": 0,
+          "strata": 0,
+          "bytesApprox": 66125798,
+          "megabytes": 63.1,
+          "budgetMB": 88,
+          "peakMB": 63.1,
+          "pending": 16,
+          "slices": {
+            "count": 480,
+            "maxMs": 12.1,
+            "avgMs": 7.3,
+            "overFrameBudget": 0
+          },
+          "built": 10,
+          "failed": 0,
+          "tier": "high",
+          "anisotropy": 16,
+          "viewport": {
+            "w": 390,
+            "h": 844,
+            "dpr": 2
+          }
+        },
+        "materials": [
+          {
+            "mesh": "static:blastedRock",
+            "kind": [
+              "blastedRock"
+            ],
+            "name": "drillity:blastedRock",
+            "map": true,
+            "normalMap": true,
+            "setReady": [
+              {
+                "family": "blastedRock",
+                "ready": false,
+                "res": {
+                  "a": 128,
+                  "n": 64,
+                  "o": 32
+                }
+              }
+            ]
+          },
+          {
+            "mesh": "static:gravel",
+            "kind": [
+              "gravel"
+            ],
+            "name": "drillity:gravel",
+            "map": true,
+            "normalMap": true,
+            "setReady": [
+              {
+                "family": "gravel",
+                "ready": true,
+                "res": {
+                  "a": 512,
+                  "n": 512,
+                  "o": 256
+                }
+              }
+            ]
+          },
+          {
+            "mesh": "static:paintedDark",
+            "kind": [
+              "paintedDark"
+            ],
+            "name": "drillity:paintedDark",
+            "map": true,
+            "normalMap": true,
+            "setReady": [
+              {
+                "family": "paintedDark",
+                "ready": false,
+                "res": {
+                  "a": 128,
+                  "n": 64,
+                  "o": 32
+                }
+              }
+            ]
+          },
+          {
+            "mesh": "static:rawSteel",
+            "kind": [
+              "rawSteel"
+            ],
+            "name": "drillity:rawSteel",
+            "map": true,
+            "normalMap": true,
+            "setReady": [
+              {
+                "family": "rawSteel",
+                "ready": false,
+                "res": {
+                  "a": 512,
+                  "n": 512,
+                  "o": 256
+                }
+              }
+            ]
+          },
+          {
+            "mesh": "static:rubber",
+            "kind": [
+              "rubber"
+            ],
+            "name": "drillity:rubber",
+            "map": true,
+            "normalMap": true,
+            "setReady": [
+              {
+                "family": "rubber",
+                "ready": false,
+                "res": {
+                  "a": 128,
+                  "n": 64,
+                  "o": 32
+                }
+              }
+            ]
+          },
+          {
+            "mesh": "static:safetyStripe",
+            "kind": [
+              "safetyStripe"
+            ],
+            "name": "drillity:safetyStripe",
+            "map": true,
+            "normalMap": true,
+            "setReady": [
+              {
+                "family": "safetyStripe",
+                "ready": true,
+                "res": {
+                  "a": 512,
+                  "n": 512,
+                  "o": 256
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "materials": 35,
+        "textures": 78,
+        "sets": 26,
+        "setsReady": 26,
+        "pools": {
+          "hero": {
+            "usedMB": 19.7,
+            "floorMB": 9.4,
+            "freeMB": 0
+          },
+          "stratum": {
+            "usedMB": 0,
+            "floorMB": 15.6,
+            "freeMB": 14.9
+          },
+          "ground": {
+            "usedMB": 18.7,
+            "floorMB": 9.4,
+            "freeMB": 0
+          },
+          "general": {
+            "usedMB": 24.7,
+            "floorMB": 10.1,
+            "freeMB": 0
+          }
+        },
+        "decals": 0,
+        "dataTextures": 0,
+        "strata": 0,
+        "bytesApprox": 66125798,
+        "megabytes": 63.1,
+        "budgetMB": 88,
+        "peakMB": 63.1,
+        "pending": 0,
+        "slices": {
+          "count": 948,
+          "maxMs": 19.2,
+          "avgMs": 7.4,
+          "overFrameBudget": 1
+        },
+        "built": 26,
+        "failed": 0,
+        "tier": "high",
+        "anisotropy": 16,
+        "viewport": {
+          "w": 390,
+          "h": 844,
+          "dpr": 2
+        }
+      }
+    }
+  ],
+  "browserClosed": true,
+  "passed": true,
+  "visualAcceptance": "Pending human/agent image inspection; successful capture alone is not visual acceptance."
+}

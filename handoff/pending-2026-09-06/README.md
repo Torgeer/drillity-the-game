@@ -1,5 +1,11 @@
 # Preserved candidate work — NOT integrated or accepted
 
+**Later update:** quarry alone has since been approved and integrated after a
+texture-readiness capture resolved the gray-rock finding. Read the latest
+`research/sites/quarry-live-collar-integration.md` and `handover.md`. This frozen
+bundle remains evidence of the earlier delivery/rejection; its patch and hash
+files are unchanged. The other three candidates remain unintegrated.
+
 Snapshot prepared 2026-09-06 during Codex usage reserve. These patches are
 review inputs, not shipped source. Nothing here is automatically applied by
 the build. `snapshot-manifest.json` records exact copied bytes and original

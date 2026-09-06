@@ -1,5 +1,36 @@
 # Drillity handover for Claude
 
+## Quarry integration update — 2026-09-06, 04:14 heartbeat
+
+This supersedes the quarry DEFER verdict below and in the historical pending
+bundle. The texture discrepancy was reproduced as an unfinished generation
+state: candidate blastedRock had a bound map whose live set was not ready.
+Waiting for assets.js's actual queue completion restored the rock texture
+without changing source or asset bytes. Both variants reached26/26 ready sets,
+zero pending/failed jobs. Four new uncased/cased capture cases passed without
+errors; root and an independent critic inspected the candidate images and
+approved the narrow fix. Prior loading-state images remain preserved.
+
+The exact author/export pair is now integrated: five objects removed from the
+live borehole, all1,025 authored survivors unchanged; candidate0/13,840 actual
+triangles intersect the live envelope versus65 original intersections. New
+quarry collision/adversarial gates are wired into the CPU site checks. Report
+`research/sites/quarry-live-collar-integration.md` gives source/asset hashes,
+commands, evidence and limits. The GLB remains ignored generated output. This
+fix does not address texture-loading presentation or claim an FPS improvement.
+
+Full `npm run build` session79902 exited0: expanded CPU suite, headed reach,
+Vite and artifact audit passed. Log `.bak/integration-build-quarry.log`. Artifact
+has one inline script,19 rigs and56 public assets/53,941,561 external bytes;
+its quarry GLB hash matches the reviewed candidate. The quarry export is6,144
+bytes smaller. Build browser closed and lease released; root5198/user5178 remain
+live. This is the current passing build, superseding the older byte count below.
+
+HUD, atlas adoption and optimized-rig runtime remain unintegrated/preserved.
+Claude owns its eight new environments. Allowance last checked8%; no new long
+assignments or replacement task will be started in reserve mode. Mandatory5%
+orderly handoff/push remains unchanged; no actual push yet.
+
 ## Reserve checkpoint — 2026-09-06, 04:08 Stockholm
 
 This update supersedes the older statuses below. Live active Codex allowance

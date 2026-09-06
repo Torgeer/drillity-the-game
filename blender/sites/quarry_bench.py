@@ -527,10 +527,19 @@ def build_shot():
         # pattern would say the machine has nothing to do.
         return not (j == ROWS - 1 and i > HOLES - 4)
 
-    at, _ = S.pattern(
+    at, collars = S.pattern(
         'shot', HOLES, ROWS, BURDEN, SPACING, S.MAT_GRAVEL,
         origin=(0.0, 0.0, 0.0), yaw=yaw,
         collar_r=0.34, seed=3.0, drilled=drilled)
+
+    # The exact origin is the LIVE hole: terrain.js CFG.collar/buildCollar()
+    # owns its throat, cuttings and casing, and attachSiteModel() places this
+    # asset at that same origin. No clearance dimension is being invented.
+    # pattern() emits capped cylinders, despite calling them dust "rings";
+    # discard this one and leave its entry in `at` so every other hole keeps
+    # its original k-based stemming and flag variation.
+    live_collar = at.index((0.0, 0.0))
+    S.bpy.data.objects.remove(collars[live_collar], do_unlink=True)
 
     # ── the stemming on each collared hole ──────────────────────────────────
     # [OSMRE-BLAST]: stemming is "sized crushed stone or drill cuttings", and
@@ -538,6 +547,8 @@ def build_shot():
     # cone of chippings pushed back over the collar; the depth is what STEM
     # names, and it is below ground, so what is visible is the surplus.
     for k, (px, py) in enumerate(at):
+        if k == live_collar:
+            continue                       # the player is drilling this hole
         if S.rnd(k * 2.7, 1.0) < 0.45:
             continue                       # not every hole is loaded yet
         r = 0.42 + S.rnd(k * 5.3, 2.0) * 0.16
@@ -548,6 +559,8 @@ def build_shot():
     # §A.4 photograph: "each flagged". Part V of [HSE-L118] independently
     # requires "flags or notices" for the danger zone. A pin and a marker.
     for k, (px, py) in enumerate(at):
+        if k == live_collar:
+            continue                       # no static pin/flag in live casing
         S.tube('flagpin-%d' % k, 0.012, 0.62, S.MAT_STEEL,
                loc=(px, py, 0.0), sides=4)
         S.box('flag-%d' % k, (0.017, 0.20, 0.13), S.MAT_HAZARD,
@@ -652,8 +665,15 @@ def build_bench():
         d = 7.0 + S.rnd(i * 2.7, 21.0) * 20.0
         a = (S.rnd(i * 4.7, 22.0) - 0.5) * 18.0
         px, py = on_axis(d, a)
-        S.rubble('spill-%d' % i, (px, py, 0.22), (1.5, 1.4, 0.55),
-                 S.MAT_ROCK, block=0.45, n=5, seed=300.0 + i, yaw=yaw)
+        spill = S.rubble('spill-%d' % i, (px, py, 0.22), (1.5, 1.4, 0.55),
+                         S.MAT_ROCK, block=0.45, n=5, seed=300.0 + i, yaw=yaw)
+        # Exact seeded scatter identity: exported spill-11-4 crosses the live
+        # throat owned by terrain.js buildCollar(). See the actual-triangle
+        # evidence in research/sites/quarry-live-collar-implementation.md.
+        # Remove only that opaque block; retain every other seeded rock and
+        # introduce no engineering clearance dimension.
+        if i == 11:
+            S.bpy.data.objects.remove(spill[4], do_unlink=True)
 
 
 # ═════════════════════════════════════════════════════════════════════════════
