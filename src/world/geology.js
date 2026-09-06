@@ -3133,6 +3133,11 @@ export function createGeology(ctx) {
   let waterLine = null, waterMat = null;
   let pinMesh = null;
   let ruler = null, logStrip = null, readout = null;
+  let readoutFontSet = null;
+  function invalidateReadoutFont() {
+    // A late font load must repaint even when depth and its rounded text stand still.
+    if (readout) { readout.lastText = null; readout.last = -Infinity; }
+  }
   /* Mode furniture. Two draw calls, built only when a mode needs them and
      disposed when it does not: `modeMesh` is one merged, part-tagged geometry
      (pits, obstacle, bore ribbon, tunnel lining, pile column, raise levels)
@@ -4135,6 +4140,10 @@ export function createGeology(ctx) {
     applyMode();
 
     const total = geologyDepth * 1.22 + 10;   // always some ground below target
+    if (!Number.isFinite(total) || total <= 0) {
+      throw new RangeError('[geology] Profile coverage must be finite and positive');
+    }
+    const minBedThickness = 0.12; // Existing authored floor; NOT SOURCED physical thickness.
     const out = [];
     let d = 0;
 
@@ -4146,9 +4155,12 @@ export function createGeology(ctx) {
       if (!g) return;
       const isSoft = g.ucs < 20;
       let th = rng.range(bed.t[0], bed.t[1]) * (isSoft ? softScale : hardScale);
-      th = Math.max(0.12, th);
+      th = Math.max(minBedThickness, th);
       if (d + th > total) th = Math.max(0.35, total - d);
       const top = d, bottom = d + th;
+      if (!Number.isFinite(bottom) || !(bottom > top)) {
+        throw new RangeError('[geology] Bed thickness must make finite positive progress');
+      }
       out.push({
         id: bed.id,
         name: g.name,
@@ -4171,11 +4183,30 @@ export function createGeology(ctx) {
       if (bed.p != null && !rng.bool(bed.p)) continue;
       pushBed(bed);
     }
+    const basement = recipe.basement;
+    const guaranteedProgress = Array.isArray(basement) && basement.length > 0
+      && basement.some((bed) => bed && Object.hasOwn(GROUND, bed.id)
+        && (bed.p == null || bed.p >= 1) && Array.isArray(bed.t)
+        && Number.isFinite(bed.t[0]) && Number.isFinite(bed.t[1]));
+    if (!guaranteedProgress) {
+      throw new Error('[geology] Basement recipe needs a valid unconditional bed');
+    }
+    // Each cycle includes an unconditional bed; allow one extra cycle
+    // for floating-point addition near the requested coverage boundary.
+    // Keep the original counter phase and random-call order for old seeds.
+    const maxBasementAttempts = Math.max(200,
+      (Math.ceil(Math.max(0, total - d) / minBedThickness) + 1) * basement.length);
+    if (!Number.isSafeInteger(maxBasementAttempts)) {
+      throw new RangeError('[geology] Profile coverage exceeds the safe attempt budget');
+    }
     let guard = 0;
-    while (d < total && guard++ < 200) {
-      const bed = recipe.basement[guard % recipe.basement.length];
+    while (d < total && guard++ < maxBasementAttempts) {
+      const bed = basement[guard % basement.length];
       if (bed.p != null && !rng.bool(bed.p)) continue;
       pushBed(bed);
+    }
+    if (!(d >= total)) {
+      throw new Error(`[geology] Incomplete profile: generated ${d} m of ${total} m`);
     }
     if (!out.length) pushBed({ id: 'granite', t: [total, total] });
 
@@ -5906,6 +5937,14 @@ export function createGeology(ctx) {
   const plateHeight = () => 36 / pxPerMetre;
   const footerHeight = () => plateHeight() + (xRuler?.heightUnits || 0) + 0.10;
 
+  // Layer 1 belongs exclusively to these instrument planes. The renderer
+  // consumes this ownership after world optics, preserving source texture alpha.
+  const instrumentLayer = 1;
+  function instrument(mesh) {
+    mesh.layers.set(instrumentLayer);
+    mesh.userData.sectionInstrument = true;
+  }
+
   function makeStrip(name, widthUnits, xPos) {
     const span = stripSpanM();
     const cssK = stripSuper();                                // canvas px per CSS px
@@ -5927,6 +5966,7 @@ export function createGeology(ctx) {
     mesh.renderOrder = 20;
     mesh.frustumCulled = false;
     mesh.name = name;
+    instrument(mesh);
     root.add(mesh);
     return {
       mesh, canvas, tex, span, widthUnits, top: -1e9,
@@ -5999,6 +6039,7 @@ export function createGeology(ctx) {
     mesh.renderOrder = 20;
     mesh.frustumCulled = false;
     mesh.name = 'station-ruler';
+    instrument(mesh);
     root.add(mesh);
     xRuler = {
       mesh, canvas, tex, span, heightUnits, left: -1e9,
@@ -6098,7 +6139,10 @@ export function createGeology(ctx) {
        right-aligned text lands on the right-hand edge of the picture. */
     const spanU = halfW * 2;
     const cssK = stripSuper();
-    const canvasW = Math.round(clamp(spanU * pxPerMetre * cssK * 0.5, 256, 1024));
+    // Keep the strip's full sampling density: the former half factor produced
+    // a 488 px canvas across 780 device px at 390 CSS px / DPR 2, magnifying
+    // already-rasterized glyphs. k below preserves the authored CSS type size.
+    const canvasW = Math.round(clamp(spanU * pxPerMetre * cssK, 256, 1024));
     const canvas = document.createElement('canvas');
     canvas.width = canvasW;
     canvas.height = Math.max(8, Math.round((canvasW * plateHeight()) / spanU));
@@ -6112,6 +6156,7 @@ export function createGeology(ctx) {
     mesh.renderOrder = 20;
     mesh.frustumCulled = false;
     mesh.name = 'scale-plate';
+    instrument(mesh);
     root.add(mesh);
     scalePlate = {
       mesh, canvas, tex, spanU,
@@ -6953,11 +6998,16 @@ export function createGeology(ctx) {
     mesh.renderOrder = 21;
     mesh.frustumCulled = false;
     mesh.name = 'depth-readout';
+    instrument(mesh);
     root.add(mesh);
     readout = { mesh, canvas, tex, ctx2d: canvas.getContext('2d'), last: -1 };
   }
 
   function drawReadout(d) {
+    const text = d.toFixed(d < 100 ? 2 : 1);
+    // The plate's other pixels are static. Track numeric motion without
+    // uploading the same texture when its rounded display is unchanged.
+    if (readout.lastText === text) { readout.last = d; return; }
     const { canvas, ctx2d: g, tex } = readout;
     const W = canvas.width, H = canvas.height;
     const R = W * READOUT_INSET;     // the frustum edge, in canvas pixels
@@ -6982,7 +7032,8 @@ export function createGeology(ctx) {
     g.font = `700 ${d < 100 ? 52 : 46}px ${BRAND.fontMono}`;
     g.textAlign = 'right';
     g.textBaseline = 'middle';
-    g.fillText(d.toFixed(d < 100 ? 2 : 1), R - 12, cy + 2);
+    g.fillText(text, R - 12, cy + 2);
+    readout.lastText = text;
     tex.needsUpdate = true;
     readout.last = d;
   }
@@ -7180,6 +7231,11 @@ export function createGeology(ctx) {
   }
 
   async function init() {
+    if (!readoutFontSet && typeof document !== 'undefined' && document.fonts?.addEventListener) {
+      readoutFontSet = document.fonts;
+      readoutFontSet.addEventListener('loadingdone', invalidateReadoutFont);
+      readoutFontSet.addEventListener('loadingerror', invalidateReadoutFont);
+    }
     ensureSection();
     const v0 = vp();
     computeView(v0.w, v0.h);
@@ -7984,6 +8040,9 @@ export function createGeology(ctx) {
   }
 
   function dispose() {
+    readoutFontSet?.removeEventListener('loadingdone', invalidateReadoutFont);
+    readoutFontSet?.removeEventListener('loadingerror', invalidateReadoutFont);
+    readoutFontSet = null;
     killModeMeshes();
     killStationRuler();
     killScalePlate();
@@ -8127,6 +8186,11 @@ export function createGeology(ctx) {
      *  it follows the head, so vfx anchored to it follow the curve. */
     get boreholeX() { return axisXAt(smoothDepth); },
     sectionRoot: root,
+    instrumentLayer,
+    /** Live handles rebuilt with layout, rather than stale cached geometry. */
+    get instrumentMeshes() {
+      return [ruler, logStrip, xRuler, scalePlate, readout].filter(Boolean).map(s => s.mesh);
+    },
     /** Section-space y of a TRUE VERTICAL DEPTH, in world terms. */
     worldYForDepth(m) { return root.position.y + secYForDepth(+m || 0); },
     /** annulus cross-section at a measured length, in section world space */

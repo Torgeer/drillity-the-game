@@ -279,6 +279,17 @@ function measure(geo, ctx, label, { atSpud = false, deep = false, driven = false
     check(!logTexts.some((text) => /\bMPa\b/.test(text.text)), 'heading-column-no-laboratory-strength', detail);
   }
   const plateBounds = meshRect(get('scale-plate'), camera, band);
+  // The CPU fixture uses geology's DPR=2 fallback. Judge actual source pixels
+  // against projected device pixels, independently of its canvas-size formula.
+  // A readable CSS font can still be blurred by magnifying an undersized map.
+  const plateCanvas = get('scale-plate').material.map.image;
+  const plateCss = { width: plateBounds.right - plateBounds.left,
+    height: plateBounds.bottom - plateBounds.top };
+  check(plateCanvas.width + 1 >= plateCss.width * 2
+    && plateCanvas.height + 1 >= plateCss.height * 2,
+  'footer-source-covers-device-pixels', { ...detail,
+    source: [plateCanvas.width, plateCanvas.height], projectedCss: plateCss, dpr: 2 });
+  check(Math.abs(plateCss.height - 36) < 0.01, 'footer-logical-height', { ...detail, plateCss });
   if (deepHdd) {
     check(geo.borePath.Dc > geo.visibleMetres, 'deep-profile-exercised',
       { ...detail, cover: geo.borePath.Dc, visibleMetres: geo.visibleMetres });
@@ -313,6 +324,8 @@ function measure(geo, ctx, label, { atSpud = false, deep = false, driven = false
     logWindowTopMetres: logWorld.y + logMesh.geometry.parameters.height / 2 - top.y,
     strata: geo.strata.map(({ id, name, top, bottom }) => ({ id, name, top, bottom })),
     textCount: visible.length, texts: visible,
+    footerCanvas: { width: plateCanvas.width, height: plateCanvas.height, projectedCss: plateCss,
+      rgba8Bytes: plateCanvas.width * plateCanvas.height * 4 },
     footerMinimumFontCss: Math.min(...footer.map((text) => text.fontCss)) });
 }
 

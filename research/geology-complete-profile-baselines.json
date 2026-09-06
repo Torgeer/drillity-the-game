@@ -1,0 +1,1566 @@
+{
+  "provenance": "120 already-complete frozen pre-cap-fix profiles. Authored CPU fixtures, NOT SOURCED physical dimensions.",
+  "sourceSha256LF": "6ae1593f3dc86a402899b8dd552c421e5aec13eef3f5b7fc728b5c3470c00a9b",
+  "cases": [
+    {
+      "fixture": {
+        "regionId": "nordic",
+        "applicationId": "water-well",
+        "profileMode": "vertical",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "909441d8d69631e6eafdff12254ea37552df9cce5ef8e04f9e04b72eea460f2a"
+    },
+    {
+      "fixture": {
+        "regionId": "nordic",
+        "applicationId": "water-well",
+        "profileMode": "vertical",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "a699005aa62305bc756c42184adec6aaea57713998cecb7ebb9d81d3500a8456"
+    },
+    {
+      "fixture": {
+        "regionId": "nordic",
+        "applicationId": "water-well",
+        "profileMode": "vertical",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "aed9442f7f41a4e1234a7113163562f3a72145397a2a34d35f28b062083f2552"
+    },
+    {
+      "fixture": {
+        "regionId": "nordic",
+        "applicationId": "water-well",
+        "profileMode": "profile",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 59.83939269772824,
+      "sha256": "1603ded054af071b8aa43a1b0a100bc3b6e879e22e6701c01234ce6b66a12536"
+    },
+    {
+      "fixture": {
+        "regionId": "nordic",
+        "applicationId": "water-well",
+        "profileMode": "profile",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 52.818771664990116,
+      "sha256": "fd6db17d9cbe8c0671388090c87526ba0ce2f812ade7edd9d925bb082047281f"
+    },
+    {
+      "fixture": {
+        "regionId": "nordic",
+        "applicationId": "water-well",
+        "profileMode": "profile",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 55.5687432891978,
+      "sha256": "e78dceb5c9b1e7cc6b0dfed32273bf2aaf2e483f0682062fa0f0e6b3ee6c4576"
+    },
+    {
+      "fixture": {
+        "regionId": "nordic",
+        "applicationId": "water-well",
+        "profileMode": "raise",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 634.6446726117758,
+      "sha256": "fdae88ab1ed77ad4ef856a27313ed3ca03cdd376b6ec3fae535a31fd5c66fd97"
+    },
+    {
+      "fixture": {
+        "regionId": "nordic",
+        "applicationId": "water-well",
+        "profileMode": "raise",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 634.9645016412502,
+      "sha256": "72166718c6a3a91d669a62ca3f37f6abc4b454e2e96877eb7969c85921ca4111"
+    },
+    {
+      "fixture": {
+        "regionId": "nordic",
+        "applicationId": "water-well",
+        "profileMode": "raise",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 636.1088791336417,
+      "sha256": "ab4cd0ff280e2cf3d01c9f15e259a5c40e539fa1e1ad35da1214327ab2dc8c1a"
+    },
+    {
+      "fixture": {
+        "regionId": "nordic",
+        "applicationId": "water-well",
+        "profileMode": "heading",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 156.78628306097062,
+      "sha256": "61e7d785f7e338c77d181bdb9606774774bedb2521871ea5b9e079dbddcc2325"
+    },
+    {
+      "fixture": {
+        "regionId": "nordic",
+        "applicationId": "water-well",
+        "profileMode": "heading",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 192.09881559634277,
+      "sha256": "c7f8eb040d3ccceac1587332ae5788a06a39ecc27675813e05f2eecdfa2cbe9a"
+    },
+    {
+      "fixture": {
+        "regionId": "nordic",
+        "applicationId": "water-well",
+        "profileMode": "heading",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 96.09531089396435,
+      "sha256": "ecf6c4d94f19861db3f958b66bb008907e5f3f81ea7a3d23dd1765102930f2cd"
+    },
+    {
+      "fixture": {
+        "regionId": "nordic",
+        "applicationId": "water-well",
+        "profileMode": "pile",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "f3cf761a8c175ee65437e7a00defda41ffb570f45a618f4cbc95b09db4671774"
+    },
+    {
+      "fixture": {
+        "regionId": "nordic",
+        "applicationId": "water-well",
+        "profileMode": "pile",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "32cb6852bdc772df074de0ac7e35b23c9221acf3ce60a44654dc7a3fe92803a8"
+    },
+    {
+      "fixture": {
+        "regionId": "nordic",
+        "applicationId": "water-well",
+        "profileMode": "pile",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "f9e852a9f8f83d6e952dac3ecec125d53fe9eb702223e64f95645b4ec904539f"
+    },
+    {
+      "fixture": {
+        "regionId": "german-site",
+        "applicationId": "water-well",
+        "profileMode": "vertical",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "5bdd07fd6ccad3e58f44d18d18cf6aee898153e36b7c303958214ead943f5f91"
+    },
+    {
+      "fixture": {
+        "regionId": "german-site",
+        "applicationId": "water-well",
+        "profileMode": "vertical",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "cb1e6509a730c56a7418f4259a2f54dfece11814056aee7eef852969436f0bf8"
+    },
+    {
+      "fixture": {
+        "regionId": "german-site",
+        "applicationId": "water-well",
+        "profileMode": "vertical",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "111147d52ce53e6dc9069fc2ddd80e5a719147c8fb00217c5ea22beb26c6071e"
+    },
+    {
+      "fixture": {
+        "regionId": "german-site",
+        "applicationId": "water-well",
+        "profileMode": "profile",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 59.83939269772824,
+      "sha256": "73b855a8ef782e0ba083e1147ed9cb43c5a90367eea6a3a0990d0c58a7d58bfb"
+    },
+    {
+      "fixture": {
+        "regionId": "german-site",
+        "applicationId": "water-well",
+        "profileMode": "profile",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 52.818771664990116,
+      "sha256": "48b8bc490f936c7f5aa8583a72202a05ef6771ca35e56fb20cb35d8e0ec7961c"
+    },
+    {
+      "fixture": {
+        "regionId": "german-site",
+        "applicationId": "water-well",
+        "profileMode": "profile",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 55.5687432891978,
+      "sha256": "39d0c2c38e305ade70eb6d272d2f7befdec7227814cda3e283edef4123020d33"
+    },
+    {
+      "fixture": {
+        "regionId": "german-site",
+        "applicationId": "water-well",
+        "profileMode": "raise",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 634.6446726117758,
+      "sha256": "d5cbee000a7b6723009220b58fba1f9c4e3eae502ba657c48f52f8c33b94d894"
+    },
+    {
+      "fixture": {
+        "regionId": "german-site",
+        "applicationId": "water-well",
+        "profileMode": "raise",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 634.9645016412502,
+      "sha256": "e88d49973a283774ebef2981b0a50416fb63e3d7ed1a2ea2b948f40234910042"
+    },
+    {
+      "fixture": {
+        "regionId": "german-site",
+        "applicationId": "water-well",
+        "profileMode": "raise",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 636.1088791336417,
+      "sha256": "64d961a1d3817c26c6b4efc20b720e65a2e4d86e2a5d9ebf636e78e48e2125eb"
+    },
+    {
+      "fixture": {
+        "regionId": "german-site",
+        "applicationId": "water-well",
+        "profileMode": "heading",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 156.78628306097062,
+      "sha256": "3101ace40208e67b6e98aecfd249ca09f768e43bd08412632e1384a4924b9585"
+    },
+    {
+      "fixture": {
+        "regionId": "german-site",
+        "applicationId": "water-well",
+        "profileMode": "heading",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 192.09881559634277,
+      "sha256": "2646e8649113f93c2ceef30d12feae5c0b8122a4cb01c82ee5760e13c236c96d"
+    },
+    {
+      "fixture": {
+        "regionId": "german-site",
+        "applicationId": "water-well",
+        "profileMode": "heading",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 96.09531089396435,
+      "sha256": "9b7fc10cafee2450513abe56aa5bb7aa825a0bf2372f5494d921833701dc4d36"
+    },
+    {
+      "fixture": {
+        "regionId": "german-site",
+        "applicationId": "water-well",
+        "profileMode": "pile",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "d5cf50f1f4dc96699b6d98c966d2d2c7356972fcd0691454283e11632918ad8d"
+    },
+    {
+      "fixture": {
+        "regionId": "german-site",
+        "applicationId": "water-well",
+        "profileMode": "pile",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "8aeed84377a98a3ddf4745bd1946c3293ba8c93f988e273d701875a14529779d"
+    },
+    {
+      "fixture": {
+        "regionId": "german-site",
+        "applicationId": "water-well",
+        "profileMode": "pile",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "6708ac5a0d7d72d9c1e1af4488db11b60442bfc99367449125f7bfadde8a08ac"
+    },
+    {
+      "fixture": {
+        "regionId": "alpine",
+        "applicationId": "water-well",
+        "profileMode": "vertical",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "3dcece0733094159e3ca046ee1608d1550de38c8324ef9a159947a001b3aedf5"
+    },
+    {
+      "fixture": {
+        "regionId": "alpine",
+        "applicationId": "water-well",
+        "profileMode": "vertical",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "8a253b724d9741797b343bc96644d21f5162e4a84a055c74e65b6dbebf35b084"
+    },
+    {
+      "fixture": {
+        "regionId": "alpine",
+        "applicationId": "water-well",
+        "profileMode": "vertical",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620.14228362853,
+      "sha256": "bdd8f3523206730417bd0634d7af680dde40ca160756114a6475b7c9c0b63ee6"
+    },
+    {
+      "fixture": {
+        "regionId": "alpine",
+        "applicationId": "water-well",
+        "profileMode": "profile",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 59.83939269772824,
+      "sha256": "5e7a35bd9f7a2885d49488985429a5683c9775b24a49397f41a94e27d2e99973"
+    },
+    {
+      "fixture": {
+        "regionId": "alpine",
+        "applicationId": "water-well",
+        "profileMode": "profile",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 52.818771664990116,
+      "sha256": "d38d1abdb6d0932e6111fcdae85ca53cf92baf9d677d7c89598ecd176e36e80d"
+    },
+    {
+      "fixture": {
+        "regionId": "alpine",
+        "applicationId": "water-well",
+        "profileMode": "profile",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 55.5687432891978,
+      "sha256": "40c3c24318b02bd9a309e2cb44bc95e762513b6549b1ef698f4cba438b56f943"
+    },
+    {
+      "fixture": {
+        "regionId": "alpine",
+        "applicationId": "water-well",
+        "profileMode": "raise",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 634.6446726117758,
+      "sha256": "9f1132a740fdb8ce796874488a8adb16e734bb3933da214d23b4db317f0b8e54"
+    },
+    {
+      "fixture": {
+        "regionId": "alpine",
+        "applicationId": "water-well",
+        "profileMode": "raise",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 634.9645016412502,
+      "sha256": "b7c7b9ca6ed306629604e8e53fc8d4bd34802865100880100393b17b370bee9b"
+    },
+    {
+      "fixture": {
+        "regionId": "alpine",
+        "applicationId": "water-well",
+        "profileMode": "raise",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 636.1088791336417,
+      "sha256": "87735fdf5cc7bb30b62787ebfc15d6120fb0c17bf6233f6f75a17a98ee364f74"
+    },
+    {
+      "fixture": {
+        "regionId": "alpine",
+        "applicationId": "water-well",
+        "profileMode": "heading",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 156.78628306097062,
+      "sha256": "48c51e98a375dc5a819a74247ce41c97318f34e5e524f6003317dd90dd90e417"
+    },
+    {
+      "fixture": {
+        "regionId": "alpine",
+        "applicationId": "water-well",
+        "profileMode": "heading",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 192.09881559634277,
+      "sha256": "d2ab3f056c7dc6a34a487558aa7aa39f515fd55c2be0736bb2a7fe90cffdc40c"
+    },
+    {
+      "fixture": {
+        "regionId": "alpine",
+        "applicationId": "water-well",
+        "profileMode": "heading",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 96.09531089396435,
+      "sha256": "5af4cfcc46cd4411502216ecef57a6dbbd7009f0a979366515c73db62da793d1"
+    },
+    {
+      "fixture": {
+        "regionId": "alpine",
+        "applicationId": "water-well",
+        "profileMode": "pile",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "07ecd4317ea355f0807d0817059cb9091c21cdbd8e80d16245a15af22329a018"
+    },
+    {
+      "fixture": {
+        "regionId": "alpine",
+        "applicationId": "water-well",
+        "profileMode": "pile",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "c2da2e7b99f3f4f3aee9b617984aa5318f136615b3c89743fb6a25a23975150e"
+    },
+    {
+      "fixture": {
+        "regionId": "alpine",
+        "applicationId": "water-well",
+        "profileMode": "pile",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620.14228362853,
+      "sha256": "3106ff78fc42b245ce77228ae43a7ec2b1b2cb51ed5fbddbf23da20a30af87d3"
+    },
+    {
+      "fixture": {
+        "regionId": "iberian-quarry",
+        "applicationId": "water-well",
+        "profileMode": "vertical",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "c50d3eefecede35535bdb327a05ff4f6f2e688cb6cbbe6b3c82c8f34e98b8ad5"
+    },
+    {
+      "fixture": {
+        "regionId": "iberian-quarry",
+        "applicationId": "water-well",
+        "profileMode": "vertical",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "6e6706da7105a0b40286fb3669eb14ece483692cd8b209b4f9c8ecbda44538da"
+    },
+    {
+      "fixture": {
+        "regionId": "iberian-quarry",
+        "applicationId": "water-well",
+        "profileMode": "vertical",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "3f1103ce36e5419d466c8368836c09294ec6b80004f142a3e254adf31c183c08"
+    },
+    {
+      "fixture": {
+        "regionId": "iberian-quarry",
+        "applicationId": "water-well",
+        "profileMode": "profile",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 59.83939269772824,
+      "sha256": "ec355d81784a847c7489eff4e52cf3696cab7f6226819470ea1349bf097be723"
+    },
+    {
+      "fixture": {
+        "regionId": "iberian-quarry",
+        "applicationId": "water-well",
+        "profileMode": "profile",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 52.818771664990116,
+      "sha256": "e8c49ca37ad348b0915d05815e98ee353e5c30b7f76bb31ad444d48bfc9e825e"
+    },
+    {
+      "fixture": {
+        "regionId": "iberian-quarry",
+        "applicationId": "water-well",
+        "profileMode": "profile",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 55.5687432891978,
+      "sha256": "88ed47d95800709c8aaecee486e85eac8afd2f5a216d8b71843bd342334f9fe1"
+    },
+    {
+      "fixture": {
+        "regionId": "iberian-quarry",
+        "applicationId": "water-well",
+        "profileMode": "raise",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 634.6446726117758,
+      "sha256": "8cfbce7235b9e279500326fc9db61a137a00ff9a86f627585df6de5de110bc11"
+    },
+    {
+      "fixture": {
+        "regionId": "iberian-quarry",
+        "applicationId": "water-well",
+        "profileMode": "raise",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 634.9645016412502,
+      "sha256": "02df67d3f1b9ee49f2b717177a9ee38ba0289169afadd432ba1164e225704c35"
+    },
+    {
+      "fixture": {
+        "regionId": "iberian-quarry",
+        "applicationId": "water-well",
+        "profileMode": "raise",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 636.1088791336417,
+      "sha256": "a75962385189850c8be89b02d3816e32e6ea83b1d0bc866d3fd0eb8c464567bb"
+    },
+    {
+      "fixture": {
+        "regionId": "iberian-quarry",
+        "applicationId": "water-well",
+        "profileMode": "heading",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 156.78628306097062,
+      "sha256": "e6a60e94add8b1f13a7bb7fa012642e9322df77b74e910687c1eca8fc328f313"
+    },
+    {
+      "fixture": {
+        "regionId": "iberian-quarry",
+        "applicationId": "water-well",
+        "profileMode": "heading",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 192.09881559634277,
+      "sha256": "eed0ac4214be680c0c46403f924a9484261c58f2607830ca01eb14b3a99a5322"
+    },
+    {
+      "fixture": {
+        "regionId": "iberian-quarry",
+        "applicationId": "water-well",
+        "profileMode": "heading",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 96.09531089396435,
+      "sha256": "cb03bdf7413370bd89ebd2ba52d9b6d1ff25246924cbe9eb9a7dab81a9df7fff"
+    },
+    {
+      "fixture": {
+        "regionId": "iberian-quarry",
+        "applicationId": "water-well",
+        "profileMode": "pile",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "81d99f0c0c3ed77e278ec0240e8ab7c5cd104ad58c2bb700d59b637514b3b0ec"
+    },
+    {
+      "fixture": {
+        "regionId": "iberian-quarry",
+        "applicationId": "water-well",
+        "profileMode": "pile",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "d3da9c5b91d1e7bdfe6c479d820107a8fb21de647c5c1da0cc89c62d8fd20d57"
+    },
+    {
+      "fixture": {
+        "regionId": "iberian-quarry",
+        "applicationId": "water-well",
+        "profileMode": "pile",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "236814b45cfa11bdb2555389a3c47fef3eedbc9491e4b1eefcbeec437fe3d34f"
+    },
+    {
+      "fixture": {
+        "regionId": "north-sea",
+        "applicationId": "water-well",
+        "profileMode": "vertical",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "03b6c3ff87d8d9522e0094c5c043e41546ba05f719f5eb74292458c2c7361b78"
+    },
+    {
+      "fixture": {
+        "regionId": "north-sea",
+        "applicationId": "water-well",
+        "profileMode": "vertical",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "ffc6ef99bd90eec67fe1d62ad778713c77c6565ed466df82962ae6ec52d4d13d"
+    },
+    {
+      "fixture": {
+        "regionId": "north-sea",
+        "applicationId": "water-well",
+        "profileMode": "vertical",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "ad5b5a9408e87508ba619ce57349773c6964f8b1159a4361cda8144aefc51265"
+    },
+    {
+      "fixture": {
+        "regionId": "north-sea",
+        "applicationId": "water-well",
+        "profileMode": "profile",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 59.83939269772824,
+      "sha256": "317bdb3c12cddc654fba4b9b1888d528279510c4b292ca84357958985fdd4a02"
+    },
+    {
+      "fixture": {
+        "regionId": "north-sea",
+        "applicationId": "water-well",
+        "profileMode": "profile",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 52.818771664990116,
+      "sha256": "a7c28834ef6d6842df50b96be667f73e1cc0db1b3603c85cab90a9c7b36a4cad"
+    },
+    {
+      "fixture": {
+        "regionId": "north-sea",
+        "applicationId": "water-well",
+        "profileMode": "profile",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 55.5687432891978,
+      "sha256": "2b968a0ba2cc89b9418f7d5260d2b024cae164990f0411132b0bcc60ad6b3af6"
+    },
+    {
+      "fixture": {
+        "regionId": "north-sea",
+        "applicationId": "water-well",
+        "profileMode": "raise",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 634.6446726117758,
+      "sha256": "d1e51c7abc3905c39a21f7a6d196bc1b7304f65659bd80ff3d9a90b64b579d7d"
+    },
+    {
+      "fixture": {
+        "regionId": "north-sea",
+        "applicationId": "water-well",
+        "profileMode": "raise",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 634.9645016412502,
+      "sha256": "a137ebfa2f21e1b682e1a894d205cecdaeba5ef6abf3c7f3d4f96e6c020d85ee"
+    },
+    {
+      "fixture": {
+        "regionId": "north-sea",
+        "applicationId": "water-well",
+        "profileMode": "raise",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 636.2830265430765,
+      "sha256": "5e1b489a83de3715bd90dc0e286404a9dc1c6a3f0f5eaf119c519292aa65e092"
+    },
+    {
+      "fixture": {
+        "regionId": "north-sea",
+        "applicationId": "water-well",
+        "profileMode": "heading",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 156.78628306097062,
+      "sha256": "115c8c8bd9a2ce87efef33268ca97d66480c4c80b24e8b2d3af70eef8972aa6d"
+    },
+    {
+      "fixture": {
+        "regionId": "north-sea",
+        "applicationId": "water-well",
+        "profileMode": "heading",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 192.09881559634277,
+      "sha256": "eeaa6f84ca437a5fafab9af2267ef2a592d10caa698ea0077edf174b419c4e8b"
+    },
+    {
+      "fixture": {
+        "regionId": "north-sea",
+        "applicationId": "water-well",
+        "profileMode": "heading",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 96.09531089396435,
+      "sha256": "61c7aeb84ba5fb9fadf2f8bec693d9ae162318391dc217d6849c737206069839"
+    },
+    {
+      "fixture": {
+        "regionId": "north-sea",
+        "applicationId": "water-well",
+        "profileMode": "pile",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "69b9d5ac91dc2b4b9f12e5c3f0a31f1bb9090f8a9ca4243731ac6c277d60e9f6"
+    },
+    {
+      "fixture": {
+        "regionId": "north-sea",
+        "applicationId": "water-well",
+        "profileMode": "pile",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "998c0010e06827320ce488fbad2e93ecde5981c3d1b384ffd18608602bd227fd"
+    },
+    {
+      "fixture": {
+        "regionId": "north-sea",
+        "applicationId": "water-well",
+        "profileMode": "pile",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "216571a4e83baa82ff80a18bb2ed0826e1c7aa42171243bdc27a969933e6fe0b"
+    },
+    {
+      "fixture": {
+        "regionId": "sahara",
+        "applicationId": "water-well",
+        "profileMode": "vertical",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "e899b18a3f6cb8bca4a505747344877f9b9046043afb3e5fbfc117cda4630e5c"
+    },
+    {
+      "fixture": {
+        "regionId": "sahara",
+        "applicationId": "water-well",
+        "profileMode": "vertical",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "89583979d740ad0762c7e71c66285097fae1188f9bd6fc15186cc5329ee296b7"
+    },
+    {
+      "fixture": {
+        "regionId": "sahara",
+        "applicationId": "water-well",
+        "profileMode": "vertical",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "6818f8891aeb22f556b74150f1ff58f7f1aad079c65220b7dcd8b739ff9c0bcb"
+    },
+    {
+      "fixture": {
+        "regionId": "sahara",
+        "applicationId": "water-well",
+        "profileMode": "profile",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 59.83939269772824,
+      "sha256": "d9645dd1089d0016747fb05d7ae4e509450d6a254c9435166462df2e98dd950c"
+    },
+    {
+      "fixture": {
+        "regionId": "sahara",
+        "applicationId": "water-well",
+        "profileMode": "profile",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 52.818771664990116,
+      "sha256": "dfbb55c1965cebc2c9d40da26252301e02ef9281b2beb93d9f6884a90fd3159a"
+    },
+    {
+      "fixture": {
+        "regionId": "sahara",
+        "applicationId": "water-well",
+        "profileMode": "profile",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 55.5687432891978,
+      "sha256": "b16f000474e70546362592aa0fc08522c858ce4aee145cf1e288635139d62741"
+    },
+    {
+      "fixture": {
+        "regionId": "sahara",
+        "applicationId": "water-well",
+        "profileMode": "raise",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 634.6446726117758,
+      "sha256": "45fda0814ec94866bf26a2efa67140c85884b7d39ce1ec1e1d5e63e6284927e6"
+    },
+    {
+      "fixture": {
+        "regionId": "sahara",
+        "applicationId": "water-well",
+        "profileMode": "raise",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 634.9645016412502,
+      "sha256": "7e69d4f94d84f96f4404850d42c5cf5540cebe42190cb2ed255ffb8e76e87cfe"
+    },
+    {
+      "fixture": {
+        "regionId": "sahara",
+        "applicationId": "water-well",
+        "profileMode": "raise",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 636.1088791336417,
+      "sha256": "b046435dd999026ab5a04ef18ce5da4af947c07a80a6dec4fa8a0253b1f949c4"
+    },
+    {
+      "fixture": {
+        "regionId": "sahara",
+        "applicationId": "water-well",
+        "profileMode": "heading",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 156.78628306097062,
+      "sha256": "3115440cb81fe0d264e509e9aafd4004d687130f395679c1e2acd2a12a31a6c1"
+    },
+    {
+      "fixture": {
+        "regionId": "sahara",
+        "applicationId": "water-well",
+        "profileMode": "heading",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 192.09881559634277,
+      "sha256": "f3bbb22219b12168a899f3953db34e84275fa28a4d7d29fa67eb377bc8ad8c4e"
+    },
+    {
+      "fixture": {
+        "regionId": "sahara",
+        "applicationId": "water-well",
+        "profileMode": "heading",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 96.09531089396435,
+      "sha256": "0b9604d08d66d182d8a89d1dd6c5684f88db9f05a05a130c926d5b99918bcad5"
+    },
+    {
+      "fixture": {
+        "regionId": "sahara",
+        "applicationId": "water-well",
+        "profileMode": "pile",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "214868d3201d96a93c753030eb815b1ed5ea65b5a12baa788017efe2d95fb1ad"
+    },
+    {
+      "fixture": {
+        "regionId": "sahara",
+        "applicationId": "water-well",
+        "profileMode": "pile",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "2f3fe1025884ecefc9b6b79c65adff9bc2e5ed9e98e6ee7f6e092fbf86245cd6"
+    },
+    {
+      "fixture": {
+        "regionId": "sahara",
+        "applicationId": "water-well",
+        "profileMode": "pile",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "693a6a94f86ddd9f0fff55ef35429f4c3ded164239d8a3f0b4becf3ac9795096"
+    },
+    {
+      "fixture": {
+        "regionId": "andes",
+        "applicationId": "water-well",
+        "profileMode": "vertical",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "80dc2fd2997c4edd9f1775c930e25239f957dc6ff361f1911034cc553b5a8f92"
+    },
+    {
+      "fixture": {
+        "regionId": "andes",
+        "applicationId": "water-well",
+        "profileMode": "vertical",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620.2797664464905,
+      "sha256": "d5387c95b3854393deaedf6eccbedbda272040762d390396a7ebaad2a24dcec7"
+    },
+    {
+      "fixture": {
+        "regionId": "andes",
+        "applicationId": "water-well",
+        "profileMode": "vertical",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "340e1673d871ba399442c45a00c2a8688adf09c8da8e3bfc7dc47ea09332c679"
+    },
+    {
+      "fixture": {
+        "regionId": "andes",
+        "applicationId": "water-well",
+        "profileMode": "profile",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 59.83939269772824,
+      "sha256": "2f80a868d176e9b76da892d2d5ef217355c444ca776366320f896f32064953e7"
+    },
+    {
+      "fixture": {
+        "regionId": "andes",
+        "applicationId": "water-well",
+        "profileMode": "profile",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 52.818771664990116,
+      "sha256": "8587eb4ca9c2c7b994ab9727cc0c50f51fb002b64dcc69ccf9eea4fac0266306"
+    },
+    {
+      "fixture": {
+        "regionId": "andes",
+        "applicationId": "water-well",
+        "profileMode": "profile",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 55.5687432891978,
+      "sha256": "0ccb7ed11617dc3175b0bc3dc7df456070d187a833457e0be50e4a3044f9ded4"
+    },
+    {
+      "fixture": {
+        "regionId": "andes",
+        "applicationId": "water-well",
+        "profileMode": "raise",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 634.6446726117758,
+      "sha256": "e17dc050c4f4805adeee8ef2ae31e7001a2f06dc63babe5911255ff1a264fa3b"
+    },
+    {
+      "fixture": {
+        "regionId": "andes",
+        "applicationId": "water-well",
+        "profileMode": "raise",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 634.9645016412502,
+      "sha256": "ad7db60211dc881808688985d5190fead39cc8cda7b76b5f824da015dcbbe560"
+    },
+    {
+      "fixture": {
+        "regionId": "andes",
+        "applicationId": "water-well",
+        "profileMode": "raise",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 636.1088791336417,
+      "sha256": "f0a874e6c3fdbf99f74b046d638272e86a21d7a3cb9afe9d3a7baf0b401d42d8"
+    },
+    {
+      "fixture": {
+        "regionId": "andes",
+        "applicationId": "water-well",
+        "profileMode": "heading",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 156.78628306097062,
+      "sha256": "f8bdf11c3c25600400d70846ab6a6c715a0eb23ff8ef083058abfce6fb683146"
+    },
+    {
+      "fixture": {
+        "regionId": "andes",
+        "applicationId": "water-well",
+        "profileMode": "heading",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 192.09881559634277,
+      "sha256": "00c16a002bc79527ab3b4bc87b273e16e396574aa37b4d21e2ec601066c00c32"
+    },
+    {
+      "fixture": {
+        "regionId": "andes",
+        "applicationId": "water-well",
+        "profileMode": "heading",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 96.09531089396435,
+      "sha256": "dfabfc1a2187e8bdda70bd6ee0b29d88a4564f963bf1534683b45a40dd37456e"
+    },
+    {
+      "fixture": {
+        "regionId": "andes",
+        "applicationId": "water-well",
+        "profileMode": "pile",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "b6dd53947eef2763a855ee653a8864ddd265731f8506567ab3e37cdfc06e0830"
+    },
+    {
+      "fixture": {
+        "regionId": "andes",
+        "applicationId": "water-well",
+        "profileMode": "pile",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620.2797664464905,
+      "sha256": "e41300cb4d9c082fc9f7fa1340e4478a6c270acfffb9735fe0c7fc331e17cbd7"
+    },
+    {
+      "fixture": {
+        "regionId": "andes",
+        "applicationId": "water-well",
+        "profileMode": "pile",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "a06a0b8b0f9b9131dd765ed9d9890b446bbd0ab845234d244bab5b7feff98d9e"
+    },
+    {
+      "fixture": {
+        "regionId": "arctic",
+        "applicationId": "water-well",
+        "profileMode": "vertical",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "ebd8b1a365c04ef52c729001cf8cdc705783d629d77ad1352b6da4726b3e0bc9"
+    },
+    {
+      "fixture": {
+        "regionId": "arctic",
+        "applicationId": "water-well",
+        "profileMode": "vertical",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "ea13439677b3aa10b0e042eaefc904e71dcfca0871eb925140b8ea275efadda7"
+    },
+    {
+      "fixture": {
+        "regionId": "arctic",
+        "applicationId": "water-well",
+        "profileMode": "vertical",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "955f63f8e937523b886684348e21fbc0034b0568f5a34e6b2bfdf6ae593fff2b"
+    },
+    {
+      "fixture": {
+        "regionId": "arctic",
+        "applicationId": "water-well",
+        "profileMode": "profile",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 59.83939269772824,
+      "sha256": "6eac6c6f5ac06fa1bba3962512e786ad2a46dd42e4cbc995a5472a1907b3fa41"
+    },
+    {
+      "fixture": {
+        "regionId": "arctic",
+        "applicationId": "water-well",
+        "profileMode": "profile",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 52.818771664990116,
+      "sha256": "b399256cce56940d0e4bc903c82e4e86b8ebc2146f92dc606e5e19c10791efe4"
+    },
+    {
+      "fixture": {
+        "regionId": "arctic",
+        "applicationId": "water-well",
+        "profileMode": "profile",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 55.5687432891978,
+      "sha256": "d8e50f598952b382b174fd6c5e50c9b127015bc105ea6b5b7b1aa02d43f34724"
+    },
+    {
+      "fixture": {
+        "regionId": "arctic",
+        "applicationId": "water-well",
+        "profileMode": "raise",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 634.6446726117758,
+      "sha256": "db60b961f3b9d1d9405bd59f10f06b07dd536420a4297f01238284ba0717f6e1"
+    },
+    {
+      "fixture": {
+        "regionId": "arctic",
+        "applicationId": "water-well",
+        "profileMode": "raise",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 634.9645016412502,
+      "sha256": "2745b3545e83f471e3ece500fe7b9761302781a9fc912978c90810a5d0a36d58"
+    },
+    {
+      "fixture": {
+        "regionId": "arctic",
+        "applicationId": "water-well",
+        "profileMode": "raise",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 636.1088791336417,
+      "sha256": "4ff3d43f998e64e991219190be2d4952b26f17b05355c0efa80096de2f9e08cb"
+    },
+    {
+      "fixture": {
+        "regionId": "arctic",
+        "applicationId": "water-well",
+        "profileMode": "heading",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 156.78628306097062,
+      "sha256": "f7a1b6f860ce096d9af696e6860e6e531e4065bcb377afd30e247ddd5a983499"
+    },
+    {
+      "fixture": {
+        "regionId": "arctic",
+        "applicationId": "water-well",
+        "profileMode": "heading",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 192.09881559634277,
+      "sha256": "f2ac2441248e1fd92f45e640940c3dcba6e69a3b6853d6b291fe10b5be17e79e"
+    },
+    {
+      "fixture": {
+        "regionId": "arctic",
+        "applicationId": "water-well",
+        "profileMode": "heading",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 96.09531089396435,
+      "sha256": "9e7cc5d88d657ebaa11e8f6d6228946a51dea7ef6704b93cf6752c7294c34212"
+    },
+    {
+      "fixture": {
+        "regionId": "arctic",
+        "applicationId": "water-well",
+        "profileMode": "pile",
+        "targetDepth": 500,
+        "seed": 1,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "6f85b60c103824eea950a7cd676bf581e197b4227daa27c155e81152129ba5e1"
+    },
+    {
+      "fixture": {
+        "regionId": "arctic",
+        "applicationId": "water-well",
+        "profileMode": "pile",
+        "targetDepth": 500,
+        "seed": 1337,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "315da40d2f13d6a753815f236636c741590c9bde6955a0cbe97a33b93ccf2f1b"
+    },
+    {
+      "fixture": {
+        "regionId": "arctic",
+        "applicationId": "water-well",
+        "profileMode": "pile",
+        "targetDepth": 500,
+        "seed": 20260903,
+        "holeDiaMm": 216,
+        "difficulty": 0.25
+      },
+      "profileDepth": 620,
+      "sha256": "299a2a3c4ecf223bbaba7d37d5025dcb4359bedca259e136329a8872ef1304cc"
+    }
+  ]
+}

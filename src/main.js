@@ -595,8 +595,11 @@ async function boot() {
     mark('shaders', tw);
     if (warm) {
       ctx.bootWarm = warm;
-      console.info(`[boot] ${warm.programs} shader programs ready in ${Math.round(warm.ms)} ms`
-        + ` (${warm.post} post-chain, parallel-compile ${warm.parallel ? 'yes' : 'NO — this device pays on first use'})`);
+      const readiness = warm.parallel
+        ? `${warm.done ?? 0}/${warm.total ?? warm.programs} driver-ready, ${warm.retired ?? 0} retired, ${warm.failed ?? 0} failed`
+        : 'driver readiness unavailable — this device pays on first use';
+      console.info(`[boot] ${warm.programs} shader programs queued in ${Math.round(warm.ms)} ms`
+        + ` (${warm.post} post-chain; ${readiness}; ${warm.reason || 'unmeasured'})`);
     }
   }
   setPhase('ready', 1);

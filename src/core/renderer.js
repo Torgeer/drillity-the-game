@@ -132,7 +132,8 @@ const POST_SCALE_RETIRED_LOW = 1.15;   // what LOW used to supersample at
    +Y. Every mode is reached with a critically damped spring — never a snap.
    ═══════════════════════════════════════════════════════════════════════════ */
 const CAMERA_MODES = {
-  /* hero — the shot the store page is made of.
+  /* hero — base ray for the measured GLB fit below; the historical starter
+     composition remains the fallback while no framing metadata is available.
      Round 1 moved the eye down to 2.60 m and set look.y 3.40, which framed
      the machine base at 6 % and the crown at 65 % OF THE RAW 54 % BAND. What
      that solve never subtracted is the HUD: on a 780x1688 frame the surface
@@ -177,6 +178,164 @@ const CAMERA_MODES = {
   orbit:    { pos: [0.00, 2.70, 13.0], look: [0.00, 3.05, 0.00], fov: 40, drift: 0.55, stiff: 0.75, orbit: 13.0, orbitSpeed: 0.055, orbitY: 2.70 },
   menu:     { pos: [10.8, 4.20, 12.6], look: [0.00, 2.90, 0.00], fov: 34, drift: 0.42, stiff: 0.55, orbit: 16.6, orbitSpeed: 0.017, orbitY: 4.2 },
 };
+
+// The same bounded lens shift is used by the fit and live band registration.
+const REG_MAX_X = 0.22;
+const REG_MAX_Y = 0.12;
+
+/** Fit the authored hero ray to the loader's actual, scenery-free framing
+ * bounds. Uniformly scaling eye AND look around the collar keeps orientation
+ * and the collar's unshifted projection unchanged; registration can still
+ * meet the section seam exactly. This changes surface px/m, never geology's
+ * metres. Four percent side and six percent top clearance are NOT SOURCED
+ * composition choices, not physical rig dimensions.
+ *
+ * For a low/wide footprint, lower the eye only as much as necessary to keep
+ * its front ground edge within three percent of the cut plane (NOT SOURCED
+ * composition tolerance). Adjust pitch to preserve the collar projection.
+ * Geometry authored below ground can still cross the cut plane.
+ * This is a conservative projection of the supplied rest/feed bounds, not a
+ * GLB ruler or an envelope for arbitrary mast/boom animation. Exported for the
+ * CPU camera regression gate.
+ */
+export function fitHeroCamera({ framing, matrixWorld, width, height, fov,
+  collarNdcX = 0, collarNdcY = -1, registered = true }) {
+  if (framing?.space !== 'rig-local' || !matrixWorld?.isMatrix4 ||
+      ![width, height, fov, collarNdcX, collarNdcY].every(Number.isFinite) ||
+      width <= 0 || height <= 0 || fov <= 0 || fov >= 180 ||
+      !matrixWorld.elements.every(Number.isFinite)) return null;
+  const { min, max } = framing;
+  if (![min, max].every(v => Array.isArray(v) && v.length === 3 && v.every(Number.isFinite)) ||
+      min.some((v, i) => v > max[i]) || min.every((v, i) => v === max[i])) return null;
+
+  const corners = [];
+  for (let i = 0; i < 8; i++) corners.push(new THREE.Vector3(
+    i & 1 ? max[0] : min[0], i & 2 ? max[1] : min[1], i & 4 ? max[2] : min[2],
+  ).applyMatrix4(matrixWorld));
+  const footprint = corners.map(corner => new THREE.Vector3(corner.x, 0, corner.z));
+  const cfg = CAMERA_MODES.hero;
+  const eye = new THREE.Vector3(...cfg.pos);
+  const look = new THREE.Vector3(...cfg.look);
+  const horizontal = new THREE.Vector3().subVectors(look, eye).setY(0);
+  const horizontalLength = horizontal.length();
+  const originDepth = -eye.dot(horizontal.normalize());
+  const basePitch = Math.atan2(look.y - eye.y, horizontalLength);
+  const baseOriginPitch = Math.atan2(-eye.y, originDepth);
+  const camera = new THREE.PerspectiveCamera(fov, width / height, 0.25, 2500);
+  const point = new THREE.Vector3();
+  let projected, registration, groundCropPx;
+
+  function setElevation(fraction) {
+    eye.y = cfg.pos[1] * fraction;
+    const pitch = basePitch + Math.atan2(-eye.y, originDepth) - baseOriginPitch;
+    look.y = eye.y + Math.tan(pitch) * horizontalLength;
+  }
+
+  function project(scale) {
+    camera.clearViewOffset();
+    camera.position.copy(eye).multiplyScalar(scale);
+    camera.lookAt(point.copy(look).multiplyScalar(scale));
+    camera.updateMatrixWorld();
+    point.set(0, 0, 0).project(camera);
+    const wantX = registered ? (point.x - collarNdcX) * width / 2 : 0;
+    const wantY = registered ? (collarNdcY - point.y) * height / 2 : 0;
+    const x = clamp(wantX, -width * REG_MAX_X, width * REG_MAX_X);
+    const y = clamp(wantY, -height * REG_MAX_Y, height * REG_MAX_Y);
+    registration = { x, y, collarErrPx: wantX - x, groundErrPx: wantY - y };
+    if (registered) camera.setViewOffset(width, height, x, y, width, height);
+    projected = { left: Infinity, right: -Infinity, top: Infinity, bottom: -Infinity };
+    let inFront = true;
+    for (const corner of corners) {
+      point.copy(corner).applyMatrix4(camera.matrixWorldInverse);
+      if (point.z >= -camera.near || point.z <= -camera.far) inFront = false;
+      point.copy(corner).project(camera);
+      const px = (point.x * 0.5 + 0.5) * width;
+      const py = (0.5 - point.y * 0.5) * height;
+      projected.left = Math.min(projected.left, px);
+      projected.right = Math.max(projected.right, px);
+      projected.top = Math.min(projected.top, py);
+      projected.bottom = Math.max(projected.bottom, py);
+    }
+    groundCropPx = 0;
+    for (const corner of footprint) {
+      point.copy(corner).project(camera);
+      groundCropPx = Math.max(groundCropPx, (0.5 - point.y * 0.5) * height - height);
+    }
+    return inFront && Object.values(projected).every(Number.isFinite) &&
+      projected.left >= width * 0.04 && projected.right <= width * 0.96 &&
+      projected.top >= height * 0.06;
+  }
+
+  function solveScale() {
+    let low = 0, high = 1;
+    for (let i = 0; i < 16 && !project(high); i++) high *= 2;
+    if (!project(high)) return null;
+    for (let i = 0; i < 32; i++) {
+      const middle = (low + high) / 2;
+      if (project(middle)) high = middle;
+      else low = middle;
+    }
+    project(high);
+    return high;
+  }
+  let scale = solveScale();
+  if (scale === null) return null;
+  let elevation = 1;
+  if (registered && groundCropPx > height * 0.03) {
+    let low = 0, high = 1;
+    for (let i = 0; i < 16; i++) {
+      const middle = (low + high) / 2;
+      setElevation(middle);
+      const candidate = solveScale();
+      if (candidate !== null && groundCropPx <= height * 0.03) low = middle;
+      else high = middle;
+    }
+    elevation = low;
+    setElevation(elevation);
+    scale = solveScale();
+    if (scale === null) return null;
+  }
+  return { scale, elevation, groundCropPx, position: eye.multiplyScalar(scale).toArray(),
+    look: look.multiplyScalar(scale).toArray(), projected, registration };
+}
+
+/** Cache only geometry/placement/layout inputs. A source replacement, resize
+ * or root movement must invalidate the fit; ordinary camera springs must not
+ * scan the geometry or re-solve the frame every render. Kept independent of
+ * WebGL so the real consumer can be exercised by the CPU gate. */
+export function createHeroFramer() {
+  let cachedRoot = null, cachedKey = '', fit = null, rigId = null, scope = null;
+  return {
+    fit(rig, view) {
+      const spec = rig?.getSpec?.();
+      const framing = spec?.glb?.feedFraming || spec?.glb?.framing;
+      const root = framing && rig?.group?.children.find(child =>
+        child.visible && child.userData.spec === spec);
+      if (!root || !Array.isArray(framing.min) || !Array.isArray(framing.max)) {
+        cachedRoot = null;
+        fit = null;
+        return null;
+      }
+      root.updateWorldMatrix(true, false);
+      const key = [view.width, view.height, view.fov, view.collarNdcX, view.collarNdcY,
+        view.registered, spec.id, framing.space, framing.scope, ...root.matrixWorld.elements,
+        ...framing.min, ...framing.max].join(',');
+      if (cachedRoot !== root || cachedKey !== key) {
+        cachedRoot = root;
+        cachedKey = key;
+        rigId = spec.id;
+        scope = framing.scope || 'rest-pose';
+        fit = fitHeroCamera({ framing, matrixWorld: root.matrixWorld, ...view });
+      }
+      return fit;
+    },
+    get info() {
+      return fit ? { rigId, scope, scale: fit.scale, elevation: fit.elevation,
+        groundCropPx: fit.groundCropPx, position: fit.position.slice(), look: fit.look.slice(),
+        projected: { ...fit.projected }, registration: { ...fit.registration } } : null;
+    },
+  };
+}
 
 /* ═══════════════════════════════════════════════════════════════════════════
    GRADE — the final look pass. Exactly one texture fetch per channel.
@@ -297,6 +456,7 @@ const GradeShader = {
   name: 'DrillityGrade',
   uniforms: {
     tDiffuse:      { value: null },
+    uInstrument:   { value: 0 }, // same film transform, without photographic optics
     uResolution:   { value: new THREE.Vector2(1, 1) },
     uTime:         { value: 0 },
     uExposure:     { value: 0.52 },   // env.js solve() drives this; base 1.05 -> 0.56
@@ -367,6 +527,7 @@ const GradeShader = {
     precision highp float;
 
     uniform sampler2D tDiffuse;
+    uniform float uInstrument;
     uniform vec2  uResolution;
     uniform float uTime;
     uniform float uExposure;
@@ -454,7 +615,7 @@ const GradeShader = {
          red one way and blue the other across the single highest-contrast
          edge in the picture and fringed it in colour. Softening a seam and
          colouring it are not the same thing. */
-      float spread = uChroma * r2 * 2.0;
+      float spread = uChroma * r2 * 2.0 * (1.0 - uInstrument);
       vec2 dir = normalize( rc + vec2( 1e-5 ) );
       vec2 off = dir * spread / uResolution;
 
@@ -462,6 +623,14 @@ const GradeShader = {
       col.r = texture2D( tDiffuse, uv + off ).r;
       col.g = texture2D( tDiffuse, uv ).g;
       col.b = texture2D( tDiffuse, uv - off ).b;
+      // Empty-target alpha blending stores premultiplied linear RGB. Recover
+      // straight colour before the nonlinear film transform to avoid halos.
+      float instrumentAlpha = 1.0;
+      if (uInstrument > 0.5) {
+        instrumentAlpha = texture2D( tDiffuse, uv ).a;
+        if (instrumentAlpha <= 0.0) { gl_FragColor = vec4(0.0); return; }
+        col /= instrumentAlpha;
+      }
       col = max( col, vec3( 0.0 ) );
 
       /* filmic grade, still in linear light */
@@ -539,6 +708,13 @@ const GradeShader = {
       col = aces( col );
       col = mix( col, col * col * ( 3.0 - 2.0 * col ), uSCurve );
       col = toSRGB( col );
+
+      // Coverage is the actual instrument texture alpha, including transparent
+      // holes. The world underneath retains its full photographic grade.
+      if (uInstrument > 0.5) {
+        gl_FragColor = vec4(col, instrumentAlpha);
+        return;
+      }
 
       /* ── VIGNETTE — ONE FALLOFF OVER BOTH BANDS ────────────────────────
          The previous term was per-band, and it was inverted. uv.y is
@@ -794,6 +970,86 @@ class BandRenderPass extends Pass {
   }
 }
 
+/** Draw the geology owner's instrument layer using the same film shader.
+ * Band callbacks consume live layout; texture alpha is the coverage authority.
+ * Exported so restoration and ordering can be exercised without a GPU. */
+export function renderSectionInstrumentLayer(renderer, scene, camera, layer,
+  target, pass, bindBand, releaseBand) {
+  const previous = { mask: camera.layers.mask, background: scene.background,
+    overrideMaterial: scene.overrideMaterial, autoClear: renderer.autoClear,
+    shadow: renderer.shadowMap.enabled, clearAlpha: renderer.getClearAlpha(),
+    clearColor: renderer.getClearColor(new THREE.Color()).clone() };
+  try {
+    camera.layers.set(layer);
+    scene.background = null;
+    scene.overrideMaterial = null;
+    renderer.shadowMap.enabled = false;
+    renderer.autoClear = false;
+    releaseBand(target);
+    renderer.setRenderTarget(target);
+    renderer.setClearColor(0x000000, 0);
+    renderer.clear(true, false, false);
+    bindBand(target);
+    renderer.render(scene, camera);
+    releaseBand(target);
+    renderer.setRenderTarget(null);
+    releaseBand(null);
+    pass.render(renderer, null, target);
+  } finally {
+    camera.layers.mask = previous.mask;
+    scene.background = previous.background;
+    scene.overrideMaterial = previous.overrideMaterial;
+    renderer.autoClear = previous.autoClear;
+    renderer.shadowMap.enabled = previous.shadow;
+    renderer.setClearColor(previous.clearColor, previous.clearAlpha);
+    renderer.setRenderTarget(null);
+    releaseBand(null);
+  }
+}
+
+/** Queue the separate instrument destinations before the shared readiness poll.
+ * compile() in Three r169 does not filter mesh materials by camera layers, so
+ * enumerate visible owners ourselves instead of recompiling the whole world
+ * with the instrument camera's lighting state. No draw or shader wait here. */
+export function warmSectionInstrumentPrograms(renderer, scene, camera, layer,
+  target, pass, quadCamera, programs, compilePrograms) {
+  if (!target || !pass?.material || !pass.fsQuad?._mesh || !Number.isInteger(layer)) return 0;
+  const quad = pass.fsQuad;
+  const previous = { target: renderer.getRenderTarget(), mask: camera.layers.mask,
+    background: scene.background, overrideMaterial: scene.overrideMaterial,
+    shadow: renderer.shadowMap.enabled, material: quad.material,
+    renderToScreen: pass.renderToScreen };
+  let queued = 0;
+  try {
+    camera.layers.set(layer);
+    scene.background = null;
+    scene.overrideMaterial = null;
+    renderer.shadowMap.enabled = false;
+    renderer.setRenderTarget(target);
+    scene.traverseVisible(object => {
+      if ((object.isMesh || object.isPoints || object.isLine || object.isSprite)
+        && object.layers.test(camera.layers)) {
+        compilePrograms(object, camera, programs, scene);
+        queued++;
+      }
+    });
+    // ShaderPass.render selects this material and the screen framebuffer.
+    quad.material = pass.material;
+    pass.renderToScreen = true;
+    renderer.setRenderTarget(null);
+    compilePrograms(quad._mesh, quadCamera, programs);
+    return queued + 1;
+  } finally {
+    quad.material = previous.material;
+    pass.renderToScreen = previous.renderToScreen;
+    camera.layers.mask = previous.mask;
+    scene.background = previous.background;
+    scene.overrideMaterial = previous.overrideMaterial;
+    renderer.shadowMap.enabled = previous.shadow;
+    renderer.setRenderTarget(previous.target);
+  }
+}
+
 const TIERS = [QUALITY.LOW, QUALITY.MEDIUM, QUALITY.HIGH];
 const tierIndex = (q) => {
   const i = TIERS.findIndex((t) => t.id === (q && q.id));
@@ -876,6 +1132,7 @@ export function createRenderer(ctx) {
   let aoPass = null;
   let bloomPass = null;
   let gradePass = null;
+  let instrumentPass = null, instrumentTarget = null;
   let smaaPass = null;
   let aoTarget = null;
   let aoScale = 0.6;
@@ -926,6 +1183,7 @@ export function createRenderer(ctx) {
   const shakeOffset = new THREE.Vector3();
   const lookTarget = new THREE.Vector3();
   const scratch = new THREE.Vector3();
+  const heroFramer = createHeroFramer();
 
   /* Metres of borehole visible in the cut.
      createRenderer runs BEFORE createGeology, so ctx.sectionCamera already
@@ -1201,7 +1459,14 @@ export function createRenderer(ctx) {
 
     // 3. CROSS-SECTION band — the borehole cutaway
     applyBand(renderer, target, bands.section);
-    renderer.render(sectionScene, sectionCamera);
+    // A failed/unavailable post chain keeps the instruments visible in the
+    // ordinary scene fallback; a working chain draws them after its optics.
+    const mask = sectionCamera.layers.mask;
+    try {
+      if ((!postOK || !instrumentPass) && Number.isInteger(ctx.geology?.instrumentLayer))
+        sectionCamera.layers.enable(ctx.geology.instrumentLayer);
+      renderer.render(sectionScene, sectionCamera);
+    } finally { sectionCamera.layers.mask = mask; }
 
     // 4. hand the buffer back full-screen for the post chain
     releaseBands(renderer, target);
@@ -1300,6 +1565,8 @@ export function createRenderer(ctx) {
       try { composer.dispose(); } catch { /* noop */ }
     }
     if (aoTarget) { aoTarget.dispose(); aoTarget = null; }
+    if (instrumentTarget) { instrumentTarget.dispose(); instrumentTarget = null; }
+    if (instrumentPass) { instrumentPass.dispose(); instrumentPass = null; }
     composer = null; bandPass = null; aoPass = null; bloomPass = null;
     gradePass = null; smaaPass = null;
     ctx.composer = null;
@@ -1424,6 +1691,31 @@ export function createRenderer(ctx) {
       }
     }
 
+    if (gradePass) {
+      try {
+        instrumentTarget = new THREE.WebGLRenderTarget(deviceW, deviceH,
+          { type: THREE.HalfFloatType, depthBuffer: false, stencilBuffer: false });
+        instrumentTarget.texture.name = 'Drillity.sectionInstruments';
+        instrumentPass = new ShaderPass(GradeShader);
+        // Share live values, including environment changes, resize and future
+        // brand-grade inputs. Only the source and instrument mode are private.
+        for (const key of Object.keys(gradePass.uniforms)) {
+          if (key !== 'tDiffuse' && key !== 'uInstrument')
+            instrumentPass.uniforms[key] = gradePass.uniforms[key];
+        }
+        instrumentPass.uniforms.uInstrument.value = 1;
+        instrumentPass.material.transparent = true;
+        instrumentPass.material.depthTest = false;
+        instrumentPass.material.depthWrite = false;
+        instrumentPass.renderToScreen = true;
+      } catch (e) {
+        if (instrumentTarget) instrumentTarget.dispose();
+        if (instrumentPass) instrumentPass.dispose();
+        instrumentTarget = null; instrumentPass = null;
+        warnOnce('instrument pass unavailable — keeping instruments in the scene grade.', e);
+      }
+    }
+
     postOK = composer.passes.length > 0;
     ctx.composer = composer;
     syncStatic();
@@ -1479,12 +1771,26 @@ export function createRenderer(ctx) {
      ═══════════════════════════════════════════════════════════════════════ */
   const modeConfig = () => CAMERA_MODES[mode] || CAMERA_MODES.hero;
 
+  function activeHeroFit(fov) {
+    const band = bands.surface;
+    const sect = bands.section;
+    scratch.set(0, 0, 0).project(sectionCamera);
+    const holeX = sect.x + (scratch.x * 0.5 + 0.5) * sect.w;
+    const collarNdcX = 2 * (holeX - band.x) / band.w - 1;
+    const collarNdcY = 1 - 2 * (sect.y - band.y) / band.h;
+    const registered = registerBandsOn && onSiteScene();
+    return heroFramer.fit(ctx.rig, { width: band.w, height: band.h, fov,
+      collarNdcX, collarNdcY, registered });
+  }
+
   function updateSurfaceCamera(dt, state) {
     const cfg = modeConfig();
     const reduced = !!(state && state.settings && state.settings.reducedMotion);
 
     if (focus && focus.until > 0 && time > focus.until) focus = null;
 
+    const targetFov = fovForBand((focus && focus.fov) ? focus.fov : cfg.fov);
+    const heroFit = !focus && mode === 'hero' ? activeHeroFit(targetFov) : null;
     if (focus) {
       posSpring.target.copy(focus.pos);
       lookSpring.target.copy(focus.look);
@@ -1496,6 +1802,9 @@ export function createRenderer(ctx) {
         Math.cos(orbitAngle) * cfg.orbit,
       );
       lookSpring.target.set(cfg.look[0], cfg.look[1], cfg.look[2]);
+    } else if (heroFit) {
+      posSpring.target.fromArray(heroFit.position);
+      lookSpring.target.fromArray(heroFit.look);
     } else {
       posSpring.target.set(cfg.pos[0], cfg.pos[1], cfg.pos[2]);
       lookSpring.target.set(cfg.look[0], cfg.look[1], cfg.look[2]);
@@ -1504,7 +1813,6 @@ export function createRenderer(ctx) {
     posSpring.step(cfg.stiff, dt);
     lookSpring.step(cfg.stiff * 1.25, dt);
 
-    const targetFov = fovForBand((focus && focus.fov) ? focus.fov : cfg.fov);
     fovCurrent = damp(fovCurrent, targetFov, 4.5, dt);
     if (Math.abs(camera.fov - fovCurrent) > 1e-3) {
       camera.fov = fovCurrent;
@@ -1668,8 +1976,6 @@ export function createRenderer(ctx) {
   let registerBandsOn = true;
   /** Bounds on the shift, as a fraction of the surface band. A stale or absurd
       solve may never throw the frame away; it may only be imperfect. */
-  const REG_MAX_X = 0.22;
-  const REG_MAX_Y = 0.12;
   const registration = { x: 0, y: 0, active: false, collarErrPx: 0, groundErrPx: 0 };
   const regPoint = new THREE.Vector3();
 
@@ -1877,21 +2183,28 @@ export function createRenderer(ctx) {
     catch { return false; }
   };
 
-  /** Programs the driver has finished, out of the ones it has been handed. */
+  /** Keep the captured batch denominator: retired/failed work is not ready.
+   * three r169 destroy() clears .program, but isReady() retains the deleted GL
+   * handle in its closure. Check ownership before issuing that driver query.
+   */
   function programReadiness(programs = gl.info.programs || []) {
     const ps = Array.from(programs);
-    let done = 0;
-    for (const p of ps) { try { if (p.isReady()) done++; } catch { done++; } }
-    return { done, total: ps.length };
+    let done = 0, pending = 0, retired = 0, failed = 0;
+    for (const p of ps) {
+      if (!p.program) { retired++; continue; }
+      try { if (p.isReady()) done++; else pending++; }
+      catch { failed++; }
+    }
+    return { done, total: ps.length, pending, retired, failed };
   }
 
   /** Capture shader objects now: shared materials may be compiled for a
    * different scene before a later readiness poll. three.js 0.169.0's compile
    * returns materials and stores each selected program in renderer.properties.
    */
-  function compilePrograms(root, cam, programs) {
+  function compilePrograms(root, cam, programs, targetScene = null) {
     const before = new Set(gl.info.programs || []);
-    const materials = gl.compile(root, cam);
+    const materials = gl.compile(root, cam, targetScene);
     for (const p of gl.info.programs || []) if (!before.has(p)) programs.add(p);
     for (const material of materials) {
       const program = gl.properties.get(material).currentProgram;
@@ -1909,35 +2222,68 @@ export function createRenderer(ctx) {
    * `compile(mesh, camera)` is the identical (root, camera) pair the composer
    * will later use and the program cache key matches exactly.
    *
-   * `UnrealBloomPass` is the awkward one: it owns ONE quad and swaps its
-   * material eight times per frame (a high-pass, five separable blurs that
-   * differ by a `KERNEL_RADIUS` define and are therefore five distinct
-   * programs, a composite and a blend). Each is compiled by setting it on the
-   * quad in turn; the pass is left exactly as it was found.
-   *
-   * Field names are read defensively on purpose — a three.js upgrade that
-   * renames one must degrade to warming fewer programs, never to throwing
-   * during boot.
+   * Follow three r169's actual pass destinations. SMAA begins with a null
+   * quad material and switches among three materials and two private targets.
+   * Bloom also switches materials/targets. The last ENABLED composer pass
+   * renders to screen, independent of its stale renderToScreen flag after a
+   * rebuild. Local buffer swaps mirror EffectComposer without mutating it.
    */
   function warmPost(programs) {
-    if (!composer) return 0;
+    if (!composer || !postOK) return 0;
     let n = 0;
-    for (const pass of composer.passes) {
-      const quad = pass.fsQuad;
-      if (!quad || !quad._mesh) continue;
-      const held = quad.material;
-      const mats = [held];
-      for (const m of [pass.materialHighPassFilter, pass.compositeMaterial,
-        pass.blendMaterial, pass.basic]) if (m) mats.push(m);
-      for (const m of (pass.separableBlurMaterials || [])) if (m) mats.push(m);
-      for (const m of mats) {
-        if (!m) continue;
-        try { quad.material = m; compilePrograms(quad._mesh, warmQuadCam, programs); n++; }
-        catch (e) { warnOnce('a post pass could not be pre-compiled.', e); }
+    const previousTarget = gl.getRenderTarget();
+    let read = composer.readBuffer, write = composer.writeBuffer;
+    const enabled = composer.passes.filter(pass => pass.enabled !== false);
+    try {
+      for (const [index, pass] of enabled.entries()) {
+        const quad = pass.fsQuad;
+        if (quad?._mesh) {
+          const held = quad.material, wasScreen = pass.renderToScreen;
+          const basicMap = pass.basic?.map;
+          const screen = !!composer.renderToScreen && index === enabled.length - 1;
+          const queue = (material, target) => {
+            if (!material || target === undefined) throw new Error('Post warm-up material/target unavailable');
+            quad.material = material;
+            gl.setRenderTarget(target);
+            compilePrograms(quad._mesh, warmQuadCam, programs);
+            n++;
+          };
+          try {
+            pass.renderToScreen = screen;
+            if (pass.materialEdges && pass.materialWeights && pass.materialBlend) {
+              queue(pass.materialEdges, pass.edgesRT);
+              queue(pass.materialWeights, pass.weightsRT);
+              queue(pass.materialBlend, screen ? null : write);
+            } else if (pass.materialHighPassFilter && pass.separableBlurMaterials) {
+              if (screen) {
+                // Bloom's screen copy uses a mapped MeshBasicMaterial; its map
+                // presence affects the program key, unlike shader uniforms.
+                pass.basic.map = read.texture;
+                queue(pass.basic, null);
+              }
+              queue(pass.materialHighPassFilter, pass.renderTargetBright);
+              for (let i = 0; i < pass.separableBlurMaterials.length; i++) {
+                queue(pass.separableBlurMaterials[i], pass.renderTargetsHorizontal[i]);
+                queue(pass.separableBlurMaterials[i], pass.renderTargetsVertical[i]);
+              }
+              queue(pass.compositeMaterial, pass.renderTargetsHorizontal[0]);
+              queue(pass.blendMaterial, screen ? null : read);
+            } else if (pass.material || held) {
+              queue(pass.material || held, screen ? null : write);
+            }
+          } finally {
+            quad.material = held;
+            pass.renderToScreen = wasScreen;
+            if (pass.basic) pass.basic.map = basicMap;
+          }
+        }
+        if (pass.needsSwap) [read, write] = [write, read];
       }
-      quad.material = held;
-    }
-    return n;
+      n += warmSectionInstrumentPrograms(gl, sectionScene, sectionCamera,
+        ctx.geology?.instrumentLayer, instrumentTarget, instrumentPass,
+        warmQuadCam, programs, compilePrograms);
+      return n;
+    } finally { gl.setRenderTarget(previousTarget); }
   }
 
   /**
@@ -2048,7 +2394,9 @@ export function createRenderer(ctx) {
      * program cache makes the second pass a no-op — but pointless.
      *
      * @param {(done:number,total:number)=>void} [onProgress] driver-measured
-     * @returns {Promise<{programs:number,ms:number,parallel:boolean,post:number}>}
+     * @returns {Promise<{programs:number,ms:number,parallel:boolean,post:number,
+     *   ready:boolean,reason:string,done?:number,total?:number,pending?:number,
+     *   retired?:number,failed?:number}>} ready requires measured completion.
      */
     async warmShaders(onProgress) {
       const t0 = performance.now();
@@ -2071,9 +2419,12 @@ export function createRenderer(ctx) {
         });
       } catch (e) {
         warnOnce('shader warm-up could not run — the first frame will pay for it.', e);
-        return { programs: (gl.info.programs || []).length, ms: performance.now() - t0, parallel, post };
+        return { programs: (gl.info.programs || []).length, ms: performance.now() - t0,
+          parallel, post, ready: false, reason: 'compile-failed' };
       }
 
+      let readiness;
+      let timedOut = false;
       if (parallel) {
         await new Promise((resolve) => {
           /* A ceiling, because a poll loop with no exit is how a boot screen
@@ -2082,25 +2433,35 @@ export function createRenderer(ctx) {
              programs cost what they always did. */
           const deadline = performance.now() + 60_000;
           const poll = () => {
-            const { done, total } = programReadiness(programs);
+            readiness = programReadiness(programs);
+            const { done, total, pending } = readiness;
             if (onProgress) { try { onProgress(done, total); } catch { /* non-fatal */ } }
-            if (done >= total || performance.now() > deadline) { resolve(); return; }
+            if (pending === 0) { resolve(); return; }
+            if (performance.now() > deadline) { timedOut = true; resolve(); return; }
             setTimeout(poll, 16);
           };
           poll();
         });
-      } else if (onProgress) {
+      } else {
         /* No non-blocking query exists, so there is no progress to report.
            Say so with a single honest step rather than animating a fiction. */
-        const { total } = programReadiness(programs);
-        try { onProgress(total, total); } catch { /* non-fatal */ }
+        readiness = programReadiness(programs);
+        if (onProgress) {
+          try { onProgress(readiness.done, readiness.total); } catch { /* non-fatal */ }
+        }
       }
 
+      const ready = parallel && readiness.done === readiness.total;
       return {
         programs: programs.size,
         ms: performance.now() - t0,
         parallel,
         post,
+        ...readiness,
+        ready,
+        reason: ready ? 'ready' : !parallel ? 'no-parallel-compile'
+          : readiness.failed ? 'query-failed' : readiness.retired ? 'program-retired'
+            : timedOut ? 'timeout' : 'pending',
       };
     },
 
@@ -2182,6 +2543,7 @@ export function createRenderer(ctx) {
       if (composer) {
         composer.setPixelRatio(ratio * postScale);
         composer.setSize(w, h);
+        if (instrumentTarget) instrumentTarget.setSize(deviceW, deviceH);
         if (aoPass) {
           const aw = Math.max(2, Math.round(deviceW * aoScale));
           const ah = Math.max(2, Math.round(deviceH * aoScale));
@@ -2234,18 +2596,20 @@ export function createRenderer(ctx) {
       } finally {
         gl.setRenderTarget(previousTarget);
       }
-      const ready = await new Promise((resolve) => {
+      const reason = await new Promise((resolve) => {
         const deadline = performance.now() + 8000;
         const poll = () => {
-          if (generation !== titleGeneration || performance.now() > deadline) { resolve(false); return; }
-          try {
-            if ([...programs].every((p) => p.isReady())) { resolve(programs.size > 0); return; }
-          } catch { resolve(false); return; }
+          if (generation !== titleGeneration) { resolve('cancelled'); return; }
+          if (performance.now() > deadline) { resolve('timeout'); return; }
+          const { done, total, retired, failed } = programReadiness(programs);
+          if (failed) { resolve('query-failed'); return; }
+          if (retired) { resolve('program-retired'); return; }
+          if (done === total) { resolve(total > 0 ? 'ready' : 'no-programs'); return; }
           setTimeout(poll, 16);
         };
         poll();
       });
-      return { ready, reason: ready ? 'ready' : 'cancelled-or-timeout', ms: performance.now() - t0, programs: programs.size };
+      return { ready: reason === 'ready', reason, ms: performance.now() - t0, programs: programs.size };
     },
 
     /** Draw the title instead of the game until `endTitle()`. */
@@ -2307,6 +2671,12 @@ export function createRenderer(ctx) {
         }
         composer.render(step);
         gl.setRenderTarget(null);
+        if (instrumentPass && instrumentTarget && Number.isInteger(ctx.geology?.instrumentLayer)) {
+          renderSectionInstrumentLayer(gl, sectionScene, sectionCamera,
+            ctx.geology.instrumentLayer, instrumentTarget, instrumentPass,
+            target => applyBand(gl, target, bands.section),
+            target => releaseBands(gl, target));
+        }
       } else {
         drawBands(gl, null);
       }
@@ -2470,6 +2840,12 @@ export function createRenderer(ctx) {
      * tell a solved frame from a clamped one.
      */
     get registration() { return registration; },
+
+    /** Target published-bounds fit for QA. The live camera uses its springs;
+        callers must project it separately when judging a transition. */
+    get heroFraming() {
+      return heroFramer.info;
+    },
 
     /**
      * QA ONLY — turn band registration off to reproduce the 62.44 / -22.81

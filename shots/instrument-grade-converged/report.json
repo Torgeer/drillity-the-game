@@ -1,0 +1,2398 @@
+{
+  "evidence": "Actual headed same-state GPU A/B and source-alpha readback. No FPS/contrast certification.",
+  "cases": [
+    {
+      "name": "390x844-vertical",
+      "width": 780,
+      "height": 1688,
+      "mode": "vertical",
+      "source": "glb",
+      "settleFrames": 3,
+      "settleChanges": [
+        0,
+        0
+      ],
+      "contextLost": false,
+      "meshNames": [
+        "depth-ruler",
+        "drill-log",
+        "scale-plate",
+        "depth-readout"
+      ],
+      "covered": 205303,
+      "opaque": 22136,
+      "uncovered": 1111337,
+      "outsideChanged": 0,
+      "opaqueOpticsChanged": 0,
+      "changed": 168489,
+      "repeatChanged": 0,
+      "worldOpticsChanged": 582716,
+      "maxOutsideDelta": 0,
+      "maxOpaqueOpticsDelta": 0,
+      "targetBytes": 10533120,
+      "drawCalls": 244,
+      "fonts": [
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald Fallback",
+          "status": "loaded"
+        }
+      ]
+    },
+    {
+      "name": "390x844-profile",
+      "width": 780,
+      "height": 1688,
+      "mode": "profile",
+      "source": "glb",
+      "settleFrames": 5,
+      "settleChanges": [
+        0,
+        278,
+        0,
+        0
+      ],
+      "contextLost": false,
+      "meshNames": [
+        "depth-ruler",
+        "drill-log",
+        "station-ruler",
+        "scale-plate",
+        "depth-readout"
+      ],
+      "covered": 232373,
+      "opaque": 22152,
+      "uncovered": 1084267,
+      "outsideChanged": 0,
+      "opaqueOpticsChanged": 0,
+      "changed": 191720,
+      "repeatChanged": 0,
+      "worldOpticsChanged": 544270,
+      "maxOutsideDelta": 0,
+      "maxOpaqueOpticsDelta": 0,
+      "targetBytes": 10533120,
+      "drawCalls": 246,
+      "fonts": [
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald Fallback",
+          "status": "loaded"
+        }
+      ]
+    },
+    {
+      "name": "390x844-raise",
+      "width": 780,
+      "height": 1688,
+      "mode": "raise",
+      "source": "glb",
+      "settleFrames": 3,
+      "settleChanges": [
+        0,
+        0
+      ],
+      "contextLost": false,
+      "meshNames": [
+        "depth-ruler",
+        "drill-log",
+        "scale-plate",
+        "depth-readout"
+      ],
+      "covered": 205303,
+      "opaque": 22152,
+      "uncovered": 1111337,
+      "outsideChanged": 0,
+      "opaqueOpticsChanged": 0,
+      "changed": 192164,
+      "repeatChanged": 0,
+      "worldOpticsChanged": 618434,
+      "maxOutsideDelta": 0,
+      "maxOpaqueOpticsDelta": 0,
+      "targetBytes": 10533120,
+      "drawCalls": 164,
+      "fonts": [
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald Fallback",
+          "status": "loaded"
+        }
+      ]
+    },
+    {
+      "name": "390x844-heading",
+      "width": 780,
+      "height": 1688,
+      "mode": "heading",
+      "source": "glb",
+      "settleFrames": 5,
+      "settleChanges": [
+        0,
+        396,
+        0,
+        0
+      ],
+      "contextLost": false,
+      "meshNames": [
+        "depth-ruler",
+        "drill-log",
+        "station-ruler",
+        "scale-plate",
+        "depth-readout"
+      ],
+      "covered": 217884,
+      "opaque": 23297,
+      "uncovered": 1098756,
+      "outsideChanged": 0,
+      "opaqueOpticsChanged": 0,
+      "changed": 196264,
+      "repeatChanged": 0,
+      "worldOpticsChanged": 525502,
+      "maxOutsideDelta": 0,
+      "maxOpaqueOpticsDelta": 1,
+      "targetBytes": 10533120,
+      "drawCalls": 223,
+      "fonts": [
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald Fallback",
+          "status": "loaded"
+        }
+      ]
+    },
+    {
+      "name": "390x844-pile",
+      "width": 780,
+      "height": 1688,
+      "mode": "pile",
+      "source": "glb",
+      "settleFrames": 4,
+      "settleChanges": [
+        583,
+        0,
+        0
+      ],
+      "contextLost": false,
+      "meshNames": [
+        "depth-ruler",
+        "drill-log",
+        "scale-plate",
+        "depth-readout"
+      ],
+      "covered": 190826,
+      "opaque": 19859,
+      "uncovered": 1125814,
+      "outsideChanged": 0,
+      "opaqueOpticsChanged": 0,
+      "changed": 151613,
+      "repeatChanged": 0,
+      "worldOpticsChanged": 539312,
+      "maxOutsideDelta": 0,
+      "maxOpaqueOpticsDelta": 0,
+      "targetBytes": 10533120,
+      "drawCalls": 261,
+      "fonts": [
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald Fallback",
+          "status": "loaded"
+        }
+      ]
+    },
+    {
+      "name": "320x568-vertical",
+      "width": 640,
+      "height": 1136,
+      "mode": "vertical",
+      "source": "glb",
+      "settleFrames": 4,
+      "settleChanges": [
+        362,
+        0,
+        0
+      ],
+      "contextLost": false,
+      "meshNames": [
+        "depth-ruler",
+        "drill-log",
+        "scale-plate",
+        "depth-readout"
+      ],
+      "covered": 101354,
+      "opaque": 8654,
+      "uncovered": 625686,
+      "outsideChanged": 0,
+      "opaqueOpticsChanged": 0,
+      "changed": 81543,
+      "repeatChanged": 0,
+      "worldOpticsChanged": 237889,
+      "maxOutsideDelta": 0,
+      "maxOpaqueOpticsDelta": 0,
+      "targetBytes": 5816320,
+      "drawCalls": 257,
+      "fonts": [
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald Fallback",
+          "status": "loaded"
+        }
+      ]
+    },
+    {
+      "name": "320x568-profile",
+      "width": 640,
+      "height": 1136,
+      "mode": "profile",
+      "source": "glb",
+      "settleFrames": 3,
+      "settleChanges": [
+        0,
+        0
+      ],
+      "contextLost": false,
+      "meshNames": [
+        "depth-ruler",
+        "drill-log",
+        "station-ruler",
+        "scale-plate",
+        "depth-readout"
+      ],
+      "covered": 124259,
+      "opaque": 8154,
+      "uncovered": 602781,
+      "outsideChanged": 0,
+      "opaqueOpticsChanged": 0,
+      "changed": 100086,
+      "repeatChanged": 0,
+      "worldOpticsChanged": 215318,
+      "maxOutsideDelta": 0,
+      "maxOpaqueOpticsDelta": 0,
+      "targetBytes": 5816320,
+      "drawCalls": 249,
+      "fonts": [
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald Fallback",
+          "status": "loaded"
+        }
+      ]
+    },
+    {
+      "name": "320x568-raise",
+      "width": 640,
+      "height": 1136,
+      "mode": "raise",
+      "source": "glb",
+      "settleFrames": 3,
+      "settleChanges": [
+        0,
+        0
+      ],
+      "contextLost": false,
+      "meshNames": [
+        "depth-ruler",
+        "drill-log",
+        "scale-plate",
+        "depth-readout"
+      ],
+      "covered": 101341,
+      "opaque": 8342,
+      "uncovered": 625699,
+      "outsideChanged": 0,
+      "opaqueOpticsChanged": 0,
+      "changed": 94992,
+      "repeatChanged": 0,
+      "worldOpticsChanged": 258826,
+      "maxOutsideDelta": 0,
+      "maxOpaqueOpticsDelta": 0,
+      "targetBytes": 5816320,
+      "drawCalls": 163,
+      "fonts": [
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald Fallback",
+          "status": "loaded"
+        }
+      ]
+    },
+    {
+      "name": "320x568-heading",
+      "width": 640,
+      "height": 1136,
+      "mode": "heading",
+      "source": "glb",
+      "settleFrames": 3,
+      "settleChanges": [
+        0,
+        0
+      ],
+      "contextLost": false,
+      "meshNames": [
+        "depth-ruler",
+        "drill-log",
+        "station-ruler",
+        "scale-plate",
+        "depth-readout"
+      ],
+      "covered": 111894,
+      "opaque": 8290,
+      "uncovered": 615146,
+      "outsideChanged": 0,
+      "opaqueOpticsChanged": 0,
+      "changed": 94122,
+      "repeatChanged": 0,
+      "worldOpticsChanged": 155889,
+      "maxOutsideDelta": 0,
+      "maxOpaqueOpticsDelta": 0,
+      "targetBytes": 5816320,
+      "drawCalls": 222,
+      "fonts": [
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald Fallback",
+          "status": "loaded"
+        }
+      ]
+    },
+    {
+      "name": "320x568-pile",
+      "width": 640,
+      "height": 1136,
+      "mode": "pile",
+      "source": "glb",
+      "settleFrames": 3,
+      "settleChanges": [
+        0,
+        0
+      ],
+      "contextLost": false,
+      "meshNames": [
+        "depth-ruler",
+        "drill-log",
+        "scale-plate",
+        "depth-readout"
+      ],
+      "covered": 90001,
+      "opaque": 7060,
+      "uncovered": 637039,
+      "outsideChanged": 0,
+      "opaqueOpticsChanged": 0,
+      "changed": 72475,
+      "repeatChanged": 0,
+      "worldOpticsChanged": 190885,
+      "maxOutsideDelta": 0,
+      "maxOpaqueOpticsDelta": 0,
+      "targetBytes": 5816320,
+      "drawCalls": 221,
+      "fonts": [
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "unloaded"
+        },
+        {
+          "family": "Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "unloaded"
+        },
+        {
+          "family": "Oswald",
+          "status": "loaded"
+        },
+        {
+          "family": "Oswald Fallback",
+          "status": "loaded"
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "warnings": [
+    "[sim] no accepted contract run — starting an unpaid preview; completion cannot award money, XP or reputation.",
+    "[env] ugFloodL: no work light named \"boom-l-lamp-0\" on this machine. It publishes [table-work-light, feed-work-light]. Falling back to the ordinal — the beam is on SOME lamp, not the right one. Fix the name in undergroundRig(), or the model.",
+    "[env] ugFloodR: no work light named \"boom-r-lamp-0\" on this machine. It publishes [table-work-light, feed-work-light]. Falling back to the ordinal — the beam is on SOME lamp, not the right one. Fix the name in undergroundRig(), or the model.",
+    "[sim] no accepted contract run — starting an unpaid preview; completion cannot award money, XP or reputation.",
+    "[env] ugFloodL: no work light named \"boom-l-lamp-0\" on this machine. It publishes [table-work-light, feed-work-light]. Falling back to the ordinal — the beam is on SOME lamp, not the right one. Fix the name in undergroundRig(), or the model.",
+    "[env] ugFloodR: no work light named \"boom-r-lamp-0\" on this machine. It publishes [table-work-light, feed-work-light]. Falling back to the ordinal — the beam is on SOME lamp, not the right one. Fix the name in undergroundRig(), or the model."
+  ],
+  "requestsFailed": [],
+  "failures": [],
+  "browserClosed": true,
+  "passed": true
+}

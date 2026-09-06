@@ -1,0 +1,1324 @@
+{
+  "results": [
+    {
+      "width": 390,
+      "height": 844,
+      "seeded": {
+        "contractMethod": "auger",
+        "source": "glb:crawler-lite"
+      },
+      "metrics": {
+        "id": "crawler-lite",
+        "source": "glb:crawler-lite",
+        "scope": "carriage-feed",
+        "position": [
+          9.648967554470438,
+          2.5869793653358797,
+          12.563846837165082
+        ],
+        "fov": 23.285770223920004,
+        "aspect": 1.270358306188925,
+        "fit": {
+          "rigId": "crawler-lite",
+          "scope": "carriage-feed",
+          "scale": 1.1484275730326772,
+          "elevation": 1,
+          "groundCropPx": 6.99526345669193,
+          "position": [
+            9.64679161347449,
+            2.5839620393235236,
+            12.563797648977488
+          ],
+          "look": [
+            -1.7800627382006498,
+            2.985911689884961,
+            0
+          ],
+          "projected": {
+            "left": 157.25771951121416,
+            "right": 374.3999999917666,
+            "top": 79.19244753407996,
+            "bottom": 314.13079185880247
+          },
+          "registration": {
+            "x": 62.44016521144071,
+            "y": -13.304308076658504,
+            "collarErrPx": 0,
+            "groundErrPx": 0
+          }
+        },
+        "extent": {
+          "left": 157.37994891274076,
+          "right": 374.40107030114035,
+          "top": 79.43503941116472,
+          "bottom": 314.2243878634408
+        },
+        "collar": {
+          "x": 195.09403669115815,
+          "y": 359.09070799726
+        },
+        "bands": {
+          "surface": {
+            "x": 0,
+            "y": 52,
+            "w": 390,
+            "h": 307,
+            "cy": 485,
+            "gx": 0,
+            "gy": 970,
+            "gw": 780,
+            "gh": 614,
+            "uv": {
+              "x": 0,
+              "y": 0.5746445497630333,
+              "z": 1,
+              "w": 0.9383886255924171
+            }
+          },
+          "section": {
+            "x": 0,
+            "y": 359,
+            "w": 390,
+            "h": 261,
+            "cy": 224,
+            "gx": 0,
+            "gy": 448,
+            "gw": 780,
+            "gh": 522,
+            "uv": {
+              "x": 0,
+              "y": 0.2654028436018957,
+              "z": 1,
+              "w": 0.5746445497630333
+            }
+          }
+        },
+        "registration": {
+          "x": 62.272477748898396,
+          "y": -13.477496559273268,
+          "active": true,
+          "collarErrPx": 0.09403669115810942,
+          "groundErrPx": 0.09070799725997425
+        },
+        "sectionMode": "vertical",
+        "contextLost": false
+      },
+      "errors": [],
+      "warnings": [
+        "[sim] no accepted contract run — starting an unpaid preview; completion cannot award money, XP or reputation."
+      ]
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "seeded": {
+        "contractMethod": "cfa",
+        "source": "glb:cfa-rig"
+      },
+      "metrics": {
+        "id": "cfa-rig",
+        "source": "glb:cfa-rig",
+        "scope": "carriage-feed",
+        "position": [
+          46.058079878994725,
+          12.33698569911511,
+          59.98516591792121
+        ],
+        "fov": 23.273699820571505,
+        "aspect": 1.270358306188925,
+        "fit": {
+          "rigId": "cfa-rig",
+          "scope": "carriage-feed",
+          "scale": 5.483812944963574,
+          "elevation": 1,
+          "groundCropPx": 8.481197043654618,
+          "position": [
+            46.064028737694024,
+            12.338579126168042,
+            59.9929136179015
+          ],
+          "look": [
+            -8.499910064693541,
+            14.257913656905293,
+            0
+          ],
+          "projected": {
+            "left": 148.5493874524881,
+            "right": 238.8028693220608,
+            "top": 18.420000074552537,
+            "bottom": 504.3985328267582
+          },
+          "registration": {
+            "x": 62.440165211440686,
+            "y": -13.304308076658554,
+            "collarErrPx": 0,
+            "groundErrPx": 0
+          }
+        },
+        "extent": {
+          "left": 148.53153315104436,
+          "right": 238.7975491516041,
+          "top": 18.3555781133413,
+          "bottom": 504.4022531660143
+        },
+        "collar": {
+          "x": 194.98849406488847,
+          "y": 358.97429993816814
+        },
+        "bands": {
+          "surface": {
+            "x": 0,
+            "y": 52,
+            "w": 390,
+            "h": 307,
+            "cy": 485,
+            "gx": 0,
+            "gy": 970,
+            "gw": 780,
+            "gh": 614,
+            "uv": {
+              "x": 0,
+              "y": 0.5746445497630333,
+              "z": 1,
+              "w": 0.9383886255924171
+            }
+          },
+          "section": {
+            "x": 0,
+            "y": 359,
+            "w": 390,
+            "h": 261,
+            "cy": 224,
+            "gx": 0,
+            "gy": 448,
+            "gw": 780,
+            "gh": 522,
+            "uv": {
+              "x": 0,
+              "y": 0.2654028436018957,
+              "z": 1,
+              "w": 0.5746445497630333
+            }
+          }
+        },
+        "registration": {
+          "x": 62.45833323361631,
+          "y": -13.263728177578846,
+          "active": true,
+          "collarErrPx": -0.011505935111578935,
+          "groundErrPx": -0.025700061831864573
+        },
+        "sectionMode": "vertical",
+        "contextLost": false
+      },
+      "errors": [],
+      "warnings": [
+        "[sim] no accepted contract run — starting an unpaid preview; completion cannot award money, XP or reputation."
+      ]
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "seeded": {
+        "contractMethod": "driven-pile",
+        "source": "glb:pd55"
+      },
+      "metrics": {
+        "id": "pd55",
+        "source": "glb:pd55",
+        "scope": "carriage-feed",
+        "position": [
+          46.07572550978263,
+          11.56607453240539,
+          60.0081472710502
+        ],
+        "fov": 21.361807492852897,
+        "aspect": 1.387900355871886,
+        "fit": {
+          "rigId": "pd55",
+          "scope": "carriage-feed",
+          "scale": 5.485239468514919,
+          "elevation": 0.9369049072265625,
+          "groundCropPx": 8.429972939427273,
+          "position": [
+            46.076011535525325,
+            11.563082494570011,
+            60.00851978555321
+          ],
+          "look": [
+            -8.502121176198125,
+            14.300841595795942,
+            0
+          ],
+          "projected": {
+            "left": 145.89696622075218,
+            "right": 240.5522007629438,
+            "top": 16.860000018496407,
+            "bottom": 290.3963875648039
+          },
+          "registration": {
+            "x": 62.539972246027986,
+            "y": -0.30430807665853665,
+            "collarErrPx": 0,
+            "groundErrPx": 0
+          }
+        },
+        "extent": {
+          "left": 145.96901893798267,
+          "right": 240.5700755218735,
+          "top": 17.10760262857908,
+          "bottom": 290.4899781648167
+        },
+        "collar": {
+          "x": 195.04386730657367,
+          "y": 333.0967729692846
+        },
+        "bands": {
+          "surface": {
+            "x": 0,
+            "y": 52,
+            "w": 390,
+            "h": 281,
+            "cy": 511,
+            "gx": 0,
+            "gy": 1022,
+            "gw": 780,
+            "gh": 562,
+            "uv": {
+              "x": 0,
+              "y": 0.6054502369668247,
+              "z": 1,
+              "w": 0.9383886255924171
+            }
+          },
+          "section": {
+            "x": 0,
+            "y": 333,
+            "w": 390,
+            "h": 239,
+            "cy": 272,
+            "gx": 0,
+            "gy": 544,
+            "gw": 780,
+            "gh": 478,
+            "uv": {
+              "x": 0,
+              "y": 0.3222748815165877,
+              "z": 1,
+              "w": 0.6054502369668247
+            }
+          }
+        },
+        "registration": {
+          "x": 62.460363354714985,
+          "y": -0.4791700933403321,
+          "active": true,
+          "collarErrPx": 0.04386730657367366,
+          "groundErrPx": 0.09677296928460366
+        },
+        "sectionMode": "pile",
+        "contextLost": false
+      },
+      "errors": [],
+      "warnings": [
+        "[sim] no accepted contract run — starting an unpaid preview; completion cannot award money, XP or reputation."
+      ]
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "seeded": {
+        "contractMethod": "tunnel-jumbo",
+        "source": "glb:tunnel-jumbo"
+      },
+      "metrics": {
+        "id": "tunnel-jumbo",
+        "source": "glb:tunnel-jumbo",
+        "scope": "carriage-feed",
+        "position": [
+          19.344344171972246,
+          1.191240107629014,
+          25.193705385878147
+        ],
+        "fov": 21.35047298073696,
+        "aspect": 1.387900355871886,
+        "fit": {
+          "rigId": "tunnel-jumbo",
+          "scope": "carriage-feed",
+          "scale": 2.3022111551836133,
+          "elevation": 0.2295379638671875,
+          "groundCropPx": 8.429710332388368,
+          "position": [
+            19.33857370354235,
+            1.1890009371446375,
+            25.186190037708727
+          ],
+          "look": [
+            -3.5684272905346006,
+            6.277409508376068,
+            0
+          ],
+          "projected": {
+            "left": 15.600000021843124,
+            "right": 305.273070374775,
+            "top": 185.856445725576,
+            "bottom": 290.460794244102
+          },
+          "registration": {
+            "x": 63.226586327351995,
+            "y": -0.30430807665853665,
+            "collarErrPx": 0,
+            "groundErrPx": 0
+          }
+        },
+        "extent": {
+          "left": 15.698284272963253,
+          "right": 305.26604709291513,
+          "top": 185.9592634781362,
+          "bottom": 290.5209452918488
+        },
+        "collar": {
+          "x": 195.02674550606324,
+          "y": 333.05076192994323
+        },
+        "bands": {
+          "surface": {
+            "x": 0,
+            "y": 52,
+            "w": 390,
+            "h": 281,
+            "cy": 511,
+            "gx": 0,
+            "gy": 1022,
+            "gw": 780,
+            "gh": 562,
+            "uv": {
+              "x": 0,
+              "y": 0.6054502369668247,
+              "z": 1,
+              "w": 0.9383886255924171
+            }
+          },
+          "section": {
+            "x": 0,
+            "y": 333,
+            "w": 390,
+            "h": 239,
+            "cy": 272,
+            "gx": 0,
+            "gy": 544,
+            "gw": 780,
+            "gh": 478,
+            "uv": {
+              "x": 0,
+              "y": 0.3222748815165877,
+              "z": 1,
+              "w": 0.6054502369668247
+            }
+          }
+        },
+        "registration": {
+          "x": 63.18192759790067,
+          "y": -0.3897542452261862,
+          "active": true,
+          "collarErrPx": 0.02674550606324999,
+          "groundErrPx": 0.0507619299431783
+        },
+        "sectionMode": "heading",
+        "contextLost": false
+      },
+      "errors": [],
+      "warnings": [
+        "[sim] no accepted contract run — starting an unpaid preview; completion cannot award money, XP or reputation.",
+        "[qa] no generated contract for \"tunnel-jumbo\" — using a STUB. Derived from the method row: Ø48 mm, application \"tunnelling\", archetype \"underground-drive\". This is not a contract the board can deal, so difficulty, payout and ground are not representative.",
+        "[sim] no flushMedium for \"tunnel-jumbo\" — the contract does not carry one and the sim will not invent one. state.drill.flushMedium publishes null; consumers fall back to their own per-method tables. FIX: have game/data.js makeContract() copy flushMedium off the method row (or pass the row itself as contract.method)."
+      ]
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "seeded": {
+        "contractMethod": "hdd",
+        "source": "glb:hdd-rig"
+      },
+      "metrics": {
+        "id": "hdd-rig",
+        "source": "glb:hdd-rig",
+        "scope": "carriage-feed",
+        "position": [
+          17.230182615993243,
+          1.1892548329894448,
+          22.440261645115
+        ],
+        "fov": 23.26463805479819,
+        "aspect": 1.270358306188925,
+        "fit": {
+          "rigId": "hdd-rig",
+          "scope": "carriage-feed",
+          "scale": 2.050532597117126,
+          "elevation": 0.2577667236328125,
+          "groundCropPx": 9.209721061961488,
+          "position": [
+            17.22447381578386,
+            1.1892579058376178,
+            22.43282661246136
+          ],
+          "look": [
+            -3.1783255255315455,
+            5.578474255188346,
+            0
+          ],
+          "projected": {
+            "left": 15.600000019562863,
+            "right": 289.3282834104027,
+            "top": 206.57213590672444,
+            "bottom": 331.71607396838766
+          },
+          "registration": {
+            "x": 63.2149531986162,
+            "y": -13.304308076658504,
+            "collarErrPx": 0,
+            "groundErrPx": 0
+          }
+        },
+        "extent": {
+          "left": 15.593116029125772,
+          "right": 289.3285121026888,
+          "top": 206.55586959827943,
+          "bottom": 331.69547541423043
+        },
+        "collar": {
+          "x": 194.99314476527437,
+          "y": 358.98353621966595
+        },
+        "bands": {
+          "surface": {
+            "x": 0,
+            "y": 52,
+            "w": 390,
+            "h": 307,
+            "cy": 485,
+            "gx": 0,
+            "gy": 970,
+            "gw": 780,
+            "gh": 614,
+            "uv": {
+              "x": 0,
+              "y": 0.5746445497630333,
+              "z": 1,
+              "w": 0.9383886255924171
+            }
+          },
+          "section": {
+            "x": 0,
+            "y": 359,
+            "w": 390,
+            "h": 261,
+            "cy": 224,
+            "gx": 0,
+            "gy": 448,
+            "gw": 780,
+            "gh": 522,
+            "uv": {
+              "x": 0,
+              "y": 0.2654028436018957,
+              "z": 1,
+              "w": 0.5746445497630333
+            }
+          }
+        },
+        "registration": {
+          "x": 63.23047647982234,
+          "y": -13.268333476221938,
+          "active": true,
+          "collarErrPx": -0.006855234725648529,
+          "groundErrPx": -0.01646378033403728
+        },
+        "sectionMode": "profile",
+        "contextLost": false
+      },
+      "errors": [],
+      "warnings": [
+        "[sim] no accepted contract run — starting an unpaid preview; completion cannot award money, XP or reputation.",
+        "[qa] no generated contract for \"tunnel-jumbo\" — using a STUB. Derived from the method row: Ø48 mm, application \"tunnelling\", archetype \"underground-drive\". This is not a contract the board can deal, so difficulty, payout and ground are not representative.",
+        "[sim] no flushMedium for \"tunnel-jumbo\" — the contract does not carry one and the sim will not invent one. state.drill.flushMedium publishes null; consumers fall back to their own per-method tables. FIX: have game/data.js makeContract() copy flushMedium off the method row (or pass the row itself as contract.method).",
+        "[qa] no generated contract for \"hdd\" — using a STUB. Derived from the method row: Ø300 mm, application \"utility-hdd\", archetype \"infrastructure-corridor\". This is not a contract the board can deal, so difficulty, payout and ground are not representative."
+      ]
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "seeded": {
+        "contractMethod": "longhole",
+        "source": "glb:longhole-rig"
+      },
+      "metrics": {
+        "id": "longhole-rig",
+        "source": "glb:longhole-rig",
+        "scope": "carriage-feed",
+        "position": [
+          11.23996210164071,
+          0.6847916254169089,
+          14.638712546660633
+        ],
+        "fov": 21.35318514708521,
+        "aspect": 1.387900355871886,
+        "fit": {
+          "rigId": "longhole-rig",
+          "scope": "carriage-feed",
+          "scale": 1.3375523108989,
+          "elevation": 0.2274169921875,
+          "groundCropPx": 8.429549918915484,
+          "position": [
+            11.235439411550761,
+            0.6844097777356524,
+            14.632822281233965
+          ],
+          "look": [
+            -2.073206081893295,
+            3.6477149332582646,
+            0
+          ],
+          "projected": {
+            "left": 15.60000004431807,
+            "right": 322.63852674854434,
+            "top": 22.60174674237171,
+            "bottom": 290.1911686189898
+          },
+          "registration": {
+            "x": 63.22740618929712,
+            "y": -0.30430807665853665,
+            "collarErrPx": 0,
+            "groundErrPx": 0
+          }
+        },
+        "extent": {
+          "left": 15.75954870727741,
+          "right": 322.6152216861677,
+          "top": 22.867181409139224,
+          "bottom": 290.2820947898871
+        },
+        "collar": {
+          "x": 195.0444990675915,
+          "y": 333.0959486563555
+        },
+        "bands": {
+          "surface": {
+            "x": 0,
+            "y": 52,
+            "w": 390,
+            "h": 281,
+            "cy": 511,
+            "gx": 0,
+            "gy": 1022,
+            "gw": 780,
+            "gh": 562,
+            "uv": {
+              "x": 0,
+              "y": 0.6054502369668247,
+              "z": 1,
+              "w": 0.9383886255924171
+            }
+          },
+          "section": {
+            "x": 0,
+            "y": 333,
+            "w": 390,
+            "h": 239,
+            "cy": 272,
+            "gx": 0,
+            "gy": 544,
+            "gw": 780,
+            "gh": 478,
+            "uv": {
+              "x": 0,
+              "y": 0.3222748815165877,
+              "z": 1,
+              "w": 0.6054502369668247
+            }
+          }
+        },
+        "registration": {
+          "x": 63.15178853656516,
+          "y": -0.467413988933962,
+          "active": true,
+          "collarErrPx": 0.044499067591523556,
+          "groundErrPx": 0.09594865635556638
+        },
+        "sectionMode": "vertical",
+        "contextLost": false
+      },
+      "errors": [],
+      "warnings": [
+        "[sim] no accepted contract run — starting an unpaid preview; completion cannot award money, XP or reputation.",
+        "[qa] no generated contract for \"tunnel-jumbo\" — using a STUB. Derived from the method row: Ø48 mm, application \"tunnelling\", archetype \"underground-drive\". This is not a contract the board can deal, so difficulty, payout and ground are not representative.",
+        "[sim] no flushMedium for \"tunnel-jumbo\" — the contract does not carry one and the sim will not invent one. state.drill.flushMedium publishes null; consumers fall back to their own per-method tables. FIX: have game/data.js makeContract() copy flushMedium off the method row (or pass the row itself as contract.method).",
+        "[qa] no generated contract for \"hdd\" — using a STUB. Derived from the method row: Ø300 mm, application \"utility-hdd\", archetype \"infrastructure-corridor\". This is not a contract the board can deal, so difficulty, payout and ground are not representative.",
+        "[qa] no generated contract for \"longhole\" — using a STUB. Derived from the method row: Ø89 mm, application \"mining\", archetype \"underground-drive\". This is not a contract the board can deal, so difficulty, payout and ground are not representative.",
+        "[env] ugFloodL: no work light named \"feed-head\" on this machine. It publishes [tram-f-00, tram-f-01, tram-f-10, tram-f-11, boom-l-lamp-0, boom-l-lamp-1, boom-r-lamp-0, boom-r-lamp-1, station, tram-r-0, tram-r-1]. Falling back to the ordinal — the beam is on SOME lamp, not the right one. Fix the name in undergroundRig(), or the model."
+      ]
+    },
+    {
+      "width": 320,
+      "height": 740,
+      "seeded": {
+        "contractMethod": "auger",
+        "source": "glb:crawler-lite"
+      },
+      "metrics": {
+        "id": "crawler-lite",
+        "source": "glb:crawler-lite",
+        "scope": "carriage-feed",
+        "position": [
+          9.660437952601532,
+          2.587652126561954,
+          12.581530525638513
+        ],
+        "fov": 23.183359737291156,
+        "aspect": 1.2749003984063745,
+        "fit": {
+          "rigId": "crawler-lite",
+          "scope": "carriage-feed",
+          "scale": 1.1494466438889503,
+          "elevation": 1,
+          "groundCropPx": 5.738358557559025,
+          "position": [
+            9.655351808667183,
+            2.5862549487501383,
+            12.574946284145117
+          ],
+          "look": [
+            -1.781642298027873,
+            2.988561274111271,
+            0
+          ],
+          "projected": {
+            "left": 129.03678179818553,
+            "right": 307.1999999570455,
+            "top": 64.12347739158261,
+            "bottom": 256.8495352711456
+          },
+          "registration": {
+            "x": 51.268998212711274,
+            "y": -10.386712674317954,
+            "collarErrPx": 0,
+            "groundErrPx": 0
+          }
+        },
+        "extent": {
+          "left": 129.09204417615098,
+          "right": 307.1245854009827,
+          "top": 64.34572653169968,
+          "bottom": 256.91035044209985
+        },
+        "collar": {
+          "x": 160.02981483477726,
+          "y": 303.0659212530078
+        },
+        "bands": {
+          "surface": {
+            "x": 0,
+            "y": 52,
+            "w": 320,
+            "h": 251,
+            "cy": 437,
+            "gx": 0,
+            "gy": 874,
+            "gw": 640,
+            "gh": 502,
+            "uv": {
+              "x": 0,
+              "y": 0.5905405405405406,
+              "z": 1,
+              "w": 0.9297297297297298
+            }
+          },
+          "section": {
+            "x": 0,
+            "y": 303,
+            "w": 320,
+            "h": 213,
+            "cy": 224,
+            "gx": 0,
+            "gy": 448,
+            "gw": 640,
+            "gh": 426,
+            "uv": {
+              "x": 0,
+              "y": 0.3027027027027027,
+              "z": 1,
+              "w": 0.5905405405405406
+            }
+          }
+        },
+        "registration": {
+          "x": 51.20443083051361,
+          "y": -10.529872384244845,
+          "active": true,
+          "collarErrPx": 0.029814834777262433,
+          "groundErrPx": 0.06592125300776353
+        },
+        "sectionMode": "vertical",
+        "contextLost": false
+      },
+      "errors": [],
+      "warnings": [
+        "[sim] no accepted contract run — starting an unpaid preview; completion cannot award money, XP or reputation."
+      ]
+    },
+    {
+      "width": 320,
+      "height": 740,
+      "seeded": {
+        "contractMethod": "cfa",
+        "source": "glb:cfa-rig"
+      },
+      "metrics": {
+        "id": "cfa-rig",
+        "source": "glb:cfa-rig",
+        "scope": "carriage-feed",
+        "position": [
+          46.244658299107456,
+          12.38696204454039,
+          60.22816211796692
+        ],
+        "fov": 23.17800057117179,
+        "aspect": 1.2749003984063745,
+        "fit": {
+          "rigId": "cfa-rig",
+          "scope": "carriage-feed",
+          "scale": 5.505980102345347,
+          "elevation": 1,
+          "groundCropPx": 6.933858144756812,
+          "position": [
+            46.25023285970092,
+            12.388455230277032,
+            60.2354223196581
+          ],
+          "look": [
+            -8.534269158635288,
+            14.315548266097904,
+            0
+          ],
+          "projected": {
+            "left": 122.01591512747208,
+            "right": 195.82383731851323,
+            "top": 15.060000063259546,
+            "bottom": 412.3803158043091
+          },
+          "registration": {
+            "x": 51.268998212711224,
+            "y": -10.386712674317968,
+            "collarErrPx": 0,
+            "groundErrPx": 0
+          }
+        },
+        "extent": {
+          "left": 122.00749072319266,
+          "right": 195.8222161668059,
+          "top": 15.028046941052649,
+          "bottom": 412.38554875810064
+        },
+        "collar": {
+          "x": 159.99500362586207,
+          "y": 302.9888393314449
+        },
+        "bands": {
+          "surface": {
+            "x": 0,
+            "y": 52,
+            "w": 320,
+            "h": 251,
+            "cy": 437,
+            "gx": 0,
+            "gy": 874,
+            "gw": 640,
+            "gh": 502,
+            "uv": {
+              "x": 0,
+              "y": 0.5905405405405406,
+              "z": 1,
+              "w": 0.9297297297297298
+            }
+          },
+          "section": {
+            "x": 0,
+            "y": 303,
+            "w": 320,
+            "h": 213,
+            "cy": 224,
+            "gx": 0,
+            "gy": 448,
+            "gw": 640,
+            "gh": 426,
+            "uv": {
+              "x": 0,
+              "y": 0.3027027027027027,
+              "z": 1,
+              "w": 0.5905405405405406
+            }
+          }
+        },
+        "registration": {
+          "x": 51.27704315906476,
+          "y": -10.36876544823979,
+          "active": true,
+          "collarErrPx": -0.004996374137931525,
+          "groundErrPx": -0.011160668555087128
+        },
+        "sectionMode": "vertical",
+        "contextLost": false
+      },
+      "errors": [],
+      "warnings": [
+        "[sim] no accepted contract run — starting an unpaid preview; completion cannot award money, XP or reputation."
+      ]
+    },
+    {
+      "width": 320,
+      "height": 740,
+      "seeded": {
+        "contractMethod": "driven-pile",
+        "source": "glb:pd55"
+      },
+      "metrics": {
+        "id": "pd55",
+        "source": "glb:pd55",
+        "scope": "carriage-feed",
+        "position": [
+          47.176624833038964,
+          11.845651544986309,
+          61.441937580172144
+        ],
+        "fov": 20.838195716857623,
+        "aspect": 1.4222222222222223,
+        "fit": {
+          "rigId": "pd55",
+          "scope": "carriage-feed",
+          "scale": 5.616881441324949,
+          "elevation": 0.93719482421875,
+          "groundCropPx": 6.749942732000505,
+          "position": [
+            47.18180410712957,
+            11.844252483885214,
+            61.44868296809494
+          ],
+          "look": [
+            -8.706166234053672,
+            14.643860187340268,
+            0
+          ],
+          "projected": {
+            "left": 120.64100220898933,
+            "right": 196.5460492583766,
+            "top": 13.500000071932758,
+            "bottom": 232.52351025252506
+          },
+          "registration": {
+            "x": 51.35058355896882,
+            "y": 2.6132873256820286,
+            "collarErrPx": 0,
+            "groundErrPx": 0
+          }
+        },
+        "extent": {
+          "left": 120.66401706147619,
+          "right": 196.5532022758075,
+          "top": 13.575815133917319,
+          "bottom": 232.55596752189663
+        },
+        "collar": {
+          "x": 160.01483535050517,
+          "y": 277.03245796029523
+        },
+        "bands": {
+          "surface": {
+            "x": 0,
+            "y": 52,
+            "w": 320,
+            "h": 225,
+            "cy": 463,
+            "gx": 0,
+            "gy": 926,
+            "gw": 640,
+            "gh": 450,
+            "uv": {
+              "x": 0,
+              "y": 0.6256756756756756,
+              "z": 1,
+              "w": 0.9297297297297298
+            }
+          },
+          "section": {
+            "x": 0,
+            "y": 277,
+            "w": 320,
+            "h": 191,
+            "cy": 272,
+            "gx": 0,
+            "gy": 544,
+            "gw": 640,
+            "gh": 382,
+            "uv": {
+              "x": 0,
+              "y": 0.3675675675675676,
+              "z": 1,
+              "w": 0.6256756756756756
+            }
+          }
+        },
+        "registration": {
+          "x": 51.32305839043206,
+          "y": 2.553672166763026,
+          "active": true,
+          "collarErrPx": 0.01483535050517304,
+          "groundErrPx": 0.03245796029522818
+        },
+        "sectionMode": "pile",
+        "contextLost": false
+      },
+      "errors": [],
+      "warnings": [
+        "[sim] no accepted contract run — starting an unpaid preview; completion cannot award money, XP or reputation."
+      ]
+    },
+    {
+      "width": 320,
+      "height": 740,
+      "seeded": {
+        "contractMethod": "tunnel-jumbo",
+        "source": "glb:tunnel-jumbo"
+      },
+      "metrics": {
+        "id": "tunnel-jumbo",
+        "source": "glb:tunnel-jumbo",
+        "scope": "carriage-feed",
+        "position": [
+          19.354873016526273,
+          1.1628424091404754,
+          25.20741795247589
+        ],
+        "fov": 20.832593995023473,
+        "aspect": 1.4222222222222223,
+        "fit": {
+          "rigId": "tunnel-jumbo",
+          "scope": "carriage-feed",
+          "scale": 2.303579912520945,
+          "elevation": 0.2239990234375,
+          "groundCropPx": 6.74959302686176,
+          "position": [
+            19.350071265175938,
+            1.1609992143336,
+            25.20116424297914
+          ],
+          "look": [
+            -3.5705488644074648,
+            6.283970718294023,
+            0
+          ],
+          "projected": {
+            "left": 12.800000044329174,
+            "right": 250.50206637877753,
+            "top": 146.78046559049392,
+            "bottom": 232.59556170718506
+          },
+          "registration": {
+            "x": 51.91646568640823,
+            "y": 2.6132873256820788,
+            "collarErrPx": 0,
+            "groundErrPx": 0
+          }
+        },
+        "extent": {
+          "left": 12.861332687566236,
+          "right": 250.48735204868078,
+          "top": 146.8361314967994,
+          "bottom": 232.62061678512143
+        },
+        "collar": {
+          "x": 160.0099172591206,
+          "y": 277.0187991537276
+        },
+        "bands": {
+          "surface": {
+            "x": 0,
+            "y": 52,
+            "w": 320,
+            "h": 225,
+            "cy": 463,
+            "gx": 0,
+            "gy": 926,
+            "gw": 640,
+            "gh": 450,
+            "uv": {
+              "x": 0,
+              "y": 0.6256756756756756,
+              "z": 1,
+              "w": 0.9297297297297298
+            }
+          },
+          "section": {
+            "x": 0,
+            "y": 277,
+            "w": 320,
+            "h": 191,
+            "cy": 272,
+            "gx": 0,
+            "gy": 544,
+            "gw": 640,
+            "gh": 382,
+            "uv": {
+              "x": 0,
+              "y": 0.3675675675675676,
+              "z": 1,
+              "w": 0.6256756756756756
+            }
+          }
+        },
+        "registration": {
+          "x": 51.893820194871026,
+          "y": 2.569588992086168,
+          "active": true,
+          "collarErrPx": 0.00991725912065533,
+          "groundErrPx": 0.018799153727669715
+        },
+        "sectionMode": "heading",
+        "contextLost": false
+      },
+      "errors": [],
+      "warnings": [
+        "[sim] no accepted contract run — starting an unpaid preview; completion cannot award money, XP or reputation.",
+        "[qa] no generated contract for \"tunnel-jumbo\" — using a STUB. Derived from the method row: Ø48 mm, application \"tunnelling\", archetype \"underground-drive\". This is not a contract the board can deal, so difficulty, payout and ground are not representative.",
+        "[sim] no flushMedium for \"tunnel-jumbo\" — the contract does not carry one and the sim will not invent one. state.drill.flushMedium publishes null; consumers fall back to their own per-method tables. FIX: have game/data.js makeContract() copy flushMedium off the method row (or pass the row itself as contract.method)."
+      ]
+    },
+    {
+      "width": 320,
+      "height": 740,
+      "seeded": {
+        "contractMethod": "hdd",
+        "source": "glb:hdd-rig"
+      },
+      "metrics": {
+        "id": "hdd-rig",
+        "source": "glb:hdd-rig",
+        "scope": "carriage-feed",
+        "position": [
+          17.240802763684055,
+          1.1857059048314402,
+          22.454093123178996
+        ],
+        "fov": 23.168563315342197,
+        "aspect": 1.2749003984063745,
+        "fit": {
+          "rigId": "hdd-rig",
+          "scope": "carriage-feed",
+          "scale": 2.051769479177892,
+          "elevation": 0.256866455078125,
+          "groundCropPx": 7.529823620493687,
+          "position": [
+            17.234863625094295,
+            1.185819193696311,
+            22.44635810220614
+          ],
+          "look": [
+            -3.180242692725733,
+            5.582240228240194,
+            0
+          ],
+          "projected": {
+            "left": 12.800000031397314,
+            "right": 237.40963446838924,
+            "top": 168.57745342533067,
+            "bottom": 271.2521140199953
+          },
+          "registration": {
+            "x": 51.90549054220444,
+            "y": -10.386712674317927,
+            "collarErrPx": 0,
+            "groundErrPx": 0
+          }
+        },
+        "extent": {
+          "left": 12.799313162685522,
+          "right": 237.40750888812997,
+          "top": 168.5667368179288,
+          "bottom": 271.23422089175887
+        },
+        "collar": {
+          "x": 159.9943803104193,
+          "y": 302.9869949306419
+        },
+        "bands": {
+          "surface": {
+            "x": 0,
+            "y": 52,
+            "w": 320,
+            "h": 251,
+            "cy": 437,
+            "gx": 0,
+            "gy": 874,
+            "gw": 640,
+            "gh": 502,
+            "uv": {
+              "x": 0,
+              "y": 0.5905405405405406,
+              "z": 1,
+              "w": 0.9297297297297298
+            }
+          },
+          "section": {
+            "x": 0,
+            "y": 303,
+            "w": 320,
+            "h": 213,
+            "cy": 224,
+            "gx": 0,
+            "gy": 448,
+            "gw": 640,
+            "gh": 426,
+            "uv": {
+              "x": 0,
+              "y": 0.3027027027027027,
+              "z": 1,
+              "w": 0.5905405405405406
+            }
+          }
+        },
+        "registration": {
+          "x": 51.91779090685516,
+          "y": -10.358840501663053,
+          "active": true,
+          "collarErrPx": -0.0056196895806834846,
+          "groundErrPx": -0.013005069358086985
+        },
+        "sectionMode": "profile",
+        "contextLost": false
+      },
+      "errors": [],
+      "warnings": [
+        "[sim] no accepted contract run — starting an unpaid preview; completion cannot award money, XP or reputation.",
+        "[qa] no generated contract for \"tunnel-jumbo\" — using a STUB. Derived from the method row: Ø48 mm, application \"tunnelling\", archetype \"underground-drive\". This is not a contract the board can deal, so difficulty, payout and ground are not representative.",
+        "[sim] no flushMedium for \"tunnel-jumbo\" — the contract does not carry one and the sim will not invent one. state.drill.flushMedium publishes null; consumers fall back to their own per-method tables. FIX: have game/data.js makeContract() copy flushMedium off the method row (or pass the row itself as contract.method).",
+        "[qa] no generated contract for \"hdd\" — using a STUB. Derived from the method row: Ø300 mm, application \"utility-hdd\", archetype \"infrastructure-corridor\". This is not a contract the board can deal, so difficulty, payout and ground are not representative."
+      ]
+    },
+    {
+      "width": 320,
+      "height": 740,
+      "seeded": {
+        "contractMethod": "longhole",
+        "source": "glb:longhole-rig"
+      },
+      "metrics": {
+        "id": "longhole-rig",
+        "source": "glb:longhole-rig",
+        "scope": "carriage-feed",
+        "position": [
+          11.27346751509731,
+          0.6723543059015075,
+          14.682349358948159
+        ],
+        "fov": 20.836312355795023,
+        "aspect": 1.4222222222222223,
+        "fit": {
+          "rigId": "longhole-rig",
+          "scope": "carriage-feed",
+          "scale": 1.3414447782561183,
+          "elevation": 0.2226104736328125,
+          "groundCropPx": 6.74990088263084,
+          "position": [
+            11.268136137351394,
+            0.6718942292396797,
+            14.675405874121934
+          ],
+          "look": [
+            -2.0792394062969835,
+            3.6597616043150003,
+            0
+          ],
+          "projected": {
+            "left": 13.196661408693782,
+            "right": 264.5405261563074,
+            "top": 13.500000057728034,
+            "bottom": 232.37290934857157
+          },
+          "registration": {
+            "x": 51.91689646431307,
+            "y": 2.613287325682054,
+            "collarErrPx": 0,
+            "groundErrPx": 0
+          }
+        },
+        "extent": {
+          "left": 13.356976995792742,
+          "right": 264.5154451826472,
+          "top": 13.766339117566359,
+          "bottom": 232.4633809091051
+        },
+        "collar": {
+          "x": 160.0441557292686,
+          "y": 277.09528865430275
+        },
+        "bands": {
+          "surface": {
+            "x": 0,
+            "y": 52,
+            "w": 320,
+            "h": 225,
+            "cy": 463,
+            "gx": 0,
+            "gy": 926,
+            "gw": 640,
+            "gh": 450,
+            "uv": {
+              "x": 0,
+              "y": 0.6256756756756756,
+              "z": 1,
+              "w": 0.9297297297297298
+            }
+          },
+          "section": {
+            "x": 0,
+            "y": 277,
+            "w": 320,
+            "h": 191,
+            "cy": 272,
+            "gx": 0,
+            "gy": 544,
+            "gw": 640,
+            "gh": 382,
+            "uv": {
+              "x": 0,
+              "y": 0.3675675675675676,
+              "z": 1,
+              "w": 0.6256756756756756
+            }
+          }
+        },
+        "registration": {
+          "x": 51.840850093990866,
+          "y": 2.449112079571779,
+          "active": true,
+          "collarErrPx": 0.04415572926859568,
+          "groundErrPx": 0.09528865430273203
+        },
+        "sectionMode": "vertical",
+        "contextLost": false
+      },
+      "errors": [],
+      "warnings": [
+        "[sim] no accepted contract run — starting an unpaid preview; completion cannot award money, XP or reputation.",
+        "[qa] no generated contract for \"tunnel-jumbo\" — using a STUB. Derived from the method row: Ø48 mm, application \"tunnelling\", archetype \"underground-drive\". This is not a contract the board can deal, so difficulty, payout and ground are not representative.",
+        "[sim] no flushMedium for \"tunnel-jumbo\" — the contract does not carry one and the sim will not invent one. state.drill.flushMedium publishes null; consumers fall back to their own per-method tables. FIX: have game/data.js makeContract() copy flushMedium off the method row (or pass the row itself as contract.method).",
+        "[qa] no generated contract for \"hdd\" — using a STUB. Derived from the method row: Ø300 mm, application \"utility-hdd\", archetype \"infrastructure-corridor\". This is not a contract the board can deal, so difficulty, payout and ground are not representative.",
+        "[qa] no generated contract for \"longhole\" — using a STUB. Derived from the method row: Ø89 mm, application \"mining\", archetype \"underground-drive\". This is not a contract the board can deal, so difficulty, payout and ground are not representative.",
+        "[env] ugFloodL: no work light named \"feed-head\" on this machine. It publishes [tram-f-00, tram-f-01, tram-f-10, tram-f-11, boom-l-lamp-0, boom-l-lamp-1, boom-r-lamp-0, boom-r-lamp-1, station, tram-r-0, tram-r-1]. Falling back to the ordinal — the beam is on SOME lamp, not the right one. Fix the name in undergroundRig(), or the model."
+      ]
+    }
+  ],
+  "errors": [],
+  "requestsFailed": [],
+  "passed": true,
+  "browserClosed": true
+}
