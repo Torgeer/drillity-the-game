@@ -1,5 +1,22 @@
 # Drillity handover for Claude
 
+## Later harness WIP — 2026-09-06, 04:55 heartbeat
+
+The saved performance harness's time-of-day false failure is now corrected in
+its private worktree. The actual gate accepts the requested or normalized
+representation initially, then requires exactly unchanged time across snapshots.
+Four tests execute the frozen environment setter, including its early return
+and rejection of changed time. All19 CPU checks pass; root reviewed the delta
+and independently reran them. No game code, frozen input or performance gate
+changed. Runtime remains0/8, with the dependency denial and broader state/device
+validation gaps still open.
+
+The original five-path patch is unchanged. Apply the separate
+`handoff/pending-2026-09-06/optimized-rig-identity-fix.patch` after it, or use the
+exact later harness `rig-runtime-identity-fixed.mjs` at its original tools path.
+The adjacent report/hash manifest identifies both versions. All98 frozen served
+files remain unchanged. This is preserved WIP, not an integrated runtime pass.
+
 ## Reserve resources — 2026-09-06, 04:30 heartbeat
 
 Live allowance7% remaining. Root QA server5198/session22747 was stopped after

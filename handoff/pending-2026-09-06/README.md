@@ -1,5 +1,11 @@
 # Preserved candidate work — NOT integrated or accepted
 
+**Later runtime-harness WIP:** `optimized-rig-identity-fix.patch` corrects only
+the time-of-day false failure and applies after the original five-path runtime
+patch. `rig-runtime-identity-fixed.mjs` is the exact later complete harness;
+see the adjacent fix report/hash manifest. Its19 CPU checks pass; runtime0/8
+and the broader device/state gaps remain open. Original snapshots are unchanged.
+
 **Later update:** quarry alone has since been approved and integrated after a
 texture-readiness capture resolved the gray-rock finding. Read the latest
 `research/sites/quarry-live-collar-integration.md` and `handover.md`. This frozen

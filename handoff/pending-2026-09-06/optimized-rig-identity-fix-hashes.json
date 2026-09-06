@@ -1,0 +1,7 @@
+{
+  "harnessSHA256": "0777a650bddf731b46c47c9f40780501f3b74ba01dc031f4c416cca92b96538d",
+  "oldHarnessSHA256": "dded0bc81fced7419fd165798b4561592b2879d8043615f7a98bf7b5b5a7ed36",
+  "deltaSHA256": "dd6e30a404cdf85c7aafa74e2e464e47722daecf4db4d5c3829cf2ce307da621",
+  "originalPatchSHA256": "d9174c81a38bf5981e84deb9ba33b1d14ea17737fec68f05671d7ea8ccd3a987",
+  "frozenFilesUnchanged": 98
+}
