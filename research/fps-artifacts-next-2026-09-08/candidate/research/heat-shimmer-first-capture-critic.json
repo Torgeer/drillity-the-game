@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "generated": "2026-09-08T13:58:41.846Z",
+  "originalCapture": "oil-orbit-pairs-01",
+  "originalValid": false,
+  "originalProtocol": "live-shimmer-pairs-v1",
+  "hashes": {
+    "report.json": "b1653921d9bc19e36d60ba14e71b6856f7489e17095cf6d4240db551628555ca",
+    "cpu-live.cpuprofile": "7589bc34054a80ebd231a994074ceb730f1d4cfc114a3347ebf372d39783ee7c",
+    "trace-live.json": "c5dcd31f555f0efa454867763e13e62d57159fad1e21edfd398317d3727ae596"
+  },
+  "differences": [
+    {
+      "path": "identity.materials.31.version",
+      "before": 4409,
+      "after": 4411
+    },
+    {
+      "path": "bufferRoles.2.texture",
+      "before": "f6a4d718-c124-4bd0-ab44-d83c05471d91",
+      "after": "09b62a28-9efe-4955-8c65-a430b93296ab"
+    },
+    {
+      "path": "bufferRoles.3.texture",
+      "before": "09b62a28-9efe-4955-8c65-a430b93296ab",
+      "after": "f6a4d718-c124-4bd0-ab44-d83c05471d91"
+    },
+    {
+      "path": "bufferRoles.4.texture",
+      "before": "f6a4d718-c124-4bd0-ab44-d83c05471d91",
+      "after": "09b62a28-9efe-4955-8c65-a430b93296ab"
+    },
+    {
+      "path": "bufferRoles.5.texture",
+      "before": "09b62a28-9efe-4955-8c65-a430b93296ab",
+      "after": "f6a4d718-c124-4bd0-ab44-d83c05471d91"
+    }
+  ],
+  "strictIdentityDifferences": [
+    {
+      "path": "identity.materials.31.version",
+      "before": 4409,
+      "after": 4411
+    }
+  ],
+  "allocationDifferences": [],
+  "sources": [
+    {
+      "path": "node_modules/three/src/renderers/WebGLRenderer.js",
+      "sha256": "5e1c9947765ee582907929a3af84831a998352b1c6522aaeac5095570e40d36f",
+      "primaryUrl": "https://raw.githubusercontent.com/mrdoob/three.js/r169/src/renderers/WebGLRenderer.js",
+      "primarySha256": "5e1c9947765ee582907929a3af84831a998352b1c6522aaeac5095570e40d36f",
+      "sameBytes": true
+    },
+    {
+      "path": "node_modules/three/src/materials/Material.js",
+      "sha256": "79b3255524d8c5f1d62b5dc96f2096b9a75db861c436d643ac1fbedaceea7b40",
+      "primaryUrl": "https://raw.githubusercontent.com/mrdoob/three.js/r169/src/materials/Material.js",
+      "primarySha256": "79b3255524d8c5f1d62b5dc96f2096b9a75db861c436d643ac1fbedaceea7b40",
+      "sameBytes": true
+    }
+  ],
+  "browserProtocol": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/152.0.7977.76",
+    "revision": "@0d89dfa2dd7c1ec4b8a14b9f303f887bb63b6174",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+    "jsVersion": "15.2.124.19"
+  },
+  "sourceUnchanged": true,
+  "browserClosed": true,
+  "serverClosed": true,
+  "measuredPairMembers": 1,
+  "interpretation": "Source-consistent DoubleSide version increments, not witnessed in the original capture. Four buffer-role swaps were already explicit diagnostic observations outside identity. No accepted pair or performance inference."
+}

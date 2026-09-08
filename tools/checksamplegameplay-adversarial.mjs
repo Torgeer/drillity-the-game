@@ -12,7 +12,7 @@ import { getMethod, getItem, RIGS, CERTS, defaultLoadoutFor, makeContract } from
 import { createProgression, SAVE_KEY, SAVE_BACKUP_KEY } from '../src/game/progression.js';
 import { createDrillSim } from '../src/sim/drilling.js';
 import { restoreSampleLedger, summariseSampleLedger } from '../src/sim/sample-ledger.js';
-import { readSampleProduct } from '../src/sim/sample-product.js';
+import { readSampleProduct, sampleOperatingRecord } from '../src/sim/sample-product.js';
 import { GRADES } from '../src/ui/screens/catalog.js';
 import { sampleUnitCard } from '../src/ui/screens/site.js';
 
@@ -40,7 +40,7 @@ function definition(kind, name) {
   return siteSource.slice(matches[0].start, matches[0].end);
 }
 function siteCallbacks(ctx) {
-  return new Function('ctx', 'SCENES', `
+  return new Function('ctx', 'SCENES', 'sampleOperatingRecord', `
     const state=ctx.state, notes=[], journal=[];
     const say=(...v)=>notes.push(v), log=(...v)=>journal.push(v);
     const clearAlert=()=>{}, resetWell=()=>{}, resetProgramme=()=>{};
@@ -49,7 +49,7 @@ function siteCallbacks(ctx) {
     return { notes, journal, pulse:firePulse, invalidate:invalidateActionOutcomes,
       observe(p=ctx.sim.getTelemetry().programme){observeSampleProduct(p);},
       unmount:({${definition('method', 'unmount')}}).unmount };
-  `)(ctx, SCENES);
+  `)(ctx, SCENES, sampleOperatingRecord);
 }
 const resultSource = readFileSync(new URL('../src/ui/screens/results.js', import.meta.url), 'utf8');
 const resultNodes = [];
@@ -100,7 +100,8 @@ async function fixture(methodId = 'core', targetDepth = 3.25, options = {}) {
   state.garage.owned = Object.values(state.garage.loadout).filter(Boolean);
   const contract = options.contract || { id: `sampling-critic-${methodId}-${++fixtureCounter}`, title: 'Sampling boundary fixture',
     methodId, regionId: 'nordic', applicationId: 'mineral-exploration', archetype: 'exploration-pad',
-    targetDepth, holes: 1, metres: targetDepth, holeDia: method.nominalDia,
+    targetDepth, holes: 1, metres: targetDepth,
+    holeDia: methodId === 'core' ? getItem(defaultLoadoutFor('core', 60).bit).sampling.holeDiameterMm : method.nominalDia,
     payout: 10000, bonus: { time: 1000, quality: 1000 }, deadlineHours: 24,
     reputationReward: 10, requiredCerts: [], difficulty: 1, hardness: .2, abrasivity: .2, seed: 194,
     ground: [{ id: methodId === 'core' ? 'limestone' : 'clay', top: 0, bottom: 1000 }], flushMedium: method.flushMedium };
@@ -333,6 +334,10 @@ test('actual Site callbacks distinguish started retrieval from completed custody
   ui.observe(); ui.observe();
   assert.equal(ui.journal.filter(row => /Box 1 logged/.test(row[1])).length, 1,
     'handling evidence from the previous row must survive a new current interval');
+  const record = sampleOperatingRecord(f.sim.getTelemetry().programme.intervals[0], 'core');
+  assert.ok(record, 'actual handled core interval carries the composed operating record');
+  assert.equal(ui.journal.filter(row => row[1] === `${record.text} · ${record.cuttingTime} drilling play time`).length, 1,
+    'the real operating helper is composed into the actual observer and logged only once');
 });
 test('actual Site sampling observer rejects stale prior-attempt or unmounted-screen snapshots', async () => {
   const f = await fixture('core', 6.5), ui = siteCallbacks(f.ctx); boundary(f);

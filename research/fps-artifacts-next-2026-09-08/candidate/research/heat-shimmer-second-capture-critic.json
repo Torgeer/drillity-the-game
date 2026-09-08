@@ -1,0 +1,559 @@
+{
+  "version": 1,
+  "generated": "2026-09-08T14:08:21.981Z",
+  "originalValid": true,
+  "protocol": "live-shimmer-pairs-v2",
+  "hashes": {
+    "report.json": "f4f03965785453a1c79db3b11b8f7d1018cd9876fc85129d0c564cffa123fc46",
+    "cpu-live.cpuprofile": "4dbf8cd0283b4e5a6553a71533b993e1c92b74d36ec86b9f7a8815711c22a301",
+    "trace-live.json": "eb4dd9ccc45834db888720a7f8bd0634f8bc128255dd8a39f4bb9b7b5d0c5f47",
+    "paired-analysis.json": "1499da747e278562e062e443d7dcbd2deb258ca61b6dbdd584600d5545f63b1f"
+  },
+  "checks": {
+    "pairFrames": true,
+    "queryRouting": true,
+    "witnesses": true,
+    "identity": true,
+    "boundaries": true,
+    "masks": true,
+    "allocations": true,
+    "digests": true,
+    "sourceFreeze": true
+  },
+  "pairs": 24,
+  "witnessCalls": 96,
+  "roleSwapMembers": 48,
+  "bufferTokens": 1409,
+  "allBufferDigests": 1409,
+  "queries": {
+    "diagnostic": {
+      "supported": true,
+      "created": 48,
+      "completed": 48,
+      "deleted": 48,
+      "discarded": 0,
+      "disjointEvents": 0,
+      "pending": 0,
+      "unresolvedAtDrain": 0,
+      "drainTimedOut": false,
+      "queryErrors": []
+    },
+    "normal": {
+      "supported": true,
+      "created": 458,
+      "completed": 458,
+      "deleted": 458,
+      "discarded": 0,
+      "disjointEvents": 0,
+      "pending": 0,
+      "drainTimedOut": false,
+      "queryErrors": []
+    }
+  },
+  "sourceEntries": 449,
+  "sourceToolHashes": {
+    "profiler": "436f48390bf25083d8a6105103389849ee61e83ac22714eb8b4c493dfddcbc40",
+    "helper": "ce926d88600161abaf1f29cc3481b512c8796ff58168f3d007a79d3333cef603"
+  },
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/152.0.7977.76",
+    "revision": "@0d89dfa2dd7c1ec4b8a14b9f303f887bb63b6174",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+    "jsVersion": "15.2.124.19"
+  },
+  "liveFrames": 2744,
+  "liveWall": {
+    "start": "2026-09-08T14:03:53.291Z",
+    "end": "2026-09-08T14:04:38.301Z"
+  },
+  "cdp": {
+    "samples": 60290,
+    "negatives": [
+      {
+        "index": 855,
+        "delta": -21,
+        "node": 2,
+        "previousNode": 2,
+        "function": "(program)",
+        "sameNode": true
+      },
+      {
+        "index": 4266,
+        "delta": -11,
+        "node": 2,
+        "previousNode": 2,
+        "function": "(program)",
+        "sameNode": true
+      },
+      {
+        "index": 7233,
+        "delta": -18,
+        "node": 2,
+        "previousNode": 2,
+        "function": "(program)",
+        "sameNode": true
+      },
+      {
+        "index": 10500,
+        "delta": -19,
+        "node": 2,
+        "previousNode": 2,
+        "function": "(program)",
+        "sameNode": true
+      },
+      {
+        "index": 16184,
+        "delta": -13,
+        "node": 2,
+        "previousNode": 2,
+        "function": "(program)",
+        "sameNode": true
+      },
+      {
+        "index": 20706,
+        "delta": -130,
+        "node": 2,
+        "previousNode": 2,
+        "function": "(program)",
+        "sameNode": true
+      },
+      {
+        "index": 26844,
+        "delta": -16,
+        "node": 2,
+        "previousNode": 2,
+        "function": "(program)",
+        "sameNode": true
+      },
+      {
+        "index": 34662,
+        "delta": -14,
+        "node": 2107,
+        "previousNode": 2108,
+        "function": "serialize",
+        "sameNode": false
+      },
+      {
+        "index": 39896,
+        "delta": -27,
+        "node": 2,
+        "previousNode": 2,
+        "function": "(program)",
+        "sameNode": true
+      },
+      {
+        "index": 44009,
+        "delta": -45,
+        "node": 2,
+        "previousNode": 2,
+        "function": "(program)",
+        "sameNode": true
+      },
+      {
+        "index": 59046,
+        "delta": -27,
+        "node": 2,
+        "previousNode": 2,
+        "function": "(program)",
+        "sameNode": true
+      }
+    ],
+    "allTimesBounded": true,
+    "moved": 22
+  },
+  "stats": {
+    "all": {
+      "n": 24,
+      "mean": 0.4412586666666665,
+      "median": 1.820672,
+      "min": -43.334655999999995,
+      "max": 36.585471999999996
+    },
+    "onFirst": {
+      "n": 12,
+      "mean": -14.95552,
+      "median": -17.115648,
+      "min": -43.334655999999995,
+      "max": 7.987200000000001
+    },
+    "offFirst": {
+      "n": 12,
+      "mean": 15.838037333333332,
+      "median": 21.880832,
+      "min": -0.41164800000000046,
+      "max": 36.585471999999996
+    },
+    "secondMinusFirst": {
+      "n": 24,
+      "mean": 15.396778666666668,
+      "median": 20.859392,
+      "min": -7.987200000000001,
+      "max": 43.334655999999995
+    },
+    "secondSlower": 19,
+    "loadScale": {
+      "n": 24,
+      "mean": 0.919546080637032,
+      "median": 0.93398037589939,
+      "min": 0.7974012627514265,
+      "max": 0.9998641780310696
+    },
+    "particles": {
+      "n": 24,
+      "mean": 1255.1666666666667,
+      "median": 1188.5,
+      "min": 247,
+      "max": 1940
+    }
+  },
+  "rows": [
+    {
+      "index": 0,
+      "frame": 1991,
+      "utc": "2026-09-08T14:03:53.309Z",
+      "order": "on,off",
+      "on": 46.329856,
+      "off": 38.342656,
+      "delta": 7.987200000000001,
+      "secondMinusFirst": -7.987200000000001,
+      "depth": 0,
+      "clockFps": 143.94242303078744,
+      "loadScale": 0.9998641780310696,
+      "particles": 247
+    },
+    {
+      "index": 1,
+      "frame": 2053,
+      "utc": "2026-09-08T14:03:54.566Z",
+      "order": "off,on",
+      "on": 5.354496,
+      "off": 3.117056,
+      "delta": 2.2374400000000003,
+      "secondMinusFirst": 2.2374400000000003,
+      "depth": 9.896102703268213,
+      "clockFps": 55.97760895641775,
+      "loadScale": 0.9383265071559835,
+      "particles": 684
+    },
+    {
+      "index": 2,
+      "frame": 2123,
+      "utc": "2026-09-08T14:03:55.827Z",
+      "order": "on,off",
+      "on": 4.80256,
+      "off": 3.493888,
+      "delta": 1.3086719999999996,
+      "secondMinusFirst": -1.3086719999999996,
+      "depth": 15.689251486182647,
+      "clockFps": 56.40925889904662,
+      "loadScale": 0.9741239570405402,
+      "particles": 943
+    },
+    {
+      "index": 3,
+      "frame": 2187,
+      "utc": "2026-09-08T14:03:57.088Z",
+      "order": "off,on",
+      "on": 25.475072,
+      "off": 4.052992,
+      "delta": 21.42208,
+      "secondMinusFirst": 21.42208,
+      "depth": 21.55190455854752,
+      "clockFps": 52.49854170717487,
+      "loadScale": 0.9890915153824079,
+      "particles": 1061
+    },
+    {
+      "index": 4,
+      "frame": 2249,
+      "utc": "2026-09-08T14:03:58.352Z",
+      "order": "on,off",
+      "on": 7.39328,
+      "off": 4.347904,
+      "delta": 3.045376,
+      "secondMinusFirst": -3.045376,
+      "depth": 26.783173819420497,
+      "clockFps": 49.97001798920689,
+      "loadScale": 0.923374961455607,
+      "particles": 1047
+    },
+    {
+      "index": 5,
+      "frame": 2368,
+      "utc": "2026-09-08T14:03:59.611Z",
+      "order": "off,on",
+      "on": 29.25056,
+      "off": 2.496512,
+      "delta": 26.754048,
+      "secondMinusFirst": 26.754048,
+      "depth": 27.97836666131375,
+      "clockFps": 125.92444533279952,
+      "loadScale": 0.8953064480881521,
+      "particles": 873
+    },
+    {
+      "index": 6,
+      "frame": 2421,
+      "utc": "2026-09-08T14:04:00.863Z",
+      "order": "on,off",
+      "on": 2.393088,
+      "off": 34.516992,
+      "delta": -32.123904,
+      "secondMinusFirst": 32.123904,
+      "depth": 34.864025221303166,
+      "clockFps": 43.39250493096645,
+      "loadScale": 0.8769665534105013,
+      "particles": 1038
+    },
+    {
+      "index": 7,
+      "frame": 2478,
+      "utc": "2026-09-08T14:04:02.120Z",
+      "order": "off,on",
+      "on": 28.416,
+      "off": 3.714048,
+      "delta": 24.701952,
+      "secondMinusFirst": 24.701952,
+      "depth": 45.31763744489535,
+      "clockFps": 45.981607357057435,
+      "loadScale": 0.8212775778020169,
+      "particles": 1382
+    },
+    {
+      "index": 8,
+      "frame": 2538,
+      "utc": "2026-09-08T14:04:03.374Z",
+      "order": "on,off",
+      "on": 4.009984,
+      "off": 24.306688,
+      "delta": -20.296704000000002,
+      "secondMinusFirst": 20.296704000000002,
+      "depth": 51.304598430748655,
+      "clockFps": 49.99000199960022,
+      "loadScale": 0.7974012627514265,
+      "particles": 1358
+    },
+    {
+      "index": 9,
+      "frame": 2661,
+      "utc": "2026-09-08T14:04:04.807Z",
+      "order": "off,on",
+      "on": 7.445504,
+      "off": 5.20192,
+      "delta": 2.2435839999999994,
+      "secondMinusFirst": 2.2435839999999994,
+      "depth": 54.009589609699134,
+      "clockFps": 97.21952167995275,
+      "loadScale": 0.8330969037705843,
+      "particles": 988
+    },
+    {
+      "index": 10,
+      "frame": 2732,
+      "utc": "2026-09-08T14:04:06.058Z",
+      "order": "on,off",
+      "on": 2.772992,
+      "off": 25.47712,
+      "delta": -22.704128,
+      "secondMinusFirst": 22.704128,
+      "depth": 62.01371200286971,
+      "clockFps": 59.97600959616186,
+      "loadScale": 0.9296342446427964,
+      "particles": 1027
+    },
+    {
+      "index": 11,
+      "frame": 2801,
+      "utc": "2026-09-08T14:04:07.325Z",
+      "order": "off,on",
+      "on": 28.3136,
+      "off": 5.974016,
+      "delta": 22.339584000000002,
+      "secondMinusFirst": 22.339584000000002,
+      "depth": 71.45276903770824,
+      "clockFps": 55.21593374087964,
+      "loadScale": 0.9706212962810162,
+      "particles": 1422
+    },
+    {
+      "index": 12,
+      "frame": 2941,
+      "utc": "2026-09-08T14:04:09.213Z",
+      "order": "on,off",
+      "on": 2.642944,
+      "off": 16.577536,
+      "delta": -13.934591999999999,
+      "secondMinusFirst": 13.934591999999999,
+      "depth": 81.25123052430419,
+      "clockFps": 117.95281887245163,
+      "loadScale": 0.8609867871575033,
+      "particles": 1652
+    },
+    {
+      "index": 13,
+      "frame": 3012,
+      "utc": "2026-09-08T14:04:10.474Z",
+      "order": "off,on",
+      "on": 28.576768,
+      "off": 2.756608,
+      "delta": 25.82016,
+      "secondMinusFirst": 25.82016,
+      "depth": 89.88977999707075,
+      "clockFps": 57.18793137448249,
+      "loadScale": 0.9416789950988498,
+      "particles": 1654
+    },
+    {
+      "index": 14,
+      "frame": 3079,
+      "utc": "2026-09-08T14:04:11.726Z",
+      "order": "on,off",
+      "on": 4.032512,
+      "off": 29.345792,
+      "delta": -25.31328,
+      "secondMinusFirst": 25.31328,
+      "depth": 101.41671663429098,
+      "clockFps": 53.97840863654489,
+      "loadScale": 0.9752930235356945,
+      "particles": 1682
+    },
+    {
+      "index": 15,
+      "frame": 3203,
+      "utc": "2026-09-08T14:04:13.179Z",
+      "order": "off,on",
+      "on": 5.103616,
+      "off": 5.515264,
+      "delta": -0.41164800000000046,
+      "secondMinusFirst": -0.41164800000000046,
+      "depth": 108.06271641683506,
+      "clockFps": 61.97520991603393,
+      "loadScale": 0.9909533096374106,
+      "particles": 1769
+    },
+    {
+      "index": 16,
+      "frame": 3275,
+      "utc": "2026-09-08T14:04:14.432Z",
+      "order": "on,off",
+      "on": 9.266176,
+      "off": 5.917696,
+      "delta": 3.3484799999999995,
+      "secondMinusFirst": -3.3484799999999995,
+      "depth": 116.47451807056132,
+      "clockFps": 57.98840231953625,
+      "loadScale": 0.9962045904688672,
+      "particles": 1940
+    },
+    {
+      "index": 17,
+      "frame": 3346,
+      "utc": "2026-09-08T14:04:15.700Z",
+      "order": "off,on",
+      "on": 6.04672,
+      "off": 4.642816,
+      "delta": 1.4039039999999998,
+      "secondMinusFirst": 1.4039039999999998,
+      "depth": 123.866574209398,
+      "clockFps": 57.17665615141987,
+      "loadScale": 0.9984078016813172,
+      "particles": 1794
+    },
+    {
+      "index": 18,
+      "frame": 3409,
+      "utc": "2026-09-08T14:04:16.959Z",
+      "order": "on,off",
+      "on": 3.483648,
+      "off": 5.086208,
+      "delta": -1.60256,
+      "secondMinusFirst": 1.60256,
+      "depth": 133.07666617626793,
+      "clockFps": 51.26182965299713,
+      "loadScale": 0.9186047776861396,
+      "particles": 1735
+    },
+    {
+      "index": 19,
+      "frame": 3529,
+      "utc": "2026-09-08T14:04:18.213Z",
+      "order": "off,on",
+      "on": 28.319744,
+      "off": 2.481152,
+      "delta": 25.838592,
+      "secondMinusFirst": 25.838592,
+      "depth": 135.36246403241933,
+      "clockFps": 107.95681727308977,
+      "loadScale": 0.8853621638813683,
+      "particles": 1449
+    },
+    {
+      "index": 20,
+      "frame": 3596,
+      "utc": "2026-09-08T14:04:19.476Z",
+      "order": "on,off",
+      "on": 2.345984,
+      "off": 45.68064,
+      "delta": -43.334655999999995,
+      "secondMinusFirst": 43.334655999999995,
+      "depth": 139.30117481888107,
+      "clockFps": 54.464112040459185,
+      "loadScale": 0.9519087022287576,
+      "particles": 1269
+    },
+    {
+      "index": 21,
+      "frame": 3658,
+      "utc": "2026-09-08T14:04:20.734Z",
+      "order": "off,on",
+      "on": 40.38144,
+      "off": 3.795968,
+      "delta": 36.585471999999996,
+      "secondMinusFirst": 36.585471999999996,
+      "depth": 142.2076925177409,
+      "clockFps": 47.98080767692879,
+      "loadScale": 0.942305588104016,
+      "particles": 1108
+    },
+    {
+      "index": 22,
+      "frame": 3715,
+      "utc": "2026-09-08T14:04:22.009Z",
+      "order": "on,off",
+      "on": 4.025344,
+      "off": 39.871488,
+      "delta": -35.846144,
+      "secondMinusFirst": 35.846144,
+      "depth": 145.1168282687843,
+      "clockFps": 44.16282642089129,
+      "loadScale": 0.8487587662816856,
+      "particles": 1040
+    },
+    {
+      "index": 23,
+      "frame": 3769,
+      "utc": "2026-09-08T14:04:23.263Z",
+      "order": "off,on",
+      "on": 4.662272,
+      "off": 3.540992,
+      "delta": 1.1212799999999996,
+      "secondMinusFirst": 1.1212799999999996,
+      "depth": 147.9511202511829,
+      "clockFps": 44.13740165035452,
+      "loadScale": 0.8095560237150569,
+      "particles": 962
+    }
+  ],
+  "verdict": "Recorded integrity passes. Strong repeated-submission order association prevents an isolated shimmer cost or useful FPS improvement claim. The identified CPU test completed before the live window; system-wide quiet is not proved. All 24 pairs and raw CPU samples are retained.",
+  "cpuQuietInvestigation": {
+    "originalConcern": "A reported 1.52-second CPU check near capture startup might have overlapped the early live window; the later quiet notice is not the process exit time.",
+    "artifact": "C:/Users/henri/Downloads/threads/drillity-fps-investigation/evidence/verification/latest/sample-conditions-author.json",
+    "sha256": "8dd9b7be5ad2d806b955216fa5ca65f2b927ed3887634d8bb300a0dd26fbcfdc",
+    "generatedAt": "2026-09-08T14:03:21.803Z",
+    "testCompletionLeadMs": 31488,
+    "writer": "tools/checksampleconditions.mjs:193-201 generates report timestamp after test work and source-hash checks; mkdir, write and logging follow.",
+    "conclusion": "This specific test work completed before the live window. Exact process exit and system-wide quiet were not instrumented. All samples are retained."
+  },
+  "finalized": "2026-09-08T14:14:20.324Z"
+}

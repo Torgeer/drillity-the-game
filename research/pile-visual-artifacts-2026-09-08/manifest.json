@@ -1,0 +1,599 @@
+{
+  "schema": 1,
+  "at": "2026-09-08T14:07:25.513Z",
+  "status": "CAPTURE_FAILED",
+  "purpose": "Evidence preservation only; no runtime integration",
+  "candidate": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual",
+  "sourceSnapshot": "../drillity-coordination/resume-70-baseline-2026-09-08",
+  "sourceParent": "a47de8a6ba199eabb108da447cd660f01c1735e7",
+  "reproducer": "node tools/checkpilemotion-browser.mjs --out evidence/pile-motion-corrected-01",
+  "captureToolSha256": "c36d7573ba4ea471fc6d6a949b820437bd906702c391df426c5ccd2a5883e52c",
+  "reportSha256": "8a12f5dc0fd699b2e10fd462ac58d60f91cf54acffcfba21ef7b49bf8451a63f",
+  "criticCaptureReview": "included: reviews/critic-capture-review.md.gz",
+  "entries": [
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\report.json",
+      "stored": "report.json.gz",
+      "encoding": "gzip",
+      "originalBytes": 3700929,
+      "originalSha256": "8a12f5dc0fd699b2e10fd462ac58d60f91cf54acffcfba21ef7b49bf8451a63f",
+      "storedBytes": 212079,
+      "storedSha256": "4ff87334ad16b63688a326faef91c84fc7ec14544bce891963f0458a18f80a15",
+      "roundTripVerified": true
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\research\\PILE_VISUAL_CAPTURE_REVIEW_2026-09-08.md",
+      "stored": "reviews/author-capture-review.md.gz",
+      "encoding": "gzip",
+      "originalBytes": 6616,
+      "originalSha256": "c892a450e33deda4b8e59cfda6683b9b695a184cc5e0ad72d0463db69e9221a3",
+      "storedBytes": 3161,
+      "storedSha256": "3e5f784307efaa49acea1684662227c7362cd9ab6e3c4985079a79f7bcee284c",
+      "roundTripVerified": true
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\research\\pile-visual-corrected-capture-summary.json",
+      "stored": "reviews/author-capture-summary.json.gz",
+      "encoding": "gzip",
+      "originalBytes": 13399,
+      "originalSha256": "271afbeb79bc3f8b52ec5ed3061f61dbb62db0e0dfe3f04f7462277871136af8",
+      "storedBytes": 2452,
+      "storedSha256": "5253ee79958801811ce845d8e71e02dead9cedeeb83c71d5bb46b51cbbafa1b5",
+      "roundTripVerified": true
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\research\\PILE_VISUAL_CRITIC_2026-09-08.md",
+      "stored": "reviews/critic-harness-preflight.md.gz",
+      "encoding": "gzip",
+      "originalBytes": 8206,
+      "originalSha256": "b8ae42e3b589c4c978cacd1f773299c537317a774d4a36985e82fb03fa507b5e",
+      "storedBytes": 3828,
+      "storedSha256": "b239c9d368c65e6af9716ca390f4a3e5e9eb86207e84f10897d53ef767c5635f",
+      "roundTripVerified": true
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\research\\pile-visual-critic.json",
+      "stored": "reviews/critic-harness-preflight.json.gz",
+      "encoding": "gzip",
+      "originalBytes": 10743,
+      "originalSha256": "64eefa982a07e4b08eb53970291032a4426389b4db5853c2095fac0ab156ce3a",
+      "storedBytes": 2512,
+      "storedSha256": "aed591139480695d05c2180520ccb9d53e881d3119ff6b5159768f9d794805a3",
+      "roundTripVerified": true
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\research\\pile-visual-critic-console.txt",
+      "stored": "reviews/critic-harness-console.txt.gz",
+      "encoding": "gzip",
+      "originalBytes": 10743,
+      "originalSha256": "64eefa982a07e4b08eb53970291032a4426389b4db5853c2095fac0ab156ce3a",
+      "storedBytes": 2512,
+      "storedSha256": "aed591139480695d05c2180520ccb9d53e881d3119ff6b5159768f9d794805a3",
+      "roundTripVerified": true
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\research\\PILE_VISUAL_HARNESS_PREFLIGHT_2026-09-08.md",
+      "stored": "reviews/author-harness-preflight.md.gz",
+      "encoding": "gzip",
+      "originalBytes": 4409,
+      "originalSha256": "fe2e17770a95a673fbd5ef4cc854a8871605a61fc11393fd5afd422150cafe5e",
+      "storedBytes": 2041,
+      "storedSha256": "d738e1af1af316580ca65ae17f3285edd0d20e6fb1c6dd1e7d7205dbee7054a9",
+      "roundTripVerified": true
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\research\\pile-visual-harness-author.json",
+      "stored": "reviews/author-harness-preflight.json.gz",
+      "encoding": "gzip",
+      "originalBytes": 5841,
+      "originalSha256": "70873b052da1e7bf225268118a5ecebf2d4e902762fb91b53159835eb9f00a46",
+      "storedBytes": 2056,
+      "storedSha256": "111de46beaf9e31d8272e3611dc533b50761e1eaf421688216fb6e0495282655",
+      "roundTripVerified": true
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\research\\pile-visual-preflight.json",
+      "stored": "provenance/preflight.json.gz",
+      "encoding": "gzip",
+      "originalBytes": 922,
+      "originalSha256": "de0a0cc80825df97910cae025d9819a82ff0a78298a242548a4dc12d551d8980",
+      "storedBytes": 568,
+      "storedSha256": "f3ddb5354f53172d6d97cad4748322675725e0e730a883d0e777b53050066101",
+      "roundTripVerified": true
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\research\\pile-visual-preflight-recovery.json",
+      "stored": "provenance/failed-dependency-preflight-and-recovery.json.gz",
+      "encoding": "gzip",
+      "originalBytes": 56842,
+      "originalSha256": "16c897da6f4fecd3d6862d3c3a7803279b0a3283cf6c59e955917ec47d9e6842",
+      "storedBytes": 21360,
+      "storedSha256": "d9354bafe5cff8e147ba47d65e74bab449c5d634e1b78cd4cc1ab5e470e8c490",
+      "roundTripVerified": true
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\research\\pile-visual-baseline.json",
+      "stored": "provenance/source-baseline-300-files.json.gz",
+      "encoding": "gzip",
+      "originalBytes": 50562,
+      "originalSha256": "66dceba44f2d7be035b66009db349f80cb4f211df77017103e6f568d1186d0d1",
+      "storedBytes": 15520,
+      "storedSha256": "cf9b730a1183c2161f5e68d34538901957934997e7c448b9158a6f985ffee90f",
+      "roundTripVerified": true
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\pile-visual-harness-delta.patch",
+      "stored": "tooling/pile-visual-harness-delta.patch.gz",
+      "encoding": "gzip",
+      "originalBytes": 34401,
+      "originalSha256": "e5dd830149873ccd7bae6e12e40afa8b8945e66d99a489bbe0d21ac31810c4f4",
+      "storedBytes": 11302,
+      "storedSha256": "3227e1dc5ee92a65ce9affece48a5435f3d79b6f15754b1ce4fd15c579525fe9",
+      "roundTripVerified": true
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\pile-visual-harness-delta.json",
+      "stored": "tooling/pile-visual-harness-delta.json.gz",
+      "encoding": "gzip",
+      "originalBytes": 616,
+      "originalSha256": "197c1663d4f406fe0c25e9ec6b704bd4c1fe08286aacb1bf3ab81c5921b7f2ba",
+      "storedBytes": 402,
+      "storedSha256": "3349781bfba3d6f460b1f7461d1ad44c0e2da0b4bba6334f16f6b92d39b6fb77",
+      "roundTripVerified": true
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\tools\\checkpilemotion-browser.mjs",
+      "stored": "tooling/checkpilemotion-browser.mjs.gz",
+      "encoding": "gzip",
+      "originalBytes": 37969,
+      "originalSha256": "c36d7573ba4ea471fc6d6a949b820437bd906702c391df426c5ccd2a5883e52c",
+      "storedBytes": 12694,
+      "storedSha256": "af5dcabd2354b7301c80e976419bf2be619c10a3ee9fb13976a07ba0bcd42859",
+      "roundTripVerified": true
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\tools\\checkpilevisual-harness.mjs",
+      "stored": "tooling/checkpilevisual-harness.mjs.gz",
+      "encoding": "gzip",
+      "originalBytes": 8842,
+      "originalSha256": "458fc6835cf93b0ad63eeb368939d575276b22db30432c8f2f93172028099d33",
+      "storedBytes": 3696,
+      "storedSha256": "f6884659b769e2d47b8c92bace67767e8257bdf572b253580588353b88b543a2",
+      "roundTripVerified": true
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\tools\\checkpilevisual-adversarial.mjs",
+      "stored": "tooling/checkpilevisual-adversarial.mjs.gz",
+      "encoding": "gzip",
+      "originalBytes": 23132,
+      "originalSha256": "752a7786e7d98ceb06d7536624676c2b5abbd9aa04beef0c642f87529c121503",
+      "storedBytes": 7192,
+      "storedSha256": "b2092266147208f023f77d02b68db6a321fc8ab7b6aeaf46a7d417a90cf31e1f",
+      "roundTripVerified": true
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\tools\\servedSourceIdentity.mjs",
+      "stored": "tooling/servedSourceIdentity.mjs.gz",
+      "encoding": "gzip",
+      "originalBytes": 2245,
+      "originalSha256": "806b0c2420a97387bae0cb50681de62f066047cdf712e9775e15a407be6d4503",
+      "storedBytes": 1056,
+      "storedSha256": "e08310d8cce122c9797dc8c38523e1c6b5b799a6cd4cfd159c413da299b2617f",
+      "roundTripVerified": true
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkpilemotion-browser.mjs",
+      "stored": "tooling/baseline-checkpilemotion-browser.mjs.gz",
+      "encoding": "gzip",
+      "originalBytes": 30721,
+      "originalSha256": "faeb1012be4d913762cdcb37b2422468c7fa57cef2c25da8296c294708203440",
+      "storedBytes": 10549,
+      "storedSha256": "cdb088aca6b787bf372a7ed6d9d182de6b9bbba3f3c0a1f75d9e662e12a22749",
+      "roundTripVerified": true
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\hero-bottom-visibility.png",
+      "stored": "images/hero-bottom-visibility.png",
+      "encoding": "identity",
+      "originalBytes": 11701,
+      "originalSha256": "427be5ae399288d6ed99531f8322b02e0939c67d2e880c907c1208a66ac9c669",
+      "storedBytes": 11701,
+      "storedSha256": "427be5ae399288d6ed99531f8322b02e0939c67d2e880c907c1208a66ac9c669"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\hero-bottom.png",
+      "stored": "images/hero-bottom.png",
+      "encoding": "identity",
+      "originalBytes": 1139645,
+      "originalSha256": "07f444c15e47d12838b7092ef11a2dfc171989b7b5cc511de1e580c6c72756d0",
+      "storedBytes": 1139645,
+      "storedSha256": "07f444c15e47d12838b7092ef11a2dfc171989b7b5cc511de1e580c6c72756d0"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\hero-dolly-rest-visibility.png",
+      "stored": "images/hero-dolly-rest-visibility.png",
+      "encoding": "identity",
+      "originalBytes": 11750,
+      "originalSha256": "c28aeb322fe362a06456728a20d543f76eac636bcdfe963b74b577af3c1dfb33",
+      "storedBytes": 11750,
+      "storedSha256": "c28aeb322fe362a06456728a20d543f76eac636bcdfe963b74b577af3c1dfb33"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\hero-dolly-rest.png",
+      "stored": "images/hero-dolly-rest.png",
+      "encoding": "identity",
+      "originalBytes": 1139708,
+      "originalSha256": "ec2f311585d349ead6f32a061297783245b7be9dcff7c60c74b4e030e2bd9950",
+      "storedBytes": 1139708,
+      "storedSha256": "ec2f311585d349ead6f32a061297783245b7be9dcff7c60c74b4e030e2bd9950"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\hero-falling-visibility.png",
+      "stored": "images/hero-falling-visibility.png",
+      "encoding": "identity",
+      "originalBytes": 11675,
+      "originalSha256": "bed430541b989207743b0489ed151c4ccef9b6a548e2a2aaa1987d49b6bfb2f6",
+      "storedBytes": 11675,
+      "storedSha256": "bed430541b989207743b0489ed151c4ccef9b6a548e2a2aaa1987d49b6bfb2f6"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\hero-falling.png",
+      "stored": "images/hero-falling.png",
+      "encoding": "identity",
+      "originalBytes": 1137510,
+      "originalSha256": "14c08fd239c78872d325ace21362bda9c9198f05fbbb5b494cf5ee9951d1f2c8",
+      "storedBytes": 1137510,
+      "storedSha256": "14c08fd239c78872d325ace21362bda9c9198f05fbbb5b494cf5ee9951d1f2c8"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\hero-paused-visibility.png",
+      "stored": "images/hero-paused-visibility.png",
+      "encoding": "identity",
+      "originalBytes": 11789,
+      "originalSha256": "23ed750dd224a6f378edad0d34acc96f12f6f90332490da4db92236ef95ae57b",
+      "storedBytes": 11789,
+      "storedSha256": "23ed750dd224a6f378edad0d34acc96f12f6f90332490da4db92236ef95ae57b"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\hero-paused.png",
+      "stored": "images/hero-paused.png",
+      "encoding": "identity",
+      "originalBytes": 313333,
+      "originalSha256": "76b4beb54e3fca1fa07916fec13ea4a9347619b404b3b9420196768fc82b033c",
+      "storedBytes": 313333,
+      "storedSha256": "76b4beb54e3fca1fa07916fec13ea4a9347619b404b3b9420196768fc82b033c"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\hero-peak-visibility.png",
+      "stored": "images/hero-peak-visibility.png",
+      "encoding": "identity",
+      "originalBytes": 11659,
+      "originalSha256": "0410f2549c350f16b46e78ae6624a30a4ad990db8920ed0bc0cede0752afda82",
+      "storedBytes": 11659,
+      "storedSha256": "0410f2549c350f16b46e78ae6624a30a4ad990db8920ed0bc0cede0752afda82"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\hero-peak.png",
+      "stored": "images/hero-peak.png",
+      "encoding": "identity",
+      "originalBytes": 1135423,
+      "originalSha256": "b149a452a66cc6663597a29c3817b41ec335ad2ae0d7f26657fa902c604d8486",
+      "storedBytes": 1135423,
+      "storedSha256": "b149a452a66cc6663597a29c3817b41ec335ad2ae0d7f26657fa902c604d8486"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\hero-pitch-rest-visibility.png",
+      "stored": "images/hero-pitch-rest-visibility.png",
+      "encoding": "identity",
+      "originalBytes": 11597,
+      "originalSha256": "26231c6b5fcae8534e7ed6ed8918210d9aef35667b5c9f2d991dd024926e2e56",
+      "storedBytes": 11597,
+      "storedSha256": "26231c6b5fcae8534e7ed6ed8918210d9aef35667b5c9f2d991dd024926e2e56"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\hero-pitch-rest.png",
+      "stored": "images/hero-pitch-rest.png",
+      "encoding": "identity",
+      "originalBytes": 1143330,
+      "originalSha256": "567d82af3f1f51e1b529f4cba1552284d85623108945b5463ffcaf4186910596",
+      "storedBytes": 1143330,
+      "storedSha256": "567d82af3f1f51e1b529f4cba1552284d85623108945b5463ffcaf4186910596"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\hero-re-drive-rest-visibility.png",
+      "stored": "images/hero-re-drive-rest-visibility.png",
+      "encoding": "identity",
+      "originalBytes": 11581,
+      "originalSha256": "baf0d8ae78b696c38a1c7a3285504eac321a5922b83c5f21c9c9b0b4f6226081",
+      "storedBytes": 11581,
+      "storedSha256": "baf0d8ae78b696c38a1c7a3285504eac321a5922b83c5f21c9c9b0b4f6226081"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\hero-re-drive-rest.png",
+      "stored": "images/hero-re-drive-rest.png",
+      "encoding": "identity",
+      "originalBytes": 1137397,
+      "originalSha256": "fcf2410ac505f06a5eedd77e06927b24f98ae8323445c0f478c3d66f2653d38f",
+      "storedBytes": 1137397,
+      "storedSha256": "fcf2410ac505f06a5eedd77e06927b24f98ae8323445c0f478c3d66f2653d38f"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\hero-rising-visibility.png",
+      "stored": "images/hero-rising-visibility.png",
+      "encoding": "identity",
+      "originalBytes": 11641,
+      "originalSha256": "a810f3bb420f3741fa9cd875a3073a0abb8f9c2729dd4f039485614aa15116e7",
+      "storedBytes": 11641,
+      "storedSha256": "a810f3bb420f3741fa9cd875a3073a0abb8f9c2729dd4f039485614aa15116e7"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\hero-rising.png",
+      "stored": "images/hero-rising.png",
+      "encoding": "identity",
+      "originalBytes": 1133618,
+      "originalSha256": "ddbc83ed8af1b904728b0bdde059cc4b3b8a2838226ffdce7e6c542a5f76bbeb",
+      "storedBytes": 1133618,
+      "storedSha256": "ddbc83ed8af1b904728b0bdde059cc4b3b8a2838226ffdce7e6c542a5f76bbeb"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\hero-take-set-falling-visibility.png",
+      "stored": "images/hero-take-set-falling-visibility.png",
+      "encoding": "identity",
+      "originalBytes": 11579,
+      "originalSha256": "d6f57d1c0dc7c7d5bb1a15b252270b9f425712ad09c2aeb5def07ff4eb3a260e",
+      "storedBytes": 11579,
+      "storedSha256": "d6f57d1c0dc7c7d5bb1a15b252270b9f425712ad09c2aeb5def07ff4eb3a260e"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\hero-take-set-falling.png",
+      "stored": "images/hero-take-set-falling.png",
+      "encoding": "identity",
+      "originalBytes": 1137592,
+      "originalSha256": "e06cba6e5689c73645343682e5f16965b10d1378599ed349348ff4c155140ea2",
+      "storedBytes": 1137592,
+      "storedSha256": "e06cba6e5689c73645343682e5f16965b10d1378599ed349348ff4c155140ea2"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\hero-take-set-rising-visibility.png",
+      "stored": "images/hero-take-set-rising-visibility.png",
+      "encoding": "identity",
+      "originalBytes": 11596,
+      "originalSha256": "471a401ebdc520fbcd5085ec29ce56c6cae49f42a4f9183e36179c323cb60e7c",
+      "storedBytes": 11596,
+      "storedSha256": "471a401ebdc520fbcd5085ec29ce56c6cae49f42a4f9183e36179c323cb60e7c"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\hero-take-set-rising.png",
+      "stored": "images/hero-take-set-rising.png",
+      "encoding": "identity",
+      "originalBytes": 1133468,
+      "originalSha256": "8fc5f7182b8b509fd0b82f572f84a401dee05030f261820b21340f58c3ccf73b",
+      "storedBytes": 1133468,
+      "storedSha256": "8fc5f7182b8b509fd0b82f572f84a401dee05030f261820b21340f58c3ccf73b"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\orbit-bottom-visibility.png",
+      "stored": "images/orbit-bottom-visibility.png",
+      "encoding": "identity",
+      "originalBytes": 11677,
+      "originalSha256": "3269c62ea1853c23730a858f6af5fd20e368948656ff07a99d23593029f2cd5a",
+      "storedBytes": 11677,
+      "storedSha256": "3269c62ea1853c23730a858f6af5fd20e368948656ff07a99d23593029f2cd5a"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\orbit-bottom.png",
+      "stored": "images/orbit-bottom.png",
+      "encoding": "identity",
+      "originalBytes": 1145354,
+      "originalSha256": "22e3ddc2efee6144f84c09922695d8460b0cebe3f1178c9b0bdb631a344fbf7e",
+      "storedBytes": 1145354,
+      "storedSha256": "22e3ddc2efee6144f84c09922695d8460b0cebe3f1178c9b0bdb631a344fbf7e"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\orbit-dolly-rest-visibility.png",
+      "stored": "images/orbit-dolly-rest-visibility.png",
+      "encoding": "identity",
+      "originalBytes": 11784,
+      "originalSha256": "7101746b657c9431c32988188a8521e19464d7e11323e31d348fab86372d5031",
+      "storedBytes": 11784,
+      "storedSha256": "7101746b657c9431c32988188a8521e19464d7e11323e31d348fab86372d5031"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\orbit-dolly-rest.png",
+      "stored": "images/orbit-dolly-rest.png",
+      "encoding": "identity",
+      "originalBytes": 1146315,
+      "originalSha256": "a133d3f73528aed63de1886364a564f1923a8ac9b1e23a3f70a428fa3668d89b",
+      "storedBytes": 1146315,
+      "storedSha256": "a133d3f73528aed63de1886364a564f1923a8ac9b1e23a3f70a428fa3668d89b"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\orbit-falling-visibility.png",
+      "stored": "images/orbit-falling-visibility.png",
+      "encoding": "identity",
+      "originalBytes": 11862,
+      "originalSha256": "7c94c512228fd9cc6bf11a6ff3760e6d8ac36871bf98b4f0fdef602b7a73013b",
+      "storedBytes": 11862,
+      "storedSha256": "7c94c512228fd9cc6bf11a6ff3760e6d8ac36871bf98b4f0fdef602b7a73013b"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\orbit-falling.png",
+      "stored": "images/orbit-falling.png",
+      "encoding": "identity",
+      "originalBytes": 1135002,
+      "originalSha256": "599be9ac1513999d40bd2f8f9148568c1c60ee2c7af467e43b36a4ca948e89bb",
+      "storedBytes": 1135002,
+      "storedSha256": "599be9ac1513999d40bd2f8f9148568c1c60ee2c7af467e43b36a4ca948e89bb"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\orbit-paused-visibility.png",
+      "stored": "images/orbit-paused-visibility.png",
+      "encoding": "identity",
+      "originalBytes": 11683,
+      "originalSha256": "ca14da5884bfa11c31a90748144d16bb202c14a4f648120bd058425f233aa96a",
+      "storedBytes": 11683,
+      "storedSha256": "ca14da5884bfa11c31a90748144d16bb202c14a4f648120bd058425f233aa96a"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\orbit-paused.png",
+      "stored": "images/orbit-paused.png",
+      "encoding": "identity",
+      "originalBytes": 305591,
+      "originalSha256": "7b619323e9e875a27581977d661a861c7c30b9c0e57ee83a4280e21f8557dac2",
+      "storedBytes": 305591,
+      "storedSha256": "7b619323e9e875a27581977d661a861c7c30b9c0e57ee83a4280e21f8557dac2"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\orbit-peak-visibility.png",
+      "stored": "images/orbit-peak-visibility.png",
+      "encoding": "identity",
+      "originalBytes": 11774,
+      "originalSha256": "48f983a2589724865b5322bbda43ba117ba5b924bd2a7ebcca08bb7511763b90",
+      "storedBytes": 11774,
+      "storedSha256": "48f983a2589724865b5322bbda43ba117ba5b924bd2a7ebcca08bb7511763b90"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\orbit-peak.png",
+      "stored": "images/orbit-peak.png",
+      "encoding": "identity",
+      "originalBytes": 1136529,
+      "originalSha256": "33b8e7fd4820ea136e88e6fea4ca46cc1cc874f7539d6d6cb2853e59ad659857",
+      "storedBytes": 1136529,
+      "storedSha256": "33b8e7fd4820ea136e88e6fea4ca46cc1cc874f7539d6d6cb2853e59ad659857"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\orbit-pitch-rest-visibility.png",
+      "stored": "images/orbit-pitch-rest-visibility.png",
+      "encoding": "identity",
+      "originalBytes": 11578,
+      "originalSha256": "3d36213690f4999fd4021a5e94217589d6f0dcab444176f708549efbf62430ac",
+      "storedBytes": 11578,
+      "storedSha256": "3d36213690f4999fd4021a5e94217589d6f0dcab444176f708549efbf62430ac"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\orbit-pitch-rest.png",
+      "stored": "images/orbit-pitch-rest.png",
+      "encoding": "identity",
+      "originalBytes": 1118903,
+      "originalSha256": "f89f0d59e545e3e58492aa96adfd4af9bcc8ca52e723b45cd3992f23ec0c6b3e",
+      "storedBytes": 1118903,
+      "storedSha256": "f89f0d59e545e3e58492aa96adfd4af9bcc8ca52e723b45cd3992f23ec0c6b3e"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\orbit-re-drive-rest-visibility.png",
+      "stored": "images/orbit-re-drive-rest-visibility.png",
+      "encoding": "identity",
+      "originalBytes": 11437,
+      "originalSha256": "bb5cb1d58e3e563ffa78bf945bddbba63b690efd1952ff1358c13b541dc69b04",
+      "storedBytes": 11437,
+      "storedSha256": "bb5cb1d58e3e563ffa78bf945bddbba63b690efd1952ff1358c13b541dc69b04"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\orbit-re-drive-rest.png",
+      "stored": "images/orbit-re-drive-rest.png",
+      "encoding": "identity",
+      "originalBytes": 1104579,
+      "originalSha256": "79fd12114333badea1ee4a44ce556f8c85499cfa3a2afaec37818a0d459b10fd",
+      "storedBytes": 1104579,
+      "storedSha256": "79fd12114333badea1ee4a44ce556f8c85499cfa3a2afaec37818a0d459b10fd"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\orbit-rising-visibility.png",
+      "stored": "images/orbit-rising-visibility.png",
+      "encoding": "identity",
+      "originalBytes": 11746,
+      "originalSha256": "a77316d27fe998308ce7ed620b96e0b2c497dc039463e4bd26ac150389ba658c",
+      "storedBytes": 11746,
+      "storedSha256": "a77316d27fe998308ce7ed620b96e0b2c497dc039463e4bd26ac150389ba658c"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\orbit-rising.png",
+      "stored": "images/orbit-rising.png",
+      "encoding": "identity",
+      "originalBytes": 1126410,
+      "originalSha256": "0a050013a6041da5da412fbefd4179a928fdcb281164efdc31b87f8ff75647b3",
+      "storedBytes": 1126410,
+      "storedSha256": "0a050013a6041da5da412fbefd4179a928fdcb281164efdc31b87f8ff75647b3"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\orbit-take-set-falling-visibility.png",
+      "stored": "images/orbit-take-set-falling-visibility.png",
+      "encoding": "identity",
+      "originalBytes": 11437,
+      "originalSha256": "bb5cb1d58e3e563ffa78bf945bddbba63b690efd1952ff1358c13b541dc69b04",
+      "storedBytes": 11437,
+      "storedSha256": "bb5cb1d58e3e563ffa78bf945bddbba63b690efd1952ff1358c13b541dc69b04"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\orbit-take-set-falling.png",
+      "stored": "images/orbit-take-set-falling.png",
+      "encoding": "identity",
+      "originalBytes": 1088193,
+      "originalSha256": "e2c4d8ca8c9b12174a82d77abc30bc467d466659f2d93f2ef553d95f444de4f4",
+      "storedBytes": 1088193,
+      "storedSha256": "e2c4d8ca8c9b12174a82d77abc30bc467d466659f2d93f2ef553d95f444de4f4"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\orbit-take-set-rising-visibility.png",
+      "stored": "images/orbit-take-set-rising-visibility.png",
+      "encoding": "identity",
+      "originalBytes": 11437,
+      "originalSha256": "bb5cb1d58e3e563ffa78bf945bddbba63b690efd1952ff1358c13b541dc69b04",
+      "storedBytes": 11437,
+      "storedSha256": "bb5cb1d58e3e563ffa78bf945bddbba63b690efd1952ff1358c13b541dc69b04"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\evidence\\pile-motion-corrected-01\\orbit-take-set-rising.png",
+      "stored": "images/orbit-take-set-rising.png",
+      "encoding": "identity",
+      "originalBytes": 1096745,
+      "originalSha256": "9144bea595ca38304674ce9474501658dfe902b8c6a25e28ed752aa5ddb75e83",
+      "storedBytes": 1096745,
+      "storedSha256": "9144bea595ca38304674ce9474501658dfe902b8c6a25e28ed752aa5ddb75e83"
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\research\\PILE_CORRECTED_CAPTURE_CRITIC_2026-09-08.md",
+      "stored": "reviews/critic-capture-review.md.gz",
+      "encoding": "gzip",
+      "originalBytes": 6975,
+      "originalSha256": "9d1ec87f1e9e46b3abfefb52a12b263731d650008569bcdd1cf24d3260fda126",
+      "storedBytes": 3278,
+      "storedSha256": "d8e7d23c085b39a0964fff1a8b668ee2d9b6ce61f531c576df2537968694a5d2",
+      "roundTripVerified": true
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\research\\pile-corrected-capture-critic.json",
+      "stored": "reviews/critic-capture-review.json.gz",
+      "encoding": "gzip",
+      "originalBytes": 15143,
+      "originalSha256": "d3687297fb50a6ab215d6ef1924b7781f1eb1b32c7c3303f3d05eed17d189435",
+      "storedBytes": 3258,
+      "storedSha256": "74eef9fc15b9492f791eb09b38e08fd364df46c409a5d6eaea887def83a17ce0",
+      "roundTripVerified": true
+    },
+    {
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-pile-visual\\tools\\reviewpilecapture-offline.mjs",
+      "stored": "tooling/reviewpilecapture-offline.mjs.gz",
+      "encoding": "gzip",
+      "originalBytes": 6665,
+      "originalSha256": "8bb648c30b19cd2ff491629e2fe5252743fb2ac7bd225128a14cf0b6f9dac093",
+      "storedBytes": 2685,
+      "storedSha256": "2a486a0c9e3bea9fe6d3d37f91b0fc8176989cd1fc0fb02395901a799ce147e0",
+      "roundTripVerified": true
+    }
+  ],
+  "readme": {
+    "path": "README.md",
+    "bytes": 4301,
+    "sha256": "f48833746d289d1fc022659ce27f74befecb06ebbeba286093af644e175f9ab8"
+  },
+  "completedAt": "2026-09-08T14:09:40.977Z",
+  "totals": {
+    "payloadFiles": 61,
+    "gzipFiles": 21,
+    "normalPngs": 20,
+    "visibilityPngs": 20,
+    "originalBytes": 25223549,
+    "storedBytes": 21511829
+  }
+}

@@ -1783,6 +1783,9 @@ export function emergencyContract(level = 1, regionId = 'nordic') {
   const targetDepth = 8;
   const holes = 3;
   const metres = targetDepth * holes;
+  // Game-authored recovery-site stratigraphy, NOT SOURCED survey measurements.
+  // Keep this existing mission column authoritative through its advertised
+  // depth; it is not a claim that every Nordic site contains these beds.
   const groundSpec = [
     { id: 'topsoil', top: 0, bottom: 0.5, thickness: 0.5 },
     { id: 'clay', top: 0.5, bottom: 3.5, thickness: 3 },
@@ -1821,6 +1824,11 @@ export function emergencyContract(level = 1, regionId = 'nordic') {
     applicationId: 'site-investigation',
     methodId: 'auger',
     requiredMethod: 'auger',
+    ...(region.id === 'nordic' ? {
+      // Existing Nordic and auger site compatibility in data.js. This is a
+      // ground-investigation plot, not the region's generic forest clearing.
+      archetype: 'urban-plot', sitePlane: 'surface', flushMedium: method.flushMedium,
+    } : {}),
     targetDepth, holeDia: 150, holes, metres, groundSpec,
     hardness: +hardness.toFixed(3),
     abrasivity: +groundAbrasivity(groundSpec).toFixed(3),
@@ -1859,6 +1867,10 @@ export function canonicalEmergencyContract(contract) {
   // Text is presentation, not the accepted economic promise. Older saved
   // postings may retain earlier copy; all workload and accounting fields match.
   return Object.keys(expected).every(key => ['description', 'title', 'client'].includes(key)
+    // Older accepted call-outs did not save these derived site descriptors.
+    // Rebuild them from the canonical factory without relaxing their values
+    // when supplied, or any workload/economic/ground identity field.
+    || (['archetype', 'sitePlane', 'flushMedium'].includes(key) && contract[key] === undefined)
     || equal(contract[key], expected[key])) ? expected : null;
 }
 

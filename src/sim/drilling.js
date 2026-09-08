@@ -26,7 +26,7 @@ import {
 } from '../core/contract.js';
 import { getItem, SKILL_ALIASES } from '../game/data.js';
 import { resolveSkills } from '../game/economy.js';
-import { checkEquipmentSupport, checkSampleEquipment } from '../game/equipment-support.js';
+import { checkEquipmentSupport, checkSampleEquipment, checkSampleTender } from '../game/equipment-support.js';
 import { createSampleLedger, applySampleEvent, summariseSampleLedger } from './sample-ledger.js';
 import { MAX_SAMPLE_INTERVALS } from './sample-product.js';
 
@@ -3829,13 +3829,28 @@ export function createDrillSim(ctx = {}) {
   }
 
   function startHole(contract) {
-    const c = contract || ctx.state?.contract || {};
+    const proposed = contract || ctx.state?.contract || {};
+    // Unsupported machinery must refuse before consulting career authority.
+    // Resolve again below after core acceptance supplies its immutable terms.
+    resolveMethod(resolveMethodId(proposed), { probeMode: resolveProbeMode(), hammerId: loadoutIds().hammer });
+    const startup = typeof ctx.progression?.checkSamplingStart === 'function'
+      ? ctx.progression.checkSamplingStart(proposed, loadoutIds())
+      : checkSampleTender(proposed, loadoutIds(), getItem);
+    if (!startup.ok) {
+      const error = new Error(startup.reason);
+      Object.assign(error, startup); throw error;
+    }
+    const c = startup.contract || proposed;
     // Resolve the proposed equipment before beginHole creates an attempt or
     // newRunState discards a live run. A refusal is a caller-visible coded
     // error, with no events, inventory changes or replacement default hammer.
     const methodId = resolveMethodId(c);
     const method = resolveMethod(methodId, { probeMode: resolveProbeMode(), hammerId: loadoutIds().hammer });
-    const samplingEquipment = checkSampleEquipment(methodId, loadoutIds(), getItem);
+    // The resolved method also covers method-row / rig / site fallbacks.
+    // Only the progression closure can preserve an old accepted mismatch.
+    const samplingEquipment = startup.tenderFitBasis === 'legacy-accepted-terms'
+      ? checkSampleEquipment(methodId, loadoutIds(), getItem)
+      : checkSampleTender({ ...c, methodId }, loadoutIds(), getItem);
     if (!samplingEquipment.ok) {
       const error = new Error(samplingEquipment.reason);
       Object.assign(error, samplingEquipment); throw error;
@@ -5341,7 +5356,7 @@ export function createDrillSim(ctx = {}) {
     const p = S.prog;
     if (!p) return dBore;
     switch (p.kind) {
-      case 'coreSample': case 'sonicSample': return stepSample(dBore);
+      case 'coreSample': case 'sonicSample': return stepSample(dt, dBore);
       case 'rc':       return stepRc(dt, dtD, dBore);
       case 'jumbo':    return stepJumbo(dt, dtD, dBore);
       case 'longhole': return stepLonghole(dt, dtD, dBore);
@@ -5385,8 +5400,18 @@ export function createDrillSim(ctx = {}) {
     p.summary = Object.freeze({ ...summariseSampleLedger(p.ledger), capacityBasis: p.capacityBasis });
   }
 
-  function stepSample(dBore) {
-    if (dBore > 0) sampleEvent('advance', { toDepthM: S.holeDepth });
+  function stepSample(dt, dBore) {
+    // Operating provenance only. These are existing authored model thresholds,
+    // NOT SOURCED as physical sample-damage/recovery limits. Record a whole
+    // player-time fixed step only when it actually advances the bore, matching
+    // S.drillSec. Sample after input/returns/torque calculation and before this
+    // step's thermal/wear update. No retrieval, handling, trip or paused time.
+    if (dBore > 0) sampleEvent('advance', { toDepthM: S.holeDepth, observation: {
+      elapsedSec: dt, effectiveFlush01: S.act.flush * S.returns,
+      heat01: S.heat, torque01: S.torque,
+      limits: { effectiveFlushMin: S.methodId === 'core' ? S.m.flushCritical : null,
+        heatMax: T.heat.overheatAt, torqueMax: T.torque.overLimit },
+    } });
     return dBore;
   }
 
@@ -6954,6 +6979,9 @@ export function createDrillSim(ctx = {}) {
 
     /* ── stage 1: the way back ── */
     const st = stages[1];
+    // A return can finish partway through this fixed step. Concrete volume
+    // and placement quality must use only the length still inside the pile.
+    const concreteLiftM = st.concrete ? Math.min(dBore, Math.max(0, S.target - p.passM)) : 0;
     p.passM = Math.min(S.target, p.passM + dBore);
     S.stageProgress = p.passM;
     S.holeDepth = p.passM;
@@ -6977,7 +7005,7 @@ export function createDrillSim(ctx = {}) {
        not being hauled into rock: it is being lifted against a concrete pump,
        and the whole job is whether those two stay matched. Its own model, and
        it ends here too. */
-    if (st.concrete) return stepConcreteLift(dt, dBore, st);
+    if (st.concrete) return stepConcreteLift(dt, concreteLiftM, st);
 
     // PULL FORCE. Not a rate: how hard the head is being hauled into the rock
     // it is breaking, plus whatever has not fallen away behind it.
@@ -8925,7 +8953,10 @@ export function createDrillSim(ctx = {}) {
     if (S.jamState === 'stuck') return Promise.resolve({ ok: false, reason: 'stuck' });
     if (isSampleProgramme()) {
       const bitId = !itemId || itemId === '_spare' ? S.bit.id : itemId;
-      const support = checkSampleEquipment(S.methodId, { ...S.samplingLoadout, bit: bitId }, getItem);
+      const loadout = { ...S.samplingLoadout, bit: bitId };
+      const support = typeof ctx.progression?.checkSamplingStart === 'function'
+        ? ctx.progression.checkSamplingStart(S.contract, loadout)
+        : checkSampleTender({ ...S.contract, methodId: S.methodId }, loadout, getItem);
       if (!support.ok) return Promise.resolve(support);
     }
     return new Promise((resolve) => {

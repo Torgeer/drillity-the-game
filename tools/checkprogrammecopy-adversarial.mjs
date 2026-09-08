@@ -6,7 +6,7 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { METHODS, REGIONS, makeContract } from '../src/game/data.js';
+import { METHODS, REGIONS, makeContract, getItem, defaultLoadoutFor } from '../src/game/data.js';
 import { createGameState, createBus, makeRandom } from '../src/core/contract.js';
 import { createDrillSim, methodOf } from '../src/sim/drilling.js';
 import { twoStageStatus, twoStageUnitCard } from '../src/ui/screens/site.js';
@@ -30,14 +30,24 @@ for (const current of METHODS) {
   else assert.equal(currentCopy, previousCopy, `${current.id}: unrelated scoring copy preserved`);
 }
 
-let boards = 0;
+let boards = 0, coreTenderUpdates = 0;
 for (const region of REGIONS) for (let level = 1; level <= 60; level++) for (let seed = 1; seed <= 20; seed++) {
   const current = makeContract(region.id, level, makeRandom(seed));
   const previous = baseline.makeContract(region.id, level, makeRandom(seed));
   const { description: currentDescription, ...currentTerms } = current;
   const { description: previousDescription, ...previousTerms } = previous;
+  if (current.methodId === 'core') {
+    coreTenderUpdates++;
+    // The later core tender policy intentionally chooses a stocked nominal
+    // system and prices that diameter. Preserve this gate's historical copy
+    // control for every other field/method, not the old arbitrary core bore.
+    const nominalBore = getItem(defaultLoadoutFor('core', level).bit).sampling.holeDiameterMm;
+    assert.equal(current.holeDia, nominalBore);
+    assert.ok(currentDescription.includes(`${nominalBore} mm`));
+    for (const key of ['holeDia', 'payout', 'bonus']) { delete currentTerms[key]; delete previousTerms[key]; }
+  }
   assert.deepEqual(currentTerms, previousTerms, `${region.id}/L${level}/S${seed}: contract terms and incentives preserved`);
-  if (currentDescription !== previousDescription) {
+  if (current.methodId !== 'core' && currentDescription !== previousDescription) {
     assert.ok(changedMethods.includes(current.methodId), 'only targeted methods change prose');
     assert.equal(current.constraint.id, 'none', 'copy does not change tight-tolerance eligibility');
   }
@@ -86,6 +96,7 @@ for (const methodId of ['cfa', 'cased-cfa']) {
     measurements.push({ methodId, initialPass, rawRatio, effectiveRatio: c.ratio, band: [c.targetLo, c.targetHi], card });
   } finally { sim.dispose(); }
 }
-console.log(JSON.stringify({ contractsPreservedAgainstGitHead: boards, allMethodsDataPreserved: METHODS.length,
+console.log(JSON.stringify({ comparedAgainstHistoricalCommit: boards, unchangedNonCoreTerms: boards - coreTenderUpdates,
+  coreNominalSizeUpdates: coreTenderUpdates, allMethodsDataPreserved: METHODS.length,
   measurements, failures }, null, 2));
 assert.deepEqual(failures, [], 'programme copy must distinguish effective volume ratio from raw supply/demand');

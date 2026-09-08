@@ -1,0 +1,131 @@
+{
+  "version": 1,
+  "generated": "2026-09-08T13:38:21.996Z",
+  "valid": true,
+  "sourceHash": "6c9b68d88eb500859f7768784b483b5e3ce096edb8ee4003c28edd6c04f271db",
+  "profilerHash": "436f48390bf25083d8a6105103389849ee61e83ac22714eb8b4c493dfddcbc40",
+  "toolHash": "52790a1e950d6e0a4005bf9589257d193ce92be0306d0796fd5f7ea5d1ac9260",
+  "results": [
+    {
+      "name": "actual manager retains identical state, alternates on/off and restores ownership",
+      "pass": true
+    },
+    {
+      "name": "composed live capture separates extra renders, owns both query sets and restores in reverse order",
+      "pass": true
+    },
+    {
+      "name": "renderer exception survives query failure and visibility is restored",
+      "pass": true
+    },
+    {
+      "name": "actual manager rejects same-version particle data mutation",
+      "pass": true
+    },
+    {
+      "name": "actual manager rejects shimmer uniform mutation",
+      "pass": true
+    },
+    {
+      "name": "actual manager rejects final-member target replacement",
+      "pass": true
+    },
+    {
+      "name": "actual manager rejects target detachment",
+      "pass": true
+    },
+    {
+      "name": "actual manager rejects camera world mutation",
+      "pass": true
+    },
+    {
+      "name": "actual manager rejects copy happened despite disabled-copy uniforms",
+      "pass": true
+    },
+    {
+      "name": "query ownership rejects never-ready query deadline",
+      "pass": true
+    },
+    {
+      "name": "query ownership rejects disjoint timer",
+      "pass": true
+    },
+    {
+      "name": "query ownership rejects NaN result",
+      "pass": true
+    },
+    {
+      "name": "query ownership rejects createQuery null",
+      "pass": true
+    },
+    {
+      "name": "query ownership rejects foreign active query",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects empty pair array without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects null pair without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects null member without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects null query without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects duplicate GPU sample without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects negative GPU time without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects missing completed counter without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects missing camera evidence everywhere without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects empty graph everywhere without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects NaN camera matrices everywhere without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects missing final identity proof without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects false restore without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects mask inversion without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects unobserved on hook without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects wrong frame association without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects copy-path uniforms enabled without throwing",
+      "pass": true
+    }
+  ],
+  "semantics": "CPU-only manager/assessor adversarial proof using real Three scene objects and a fake query driver. No browser/GPU/FPS acceptance."
+}

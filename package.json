@@ -28,7 +28,7 @@
     "models:pack": "node tools/glbpack.mjs",
     "models:check": "node tools/glbpack.mjs --check",
     "check:models": "node tools/checkmodels.mjs",
-    "check:haptics": "node tools/checkhaptics.mjs",
+    "check:haptics": "node tools/checkhaptics.mjs && node tools/checkhapticdispatch.mjs && node tools/checkhapticdispatch-adversarial.mjs",
     "qa:entrance": "node tools/checkentrance.mjs",
     "qa:rigvisual": "node tools/checkrigvisual.mjs",
     "qa:ui": "node tools/checkuimotion.mjs",
@@ -48,10 +48,12 @@
     "check:instruments": "node tools/checkinstrumentgrade.mjs && node tools/checkinstrumentwarmup.mjs && node tools/checkprogramreadiness.mjs && node tools/checkpostwarmup.mjs",
     "check:ruler": "node tools/checkruler.mjs",
     "check:domain": "node tools/checkdomain-rockbolt.mjs && node tools/checkdomain-pile-energy.mjs && node tools/checkdomain-mechanics-adversarial.mjs && node tools/checkdomain-rockbolt-length.mjs && node tools/checkdomain-rockbolt-ui.mjs && node tools/checkdomain-followup-adversarial.mjs",
-    "check:cfafeed": "node tools/checkcfafeed.mjs",
+    "check:cfafeed": "node tools/checkcfafeed.mjs && npm run check:concrete-volume",
+    "check:concrete-volume": "node tools/checkconcrete-volume.mjs && node tools/checkconcrete-volume-critic.mjs",
     "check:toolselection": "node tools/auditrigattachments.mjs --tool-selection-only",
-    "check:cpu": "node tools/checkfacts.mjs && node tools/checkdata.mjs && node tools/checkbeds.mjs && node tools/checkcareer.mjs && npm run check:rigcapacity && npm run check:tunnel && npm run check:toolcatalogue && npm run check:sonic && npm run check:atlas && npm run check:progression && npm run check:domain && npm run check:contracts && npm run check:preview && npm run check:geology && npm run check:instruments && npm run check:heroframing && node tools/checkmodels.mjs && node tools/checkrigmetadata.mjs && npm run check:toolselection && npm run check:cfafeed && npm run check:underground && npm run check:vibro && npm run check:sites && node tools/checkhaptics.mjs && npm run check:motion && npm run check:materials && npm run check:qa && npm run check:siteassets && node tools/check_rc_axis.mjs && npm run check:controls && npm run check:pause && npm run check:skills && npm run check:programme-copy && npm run check:action-outcomes && npm run check:save-feedback && npm run check:orbit-framing && npm run check:field-regrind && npm run check:interactions && npm run check:rescue-viability && npm run check:career-endgame && npm run check:pile-motion && npm run check:sampling",
-    "check:geology": "node tools/checkgeologycoverage.mjs && node tools/checkreadoutcache-shipping.mjs && node tools/checkruler.mjs",
+    "check:cpu": "node tools/checkfacts.mjs && node tools/checkdata.mjs && node tools/checkbeds.mjs && node tools/checkcareer.mjs && npm run check:rigcapacity && npm run check:tunnel && npm run check:toolcatalogue && npm run check:sonic && npm run check:atlas && npm run check:progression && npm run check:domain && npm run check:contracts && npm run check:preview && npm run check:geology && npm run check:instruments && npm run check:heroframing && node tools/checkmodels.mjs && node tools/checkrigmetadata.mjs && npm run check:toolselection && npm run check:cfafeed && npm run check:underground && npm run check:vibro && npm run check:sites && npm run check:haptics && npm run check:motion && npm run check:materials && npm run check:qa && npm run check:siteassets && node tools/check_rc_axis.mjs && npm run check:controls && npm run check:pause && npm run check:skills && npm run check:programme-copy && npm run check:action-outcomes && npm run check:save-feedback && npm run check:orbit-framing && npm run check:field-regrind && npm run check:interactions && npm run check:rescue-viability && npm run check:career-endgame && npm run check:pile-motion && npm run check:sampling",
+    "check:geology": "node tools/checkgeologycoverage.mjs && node tools/checkreadoutcache-shipping.mjs && node tools/checkruler.mjs && npm run check:rescue-geology",
+    "check:rescue-geology": "node tools/checkrescuegeology.mjs && node tools/checkrescuegeology-adversarial.mjs",
     "check:tunnel": "node tools/checktunnelcyclehours.mjs && node tools/checktunnelestimator.mjs",
     "check:toolcatalogue": "node tools/checktoolcataloguegeometry.mjs && node tools/checktoolcataloguepreview.mjs",
     "check:sonic": "node tools/checksonic-capabilities.mjs",
@@ -77,13 +79,16 @@
     "check:career-endgame": "node tools/checkcareerendgame.mjs && node tools/checkcareerendgame-adversarial.mjs",
     "check:pile-motion": "node tools/checkpilemotion.mjs && node tools/checkpilemotion-adversarial.mjs && node tools/checkpileplacement.mjs && node tools/checkpilefeed-adversarial.mjs",
     "qa:field-save": "node tools/checkfieldsave-browser.mjs",
-    "check:sampling": "node tools/checksampleledger.mjs && node tools/checksampleledger-adversarial.mjs && node tools/checksamplegameplay.mjs && node tools/checksamplegameplay-adversarial.mjs && node tools/checksampleloadouts.mjs && node tools/checksampleloadouts-adversarial.mjs --start --catalogue && node tools/checksamplecatalogue-adversarial.mjs"
+    "check:sampling": "node tools/checksampleledger.mjs && node tools/checksampleledger-adversarial.mjs && node tools/checksamplegameplay.mjs && node tools/checksamplegameplay-adversarial.mjs && node tools/checksampleloadouts.mjs && node tools/checksampleloadouts-adversarial.mjs --start --catalogue && node tools/checksamplecatalogue-adversarial.mjs && npm run check:sample-tenders && npm run check:sample-conditions",
+    "check:sample-tenders": "node tools/checksamplingtenderfit.mjs && node tools/checksampletender-adversarial.mjs",
+    "check:sample-conditions": "node tools/checksampleconditions.mjs && node tools/checksampleconditions-adversarial.mjs"
   },
   "dependencies": {
     "three": "0.169.0"
   },
   "devDependencies": {
     "@gltf-transform/cli": "^4.5.0",
+    "@napi-rs/canvas": "0.1.100",
     "playwright": "^1.49.1",
     "vite": "^5.4.10",
     "vite-plugin-singlefile": "^2.0.3"

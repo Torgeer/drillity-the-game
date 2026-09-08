@@ -1,0 +1,422 @@
+{
+  "status": "INVALID capture; CPU candidate only; no overall approval or production integration",
+  "originalsPreserved": true,
+  "files": [
+    {
+      "path": "research/cab-glass-cpu-2026-09-08.json.gz",
+      "encoding": "gzip",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\research\\cab-glass-cpu-2026-09-08.json",
+      "originalBytes": 7706,
+      "originalSha256": "d9e9e132aae901c9c51b21c429abb9d9c31e008928edaaf411ddb2240374f80c",
+      "storedBytes": 1785,
+      "storedSha256": "b6f92c22b48ba4c182adf0dc2b03162a7705708d733f499c2f7cbc563a1f37cd"
+    },
+    {
+      "path": "research/cab-glass-cpu-rejected-geometry-assumption-2026-09-08.json.gz",
+      "encoding": "gzip",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\research\\cab-glass-cpu-rejected-geometry-assumption-2026-09-08.json",
+      "originalBytes": 967,
+      "originalSha256": "15cca4357b22d23258929f8a59064e11efe896a53ab4e38c683a609cd1b4fd8a",
+      "storedBytes": 589,
+      "storedSha256": "cb40904c97c913926eca926693f005bf831c86db4c1213e9699049af57c4f1fa"
+    },
+    {
+      "path": "research/cab-glass-independent-2026-09-08.json.gz",
+      "encoding": "gzip",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\research\\cab-glass-independent-2026-09-08.json",
+      "originalBytes": 3764,
+      "originalSha256": "848d5b839eb9bd7ab8d8a72f0b34f1a178c0144cbe0ed9e41ff6cfa94130a8c2",
+      "storedBytes": 1980,
+      "storedSha256": "c976a3d654e3d4c54783f0fb6d3e5447b24eca2a29ed202d1f63eabeec3bba6c"
+    },
+    {
+      "path": "research/CAB_GLASS_PACKAGE_README_2026-09-08.md.gz",
+      "encoding": "gzip",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\research\\CAB_GLASS_PACKAGE_README_2026-09-08.md",
+      "originalBytes": 5512,
+      "originalSha256": "ca184f27850fc1444bc30fabcea0d53afd5921d57a5aeb0b966e4637c53a1e24",
+      "storedBytes": 2788,
+      "storedSha256": "f224a4e6a385bf62e495b7eef0fe1c405658e89f64cdee2f0da5edd79a3426fe"
+    },
+    {
+      "path": "research/CAB_GLASS_PROPOSAL_2026-09-08.md.gz",
+      "encoding": "gzip",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\research\\CAB_GLASS_PROPOSAL_2026-09-08.md",
+      "originalBytes": 6092,
+      "originalSha256": "1d613f0a4aab2442559c4c11d26f3fe91370841892d6151ce78a2b290dd591be",
+      "storedBytes": 2929,
+      "storedSha256": "a3aa30f785d6bf0f8d25e6696c165520fbeca1ca92dad4fa37799c3e53d2d3de"
+    },
+    {
+      "path": "research/glass-baseline-manifest-2026-09-08.json.gz",
+      "encoding": "gzip",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\research\\glass-baseline-manifest-2026-09-08.json",
+      "originalBytes": 50562,
+      "originalSha256": "66dceba44f2d7be035b66009db349f80cb4f211df77017103e6f568d1186d0d1",
+      "storedBytes": 16377,
+      "storedSha256": "88c58a722252a7c52026c561682ab007b9d3826628dc95f649fcb3ca4f717672"
+    },
+    {
+      "path": "research/glass-bindings-independent-2026-09-08.json.gz",
+      "encoding": "gzip",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\research\\glass-bindings-independent-2026-09-08.json",
+      "originalBytes": 43873,
+      "originalSha256": "f04c820e42ab4092c1c5acdbfd0bd6b01fbc116d893a06169b16630e62453902",
+      "storedBytes": 7746,
+      "storedSha256": "4c35262035899e148842a84d5123c3ed66448feac7efc5848fe8cbd45297c57d"
+    },
+    {
+      "path": "research/glass-capture-independent-2026-09-08.json.gz",
+      "encoding": "gzip",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\research\\glass-capture-independent-2026-09-08.json",
+      "originalBytes": 22596,
+      "originalSha256": "223eb3467ada06c460d6ef3d00cb5fd37a3999ef0ae43addab35dbb05c06e2c5",
+      "storedBytes": 2629,
+      "storedSha256": "6b110d58a9393fd3e0ead6d32074a77aa21a28358f46c5b5950a6c358173a71f"
+    },
+    {
+      "path": "research/glass-capture-preflight-2026-09-08.json.gz",
+      "encoding": "gzip",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\research\\glass-capture-preflight-2026-09-08.json",
+      "originalBytes": 7888,
+      "originalSha256": "2dfa56f3ae92bbd47aa9f6935f978748a13f4fbb0a5439f7c9bd242e85a51b61",
+      "storedBytes": 2784,
+      "storedSha256": "141fd3c8e03f261df8149852ced57a0d418730141c1982d79275132d89fb6013"
+    },
+    {
+      "path": "research/glass-prelaunch-2026-09-08.json.gz",
+      "encoding": "gzip",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\research\\glass-prelaunch-2026-09-08.json",
+      "originalBytes": 1033,
+      "originalSha256": "ce9eb473c75f8788d8896abd099ae5ccca9f79bd3bb662c5d6566927f8fd404d",
+      "storedBytes": 554,
+      "storedSha256": "7bc7c997d4c95976cf5e71ef1e7fc19c9b64a84e3386a3e9f17ca0066feae1fb"
+    },
+    {
+      "path": "research/GLASS_BINDING_CRITIC_2026-09-08.md.gz",
+      "encoding": "gzip",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\research\\GLASS_BINDING_CRITIC_2026-09-08.md",
+      "originalBytes": 7502,
+      "originalSha256": "5362c6d113c0a30ebbbf6d6d176b94a7acf80c400cba067f6c9f2160c60307a4",
+      "storedBytes": 3585,
+      "storedSha256": "fc46945c1b5e2ffef4ebe86b5351f77b79c0bfcca86dfc73ac25cca663ccb278"
+    },
+    {
+      "path": "research/GLASS_CAPTURE_PREFLIGHT_CRITIC_2026-09-08.md.gz",
+      "encoding": "gzip",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\research\\GLASS_CAPTURE_PREFLIGHT_CRITIC_2026-09-08.md",
+      "originalBytes": 6602,
+      "originalSha256": "5f341b0c5e0c758e1fb3a83d1bfb20a87ed7e3b5cc427bdd41c7b258fafc81a4",
+      "storedBytes": 3197,
+      "storedSha256": "b829ef98eb7dde13c3869d88f020d49686919d6bd3c96c22bd6f709bbbe43105"
+    },
+    {
+      "path": "research/GLASS_VISUAL_CRITIC_2026-09-08.md.gz",
+      "encoding": "gzip",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\research\\GLASS_VISUAL_CRITIC_2026-09-08.md",
+      "originalBytes": 7807,
+      "originalSha256": "764ca21b82e55087f7dfef5e8c2e1a43070e43d151b974a087f7b0fbc70825a4",
+      "storedBytes": 3702,
+      "storedSha256": "a8a62744e53309b1e2c23be40f6b263a01bf8d7d958af748e09600bc35397ee3"
+    },
+    {
+      "path": "tools/auditglassbindings-adversarial.mjs.gz",
+      "encoding": "gzip",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\tools\\auditglassbindings-adversarial.mjs",
+      "originalBytes": 7022,
+      "originalSha256": "7f1802056a192eee3759339c81ca5d2701c34af23f1a9c473174dea94cd0582c",
+      "storedBytes": 2933,
+      "storedSha256": "32a0d5461a8f01549598665a9eeb60f2b717f6964f8d95fc5535b8fb234d0789"
+    },
+    {
+      "path": "tools/auditglasscapture-independent.py.gz",
+      "encoding": "gzip",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\tools\\auditglasscapture-independent.py",
+      "originalBytes": 6473,
+      "originalSha256": "8853db501e27a3b20317d60c431454bd74389b8b1f943268b2f2b97081e7a730",
+      "storedBytes": 2374,
+      "storedSha256": "64f2b1dc854ae53059de3b33d5066c7cc652808095a56ae1340a3357af7a5844"
+    },
+    {
+      "path": "tools/checkcabglass-adversarial.mjs.gz",
+      "encoding": "gzip",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\tools\\checkcabglass-adversarial.mjs",
+      "originalBytes": 12489,
+      "originalSha256": "4d46bc1fe2960aa69575c9d1cd5369ac39bc97dd2db0897352cd629e21bc956e",
+      "storedBytes": 4389,
+      "storedSha256": "551f5489a8974a48bd8aabd63a3969993ac41db0e32fe436fc71228d48368423"
+    },
+    {
+      "path": "tools/checkcabglass.mjs.gz",
+      "encoding": "gzip",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\tools\\checkcabglass.mjs",
+      "originalBytes": 6956,
+      "originalSha256": "c3a46e633f572fe37c162badd55dfe12e97244f131a634f57873eea64124b4d3",
+      "storedBytes": 2940,
+      "storedSha256": "47fe765d21f55c00cd710888e9db3cfa271d4205e66d48c2281b8ae0b8ab6190"
+    },
+    {
+      "path": "tools/packagecabglass.py.gz",
+      "encoding": "gzip",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\tools\\packagecabglass.py",
+      "originalBytes": 3340,
+      "originalSha256": "c6a344db85927a9a4a55480afd5a3202c5c8a3b69f1cbe1408e13e8620053eb6",
+      "storedBytes": 1409,
+      "storedSha256": "ed1a0b13b0ebdc21d6a0a2fcbc7debcbd85275fb1a0e8e57c47af60f77ee2816"
+    },
+    {
+      "path": "tools/validateglass.mjs.gz",
+      "encoding": "gzip",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\tools\\validateglass.mjs",
+      "originalBytes": 23920,
+      "originalSha256": "a47f530ff58c4a4f032aa3a3b8eb3f4996535ffebb2979cdda64459480c07a23",
+      "storedBytes": 7956,
+      "storedSha256": "d83b1d0bded400623303b303c72327beea2f4f94b62bffc145fd8b07796785bf"
+    },
+    {
+      "path": "capture/cleanup-verification.json.gz",
+      "encoding": "gzip",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\evidence\\graphics\\glass-01\\cleanup-verification.json",
+      "originalBytes": 206,
+      "originalSha256": "b1d345e6a17da8519eecd17b342b4b3f4de65db9343f634e557ded7b1a383e7f",
+      "storedBytes": 158,
+      "storedSha256": "15d81998ebaf340fa485fe3c4026c9ff2662423b44621ad354ad510bb6bad279"
+    },
+    {
+      "path": "capture/dth-mixed-control-baseline-repeat.png",
+      "encoding": "unchanged PNG",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\evidence\\graphics\\glass-01\\dth-mixed-control-baseline-repeat.png",
+      "originalBytes": 1226723,
+      "originalSha256": "f2e40c3db2894f36c1e2b1ecc5e11f09130caf7504b7a2f86221bdb6e9d434e3",
+      "storedBytes": 1226723,
+      "storedSha256": "f2e40c3db2894f36c1e2b1ecc5e11f09130caf7504b7a2f86221bdb6e9d434e3"
+    },
+    {
+      "path": "capture/dth-mixed-control-baseline-response.png",
+      "encoding": "unchanged PNG",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\evidence\\graphics\\glass-01\\dth-mixed-control-baseline-response.png",
+      "originalBytes": 1226723,
+      "originalSha256": "f2e40c3db2894f36c1e2b1ecc5e11f09130caf7504b7a2f86221bdb6e9d434e3",
+      "storedBytes": 1226723,
+      "storedSha256": "f2e40c3db2894f36c1e2b1ecc5e11f09130caf7504b7a2f86221bdb6e9d434e3"
+    },
+    {
+      "path": "capture/dth-mixed-control-candidate-repeat.png",
+      "encoding": "unchanged PNG",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\evidence\\graphics\\glass-01\\dth-mixed-control-candidate-repeat.png",
+      "originalBytes": 1226723,
+      "originalSha256": "f2e40c3db2894f36c1e2b1ecc5e11f09130caf7504b7a2f86221bdb6e9d434e3",
+      "storedBytes": 1226723,
+      "storedSha256": "f2e40c3db2894f36c1e2b1ecc5e11f09130caf7504b7a2f86221bdb6e9d434e3"
+    },
+    {
+      "path": "capture/dth-mixed-control-candidate-source.png",
+      "encoding": "unchanged PNG",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\evidence\\graphics\\glass-01\\dth-mixed-control-candidate-source.png",
+      "originalBytes": 1226723,
+      "originalSha256": "f2e40c3db2894f36c1e2b1ecc5e11f09130caf7504b7a2f86221bdb6e9d434e3",
+      "storedBytes": 1226723,
+      "storedSha256": "f2e40c3db2894f36c1e2b1ecc5e11f09130caf7504b7a2f86221bdb6e9d434e3"
+    },
+    {
+      "path": "capture/longhole-cab-baseline-repeat.png",
+      "encoding": "unchanged PNG",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\evidence\\graphics\\glass-01\\longhole-cab-baseline-repeat.png",
+      "originalBytes": 1330753,
+      "originalSha256": "180907c50b29c9eba39405927e131be40235005804aafedc0e15f4be60864d90",
+      "storedBytes": 1330753,
+      "storedSha256": "180907c50b29c9eba39405927e131be40235005804aafedc0e15f4be60864d90"
+    },
+    {
+      "path": "capture/longhole-cab-baseline-response.png",
+      "encoding": "unchanged PNG",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\evidence\\graphics\\glass-01\\longhole-cab-baseline-response.png",
+      "originalBytes": 1330775,
+      "originalSha256": "42c3a3b5e00d5d3ccb2f2f32ee25431ceb960810b5a6715ec6b6384cbe0268f2",
+      "storedBytes": 1330775,
+      "storedSha256": "42c3a3b5e00d5d3ccb2f2f32ee25431ceb960810b5a6715ec6b6384cbe0268f2"
+    },
+    {
+      "path": "capture/longhole-cab-candidate-repeat.png",
+      "encoding": "unchanged PNG",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\evidence\\graphics\\glass-01\\longhole-cab-candidate-repeat.png",
+      "originalBytes": 1331073,
+      "originalSha256": "5c61f326d881d9e81cc504b502392167093f7fc3f8c3287f77e7c5022c48b5d6",
+      "storedBytes": 1331073,
+      "storedSha256": "5c61f326d881d9e81cc504b502392167093f7fc3f8c3287f77e7c5022c48b5d6"
+    },
+    {
+      "path": "capture/longhole-cab-candidate-source.png",
+      "encoding": "unchanged PNG",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\evidence\\graphics\\glass-01\\longhole-cab-candidate-source.png",
+      "originalBytes": 1331035,
+      "originalSha256": "1b04290634294348366b2f548121ca774ae7038c06b18a548c9935bd5f60a488",
+      "storedBytes": 1331035,
+      "storedSha256": "1b04290634294348366b2f548121ca774ae7038c06b18a548c9935bd5f60a488"
+    },
+    {
+      "path": "capture/oil-cab-focus-baseline-repeat.png",
+      "encoding": "unchanged PNG",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\evidence\\graphics\\glass-01\\oil-cab-focus-baseline-repeat.png",
+      "originalBytes": 1026872,
+      "originalSha256": "a7392ed0749ffcff032303ddf939c6e5bf79161517f483b74f4ca2e572f51306",
+      "storedBytes": 1026872,
+      "storedSha256": "a7392ed0749ffcff032303ddf939c6e5bf79161517f483b74f4ca2e572f51306"
+    },
+    {
+      "path": "capture/oil-cab-focus-baseline-response.png",
+      "encoding": "unchanged PNG",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\evidence\\graphics\\glass-01\\oil-cab-focus-baseline-response.png",
+      "originalBytes": 1026873,
+      "originalSha256": "a1210e76c57c657e1883b034297f0670de1e619b797cacb38b822689c1bdcc41",
+      "storedBytes": 1026873,
+      "storedSha256": "a1210e76c57c657e1883b034297f0670de1e619b797cacb38b822689c1bdcc41"
+    },
+    {
+      "path": "capture/oil-cab-focus-candidate-repeat.png",
+      "encoding": "unchanged PNG",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\evidence\\graphics\\glass-01\\oil-cab-focus-candidate-repeat.png",
+      "originalBytes": 1026872,
+      "originalSha256": "e9409263047befdad080a787e2c39a448961edbec0250b08d7829d0cf6dbd405",
+      "storedBytes": 1026872,
+      "storedSha256": "e9409263047befdad080a787e2c39a448961edbec0250b08d7829d0cf6dbd405"
+    },
+    {
+      "path": "capture/oil-cab-focus-candidate-source.png",
+      "encoding": "unchanged PNG",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\evidence\\graphics\\glass-01\\oil-cab-focus-candidate-source.png",
+      "originalBytes": 1026872,
+      "originalSha256": "e9409263047befdad080a787e2c39a448961edbec0250b08d7829d0cf6dbd405",
+      "storedBytes": 1026872,
+      "storedSha256": "e9409263047befdad080a787e2c39a448961edbec0250b08d7829d0cf6dbd405"
+    },
+    {
+      "path": "capture/oil-cab-focus-wide-context.png",
+      "encoding": "unchanged PNG",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\evidence\\graphics\\glass-01\\oil-cab-focus-wide-context.png",
+      "originalBytes": 1089898,
+      "originalSha256": "5905a4c0d020c64c8771dafd9d9dfbfbc9d4f7d4f79b5e5c3f4315f15b8c19c2",
+      "storedBytes": 1089898,
+      "storedSha256": "5905a4c0d020c64c8771dafd9d9dfbfbc9d4f7d4f79b5e5c3f4315f15b8c19c2"
+    },
+    {
+      "path": "capture/piling-cab-focus-baseline-repeat.png",
+      "encoding": "unchanged PNG",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\evidence\\graphics\\glass-01\\piling-cab-focus-baseline-repeat.png",
+      "originalBytes": 1320987,
+      "originalSha256": "829747f595bbf32587c13720ad7a3d9dca0d73762da144a03d53c469f5ba8e3d",
+      "storedBytes": 1320987,
+      "storedSha256": "829747f595bbf32587c13720ad7a3d9dca0d73762da144a03d53c469f5ba8e3d"
+    },
+    {
+      "path": "capture/piling-cab-focus-baseline-response.png",
+      "encoding": "unchanged PNG",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\evidence\\graphics\\glass-01\\piling-cab-focus-baseline-response.png",
+      "originalBytes": 1320996,
+      "originalSha256": "76e1eca8cd6bb53ced3669fb93fe5003b78f886ad6a60f46011f9fe30433eb09",
+      "storedBytes": 1320996,
+      "storedSha256": "76e1eca8cd6bb53ced3669fb93fe5003b78f886ad6a60f46011f9fe30433eb09"
+    },
+    {
+      "path": "capture/piling-cab-focus-candidate-repeat.png",
+      "encoding": "unchanged PNG",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\evidence\\graphics\\glass-01\\piling-cab-focus-candidate-repeat.png",
+      "originalBytes": 1320973,
+      "originalSha256": "a4d907a4b555f33f6c72397da95b4d298033f3915949f6cb18baea5f69320652",
+      "storedBytes": 1320973,
+      "storedSha256": "a4d907a4b555f33f6c72397da95b4d298033f3915949f6cb18baea5f69320652"
+    },
+    {
+      "path": "capture/piling-cab-focus-candidate-source.png",
+      "encoding": "unchanged PNG",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\evidence\\graphics\\glass-01\\piling-cab-focus-candidate-source.png",
+      "originalBytes": 1320973,
+      "originalSha256": "a4d907a4b555f33f6c72397da95b4d298033f3915949f6cb18baea5f69320652",
+      "storedBytes": 1320973,
+      "storedSha256": "a4d907a4b555f33f6c72397da95b4d298033f3915949f6cb18baea5f69320652"
+    },
+    {
+      "path": "capture/piling-cab-focus-wide-context.png",
+      "encoding": "unchanged PNG",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\evidence\\graphics\\glass-01\\piling-cab-focus-wide-context.png",
+      "originalBytes": 1146134,
+      "originalSha256": "4db91677c5b8a2f921a56fb1da57e2521719023e5617385cd3adb2f0db158e13",
+      "storedBytes": 1146134,
+      "storedSha256": "4db91677c5b8a2f921a56fb1da57e2521719023e5617385cd3adb2f0db158e13"
+    },
+    {
+      "path": "capture/report.json.gz",
+      "encoding": "gzip",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\evidence\\graphics\\glass-01\\report.json",
+      "originalBytes": 9191892,
+      "originalSha256": "37db70154eb7c92e76002e03580d8a06394d3015f4f1b04f03ca4f2c0ae7a8d9",
+      "storedBytes": 988487,
+      "storedSha256": "4e18d2fc38d6d0d4a6ae93e8c44d3839557c687ff3961ae73bc0a87b228e1586"
+    },
+    {
+      "path": "capture/validateglass-source.mjs.gz",
+      "encoding": "gzip",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\evidence\\graphics\\glass-01\\validateglass-source.mjs",
+      "originalBytes": 23920,
+      "originalSha256": "a47f530ff58c4a4f032aa3a3b8eb3f4996535ffebb2979cdda64459480c07a23",
+      "storedBytes": 7956,
+      "storedSha256": "d83b1d0bded400623303b303c72327beea2f4f94b62bffc145fd8b07796785bf"
+    },
+    {
+      "path": "candidate-source/src/core/assets.js.gz",
+      "encoding": "gzip",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\src\\core\\assets.js",
+      "originalBytes": 271857,
+      "originalSha256": "154d5eac58bdeac6aaa0b559d2f13c43700d3aede18eb46816a738551533c605",
+      "storedBytes": 76447,
+      "storedSha256": "d46d19223e9d40c23e4d9afc68c267eec9f1c5acd1ebec736dbf6a92b554611f"
+    },
+    {
+      "path": "baseline-source/src/core/assets.js.gz",
+      "encoding": "gzip",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\core\\assets.js",
+      "originalBytes": 270672,
+      "originalSha256": "fccb6779082d32c1a9967683508ecd869f3bd3599ed57787436921404673c04a",
+      "storedBytes": 76019,
+      "storedSha256": "9e1a06cd8d197c358bc84c1df5b7528224308b948f5580bd0dd2f3827e030769"
+    },
+    {
+      "path": "candidate-source/src/core/gltfRig.js.gz",
+      "encoding": "gzip",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-glass-readability\\src\\core\\gltfRig.js",
+      "originalBytes": 52720,
+      "originalSha256": "3d5f9f56986278a5a932ef8f644b420c141b4114396ba5a3d6e240eeebc3d818",
+      "storedBytes": 17478,
+      "storedSha256": "289641747b1e313f90ea7dd09762d562c27bece5da0ebbe3790426da3d8fc8a8"
+    },
+    {
+      "path": "baseline-source/src/core/gltfRig.js.gz",
+      "encoding": "gzip",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\core\\gltfRig.js",
+      "originalBytes": 51556,
+      "originalSha256": "ea7aa46ab87be5a0b2c04152bb959be5c227ed6f073762dc78d5d654c7a4b53b",
+      "storedBytes": 16980,
+      "storedSha256": "1fc8528b99b7823351fef4e4bbe6c001215b85dae4c5f1cfae8adff63439c90f"
+    },
+    {
+      "path": "cab-glass-delta.patch.gz",
+      "encoding": "gzip",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\cab-glass-delta.patch",
+      "originalBytes": 5814,
+      "originalSha256": "3b2aa659e83d08cb8e727bfbf36cc6d33f357b7b888ce6d65e4b324b364cfdda",
+      "storedBytes": 2456,
+      "storedSha256": "b6c953899cd7650a33ca423a0c7bbb44fb2219b6c9de2a8ae74c1851754a6e52"
+    },
+    {
+      "path": "cab-glass-delta.json.gz",
+      "encoding": "gzip",
+      "originalPath": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\cab-glass-delta.json",
+      "originalBytes": 884,
+      "originalSha256": "c4b9c3c06b309e37581abc20955e4bc7f10a461ee3853f08e39d774bfc712737",
+      "storedBytes": 507,
+      "storedSha256": "a0cbef647b40c15fb72bc250c6fd6e8694aba217431ba687d6ab9054c01c9afa"
+    }
+  ],
+  "pngCount": 18,
+  "storedBytes": 23117112
+}

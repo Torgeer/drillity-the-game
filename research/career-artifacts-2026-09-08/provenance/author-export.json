@@ -1,0 +1,1155 @@
+{
+  "candidate": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-career-playthrough",
+  "baseline": "C:/Users/henri/Downloads/threads/drillity-coordination/resume-70-baseline-2026-09-08",
+  "productionOwnership": "No career-authored production delta. The composed geology implementation is owned by rescue_viability; integrate its reviewed source delta once.",
+  "sharedProduction": {
+    "path": "src/world/geology.js",
+    "sha256": "faeb7e7b14af50f16b9905adba1efae7fb6cf754afa1894a8ce10c8a93466e88"
+  },
+  "criticalSave": "research/earned-career-chain-03/job-102.save.json",
+  "criticalSaveSha256": "4f5bfaa36e7942c023fc10ad354f100fbdde4f68297770ad815577fb85a969e4",
+  "files": [
+    {
+      "path": "research/CAREER_PLAYTHROUGH_2026-09-08.md",
+      "sha256": "5b566a0a9dbdec250acb831426e0eca0a9ce7d61d2b36f5269bd0f3ab4dd83e5",
+      "bytes": 12059
+    },
+    {
+      "path": "research/career-playthrough-1337-card0.json",
+      "sha256": "f9f9fd87081db5d1cf58d7733fc214987ba3341be52b191a4e1cf2245ac976a0",
+      "bytes": 68329
+    },
+    {
+      "path": "research/career-playthrough-1337-card1.json",
+      "sha256": "f0a3310985a3d53d76b9d4704a1325a461db90bdfcab8fc1a1b8c099c82128e9",
+      "bytes": 68908
+    },
+    {
+      "path": "research/career-playthrough-1337-card3.json",
+      "sha256": "db765052159401082521be0fdd13457c5b126eb0e7ba0bc416d7a629ee51e83f",
+      "bytes": 69264
+    },
+    {
+      "path": "research/career-playthrough-1337-card4.json",
+      "sha256": "81dd7ef8ea3a0d64effe82c6b2ad679be78b6b30c16e808cbcb5c86a1ad98584",
+      "bytes": 65760
+    },
+    {
+      "path": "research/career-playthrough-after-fix-pinned.json",
+      "sha256": "c3164023f5a9307fc50fa7492f77e6aed20d1af94945207e6beeec49ad7c5fa9",
+      "bytes": 31321
+    },
+    {
+      "path": "research/career-playthrough-after-fix-pinned.save.json",
+      "sha256": "968260497ee3b80c31bc5cb2710633962147600a1fc4ab484a832a4f99d2b472",
+      "bytes": 2181
+    },
+    {
+      "path": "research/career-playthrough-baseline.json",
+      "sha256": "66dceba44f2d7be035b66009db349f80cb4f211df77017103e6f568d1186d0d1",
+      "bytes": 50562
+    },
+    {
+      "path": "research/career-playthrough-before-fix-pinned.json",
+      "sha256": "59bbdba6e3a0e1c2fcf4e383e5b8fd8dfc642c5f2d202fbbe97b60c5249a82f6",
+      "bytes": 44168
+    },
+    {
+      "path": "research/career-playthrough-environment-failed.json",
+      "sha256": "eec265e7ef55c27b3eeaf87b006f4fee6d7a8781d3e350f08562692ce2f709ce",
+      "bytes": 858
+    },
+    {
+      "path": "research/career-playthrough-seed-1337.json",
+      "sha256": "e25055f313d57dd29f586b40b9b33fb71b2c24d3ea6cbbe1839270cfd5d6d6b5",
+      "bytes": 42738
+    },
+    {
+      "path": "research/earned-career-chain-01/chain-before-clockfix.json",
+      "sha256": "cc1aa069d6b1d431e876fd9ee30139324ff2ae925a03e0fa6858dd1dbdeafc2b",
+      "bytes": 26041
+    },
+    {
+      "path": "research/earned-career-chain-01/chain.json",
+      "sha256": "61a90586cf0ac0bfd74719d01a5de2092b2b9bf47b30f965f3887702dfc07db4",
+      "bytes": 27193
+    },
+    {
+      "path": "research/earned-career-chain-01/job-001.json",
+      "sha256": "c23724a38648dc159d26747f6146d85a2028bae44aa5d9182a0e760ebe032b35",
+      "bytes": 31321
+    },
+    {
+      "path": "research/earned-career-chain-01/job-001.save.json",
+      "sha256": "968260497ee3b80c31bc5cb2710633962147600a1fc4ab484a832a4f99d2b472",
+      "bytes": 2181
+    },
+    {
+      "path": "research/earned-career-chain-01/job-002.json",
+      "sha256": "557dad1a6b865381591fda85d28e1dbab7c7c1962bd5f1b3a00f5821d6e4d512",
+      "bytes": 30640
+    },
+    {
+      "path": "research/earned-career-chain-01/job-002.save.json",
+      "sha256": "78b34c5868421226dbd9d068c0468c35dc344fe944b48bfdd99fa9277e37a2af",
+      "bytes": 2839
+    },
+    {
+      "path": "research/earned-career-chain-01/job-003.json",
+      "sha256": "725917bd69c7427d8fadbf13e249c6136003d9385ee389eca4a55749bb6a5097",
+      "bytes": 31083
+    },
+    {
+      "path": "research/earned-career-chain-01/job-003.save.json",
+      "sha256": "ceb35d56b459ba1a7b0b953de4e580976d3d100f43b79442758c502b5f9495d0",
+      "bytes": 3454
+    },
+    {
+      "path": "research/earned-career-chain-01/job-004.json",
+      "sha256": "4a9c6573e98b28140c61071f5945d1a85f0bc1d9e08ed724df9d13d0049d52d5",
+      "bytes": 38424
+    },
+    {
+      "path": "research/earned-career-chain-01/job-004.save.json",
+      "sha256": "643c088cc4e43a597a6271ea58b811a36171677f5f6e20cc98e5d36b0ff3a7fe",
+      "bytes": 4685
+    },
+    {
+      "path": "research/earned-career-chain-01/job-005.json",
+      "sha256": "8b18a6ef2885ca75dadad2c657af8911d8065d6b6909a17070fef6a2bfa997f1",
+      "bytes": 197041
+    },
+    {
+      "path": "research/earned-career-chain-01/job-005.save.json",
+      "sha256": "77051ddc3170b9fa60512c8191e9dc2b14f43fd92c27c207f33c844a8811afca",
+      "bytes": 7135
+    },
+    {
+      "path": "research/earned-career-chain-01/job-006.json",
+      "sha256": "9623b26e11c702df7e5d076b09fd1f1c17ad90bc5890725d06fa70a47dd96915",
+      "bytes": 296456
+    },
+    {
+      "path": "research/earned-career-chain-01/job-006.save.json",
+      "sha256": "5de461cdeaeee002ccf161ba742b9ff0b61f61a6d86ce5ff080f14b493636e12",
+      "bytes": 10723
+    },
+    {
+      "path": "research/earned-career-chain-01/job-007.json",
+      "sha256": "8b03d1f3737692659f74a9156b9c02d028b6810a8aafdd303e35e37ec11bb3d1",
+      "bytes": 40222
+    },
+    {
+      "path": "research/earned-career-chain-01/job-007.save.json",
+      "sha256": "cd66bc0f8e8e8bf4c22a9a7e6a98c01f732c85b4dfa3c4e14d253b68ca2b161e",
+      "bytes": 11945
+    },
+    {
+      "path": "research/earned-career-chain-01/job-008.json",
+      "sha256": "31b5c5f57c8fcd1a1c9823ffe249cafe7c268e8678eb34365ddf258e1fc769e8",
+      "bytes": 148011
+    },
+    {
+      "path": "research/earned-career-chain-01/job-008.save.json",
+      "sha256": "56b41e10ef612dcff53f4195ef231fb79552ab1959ee9d38e7d1561bffb0753e",
+      "bytes": 14386
+    },
+    {
+      "path": "research/earned-career-chain-01/job-009.json",
+      "sha256": "4b20a7788ae6ad7e02c759a3a390b27337ae0a824f065c96c929ba6c0bf55eb7",
+      "bytes": 64500
+    },
+    {
+      "path": "research/earned-career-chain-01/job-009.save.json",
+      "sha256": "170dc4f6503d34bbc74b14bec252d5f49e210d573b82fce00f4e50d78d1e9f43",
+      "bytes": 16222
+    },
+    {
+      "path": "research/earned-career-chain-01/job-010.json",
+      "sha256": "79f688920c0831f108e7fffa063cdfd03bd137758ecf6b93e5b07885e74efc6b",
+      "bytes": 293557
+    },
+    {
+      "path": "research/earned-career-chain-01/job-010.save.json",
+      "sha256": "c52b26feae9bf91153ec69c6a22e241d9a287f9a03eed243d2280afd09dbdc10",
+      "bytes": 16256
+    },
+    {
+      "path": "research/earned-career-chain-02/chain.json",
+      "sha256": "1fa5822a58e77d514589f33a8d10066690be8dccaeed425c83878506e6f42b55",
+      "bytes": 5883
+    },
+    {
+      "path": "research/earned-career-chain-02/job-011.json",
+      "sha256": "3c0dd12255811417ad1ff30c2f9f44a70071f132948d94e2cda269bf518d2e58",
+      "bytes": 99472
+    },
+    {
+      "path": "research/earned-career-chain-02/job-011.save.json",
+      "sha256": "fec8224e15ba660baa8df625507ff4d6eb34a00d9f17305de2f088d9447b0bfb",
+      "bytes": 16272
+    },
+    {
+      "path": "research/earned-career-chain-02/job-012.json",
+      "sha256": "747b96b9966263635f3f45ee7624b85a6e8ae1ed97a7db66bcea513da0e162bb",
+      "bytes": 150251
+    },
+    {
+      "path": "research/earned-career-chain-03/chain.json",
+      "sha256": "1337f2655f66c0c384137d329a17705834a95f43a88db2ab10873ddeb720b190",
+      "bytes": 243308
+    },
+    {
+      "path": "research/earned-career-chain-03/job-012.json",
+      "sha256": "4edacaf5693e05d91e7d2374512ebdee48290786ab3a348932bae0753660101a",
+      "bytes": 139855
+    },
+    {
+      "path": "research/earned-career-chain-03/job-012.save.json",
+      "sha256": "5402c346cb4e6fc48bc60deab364098ee318ecd78c03b36ddc9518c6c84cc16d",
+      "bytes": 16311
+    },
+    {
+      "path": "research/earned-career-chain-03/job-013.json",
+      "sha256": "13326fe1404c792efd518454e3cd7e87f7392953298918fc275d737ccafa528b",
+      "bytes": 233798
+    },
+    {
+      "path": "research/earned-career-chain-03/job-013.save.json",
+      "sha256": "adb263a548ec0855995b077be4c90cfacca44a527a36b4ed186d31375d3e3c07",
+      "bytes": 16344
+    },
+    {
+      "path": "research/earned-career-chain-03/job-014.json",
+      "sha256": "398fd32da77378a0057456ef61e609fae76c4bd155b4c2f88416e0ae966426f7",
+      "bytes": 312808
+    },
+    {
+      "path": "research/earned-career-chain-03/job-014.save.json",
+      "sha256": "497348ea186e10decdfe5e78c383cdee48cb7514aa2e88411b9e58459cbce5cd",
+      "bytes": 16370
+    },
+    {
+      "path": "research/earned-career-chain-03/job-015.json",
+      "sha256": "0129039274517dcc60658c7db25a8b742d0e162a92f0b5277fc55f809fbc2141",
+      "bytes": 170225
+    },
+    {
+      "path": "research/earned-career-chain-03/job-015.save.json",
+      "sha256": "cf9dc2ad79bf892e080c3b3ecabc79820c77faf7adfff784b37cb8b9292ee799",
+      "bytes": 16404
+    },
+    {
+      "path": "research/earned-career-chain-03/job-016.json",
+      "sha256": "f526762f37b4d0f593867048fa0c45d5c52f13e8c9dd2ba4d2e4439c3ba734c9",
+      "bytes": 133765
+    },
+    {
+      "path": "research/earned-career-chain-03/job-016.save.json",
+      "sha256": "16dae2ca76a03196fb65f106746a853db4622647e10d8c0bfbcd7b1718d327e2",
+      "bytes": 16443
+    },
+    {
+      "path": "research/earned-career-chain-03/job-017.json",
+      "sha256": "e36d8b475e087c4b946731c2eb90ab67881e75525777a70a1d3f62d1eae63b53",
+      "bytes": 93801
+    },
+    {
+      "path": "research/earned-career-chain-03/job-017.save.json",
+      "sha256": "ce8ac56725fa647b0efd10deb216bf4d941c5fc05f960bf514e3a624a2711c36",
+      "bytes": 16474
+    },
+    {
+      "path": "research/earned-career-chain-03/job-018.json",
+      "sha256": "4312b8c6af79aa5cd6f0761f4e263f5dc672d5cc08bc94ad8b30375a28e1d61b",
+      "bytes": 149578
+    },
+    {
+      "path": "research/earned-career-chain-03/job-018.save.json",
+      "sha256": "57244e0c9c25c2ba56a28c8da30d28c6120ef596e469897da840168bd491a479",
+      "bytes": 16513
+    },
+    {
+      "path": "research/earned-career-chain-03/job-019.json",
+      "sha256": "7a6df171b1c017ea611942625652e1ea2d92c79f201341982bd5f11cf3abbb58",
+      "bytes": 51847
+    },
+    {
+      "path": "research/earned-career-chain-03/job-019.save.json",
+      "sha256": "1a7b204b577906ce4cda28040a1e3c0a7e667a280c5ff68fc32741a7639cf91b",
+      "bytes": 16534
+    },
+    {
+      "path": "research/earned-career-chain-03/job-020.json",
+      "sha256": "2bc4be5ecf8d4987a4ed568b2f4def2624802c88fa15c8dcd93f906d76a059c6",
+      "bytes": 138686
+    },
+    {
+      "path": "research/earned-career-chain-03/job-020.save.json",
+      "sha256": "8c9d21bdd252e9c4fb484e93b081d40121364ff5f41c4b4e6a1bacecc52af649",
+      "bytes": 16564
+    },
+    {
+      "path": "research/earned-career-chain-03/job-021.json",
+      "sha256": "9f3db2cff9360680bffba7616d503e3444c5913a6a3058c5ad38e1550fd3e4b9",
+      "bytes": 110258
+    },
+    {
+      "path": "research/earned-career-chain-03/job-021.save.json",
+      "sha256": "f1dfd5cdf7767e1ccf12f6e7975f899eb4f094a42ed8d34820d8e9ebee25c3b1",
+      "bytes": 16613
+    },
+    {
+      "path": "research/earned-career-chain-03/job-022.json",
+      "sha256": "3a999741de0d6e058a2b0ff788647b3d39417cee7cf410b09d170790ffa12ea1",
+      "bytes": 116069
+    },
+    {
+      "path": "research/earned-career-chain-03/job-022.save.json",
+      "sha256": "a007aea785ff2d977932d5a018f53aa12ab383e5990591e35c46cd2e2f634c54",
+      "bytes": 16619
+    },
+    {
+      "path": "research/earned-career-chain-03/job-023.json",
+      "sha256": "b178667dbd94566c12012d30c5cc5ff015f85468f0dee26eece86ceb71776a06",
+      "bytes": 100163
+    },
+    {
+      "path": "research/earned-career-chain-03/job-023.save.json",
+      "sha256": "ed4e555dbbcfd3f0e2319500062e785be2c321559a7de06978d991ef058f31f9",
+      "bytes": 16661
+    },
+    {
+      "path": "research/earned-career-chain-03/job-024.json",
+      "sha256": "a5e450677f9e309da2254e621a30cf892bcef6a60a37083e6d5d0965904589f8",
+      "bytes": 136376
+    },
+    {
+      "path": "research/earned-career-chain-03/job-024.save.json",
+      "sha256": "98eeb3dc2365bdf0471de6c8264bff6b881f0670a5ed5ce28bd0e27eec35c64f",
+      "bytes": 16680
+    },
+    {
+      "path": "research/earned-career-chain-03/job-025.json",
+      "sha256": "9375346d6e6ae7374d32ccead56aa1dc47fa12f96e2d6429cbab22b960e8e3c0",
+      "bytes": 339918
+    },
+    {
+      "path": "research/earned-career-chain-03/job-025.save.json",
+      "sha256": "0d869c7111db7351718782e12774a39e019e8261c67e54ec323a3411f073cab4",
+      "bytes": 16702
+    },
+    {
+      "path": "research/earned-career-chain-03/job-026.json",
+      "sha256": "63046fdd19fc05e1580f4a5fc7ecb0a8b4bdc210d648361b4d5217cb69706a02",
+      "bytes": 153864
+    },
+    {
+      "path": "research/earned-career-chain-03/job-026.save.json",
+      "sha256": "3b4b6f426599ebf079c62788ac68ddd84ca7ec2f9f6e2b26beab800091f088de",
+      "bytes": 16744
+    },
+    {
+      "path": "research/earned-career-chain-03/job-027.json",
+      "sha256": "83e771ee2c5ce145bc0f803248dd70906191132aeccbf49a47eceb5e960a80cf",
+      "bytes": 189015
+    },
+    {
+      "path": "research/earned-career-chain-03/job-027.save.json",
+      "sha256": "e938f01220e84a7103bd2dc4e485b672ad35fd9ea785ec13d5ab93355b1e397c",
+      "bytes": 16782
+    },
+    {
+      "path": "research/earned-career-chain-03/job-028.json",
+      "sha256": "3dfbec9c87f8b80be6c452d68f3ae23c836884abfa800d1bb6f0d4c0113c4fe7",
+      "bytes": 44852
+    },
+    {
+      "path": "research/earned-career-chain-03/job-028.save.json",
+      "sha256": "13da7848759b9ebba0456f301dcf6addcf5c4486363a9cf037c32d8bddcbaed0",
+      "bytes": 16791
+    },
+    {
+      "path": "research/earned-career-chain-03/job-029.json",
+      "sha256": "0ba3236a65cf1d94a63fb1db9fed1c64b7764e3d1c3535f2c8dcaa6bb9254f46",
+      "bytes": 79536
+    },
+    {
+      "path": "research/earned-career-chain-03/job-029.save.json",
+      "sha256": "229929916b03c5a7198c76c1c82e15bac87a07442f56b69a132f86593661ba5f",
+      "bytes": 16839
+    },
+    {
+      "path": "research/earned-career-chain-03/job-030.json",
+      "sha256": "6daa65594b04532bb646dd2a72e1fcdb7c0f5c8f149e9598e7380ab634bd6fbb",
+      "bytes": 577092
+    },
+    {
+      "path": "research/earned-career-chain-03/job-030.save.json",
+      "sha256": "c3a5081303bb6682f091f3ae6593ad921e1bed57710d40126553822ce0d0190b",
+      "bytes": 16906
+    },
+    {
+      "path": "research/earned-career-chain-03/job-031.json",
+      "sha256": "9adadbdb8a9bfb8252c39e07ccec3f59541e625886b7334afa49796c8fbeded1",
+      "bytes": 96505
+    },
+    {
+      "path": "research/earned-career-chain-03/job-031.save.json",
+      "sha256": "54461b1552dc0be6ff2595772ce74d3f36aead94c6a038c26efc6bb78bc3b858",
+      "bytes": 16906
+    },
+    {
+      "path": "research/earned-career-chain-03/job-032.json",
+      "sha256": "21665e46eccb9e35305f4334e598a765b9c48d6811d007fb1ec4099416eb3bf7",
+      "bytes": 72492
+    },
+    {
+      "path": "research/earned-career-chain-03/job-032.save.json",
+      "sha256": "a0cce376af1d9d79bbd5521309c94ae38e3626d434d84a5e94b567fe4801b4cc",
+      "bytes": 16937
+    },
+    {
+      "path": "research/earned-career-chain-03/job-033.json",
+      "sha256": "6da76264483cfe3776ba934837b8684e436e0d5812ec932dcc175c6093eceb82",
+      "bytes": 377133
+    },
+    {
+      "path": "research/earned-career-chain-03/job-033.save.json",
+      "sha256": "f1b88c68e4cbdaefe4ad58cad24423f843421d74a498a6be31d95d2e6cd530d8",
+      "bytes": 16969
+    },
+    {
+      "path": "research/earned-career-chain-03/job-034.json",
+      "sha256": "4425be492e68145d5c7e5d3abf37b18279e248f84b5d4b88888013a7ab2db869",
+      "bytes": 194538
+    },
+    {
+      "path": "research/earned-career-chain-03/job-034.save.json",
+      "sha256": "5ab726ec746b23dbae1bc56c6821b3c1bf9d96b11c86e5c85a7f9b992c6daeaf",
+      "bytes": 16981
+    },
+    {
+      "path": "research/earned-career-chain-03/job-035.json",
+      "sha256": "abcf485b4ea1caed0dc6c3faa212b42437d60a692dfebcab000963d06bc6a1bc",
+      "bytes": 46688
+    },
+    {
+      "path": "research/earned-career-chain-03/job-035.save.json",
+      "sha256": "a98797a7c36624abaa0a62294b3dcb123bfdcb4099f0a71eee15f6d035ec91c3",
+      "bytes": 16988
+    },
+    {
+      "path": "research/earned-career-chain-03/job-036.json",
+      "sha256": "0e72302a41ce5b28dbba5842321e9c2d33524d4998cb4a500c8e34590f0d306e",
+      "bytes": 383342
+    },
+    {
+      "path": "research/earned-career-chain-03/job-036.save.json",
+      "sha256": "7afddfedbd7eb17abb82d370ec3ca0a492a519199c095b78f22efc9874a57f91",
+      "bytes": 17002
+    },
+    {
+      "path": "research/earned-career-chain-03/job-037.json",
+      "sha256": "ea7a1a3345a27656ee5ba08cd4f938cca09627df551e271fca0913dd45950559",
+      "bytes": 302394
+    },
+    {
+      "path": "research/earned-career-chain-03/job-037.save.json",
+      "sha256": "c3d7f06579e753a5033b00f1831403b8303c47c87b1c04cfae56ec65a4fdee90",
+      "bytes": 17035
+    },
+    {
+      "path": "research/earned-career-chain-03/job-038.json",
+      "sha256": "3a98a9cedb63a214ded71f5357d3758e9ad59b56b7bc03e6af38874b8222d5d5",
+      "bytes": 235000
+    },
+    {
+      "path": "research/earned-career-chain-03/job-038.save.json",
+      "sha256": "31eb80996ce0d0f10fd8ad0e3ea3ae58e074ab8040cd2d1d4bd27c95d7c6cfba",
+      "bytes": 17067
+    },
+    {
+      "path": "research/earned-career-chain-03/job-039.json",
+      "sha256": "d1866d2c66f162c7b6bb3e50a085d39dbf4244cb7eba5b964191fa578f52691c",
+      "bytes": 172249
+    },
+    {
+      "path": "research/earned-career-chain-03/job-039.save.json",
+      "sha256": "4d20d90bfa313444a83e0b0fc031337adbdc54c782ce79e61e42e742c62f0643",
+      "bytes": 17061
+    },
+    {
+      "path": "research/earned-career-chain-03/job-040.json",
+      "sha256": "c2ca3e2b1ac73b4d07b630c852387939f1ab77b2f6bfc952985a6c1648bf6a24",
+      "bytes": 167372
+    },
+    {
+      "path": "research/earned-career-chain-03/job-040.save.json",
+      "sha256": "ececbbcbf94d2b1c56d2c96f9aedb90c89d9a27e4406250527d44911dff27ecc",
+      "bytes": 17101
+    },
+    {
+      "path": "research/earned-career-chain-03/job-041.json",
+      "sha256": "297a0576c71bfc7d1dd082b4e589db63c7d64405d9b9d56f005f1a291349204a",
+      "bytes": 109068
+    },
+    {
+      "path": "research/earned-career-chain-03/job-041.save.json",
+      "sha256": "d2ee65e5b30b6f17f1b398e2a2994fd7c724ec95f66c9cf26e403e00f31265f3",
+      "bytes": 17126
+    },
+    {
+      "path": "research/earned-career-chain-03/job-042.json",
+      "sha256": "8319556aab2af245bdcb385878deaa778e2b5ec40a7e99e54631f85182dc70df",
+      "bytes": 146877
+    },
+    {
+      "path": "research/earned-career-chain-03/job-042.save.json",
+      "sha256": "41fdb60a7b7cee9c0064e4d629c1681738b7e5b8a145b9fcf12af2718ffceace",
+      "bytes": 17190
+    },
+    {
+      "path": "research/earned-career-chain-03/job-043.json",
+      "sha256": "dbf6fd874170e514da83bb7d043356f6da5ac721984f9d81ae118b3256e834f8",
+      "bytes": 118683
+    },
+    {
+      "path": "research/earned-career-chain-03/job-043.save.json",
+      "sha256": "f2f35ebb898ab6ce58a56647484c9e90ac46c18d24459d92a0c2309d6146edb8",
+      "bytes": 17205
+    },
+    {
+      "path": "research/earned-career-chain-03/job-044.json",
+      "sha256": "db59eb3d43e3d89f49fde03a45db5fdfa1df71ca07cd0426c61ebb4b1c6cfc36",
+      "bytes": 378229
+    },
+    {
+      "path": "research/earned-career-chain-03/job-044.save.json",
+      "sha256": "779b0a70d31f407782664340b906cb5b9ad4a5b10f7cb7f4138165bf4e151121",
+      "bytes": 17245
+    },
+    {
+      "path": "research/earned-career-chain-03/job-045.json",
+      "sha256": "165b1fa5fb9429344eab703654a919a9a279ab251f2fdbf9f42a23e5d6617bea",
+      "bytes": 197251
+    },
+    {
+      "path": "research/earned-career-chain-03/job-045.save.json",
+      "sha256": "4f6814cd65d2429ee8120990fbfb902f4ffb4a817d3f14a39d8faa3d3da49b78",
+      "bytes": 17267
+    },
+    {
+      "path": "research/earned-career-chain-03/job-046.json",
+      "sha256": "f2e820792bba81550a09f1f4ad880260b51d6c0b83e0755046f5a13cdee62a0e",
+      "bytes": 153527
+    },
+    {
+      "path": "research/earned-career-chain-03/job-046.save.json",
+      "sha256": "a770ac5df9f8a35b407cbd8d47ef0f9f9acac9f3038d872ab56cb5aef074be56",
+      "bytes": 17308
+    },
+    {
+      "path": "research/earned-career-chain-03/job-047.json",
+      "sha256": "e15b62aa03cf50f43e0a8cdf0f92228b24c49068254c9bba160ff945ec8ead70",
+      "bytes": 279897
+    },
+    {
+      "path": "research/earned-career-chain-03/job-047.save.json",
+      "sha256": "409870688c66054a79c61b3bf27a8e5c2245e99a65a8c34c7cba6cf6f8e70a90",
+      "bytes": 17310
+    },
+    {
+      "path": "research/earned-career-chain-03/job-048.json",
+      "sha256": "f5fdcf5a8b7abc57c3d5c8bc05399c5c3a3e72f9e23cdbefa93a8829ce7e0951",
+      "bytes": 125290
+    },
+    {
+      "path": "research/earned-career-chain-03/job-048.save.json",
+      "sha256": "e8b562552addb108c7a09b51c21a722b685f7473aef265f370c7ba05d7c4f919",
+      "bytes": 17347
+    },
+    {
+      "path": "research/earned-career-chain-03/job-049.json",
+      "sha256": "8e6ee5d781725d7922fe241d79d66dad694b41240adced93f7f8398064699c9b",
+      "bytes": 84905
+    },
+    {
+      "path": "research/earned-career-chain-03/job-049.save.json",
+      "sha256": "544fbfbe0d189240cbdf73f4ac17e3f07af1b95a5f684bd5fae09ecff988e640",
+      "bytes": 17369
+    },
+    {
+      "path": "research/earned-career-chain-03/job-050.json",
+      "sha256": "a1e91c4edda5bd920a8ddd01d1ac908fd0a908a80d76430975aa01a44824926b",
+      "bytes": 989416
+    },
+    {
+      "path": "research/earned-career-chain-03/job-050.save.json",
+      "sha256": "16bbb00490062fa502cf297669c9af67380bedd3aaab2db23bd1364d85b0a016",
+      "bytes": 17401
+    },
+    {
+      "path": "research/earned-career-chain-03/job-051.json",
+      "sha256": "e7650fb09fc7aafc6792cfd6453c9ab70af48d19f88ca67d4ff5448006b20f5d",
+      "bytes": 189709
+    },
+    {
+      "path": "research/earned-career-chain-03/job-051.save.json",
+      "sha256": "9030d998d55df7dea50ecb0e6388e94f26e91049c7d2f48eedd8fbd2c67987ab",
+      "bytes": 17400
+    },
+    {
+      "path": "research/earned-career-chain-03/job-052.json",
+      "sha256": "0d3ae7932c4cfaa3bb2166b99fb270c1b0a0d73f5df0ab2771394fac872371d8",
+      "bytes": 890895
+    },
+    {
+      "path": "research/earned-career-chain-03/job-052.save.json",
+      "sha256": "a1fb9df7121c125649e1593bc2811376369225052dea3e1e564f5b89593e5c97",
+      "bytes": 17440
+    },
+    {
+      "path": "research/earned-career-chain-03/job-053.json",
+      "sha256": "85e8e5959a00db42a665d89f3629a91a0836100e42bbbc8fa2a9951b972214d0",
+      "bytes": 178588
+    },
+    {
+      "path": "research/earned-career-chain-03/job-053.save.json",
+      "sha256": "e59ce39b7b9d69209e7769b0aa3b327b20f4dcf18345a7da8a1e04496a841726",
+      "bytes": 17492
+    },
+    {
+      "path": "research/earned-career-chain-03/job-054.json",
+      "sha256": "b1390891572441cb0408c756f128de931c198dd24cb1761dcee670cfa17ade7c",
+      "bytes": 472737
+    },
+    {
+      "path": "research/earned-career-chain-03/job-054.save.json",
+      "sha256": "f9ae999cdc77df6631ac84d77dd66ae37475d6dcdd0fe45eb4daeafe1ebc5bda",
+      "bytes": 17519
+    },
+    {
+      "path": "research/earned-career-chain-03/job-055.json",
+      "sha256": "30c40bc89027c9a6b9fe5cdd8d5a9e8d87595f2295b6beba1b97a7608797e190",
+      "bytes": 181631
+    },
+    {
+      "path": "research/earned-career-chain-03/job-055.save.json",
+      "sha256": "c4c5ca5486878ccfa0976acba027ddaeb27795deedb4639e126ddb43997b5147",
+      "bytes": 17538
+    },
+    {
+      "path": "research/earned-career-chain-03/job-056.json",
+      "sha256": "ee54c84642c99a297c2b0a6d549b8c2471e35919d16926963837c89df578bb76",
+      "bytes": 166201
+    },
+    {
+      "path": "research/earned-career-chain-03/job-056.save.json",
+      "sha256": "db2e0a0390e13b664e3a8634748b6f95d0e62790d17943017ed0171e4fc753bf",
+      "bytes": 17551
+    },
+    {
+      "path": "research/earned-career-chain-03/job-057.json",
+      "sha256": "771ed0b7bd2d9359fee7933a5c9d7602268a727de9ba6576c83f184fe1377642",
+      "bytes": 84547
+    },
+    {
+      "path": "research/earned-career-chain-03/job-057.save.json",
+      "sha256": "b7453ed66c0e9e1d4a20454995ea82d907486c9ebb6a39b03cd08979210e09d5",
+      "bytes": 17589
+    },
+    {
+      "path": "research/earned-career-chain-03/job-058.json",
+      "sha256": "0bffc6c60c14fda676d3e7e812115c0c12bb52042176fb999e1494607ee0602d",
+      "bytes": 210592
+    },
+    {
+      "path": "research/earned-career-chain-03/job-058.save.json",
+      "sha256": "012542ba89031dcef3d1f1b10e6ccfa445f22ca05136402ab87839e8fe1e71fd",
+      "bytes": 17612
+    },
+    {
+      "path": "research/earned-career-chain-03/job-059.json",
+      "sha256": "73b0191f1b0768059a4695f1b8efb5e7027b2e911a214ef7b7b99a80dd0bb87a",
+      "bytes": 109534
+    },
+    {
+      "path": "research/earned-career-chain-03/job-059.save.json",
+      "sha256": "5d86018f21e751c5c650c97770fa06fdc6df8c8192fe8ab04fb89eccc1c8b9a3",
+      "bytes": 17615
+    },
+    {
+      "path": "research/earned-career-chain-03/job-060.json",
+      "sha256": "cd0111b1676b7c6ddcc84f030fc4660db8c529c62f53afad4580a651028483ec",
+      "bytes": 150795
+    },
+    {
+      "path": "research/earned-career-chain-03/job-060.save.json",
+      "sha256": "e3fc391c5956bcd032d599fac2e06426032649928f601a6060181bb10c83d8de",
+      "bytes": 17644
+    },
+    {
+      "path": "research/earned-career-chain-03/job-061.json",
+      "sha256": "5ff13998158a92a75c0dff3a40392099ffade22abeab4895731cbe31babae0ab",
+      "bytes": 522261
+    },
+    {
+      "path": "research/earned-career-chain-03/job-061.save.json",
+      "sha256": "48dbb25757334223d09d9169ac8a551803f3b6c3fdaa35bf35850d9fc6babf55",
+      "bytes": 17682
+    },
+    {
+      "path": "research/earned-career-chain-03/job-062.json",
+      "sha256": "e2aeb4074ec68e91d0fec18778a993bd9fe9a1ded9f7613ef5b75e43d13796b6",
+      "bytes": 126827
+    },
+    {
+      "path": "research/earned-career-chain-03/job-062.save.json",
+      "sha256": "a1dc95203341a7b137abb1d78a028a2bd20069e962e9514825e9bc4bac9ccfce",
+      "bytes": 17672
+    },
+    {
+      "path": "research/earned-career-chain-03/job-063.json",
+      "sha256": "db405bafbcb287dc1587e155aecdc6aca373940316ab0b0935954cdfe9dff1db",
+      "bytes": 96375
+    },
+    {
+      "path": "research/earned-career-chain-03/job-063.save.json",
+      "sha256": "8887da9040316ec6f20e7dd5f7addd5462b4c26c3a9a3815648027123e4389f6",
+      "bytes": 17686
+    },
+    {
+      "path": "research/earned-career-chain-03/job-064.json",
+      "sha256": "96c2b6d78e05fd7b5494d86fc7df447994f8eb893dec94c8a8c21e85685d5bad",
+      "bytes": 243627
+    },
+    {
+      "path": "research/earned-career-chain-03/job-064.save.json",
+      "sha256": "18fdd0c9ec52b6579fde033ab6992acacda326f1bf2584b1326649e335005558",
+      "bytes": 17744
+    },
+    {
+      "path": "research/earned-career-chain-03/job-065.json",
+      "sha256": "b12ec09342af5f2b2fb81dbc3dcd13bc616d1c10ab1a5c757dedbf597aa556b3",
+      "bytes": 222630
+    },
+    {
+      "path": "research/earned-career-chain-03/job-065.save.json",
+      "sha256": "9a5247d21eb603a8b87ce59a7419f987a7a27f555a60c9f542badabff0cb0c59",
+      "bytes": 17764
+    },
+    {
+      "path": "research/earned-career-chain-03/job-066.json",
+      "sha256": "bb2158e5efa26c5acf3e2129831a4cdaab4c0e4a63545077f1519bacde144e48",
+      "bytes": 145684
+    },
+    {
+      "path": "research/earned-career-chain-03/job-066.save.json",
+      "sha256": "52163fd304b1e25a40f5f94f5406dd9683a171e02b2b6f30ffa827ca8ebffb4f",
+      "bytes": 17785
+    },
+    {
+      "path": "research/earned-career-chain-03/job-067.json",
+      "sha256": "bd80cda19a9a0a2b357c176aaf613931bfbb0c6aacf6b8b8ce2b9c8916c99fdb",
+      "bytes": 360187
+    },
+    {
+      "path": "research/earned-career-chain-03/job-067.save.json",
+      "sha256": "b07766e283e42860c26879a0d4958655e0d1a830475467fa14312edc1bd14852",
+      "bytes": 17825
+    },
+    {
+      "path": "research/earned-career-chain-03/job-068.json",
+      "sha256": "6bee73ba927f38494209bd2d38e1ecbdd6869345a3911beca7ce0893ebd3f263",
+      "bytes": 257902
+    },
+    {
+      "path": "research/earned-career-chain-03/job-068.save.json",
+      "sha256": "fb0572a14f4a033d3d897b3546cf3f9f19f747a4e8df6fd28755ed54aebd21cf",
+      "bytes": 17834
+    },
+    {
+      "path": "research/earned-career-chain-03/job-069.json",
+      "sha256": "8ca8ee4df755a2bb62bde7629fa85e7470f3653b8a5b85150234a3eef0f47ba9",
+      "bytes": 125768
+    },
+    {
+      "path": "research/earned-career-chain-03/job-069.save.json",
+      "sha256": "560405e987dec8fb931bb4e5a8e2f4c563ce499b84bd02407c6380dfe1dad3a7",
+      "bytes": 17872
+    },
+    {
+      "path": "research/earned-career-chain-03/job-070.json",
+      "sha256": "3a7bd8b9c591ee010840b5dc8a4781a938e8b2c0962904e70eed70511d99120c",
+      "bytes": 94051
+    },
+    {
+      "path": "research/earned-career-chain-03/job-070.save.json",
+      "sha256": "725afede55dd7a1226cb594b52d6236852a3e3a9e73ea613e4b700e01e16d3f2",
+      "bytes": 17874
+    },
+    {
+      "path": "research/earned-career-chain-03/job-071.json",
+      "sha256": "ae63edaac3574d815c237fac7e3fae16b69b8a85a0b62f00b752bb37bb3b1b83",
+      "bytes": 561403
+    },
+    {
+      "path": "research/earned-career-chain-03/job-071.save.json",
+      "sha256": "035a474fe535e70cd13e32935d68d095913f833f19fb4c39fd39df8983276d39",
+      "bytes": 17920
+    },
+    {
+      "path": "research/earned-career-chain-03/job-072.json",
+      "sha256": "1b4f8e792dc8b43b23bf22d70d72272def2843a9a219fb3eea8e71f64598e028",
+      "bytes": 246588
+    },
+    {
+      "path": "research/earned-career-chain-03/job-072.save.json",
+      "sha256": "d249b7237cd7e6f7dc5a4e317da7ad65b311e4465f2d50f24904a5e29773faed",
+      "bytes": 17955
+    },
+    {
+      "path": "research/earned-career-chain-03/job-073.json",
+      "sha256": "f36cf33f26c9b5147fdb04542f6657ee13754d8ac78fe12c3c0dc8dea259d503",
+      "bytes": 234202
+    },
+    {
+      "path": "research/earned-career-chain-03/job-073.save.json",
+      "sha256": "52339e811954b436d2fa624df5bce52e8eab28c600251d5ea11241bf3af32bd3",
+      "bytes": 17992
+    },
+    {
+      "path": "research/earned-career-chain-03/job-074.json",
+      "sha256": "a4e27a1ecf3b4fb4836eaa0c0f34ed6e5204f6541e3da365c1fa24e3ac841349",
+      "bytes": 274974
+    },
+    {
+      "path": "research/earned-career-chain-03/job-074.save.json",
+      "sha256": "8e3277b73075f1168e6552acb274fc097b4e4cf942227b83fae52da7b72c25e6",
+      "bytes": 18007
+    },
+    {
+      "path": "research/earned-career-chain-03/job-075.json",
+      "sha256": "35f30bb7db0acf773cbbd15abdc2e7c5f3df5afc6c9c7eedac90c1fe1209549f",
+      "bytes": 347573
+    },
+    {
+      "path": "research/earned-career-chain-03/job-075.save.json",
+      "sha256": "058e00412011e477ad899db1054da6ae64ba9fb41208b7e7b8b2546e35bdf4ed",
+      "bytes": 18070
+    },
+    {
+      "path": "research/earned-career-chain-03/job-076.json",
+      "sha256": "77ccc04a93da986db309faa250c3bb689c8ff0fbd7504273b243f4ff5fe98ace",
+      "bytes": 219015
+    },
+    {
+      "path": "research/earned-career-chain-03/job-076.save.json",
+      "sha256": "2e7db561e0a695ded4419bec39b5746e809cabd93a4a3cc6ccd5287502f3e879",
+      "bytes": 18071
+    },
+    {
+      "path": "research/earned-career-chain-03/job-077.json",
+      "sha256": "e0db898395397777764428e587020e5c0278c56d8e09613e9803c9517625f681",
+      "bytes": 209633
+    },
+    {
+      "path": "research/earned-career-chain-03/job-077.save.json",
+      "sha256": "819b1bc2d21aa7e65181238892b740d4bb85da0efaf59f33533c383f055acdd5",
+      "bytes": 18081
+    },
+    {
+      "path": "research/earned-career-chain-03/job-078.json",
+      "sha256": "12a488e382197c55887e40df4d96ef0ff11e96d92dc61a11b1d950ffc6ec2b21",
+      "bytes": 366387
+    },
+    {
+      "path": "research/earned-career-chain-03/job-078.save.json",
+      "sha256": "074f96d8e3438d2e95f5cadd95d50146cc5b43699164bd9470cd73226af62b83",
+      "bytes": 18116
+    },
+    {
+      "path": "research/earned-career-chain-03/job-079.json",
+      "sha256": "ca2327c541435a193db07f375126e6c9dffed622684ef96663cc62145ea7d317",
+      "bytes": 287511
+    },
+    {
+      "path": "research/earned-career-chain-03/job-079.save.json",
+      "sha256": "68d3368bacdd498c949734d088c1fcd5d25d0aaa727b62bf57437263c53f9946",
+      "bytes": 18160
+    },
+    {
+      "path": "research/earned-career-chain-03/job-080.json",
+      "sha256": "31cb44d5f45b16f618fb6a6126be512f96509382ebac04f6e442e74296e0e0f9",
+      "bytes": 354604
+    },
+    {
+      "path": "research/earned-career-chain-03/job-080.save.json",
+      "sha256": "5d0f9c3ee12cc02a4a478813dab1cd5d992f079937679d3f0071dd05194dafcf",
+      "bytes": 18189
+    },
+    {
+      "path": "research/earned-career-chain-03/job-081.json",
+      "sha256": "741d2f45dd1b385201d1d80feca649e8ea35ef68586545ae57137c0cd8521f4c",
+      "bytes": 100494
+    },
+    {
+      "path": "research/earned-career-chain-03/job-081.save.json",
+      "sha256": "4d57be1ef0ecafcdb0ad2e1d301833d3bc8c961b2819838614017380e20a89cf",
+      "bytes": 18195
+    },
+    {
+      "path": "research/earned-career-chain-03/job-082.json",
+      "sha256": "b63a88c459beaa5066ed210cc35bd3ec2708d3842b9c0b995da38ae64cbd7feb",
+      "bytes": 877600
+    },
+    {
+      "path": "research/earned-career-chain-03/job-082.save.json",
+      "sha256": "af59676f23d39bcf4166babf87d6261bc8547496419980e816805f0af4dca1d6",
+      "bytes": 18262
+    },
+    {
+      "path": "research/earned-career-chain-03/job-083.json",
+      "sha256": "9bf7a1ef81c5f5fe01b2054cd84ee4fd2462680482ae8361c724d15421b29147",
+      "bytes": 493398
+    },
+    {
+      "path": "research/earned-career-chain-03/job-083.save.json",
+      "sha256": "ad70db089d379e5fa9db7407ca05814ab01f3088b43f7178a74dc3aca9968c65",
+      "bytes": 18239
+    },
+    {
+      "path": "research/earned-career-chain-03/job-084.json",
+      "sha256": "679b571f9ee21765af4e4753d8c9a27413fe0db720ba859cb0097c1b84dca2e1",
+      "bytes": 288212
+    },
+    {
+      "path": "research/earned-career-chain-03/job-084.save.json",
+      "sha256": "bd01254e4c6f671264b64d3b968100683187232dbe5676f698589863a217d1c4",
+      "bytes": 18259
+    },
+    {
+      "path": "research/earned-career-chain-03/job-085.json",
+      "sha256": "4bd1cdb536d5120a25a4b62de11747a3f5d852049d5d6dd47862e8a5d12910d3",
+      "bytes": 80799
+    },
+    {
+      "path": "research/earned-career-chain-03/job-085.save.json",
+      "sha256": "8a77570ae8172a6d8fc5835b58f42a5a1ca085a296cadda21ac0bc15efc0ea30",
+      "bytes": 18284
+    },
+    {
+      "path": "research/earned-career-chain-03/job-086.json",
+      "sha256": "7bd83adcd338bf8268379d4ecd4f99f72984704b9f01bece8a4999eb70c85454",
+      "bytes": 401513
+    },
+    {
+      "path": "research/earned-career-chain-03/job-086.save.json",
+      "sha256": "53484733c4e0f0babccd048a1c5e8b511962df2b767a74ab7648d563350b6c4d",
+      "bytes": 18288
+    },
+    {
+      "path": "research/earned-career-chain-03/job-087.json",
+      "sha256": "d727490d4cad58429cd082c69173238e0e82df95bf3875c6a490f4be3e57c0b6",
+      "bytes": 179780
+    },
+    {
+      "path": "research/earned-career-chain-03/job-087.save.json",
+      "sha256": "77259c4f20f69014f78f7da88c8292a0c0f8c4ec8ff48bc538b670905048b4e2",
+      "bytes": 18317
+    },
+    {
+      "path": "research/earned-career-chain-03/job-088.json",
+      "sha256": "9e76c4f2bb4d40b3892602c8411a5f0f0ed0b24b9dfe084cb806e8fce3da3245",
+      "bytes": 312806
+    },
+    {
+      "path": "research/earned-career-chain-03/job-088.save.json",
+      "sha256": "edaf7c6c0a9049153fc82c0cb8e769254745c95eedd02975d0bbea0273e53f38",
+      "bytes": 18349
+    },
+    {
+      "path": "research/earned-career-chain-03/job-089.json",
+      "sha256": "9ca649c37fdac83e03ca048d3a95a3deb5ebb177f9ff0ccdd2a0c9328cf5c171",
+      "bytes": 758833
+    },
+    {
+      "path": "research/earned-career-chain-03/job-089.save.json",
+      "sha256": "ab47f594f5449e5e8cc88d9e333162247f6933199a93aba9efb149dbfd934188",
+      "bytes": 18384
+    },
+    {
+      "path": "research/earned-career-chain-03/job-090.json",
+      "sha256": "22c23b7953233554e25635e5782178ab930c661ffed4e978d78801c4cd6d3378",
+      "bytes": 232437
+    },
+    {
+      "path": "research/earned-career-chain-03/job-090.save.json",
+      "sha256": "13de70a7130a42c69b80605a65f941a7165e1450dc7701968bae92a9ac0b4829",
+      "bytes": 18423
+    },
+    {
+      "path": "research/earned-career-chain-03/job-091.json",
+      "sha256": "8d2d193e7f9be351ac52d9af6d6d9842c182708aef53065e0798d834d96574bc",
+      "bytes": 122061
+    },
+    {
+      "path": "research/earned-career-chain-03/job-091.save.json",
+      "sha256": "a6f16fb31246bcdc925a6f036290a05a0c8500f0aaffc0f808fe370c5e3da23c",
+      "bytes": 18428
+    },
+    {
+      "path": "research/earned-career-chain-03/job-092.json",
+      "sha256": "1778bc5de930dee5c8844ea0f1098cd8c352e33fbbfd0015b9c3f53e44cedd1c",
+      "bytes": 166332
+    },
+    {
+      "path": "research/earned-career-chain-03/job-092.save.json",
+      "sha256": "7ab746046c17006a49b8de712b8d7e520b5811b91a6a3ccf3e8f3fe9563b0395",
+      "bytes": 18455
+    },
+    {
+      "path": "research/earned-career-chain-03/job-093.json",
+      "sha256": "76f23034a06c952b6b50f853fd2dd733409a09e49c334a48e5e5d5d01c2dcd99",
+      "bytes": 396085
+    },
+    {
+      "path": "research/earned-career-chain-03/job-093.save.json",
+      "sha256": "81c147e25f38c3633d2bf4b94e3dde13acb88eec2167b75334ef9d1ed065a1b3",
+      "bytes": 18485
+    },
+    {
+      "path": "research/earned-career-chain-03/job-094.json",
+      "sha256": "9f90b6091e5596ac6094b25385e865950b4354337a2c02b5c394e28138b3674d",
+      "bytes": 807919
+    },
+    {
+      "path": "research/earned-career-chain-03/job-094.save.json",
+      "sha256": "bdd131d579dd077a9b52e8a163b4cec1a53cb08db26b89567f088c5f454960c8",
+      "bytes": 18501
+    },
+    {
+      "path": "research/earned-career-chain-03/job-095.json",
+      "sha256": "f0f5fd561a9cb8a9c2e60332438581516200a96e0e45d5e331459fa436461712",
+      "bytes": 647861
+    },
+    {
+      "path": "research/earned-career-chain-03/job-095.save.json",
+      "sha256": "483516f4abe9f935cd0c9b0de9ff9eb04a77c84414d598a650d71976edc02573",
+      "bytes": 18514
+    },
+    {
+      "path": "research/earned-career-chain-03/job-096.json",
+      "sha256": "2e1077a5d8c7bd77c62c30f13569b4b6a0fdc923f042fbd1252a7690ceec236a",
+      "bytes": 335645
+    },
+    {
+      "path": "research/earned-career-chain-03/job-096.save.json",
+      "sha256": "4f88195cb99c04f64f9c1c71e96712fca4f1ad637bbb242f48ba22d8a238d81a",
+      "bytes": 18507
+    },
+    {
+      "path": "research/earned-career-chain-03/job-097.json",
+      "sha256": "a4d36e4adead6903108da23a30a0fbd168827122ddcc2c3dd1a70ca24e797766",
+      "bytes": 79689
+    },
+    {
+      "path": "research/earned-career-chain-03/job-097.save.json",
+      "sha256": "55812a128ca9e1404a7c81ef4649c7ca2ba8c1d39925e224f899d5d3aeac803f",
+      "bytes": 18522
+    },
+    {
+      "path": "research/earned-career-chain-03/job-098.json",
+      "sha256": "164e78fea9a0d268fd6813c58ea8b87d615a205326a3d1519147c04924a25a59",
+      "bytes": 175850
+    },
+    {
+      "path": "research/earned-career-chain-03/job-098.save.json",
+      "sha256": "296688125ca336f48e5868f29fadb15ece12ed85a5d6d160f80b53b4f4b19e67",
+      "bytes": 18553
+    },
+    {
+      "path": "research/earned-career-chain-03/job-099.json",
+      "sha256": "a41c2d2c6ad8f2533bdb2aa1e0e66eb8e6a74113762f2e142c74c8fbd59b3ffe",
+      "bytes": 397132
+    },
+    {
+      "path": "research/earned-career-chain-03/job-099.save.json",
+      "sha256": "f38553470652211594c7dbe5ca8e23203111febdbe527a0552905954e45713f6",
+      "bytes": 18594
+    },
+    {
+      "path": "research/earned-career-chain-03/job-100.json",
+      "sha256": "762b968b07e4c4ff903ebcfb58e26c62eb496f5156111e93d60c4c29ba5dcbe5",
+      "bytes": 139335
+    },
+    {
+      "path": "research/earned-career-chain-03/job-100.save.json",
+      "sha256": "53f777f10229fcdb5e6d7fe970c603edf0bf3557a087bbf454263795d124403e",
+      "bytes": 18609
+    },
+    {
+      "path": "research/earned-career-chain-03/job-101.json",
+      "sha256": "437ed0b0711cf29f0397d872718893ffe3b1304118e27f3b84a5b79dbd92cbfd",
+      "bytes": 560390
+    },
+    {
+      "path": "research/earned-career-chain-03/job-101.save.json",
+      "sha256": "5220bbefc7a88760c23024185ee96e92d68da4c04d4ba0d1db65ca71bf5ef119",
+      "bytes": 18673
+    },
+    {
+      "path": "research/earned-career-chain-03/job-102.json",
+      "sha256": "28bd61839cc160e02c251659117d3e4350bf9bf80d34faca1c062028557de977",
+      "bytes": 417996
+    },
+    {
+      "path": "research/earned-career-chain-03/job-102.save.json",
+      "sha256": "4f5bfaa36e7942c023fc10ad354f100fbdde4f68297770ad815577fb85a969e4",
+      "bytes": 18725
+    },
+    {
+      "path": "research/earned-career-provenance.json",
+      "sha256": "62b1e33a888990bb129a957db5603a211f4089d65f057bc63faf78be54229a9a",
+      "bytes": 33358
+    },
+    {
+      "path": "research/earned-core-access.json",
+      "sha256": "addb5ca7350cbdfae06fe8d2edbfabac0470a23572b030d37d37355fa26a3908",
+      "bytes": 1427
+    },
+    {
+      "path": "research/probe-career-playthrough-66e16be1.mjs",
+      "sha256": "66e16be11596d01e5e0af5e27706855e76bc7f15668ca37140a32b29ae3bbab4",
+      "bytes": 8186
+    },
+    {
+      "path": "research/probe-career-playthrough-harness.mjs",
+      "sha256": "9fba87652b1adbe0428cd37a5f154ef03bf741b494e826ae2d7278996aff96f4",
+      "bytes": 7926
+    },
+    {
+      "path": "tools/check-earned-career-provenance.mjs",
+      "sha256": "8f915fdc9453884d3af68f3e7ca74bbeb541d126ce06be2875911ac1b42d4a5f",
+      "bytes": 5200
+    },
+    {
+      "path": "tools/check-earned-core-access.mjs",
+      "sha256": "2dacb0054286682246bcc3343c5130411b0a8cc378e6e69765eafbec736b2035",
+      "bytes": 3022
+    },
+    {
+      "path": "tools/probe-career-playthrough.mjs",
+      "sha256": "da40d435b713350235ecadd885287536e69cdf58d8078faf7b73406865ad9e6c",
+      "bytes": 8334
+    },
+    {
+      "path": "tools/run-career-earned.mjs",
+      "sha256": "c4880ff6087c005c5e32a4b13280a089d4b8a4d89947e93808a5d9a8791eccb3",
+      "bytes": 3399
+    }
+  ],
+  "bytes": 27760835,
+  "limits": "Preserves original failures, the controller-checkpoint restart, exact recorded production identities and recovered historical 66e16be1 probe. Independent critic owns its separate tools/reports."
+}

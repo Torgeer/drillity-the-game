@@ -1,0 +1,444 @@
+{
+  "version": 1,
+  "mode": "primary-source-raw-and-author-V2",
+  "generated": "2026-09-08T13:32:09.619Z",
+  "sourceManifestHash": "b41ed3cfad06d052bac015f10b7b547ce10c2b05acd70093ced2d756e86b0448",
+  "toolHash": "cc5abdbe08eb9ae24aa151b0e7be89e63eb508a2add2475b401ee1f389bfb8b9",
+  "productionHash": "0c35f16a3571969745cb2bc1bc3cc8641002987ad7558ae01c3659e9a37ce286",
+  "groups": [
+    {
+      "name": "primary sort retains sample associations and equal-time stable order",
+      "pass": true
+    },
+    {
+      "name": "sorting signed intervals themselves corrupts the primary timestamps",
+      "pass": true
+    },
+    {
+      "name": "clamping negatives corrupts later timestamps",
+      "pass": true
+    },
+    {
+      "name": "oil-vfx-on-first-01: original rejection, complete retained pairing and bounded timestamps",
+      "pass": true
+    },
+    {
+      "name": "oil-vfx-on-first-02: original rejection, complete retained pairing and bounded timestamps",
+      "pass": true
+    },
+    {
+      "name": "V2 accepts signed bounded chronology without mutating raw",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects null profile",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects missing samples",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects empty samples",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects samples object",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects timeDeltas object",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects mismatched lengths",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects sparse deltas",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects sparse samples",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects NaN delta",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects Infinity delta",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects fractional delta",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects string delta",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects timestamp before start",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects intermediate overshoot hidden by later negative",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects last timestamp after end",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects all-zero timing",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects invalid interval",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects unsafe start timestamp",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects NaN end timestamp",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects negative start timestamp",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects unknown sample id",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects null sample id",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects missing nodes",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects null node",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects sparse nodes",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects duplicate node id",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects fractional node id",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects missing callFrame",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects empty trace",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects missing end mark",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects duplicate start",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects reverse marks",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects NaN mark",
+      "pass": true
+    },
+    {
+      "name": "V2 rejects null trace event",
+      "pass": true
+    },
+    {
+      "name": "V2 allows zero first delta and equal sample timestamps with elapsed coverage",
+      "pass": true
+    },
+    {
+      "name": "V2 orders a non-adjacent final inversion without treating last raw index as latest time",
+      "pass": true
+    },
+    {
+      "name": "oil-vfx-on-first-01: V2 derived order equals primary oracle; original remains rejected",
+      "pass": true
+    },
+    {
+      "name": "oil-vfx-on-first-02: V2 derived order equals primary oracle; original remains rejected",
+      "pass": true
+    }
+  ],
+  "records": [
+    {
+      "name": "oil-vfx-on-first-01",
+      "originalValid": false,
+      "browserRecorded": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+      "hashes": {
+        "report.json": "fa30b2be2100ba021c0ff0ace3e7e3a97d80f5bc211108b229b5ce207e2f004d",
+        "cpu-live.cpuprofile": "bf8eaaf6b3c94fd8793d04b31aa3122db6461f12f3356ea4dc7d7ec8bb94dd5b",
+        "trace-live.json": "bfa69c181981e9948973c47f6dd3e26d4b5db4f412f709e0572a862347c536fa"
+      },
+      "samples": 37930,
+      "startTime": 13228960024,
+      "endTime": 13281906042,
+      "first": 13229510488,
+      "last": 13281905555,
+      "signedTotalUs": 52945531,
+      "negatives": [
+        {
+          "index": 15292,
+          "delta": -48,
+          "previousTimestamp": 13250126008,
+          "timestamp": 13250125960,
+          "previousNode": 2,
+          "node": 2,
+          "callFrame": {
+            "functionName": "(program)",
+            "scriptId": "0",
+            "url": "",
+            "lineNumber": -1,
+            "columnNumber": -1
+          }
+        },
+        {
+          "index": 25382,
+          "delta": -38,
+          "previousTimestamp": 13263864020,
+          "timestamp": 13263863982,
+          "previousNode": 2,
+          "node": 2,
+          "callFrame": {
+            "functionName": "(program)",
+            "scriptId": "0",
+            "url": "",
+            "lineNumber": -1,
+            "columnNumber": -1
+          }
+        },
+        {
+          "index": 25530,
+          "delta": -50,
+          "previousTimestamp": 13264070791,
+          "timestamp": 13264070741,
+          "previousNode": 2,
+          "node": 2,
+          "callFrame": {
+            "functionName": "(program)",
+            "scriptId": "0",
+            "url": "",
+            "lineNumber": -1,
+            "columnNumber": -1
+          }
+        },
+        {
+          "index": 28225,
+          "delta": -32,
+          "previousTimestamp": 13267899491,
+          "timestamp": 13267899459,
+          "previousNode": 2,
+          "node": 2,
+          "callFrame": {
+            "functionName": "(program)",
+            "scriptId": "0",
+            "url": "",
+            "lineNumber": -1,
+            "columnNumber": -1
+          }
+        }
+      ],
+      "moved": [
+        {
+          "originalIndex": 15292,
+          "sortedIndex": 15291
+        },
+        {
+          "originalIndex": 15291,
+          "sortedIndex": 15292
+        },
+        {
+          "originalIndex": 25382,
+          "sortedIndex": 25381
+        },
+        {
+          "originalIndex": 25381,
+          "sortedIndex": 25382
+        },
+        {
+          "originalIndex": 25530,
+          "sortedIndex": 25529
+        },
+        {
+          "originalIndex": 25529,
+          "sortedIndex": 25530
+        },
+        {
+          "originalIndex": 28225,
+          "sortedIndex": 28224
+        },
+        {
+          "originalIndex": 28224,
+          "sortedIndex": 28225
+        }
+      ],
+      "derivedMeaning": "Offline paired chronology only; historical overall rejection and confounded feature comparison unchanged."
+    },
+    {
+      "name": "oil-vfx-on-first-02",
+      "originalValid": false,
+      "browserRecorded": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+      "hashes": {
+        "report.json": "89cee36f6af906eec507117e1914d69a73899783f52153eba62682dcfae28d04",
+        "cpu-live.cpuprofile": "4830ffdb43d86b90687b9cc5102b11f43ea33f2f325e221125404a0827351a86",
+        "trace-live.json": "5ac42bd15637beccf310f66e3fa7b0e76badb680f736cdb0927f8c3b47432d0e"
+      },
+      "samples": 38474,
+      "startTime": 13425624509,
+      "endTime": 13479339146,
+      "first": 13425864065,
+      "last": 13479338834,
+      "signedTotalUs": 53714325,
+      "negatives": [
+        {
+          "index": 19490,
+          "delta": -58,
+          "previousTimestamp": 13452038952,
+          "timestamp": 13452038894,
+          "previousNode": 2,
+          "node": 2,
+          "callFrame": {
+            "functionName": "(program)",
+            "scriptId": "0",
+            "url": "",
+            "lineNumber": -1,
+            "columnNumber": -1
+          }
+        },
+        {
+          "index": 23565,
+          "delta": -33,
+          "previousTimestamp": 13457886640,
+          "timestamp": 13457886607,
+          "previousNode": 2,
+          "node": 2,
+          "callFrame": {
+            "functionName": "(program)",
+            "scriptId": "0",
+            "url": "",
+            "lineNumber": -1,
+            "columnNumber": -1
+          }
+        },
+        {
+          "index": 29309,
+          "delta": -31,
+          "previousTimestamp": 13465898600,
+          "timestamp": 13465898569,
+          "previousNode": 2,
+          "node": 2,
+          "callFrame": {
+            "functionName": "(program)",
+            "scriptId": "0",
+            "url": "",
+            "lineNumber": -1,
+            "columnNumber": -1
+          }
+        },
+        {
+          "index": 29392,
+          "delta": -34,
+          "previousTimestamp": 13465988363,
+          "timestamp": 13465988329,
+          "previousNode": 2,
+          "node": 2,
+          "callFrame": {
+            "functionName": "(program)",
+            "scriptId": "0",
+            "url": "",
+            "lineNumber": -1,
+            "columnNumber": -1
+          }
+        },
+        {
+          "index": 34586,
+          "delta": -52,
+          "previousTimestamp": 13473494132,
+          "timestamp": 13473494080,
+          "previousNode": 2,
+          "node": 2,
+          "callFrame": {
+            "functionName": "(program)",
+            "scriptId": "0",
+            "url": "",
+            "lineNumber": -1,
+            "columnNumber": -1
+          }
+        }
+      ],
+      "moved": [
+        {
+          "originalIndex": 19490,
+          "sortedIndex": 19489
+        },
+        {
+          "originalIndex": 19489,
+          "sortedIndex": 19490
+        },
+        {
+          "originalIndex": 23565,
+          "sortedIndex": 23564
+        },
+        {
+          "originalIndex": 23564,
+          "sortedIndex": 23565
+        },
+        {
+          "originalIndex": 29309,
+          "sortedIndex": 29308
+        },
+        {
+          "originalIndex": 29308,
+          "sortedIndex": 29309
+        },
+        {
+          "originalIndex": 29392,
+          "sortedIndex": 29391
+        },
+        {
+          "originalIndex": 29391,
+          "sortedIndex": 29392
+        },
+        {
+          "originalIndex": 34586,
+          "sortedIndex": 34585
+        },
+        {
+          "originalIndex": 34585,
+          "sortedIndex": 34586
+        }
+      ],
+      "derivedMeaning": "Offline paired chronology only; historical overall rejection and confounded feature comparison unchanged."
+    }
+  ],
+  "valid": true,
+  "limits": [
+    "No browser or GPU executed.",
+    "No original capture was reclassified or rewritten.",
+    "Source main revisions establish implementation semantics, not the exact unrecorded binary revision.",
+    "Queue provenance and OS mechanism are not present in these artifacts."
+  ]
+}

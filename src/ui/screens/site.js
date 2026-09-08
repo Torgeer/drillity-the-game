@@ -31,6 +31,7 @@
 import { SCENES, EVENTS, GROUND, clamp, damp } from '../../core/contract.js';
 import { ease, DUR } from '../../core/motion.js';
 import { SITE_ACTIONS, strataFromProfile, methodInfo } from './catalog.js';
+import { sampleOperatingRecord } from '../../sim/sample-product.js';
 
 /* Fallback ground profile so the screen reviews standalone. */
 const DEMO_PROFILE = [
@@ -253,14 +254,17 @@ export function sampleUnitCard(p) {
   const row = p.lastCompletedInterval || p.lastInterval;
   if (!row?.retrieval) return null;
   const core = p.kind === 'coreSample', handled = !!row.handling;
+  const operating = sampleOperatingRecord(row, core ? 'core' : 'sonic');
   return { title: handled ? (core ? 'Core boxed and logged' : 'Sample sleeved and labelled')
-      : (core ? 'Inner tube retrieved' : 'Barrel extracted'), tone: handled ? 'good' : 'warn',
+      : (core ? 'Inner tube retrieved' : 'Barrel extracted'), tone: handled && !operating?.hasExcursion ? 'good' : 'warn',
     rows: [['Interval', `${num(row.fromM, 1)}–${num(row.toM, 1)} m`],
       ['Container', handled ? `${core ? 'Box' : 'Sleeve'} ${row.index}` : 'Handling due'],
       [p.capacityBasis === 'inner-tube-length' ? 'Inner tube capacity' : 'Sampling run limit',
         `${num(p.barrelCapacityM, 1)} m${p.capacityBasis === 'gameplay-run-limit' ? ' · game setting' : ''}`],
       ['Material recovery', 'Unmeasured']],
-    note: p.capacityBasis === 'gameplay-run-limit'
+    note: operating ? `Operating record (play time): ${operating.text}. ${core
+      ? 'Material recovery is unmeasured.' : 'Usable capacity and material recovery are unmeasured.'}`
+      : p.capacityBasis === 'gameplay-run-limit'
       ? 'The run limit is a game setting. Usable inner capacity and recovered material length are unmeasured.'
       : 'The interval identifies the bore section. It does not measure recovered material length.' };
 }
@@ -828,6 +832,9 @@ export function createSiteScreen(app) {
       }
       if (row.handling && row.handling.sequence > sampleLogSequence) {
         log(row.toM, `${p.kind === 'coreSample' ? 'Box' : 'Sleeve'} ${row.index} logged · ${interval}`);
+        const operating = sampleOperatingRecord(row, p.kind === 'coreSample' ? 'core' : 'sonic');
+        if (operating) log(row.toM, `${operating.text} · ${operating.cuttingTime} drilling play time`,
+          operating.hasExcursion ? 'warn' : null);
         sampleLogSequence = row.handling.sequence;
       }
     }

@@ -1,0 +1,2110 @@
+{
+  "status": "UNACCEPTED \u2014 no accepted matched source pair",
+  "baselineParent": "a47de8a6ba199eabb108da447cd660f01c1735e7",
+  "baselineFiles": 300,
+  "candidateProductionDelta": "Six additions to src/core/env.js only",
+  "frozenSha256": {
+    "tools/capture-nordic-fog.mjs": "01260a551670da8a094f6d1d1aa9b871005c19db43d89abcda8cf2e261e345da",
+    "tools/nordic-fog-controls.mjs": "83250843f3ce04c400337139661d660be9c865c15c29bfea5133d771d610f4d3",
+    "tools/nordic-fog-pair.mjs": "b1209b1f6d8b8210cfda46abc572b230b21e5a4494cde3ebedd0d96b38c99e46",
+    "src/core/env.js": "3d218dd6d95fa79c1aad2b4872e910f577d214b0531ab8d2095f796f0bd6bcea"
+  },
+  "archive": {
+    "path": "fog-evidence-lossless.zip",
+    "bytes": 19828475,
+    "sha256": "78a3bf9ac221310d05d8ba89479b2fd38d69c04c4888bae28750abe3f3bfdee6",
+    "members": 348,
+    "decodedBytes": 39085275,
+    "everyMemberVerifiedByteForByte": true
+  },
+  "files": [
+    {
+      "path": "baseline/ASTRA.md",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\ASTRA.md",
+      "bytes": 43855,
+      "sha256": "48157f4503bb7d278107116ffbf5bbb47602c9a6698b70c803d9113a2eb7bb2d"
+    },
+    {
+      "path": "baseline/DOMAIN.md",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\DOMAIN.md",
+      "bytes": 27920,
+      "sha256": "7bb40cb912a13f9cb60cb41f847780d66a2c03886f2a09e1b2a80fbae7d03443"
+    },
+    {
+      "path": "baseline/FACTS_VERIFIED.md",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\FACTS_VERIFIED.md",
+      "bytes": 8306,
+      "sha256": "478bb6cf906a0353b716ff761d9d88e832d9f3b68993917a26d4738a85b88d23"
+    },
+    {
+      "path": "baseline/blender/bolter.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\bolter.py",
+      "bytes": 132706,
+      "sha256": "3c13b1cfee036ef029c7c6ff5321eae12c1faafa3195fababf8c80d093769333"
+    },
+    {
+      "path": "baseline/blender/build.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\build.py",
+      "bytes": 3622,
+      "sha256": "82901cd8e3c384c5cb0ba2a1c4039578d25ae3b86bd7338ea1876ff33f8be5ae"
+    },
+    {
+      "path": "baseline/blender/cable_percussion.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\cable_percussion.py",
+      "bytes": 85836,
+      "sha256": "42a1442ccb51c220e9f8bd878a99cae93dd052ca1d831adf4d16c713b70a5856"
+    },
+    {
+      "path": "baseline/blender/cfa_rig.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\cfa_rig.py",
+      "bytes": 66710,
+      "sha256": "f39cb1bb7ec65baa1f08394683f5c2f4a1668ea2ce26e002759210e75bb2df37"
+    },
+    {
+      "path": "baseline/blender/check_motion.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\check_motion.py",
+      "bytes": 2705,
+      "sha256": "03c8dd7fc98937cdbf85e2859f9dac98d8d6c8d18c65be12a5f2844a55d9791f"
+    },
+    {
+      "path": "baseline/blender/core_rig.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\core_rig.py",
+      "bytes": 54007,
+      "sha256": "20a4cf52ee2e0ab1702cdc80f621562e49f470b2ff26ca4fc6cb993cd7862142"
+    },
+    {
+      "path": "baseline/blender/cpt_unit.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\cpt_unit.py",
+      "bytes": 68365,
+      "sha256": "f50f7daed4749e5276e726bd1e7efff0c9f97425d930a77cc0a2e0843d1abb97"
+    },
+    {
+      "path": "baseline/blender/crawler_lite.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\crawler_lite.py",
+      "bytes": 112115,
+      "sha256": "27045b67e833026909af6a46aa6c4e8369b6b0185223bf6936ae90001f01d06c"
+    },
+    {
+      "path": "baseline/blender/crawler_th.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\crawler_th.py",
+      "bytes": 83834,
+      "sha256": "ba66db8f880c6e5432324c02944725bf197c0e9acc1a97eb30a755569db8aba9"
+    },
+    {
+      "path": "baseline/blender/dth_crawler.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\dth_crawler.py",
+      "bytes": 87771,
+      "sha256": "88e29593760b5b505b147a5c5dab25abf43b4fb34a02d9b83c3c5c31df114164"
+    },
+    {
+      "path": "baseline/blender/foundation_bg.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\foundation_bg.py",
+      "bytes": 86037,
+      "sha256": "3be2cf56b5ac906fbf7eed786a09422923e84371a96442278b1cad1edd2d8f49"
+    },
+    {
+      "path": "baseline/blender/glb_report.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\glb_report.py",
+      "bytes": 3223,
+      "sha256": "003b2a3f13af3d2c8db4c87a6c5d2085386ccd2d3c8a4ce4d95a93f8ee73dd83"
+    },
+    {
+      "path": "baseline/blender/hdd_rig.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\hdd_rig.py",
+      "bytes": 95062,
+      "sha256": "c76685102b24270f551bc27836b63ee17d486c751632717a216cd9f5ebe9c9c2"
+    },
+    {
+      "path": "baseline/blender/inspect_glb.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\inspect_glb.py",
+      "bytes": 3041,
+      "sha256": "73fe5f48abb2eeaa17f7361443a27e90c03df7787d05e4d3435052f4382d8ed4"
+    },
+    {
+      "path": "baseline/blender/lib/anim.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\lib\\anim.py",
+      "bytes": 36056,
+      "sha256": "166082e45eb92a02712cef1de5e2618abd4ccd8d9294456777f469c6e43c6b48"
+    },
+    {
+      "path": "baseline/blender/lib/curves.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\lib\\curves.py",
+      "bytes": 32308,
+      "sha256": "5f1055909aba37a8f22de043c0656e87033451e18b17cf2a4bbe020438c520bb"
+    },
+    {
+      "path": "baseline/blender/lib/rig.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\lib\\rig.py",
+      "bytes": 23103,
+      "sha256": "b162741a7e6f032a3a3e817e4b33125069f70b9ed7d3f54a8cddaf371d7a8ed5"
+    },
+    {
+      "path": "baseline/blender/lib/site.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\lib\\site.py",
+      "bytes": 58286,
+      "sha256": "d6fdd20a8668539ea72f736b4d32aaaa607d3fd198cb045f3b0718aa827e0ce8"
+    },
+    {
+      "path": "baseline/blender/longhole_rig.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\longhole_rig.py",
+      "bytes": 83601,
+      "sha256": "9c6e521105bac9d043cfba498422e4c21721549a041a08995b838e1a7bfd531c"
+    },
+    {
+      "path": "baseline/blender/motion/dth_crawler.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\motion\\dth_crawler.py",
+      "bytes": 10469,
+      "sha256": "c7bfacd49de119c84f20beab3dc8f84d44ed1bf6bb8eebbd5ea7d76df03c0217"
+    },
+    {
+      "path": "baseline/blender/oil_derrick.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\oil_derrick.py",
+      "bytes": 110333,
+      "sha256": "4480590e23296ae99ad5d81117af796cce0e591362e6040a0afefc8353595ecc"
+    },
+    {
+      "path": "baseline/blender/pd55.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\pd55.py",
+      "bytes": 75763,
+      "sha256": "6ded4dcd971a24ed09ce769c4b39583e8cd4c772940f6e716e53a17ea45d339a"
+    },
+    {
+      "path": "baseline/blender/piling_leader.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\piling_leader.py",
+      "bytes": 76882,
+      "sha256": "bb5b22ab0d8c7e8c65a30a281f09a672a91cf576aff08309946f779c479c9daf"
+    },
+    {
+      "path": "baseline/blender/preview.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\preview.py",
+      "bytes": 8678,
+      "sha256": "ff5662f8795104910f853a9e0c21648bf1e5dee5eeeb25c2f941e58f45041ffa"
+    },
+    {
+      "path": "baseline/blender/raisebore.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\raisebore.py",
+      "bytes": 92852,
+      "sha256": "fd9b3e86304a6e27d8fd2e020eec01bd82cc8ab6cb07f47e2bd8943ebdb7528f"
+    },
+    {
+      "path": "baseline/blender/rc_rig.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\rc_rig.py",
+      "bytes": 128853,
+      "sha256": "5d44d2889295c3aa5fd79f01d4b1a0a455b8d4250602f757cf1b91ca917a1661"
+    },
+    {
+      "path": "baseline/blender/si_rig.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\si_rig.py",
+      "bytes": 71341,
+      "sha256": "9bb944a4d929a63189cc362cec4e5f99d2c6cc5fd261295704a29fc407c6246d"
+    },
+    {
+      "path": "baseline/blender/sites/exploration_pad.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\sites\\exploration_pad.py",
+      "bytes": 61611,
+      "sha256": "bd8f206dcefa0bf8981d8b421879579d506fb9de284760e9c29713722d926fc2"
+    },
+    {
+      "path": "baseline/blender/sites/infrastructure_corridor.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\sites\\infrastructure_corridor.py",
+      "bytes": 86913,
+      "sha256": "40e05fefac63c1a586a1a411bb0f4d3ccf510f5deef9687326996a5f0dc246c3"
+    },
+    {
+      "path": "baseline/blender/sites/marine_spread.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\sites\\marine_spread.py",
+      "bytes": 65067,
+      "sha256": "11d33f03d76c36e00acfc998e2ca558cf74fbb0b6ef4c89a1bd97e7eb8d2614e"
+    },
+    {
+      "path": "baseline/blender/sites/open_pit_bench.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\sites\\open_pit_bench.py",
+      "bytes": 112343,
+      "sha256": "f8ecb54fd5ab79078ad0f7c575d0851d0753923145add190ac391eff90729a7a"
+    },
+    {
+      "path": "baseline/blender/sites/platform_deck.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\sites\\platform_deck.py",
+      "bytes": 86719,
+      "sha256": "82f093517d7ddda2d2a96049d52c77355fd91caa80bc95f27ec425325784eaf3"
+    },
+    {
+      "path": "baseline/blender/sites/quarry_bench.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\sites\\quarry_bench.py",
+      "bytes": 53807,
+      "sha256": "74739498fe20db791076a57e14088d07a6295b9dd12b8ae2cf89ec469cd1935f"
+    },
+    {
+      "path": "baseline/blender/sites/tunnel_portal.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\sites\\tunnel_portal.py",
+      "bytes": 96001,
+      "sha256": "841733604a9edaf7827f7fde14f891a6c7d252426029f530e9ccf91c27334514"
+    },
+    {
+      "path": "baseline/blender/sites/underground_drive.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\sites\\underground_drive.py",
+      "bytes": 94299,
+      "sha256": "9cc7c31cabaee2bb2c70e5e38adb94c5c96883dca30e99dabcadd06e45461e4f"
+    },
+    {
+      "path": "baseline/blender/sites/urban_plot.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\sites\\urban_plot.py",
+      "bytes": 17163,
+      "sha256": "11c1cedee20b2a8b64f6bcc6b104a9916431f4f914716724e7af154cdbc98d69"
+    },
+    {
+      "path": "baseline/blender/sites/well_pad.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\sites\\well_pad.py",
+      "bytes": 91429,
+      "sha256": "5073efbd491b33602ef9b9bb731b4317d95f336b50962a35b709b58dfac12e9f"
+    },
+    {
+      "path": "baseline/blender/sonic_truck.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\sonic_truck.py",
+      "bytes": 115261,
+      "sha256": "c6f076958e70c031527d17e9d65d0204727097f45e8c20c1adea07b5730adc5c"
+    },
+    {
+      "path": "baseline/blender/tests/check_rig_metadata.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\tests\\check_rig_metadata.py",
+      "bytes": 10939,
+      "sha256": "2c14eda6c073b18597f3430e48536d0c19aa628d67edeb8b01971d1f0c3f9312"
+    },
+    {
+      "path": "baseline/blender/teststub.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\teststub.py",
+      "bytes": 5108,
+      "sha256": "d33e1d9741e4f6a9deec4434928aa8a386ca72de5e5d70f6abfb3e08e5e23881"
+    },
+    {
+      "path": "baseline/blender/tunnel_jumbo.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\tunnel_jumbo.py",
+      "bytes": 60857,
+      "sha256": "4f5aa23317d8fbafde1b1f5af9646881a8dc22533ceefe4d682659ae4d84b867"
+    },
+    {
+      "path": "baseline/blender/ui_atlas.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\ui_atlas.py",
+      "bytes": 21278,
+      "sha256": "adfa01eff1cff5778e9b39b5d40bc6e072c5996cc43c81cdfb04b286b0a84e1b"
+    },
+    {
+      "path": "baseline/blender/ui_motion.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\blender\\ui_motion.py",
+      "bytes": 4481,
+      "sha256": "0cd077ee7f549791eeb39aee1c1efb7b86f6ce84f48b4d818beb5e075b2d8a07"
+    },
+    {
+      "path": "baseline/index.html",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\index.html",
+      "bytes": 1180,
+      "sha256": "80093df10d14000da429ff9ac9159dc55487d92769d539374872278e56f146a1"
+    },
+    {
+      "path": "baseline/manifest.json",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\manifest.json",
+      "bytes": 50562,
+      "sha256": "66dceba44f2d7be035b66009db349f80cb4f211df77017103e6f568d1186d0d1"
+    },
+    {
+      "path": "baseline/package-lock.json",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\package-lock.json",
+      "bytes": 37573,
+      "sha256": "5fa488c123e98c116d7c071762c92e15a00156a4d2c68fc5a44ecfeabbb6738d"
+    },
+    {
+      "path": "baseline/package.json",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\package.json",
+      "bytes": 10790,
+      "sha256": "f70295ddb249ccfdc6b0e22d0ce9a52252428942ee1fb341cf2eec66ae1acaf5"
+    },
+    {
+      "path": "baseline/src/audio/audio.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\audio\\audio.js",
+      "bytes": 416306,
+      "sha256": "9150ec5acdaa2cf7e82a758f0f558fe9a3580d659fff154e8fab4889a25a047a"
+    },
+    {
+      "path": "baseline/src/audio/haptics.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\audio\\haptics.js",
+      "bytes": 42062,
+      "sha256": "6ce41ba766273e8e2c94ab8ca1fad7264d56ba8de47010a2da1ad151573a4c95"
+    },
+    {
+      "path": "baseline/src/core/assets.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\core\\assets.js",
+      "bytes": 270672,
+      "sha256": "fccb6779082d32c1a9967683508ecd869f3bd3599ed57787436921404673c04a"
+    },
+    {
+      "path": "baseline/src/core/contract.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\core\\contract.js",
+      "bytes": 30308,
+      "sha256": "dfb40a897139a7a67fc9d62a2d17a473096a51f42513becca6e3391767e3cf53"
+    },
+    {
+      "path": "baseline/src/core/env.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\core\\env.js",
+      "bytes": 172807,
+      "sha256": "af2afb3afbae2b49965e0673fa42f46d4fbf6b3de9e7e15d3e8ad2b4caca8511"
+    },
+    {
+      "path": "baseline/src/core/gltfAnim.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\core\\gltfAnim.js",
+      "bytes": 21755,
+      "sha256": "31317fa07cdfc9fd9e138cdfb776922c285941b75bb1c1e63822992a9e4693d1"
+    },
+    {
+      "path": "baseline/src/core/gltfRig.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\core\\gltfRig.js",
+      "bytes": 51556,
+      "sha256": "ea7aa46ab87be5a0b2c04152bb959be5c227ed6f073762dc78d5d654c7a4b53b"
+    },
+    {
+      "path": "baseline/src/core/motion.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\core\\motion.js",
+      "bytes": 3543,
+      "sha256": "83131fb56d9e329b60d09a65972afad7ec6d076227b9915021ad2963a9cc545c"
+    },
+    {
+      "path": "baseline/src/core/orbitFraming.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\core\\orbitFraming.js",
+      "bytes": 6323,
+      "sha256": "78216be3038a4c2582906f6ef9ccce946344274c90aa12b97994a8aaa14f5e83"
+    },
+    {
+      "path": "baseline/src/core/preview.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\core\\preview.js",
+      "bytes": 52758,
+      "sha256": "f3bfeb6813defd80b0d9cd433ba552dfe2513c4114f9e31d1bd2b82a17f4bc04"
+    },
+    {
+      "path": "baseline/src/core/renderer.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\core\\renderer.js",
+      "bytes": 140993,
+      "sha256": "ab18d0f124b3e65565574eb1f21543cd6dc3036f4c6a93c5ea33f1a7c29d4f54"
+    },
+    {
+      "path": "baseline/src/game/data.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\game\\data.js",
+      "bytes": 489188,
+      "sha256": "bb207515d7c43b643a011f055848a95a7e9d3b3e262a5f2fc0729668fae24c2f"
+    },
+    {
+      "path": "baseline/src/game/economy.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\game\\economy.js",
+      "bytes": 134932,
+      "sha256": "ef98a6b8e7569f8542b541f9d8baad8e8c0f01193b088d2ef7ff3e433f7bcac6"
+    },
+    {
+      "path": "baseline/src/game/equipment-support.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\game\\equipment-support.js",
+      "bytes": 4173,
+      "sha256": "d3cd061674207b2dc71d144a84f0f438c037c8d3633ab3e8e83e85e3e5e840b3"
+    },
+    {
+      "path": "baseline/src/game/progression.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\game\\progression.js",
+      "bytes": 111120,
+      "sha256": "8b4b1312342fadd820e1cf6ee7ce2a4a939aa716656005623374091bb7daae9f"
+    },
+    {
+      "path": "baseline/src/main.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\main.js",
+      "bytes": 45067,
+      "sha256": "b338acab39c6c683d9c6dc56519b80fa22450c871494a7593c723766bf254336"
+    },
+    {
+      "path": "baseline/src/rig/rigFactory.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\rig\\rigFactory.js",
+      "bytes": 486030,
+      "sha256": "7495aef8fd0d98ee7a3be9cd72dbf2f335a4a5d4b45b0de6403f72d964b78353"
+    },
+    {
+      "path": "baseline/src/rig/tools.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\rig\\tools.js",
+      "bytes": 573615,
+      "sha256": "1821620eee32c105c9966d762d143ecc6fc14705adb71a34476970ab06d9c32b"
+    },
+    {
+      "path": "baseline/src/sim/drilling.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\sim\\drilling.js",
+      "bytes": 583654,
+      "sha256": "07ccd37ec9f74cf6030639053c6165fc0617876f7fbfca542e95fc5fbba5ab74"
+    },
+    {
+      "path": "baseline/src/sim/sample-ledger.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\sim\\sample-ledger.js",
+      "bytes": 13062,
+      "sha256": "6d17b4da3b4906f12c1d1fc7c0f272a83ab701b1ebd5392bc1194ff8dd73f45e"
+    },
+    {
+      "path": "baseline/src/sim/sample-product.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\sim\\sample-product.js",
+      "bytes": 1444,
+      "sha256": "29992d3fd17348722a8b4c583da59bc82b757a6078406903a4a6450c131d0f0d"
+    },
+    {
+      "path": "baseline/src/sim/vfx.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\sim\\vfx.js",
+      "bytes": 252873,
+      "sha256": "5b36d58461b61f4e9e65b5df01572de99bde1b1bbfa3153bfe45d7d48495ed93"
+    },
+    {
+      "path": "baseline/src/ui/assets/logo-full.png",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\ui\\assets\\logo-full.png",
+      "bytes": 54023,
+      "sha256": "3cafdde184e8897194a3c76732baf7e2e891ea3723cae7d5a04fa26050f1e7f4"
+    },
+    {
+      "path": "baseline/src/ui/assets/logo-small.png",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\ui\\assets\\logo-small.png",
+      "bytes": 27576,
+      "sha256": "84d7d09020f8354b018aaca0ca887e26439a8ce303fc2b05aaf1339a74a3f89c"
+    },
+    {
+      "path": "baseline/src/ui/assets/logo-wordmark.png",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\ui\\assets\\logo-wordmark.png",
+      "bytes": 15913,
+      "sha256": "63683658ba08f65bb9aa64b47cecb803030eddf2efc9e4b55a6d987d1a3737dc"
+    },
+    {
+      "path": "baseline/src/ui/blender-atlas.css",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\ui\\blender-atlas.css",
+      "bytes": 7595,
+      "sha256": "225d245e5f5e332de9d5d105b593895804123cb054ad86f6001c3e9e7550aa71"
+    },
+    {
+      "path": "baseline/src/ui/components.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\ui\\components.js",
+      "bytes": 55960,
+      "sha256": "7443dc4755c83043b1ca9873271104f58aaa8b818ddd53fc2186c2e5091b4705"
+    },
+    {
+      "path": "baseline/src/ui/modal-focus.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\ui\\modal-focus.js",
+      "bytes": 6536,
+      "sha256": "6b051f1a748f6448d1656a9f8fc9bbae232262968b47184dd0c09887306958ba"
+    },
+    {
+      "path": "baseline/src/ui/motion.css",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\ui\\motion.css",
+      "bytes": 17506,
+      "sha256": "8530c48cca764834b5f009d4359a712d82718a9ca98ba983d769ebe9eee19e57"
+    },
+    {
+      "path": "baseline/src/ui/save-status.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\ui\\save-status.js",
+      "bytes": 6786,
+      "sha256": "36b5359c6c62636a6dae6caa520fb666ce4df27d373d11753907cdb32b8fab12"
+    },
+    {
+      "path": "baseline/src/ui/screens/boot.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\ui\\screens\\boot.js",
+      "bytes": 11242,
+      "sha256": "3b02f5fee1a540c6cf2867f76822d7f96c96be946d10cf8f15295893c7c9fd50"
+    },
+    {
+      "path": "baseline/src/ui/screens/career.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\ui\\screens\\career.js",
+      "bytes": 34461,
+      "sha256": "7513bad0eebcfa70b6bf236b53c29ef858d5448f1255d039e14487c019cb4529"
+    },
+    {
+      "path": "baseline/src/ui/screens/catalog.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\ui\\screens\\catalog.js",
+      "bytes": 50622,
+      "sha256": "d49f24548b8f1dd67f6936ad60f2647276c34cb11727ad6d0d7dd412fd80eae3"
+    },
+    {
+      "path": "baseline/src/ui/screens/contracts.css",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\ui\\screens\\contracts.css",
+      "bytes": 8426,
+      "sha256": "799b9abaacd67b1b9612d03ee5b4eb62cb980fa98bdf56601368f1486cfad2f8"
+    },
+    {
+      "path": "baseline/src/ui/screens/contracts.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\ui\\screens\\contracts.js",
+      "bytes": 22947,
+      "sha256": "7b32d70896d8e5e43d01e0c3bce7ffee365e7547b8b7a440610bdd4055bd900f"
+    },
+    {
+      "path": "baseline/src/ui/screens/garage.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\ui\\screens\\garage.js",
+      "bytes": 30456,
+      "sha256": "e1f1a6ad32320e41f33c4ff42ce6c46cc3cc0c643b7ee77e4f3fcbb8ee9905f6"
+    },
+    {
+      "path": "baseline/src/ui/screens/menu.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\ui\\screens\\menu.js",
+      "bytes": 12981,
+      "sha256": "0c37238b5fe84f46178a6247cc04616ddce96cdcf5c396c0d4088503ad38d44e"
+    },
+    {
+      "path": "baseline/src/ui/screens/results.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\ui\\screens\\results.js",
+      "bytes": 58339,
+      "sha256": "8e30d76c4beb28c36b252f8ed9b0c0171d5eefc78ba18dd6282827153c66fa06"
+    },
+    {
+      "path": "baseline/src/ui/screens/shop.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\ui\\screens\\shop.js",
+      "bytes": 47304,
+      "sha256": "63a54aa250983e0b723dc86bc8c458b5a192debf1b4778941c34af4d68163f92"
+    },
+    {
+      "path": "baseline/src/ui/screens/site.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\ui\\screens\\site.js",
+      "bytes": 146734,
+      "sha256": "7a4d66b8d8d5134680916428ce3055b46ed0c9ec135efb8527e47a8044d09e8b"
+    },
+    {
+      "path": "baseline/src/ui/shell.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\ui\\shell.js",
+      "bytes": 44277,
+      "sha256": "63b54470b80237d0d616552cc3ff6f80e55fd6520aead8cfbc8a7a147d4efe4c"
+    },
+    {
+      "path": "baseline/src/ui/styles.css",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\ui\\styles.css",
+      "bytes": 134146,
+      "sha256": "0bbef43917c3c9d507d9327d33b2dab3af36f65be4c843379757d1a1e757bde0"
+    },
+    {
+      "path": "baseline/src/ui/xp-display.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\ui\\xp-display.js",
+      "bytes": 1567,
+      "sha256": "068439a985cd14d842bea9aac1fe7b35e0d8a96977fc938deb2b781268d114ae"
+    },
+    {
+      "path": "baseline/src/world/geology.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\world\\geology.js",
+      "bytes": 423992,
+      "sha256": "895036315fd5924ab7e86b6a516d4fab3f046e740275b9f20f568de7c75d0fdc"
+    },
+    {
+      "path": "baseline/src/world/terrain.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\src\\world\\terrain.js",
+      "bytes": 408989,
+      "sha256": "7c60edd9fde4a6fa55ef7ae725965316b1c621fe7dc6afb1116075135b50a754"
+    },
+    {
+      "path": "baseline/tools/_bgprobe.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\_bgprobe.mjs",
+      "bytes": 849,
+      "sha256": "7f88291aa8fe81a3a717ac3e91b8b5539ac8dd8569342e9d1fc215603fb9519f"
+    },
+    {
+      "path": "baseline/tools/_probe.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\_probe.mjs",
+      "bytes": 654,
+      "sha256": "0f83cf2e17ca0fca20d83f7e4b681d2de0051f2e4356810fc7b3369b0f38c152"
+    },
+    {
+      "path": "baseline/tools/audit-vibro-runtime.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\audit-vibro-runtime.mjs",
+      "bytes": 9091,
+      "sha256": "bafeada719bdeeed30bc727921f106e66561b47bea5b6c771abc486aac3f8b0d"
+    },
+    {
+      "path": "baseline/tools/auditmechanismactions.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\auditmechanismactions.mjs",
+      "bytes": 9065,
+      "sha256": "d5cf836b492d1a6d4a622b5387e423fb3131f3f6f7be7d8083082100645252b8"
+    },
+    {
+      "path": "baseline/tools/auditmethodsettlement.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\auditmethodsettlement.mjs",
+      "bytes": 11586,
+      "sha256": "c669281ce06a70d83c601ddff53e017d719bce90ae90ee8b2f75d953120d7370"
+    },
+    {
+      "path": "baseline/tools/auditrigattachments.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\auditrigattachments.mjs",
+      "bytes": 16392,
+      "sha256": "a3dc7098121632d72113c9157e42f336f78b470fa843058c60661b2132b93680"
+    },
+    {
+      "path": "baseline/tools/auditsampleproduct-gap.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\auditsampleproduct-gap.mjs",
+      "bytes": 5383,
+      "sha256": "0457ff1c582ab42e2f6455854600c22d692487297d1a1d858e0ebd236be1ec45"
+    },
+    {
+      "path": "baseline/tools/bigobj.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\bigobj.mjs",
+      "bytes": 1666,
+      "sha256": "eb9e4a0ec438a8d37da3191e2c8366bb0af17b08b0cf608753c296a55b2dd7ce"
+    },
+    {
+      "path": "baseline/tools/bootprobe.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\bootprobe.mjs",
+      "bytes": 26117,
+      "sha256": "2da10e9673de80b9797ce981e183cfaa50692260c08b466d644a3098f3b9ace8"
+    },
+    {
+      "path": "baseline/tools/buildcheckpoint.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\buildcheckpoint.mjs",
+      "bytes": 3544,
+      "sha256": "7ecc5696d22a6060ca29314cf5b915d537062822d732b4e26f13ac5184c03184"
+    },
+    {
+      "path": "baseline/tools/check-ui-atlas-repeatability.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\check-ui-atlas-repeatability.mjs",
+      "bytes": 4517,
+      "sha256": "3ae671e48dd7695378790b92c37fa5017441414927c6dcf51e73c11c26ac5d6d"
+    },
+    {
+      "path": "baseline/tools/check-ui-atlas.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\check-ui-atlas.mjs",
+      "bytes": 28346,
+      "sha256": "b6ae950c989782019fb1e7770bf7a1477c0bef993a52083571ade00580864ac7"
+    },
+    {
+      "path": "baseline/tools/check_rc_axis.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\check_rc_axis.mjs",
+      "bytes": 5538,
+      "sha256": "0ac62b8edbdd0cdd6e2329c7a5587fc92ef9e0fde0b60e47f489ee076a4bfa1b"
+    },
+    {
+      "path": "baseline/tools/checkactionoutcomes-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkactionoutcomes-adversarial.mjs",
+      "bytes": 10926,
+      "sha256": "b9f1bace0d1c927e8833bf9908d32acdf84a081541c3250a6ea477f2660789c4"
+    },
+    {
+      "path": "baseline/tools/checkactionoutcomes.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkactionoutcomes.mjs",
+      "bytes": 12540,
+      "sha256": "000daef5d3a41ddefa45ab4f2e4ea58b43258b71e2795913716c1a513bb06155"
+    },
+    {
+      "path": "baseline/tools/checkartifactfailures.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkartifactfailures.mjs",
+      "bytes": 8008,
+      "sha256": "970460b1de1919be7353c104bb70b5f04015a65e2488a1085f0a396e31bf118e"
+    },
+    {
+      "path": "baseline/tools/checkassembledinteractions.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkassembledinteractions.mjs",
+      "bytes": 11666,
+      "sha256": "9f322d7c9525532b25ff3d0207c57faddb297e2fae43c9c1a82af24b064b902b"
+    },
+    {
+      "path": "baseline/tools/checkbeds.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkbeds.mjs",
+      "bytes": 9211,
+      "sha256": "e6e31202fcb7fafbe10eebec76ec2ab192542466c98f7dd07398fdb45b60e5f9"
+    },
+    {
+      "path": "baseline/tools/checkboardprovider.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkboardprovider.mjs",
+      "bytes": 9406,
+      "sha256": "362e76f9aa773ed0e03f222f8029915eba346818050e7f1ba1d949cf4069111d"
+    },
+    {
+      "path": "baseline/tools/checkbuild.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkbuild.mjs",
+      "bytes": 2964,
+      "sha256": "78f92030c79a374eabf3aef731fc185ed7623fac7684ada8d600fe502965e6df"
+    },
+    {
+      "path": "baseline/tools/checkcareer.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkcareer.mjs",
+      "bytes": 62786,
+      "sha256": "563590b74e8becb15e7f939f5b7ac42d9541ecee9efc642f64addf9db133d713"
+    },
+    {
+      "path": "baseline/tools/checkcareerendgame-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkcareerendgame-adversarial.mjs",
+      "bytes": 14777,
+      "sha256": "0a106785ec18b74958fb532ce3291ce06972827aa5b5987599a862d4531f6051"
+    },
+    {
+      "path": "baseline/tools/checkcareerendgame.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkcareerendgame.mjs",
+      "bytes": 12826,
+      "sha256": "4570147a624a78eb3ecfcda7e3a48429bf74fed4a4e910e982411fce2ee52f19"
+    },
+    {
+      "path": "baseline/tools/checkcareertransitions-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkcareertransitions-adversarial.mjs",
+      "bytes": 15232,
+      "sha256": "72df6a577e678620b058ccd9b487862e39d06ac7122b016296b63d208b466de5"
+    },
+    {
+      "path": "baseline/tools/checkcareertransitions.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkcareertransitions.mjs",
+      "bytes": 11613,
+      "sha256": "6423aeeab7e916d84f1e98192e116c7b38838a2585e9dd70b699fdcf69977000"
+    },
+    {
+      "path": "baseline/tools/checkcfafeed.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkcfafeed.mjs",
+      "bytes": 14933,
+      "sha256": "9a84af22406bb7ec13e50688122070c292c82630bf058d4dabb6b240cfca8c55"
+    },
+    {
+      "path": "baseline/tools/checkcontract-readiness.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkcontract-readiness.mjs",
+      "bytes": 23252,
+      "sha256": "ff7f7d7382225729a38ed34c2d315365ab33eb17b11c7da50f4753872f9cbd69"
+    },
+    {
+      "path": "baseline/tools/checkcontracts-cpu-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkcontracts-cpu-adversarial.mjs",
+      "bytes": 7989,
+      "sha256": "ba1cca886c72a7264c689ff05ec943cd0cb14853485c6fcc52add63fd46f8e3a"
+    },
+    {
+      "path": "baseline/tools/checkcontracts.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkcontracts.mjs",
+      "bytes": 53897,
+      "sha256": "6f480e507420acce1ffbe9660af12e45aba25ddd1a48198a7ea9067167cc9db7"
+    },
+    {
+      "path": "baseline/tools/checkcontractslots-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkcontractslots-adversarial.mjs",
+      "bytes": 7675,
+      "sha256": "f6ecc5f15496fddde5033e1d4f93bb8a503d55706839caa85da32858afe0c950"
+    },
+    {
+      "path": "baseline/tools/checkcontractslots.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkcontractslots.mjs",
+      "bytes": 8212,
+      "sha256": "17fa16a46fda265533e77a5b3d2141c4e6c60bf616559bc7fecf5827fcd3aa3a"
+    },
+    {
+      "path": "baseline/tools/checkdata.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkdata.mjs",
+      "bytes": 11775,
+      "sha256": "fbef156613e99b70c04a6f7c3a5f7d8fe4b759ba9ec1c57c77b2c6f48f619dbb"
+    },
+    {
+      "path": "baseline/tools/checkdefaultloadout-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkdefaultloadout-adversarial.mjs",
+      "bytes": 10049,
+      "sha256": "ab005984aaa587135c9af277d27f684b0f71398119e866c86a23d5db37c16b76"
+    },
+    {
+      "path": "baseline/tools/checkdefaultloadout.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkdefaultloadout.mjs",
+      "bytes": 7556,
+      "sha256": "fb9b40786e99b887253a66a28db315401f3516e20d1c6f0522d4bb1ede91bf57"
+    },
+    {
+      "path": "baseline/tools/checkdevserveridentity.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkdevserveridentity.mjs",
+      "bytes": 9561,
+      "sha256": "8a9a65354d3bb1720fb0a2590fbbeccf0708a6dd9ef4f0b24e8ccf28677314c5"
+    },
+    {
+      "path": "baseline/tools/checkdomain-followup-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkdomain-followup-adversarial.mjs",
+      "bytes": 9251,
+      "sha256": "21058946e328635033bc3d2d6ea6b21a2a39fef9d72184b39eac78d21a9173dd"
+    },
+    {
+      "path": "baseline/tools/checkdomain-mechanics-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkdomain-mechanics-adversarial.mjs",
+      "bytes": 6458,
+      "sha256": "7b1700e90381640d1c2ec6ca975994e07e8419dd9f1f1ac0f4c4159ee00026e8"
+    },
+    {
+      "path": "baseline/tools/checkdomain-pile-energy.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkdomain-pile-energy.mjs",
+      "bytes": 5946,
+      "sha256": "434c522e73231f54a1b8d0a5ee8142b1507b7f7d9bc9df31e8d534af1d8accca"
+    },
+    {
+      "path": "baseline/tools/checkdomain-rockbolt-length.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkdomain-rockbolt-length.mjs",
+      "bytes": 5003,
+      "sha256": "95788045b6f087a5d2742ebf6ee7fe7c243200a8f30e1a9c14c1cd57009866a1"
+    },
+    {
+      "path": "baseline/tools/checkdomain-rockbolt-ui-browser.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkdomain-rockbolt-ui-browser.mjs",
+      "bytes": 16132,
+      "sha256": "61cabc7a6afd98c0d94e582484aaa184fe2545d353860739014711441816bbb2"
+    },
+    {
+      "path": "baseline/tools/checkdomain-rockbolt-ui.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkdomain-rockbolt-ui.mjs",
+      "bytes": 5172,
+      "sha256": "3fa04347fba9a10becef2cd1e6ec1f7f3eecdc5e35ff819a6d2f02a599148f34"
+    },
+    {
+      "path": "baseline/tools/checkdomain-rockbolt.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkdomain-rockbolt.mjs",
+      "bytes": 7011,
+      "sha256": "316f352c08822cbbc46de3e9c38e025b92b8f71f228b739f7fffbba2672c08be"
+    },
+    {
+      "path": "baseline/tools/checkdrillingviewspace.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkdrillingviewspace.mjs",
+      "bytes": 28708,
+      "sha256": "cb7237b4c9290b14e82ceb1d8e1127c04d2a669e2d091f557c23bd4637dae2d2"
+    },
+    {
+      "path": "baseline/tools/checkentrance.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkentrance.mjs",
+      "bytes": 8976,
+      "sha256": "f3a24a9b58055bb0e188ae2fb759e9f7c930d6f78f3caec976746d9698274ac8"
+    },
+    {
+      "path": "baseline/tools/checkfacts.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkfacts.mjs",
+      "bytes": 5124,
+      "sha256": "168174060d81ca5620f12b0de5360f364ead328507c0bcf8715724e30b9da45a"
+    },
+    {
+      "path": "baseline/tools/checkfieldregrind-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkfieldregrind-adversarial.mjs",
+      "bytes": 14532,
+      "sha256": "dc3e4c8bb4a796561179a77bbb831d34bdecd31c480a7331a6c6365815835423"
+    },
+    {
+      "path": "baseline/tools/checkfieldregrind.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkfieldregrind.mjs",
+      "bytes": 15656,
+      "sha256": "b290383e5789cc45a3b7ff56ba65fe83b26362b915bef8288567cb93dded0e35"
+    },
+    {
+      "path": "baseline/tools/checkfieldsave-browser.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkfieldsave-browser.mjs",
+      "bytes": 25235,
+      "sha256": "9989be38f9bbbb5b10a0359c867a75d8469cb4144542d96963061bb77b7ea2b0"
+    },
+    {
+      "path": "baseline/tools/checkfieldsaveintegration-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkfieldsaveintegration-adversarial.mjs",
+      "bytes": 18515,
+      "sha256": "63cb5d28d5bc6fa1cbab13438612da2020703d05cc21d71b7c7ed98f983b735b"
+    },
+    {
+      "path": "baseline/tools/checkfieldsaveintegration.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkfieldsaveintegration.mjs",
+      "bytes": 8248,
+      "sha256": "498c35f454edbfc7c45246b193896bf85bd3a2da0fe57cbfaa96dc036831e286"
+    },
+    {
+      "path": "baseline/tools/checkgatefailures.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkgatefailures.mjs",
+      "bytes": 4524,
+      "sha256": "91117354e02f481297ce6140272166c853621d13cfe5103ffba5dc841a7e2c9d"
+    },
+    {
+      "path": "baseline/tools/checkgeologycoverage.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkgeologycoverage.mjs",
+      "bytes": 5882,
+      "sha256": "834e525ce25c3d47e1884faa71f0c3b4bf868844ae59c4e65051bb5c9e097f08"
+    },
+    {
+      "path": "baseline/tools/checkhaptics.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkhaptics.mjs",
+      "bytes": 37610,
+      "sha256": "4e92f9a4a736cf1a242aba4acf7f6d260804930f9710298ddf1fe2eeb1234d3d"
+    },
+    {
+      "path": "baseline/tools/checkheroframing.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkheroframing.mjs",
+      "bytes": 25232,
+      "sha256": "b0026f43ef9ca2a9e5e8f7158fc9e2b434d1c91118519e9a68efffa7167557e5"
+    },
+    {
+      "path": "baseline/tools/checkheroframingbrowser.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkheroframingbrowser.mjs",
+      "bytes": 6738,
+      "sha256": "beeafde8a79046916f111661a06e61c2c3eb0c104849cfab99d203440e6baefe"
+    },
+    {
+      "path": "baseline/tools/checkinstrumentgrade.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkinstrumentgrade.mjs",
+      "bytes": 6685,
+      "sha256": "543c1c0befe5cf48d1e6db904fb1a409eea3d175a317316174cd4f67a474e76e"
+    },
+    {
+      "path": "baseline/tools/checkinstrumentgradebrowser.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkinstrumentgradebrowser.mjs",
+      "bytes": 9784,
+      "sha256": "5ef0116f4a7db7391bfc85f826268d951d97acd950bbaa975e457dfcaa7f1a05"
+    },
+    {
+      "path": "baseline/tools/checkinstrumentlifecyclebrowser.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkinstrumentlifecyclebrowser.mjs",
+      "bytes": 14809,
+      "sha256": "1457182c53cf03e7ed6bcf82cfa24ff87584cd99af368989d9517d9550fafbd7"
+    },
+    {
+      "path": "baseline/tools/checkinstrumentwarmup.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkinstrumentwarmup.mjs",
+      "bytes": 5832,
+      "sha256": "d0d2a32348787703b9251d8a3281ac366fa5478c2e71dc07bca577efe6becf1c"
+    },
+    {
+      "path": "baseline/tools/checkjamaccounting.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkjamaccounting.mjs",
+      "bytes": 7529,
+      "sha256": "d97ea6c89e5fff2e718506998a2fb6cf5772111eb6cfc0337258fb8cb84ddadb"
+    },
+    {
+      "path": "baseline/tools/checkliveprofiler-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkliveprofiler-adversarial.mjs",
+      "bytes": 38796,
+      "sha256": "aa27169caba0ad37594c569b633eff623bf9b6488cb564d3acc16ab25d907179"
+    },
+    {
+      "path": "baseline/tools/checklockedcontrols-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checklockedcontrols-adversarial.mjs",
+      "bytes": 9658,
+      "sha256": "b14bb28bb62be7e1dd5b2db90cccda16974ed31e25e9a5dfe44ee77ac6c67c77"
+    },
+    {
+      "path": "baseline/tools/checklockedcontrols.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checklockedcontrols.mjs",
+      "bytes": 12900,
+      "sha256": "33fa044ca02bf87cdb74a17fe37206c800a0b2f7b427a1f21c7bfb602955c520"
+    },
+    {
+      "path": "baseline/tools/checkmaterials.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkmaterials.mjs",
+      "bytes": 7755,
+      "sha256": "b764d8dc06b9f038afe9f3c35ff960c34394f29c3e9df31ed9ca7f8c15747d20"
+    },
+    {
+      "path": "baseline/tools/checkmethodsettlement-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkmethodsettlement-adversarial.mjs",
+      "bytes": 16076,
+      "sha256": "00343a92c2ab9a4ea70e05ff8853d2105005e63d467d3caf21e77f70d2df586b"
+    },
+    {
+      "path": "baseline/tools/checkmethodsettlement.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkmethodsettlement.mjs",
+      "bytes": 10382,
+      "sha256": "29624fffc90173d440b67aff0969ee52dbd15a7109ac099033362e7524e4aada"
+    },
+    {
+      "path": "baseline/tools/checkmirror.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkmirror.mjs",
+      "bytes": 12498,
+      "sha256": "6bea4bf14a8c3ce438e39f733295486f0e3e31588a5c9054df838e832b2cf294"
+    },
+    {
+      "path": "baseline/tools/checkmodalfocus-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkmodalfocus-adversarial.mjs",
+      "bytes": 11955,
+      "sha256": "3c29eaf4eef15ba0019fa25c8ca862192c21414a0b6ce00dd98c29857e1bdace"
+    },
+    {
+      "path": "baseline/tools/checkmodalfocus.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkmodalfocus.mjs",
+      "bytes": 16944,
+      "sha256": "a1f8fb25b654ec9f45e3d342ddeacddbbcb8442a6008c1369b0a391f409b1e18"
+    },
+    {
+      "path": "baseline/tools/checkmodels.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkmodels.mjs",
+      "bytes": 16953,
+      "sha256": "e324ff4f3fc6229befe0f5b91b87e9482e4e932bdc81aab21a968418bb32691b"
+    },
+    {
+      "path": "baseline/tools/checkmotion.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkmotion.mjs",
+      "bytes": 5200,
+      "sha256": "417518ef14535c0d7ce037c1c48e631dbca66193c4bb099750844873e261643c"
+    },
+    {
+      "path": "baseline/tools/checkmotionpreference.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkmotionpreference.mjs",
+      "bytes": 8841,
+      "sha256": "55f348b543ed768c20b85a26b6de251355b4ec91e1a47d4faf7fa9b010990039"
+    },
+    {
+      "path": "baseline/tools/checkorbitframing-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkorbitframing-adversarial.mjs",
+      "bytes": 17453,
+      "sha256": "439e48390c092e3db92de47ef48e343fd039161a7ddcffa6bad685f971609c45"
+    },
+    {
+      "path": "baseline/tools/checkorbitframing.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkorbitframing.mjs",
+      "bytes": 10621,
+      "sha256": "5f08036f73a4a1c629e23253b2e1a0b9017dce418339e083249ee40de530eaa7"
+    },
+    {
+      "path": "baseline/tools/checkpaintresponse.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkpaintresponse.mjs",
+      "bytes": 6754,
+      "sha256": "10b8a92a4f55aac08eae6c304b2b94d032cbcf690a97b57ae4f90106bb3082b9"
+    },
+    {
+      "path": "baseline/tools/checkpassiveskills-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkpassiveskills-adversarial.mjs",
+      "bytes": 17703,
+      "sha256": "7da39a05c6df8e53df605c25a50966ecd15aa367f689ffcf87ce2841e7568500"
+    },
+    {
+      "path": "baseline/tools/checkpassiveskills.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkpassiveskills.mjs",
+      "bytes": 16259,
+      "sha256": "fd404a7e39d4299b141dc4c5ed68ef386dea66d92338cb3238896d36a7fc13ca"
+    },
+    {
+      "path": "baseline/tools/checkpauselifecycle-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkpauselifecycle-adversarial.mjs",
+      "bytes": 19842,
+      "sha256": "c25e56ea42e76ccf86f27b3105568f9959e871a42a44c5f024334ed6e1b870d5"
+    },
+    {
+      "path": "baseline/tools/checkpauselifecycle.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkpauselifecycle.mjs",
+      "bytes": 6444,
+      "sha256": "79d3675e0ca69ce8d7e5819e4a39840012b0260b8e1cf73338db9b5e8d37eb8c"
+    },
+    {
+      "path": "baseline/tools/checkpilefeed-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkpilefeed-adversarial.mjs",
+      "bytes": 6180,
+      "sha256": "6526a7485bd15aa3263b15e486c5b3b3ae510bff2ab83f74ed8d45f70ae11b70"
+    },
+    {
+      "path": "baseline/tools/checkpilemotion-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkpilemotion-adversarial.mjs",
+      "bytes": 26828,
+      "sha256": "0e73ea2c7b66a651bd4208ac396ff283c1247830f5085183459e442d6c15f875"
+    },
+    {
+      "path": "baseline/tools/checkpilemotion-browser.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkpilemotion-browser.mjs",
+      "bytes": 30721,
+      "sha256": "faeb1012be4d913762cdcb37b2422468c7fa57cef2c25da8296c294708203440"
+    },
+    {
+      "path": "baseline/tools/checkpilemotion.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkpilemotion.mjs",
+      "bytes": 9842,
+      "sha256": "aae45ff3f2c9bbe9a7cdf928c1573c70640923b28dd2557a26f28c9f6633cc95"
+    },
+    {
+      "path": "baseline/tools/checkpileplacement.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkpileplacement.mjs",
+      "bytes": 7340,
+      "sha256": "8575d4c34f4379c86dbe5ea391d1c050d7cd740946b92d47c92c702bec2062c3"
+    },
+    {
+      "path": "baseline/tools/checkpostwarmup.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkpostwarmup.mjs",
+      "bytes": 6358,
+      "sha256": "a46f68fac3e879cb8503070f12b7ce0be812d16428937effd458b5fe7e8e5a82"
+    },
+    {
+      "path": "baseline/tools/checkpreviewcatalogue.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkpreviewcatalogue.mjs",
+      "bytes": 20114,
+      "sha256": "3efa32629d9cdf83362323c403a67fa741859592ab8394bbf3d2d38b1e8cb001"
+    },
+    {
+      "path": "baseline/tools/checkpreviewframing.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkpreviewframing.mjs",
+      "bytes": 12510,
+      "sha256": "83aca40d268b928e4bc2a1f85241b9a9ce8ac465025fdb91f45be9e03b5cdd33"
+    },
+    {
+      "path": "baseline/tools/checkpreviewgpu.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkpreviewgpu.mjs",
+      "bytes": 12364,
+      "sha256": "ca9fa3cb0a54e76b0dcfe008dc64bc75a0a1869b0536a217aea668343711cde0"
+    },
+    {
+      "path": "baseline/tools/checkpreviewlifecycle.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkpreviewlifecycle.mjs",
+      "bytes": 20125,
+      "sha256": "cbd4ba49d5e62f8f1094eec07ef861b4c2b98922220bcede5214c9a616363fa4"
+    },
+    {
+      "path": "baseline/tools/checkprogrammecopy-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkprogrammecopy-adversarial.mjs",
+      "bytes": 5340,
+      "sha256": "f8bae8c928189dd2e17488125eead4af36369ac3d0645fe46715adc32afecece"
+    },
+    {
+      "path": "baseline/tools/checkprogrammecopy.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkprogrammecopy.mjs",
+      "bytes": 5542,
+      "sha256": "2eb591df25343d7f3747ff0ec02f102bacee4fd13a641d71933c04791579713f"
+    },
+    {
+      "path": "baseline/tools/checkprogramreadiness.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkprogramreadiness.mjs",
+      "bytes": 5733,
+      "sha256": "08cb2e17e30834b579ae76e45154c7181d4108b99205c0e53181db8d86e3fa93"
+    },
+    {
+      "path": "baseline/tools/checkprogression-acceptance.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkprogression-acceptance.mjs",
+      "bytes": 16138,
+      "sha256": "24bd9015ee49768ee16b84548ac88ef31acaedf3f20327d63a5a12d7b2aa0c5c"
+    },
+    {
+      "path": "baseline/tools/checkprogression-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkprogression-adversarial.mjs",
+      "bytes": 10834,
+      "sha256": "3a8ffad5699aec074d36d02fdb83711f1be485bf4acb3b00604cdc5011d326ac"
+    },
+    {
+      "path": "baseline/tools/checkprogression-capacity.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkprogression-capacity.mjs",
+      "bytes": 7514,
+      "sha256": "aaebe13e73f9622cda9805c13675a2d70bab335aad197c398318d382244557ef"
+    },
+    {
+      "path": "baseline/tools/checkprogression-protocol-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkprogression-protocol-adversarial.mjs",
+      "bytes": 11871,
+      "sha256": "6d69fb2c4c376b036f73853ffbfe9ccfb15141500e643d6cf05662c35ca46838"
+    },
+    {
+      "path": "baseline/tools/checkprogression-settlement.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkprogression-settlement.mjs",
+      "bytes": 32249,
+      "sha256": "b06f97c12988756a4ae046462125a1cec7ec07d021bcb65ed28b7a16d6d64b5b"
+    },
+    {
+      "path": "baseline/tools/checkqa.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkqa.mjs",
+      "bytes": 10129,
+      "sha256": "a5d52d6eef1cf9b38481fb343c76e2ff328d5ba4cdbbfd795db0e043882a0580"
+    },
+    {
+      "path": "baseline/tools/checkqacleanup.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkqacleanup.mjs",
+      "bytes": 6001,
+      "sha256": "c74ea855d0508b234ae3e5fb4250fdeec7bfdcbd18dd3f5d52e5838415ba2be4"
+    },
+    {
+      "path": "baseline/tools/checkquarrylivecollar-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkquarrylivecollar-adversarial.mjs",
+      "bytes": 5859,
+      "sha256": "9e8618d0e2c21fe43f355fe474ebb9949cd9aade8909557a21aced9273cc1367"
+    },
+    {
+      "path": "baseline/tools/checkquarrylivecollar.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkquarrylivecollar.mjs",
+      "bytes": 11737,
+      "sha256": "c62b9a41e49cc92e43b8bf38e16e83260f0c787871312862b51d0cdb18c57812"
+    },
+    {
+      "path": "baseline/tools/checkquarrylivecollarbrowser.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkquarrylivecollarbrowser.mjs",
+      "bytes": 9680,
+      "sha256": "373373f016ed2ad9277ef2b267c290d7038dc388243690aeab8da8a9abcf200f"
+    },
+    {
+      "path": "baseline/tools/checkrateprovenance.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkrateprovenance.mjs",
+      "bytes": 16057,
+      "sha256": "7296e4be55be21343426f79a4c44550fe8cbdf716074977cd8419cf878c89380"
+    },
+    {
+      "path": "baseline/tools/checkreach.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkreach.mjs",
+      "bytes": 31429,
+      "sha256": "92399cf776f89f4014684bb2f47e9dcd9430654c1cb1d57163777c73c13e60ef"
+    },
+    {
+      "path": "baseline/tools/checkreadoutcache-shipping.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkreadoutcache-shipping.mjs",
+      "bytes": 17285,
+      "sha256": "6560fa39a69391c637c45a8c778c2995245d048d5f094a9d488fb753008dc59b"
+    },
+    {
+      "path": "baseline/tools/checkrescuehome-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkrescuehome-adversarial.mjs",
+      "bytes": 11257,
+      "sha256": "b1e07ca870d0c262826bf9c59c4ef573cc43e0f809e2f892a1ff1d830dcd7321"
+    },
+    {
+      "path": "baseline/tools/checkrescuestart-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkrescuestart-adversarial.mjs",
+      "bytes": 9514,
+      "sha256": "740a71774306fdae7a64413460ab43aca7ce17ea8874efc8b46a981e1c35d620"
+    },
+    {
+      "path": "baseline/tools/checkrescuestart.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkrescuestart.mjs",
+      "bytes": 6509,
+      "sha256": "f0360d9067dada5f283f891e583c4560740edeeb2423a0265204a1afe138c595"
+    },
+    {
+      "path": "baseline/tools/checkrescueviability-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkrescueviability-adversarial.mjs",
+      "bytes": 22147,
+      "sha256": "b2334433826a53734ecc6f0687f0de2f2e7b288295da615af2401cddef167d6a"
+    },
+    {
+      "path": "baseline/tools/checkrescueviability.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkrescueviability.mjs",
+      "bytes": 8751,
+      "sha256": "b7d31c717766360e327bb18e26b13877fbb87233976639042de28deb0fd0aa9e"
+    },
+    {
+      "path": "baseline/tools/checkresults-critic.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkresults-critic.mjs",
+      "bytes": 6942,
+      "sha256": "408393282ffed0c3ad0afc5a2596b98ffb703ea7edcdf716ebf494518809277c"
+    },
+    {
+      "path": "baseline/tools/checkresults-identity.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkresults-identity.mjs",
+      "bytes": 15330,
+      "sha256": "cd71c4ea51f0348fd84a74e393d240148253a5b64480f37e3f5109e8db1e154e"
+    },
+    {
+      "path": "baseline/tools/checkrigcapacity.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkrigcapacity.mjs",
+      "bytes": 6251,
+      "sha256": "d86cf85ca4a07e19d393c7421e7bd884b2a16ab0e44b4ffa502b56bcc0748f8e"
+    },
+    {
+      "path": "baseline/tools/checkrigloader.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkrigloader.mjs",
+      "bytes": 8631,
+      "sha256": "d4f31a1fda0dc11fa4442d1f694df8f82ec0c066ece4e1123f9ec8b935d119f8"
+    },
+    {
+      "path": "baseline/tools/checkrigmetadata.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkrigmetadata.mjs",
+      "bytes": 36490,
+      "sha256": "a0dcc729d4a75d1ca21671132c34d332cad530380ee7c4c0fedb75c6d15d619a"
+    },
+    {
+      "path": "baseline/tools/checkrigvisual.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkrigvisual.mjs",
+      "bytes": 7668,
+      "sha256": "c386a391c663965fbeb789cdd02d80edcdd976ce2fc0bb1104ebc02da0b3c2ed"
+    },
+    {
+      "path": "baseline/tools/checkruler.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkruler.mjs",
+      "bytes": 25930,
+      "sha256": "616a2060829bc3fe7269dc8c75b46429098650d54ee06e43006126eec0c25181"
+    },
+    {
+      "path": "baseline/tools/checkrulerbrowser.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkrulerbrowser.mjs",
+      "bytes": 9021,
+      "sha256": "db131ace4cf53f11dc37f5ae840306dab7608f76e9a677a4bec898261a74ba8a"
+    },
+    {
+      "path": "baseline/tools/checksamplecatalogue-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checksamplecatalogue-adversarial.mjs",
+      "bytes": 11961,
+      "sha256": "d1cc07a2336679070540277768d47cb19ff14ecd61036a5920e143c5020d6291"
+    },
+    {
+      "path": "baseline/tools/checksamplegameplay-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checksamplegameplay-adversarial.mjs",
+      "bytes": 32757,
+      "sha256": "6d22b82167787970c2429c208c8e3d710312bed3e2eada8048168983b2cc6457"
+    },
+    {
+      "path": "baseline/tools/checksamplegameplay.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checksamplegameplay.mjs",
+      "bytes": 8144,
+      "sha256": "594f6dce0d6befab26e782e2637ee80eac06a209620d97f1e89aa866d2d9f632"
+    },
+    {
+      "path": "baseline/tools/checksampleledger-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checksampleledger-adversarial.mjs",
+      "bytes": 18532,
+      "sha256": "5e74b200bb7a8bd0c3abf71f866398568ee867f7a37d731c4c0a4d788fabf379"
+    },
+    {
+      "path": "baseline/tools/checksampleledger.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checksampleledger.mjs",
+      "bytes": 11675,
+      "sha256": "4dd0c2bf2ce276c81f78bd54bb51c68d79cc156945be7ab2cd210970096e7446"
+    },
+    {
+      "path": "baseline/tools/checksampleloadouts-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checksampleloadouts-adversarial.mjs",
+      "bytes": 21337,
+      "sha256": "e22d61e18f3695bf6b778f9df2cbad5e5d1713e8308e76060c7d80b0f7f15ba4"
+    },
+    {
+      "path": "baseline/tools/checksampleloadouts.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checksampleloadouts.mjs",
+      "bytes": 5235,
+      "sha256": "d2ab38c0618d05a1d63ab4b0467db0753aab5ac62c867bffb836ea2ca448d622"
+    },
+    {
+      "path": "baseline/tools/checksavefeedback-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checksavefeedback-adversarial.mjs",
+      "bytes": 15577,
+      "sha256": "45b17e1d04982d721d6c71bc78d676ba9c1562b9ddcbccac8f84a544fb18890c"
+    },
+    {
+      "path": "baseline/tools/checksavefeedback.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checksavefeedback.mjs",
+      "bytes": 10359,
+      "sha256": "0e86d44ba44a5f72c22f1e5a17581df747f65dfb8774df1d33d315e613011651"
+    },
+    {
+      "path": "baseline/tools/checksettingspersistence-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checksettingspersistence-adversarial.mjs",
+      "bytes": 13116,
+      "sha256": "3f366f8e5d9725d83f38a2fc7aad6788afc9d3f497c9fbc240f617d7d86b930a"
+    },
+    {
+      "path": "baseline/tools/checksettingspersistence.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checksettingspersistence.mjs",
+      "bytes": 11515,
+      "sha256": "41f089a60010295cadf5fb9c2cadded96158f3bb58e5f1a73dfeb34e8419280c"
+    },
+    {
+      "path": "baseline/tools/checksiteenvironment.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checksiteenvironment.mjs",
+      "bytes": 52624,
+      "sha256": "584919badf4964e9c98ef75f9a2c48a1084ce79c172316eae65a952bd4f72710"
+    },
+    {
+      "path": "baseline/tools/checksites.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checksites.mjs",
+      "bytes": 63726,
+      "sha256": "b3e3d14fd3ad54cbce9b6bd3d621d0fd5fa28bf34a1e4772b0cf9572c4db59f7"
+    },
+    {
+      "path": "baseline/tools/checkskilleffects-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkskilleffects-adversarial.mjs",
+      "bytes": 17975,
+      "sha256": "c4a2f05640805b76a2745eec4788d96789eb6e1e202f8403d11d6b72afc4f967"
+    },
+    {
+      "path": "baseline/tools/checkskilleffects.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkskilleffects.mjs",
+      "bytes": 13122,
+      "sha256": "8473848fa10b4c30852cd0f5222157755e2d6048d012a52274604b10435753e4"
+    },
+    {
+      "path": "baseline/tools/checksonic-capabilities.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checksonic-capabilities.mjs",
+      "bytes": 2493,
+      "sha256": "fde53c117aee46a0bf2aa9846856f85672df916ee50440dcfedce9af165e81d9"
+    },
+    {
+      "path": "baseline/tools/checksteelresponse-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checksteelresponse-adversarial.mjs",
+      "bytes": 18624,
+      "sha256": "03b4c93eb82e1e452a8f47d53efc4852bae0f9353b86af53f14538eee0021a54"
+    },
+    {
+      "path": "baseline/tools/checksteelresponse.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checksteelresponse.mjs",
+      "bytes": 6568,
+      "sha256": "a5de044a4d2c40a2587209033d65295c7a769ea62fa9fe5fff219cb4e8cc9692"
+    },
+    {
+      "path": "baseline/tools/checktapactivation-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checktapactivation-adversarial.mjs",
+      "bytes": 8262,
+      "sha256": "7e30571246406868a7b7087ea2dd4f293fcd1f157a63009d61b14e6ceb344eee"
+    },
+    {
+      "path": "baseline/tools/checktapactivation-browser.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checktapactivation-browser.mjs",
+      "bytes": 9012,
+      "sha256": "e66ed96d29d712b2435c3e03062482ca741f9d049eb10fa7a9d3b1b4f2792540"
+    },
+    {
+      "path": "baseline/tools/checktapactivation.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checktapactivation.mjs",
+      "bytes": 6646,
+      "sha256": "ae101b1060e2e758dac04e2fdf4498b280423883da4262d04098457625752db6"
+    },
+    {
+      "path": "baseline/tools/checktoolcataloguegeometry.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checktoolcataloguegeometry.mjs",
+      "bytes": 19212,
+      "sha256": "11261d4a624de00adef7abee51e63216065ef79ddacce9df66ffab486b202daa"
+    },
+    {
+      "path": "baseline/tools/checktoolcataloguepreview.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checktoolcataloguepreview.mjs",
+      "bytes": 6091,
+      "sha256": "73c62e1fa4e33a2aa1354cd4d051b5448771ffc86dbf32efd935d4fc1cb7418f"
+    },
+    {
+      "path": "baseline/tools/checktunnelcyclehours.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checktunnelcyclehours.mjs",
+      "bytes": 13096,
+      "sha256": "62311cf935fd3c7dd98b965670bb98251351218c229a361db17886ecccd5ac13"
+    },
+    {
+      "path": "baseline/tools/checktunnelestimator.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checktunnelestimator.mjs",
+      "bytes": 5826,
+      "sha256": "eb7c8b520a50ecf2e5e68656fe45140c0433552ef7ecd681108e1ac05dc27182"
+    },
+    {
+      "path": "baseline/tools/checkuimotion.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkuimotion.mjs",
+      "bytes": 12077,
+      "sha256": "133359a4d4be84110e4e1acefd6e62053a7ea4242a08c6de59416e69399ad924"
+    },
+    {
+      "path": "baseline/tools/checkundergroundlightbindings-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkundergroundlightbindings-adversarial.mjs",
+      "bytes": 17216,
+      "sha256": "aafef5f95fb7f4b3dd49193bfd0dea3bdcb78f56acda3838a58792ec6ba918a0"
+    },
+    {
+      "path": "baseline/tools/checkundergroundlightbindings.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkundergroundlightbindings.mjs",
+      "bytes": 11602,
+      "sha256": "7c579405c69bf1daaea63cb479a66c288bf476221a09ea973b2144f95b4fffc7"
+    },
+    {
+      "path": "baseline/tools/checkundergroundlightbrowser.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkundergroundlightbrowser.mjs",
+      "bytes": 16634,
+      "sha256": "b9c724eea8cca03f50270948b88223758d356f5c6ab1e63e7359e12e88b86e08"
+    },
+    {
+      "path": "baseline/tools/checkvibro-catalogue.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkvibro-catalogue.mjs",
+      "bytes": 13207,
+      "sha256": "22f65139a5dd503bb8ae202b811700b1ace58f53eb48039c344ef16d746f39e8"
+    },
+    {
+      "path": "baseline/tools/checkvibro-site-recovery.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkvibro-site-recovery.mjs",
+      "bytes": 14023,
+      "sha256": "7c16d50b497cd4caa701b4f244df55df01c4ec13c8a1e7e98425902914d8b3f8"
+    },
+    {
+      "path": "baseline/tools/checkvibro-start-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkvibro-start-adversarial.mjs",
+      "bytes": 14091,
+      "sha256": "0743dce085d103ec087c1d5b5cd7ee0ed6bdf0552587dcd5a29adaf939b240a6"
+    },
+    {
+      "path": "baseline/tools/checkvibro-start-guard.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkvibro-start-guard.mjs",
+      "bytes": 15215,
+      "sha256": "e069c697a9c78b39913494728e2651e5b12b25f93123fe53799a5860405fc47e"
+    },
+    {
+      "path": "baseline/tools/checkvibrocatalogue-adversarial.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\checkvibrocatalogue-adversarial.mjs",
+      "bytes": 13417,
+      "sha256": "d1b64cb4f0a20aef2bd09cf03ff8fba1f0023a5032e48588387ab3dd1046d0c7"
+    },
+    {
+      "path": "baseline/tools/devserver.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\devserver.mjs",
+      "bytes": 14969,
+      "sha256": "13a2f950402861ecbbca03e303cecb8f48ab9d0508028b49bd2ad909438d51d8"
+    },
+    {
+      "path": "baseline/tools/diag.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\diag.mjs",
+      "bytes": 2009,
+      "sha256": "16591df2a983c785bf09e08a0bd0edfab6c5274d6bac8a08c7ec897edfbc8a84"
+    },
+    {
+      "path": "baseline/tools/fixtures/drilling-view-career.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\fixtures\\drilling-view-career.js",
+      "bytes": 4050,
+      "sha256": "ac9ac347f9ca682b0451ed219ca22d3d6da9ad43e7697fcf381ea7979d0b0bc2"
+    },
+    {
+      "path": "baseline/tools/fixtures/drilling-view-space.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\fixtures\\drilling-view-space.js",
+      "bytes": 11032,
+      "sha256": "a0445bcf29cdff301bebc1b990708c0d4c74c3731deb5d2af58f4eebea790606"
+    },
+    {
+      "path": "baseline/tools/fixtures/field-save-browser.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\fixtures\\field-save-browser.js",
+      "bytes": 6327,
+      "sha256": "d75651249190e1bd55516f32749bbb77c9388e6199cbdf4a2c8c0227ef30dd34"
+    },
+    {
+      "path": "baseline/tools/gl.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\gl.mjs",
+      "bytes": 2198,
+      "sha256": "a30b4f6351c44d94a63c21e075df6ca12d4aaf8146cf93f6a2a8ebea5d04e35c"
+    },
+    {
+      "path": "baseline/tools/glbcompress.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\glbcompress.mjs",
+      "bytes": 8446,
+      "sha256": "b0a8621c0271703f75da449c96edddd0b3f31aae18a6051b7f6eac45eddf327a"
+    },
+    {
+      "path": "baseline/tools/glbinfo.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\glbinfo.mjs",
+      "bytes": 21203,
+      "sha256": "057bb6c89e0e8d974e2182b5db758e37c10b2254c3cd18409e8a097fab17cc11"
+    },
+    {
+      "path": "baseline/tools/glbpack.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\glbpack.mjs",
+      "bytes": 10330,
+      "sha256": "2b9f6c4200c1282617fef80b6faf7163a4a7021db29ab78e023cb60b86c3e46d"
+    },
+    {
+      "path": "baseline/tools/glbverify.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\glbverify.mjs",
+      "bytes": 19839,
+      "sha256": "085445cda8c2ebfffd0b1bb7513e6d2b20849c850e4ffb71eefaebdc43c0f110"
+    },
+    {
+      "path": "baseline/tools/hints.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\hints.mjs",
+      "bytes": 1427,
+      "sha256": "45c9b3d27d79a591de59cffeae834d1aa224ec1299a8a272362788050e4eed98"
+    },
+    {
+      "path": "baseline/tools/iso2.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\iso2.mjs",
+      "bytes": 1068,
+      "sha256": "f617264ecc74ce406d64d339bc51f08c6a1180b36f3279fc2d20eb2f25dc9e5e"
+    },
+    {
+      "path": "baseline/tools/iso3.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\iso3.mjs",
+      "bytes": 1534,
+      "sha256": "0180b906745b8fd00fa4735c55578f83e55997c7a47b742a77811f05d7675216"
+    },
+    {
+      "path": "baseline/tools/iso4.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\iso4.mjs",
+      "bytes": 1683,
+      "sha256": "0235e836f1bb44f46134b4eae6e99bfa0d3906d2a516b980b2fcff9ecc721795"
+    },
+    {
+      "path": "baseline/tools/isolate.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\isolate.mjs",
+      "bytes": 1320,
+      "sha256": "c30128b02f1d5365e6a5b4870acc3a68b71e9a0efc3aafb314509a34c3050b01"
+    },
+    {
+      "path": "baseline/tools/probe.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\probe.mjs",
+      "bytes": 1362,
+      "sha256": "798efcffb71f0297ac5466d25d1191137f5d2cbb27e772e3208a37d5a0757a6d"
+    },
+    {
+      "path": "baseline/tools/profileframes.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\profileframes.mjs",
+      "bytes": 80643,
+      "sha256": "155d2cf39c90dc4aca5d70a65f19ae9fa0bb0e76967137f782b2eb83454ecfc2"
+    },
+    {
+      "path": "baseline/tools/qa-verdict.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\qa-verdict.mjs",
+      "bytes": 2953,
+      "sha256": "acbba15a1e6899f5559e138ec84291b83f4805d6c5d4bc8ec093e437720f2ffc"
+    },
+    {
+      "path": "baseline/tools/ray.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\ray.mjs",
+      "bytes": 1474,
+      "sha256": "8b3c3c1d225c6710faa9b4583896397bef15de4b061a47d306ce460c73f9ebcc"
+    },
+    {
+      "path": "baseline/tools/rigcount.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\rigcount.mjs",
+      "bytes": 3718,
+      "sha256": "29dd2107479635154bb4e17669259a7052f57dd478d4415e084a277dc7ff72d7"
+    },
+    {
+      "path": "baseline/tools/rigfix_crawler_lenses.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\rigfix_crawler_lenses.py",
+      "bytes": 5164,
+      "sha256": "c463a257a6471d4c05580a13efbd73b28ea38e8b619fb8ed2082a56d89c375a3"
+    },
+    {
+      "path": "baseline/tools/rigfix_crawler_render.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\rigfix_crawler_render.py",
+      "bytes": 4109,
+      "sha256": "a5c542fdcc81417ad2bf1966da44e2842df5fcbea66e54ff8fde63cba720a160"
+    },
+    {
+      "path": "baseline/tools/rigfix_review_exports.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\rigfix_review_exports.mjs",
+      "bytes": 17127,
+      "sha256": "7cb3798c6cc63927fb4244f5759dec4552d134a8b501a0eedbe63cfb63c82651"
+    },
+    {
+      "path": "baseline/tools/rigfix_sonic_build.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\rigfix_sonic_build.py",
+      "bytes": 2527,
+      "sha256": "4faa639cfb9f3ab03b6c59b5c4327ff8a42bc93681ce1c670eea7cfe7fdc2364"
+    },
+    {
+      "path": "baseline/tools/rigfix_sonic_verify.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\rigfix_sonic_verify.mjs",
+      "bytes": 8475,
+      "sha256": "9f6ee85939123eb688b0fe40d94feed27e9996399b2c07c794ef69d7802a5380"
+    },
+    {
+      "path": "baseline/tools/rigfix_tunnel_entrypoint.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\rigfix_tunnel_entrypoint.mjs",
+      "bytes": 12400,
+      "sha256": "9a15c2c432dd742080a15dc61845d2df1ff5970fb4f0ba8bb6da199a9e7f1433"
+    },
+    {
+      "path": "baseline/tools/rigobj.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\rigobj.mjs",
+      "bytes": 1550,
+      "sha256": "213f0093076f3b412bffe475a932455013e3a67cadc95acd1b4f2045126824ff"
+    },
+    {
+      "path": "baseline/tools/rigopt_bolter.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\rigopt_bolter.py",
+      "bytes": 2277,
+      "sha256": "1f16494bbf6544fe27abd20b1d15688d46a424b8bb2e04b7dd23fa5745329b04"
+    },
+    {
+      "path": "baseline/tools/rigopt_bolter_render.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\rigopt_bolter_render.py",
+      "bytes": 3209,
+      "sha256": "67951b4cbe5095f1bb142aa9557f5c31d86dc906e8220d832b5452dfd74c64c7"
+    },
+    {
+      "path": "baseline/tools/rigopt_contracts.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\rigopt_contracts.mjs",
+      "bytes": 21338,
+      "sha256": "f995a01360185cc546732ae368753369f1948a0e4422254d8ac2b81b44813130"
+    },
+    {
+      "path": "baseline/tools/rigopt_crawler_build.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\rigopt_crawler_build.py",
+      "bytes": 3214,
+      "sha256": "43d7969c862349b385dc262cf54c05d4fedd6d2ec017f588a7fb6540cbe009fc"
+    },
+    {
+      "path": "baseline/tools/rigopt_crawler_render.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\rigopt_crawler_render.py",
+      "bytes": 3419,
+      "sha256": "b1dd08a28477d180c4a55383f88bfe45711fe41f2838f0125a1637e24aea6241"
+    },
+    {
+      "path": "baseline/tools/rigopt_sonic_build.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\rigopt_sonic_build.py",
+      "bytes": 2395,
+      "sha256": "24eb5c9fc5ae9548abe3cb5711582aef96c0e8895aa50ac1bbf042aa2abb8921"
+    },
+    {
+      "path": "baseline/tools/rigopt_sonic_render.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\rigopt_sonic_render.py",
+      "bytes": 3317,
+      "sha256": "e8074cb99238a18d28d3aac93c535c6bde0d3091468cb61f74dcaacd74fa526c"
+    },
+    {
+      "path": "baseline/tools/rigopt_sonic_verify.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\rigopt_sonic_verify.mjs",
+      "bytes": 4801,
+      "sha256": "374936841b979b633f98662dc6abfc0f0b807a697edb5d808177a624301ee7b8"
+    },
+    {
+      "path": "baseline/tools/rigopt_tunnel_build.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\rigopt_tunnel_build.py",
+      "bytes": 3898,
+      "sha256": "e4e5b630f4a6885a068282865ef2585214250eea683bd2fd63f0a35c32d53977"
+    },
+    {
+      "path": "baseline/tools/rigopt_tunnel_render.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\rigopt_tunnel_render.py",
+      "bytes": 3897,
+      "sha256": "f923c93a279cabacbe56c067fe38309734bf24a205c95515729f9334ce5acd78"
+    },
+    {
+      "path": "baseline/tools/rigopt_verify.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\rigopt_verify.mjs",
+      "bytes": 2662,
+      "sha256": "4d2f89a3976cbe2a1f2cd98194b4f3a5b2295feb3cb59a42431b8a536edb81c5"
+    },
+    {
+      "path": "baseline/tools/rigshot.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\rigshot.mjs",
+      "bytes": 5213,
+      "sha256": "e14473ed86e0293a05ceac5e5c7e2056e7ec53b7182dc045a2b140e6fed17bb7"
+    },
+    {
+      "path": "baseline/tools/servedSourceIdentity.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\servedSourceIdentity.mjs",
+      "bytes": 2245,
+      "sha256": "806b0c2420a97387bae0cb50681de62f066047cdf712e9775e15a407be6d4503"
+    },
+    {
+      "path": "baseline/tools/shoot.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\shoot.mjs",
+      "bytes": 109424,
+      "sha256": "cf1ff888ca54f20e90c0e879ea03fd41d091c5d1913cf54cdb14a64227b48144"
+    },
+    {
+      "path": "baseline/tools/sphere.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\sphere.mjs",
+      "bytes": 1511,
+      "sha256": "3cdf5d761da94c61fa70c31a2d5a627baec138c005494167ac3a34fb559968dc"
+    },
+    {
+      "path": "baseline/tools/stagepace.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\stagepace.mjs",
+      "bytes": 29627,
+      "sha256": "ffe7392564cac5798ee7825b5d38bc83a92a23cbc6e31f193cb8a38694e6ae4b"
+    },
+    {
+      "path": "baseline/tools/t.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\t.mjs",
+      "bytes": 1413,
+      "sha256": "c7be4328a9101b0fae888a0800a5b231373e3b0a00052535b7800e6da210449d"
+    },
+    {
+      "path": "baseline/tools/ui-atlas-demo/.gitignore",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\ui-atlas-demo\\.gitignore",
+      "bytes": 49,
+      "sha256": "91dc55635d6ca6b6d7a832a21593895e6991827dc550c397d6dc44ea3f0d4a36"
+    },
+    {
+      "path": "baseline/tools/ui-atlas-demo/demo.css",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\ui-atlas-demo\\demo.css",
+      "bytes": 4166,
+      "sha256": "f54e54f0f240f03a84a014b88c28d87006e788922f98808094e7b47e567d66ee"
+    },
+    {
+      "path": "baseline/tools/ui-atlas-demo/demo.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\ui-atlas-demo\\demo.js",
+      "bytes": 6735,
+      "sha256": "9a918dee5f188f3c5e5f0a57d7b03be59a9f769a2372a835a05bf27177b79c2c"
+    },
+    {
+      "path": "baseline/tools/ui-atlas-demo/index.html",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\ui-atlas-demo\\index.html",
+      "bytes": 5130,
+      "sha256": "e0476adf9cb7154d61de0c4b9b2b1676dc8c279b74b1fc8ead2bb4b0cf8adf3d"
+    },
+    {
+      "path": "baseline/tools/ui-atlas-demo/serve.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\ui-atlas-demo\\serve.mjs",
+      "bytes": 997,
+      "sha256": "11dc7d4134f1b1991dd7ef6fb05e3b9e48627f36174563e364b7ceced9696466"
+    },
+    {
+      "path": "baseline/tools/ui-atlas-demo/vite.config.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\ui-atlas-demo\\vite.config.mjs",
+      "bytes": 1216,
+      "sha256": "8cb4a7751b31f08e5770d2a4cb949e8705f7d4cba673505069ebc529dcc55ca1"
+    },
+    {
+      "path": "baseline/tools/verify_blender_wip.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\verify_blender_wip.py",
+      "bytes": 4816,
+      "sha256": "4ee8ce9bba83d618068a56e87d62cb142387c97d579c95716ca566aa8593c057"
+    },
+    {
+      "path": "baseline/tools/verify_quarry_live_collar.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\verify_quarry_live_collar.py",
+      "bytes": 9396,
+      "sha256": "e0391a50bead73690d79f02848c2f9a0388421c48a7e07293d890b80300710e4"
+    },
+    {
+      "path": "baseline/tools/vfx-methods.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\tools\\vfx-methods.mjs",
+      "bytes": 18996,
+      "sha256": "e32b95bfd374bf726a8f330d3330835c1c43470e647454d6af4e7826f268f30f"
+    },
+    {
+      "path": "baseline/vite.config.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-coordination\\resume-70-baseline-2026-09-08\\vite.config.js",
+      "bytes": 4815,
+      "sha256": "b5d8c2dbea6cab9e2fa10036f1ba41f938af465878558d6826ee6dd7e22ec106"
+    },
+    {
+      "path": "candidate/evidence/nordic-fog-critic/captures-02-diagnosis.json",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\evidence\\nordic-fog-critic\\captures-02-diagnosis.json",
+      "bytes": 1607,
+      "sha256": "4225af917a85c76edded2249ae47769e2f5ed7a69ae8ec61c4534fbd19896898"
+    },
+    {
+      "path": "candidate/evidence/nordic-fog-critic/negative-controls.json",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\evidence\\nordic-fog-critic\\negative-controls.json",
+      "bytes": 3499,
+      "sha256": "97bec659ad546753de47b52c3cd9fc2b0fcac70862c0dd191a0caea5b4253e7a"
+    },
+    {
+      "path": "candidate/evidence/nordic-fog/ARCHIVE_README.md",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\evidence\\nordic-fog\\ARCHIVE_README.md",
+      "bytes": 6414,
+      "sha256": "0f5bdd63290086117c37590e31250a42a27718399a49feb01be79fec7b59f8ce"
+    },
+    {
+      "path": "candidate/evidence/nordic-fog/baseline.json",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\evidence\\nordic-fog\\baseline.json",
+      "bytes": 59194,
+      "sha256": "b4ce70cabc4838e10f7730e5d444341e02b26d124fee8e5a884bd297ecf82902"
+    },
+    {
+      "path": "candidate/evidence/nordic-fog/candidate.json",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\evidence\\nordic-fog\\candidate.json",
+      "bytes": 59201,
+      "sha256": "459077fd349f98f29d71437c50c15a4257d1e6c37081f1c6374139a6a0411db4"
+    },
+    {
+      "path": "candidate/evidence/nordic-fog/capture-preflight.json",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\evidence\\nordic-fog\\capture-preflight.json",
+      "bytes": 2677,
+      "sha256": "6a5faa22efd7ee5bf64e96fdddc38e69e25376d44cd0b1bcfafc1f197031d6b8"
+    },
+    {
+      "path": "candidate/evidence/nordic-fog/captures-01/capture-source.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\evidence\\nordic-fog\\captures-01\\capture-source.mjs",
+      "bytes": 12980,
+      "sha256": "32f3f039a7177527c9a7ba66c5e614225449a6f8528ee64e7578492d02ebc8bc"
+    },
+    {
+      "path": "candidate/evidence/nordic-fog/captures-01/controls-source.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\evidence\\nordic-fog\\captures-01\\controls-source.mjs",
+      "bytes": 15046,
+      "sha256": "fc53071c56c578772c8d88bc17aed472eddf7eaf4cd8530ceb07d5a05687ed56"
+    },
+    {
+      "path": "candidate/evidence/nordic-fog/captures-01/report.json",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\evidence\\nordic-fog\\captures-01\\report.json",
+      "bytes": 114993,
+      "sha256": "cd80c0c34027eb7686a14657453b6924ca42864fd285edac6d99d2d761e2e28d"
+    },
+    {
+      "path": "candidate/evidence/nordic-fog/captures-01/served-main.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\evidence\\nordic-fog\\captures-01\\served-main.js",
+      "bytes": 44248,
+      "sha256": "f593620ed21a2214e740e4535e04b25ed1847f9af6bb9f68e4049a2245f23d4c"
+    },
+    {
+      "path": "candidate/evidence/nordic-fog/captures-02-classification.json",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\evidence\\nordic-fog\\captures-02-classification.json",
+      "bytes": 9586,
+      "sha256": "367f21793c38f509739e0e3e395ff156c74828cb1edf0e9019679dcaf75545ab"
+    },
+    {
+      "path": "candidate/evidence/nordic-fog/captures-02/capture-source.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\evidence\\nordic-fog\\captures-02\\capture-source.mjs",
+      "bytes": 14654,
+      "sha256": "f13ceef1400e8350486efcaeb08bcf7d8e542de0a0f4112b6de6a2e75fbc9f2f"
+    },
+    {
+      "path": "candidate/evidence/nordic-fog/captures-02/controls-source.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\evidence\\nordic-fog\\captures-02\\controls-source.mjs",
+      "bytes": 15046,
+      "sha256": "fc53071c56c578772c8d88bc17aed472eddf7eaf4cd8530ceb07d5a05687ed56"
+    },
+    {
+      "path": "candidate/evidence/nordic-fog/captures-02/nordic-hero-0.34-baseline.png",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\evidence\\nordic-fog\\captures-02\\nordic-hero-0.34-baseline.png",
+      "bytes": 1222961,
+      "sha256": "89790c4fa6164a9c2ba3da84c58a0adda88b47e9a49790b54bdf29b2d785f8ae"
+    },
+    {
+      "path": "candidate/evidence/nordic-fog/captures-02/nordic-hero-0.34-candidate.png",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\evidence\\nordic-fog\\captures-02\\nordic-hero-0.34-candidate.png",
+      "bytes": 1225023,
+      "sha256": "dbfb560418c94764822d0bf3baab69ae88f95fe290be0610b1d98709d0d57229"
+    },
+    {
+      "path": "candidate/evidence/nordic-fog/captures-02/report.json",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\evidence\\nordic-fog\\captures-02\\report.json",
+      "bytes": 7688647,
+      "sha256": "5af478d5f80c05f0db8bdb30c7d5d4607dae9fc1315f5b4460789dbab7b2c1eb"
+    },
+    {
+      "path": "candidate/evidence/nordic-fog/captures-02/served-main.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\evidence\\nordic-fog\\captures-02\\served-main.js",
+      "bytes": 44248,
+      "sha256": "f593620ed21a2214e740e4535e04b25ed1847f9af6bb9f68e4049a2245f23d4c"
+    },
+    {
+      "path": "candidate/evidence/nordic-fog/cpu-differential.json",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\evidence\\nordic-fog\\cpu-differential.json",
+      "bytes": 275,
+      "sha256": "44a1eedf0fab377d8679ad4441b1701ae2cad93c2d36fbdc0ba2a787480f2e46"
+    },
+    {
+      "path": "candidate/evidence/nordic-fog/env-before.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\evidence\\nordic-fog\\env-before.js",
+      "bytes": 172807,
+      "sha256": "af2afb3afbae2b49965e0673fa42f46d4fbf6b3de9e7e15d3e8ad2b4caca8511"
+    },
+    {
+      "path": "candidate/evidence/nordic-fog/nordic-fog-delta.patch",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\evidence\\nordic-fog\\nordic-fog-delta.patch",
+      "bytes": 1174,
+      "sha256": "e003b56b91b9834dec1d4bd3a8db1e86ba3fe56af8953fc24ed2ba77b90655ec"
+    },
+    {
+      "path": "candidate/evidence/nordic-fog/source-baseline-manifest.json",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\evidence\\nordic-fog\\source-baseline-manifest.json",
+      "bytes": 50562,
+      "sha256": "66dceba44f2d7be035b66009db349f80cb4f211df77017103e6f568d1186d0d1"
+    },
+    {
+      "path": "candidate/research/NORDIC_FOG_2026-09-08.md",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\research\\NORDIC_FOG_2026-09-08.md",
+      "bytes": 12259,
+      "sha256": "348962c90d7bef4a576261267dbdeab2e7b9cec9b4c8eb49475fbc4352f34e9c"
+    },
+    {
+      "path": "candidate/research/NORDIC_FOG_CRITIC.md",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\research\\NORDIC_FOG_CRITIC.md",
+      "bytes": 13483,
+      "sha256": "1a125d41bf7bcf2b97218ae3c4e1a2dc6cd933dbba6e73eb56d2986cae33deef"
+    },
+    {
+      "path": "candidate/src/core/env.js",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\src\\core\\env.js",
+      "bytes": 173165,
+      "sha256": "3d218dd6d95fa79c1aad2b4872e910f577d214b0531ab8d2095f796f0bd6bcea"
+    },
+    {
+      "path": "candidate/tools/capture-nordic-fog.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\tools\\capture-nordic-fog.mjs",
+      "bytes": 14817,
+      "sha256": "01260a551670da8a094f6d1d1aa9b871005c19db43d89abcda8cf2e261e345da"
+    },
+    {
+      "path": "candidate/tools/checknordicfog-capture-controls.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\tools\\checknordicfog-capture-controls.mjs",
+      "bytes": 6018,
+      "sha256": "4cd53c4fbe9d77d5ba5f2099afd989dbabf9980f2a0a7fe2c02077c931469e41"
+    },
+    {
+      "path": "candidate/tools/checknordicfog-critic.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\tools\\checknordicfog-critic.mjs",
+      "bytes": 20416,
+      "sha256": "72092d166c6e18533610493060050d3a7358cd2db77009e773fda1ad134d66da"
+    },
+    {
+      "path": "candidate/tools/checknordicfog-pair.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\tools\\checknordicfog-pair.mjs",
+      "bytes": 3494,
+      "sha256": "de9d3ea6f8244b82cb242638fe5613be22ba583a8e30534e811882e7f0ae245e"
+    },
+    {
+      "path": "candidate/tools/checknordicfog.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\tools\\checknordicfog.mjs",
+      "bytes": 3743,
+      "sha256": "8929098c98f232c25ac79c564a9ae15aefe830d8171c8f602d74d8fdc7f1c41a"
+    },
+    {
+      "path": "candidate/tools/diagnosenordicfog-critic.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\tools\\diagnosenordicfog-critic.mjs",
+      "bytes": 5111,
+      "sha256": "c89f8953f3130aa4134de32d5d35e97d7266d7eb039ae2a071fe259c43850e07"
+    },
+    {
+      "path": "candidate/tools/measurenordicfog.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\tools\\measurenordicfog.mjs",
+      "bytes": 2566,
+      "sha256": "1f54f06f683e2e32a83d89cc3a282ae78be5263da0879da4254bfa713ed0a557"
+    },
+    {
+      "path": "candidate/tools/nordic-fog-controls.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\tools\\nordic-fog-controls.mjs",
+      "bytes": 15287,
+      "sha256": "83250843f3ce04c400337139661d660be9c865c15c29bfea5133d771d610f4d3"
+    },
+    {
+      "path": "candidate/tools/nordic-fog-pair.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\tools\\nordic-fog-pair.mjs",
+      "bytes": 3605,
+      "sha256": "b1209b1f6d8b8210cfda46abc572b230b21e5a4494cde3ebedd0d96b38c99e46"
+    },
+    {
+      "path": "candidate/tools/package-nordic-fog.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\tools\\package-nordic-fog.py",
+      "bytes": 4488,
+      "sha256": "d022379529e2fcc7c355b886751e36c80cb586a1e285eef8c7b468edb283cfc6"
+    },
+    {
+      "path": "candidate/tools/prepare-nordic-fog.py",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-nordic-fog\\tools\\prepare-nordic-fog.py",
+      "bytes": 1375,
+      "sha256": "3f4c969ab46f84f32f43d7b12377ec57c924b374540f00d80fc4b1de97bda809"
+    },
+    {
+      "path": "legacy-regional-fog/captures-01/capture-regional-fog-source.mjs",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-regional-fog\\evidence\\regional-fog\\captures-01\\capture-regional-fog-source.mjs",
+      "bytes": 19057,
+      "sha256": "9e7d4d09e9d73082c08431d9a1779738d73cc55121cd1c9f5aa5f99faf88e6e8"
+    },
+    {
+      "path": "legacy-regional-fog/captures-01/nordic-glass-orbit-baseline-source.png",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-regional-fog\\evidence\\regional-fog\\captures-01\\nordic-glass-orbit-baseline-source.png",
+      "bytes": 1276502,
+      "sha256": "dc4e46c5551127271dded83221a48a9245f44c969eb6b304924d87b9f00aad92"
+    },
+    {
+      "path": "legacy-regional-fog/captures-01/nordic-glass-orbit-candidate-source.png",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-regional-fog\\evidence\\regional-fog\\captures-01\\nordic-glass-orbit-candidate-source.png",
+      "bytes": 1320594,
+      "sha256": "95f109b956d8c086f0413111c6d098f5e0c0d7af78ebb2a03dbdb876bd6d066b"
+    },
+    {
+      "path": "legacy-regional-fog/captures-01/nordic-hero-0.34-baseline-source.png",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-regional-fog\\evidence\\regional-fog\\captures-01\\nordic-hero-0.34-baseline-source.png",
+      "bytes": 1222057,
+      "sha256": "98c6b1a5244573ae9f4501aac14ece517089ef62c58d69ffc61115f43a3d598b"
+    },
+    {
+      "path": "legacy-regional-fog/captures-01/nordic-hero-0.34-candidate-source.png",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-regional-fog\\evidence\\regional-fog\\captures-01\\nordic-hero-0.34-candidate-source.png",
+      "bytes": 1223564,
+      "sha256": "5624ecbc25f382cbf5ffba2f1503c92496cd02dd3d590f393c4e1d55821e097d"
+    },
+    {
+      "path": "legacy-regional-fog/captures-01/nordic-hero-0.5-baseline-source.png",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-regional-fog\\evidence\\regional-fog\\captures-01\\nordic-hero-0.5-baseline-source.png",
+      "bytes": 1218752,
+      "sha256": "7dbcfa83c4bbe73f6a0a8ace72f05c04a3d2b9864f9f3983e41b88c0c97e474a"
+    },
+    {
+      "path": "legacy-regional-fog/captures-01/nordic-hero-0.5-candidate-source.png",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-regional-fog\\evidence\\regional-fog\\captures-01\\nordic-hero-0.5-candidate-source.png",
+      "bytes": 1216241,
+      "sha256": "fd1d448c44c957f7999bb7eb3ad85f383426493fbea763a439b7ffdbe889d8fa"
+    },
+    {
+      "path": "legacy-regional-fog/captures-01/nordic-hero-0.7-baseline-source.png",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-regional-fog\\evidence\\regional-fog\\captures-01\\nordic-hero-0.7-baseline-source.png",
+      "bytes": 1210004,
+      "sha256": "f0d76af6c9885dee2c89b3d30429d7da81ba5a0c499919a42735d0c4863e0c5d"
+    },
+    {
+      "path": "legacy-regional-fog/captures-01/nordic-hero-0.7-candidate-source.png",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-regional-fog\\evidence\\regional-fog\\captures-01\\nordic-hero-0.7-candidate-source.png",
+      "bytes": 1206944,
+      "sha256": "f34fd7af142c77fe9868400753bfc8a7dfe0f1cf1e85f6268c58164d09967e5c"
+    },
+    {
+      "path": "legacy-regional-fog/captures-01/report.json",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-regional-fog\\evidence\\regional-fog\\captures-01\\report.json",
+      "bytes": 5014740,
+      "sha256": "8603d116e59be336fdf0aeaedbd2679425144da966c6d8ad493a89a8db1c3208"
+    },
+    {
+      "path": "legacy-regional-fog/captures-01/sahara-control-baseline-source.png",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-regional-fog\\evidence\\regional-fog\\captures-01\\sahara-control-baseline-source.png",
+      "bytes": 1061659,
+      "sha256": "882da9235f72d55757843a465bf8bbfbb94d2841d22ac492d6ae42e0c6e24789"
+    },
+    {
+      "path": "legacy-regional-fog/captures-01/sahara-control-candidate-source.png",
+      "source": "C:\\Users\\henri\\Downloads\\threads\\drillity-regional-fog\\evidence\\regional-fog\\captures-01\\sahara-control-candidate-source.png",
+      "bytes": 1063323,
+      "sha256": "e515c2313bf94df0735b6b5fe6778677353367b3345feeec46c4ce3d835ed1aa"
+    }
+  ]
+}

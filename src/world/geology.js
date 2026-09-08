@@ -70,6 +70,8 @@
  */
 
 import * as THREE from 'three';
+import { canonicalEmergencyContract } from '../game/economy.js';
+import { getMethod, getRegion, archetypesFor } from '../game/data.js';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import {
   EVENTS, GROUND, BRAND, LAYOUT,
@@ -2925,6 +2927,10 @@ export function createGeology(ctx) {
   let dip = 0.02;
   let waterTableDepth = 6;
   let features = { boulders: [], fractures: [], cavities: [], seeps: [] };
+  // Only progression acceptance/restoration establishes an authored soil
+  // column. Keep a private copy: ordinary public cards are mutable, but editing
+  // one after acceptance must not rewrite the ground beneath the live job.
+  let soilWorkOrder = null;
   let spec = {
     regionId: 'nordic', applicationId: 'water-well', targetDepth: 45,
     seed: 1337, difficulty: 0.3, holeDiaMm: CFG.holeDiaDefault,
@@ -4074,11 +4080,60 @@ export function createGeology(ctx) {
   /* ═════════════════════════════════════════════════════════════════════════
      PROFILE GENERATION
      ═════════════════════════════════════════════════════════════════════════ */
+  function captureSoilWorkOrder(c) {
+    if (c !== ctx?.state?.contract || c !== ctx?.progression?.run?.contract) return null;
+    if (soilWorkOrder?.contract === c && soilWorkOrder.runId === ctx.progression.run.runId) return soilWorkOrder;
+    const recovery = c.emergency === true ? canonicalEmergencyContract(c) : null;
+    if (c.emergency === true && (!recovery || recovery.regionId !== 'nordic')) return null;
+    const source = recovery || c;
+    const method = getMethod(source.methodId), region = getRegion(source.regionId);
+    if (method?.id !== 'auger' || !region || source.sitePlane !== 'surface'
+        || !archetypesFor('auger', region.id, source.applicationId).includes(source.archetype)
+        || !Number.isFinite(source.targetDepth) || source.targetDepth <= 0
+        || !Number.isInteger(source.seed) || source.seed < 0 || source.seed > 0xffffffff
+        || !Number.isFinite(source.holeDia) || source.holeDia <= 0
+        || (source.commodity != null && source.commodity !== 'none')
+        || modeForMethod(source.methodId) !== 'vertical'
+        || (source.profileMode != null && source.profileMode !== 'vertical')
+        || !Array.isArray(source.groundSpec) || !source.groundSpec.length) return null;
+    // Deliberately limited to existing soil IDs; the catalogue's marl/chalk
+    // entries are not evidence that this repair certifies augering in rock.
+    const soil = new Set(['topsoil', 'clay', 'silt', 'sand', 'gravel', 'till']);
+    const column = [];
+    let end = 0;
+    for (const bed of source.groundSpec) {
+      if (!bed || !soil.has(bed.id) || !method.validGround.includes(bed.id)
+          || !Number.isFinite(bed.top) || !Number.isFinite(bed.bottom)
+          || bed.bottom <= bed.top || Math.abs(bed.top - end) > 1e-8
+          || bed.bottom > source.targetDepth + 1e-8) return null;
+      // data.trimColumn intentionally floors its accounting thickness. The
+      // displayed top/bottom contacts, not that derived field, define geometry.
+      column.push(Object.freeze({ id: bed.id, top: end, bottom: bed.bottom }));
+      end = bed.bottom;
+    }
+    if (Math.abs(end - source.targetDepth) > 1e-8) return null;
+    return Object.freeze({ contract: c, runId: ctx.progression.run.runId,
+      column: Object.freeze(column), context: Object.freeze({
+        regionId: source.regionId, applicationId: source.applicationId,
+        targetDepth: source.targetDepth, seed: source.seed, methodId: source.methodId,
+        profileMode: 'vertical', holeDiaMm: source.holeDia,
+        difficulty: normDifficulty(source.difficulty ?? 0.3),
+        commodity: source.commodity ?? null,
+        oreConfidence: source.oreConfidence == null ? 0.55 : clamp(+source.oreConfidence || 0, 0, 1),
+      }),
+    });
+  }
+
   function generateProfile(inSpec = {}) {
     const methodId = inSpec.methodId || inSpec.method
                   || ctx?.state?.contract?.methodId || null;
     const wantMode = MODES[inSpec.profileMode] ? inSpec.profileMode
                                                : modeForMethod(methodId);
+    const accepted = soilWorkOrder && inSpec.acceptedContract === soilWorkOrder.contract
+      && soilWorkOrder.contract === ctx?.state?.contract
+      && soilWorkOrder.contract === ctx?.progression?.run?.contract
+      && soilWorkOrder.runId === ctx.progression.run.runId
+      ? soilWorkOrder : null;
     spec = {
       regionId: inSpec.regionId || ctx?.state?.world?.regionId || 'nordic',
       applicationId: inSpec.applicationId || 'water-well',
@@ -4097,6 +4152,13 @@ export function createGeology(ctx) {
       oreConfidence: inSpec.oreConfidence == null ? 0.55
                    : clamp(+inSpec.oreConfidence || 0, 0, 1),
     };
+    // Preserve an accepted shallow job's actual depth in the context; regional
+    // generation still keeps its original minimum extent below. Every physical
+    // input must match the captured work order, including diameter and ore.
+    if (accepted && inSpec.targetDepth === accepted.context.targetDepth) spec.targetDepth = inSpec.targetDepth;
+    const acceptedColumn = accepted && Object.keys(accepted.context)
+      .every(key => spec[key] === accepted.context[key]) ? accepted.column : null;
+    if (acceptedColumn) spec.acceptedContract = accepted.contract;
     /* Knowledge bought for the LAST hole is not knowledge about this one. A
        new profile is new ground, so anything setSurveyConfidence() was told
        dies with the profile that earned it. Same for the ground the last hole
@@ -4124,7 +4186,7 @@ export function createGeology(ctx) {
     path = null; heading = null; raise = null; pile = null; ore = null;
     stage = 0; stageProgress = 0;
 
-    let geologyDepth = spec.targetDepth;
+    let geologyDepth = acceptedColumn ? Math.max(6, spec.targetDepth) : spec.targetDepth;
     if (wantMode === 'profile') {
       path = solveHddPath(spec.targetDepth, spec.holeDiaMm, rng, diff);
       layout.totalLength = path.length;
@@ -4210,11 +4272,31 @@ export function createGeology(ctx) {
     }
     if (!out.length) pushBed({ id: 'granite', t: [total, total] });
 
+    if (acceptedColumn) {
+      // Accepted auger contracts already advertise this game-authored column
+      // (data.makeContract / economy.emergencyContract). NOT SOURCED real
+      // survey measurements; the soil-only tender is the mission's ground.
+      // Preserve the actual region recipe below the work order rather than
+      // silently extending its soft final bed to the end of the section.
+      const end = accepted.context.targetDepth;
+      const tail = out.filter(s => s.bottom > end).map(s => ({ ...s, top: Math.max(end, s.top) }));
+      const mission = acceptedColumn.map(bed => {
+        const g = GROUND[bed.id];
+        return { id: bed.id, name: g.name, top: bed.top, bottom: bed.bottom,
+          ucs: g.ucs, abrasivity: g.abrasivity, stability: g.stability,
+          water: g.water, colors: g.colors.slice(), pattern: g.pattern, grain: g.grain,
+          bestMethods: (BEST_METHODS[bed.id] || []).slice(), _boulders: 0, _fract: 0, _karst: 0 };
+      });
+      out.splice(0, out.length, ...mission, ...tail);
+    }
+
     // merge runs of the same material so we do not get invisible seams
     const merged = [];
     for (const s of out) {
       const prev = merged[merged.length - 1];
-      if (prev && prev.id === s.id) {
+      // An authored soil bed and a regional till tail can share an ID. Merging
+      // across that boundary would reintroduce tail boulders inside the job.
+      if (prev && prev.id === s.id && (!acceptedColumn || s.top > accepted.context.targetDepth)) {
         prev.bottom = s.bottom;
         prev._boulders = Math.max(prev._boulders, s._boulders);
         prev._fract = Math.max(prev._fract, s._fract);
@@ -4442,6 +4524,15 @@ export function createGeology(ctx) {
     if (commodityId) ore = makeOreBody(commodityId, rng, spec.oreConfidence);
     applyOreUniforms();
 
+    if (acceptedColumn) {
+      // Keep the regional tail, but not a clast/void/joint whose extent reaches
+      // back into the soil-only work order. Use the renderer's full clast
+      // envelope and the same joint proximity used by fractureNear().
+      const end = accepted.context.targetDepth;
+      features.boulders = features.boulders.filter(b => b.depth - b.r * Math.max(1, b.squash || 0.9) > end);
+      features.cavities = features.cavities.filter(c => c.depth - c.halfH > end);
+      features.fractures = features.fractures.filter(f => f.holeDepth == null || f.holeDepth - 0.4 > end);
+    }
     linkFeaturesToHole();
 
     if (ctx?.state?.world) ctx.state.world.strata = strata;
@@ -7264,6 +7355,7 @@ export function createGeology(ctx) {
       bus.on(EV.CONTRACT_ACCEPT, (p) => {
         const c = p?.contract;
         if (!c) return;
+        soilWorkOrder = captureSoilWorkOrder(c);
         generateProfile({
           regionId: c.regionId || c.region || ctx?.state?.world?.regionId,
           applicationId: c.applicationId || c.application || c.industryId,
@@ -7280,6 +7372,7 @@ export function createGeology(ctx) {
           // and what the job is drilling FOR, if it is drilling for anything
           commodity: c.commodity ?? c.target ?? null,
           oreConfidence: c.oreConfidence ?? c.targetConfidence,
+          acceptedContract: soilWorkOrder?.contract,
         });
         stage = 0;
         stageProgress = 0;
@@ -8040,6 +8133,7 @@ export function createGeology(ctx) {
   }
 
   function dispose() {
+    soilWorkOrder = null;
     readoutFontSet?.removeEventListener('loadingdone', invalidateReadoutFont);
     readoutFontSet?.removeEventListener('loadingerror', invalidateReadoutFont);
     readoutFontSet = null;

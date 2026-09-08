@@ -11,6 +11,7 @@ public/models/*.glb
 public/models/sites/*.glb
 
 # QA scratch output — reports and logs regenerate on every run
+/evidence/verification/latest/
 shots/*.json
 shots/*.txt
 *.log

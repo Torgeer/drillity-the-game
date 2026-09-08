@@ -1,0 +1,132 @@
+{
+  "version": 1,
+  "generated": "2026-09-08T13:35:16.800Z",
+  "valid": false,
+  "sourceHash": "fcdf90bc6d3558ad25f4f377d7169c1a8e3eaa83291276d3b5dc18bad44804ba",
+  "profilerHash": "436f48390bf25083d8a6105103389849ee61e83ac22714eb8b4c493dfddcbc40",
+  "toolHash": "0f999466aebf47aa0926069aa65f5bda2165e14509d5c6689c3acf112fe082c4",
+  "results": [
+    {
+      "name": "actual manager retains identical state, alternates on/off and restores ownership",
+      "pass": true
+    },
+    {
+      "name": "composed live capture separates extra renders, owns both query sets and restores in reverse order",
+      "pass": false,
+      "error": "Error: Warm-up attempt advanced or was not paused\n    at installLiveHarness (file:///C:/Users/henri/Downloads/threads/drillity-next-heat-shimmer/tools/profileframes.mjs:537:79)\n    at fixture.live (file:///C:/Users/henri/Downloads/threads/drillity-next-heat-shimmer/tools/checkheatshimmer-adversarial.mjs:135:16)\n    at fixture (file:///C:/Users/henri/Downloads/threads/drillity-next-heat-shimmer/tools/checkheatshimmer-adversarial.mjs:114:15)\n    at file:///C:/Users/henri/Downloads/threads/drillity-next-heat-shimmer/tools/checkheatshimmer-adversarial.mjs:133:119\n    at test (file:///C:/Users/henri/Downloads/threads/drillity-next-heat-shimmer/tools/checkheatshimmer-adversarial.mjs:15:15)\n    at file:///C:/Users/henri/Downloads/threads/drillity-next-heat-shimmer/tools/checkheatshimmer-adversarial.mjs:133:7"
+    },
+    {
+      "name": "renderer exception survives query failure and visibility is restored",
+      "pass": true
+    },
+    {
+      "name": "actual manager rejects same-version particle data mutation",
+      "pass": true
+    },
+    {
+      "name": "actual manager rejects shimmer uniform mutation",
+      "pass": true
+    },
+    {
+      "name": "actual manager rejects final-member target replacement",
+      "pass": true
+    },
+    {
+      "name": "actual manager rejects target detachment",
+      "pass": true
+    },
+    {
+      "name": "actual manager rejects camera world mutation",
+      "pass": true
+    },
+    {
+      "name": "actual manager rejects copy happened despite disabled-copy uniforms",
+      "pass": true
+    },
+    {
+      "name": "query ownership rejects never-ready query deadline",
+      "pass": true
+    },
+    {
+      "name": "query ownership rejects disjoint timer",
+      "pass": true
+    },
+    {
+      "name": "query ownership rejects NaN result",
+      "pass": true
+    },
+    {
+      "name": "query ownership rejects createQuery null",
+      "pass": true
+    },
+    {
+      "name": "query ownership rejects foreign active query",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects empty pair array without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects null pair without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects null member without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects null query without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects duplicate GPU sample without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects negative GPU time without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects missing completed counter without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects missing camera evidence everywhere without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects empty graph everywhere without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects NaN camera matrices everywhere without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects missing final identity proof without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects false restore without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects mask inversion without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects unobserved on hook without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects wrong frame association without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects copy-path uniforms enabled without throwing",
+      "pass": true
+    }
+  ],
+  "semantics": "CPU-only manager/assessor adversarial proof using real Three scene objects and a fake query driver. No browser/GPU/FPS acceptance."
+}

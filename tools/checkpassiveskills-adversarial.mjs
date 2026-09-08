@@ -10,7 +10,7 @@ import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
 import { parseAst } from 'rollup/parseAst';
 import { createGameState, createBus, GROUND, EVENTS } from '../src/core/contract.js';
-import { defaultLoadoutFor, getMethod, getSkill } from '../src/game/data.js';
+import { defaultLoadoutFor, getMethod, getItem, getSkill } from '../src/game/data.js';
 import { createProgression } from '../src/game/progression.js';
 import { createDrillSim, TUNING } from '../src/sim/drilling.js';
 import { stratumForecastReadout } from '../src/ui/screens/site.js';
@@ -27,6 +27,7 @@ function fixture(skills = {}, factory = createDrillSim) {
   state.garage.rigId = getMethod('core').rigIds[0];
   state.garage.loadout = defaultLoadoutFor('core', 60);
   state.contract = { id: 'independent-passives', methodId: 'core', regionId: 'nordic',
+    holeDia: getItem(state.garage.loadout.bit).sampling.holeDiameterMm,
     targetDepth: 100, holes: 1, difficulty: 0, seed: 811, archetype: 'quarry', flushMedium: 'water' };
   const strata = [
     { ...GROUND.granite, id: 'granite', top: 0, bottom: 11, index: 0 },

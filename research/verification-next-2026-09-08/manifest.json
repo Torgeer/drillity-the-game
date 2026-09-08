@@ -1,0 +1,268 @@
+{
+  "capturedAt": "2026-09-08T14:19:40.608Z",
+  "parentCommit": "859fde2023e531d44e5ff334355e4d24e4c4d92c",
+  "sourceIncludesUncommittedChanges": true,
+  "commands": [
+    {
+      "command": "npm run check:cpu",
+      "artifact": "evidence/verification/cpu-next-gameplay-01.log",
+      "exitCode": 1,
+      "status": "failed: test import adapter omitted new actual geology dependency"
+    },
+    {
+      "command": "npm run check:cpu",
+      "artifact": "evidence/verification/cpu-next-gameplay-02.log",
+      "exitCode": 1,
+      "status": "failed: core preflight preceded unsupported machinery refusal"
+    },
+    {
+      "command": "npm run check:cpu",
+      "artifact": "evidence/verification/cpu-next-gameplay-03.log",
+      "exitCode": 0,
+      "status": "passed full current CPU gate after both corrections"
+    },
+    {
+      "command": "node tools/buildcheckpoint.mjs",
+      "artifact": "evidence/verification/build-next-gameplay-01.log",
+      "exitCode": 0,
+      "status": "passed Vite, build-artifact check and unchanged input identities"
+    }
+  ],
+  "buildIdentityRechecked": {
+    "inputs": 117,
+    "outputs": 65
+  },
+  "source": [
+    {
+      "path": "package-lock.json",
+      "sha256": "ae86b1cd193d3bd9c250f5b25f4b2046e70eb9a0c20f6f07eef328feb24e9862"
+    },
+    {
+      "path": "package.json",
+      "sha256": "0e8ef5cb456f3f0cbc76e9324af5facc2631ffb6b213ffe1094f603e5c811079"
+    },
+    {
+      "path": "src/game/data.js",
+      "sha256": "220a8e25a3caef0c296c840a82edf20d66942a9df5173861e90ef969db0151b7"
+    },
+    {
+      "path": "src/game/economy.js",
+      "sha256": "67fd6d0e5c24fb3428e2db36fb95d8ab205c2b0b3d6cb6a2cfb5d8b2e22a89b0"
+    },
+    {
+      "path": "src/game/equipment-support.js",
+      "sha256": "5a292120216c667a49c8bb887fcf9fd79ec47f320caf13f7077a1f7b52eabb6a"
+    },
+    {
+      "path": "src/game/progression.js",
+      "sha256": "8d32c146bc62974efb2b9098180258f3be8ff13b0495ecac35eb8bd98ef0ed6a"
+    },
+    {
+      "path": "src/sim/drilling.js",
+      "sha256": "17c164f5cbe8f50c51e2ca0cdd312fc38944854b91076974285559f76a74b324"
+    },
+    {
+      "path": "src/sim/sample-ledger.js",
+      "sha256": "4849ffdeacde9c98f1ce753b1cc1132be71e474660707ec6288795d0e449ba9e"
+    },
+    {
+      "path": "src/sim/sample-product.js",
+      "sha256": "b8fff618de895b5aae1157b53d70666bfe24c76a6f5e9368b9c876233ba300f6"
+    },
+    {
+      "path": "src/ui/screens/results.js",
+      "sha256": "98ed23965951f8feccca9437f506c54f30d38804dce7e33a12535146bfeb8b9a"
+    },
+    {
+      "path": "src/ui/screens/site.js",
+      "sha256": "82144b4ad8e969426b70dad82c79a5edb100de93c782bdac21458f9699437c56"
+    },
+    {
+      "path": "src/ui/shell.js",
+      "sha256": "3b0bb7e4f7df43f13b228e11f6bb1a1c8c261c0e78b24ae0c237556a481e9def"
+    },
+    {
+      "path": "src/world/geology.js",
+      "sha256": "faeb7e7b14af50f16b9905adba1efae7fb6cf754afa1894a8ce10c8a93466e88"
+    },
+    {
+      "path": "tools/check-earned-career-independent.mjs",
+      "sha256": "68eb7de893eae30b8e4f625d9f217895d94ffdaa431bbf24b5ad1b79ed5a2984"
+    },
+    {
+      "path": "tools/check-earned-career-provenance.mjs",
+      "sha256": "8f915fdc9453884d3af68f3e7ca74bbeb541d126ce06be2875911ac1b42d4a5f"
+    },
+    {
+      "path": "tools/check-earned-core-access.mjs",
+      "sha256": "2dacb0054286682246bcc3343c5130411b0a8cc378e6e69765eafbec736b2035"
+    },
+    {
+      "path": "tools/checkconcrete-volume-critic.mjs",
+      "sha256": "9fd6a93ce05ec06873f8503bf25fdf40eb0e7af78d91344651f04954dffcaa0a"
+    },
+    {
+      "path": "tools/checkconcrete-volume.mjs",
+      "sha256": "ca5199654d77e38efb42d3eadfa9bf9bf6f8585c7f36fe70b3cba409fca7ced8"
+    },
+    {
+      "path": "tools/checkhapticdispatch-adversarial.mjs",
+      "sha256": "d98fa2df4bb12a50efff6bb5fdfcaf72894353b17660291c3d0770fa0ed19862"
+    },
+    {
+      "path": "tools/checkhapticdispatch.mjs",
+      "sha256": "141b66eecf89ba9ea588ff68939c5d9a42ed9e7ea7c7657eee35cc587f0ec722"
+    },
+    {
+      "path": "tools/checkpassiveskills-adversarial.mjs",
+      "sha256": "5137ada1973a89fbab439724ff5264929f72a466e4d599d887c4a696a1aec496"
+    },
+    {
+      "path": "tools/checkpassiveskills.mjs",
+      "sha256": "680f2b54c6baed30d719fc6cfae3bea22f88917a2e323358ce5762a6e965bf8c"
+    },
+    {
+      "path": "tools/checkprogrammecopy-adversarial.mjs",
+      "sha256": "afcfbf873eb6f301d982c9339cc5d583613ddece6376451e2335032b14524381"
+    },
+    {
+      "path": "tools/checkreadoutcache-shipping.mjs",
+      "sha256": "667d594290865bac74e815a3a7cd60583679a3291c95623a906d15d21d8e0b1b"
+    },
+    {
+      "path": "tools/checkrescuegeology-adversarial.mjs",
+      "sha256": "e4d034179caedbd47e4e286b2450f99bff4a1801dd78390a0817a5e8cecdfaf0"
+    },
+    {
+      "path": "tools/checkrescuegeology.mjs",
+      "sha256": "ac538c523ab9de397c81e860bf232cae243814e751a6a05fb27f71b1ff0efdb1"
+    },
+    {
+      "path": "tools/checksampleconditions-adversarial.mjs",
+      "sha256": "26e7bf8e7a1b8dd12884a53f22bc1d6ac1ea89a547cbd5d839e1978389d59c9f"
+    },
+    {
+      "path": "tools/checksampleconditions.mjs",
+      "sha256": "1b81d8305dc71c51e94206bd571ae567f4857197db04b5035822391ee4248580"
+    },
+    {
+      "path": "tools/checksamplegameplay-adversarial.mjs",
+      "sha256": "b54158c5aafe722b8c505b4f621cbc452355a3417926c2143d372e2e0f0d5af1"
+    },
+    {
+      "path": "tools/checksamplegameplay.mjs",
+      "sha256": "53affc319887db87f8054656168aba6eb66f086e0b588837d3ca384ed768d6ad"
+    },
+    {
+      "path": "tools/checksampletender-adversarial.mjs",
+      "sha256": "0da1703283be2020a4ba527274ae5f42c2d68b68ed428ff6ceedc06c2778c434"
+    },
+    {
+      "path": "tools/checksamplingtenderfit.mjs",
+      "sha256": "b2a7e50b2b3762dce4daa1546368717b088bc6f5c0e50c6cba237a08319a6cb3"
+    },
+    {
+      "path": "tools/probe-career-playthrough.mjs",
+      "sha256": "da40d435b713350235ecadd885287536e69cdf58d8078faf7b73406865ad9e6c"
+    },
+    {
+      "path": "tools/probeaudiohapticlifecycle.mjs",
+      "sha256": "0214e8a0dc3161cf341d5bba652e61dda63eb6a3e783e319d0d4d8a78e90d13a"
+    },
+    {
+      "path": "tools/run-career-earned.mjs",
+      "sha256": "c4880ff6087c005c5e32a4b13280a089d4b8a4d89947e93808a5d9a8791eccb3"
+    }
+  ],
+  "artifacts": [
+    {
+      "source": "evidence/verification/cpu-next-gameplay-01.log",
+      "bytes": 669027,
+      "sha256": "605b3fcda74dac4106af9befd2362da50ed0cc94824d4602b2b3962bfe90bb35",
+      "artifact": "evidence__verification__cpu-next-gameplay-01.log.gz",
+      "compressedBytes": 223066,
+      "compressedSha256": "4ef624690757ee8385255cf47d4ffa4a3ee682f92e258c6ba6c22cc8b8fef232"
+    },
+    {
+      "source": "evidence/verification/cpu-next-gameplay-02.log",
+      "bytes": 142564,
+      "sha256": "caaec9bf033f48cebdf57ac4c6932c19c3de440b323981f0c32018840927d808",
+      "artifact": "evidence__verification__cpu-next-gameplay-02.log.gz",
+      "compressedBytes": 34008,
+      "compressedSha256": "cf44df2f65075aeb63b08996040bb4a0375091bc1fa60e91fc92e6fbd16775c7"
+    },
+    {
+      "source": "evidence/verification/cpu-next-gameplay-03.log",
+      "bytes": 385004,
+      "sha256": "55e88d2c197d881bb3a90ad6edd2c97eddcc2c3304dd767b42376621cc091293",
+      "artifact": "evidence__verification__cpu-next-gameplay-03.log.gz",
+      "compressedBytes": 73347,
+      "compressedSha256": "8c1c9b066c3e0bdf50c89d4768781bb8c9a3d1e326d54b26aac76aeec58a7401"
+    },
+    {
+      "source": "evidence/verification/build-next-gameplay-01.log",
+      "bytes": 10262,
+      "sha256": "d84a4422403c484d46986478bfc6be05df900b37b70b9034845406fedd1872d1",
+      "artifact": "evidence__verification__build-next-gameplay-01.log.gz",
+      "compressedBytes": 1430,
+      "compressedSha256": "7f2070f41479bebfb1ef700cb0a24d364fe5fa5db3a8a6d51ba7b6c408cda18a"
+    },
+    {
+      "source": "evidence/verification/vibro-core-order-03.log",
+      "bytes": 1964,
+      "sha256": "859ddd3480de1703ec38e0b0d0306c4d14ae43e363539bc3a1eeadb315af3174",
+      "artifact": "evidence__verification__vibro-core-order-03.log.gz",
+      "compressedBytes": 1046,
+      "compressedSha256": "92eaaa0715f8ab193cff27eeaf9541092ecf6dd8d8321cc2e74e7c2cab4f2021"
+    },
+    {
+      "source": "evidence/verification/core-composed/tender-vibro-order-01.log",
+      "bytes": 6347,
+      "sha256": "d3e7ddd2cdc04aecf8afb6602a26a8e6b499fb6243db79251a83d3eea9b5f15c",
+      "artifact": "evidence__verification__core-composed__tender-vibro-order-01.log.gz",
+      "compressedBytes": 2788,
+      "compressedSha256": "7634e3b68a475967ebc57452cf7f9ffe72f1b0334887fef94df4775e2494b636"
+    },
+    {
+      "source": "evidence/verification/core-composed/vibro-order-01.log",
+      "bytes": 1964,
+      "sha256": "859ddd3480de1703ec38e0b0d0306c4d14ae43e363539bc3a1eeadb315af3174",
+      "artifact": "evidence__verification__core-composed__vibro-order-01.log.gz",
+      "compressedBytes": 1046,
+      "compressedSha256": "92eaaa0715f8ab193cff27eeaf9541092ecf6dd8d8321cc2e74e7c2cab4f2021"
+    },
+    {
+      "source": "research/readout-import-adapter-critic-identities.json",
+      "bytes": 1486,
+      "sha256": "de81c9b9238679666eca8fe27db264a960a52ad0b65530d53b60c67778ec49d5",
+      "artifact": "research__readout-import-adapter-critic-identities.json.gz",
+      "compressedBytes": 413,
+      "compressedSha256": "f8d989bb3b04756c8ee4d70d82731b1602c6aaf9772ef089430fe8a6e3d09fac"
+    },
+    {
+      "source": "research/readout-import-adapter-critic-final.json",
+      "bytes": 6835,
+      "sha256": "b1fff2286b594f87e5fa08654b1c79488a354f80f41d9ba24bff8a457ab776e0",
+      "artifact": "research__readout-import-adapter-critic-final.json.gz",
+      "compressedBytes": 1978,
+      "compressedSha256": "4b64bae992a3b3d149610b3c38aa4bf9f899e2fe96901bcc4aab008ff75f8124"
+    },
+    {
+      "source": "research/sample-conditions-composed-adversarial-2026-09-08.json",
+      "bytes": 10176,
+      "sha256": "4c8b9c89aeb5136d0a720f034c758062c37edb45cd9fee65d8b99346469de0d6",
+      "artifact": "research__sample-conditions-composed-adversarial-2026-09-08.json.gz",
+      "compressedBytes": 3067,
+      "compressedSha256": "c919f9d698982f594dd863185d0bd865462307cef5e9542efa0ebd0b12422780"
+    },
+    {
+      "source": "evidence/verification/latest/sample-conditions-author.json",
+      "bytes": 10430,
+      "sha256": "90aa6db9e6b1e668f5f25c3951015ab32d2b8565be89ebed980c2e3c4d87d3fc",
+      "artifact": "evidence__verification__latest__sample-conditions-author.json.gz",
+      "compressedBytes": 1754,
+      "compressedSha256": "ab09725d4482c19a36a2023988b821736001cfbc27bf732ea0c8a64eb2499af4"
+    }
+  ],
+  "limitations": "No new compound npm run build, full reach/HUD, phone/Safari, complete-career or rendered graphics acceptance is implied. Separate native sampling captures retain their own outcomes. Candidate graphics and profiler patches are archived, not production integrations."
+}

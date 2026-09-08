@@ -19,7 +19,7 @@
  */
 
 import { EVENTS, clamp, createGameState } from '../core/contract.js';
-import { checkEquipmentSupport, checkSampleEquipment } from './equipment-support.js';
+import { checkEquipmentSupport, checkSampleEquipment, checkSampleTender } from './equipment-support.js';
 import { readSampleProduct, sampleCapacityBasisMatches } from '../sim/sample-product.js';
 import {
   METHODS, RIGS, REGIONS, CERTS, ROLES, SKILLS, LEVELS, MAX_LEVEL, CORE_SLOTS, CAT,
@@ -214,6 +214,10 @@ export function createProgression(ctx) {
 
   /** The run currently in progress (one accepted contract). */
   let run = null;
+  // Only load() can grant this exception for an already paid, pre-policy core
+  // job. Never derive it from a proposed contract or the public run test seam.
+  let legacySamplingContract = null;
+  let acceptedCoreContract = null;
   let identitySequence = 0;
   let changingContract = false;
   let pendingEvents = null;
@@ -344,6 +348,8 @@ export function createProgression(ctx) {
    * @param {'settled'|'abandoned'|'reset'} reason
    */
   function releaseContract(reason) {
+    legacySamplingContract = null;
+    acceptedCoreContract = null;
     const had = state.contract;
     if (had) lastContract = had;
     state.contract = null;
@@ -853,7 +859,7 @@ export function createProgression(ctx) {
     }
     const equipment = checkEquipmentSupport(method.id, state.garage?.loadout?.hammer, getItem);
     if (!equipment.ok) return equipment;
-    const sampling = checkSampleEquipment(method.id, state.garage?.loadout, getItem);
+    const sampling = checkSampleTender(contract, state.garage?.loadout, getItem);
     if (!sampling.ok) return sampling;
     for (const slot of sampling.requiredSlots || []) {
       const id = state.garage.loadout[slot], item = getItem(id);
@@ -918,6 +924,10 @@ export function createProgression(ctx) {
   }
 
   function openContract(contract, rig, mobilisation) {
+    legacySamplingContract = null;
+    // Keep a paid core job's exact terms independent of its mutable board card.
+    if (contract.methodId === 'core') contract = freezeContractSnapshot(contract);
+    acceptedCoreContract = contract.methodId === 'core' ? contract : null;
     // Recovery is an accepted canonical work order, not a mutable public card.
     // Rebuild and freeze its nested values; UI-only additions and caller edits
     // cannot turn it into different work after the affordability exemption.
@@ -961,6 +971,7 @@ export function createProgression(ctx) {
       mobilisation,
       holePending: true,
     };
+    if (acceptedCoreContract) Object.defineProperty(run, 'contract', { writable: false, configurable: false });
 
     // Geology subscribes to this event and creates world.strata synchronously
     // before the caller navigates to the site. Do not generate it twice.
@@ -970,6 +981,27 @@ export function createProgression(ctx) {
     return { ok: true, reason: '', mobilisation };
   }
 
+  /** Resolve core startup against the accepted snapshot before any attempt or
+   * simulator mutation. Same-ID card copies cannot replace paid terms.
+   */
+  function checkSamplingStart(contract, loadout = state.garage?.loadout) {
+    const activeCore = acceptedCoreContract !== null;
+    let canonical = contract;
+    if (activeCore) {
+      if (changingContract || run?.contract !== acceptedCoreContract || state.contract !== acceptedCoreContract
+          || contract?.id !== acceptedCoreContract.id) {
+        return { ok: false, code: 'sampling-contract-not-active', reason: 'This core job is not the active accepted contract.' };
+      }
+      canonical = acceptedCoreContract;
+    }
+    const legacy = activeCore && legacySamplingContract === canonical;
+    const support = legacy
+      ? checkSampleEquipment(canonical.methodId, loadout, getItem)
+      : checkSampleTender(canonical, loadout, getItem);
+    return support.ok ? { ...support, contract: canonical,
+      ...(legacy ? { tenderFitBasis: 'legacy-accepted-terms' } : {}) } : support;
+  }
+
   /** Issue a new physical attempt for this accepted job, before sim starts.
    * The returned scalars belong to that attempt even after later starts.
    * DRILL_START is only its notification and cannot issue payment identity.
@@ -977,6 +1009,7 @@ export function createProgression(ctx) {
   function beginHole(contract) {
     if (changingContract || !run || !contract || contract.id !== run.contract.id
         || state.contract?.id !== run.contract.id) return null;
+    if (acceptedCoreContract && (run.contract !== acceptedCoreContract || state.contract !== acceptedCoreContract)) return null;
     run.attemptId = allocateIdentity();
     run.holePending = true;
     return Object.freeze({ runId: run.runId, attemptId: run.attemptId });
@@ -1571,6 +1604,7 @@ export function createProgression(ctx) {
   function serialise() {
     return {
       version: SAVE_VERSION,
+      samplingFitPolicy: 1,
       identitySequence,
       savedAtDay: +career().daysElapsed.toFixed(3),
       player: {
@@ -1606,11 +1640,12 @@ export function createProgression(ctx) {
          player paid to move the spread and came back to an empty board with no
          job and no explanation. `state.contract` is progression's own branch,
          so it belongs in progression's own save. */
-      contract: state.contract || null,
+      contract: acceptedCoreContract || state.contract || null,
       /* The accumulator, without its contract: that object is stored once
          above and rehydrated onto the run on load, so the two can never
          disagree about which job is being settled. */
       run: run ? {
+        legacySamplingTerms: legacySamplingContract === run.contract,
         runId: run.runId, attemptId: run.attemptId,
         holesDone: run.holesDone, hours: run.hours, revenue: run.revenue,
         costs: run.costs, xp: run.xp, reputation: run.reputation,
@@ -1826,11 +1861,12 @@ export function createProgression(ctx) {
       }
       if (!selected) return false;
       const payload = selected.payload;
+      const originalVersion = payload.version;
       const usedBackup = selected.key === SAVE_BACKUP_KEY;
       savePending = usedBackup;
       saveTimer = 0;
       publishSaveStatus({ error: null });
-      changeContract(() => applyPayload(migrate(payload)));
+      changeContract(() => applyPayload(migrate(payload), originalVersion));
       if (usedBackup) console.warn('[progression] primary save was unreadable — restored from backup');
       // Restored-contract observers can request a save and fail. Retain that
       // failure instead of announcing durability merely because loading worked.
@@ -1843,7 +1879,7 @@ export function createProgression(ctx) {
   }
 
   /** Apply a migrated payload onto the live state, field by field. */
-  function applyPayload(p) {
+  function applyPayload(p, originalVersion) {
     identitySequence = Math.max(identitySequence, p.identitySequence || 0,
       p.run?.runId || 0, p.run?.attemptId || 0);
     identityHighWater = Math.max(identityHighWater, identitySequence);
@@ -1895,6 +1931,28 @@ export function createProgression(ctx) {
        state a fresh career is in — so this cannot break an old save, it can
        only stop losing a new one. */
     let saved = p.contract && typeof p.contract === 'object' ? p.contract : null;
+    legacySamplingContract = null;
+    acceptedCoreContract = null;
+    if (saved?.methodId === 'core') {
+      saved = freezeContractSnapshot(saved);
+      acceptedCoreContract = saved;
+      const priorRun = p.run;
+      const priorPolicy = p.samplingFitPolicy;
+      // MIGRATIONS3 first saved accepted runs (v4); MIGRATIONS5 first added
+      // identity fields (v6). Preserve that known v4/v5 accumulator shape,
+      // without letting a modern run missing its identity gain an exception.
+      const preIdentityAccepted = (originalVersion === 4 || originalVersion === 5)
+        && priorPolicy === undefined && priorRun?.runId == null
+        && Number.isInteger(priorRun?.holesDone) && priorRun.holesDone >= 0
+        && Number.isInteger(saved.holes) && priorRun.holesDone < saved.holes
+        && Number.isFinite(priorRun?.mobilisation) && priorRun.mobilisation >= 0;
+      const oldAccepted = priorRun && (validIdentity(priorRun.runId) || preIdentityAccepted)
+        && (priorPolicy === undefined || (priorPolicy === 1 && priorRun.legacySamplingTerms === true));
+      // Matching old jobs need no exception. Retain only the specific diameter
+      // mismatch of an actual restored accepted job, without rewriting terms.
+      if (oldAccepted && checkSampleTender(saved, defaultLoadoutFor('core', MAX_LEVEL), getItem).code
+          === 'sample-tender-diameter-mismatch') legacySamplingContract = saved;
+    }
     const savedRecovery = saved && canonicalEmergencyContract(saved);
     if (savedRecovery && (p.run?.mobilisation ?? 0) === 0) saved = freezeContractSnapshot(savedRecovery);
     state.contract = saved;
@@ -1940,6 +1998,7 @@ export function createProgression(ctx) {
         // must issue a new token; queued pre-load results are stale.
         holePending: r?.attemptId == null && r?.holePending === true,
       };
+      if (acceptedCoreContract) Object.defineProperty(run, 'contract', { writable: false, configurable: false });
       if (!r) {
         warnOnce('[progression] restored an active contract with no run '
           + 'accumulator — holes already settled towards it are not recoverable, '
@@ -2000,6 +2059,8 @@ export function createProgression(ctx) {
     state.world.contractId = null;
     boardCache = null;
     state.contract = null;
+    acceptedCoreContract = null;
+    legacySamplingContract = null;
     lastContract = null;
     adoptedContract = null;
     settledContracts.clear();
@@ -2212,7 +2273,7 @@ export function createProgression(ctx) {
     unlock, spendSkillPoint, canSpendSkillPoint, skillRank, skillCost, getEffects,
 
     // contracts
-    previewContract, acceptContract, beginHole, abandonContract, completeHole, rescueContract, isBroke,
+    previewContract, acceptContract, checkSamplingStart, beginHole, abandonContract, completeHole, rescueContract, isBroke,
     settlementForCompletion,
 
     // world

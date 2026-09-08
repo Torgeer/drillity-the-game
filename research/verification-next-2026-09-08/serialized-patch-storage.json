@@ -1,0 +1,23 @@
+{
+  "note": "Diff context blank lines contain a meaningful leading space. Original patch bytes are stored losslessly in gzip; no source whitespace gate was relaxed. Local originals remain untouched.",
+  "entries": [
+    {
+      "logicalPath": "research/fog-artifacts-next-2026-09-08/nordic-fog-delta.patch",
+      "sha256": "e003b56b91b9834dec1d4bd3a8db1e86ba3fe56af8953fc24ed2ba77b90655ec",
+      "storage": "research/fog-artifacts-next-2026-09-08/nordic-fog-delta.patch.gz",
+      "compressedSha256": "ec155791a9cf0f0850e04001f57153003130887aa739a8147f6f518590e764c6"
+    },
+    {
+      "logicalPath": "research/fps-artifacts-next-2026-09-08/candidate/evidence/heat-shimmer-preflight/candidate-vs-snapshot-v2.patch",
+      "sha256": "1666f45a02c22e9d9ca22de28297822361bb8491fa7cc2bc08f0182e4d40c0ef",
+      "storage": "research/fps-artifacts-next-2026-09-08/candidate/evidence/heat-shimmer-preflight/candidate-vs-snapshot-v2.patch.gz",
+      "compressedSha256": "63555952617c6ad09cce2f52dc3f09f03375ec639a1574830bf3978b71d53c7d"
+    },
+    {
+      "logicalPath": "research/fps-artifacts-next-2026-09-08/candidate/evidence/heat-shimmer-preflight/candidate-vs-snapshot.patch",
+      "sha256": "5ed431912c3d045e8d63efff93060b80ad62c303715a70e28f40b207422d0e74",
+      "storage": "research/fps-artifacts-next-2026-09-08/candidate/evidence/heat-shimmer-preflight/candidate-vs-snapshot.patch.gz",
+      "compressedSha256": "4158e482bc8611c9a8c33eccfaebcbcd07b268e41e245f3fd3d3a315d3485651"
+    }
+  ]
+}

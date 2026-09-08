@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { parseAst } from 'rollup/parseAst';
 import { createBus, createGameState, EVENTS, GROUND } from '../src/core/contract.js';
-import { getMethod, getSkill, defaultLoadoutFor } from '../src/game/data.js';
+import { getMethod, getItem, getSkill, defaultLoadoutFor } from '../src/game/data.js';
 import { createProgression } from '../src/game/progression.js';
 import { createDrillSim, TUNING } from '../src/sim/drilling.js';
 import { stratumForecastReadout } from '../src/ui/screens/site.js';
@@ -22,6 +22,7 @@ function fixture(skills = {}) {
   state.garage.rigId = getMethod('core').rigIds[0];
   state.garage.loadout = defaultLoadoutFor('core', 60);
   state.contract = { id: 'passive-skills', methodId: 'core', regionId: 'nordic',
+    holeDia: getItem(state.garage.loadout.bit).sampling.holeDiameterMm,
     targetDepth: 80, holes: 1, difficulty: 0, seed: 48, archetype: 'quarry', flushMedium: 'water' };
   const strata = [
     { ...GROUND.granite, id: 'granite', top: 0, bottom: 8, index: 0 },

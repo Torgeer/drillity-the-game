@@ -2,8 +2,10 @@
  *
  * Distances are bore-interval coordinates supplied by the caller, NOT recovered
  * material lengths, TCR, SCR, RQD, or a claim of undisturbed sample quality.
- * The caller supplies its verified barrel capacity; this module invents no
- * physical dimensions, duration, damage coefficient, score, or payment rule.
+ * The caller supplies an interval limit/capacity. The consumer's capacityBasis
+ * distinguishes a physical inner-tube length from a gameplay run limit; this
+ * module supplies no physical capacity evidence, duration, damage coefficient,
+ * score, or payment rule.
  *
  * Events report completed operations. They must not be sent when an animation
  * or timed operation merely starts. Core records wireline inner-tube retrieval;
@@ -46,13 +48,62 @@ function configuration(value) {
     // Numerical representation limit, not a physical minimum barrel length.
     && (value.targetDepthM === 0 || value.targetDepthM + value.barrelCapacityM > value.targetDepthM);
 }
+const LIMIT_KEYS = ['effectiveFlushMin', 'heatMax', 'torqueMax'];
+const CONDITION_KEYS = ['version', 'basis', 'clock', 'limits', 'steps', 'cuttingSec',
+  'lowFlushSec', 'overheatSec', 'overtorqueSec'];
+function validLimits(limits, methodId) {
+  return Object.hasOwn(METHODS, methodId) && keysExactly(limits, LIMIT_KEYS)
+    && (methodId === 'core' ? distance(limits.effectiveFlushMin) && limits.effectiveFlushMin > 0
+      : limits.effectiveFlushMin === null)
+    && distance(limits.heatMax) && limits.heatMax > 0
+    && distance(limits.torqueMax) && limits.torqueMax > 0;
+}
+function copyLimits(limits) { return Object.fromEntries(LIMIT_KEYS.map(k => [k, limits[k]])); }
+function validObservation(o, methodId) {
+  return keysExactly(o, ['elapsedSec', 'effectiveFlush01', 'heat01', 'torque01', 'limits'])
+    && distance(o.elapsedSec) && o.elapsedSec > 0
+    && distance(o.effectiveFlush01) && distance(o.heat01) && distance(o.torque01)
+    && validLimits(o.limits, methodId);
+}
+function copyObservation(o) {
+  return { elapsedSec: o.elapsedSec, effectiveFlush01: o.effectiveFlush01,
+    heat01: o.heat01, torque01: o.torque01, limits: copyLimits(o.limits) };
+}
+function validConditions(c, methodId) {
+  return keysExactly(c, CONDITION_KEYS) && c.version === 1
+    && c.basis === 'authored-simulation-thresholds' && c.clock === 'player-simulation-seconds'
+    && validLimits(c.limits, methodId) && positiveId(c.steps) && distance(c.cuttingSec) && c.cuttingSec > 0
+    && (methodId === 'core' ? distance(c.lowFlushSec) && c.lowFlushSec <= c.cuttingSec : c.lowFlushSec === null)
+    && ['overheatSec', 'overtorqueSec'].every(k => distance(c[k]) && c[k] <= c.cuttingSec);
+}
+function accumulateConditions(previous, observation, methodId) {
+  const o = observation, limits = copyLimits(o.limits), elapsed = o.elapsedSec;
+  const lowFlush = limits.effectiveFlushMin === null ? null : o.effectiveFlush01 < limits.effectiveFlushMin;
+  return {
+    version: 1, basis: 'authored-simulation-thresholds', clock: 'player-simulation-seconds', limits,
+    steps: (previous?.steps ?? 0) + 1,
+    cuttingSec: (previous?.cuttingSec ?? 0) + elapsed,
+    lowFlushSec: lowFlush === null ? null : (previous?.lowFlushSec ?? 0) + (lowFlush ? elapsed : 0),
+    overheatSec: (previous?.overheatSec ?? 0) + (o.heat01 > limits.heatMax ? elapsed : 0),
+    overtorqueSec: (previous?.overtorqueSec ?? 0) + (o.torque01 > limits.torqueMax ? elapsed : 0),
+  };
+}
+
+/** Optional observed operating history, never material quality or recovery.
+ * Missing legacy history remains null; no zero record is manufactured.
+ */
+export function readSampleOperatingConditions(value, methodId) {
+  if (!validConditions(value, methodId)) return null;
+  return freeze({ ...value, limits: copyLimits(value.limits) });
+}
 function eventKeys(event) {
   const extra = {
     advance: ['toDepthM'], case: ['toDepthM'],
     retrieve: ['toDepthM', 'provenance'], handle: ['intervalIndex', 'container'],
   };
   return Object.hasOwn(extra, event?.type)
-    ? ['type', 'runId', 'attemptId', 'sequence', ...extra[event.type]] : null;
+    ? ['type', 'runId', 'attemptId', 'sequence', ...extra[event.type],
+      ...(event.type === 'advance' && Object.hasOwn(event, 'observation') ? ['observation'] : [])] : null;
 }
 function validEvent(event, methodId) {
   const keys = eventKeys(event);
@@ -60,10 +111,12 @@ function validEvent(event, methodId) {
   if (event.type === 'handle') return positiveId(event.intervalIndex)
     && event.container === METHODS[methodId]?.container;
   if (!distance(event.toDepthM)) return false;
+  if (event.type === 'advance' && Object.hasOwn(event, 'observation') && !validObservation(event.observation, methodId)) return false;
   return event.type !== 'retrieve' || event.provenance === METHODS[methodId]?.provenance;
 }
 function canonicalEvent(event) {
-  return Object.fromEntries(eventKeys(event).map(key => [key, event[key]]));
+  return Object.fromEntries(eventKeys(event).map(key => [key,
+    key === 'observation' ? copyObservation(event[key]) : event[key]]));
 }
 function sameIdentity(left, right) {
   return left.runId === right.runId && left.attemptId === right.attemptId;
@@ -100,8 +153,11 @@ export function restoreSampleLedger(snapshot, expectedIdentity) {
   let end = 0, previousHandling = 0;
   for (let i = 0; i < s.intervals.length; i++) {
     const x = s.intervals[i];
-    if (!keysExactly(x, ['index', 'fromM', 'toM', 'retrieval', 'handling']) || x.index !== i + 1
+    const recorded = Object.hasOwn(x, 'operatingConditions');
+    if (!keysExactly(x, ['index', 'fromM', 'toM', 'retrieval', 'handling', ...(recorded ? ['operatingConditions'] : [])]) || x.index !== i + 1
       || x.fromM !== end || !distance(x.toM) || x.toM <= x.fromM || x.toM > stopDepth(s, x.fromM)) fail('invalid interval coverage');
+    if (recorded && (!validConditions(x.operatingConditions, s.methodId)
+      || x.operatingConditions.steps > sequence - previousHandling)) fail('invalid operating conditions');
     if (x.retrieval !== null) {
       const r = x.retrieval;
       // Each new interval required at least one advance event; sonic also
@@ -110,6 +166,10 @@ export function restoreSampleLedger(snapshot, expectedIdentity) {
       if (!keysExactly(r, ['provenance', 'sequence']) || r.provenance !== spec.provenance
         || !positiveId(r.sequence) || r.sequence <= previousHandling + minimumEarlierEvents || r.sequence > sequence
         || (s.methodId === 'sonic' && s.casedDepthM < x.toM)) fail('invalid retrieval');
+      // Later intervals cannot donate event slots to an earlier operating
+      // record. Reserve the retrieval itself and sonic's required casing.
+      if (recorded && x.operatingConditions.steps > r.sequence - previousHandling
+        - (s.methodId === 'sonic' ? 2 : 1)) fail('operating steps exceed interval history');
     }
     if (x.handling !== null) {
       const h = x.handling;
@@ -126,6 +186,29 @@ export function restoreSampleLedger(snapshot, expectedIdentity) {
     const e = s.lastEvent, last = s.intervals.at(-1);
     const previousEnd = s.intervals.at(-2)?.toM ?? 0;
     const earlierCasingInThisInterval = s.methodId === 'sonic' && s.casedDepthM > previousEnd;
+    if (e.type === 'advance') {
+      const observed = Object.hasOwn(e, 'observation'), recorded = Object.hasOwn(last, 'operatingConditions');
+      if (observed !== recorded) fail('observation recording mode disagrees');
+      if (observed) {
+        const c = last.operatingConditions, o = e.observation;
+        const one = accumulateConditions(null, o, s.methodId);
+        if (c.steps > e.sequence - previousHandling - (earlierCasingInThisInterval ? 1 : 0)) fail('operating steps exceed open interval history');
+        if (JSON.stringify(copyLimits(c.limits)) !== JSON.stringify(copyLimits(o.limits))
+          || ['cuttingSec', 'overheatSec', 'overtorqueSec'].some(k => c[k] < one[k])
+          || (s.methodId === 'core' && c.lowFlushSec < one.lowFlushSec)) fail('observation exceeds recorded conditions');
+        const durationKeys = ['overheatSec', 'overtorqueSec', ...(s.methodId === 'core' ? ['lowFlushSec'] : [])];
+        // Reconstruct a calm latest step rather than subtracting it: floating
+        // subtraction can round a valid earlier cutting total below its own
+        // exposure total. If the condition is active in the newest step,
+        // validConditions already ensures the residual ordering. A tiny prior
+        // duration can also round away when added to a much larger last step;
+        // the accumulation cannot be inverted to demand a positive difference.
+        if (c.steps === 1 ? c.cuttingSec !== one.cuttingSec || durationKeys.some(k => c[k] !== one[k])
+          : durationKeys.some(k => one[k] === 0 && c[k] + one.cuttingSec > c.cuttingSec)) fail('impossible earlier operating conditions');
+      }
+    }
+    if (e.type === 'case' && last.operatingConditions
+      && last.operatingConditions.steps > e.sequence - previousHandling - 1) fail('casing leaves no slot for operating steps');
     if ((e.type === 'advance' && (e.toDepthM !== s.drilledDepthM || last.retrieval !== null
         || e.sequence <= previousHandling + (earlierCasingInThisInterval ? 2 : 0)
         || (s.methodId === 'sonic' && s.casedDepthM >= s.drilledDepthM)))
@@ -171,6 +254,16 @@ export function applySampleEvent(ledger, event) {
     if (e.toDepthM > stopDepth(ledger, fromM)) return reject('barrel-capacity-exceeded');
     const interval = last && !last.handling ? { ...last, toM: e.toDepthM }
       : { index: rows.length + 1, fromM, toM: e.toDepthM, retrieval: null, handling: null };
+    const existing = last && !last.handling ? last : null;
+    const observed = Object.hasOwn(e, 'observation');
+    if (existing && observed !== Object.hasOwn(existing, 'operatingConditions')) return reject('condition-recording-mode-mismatch');
+    if (observed) {
+      const prior = existing?.operatingConditions;
+      if (prior && JSON.stringify(copyLimits(prior.limits)) !== JSON.stringify(copyLimits(e.observation.limits))) return reject('condition-limits-changed');
+      const conditions = accumulateConditions(prior, e.observation, ledger.methodId);
+      if (!validConditions(conditions, ledger.methodId)) return reject('invalid-condition-total');
+      interval.operatingConditions = conditions;
+    }
     next = { ...ledger, drilledDepthM: e.toDepthM,
       intervals: last && !last.handling ? [...rows.slice(0, -1), interval] : [...rows, interval] };
   } else if (e.type === 'case') {

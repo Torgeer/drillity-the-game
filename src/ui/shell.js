@@ -230,12 +230,11 @@ export function createUI(ctx) {
   }
 
   /* ── Haptics ──────────────────────────────────────────────────────────── */
-  const VIBRATE = { light: 8, medium: 16, heavy: 32, success: [10, 40, 18], fail: [26, 50, 26] };
   function haptic(pattern = 'light') {
     if (!state.settings || state.settings.haptics === false) return;
+    // The audio event consumer owns haptics even before audio unlock. One
+    // dispatcher preserves its vocabulary, motor budget and capture silence.
     bus.emit(EVENTS.HAPTIC, { pattern });
-    const v = VIBRATE[pattern];
-    if (v && navigator.vibrate) { try { navigator.vibrate(v); } catch (_) { /* unsupported */ } }
   }
   C.setHapticSink(haptic);
 

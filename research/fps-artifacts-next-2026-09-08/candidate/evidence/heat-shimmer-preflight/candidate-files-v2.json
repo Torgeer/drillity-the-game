@@ -1,0 +1,28 @@
+{
+  "snapshotManifestSha256": "66dceba44f2d7be035b66009db349f80cb4f211df77017103e6f568d1186d0d1",
+  "baselineFilesVerified": 300,
+  "changes": [
+    {
+      "path": "tools/profileframes.mjs",
+      "beforeSha256": "155d2cf39c90dc4aca5d70a65f19ae9fa0bb0e76967137f782b2eb83454ecfc2",
+      "afterSha256": "436f48390bf25083d8a6105103389849ee61e83ac22714eb8b4c493dfddcbc40",
+      "bytes": 86127
+    }
+  ],
+  "newHelper": {
+    "path": "tools/live-shimmer-pairs.mjs",
+    "bytes": 29960,
+    "sha256": "ce926d88600161abaf1f29cc3481b512c8796ff58168f3d007a79d3333cef603"
+  },
+  "patch": {
+    "path": "candidate-vs-snapshot-v2.patch",
+    "sha256": "1666f45a02c22e9d9ca22de28297822361bb8491fa7cc2bc08f0182e4d40c0ef"
+  },
+  "noProductionSourceChanges": true,
+  "independentFinalApprovalPending": false,
+  "independentApproval": {
+    "checks": 57,
+    "record": "research/heat-shimmer-critic-side-03.json",
+    "helperSha256": "ce926d88600161abaf1f29cc3481b512c8796ff58168f3d007a79d3333cef603"
+  }
+}

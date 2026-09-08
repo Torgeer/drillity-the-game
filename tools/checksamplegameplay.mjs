@@ -5,7 +5,7 @@
  */
 import assert from 'node:assert/strict';
 import { createGameState, createBus, makeRandom, EVENTS, SCENES } from '../src/core/contract.js';
-import { getMethod, RIGS, CERTS, defaultLoadoutFor, makeContract } from '../src/game/data.js';
+import { getMethod, getItem, RIGS, CERTS, defaultLoadoutFor, makeContract } from '../src/game/data.js';
 import { createProgression, SAVE_KEY } from '../src/game/progression.js';
 import { createDrillSim } from '../src/sim/drilling.js';
 import { summariseSampleLedger } from '../src/sim/sample-ledger.js';
@@ -34,7 +34,8 @@ async function fixture(methodId, targetDepth, saved = false, generated = null) {
   }
   const contract = saved ? state.contract : generated || { id: `sample-author-${methodId}-${targetDepth}`,
     title: 'Boundary fixture', methodId, regionId: 'nordic', applicationId: 'mineral-exploration',
-    archetype: 'exploration-pad', targetDepth, holes: 1, metres: targetDepth, holeDia: method.nominalDia,
+    archetype: 'exploration-pad', targetDepth, holes: 1, metres: targetDepth,
+    holeDia: methodId === 'core' ? getItem(defaultLoadoutFor('core', 60).bit).sampling.holeDiameterMm : method.nominalDia,
     payout: 10000, bonus: { time: 1000, quality: 1000 }, deadlineHours: 24, reputationReward: 10,
     requiredCerts: [], difficulty: 1, hardness: .2, abrasivity: .2, seed: 194,
     ground: [{ id: methodId === 'core' ? 'limestone' : 'clay', top: 0, bottom: 1000 }], flushMedium: method.flushMedium };

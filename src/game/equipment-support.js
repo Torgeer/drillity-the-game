@@ -45,6 +45,7 @@ export function checkSampleEquipment(methodId, loadout = {}, lookupItem) {
     }
     return { ok: true, sampleMode: 'core', bitId: bit.id, barrelId: rod.id,
       barrelCapacityM: barrel.barrelCapacityM, capacityBasis: barrel.capacityBasis, family: barrel.family,
+      holeDiameterMm: crown.holeDiameterMm,
       requiredSlots: ['bit', 'rod'] };
   }
   const casing = itemAt('casing');
@@ -64,4 +65,25 @@ export function checkSampleEquipment(methodId, loadout = {}, lookupItem) {
   return { ok: true, sampleMode: 'sonic', bitId: bit.id, barrelId: bit.id,
     barrelCapacityM: bit.sampling.barrelCapacityM, capacityBasis: bit.sampling.capacityBasis,
     requiredSlots: ['bit', 'rod', 'casing'] };
+}
+
+/** A core tender must request the fitted system's sourced nominal bore size.
+ * holeDiameterMm is a catalogue size, not a measured crown OD or clearance;
+ * exact equality here compares nominal labels, not manufacturing tolerances.
+ * Sonic remains a role check only: its nominal labels do not establish bore
+ * diameter or casing clearance. No diameter is inferred for that method.
+ */
+export function checkSampleTender(contract, loadout = {}, lookupItem) {
+  const support = checkSampleEquipment(contract?.methodId, loadout, lookupItem);
+  if (!support.ok || contract?.methodId !== 'core') return support;
+  if (!Number.isFinite(contract.holeDia) || contract.holeDia <= 0) {
+    return { ok: false, code: 'invalid-core-tender-diameter', methodId: 'core',
+      reason: 'This core job has no valid hole diameter. Choose another core offer.' };
+  }
+  if (contract.holeDia !== support.holeDiameterMm) {
+    return { ok: false, code: 'sample-tender-diameter-mismatch', methodId: 'core',
+      reason: `This job requires a ${contract.holeDia} mm hole; the fitted ${support.family} system has a ${support.holeDiameterMm} mm nominal bore. Choose a matching core offer.`,
+      requiredDiameterMm: contract.holeDia, fittedDiameterMm: support.holeDiameterMm };
+  }
+  return support;
 }

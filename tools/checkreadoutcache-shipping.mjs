@@ -35,6 +35,12 @@ async function loadVirtual(code, label) {
   code = replaceOnce(code, "from 'three/examples/jsm/utils/BufferGeometryUtils.js';",
     `from '${import.meta.resolve('three/examples/jsm/utils/BufferGeometryUtils.js')}';`);
   code = replaceOnce(code, "from '../core/contract.js';", `from '${new URL('../src/core/contract.js', import.meta.url).href}';`);
+  // A data URL has no filesystem-relative module base. Resolve every remaining
+  // relative static dependency from the real geology file (including game
+  // economy/data), identically for the cached and uncached comparison. These
+  // stay real imports; neither dependency implementations nor checks change.
+  code = code.replace(/(\bfrom\s*)(['"])(\.\.?\/[^'"]+)\2/g,
+    (_match, prefix, quote, specifier) => `${prefix}${quote}${new URL(specifier, sourceUrl).href}${quote}`);
   return (await import('data:text/javascript;base64,' + Buffer.from(code + '\n// ' + label).toString('base64'))).createGeology;
 }
 const factories = await Promise.all([loadVirtual(uncached, 'uncached-reference'), loadVirtual(source, 'actual-shipping')]);

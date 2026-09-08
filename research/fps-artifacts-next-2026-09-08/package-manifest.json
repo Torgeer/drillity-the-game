@@ -1,0 +1,220 @@
+{
+  "generatedAt": "2026-09-08T14:16:34.984474+00:00",
+  "sourceCandidate": "C:\\Users\\henri\\Downloads\\threads\\drillity-next-heat-shimmer",
+  "entries": [
+    {
+      "path": "candidate/evidence/heat-shimmer-preflight/baseline-manifest.json",
+      "bytes": 50562,
+      "sha256": "66dceba44f2d7be035b66009db349f80cb4f211df77017103e6f568d1186d0d1"
+    },
+    {
+      "path": "candidate/evidence/heat-shimmer-preflight/candidate-files-v2.json",
+      "bytes": 993,
+      "sha256": "ea7dbe967a4569ec1d7fed46f1178e64ede59fb4a70e259a9033b384014ecb18"
+    },
+    {
+      "path": "candidate/evidence/heat-shimmer-preflight/candidate-files.json",
+      "bytes": 626,
+      "sha256": "2598602c95eb265b8471085c6ac26ccc9194413831a6c291c9401844a5cc4caa"
+    },
+    {
+      "path": "candidate/evidence/heat-shimmer-preflight/candidate-vs-snapshot-v2.patch",
+      "bytes": 46647,
+      "sha256": "1666f45a02c22e9d9ca22de28297822361bb8491fa7cc2bc08f0182e4d40c0ef"
+    },
+    {
+      "path": "candidate/evidence/heat-shimmer-preflight/candidate-vs-snapshot.patch",
+      "bytes": 39853,
+      "sha256": "5ed431912c3d045e8d63efff93060b80ad62c303715a70e28f40b207422d0e74"
+    },
+    {
+      "path": "candidate/evidence/heat-shimmer-preflight/PLAN.md",
+      "bytes": 12869,
+      "sha256": "c61d375cfbdf7561f66066d51f29ca047593227693fae347a7f9090630f10d52"
+    },
+    {
+      "path": "candidate/research/cdp-chronology-critic-v2-01.json",
+      "bytes": 11450,
+      "sha256": "bf7b395a9f477561193868f50646eb6c57292522cd8302b7d06463be6cf444b9"
+    },
+    {
+      "path": "candidate/research/cdp-chronology-critic-v2-02.json",
+      "bytes": 11450,
+      "sha256": "bee712c64d3c970adb47b2f92729a1f2c5366adab5b97b614886f0816491b3d0"
+    },
+    {
+      "path": "candidate/research/cdp-chronology-source-audit.json",
+      "bytes": 8117,
+      "sha256": "d758b42ec53062d809af51c08a353b53b9ab795bb4d662a7c78a8dcc961dde29"
+    },
+    {
+      "path": "candidate/research/cdp-primary-2026-09-08/cpu-profiler.cc",
+      "bytes": 25317,
+      "sha256": "0fc3c2dc54b74b930de31a7633178dd064b2382d2fcdfcca94c0f8b2e305ed24"
+    },
+    {
+      "path": "candidate/research/cdp-primary-2026-09-08/CPUProfileDataModel.ts",
+      "bytes": 21830,
+      "sha256": "710dfae00238647201fe3243c133641e3a0930dada500f46cc85e1527c14a82b"
+    },
+    {
+      "path": "candidate/research/cdp-primary-2026-09-08/inspector.cc",
+      "bytes": 19490,
+      "sha256": "4db6678ad50265752e74d1c918a3a4c751209e13f58b86b7771b314d032bb315"
+    },
+    {
+      "path": "candidate/research/cdp-primary-2026-09-08/js_protocol.pdl",
+      "bytes": 70325,
+      "sha256": "c95dc145912a71b09f037e2cf3e0c5e3618bce70419aa5bdf38a5ad753b7bb95"
+    },
+    {
+      "path": "candidate/research/cdp-primary-2026-09-08/profile-generator.cc",
+      "bytes": 45901,
+      "sha256": "b22f6debd0e9557920dc5b57acff38ed038ffd9c9439dc29661c1741bc772aa0"
+    },
+    {
+      "path": "candidate/research/cdp-primary-2026-09-08/sources.json",
+      "bytes": 2552,
+      "sha256": "b41ed3cfad06d052bac015f10b7b547ce10c2b05acd70093ced2d756e86b0448"
+    },
+    {
+      "path": "candidate/research/cdp-primary-2026-09-08/tick-sample.cc",
+      "bytes": 16776,
+      "sha256": "afb66dda84c2db026ab785cdf8beecc61ebe18ad6dcc77035f9020d30b2ccea5"
+    },
+    {
+      "path": "candidate/research/heat-shimmer-critic-01.json",
+      "bytes": 4147,
+      "sha256": "1f6cb6016b1035763d98784eb193072166153bdd20d09f9e6da2b0a00df99fc7"
+    },
+    {
+      "path": "candidate/research/heat-shimmer-critic-02.json",
+      "bytes": 3387,
+      "sha256": "eca521deaa4abf0715cd5cecd2ffa09545eac46f1be689b69233e2744cce2fcc"
+    },
+    {
+      "path": "candidate/research/heat-shimmer-critic-03.json",
+      "bytes": 4459,
+      "sha256": "1ad0fbb1e743ffaec805cdf777851dda36f694f5a3db7daf4334f346ed30bd02"
+    },
+    {
+      "path": "candidate/research/heat-shimmer-critic-04.json",
+      "bytes": 3620,
+      "sha256": "ae6a1488296a7b2aa63c96c4fad2fd2c8643f6d315731ad6cb9e52af294f4fc8"
+    },
+    {
+      "path": "candidate/research/heat-shimmer-critic-05.json",
+      "bytes": 3620,
+      "sha256": "94becbb738d2117dd9fec1f8dc55cf666aced7e935c4a15bbecabddc4b3a5db7"
+    },
+    {
+      "path": "candidate/research/heat-shimmer-critic-06.json",
+      "bytes": 3620,
+      "sha256": "19d7dc6cfdc490fffbc1b6b6a2f421ed235bc393832c6fca5f9c427ace930254"
+    },
+    {
+      "path": "candidate/research/heat-shimmer-critic-manifest.json",
+      "bytes": 4434,
+      "sha256": "d52a1260d795e6e9f987d4533d91acf1f813478e7bb23cdfd144330b68d60e3a"
+    },
+    {
+      "path": "candidate/research/heat-shimmer-critic-side-01.json",
+      "bytes": 4423,
+      "sha256": "9f6cbae5c17b80558568d264aa0ff52f8b94315742984054fbb180fbf03537c4"
+    },
+    {
+      "path": "candidate/research/heat-shimmer-critic-side-02.json",
+      "bytes": 6110,
+      "sha256": "385b64b5639f8be0960b5f1f4a38a22c3a31a020574617ddef2c26283007fa0c"
+    },
+    {
+      "path": "candidate/research/heat-shimmer-critic-side-03.json",
+      "bytes": 6690,
+      "sha256": "434bfcef6c44d54c2dd7773cd89b88102cff092bcade935c81bc6e386a7a970a"
+    },
+    {
+      "path": "candidate/research/heat-shimmer-first-capture-critic.json",
+      "bytes": 2863,
+      "sha256": "4a8672db37f2c8df73f8f96253d871380a6fad6189a9926a36957cf0baf40924"
+    },
+    {
+      "path": "candidate/research/heat-shimmer-second-capture-critic.json",
+      "bytes": 15070,
+      "sha256": "d06d9736ad9591f9c3387a51ba65f169826e7b4f75d22b610d16c8249a473a04"
+    },
+    {
+      "path": "candidate/research/HEAT_SHIMMER_CRITIC_2026-09-08.md",
+      "bytes": 23762,
+      "sha256": "71bb13e597015a59a624fa320864e0083d650597fd96c42eaf3d1530691606fa"
+    },
+    {
+      "path": "candidate/tools/analyze-heat-shimmer-pairs.mjs",
+      "bytes": 3817,
+      "sha256": "e57bfb69379ef09ff1ec103afc39e8e299b892bdaac67e00d1efeba98bb2d74f"
+    },
+    {
+      "path": "candidate/tools/checkcdp-chronology-adversarial.mjs",
+      "bytes": 11982,
+      "sha256": "cc5abdbe08eb9ae24aa151b0e7be89e63eb508a2add2475b401ee1f389bfb8b9"
+    },
+    {
+      "path": "candidate/tools/checkheatshimmer-adversarial.mjs",
+      "bytes": 26142,
+      "sha256": "a2e87520f52c2927f66505e9c61a3155825ec8d2971ad83d71e2432e31601bd6"
+    },
+    {
+      "path": "candidate/tools/checkliveprofiler-adversarial.mjs",
+      "bytes": 38796,
+      "sha256": "aa27169caba0ad37594c569b633eff623bf9b6488cb564d3acc16ab25d907179"
+    },
+    {
+      "path": "candidate/tools/live-shimmer-pairs.mjs",
+      "bytes": 29960,
+      "sha256": "ce926d88600161abaf1f29cc3481b512c8796ff58168f3d007a79d3333cef603"
+    },
+    {
+      "path": "candidate/tools/profileframes.mjs",
+      "bytes": 86127,
+      "sha256": "436f48390bf25083d8a6105103389849ee61e83ac22714eb8b4c493dfddcbc40"
+    },
+    {
+      "path": "raw-captures-manifest.json",
+      "bytes": 2806,
+      "sha256": "00fab6632a6eb40b4c36bfa670a86242bd5a18dedd0190fe571a7e0c1c3f31bb"
+    },
+    {
+      "path": "raw-captures.zip",
+      "bytes": 9860668,
+      "sha256": "5d7d243e812961e9487e8799842409a509fd1ace694271247382d26d9937feea"
+    },
+    {
+      "path": "README.md",
+      "bytes": 6820,
+      "sha256": "bb05d9ce816e75a43be2cdafcdd50e61e0fd5504a04fab8e5cc79c5828cba4c9"
+    },
+    {
+      "path": "snapshot-source.zip",
+      "bytes": 3567206,
+      "sha256": "23af7704779c5ba192fbd689451902073ca331fa7cebbde08a063be3ff63c0fd"
+    },
+    {
+      "path": "verify-package.py",
+      "bytes": 1233,
+      "sha256": "c5baf0f7d1fbcb05507467963c5276967cdaffbd82d936fbb15bc4ddec1e88b1"
+    }
+  ],
+  "repositoryStorageAdjustment": {
+    "originalManifestSha256": "bfdedd541b17362af23372fa0ffdcf3decbc5daa4829865b7c2ef9a4d3003afc",
+    "changedPresentationFiles": [
+      {
+        "path": "README.md",
+        "previousSha256": "4edd675accd6571b72cad4756fbbcbc101a5fa1cd2845d246b4009066f687fcd"
+      },
+      {
+        "path": "verify-package.py",
+        "previousSha256": "37aae4e877a8d44d8f16bb54441c4dbf245ca6f185f7fa62aac495d37b93db03"
+      }
+    ],
+    "note": "Exact original logical patch bytes now also have gzip storage. Verifier supports transparent decompression; README explains it. Original manifest retained losslessly."
+  }
+}

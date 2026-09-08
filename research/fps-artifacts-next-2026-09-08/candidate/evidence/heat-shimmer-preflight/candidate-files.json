@@ -1,0 +1,18 @@
+{
+  "snapshotManifestSha256": "66dceba44f2d7be035b66009db349f80cb4f211df77017103e6f568d1186d0d1",
+  "baselineFilesVerified": 300,
+  "changes": [
+    {
+      "path": "tools/profileframes.mjs",
+      "beforeSha256": "155d2cf39c90dc4aca5d70a65f19ae9fa0bb0e76967137f782b2eb83454ecfc2",
+      "afterSha256": "436f48390bf25083d8a6105103389849ee61e83ac22714eb8b4c493dfddcbc40",
+      "bytes": 86127
+    }
+  ],
+  "newHelper": {
+    "path": "tools/live-shimmer-pairs.mjs",
+    "bytes": 23120,
+    "sha256": "6c9b68d88eb500859f7768784b483b5e3ce096edb8ee4003c28edd6c04f271db"
+  },
+  "noProductionSourceChanges": true
+}

@@ -1,0 +1,111 @@
+{
+  "owner": "completion_checkpoint_refresh",
+  "inventory": "Explicit tool/report paths plus all frozen journey, ordinary-soil and earned-review JSON files; 21 files, including rejected/preliminary artifacts.",
+  "files": [
+    {
+      "path": "research/CAREER_JOURNEY_INDEPENDENT_2026-09-08.md",
+      "sha256": "af8fbe86c50ad640f395bfe47bf2ba61f469db157d6c9bcdd328dbcb66220b81",
+      "bytes": 10656
+    },
+    {
+      "path": "research/EARNED_CAREER_INDEPENDENT_REVIEW_2026-09-08.md",
+      "sha256": "664b54738575207456c6d10dfcf4558a8c144cb1d9475e869048b2f494d29f2d",
+      "bytes": 7641
+    },
+    {
+      "path": "research/career-journey-independent-907-0.json",
+      "sha256": "a30cd7d2d78f7801dbc333e0edff9e37b063474271a6a8f3502b329aacd8c612",
+      "bytes": 17768
+    },
+    {
+      "path": "research/career-journey-independent-907-1.json",
+      "sha256": "de449d9996766f7c5f9fe7d238d9f18578959bc4e10f02b1c73d136458d6cc57",
+      "bytes": 18552
+    },
+    {
+      "path": "research/career-journey-independent-907-2.json",
+      "sha256": "e841929b641c5aba90c20d804280476ae6ccc0c738eeb6d7a94b31a4dd78a45d",
+      "bytes": 18558
+    },
+    {
+      "path": "research/career-journey-independent-907-3.json",
+      "sha256": "e8194711784ae66ae068ff9a6e2b60678c6dfbaee132561277e38fb0a8fa1a0f",
+      "bytes": 18784
+    },
+    {
+      "path": "research/career-journey-independent-907-4.json",
+      "sha256": "f696a434683280bbabd07a7a96a6d30672c6f0d326f677de17222503088d6c48",
+      "bytes": 18723
+    },
+    {
+      "path": "research/career-journey-independent-fixed-lifecycle-907-0.json",
+      "sha256": "5e502dfa5c9f2581e770605c7887badf7c2e0d6ba90fbccb5d1271d1c169473d",
+      "bytes": 21527
+    },
+    {
+      "path": "research/career-journey-independent-fixed-lifecycle-907-1.json",
+      "sha256": "b7af8f7500d227a206a8b927aad308ed45e2e353a24d6618d279eca807bd1a03",
+      "bytes": 21949
+    },
+    {
+      "path": "research/career-journey-independent-fixed-lifecycle-907-4.json",
+      "sha256": "88e8d359fa62ffe543360d05fd5534f54f4ac68b895b8ef4ae2d70767346dee3",
+      "bytes": 26252
+    },
+    {
+      "path": "research/career-journey-independent-lifecycle-907-1.json",
+      "sha256": "6b8168c6e17ab1a7986d0b2263f850acbc465a258ee0265a56882529d29dc4f3",
+      "bytes": 18573
+    },
+    {
+      "path": "research/career-journey-independent-service-907-0.json",
+      "sha256": "e7207b9adf0e1e2795afe4a92e244c3aa9fdb2124efba173132a4aaaf4d201f9",
+      "bytes": 18667
+    },
+    {
+      "path": "research/career-journey-independent-service-907-1.json",
+      "sha256": "b376a5543acf41a513fb1ebbf44847991220bd66630f274caa91925228f5899d",
+      "bytes": 18538
+    },
+    {
+      "path": "research/career-journey-independent-service-907-2.json",
+      "sha256": "90c7a33b0203ae7f1533d5974e4cd1751014c7a81b6afe6a422c3184fba1b650",
+      "bytes": 18687
+    },
+    {
+      "path": "research/earned-career-independent-01.json",
+      "sha256": "e1cb033f17efe23780c87a5f8cf082d704f87faabd8f5b974dc14122142488de",
+      "bytes": 60315
+    },
+    {
+      "path": "research/earned-career-independent-final.json",
+      "sha256": "71cc0bcffd3908bb668ef1942234a2f30bcd257c1a731df7f7825b690107ebee",
+      "bytes": 60327
+    },
+    {
+      "path": "research/ordinary-soil-independent-initialized-baseline.json",
+      "sha256": "7db18862f7ece07b8fc5382b93fc4c94e9e9502cb202e72a6cf7368c725cb7e3",
+      "bytes": 3493
+    },
+    {
+      "path": "research/ordinary-soil-independent.json",
+      "sha256": "244da9aa67db808f1b317f5252a2942ff3cf71b93e538db7f9c9d72986974452",
+      "bytes": 6623
+    },
+    {
+      "path": "tools/check-earned-career-independent.mjs",
+      "sha256": "68eb7de893eae30b8e4f625d9f217895d94ffdaa431bbf24b5ad1b79ed5a2984",
+      "bytes": 15810
+    },
+    {
+      "path": "tools/checkcareerjourney-independent.mjs",
+      "sha256": "8ae0a95db6bfb20471f80ee5ae66891e3f307f418aa131bcf1b53c94f50c74cd",
+      "bytes": 10552
+    },
+    {
+      "path": "tools/checkordinarysoil-independent.mjs",
+      "sha256": "8f0e8d29ce5ac26dbf26d42121a33c34c95c8a07038ada24e178abcaba79f8cc",
+      "bytes": 8432
+    }
+  ]
+}

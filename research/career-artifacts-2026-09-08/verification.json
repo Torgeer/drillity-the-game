@@ -1,0 +1,15 @@
+{
+  "pass": true,
+  "checks": [
+    "Conflicting existing bytes refuse before extraction writes",
+    "All249 compressed artifacts restore with exact original hashes",
+    "Idempotent extraction accepts exact existing bytes",
+    "Extraction copies zero production files",
+    "Original independent ledger/public-access review passes through portable wrapper; no simulation"
+  ],
+  "manifestSha256": "994d315d9578c68159b508bd41ea1d6157b20343bb3f53e89b04eff19c2c8778",
+  "wrapperSha256": "c36301fd480ab262ca97533be3f8362a727d288bf421e847f570a1af01ea3461",
+  "temporaryCopiesRemoved": true,
+  "productionFilesCopied": 0,
+  "simulationRun": false
+}

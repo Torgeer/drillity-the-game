@@ -1,0 +1,153 @@
+{
+  "version": 1,
+  "generated": "2026-09-08T13:53:49.377Z",
+  "valid": true,
+  "sourceHash": "e1a7b8a26b182d09efcdb0f7389972357bc4cce2ac28e172a6cfe31629508e3c",
+  "profilerHash": "436f48390bf25083d8a6105103389849ee61e83ac22714eb8b4c493dfddcbc40",
+  "threeSourceHash": "5e1c9947765ee582907929a3af84831a998352b1c6522aaeac5095570e40d36f",
+  "threeModuleHash": "0a3368c165eea773490aec7b77c22de70e3eac288503409256fdbf4d12578416",
+  "toolHash": "481d0775bcf2439cf32bce275cb832cea9aa62f040fd6ba7e88509e1382fdc5c",
+  "results": [
+    {
+      "name": "actual manager retains identical state, alternates on/off and restores ownership",
+      "pass": true
+    },
+    {
+      "name": "installed Three DoubleSide function provides exact witnessed version increments without erasing raw versions",
+      "pass": true
+    },
+    {
+      "name": "shared eligible material requires every actual back/front draw pair",
+      "pass": true
+    },
+    {
+      "name": "composed live capture separates extra renders, owns both query sets and restores in reverse order",
+      "pass": true
+    },
+    {
+      "name": "renderer exception survives query failure and visibility is restored",
+      "pass": true
+    },
+    {
+      "name": "actual manager rejects extra pre-draw material increment",
+      "pass": true
+    },
+    {
+      "name": "actual manager rejects material mutation during actual direct draw",
+      "pass": true
+    },
+    {
+      "name": "actual manager rejects non-version material mutation during actual direct draw",
+      "pass": true
+    },
+    {
+      "name": "actual manager rejects same-version particle data mutation",
+      "pass": true
+    },
+    {
+      "name": "actual manager rejects shimmer uniform mutation",
+      "pass": true
+    },
+    {
+      "name": "actual manager rejects final-member target replacement",
+      "pass": true
+    },
+    {
+      "name": "actual manager rejects target detachment",
+      "pass": true
+    },
+    {
+      "name": "actual manager rejects camera world mutation",
+      "pass": true
+    },
+    {
+      "name": "actual manager rejects copy happened despite disabled-copy uniforms",
+      "pass": true
+    },
+    {
+      "name": "query ownership rejects never-ready query deadline",
+      "pass": true
+    },
+    {
+      "name": "query ownership rejects disjoint timer",
+      "pass": true
+    },
+    {
+      "name": "query ownership rejects NaN result",
+      "pass": true
+    },
+    {
+      "name": "query ownership rejects createQuery null",
+      "pass": true
+    },
+    {
+      "name": "query ownership rejects foreign active query",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects empty pair array without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects null pair without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects null member without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects null query without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects duplicate GPU sample without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects negative GPU time without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects missing completed counter without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects missing camera evidence everywhere without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects empty graph everywhere without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects NaN camera matrices everywhere without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects missing final identity proof without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects false restore without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects mask inversion without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects unobserved on hook without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects wrong frame association without throwing",
+      "pass": true
+    },
+    {
+      "name": "assessor rejects copy-path uniforms enabled without throwing",
+      "pass": true
+    }
+  ],
+  "semantics": "CPU-only manager/assessor adversarial proof using real Three scene objects and a fake query driver. No browser/GPU/FPS acceptance."
+}

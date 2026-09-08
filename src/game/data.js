@@ -5898,6 +5898,16 @@ export function makeContract(regionId, level = 1, rand = makeRandom(Date.now() &
   const [diaLo, diaHi] = method.holeDiaRange;
   const nominal = method.nominalDia;
   let holeDia = Math.round(clamp(nominal * rand.range(0.7, 1.35), diaLo, diaHi));
+  if (method.id === 'core') {
+    // Consume the original diameter draw above to preserve the random stream.
+    // Offer an unlocked, complete stocked system's nominal bore size, sourced
+    // beside its item metadata (Diamond Technical Book PDF35 / printed p69).
+    // This identifies the nominal system, not actual crown OD or tolerances.
+    // Sonic's nominal labels do not establish bore/clearance: NOT SOURCED.
+    const sample = checkSampleEquipment(method.id, sampleLoadoutFor(method.id, level), getItem);
+    if (!sample.ok) throw new Error('No supported core sampling set is available for this offer.');
+    holeDia = sample.holeDiameterMm;
+  }
   if (method.id === 'oil-rotary') {
     const row = OIL_HOLE_SIZES.find((r) => targetDepth <= r.maxDepth) || OIL_HOLE_SIZES[OIL_HOLE_SIZES.length - 1];
     holeDia = rand.pick(row.sizes);

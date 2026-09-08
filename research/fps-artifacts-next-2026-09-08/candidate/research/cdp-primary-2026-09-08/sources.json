@@ -1,0 +1,53 @@
+{
+  "retrieved": "2026-09-08T13:18:47.869Z",
+  "files": [
+    {
+      "repo": "v8/v8",
+      "revision": "4a2fa0009813b95ff179b323eacda16517f882ce",
+      "path": "src/inspector/v8-profiler-agent-impl.cc",
+      "name": "inspector.cc",
+      "url": "https://raw.githubusercontent.com/v8/v8/4a2fa0009813b95ff179b323eacda16517f882ce/src/inspector/v8-profiler-agent-impl.cc",
+      "sha256": "4db6678ad50265752e74d1c918a3a4c751209e13f58b86b7771b314d032bb315"
+    },
+    {
+      "repo": "v8/v8",
+      "revision": "4a2fa0009813b95ff179b323eacda16517f882ce",
+      "path": "src/profiler/cpu-profiler.cc",
+      "name": "cpu-profiler.cc",
+      "url": "https://raw.githubusercontent.com/v8/v8/4a2fa0009813b95ff179b323eacda16517f882ce/src/profiler/cpu-profiler.cc",
+      "sha256": "0fc3c2dc54b74b930de31a7633178dd064b2382d2fcdfcca94c0f8b2e305ed24"
+    },
+    {
+      "repo": "v8/v8",
+      "revision": "4a2fa0009813b95ff179b323eacda16517f882ce",
+      "path": "src/profiler/profile-generator.cc",
+      "name": "profile-generator.cc",
+      "url": "https://raw.githubusercontent.com/v8/v8/4a2fa0009813b95ff179b323eacda16517f882ce/src/profiler/profile-generator.cc",
+      "sha256": "b22f6debd0e9557920dc5b57acff38ed038ffd9c9439dc29661c1741bc772aa0"
+    },
+    {
+      "repo": "v8/v8",
+      "revision": "4a2fa0009813b95ff179b323eacda16517f882ce",
+      "path": "src/profiler/tick-sample.cc",
+      "name": "tick-sample.cc",
+      "url": "https://raw.githubusercontent.com/v8/v8/4a2fa0009813b95ff179b323eacda16517f882ce/src/profiler/tick-sample.cc",
+      "sha256": "afb66dda84c2db026ab785cdf8beecc61ebe18ad6dcc77035f9020d30b2ccea5"
+    },
+    {
+      "repo": "ChromeDevTools/devtools-frontend",
+      "revision": "93d8a052f677cb46e6e52446e19368d725367408",
+      "path": "front_end/models/cpu_profile/CPUProfileDataModel.ts",
+      "name": "CPUProfileDataModel.ts",
+      "url": "https://raw.githubusercontent.com/ChromeDevTools/devtools-frontend/93d8a052f677cb46e6e52446e19368d725367408/front_end/models/cpu_profile/CPUProfileDataModel.ts",
+      "sha256": "710dfae00238647201fe3243c133641e3a0930dada500f46cc85e1527c14a82b"
+    },
+    {
+      "repo": "ChromeDevTools/devtools-protocol",
+      "revision": "90778954a4820558eb0a98194e89000d40087ba4",
+      "path": "pdl/js_protocol.pdl",
+      "name": "js_protocol.pdl",
+      "url": "https://raw.githubusercontent.com/ChromeDevTools/devtools-protocol/90778954a4820558eb0a98194e89000d40087ba4/pdl/js_protocol.pdl",
+      "sha256": "c95dc145912a71b09f037e2cf3e0c5e3618bce70419aa5bdf38a5ad753b7bb95"
+    }
+  ]
+}

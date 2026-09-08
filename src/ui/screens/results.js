@@ -28,7 +28,7 @@
  * finishes inside 1.2 s.
  */
 import { SCENES, EVENTS, clamp } from '../../core/contract.js';
-import { readSampleProduct } from '../../sim/sample-product.js';
+import { readSampleProduct, sampleOperatingRecord } from '../../sim/sample-product.js';
 import { GRADES, roleAt, regionInfo, methodInfo } from './catalog.js';
 
 /**
@@ -881,8 +881,15 @@ export function createResultsScreen(app) {
               ? 'game setting; usable inner capacity unmeasured' : 'basis unrecorded'}`));
           scoreList.appendChild(C.SpecRow('Material recovery', 'Unmeasured'));
           const rows = C.h('dl.specs');
-          for (const row of product.intervals) rows.appendChild(C.SpecRow(
-            `${core ? 'Box' : 'Sleeve'} ${row.index}`, `${row.fromM.toFixed(2)}–${row.toM.toFixed(2)} m · logged`));
+          for (const row of product.intervals) {
+            rows.appendChild(C.SpecRow(`${core ? 'Box' : 'Sleeve'} ${row.index}`,
+              `${row.fromM.toFixed(2)}–${row.toM.toFixed(2)} m · logged`));
+            const operating = sampleOperatingRecord(row, product.methodId);
+            rows.appendChild(C.SpecRow('Operating record', operating
+              ? `${operating.text} · ${operating.cuttingTime} drilling play time`
+              : 'Unrecorded'));
+          }
+          rows.appendChild(C.SpecRow('Operating limits', 'Game thresholds; material condition is unmeasured'));
           scoreList.appendChild(C.h('div', C.h('details',
             C.h('summary', { style: { 'min-height': '44px', cursor: 'pointer' }, text: 'View sample interval log' }), rows)));
         } else if (['core', 'sonic'].includes(sm.contract?.methodId)) {

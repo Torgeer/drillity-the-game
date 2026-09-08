@@ -1,0 +1,91 @@
+{
+  "passed": 58,
+  "groups": [
+    "Reject the real old camera pair: nordic-hero-0.34",
+    "Reject the real old camera pair: nordic-hero-0.5",
+    "Reject the real old camera pair: nordic-hero-0.7",
+    "Reject the real old camera pair: nordic-glass-orbit",
+    "Reject the real old camera pair: sahara-control",
+    "Complete real Three camera and unchanged controls pass",
+    "Reject altered position",
+    "Reject omitted position",
+    "Reject altered quaternion",
+    "Reject omitted quaternion",
+    "Reject altered scale",
+    "Reject omitted scale",
+    "Reject altered up",
+    "Reject omitted up",
+    "Reject altered matrix",
+    "Reject omitted matrix",
+    "Reject altered world",
+    "Reject omitted world",
+    "Reject altered inverse",
+    "Reject omitted inverse",
+    "Reject altered projection",
+    "Reject omitted projection",
+    "Reject altered projectionInverse",
+    "Reject omitted projectionInverse",
+    "Reject altered lens near",
+    "Reject altered lens far",
+    "Reject altered lens zoom",
+    "Reject altered lens fov",
+    "Reject altered lens aspect",
+    "Reject altered lens focus",
+    "Reject altered lens filmGauge",
+    "Reject altered lens filmOffset",
+    "Reject mismatched view offset",
+    "Reject NaN even on both sides",
+    "Reject old evidence missing complete camera metadata",
+    "Reject changed whole-scene control 0",
+    "Reject changed whole-scene control 1",
+    "Reject changed whole-scene control 2",
+    "Reject changed whole-scene control 3",
+    "Reject changed whole-scene control 4",
+    "Reject changed whole-scene control 5",
+    "Reject changed whole-scene control 6",
+    "Reject changed whole-scene control 7",
+    "Reject changed whole-scene control 8",
+    "Reject changed whole-scene control 9",
+    "Reject changed whole-scene control 10",
+    "Real captures-02 still rejected after exact fog and timing bookkeeping normalization",
+    "Unchanged normalized real capture passes",
+    "Reject altered real capture after source-owned normalization 0",
+    "Reject altered real capture after source-owned normalization 1",
+    "Reject altered real capture after source-owned normalization 2",
+    "Reject altered real capture after source-owned normalization 3",
+    "Reject altered real capture after source-owned normalization 4",
+    "Reject altered real capture after source-owned normalization 5",
+    "Reject altered real capture after source-owned normalization 6",
+    "Reject altered real capture after source-owned normalization 7",
+    "Reject altered real capture after source-owned normalization 8",
+    "Reject altered real capture after source-owned normalization 9"
+  ],
+  "oldRejectedPairs": [
+    {
+      "pair": "nordic-hero-0.34",
+      "worldMaxError": 2.842170943040401e-14,
+      "projectionMaxError": 0.00008961210027091937
+    },
+    {
+      "pair": "nordic-hero-0.5",
+      "worldMaxError": 7.105427357601002e-15,
+      "projectionMaxError": 0.00013973476723272427
+    },
+    {
+      "pair": "nordic-hero-0.7",
+      "worldMaxError": 3.197442310920451e-14,
+      "projectionMaxError": 0.00003243561650112525
+    },
+    {
+      "pair": "nordic-glass-orbit",
+      "worldMaxError": 48.69129168850028,
+      "projectionMaxError": 0.00008040159074651498
+    },
+    {
+      "pair": "sahara-control",
+      "worldMaxError": 0,
+      "projectionMaxError": 0.00005965253138917603
+    }
+  ],
+  "limits": "CPU gate self-tests and real historical rejected matrices only; no new candidate visual acceptance."
+}
