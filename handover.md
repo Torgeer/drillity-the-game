@@ -1,102 +1,222 @@
-# Drillity handover — September 8, 2026
+# Full Codex → Claude handover — September 8, 2026
 
-## Final checkpoint status
+## Start here
 
-The five-feature gameplay increment is committed and ordinary-pushed as **102338b81f5088377806d19f395a7d7df902f3b3**, with exact origin HEAD verified. Continue from `codex/fps-investigation` in this checkout. It passes the complete `npm run check:cpu` gate (`evidence/verification/cpu-next-gameplay-03.log`) and `node tools/buildcheckpoint.mjs` (`evidence/verification/build-next-gameplay-01.log`):117 unchanged inputs,65 output files,19 rigs,64 public assets and69,874,753 public bytes. Full compound `npm run build` was not rerun. Final headed reach and six-phone/five-method bandshare passed. The remaining GPU-disabled Site DOM matrix was deliberately stopped at the budget cutoff after376/612 cases with zero recorded assertion failures. Its report correctly remains passed:false with browser-closure fatal status; the compound HUD command exited1. Exact stop record and partial report are preserved; this is not a full DOM acceptance pass.
+**Resume from the current `origin/codex/fps-investigation`. It contains your complete `claude/merge-astra-sites` line plus the subsequent reviewed work.** Do not restart from obsolete `codex/astra-improvements` or apply the new work over an unchanged old branch.
 
-**First concrete UI follow-up:** native sampling final02 failed at320px because the sample card ellipsizes INNER TUBE CAPACITY and MATERIAL RECOVERY. Core acceptance at75.7mm, actual1.5m stop and native retrieval start/repeat-refusal/completion are evidenced; handling, final settlement, Results, reloads and sonic remain unverified by this browser run. The card and44px actions fit; the operating note fits. Repair label readability without hiding information or compromising targets, then reuse the preserved harness. Both failed runs,8 PNGs, exact source/harness and independent review are in `research/sampling-browser-artifacts-2026-09-08/`.
+Repository: https://github.com/Torgeer/drillity-the-game
 
-Graphics outcomes remain bounded: corrected shimmer02 passes recording integrity but shows render-order cost, not an isolated benefit; fog remains unaccepted; cab-glass capture is invalid; piling has stable captures and visible hero motion but incomplete orbit visibility. Preserve those limits. **Development reached80% weekly used /20% remaining and the existing overnight heartbeat is PAUSED.** No new development assignments are authorized by that heartbeat. Finish saving already-started validation and handover. The user's subsequent15-second trailer request is a separate bounded media task using the saved game; it does not resume development.
+MAIN: `C:/Users/henri/Downloads/threads/drillity-fps-investigation`. Coordination: `C:/Users/henri/Downloads/threads/drillity-coordination`. All relative source/research paths below refer to MAIN; sibling paths refer to `Downloads/threads`.
 
-## Resume authority and branch
+These remote refs were independently queried during handover preparation:
 
-The user's development limit was **20% of the weekly allowance REMAINING, equivalent to 80% USED**. That cutoff has been reached. Development is stopped and heartbeat `drillity-overnight-build` is PAUSED. This replaces the previous 30%-remaining/70%-used stop and earlier 50%-used stop. The subsequent trailer request authorizes that bounded media task only. No reset, purchase, force push, deployment or message to another person is authorized by this run.
+| Checkpoint | Exact commit | Meaning |
+| --- | --- | --- |
+| `codex/fps-investigation` before this handover | `32dc410d08c53419e07b732e5d84f6ad67ba745e` | Pushed implementation, evidence and budget-stop documentation |
+| Latest production increment | `102338b81f5088377806d19f395a7d7df902f3b3` | Five reviewed gameplay changes; complete CPU and buildcheckpoint pass |
+| Previous full compound build | `859fde2023e531d44e5ff334355e4d24e4c4d92c` | Piling correction and full build04; predates the five later changes |
+| Your `claude/merge-astra-sites` | `3aab87dd815b6fc5df435efcac5d3a69b09b1840` | Proven ancestor of MAIN, including your prior62 commits |
+| `master` | `8a1546aadd3d1579f85c166cce421e7ce8fed914` | Still stale; no master merge or deployment performed |
 
-Use `C:/Users/henri/Downloads/threads/drillity-fps-investigation`, branch `codex/fps-investigation`. The latest implementation checkpoint **102338b81f5088377806d19f395a7d7df902f3b3** was ordinary-pushed and verified against origin. It includes the five reviewed patches listed below. Its parent859fde2023e531d44e5ff334355e4d24e4c4d92c includes the piling-placement repair, metadata-aware fixture repairs and successful full build04. That full build predates the five patches; their later evidence is recorded separately. The branch includes Claude's full `claude/merge-astra-sites` at3aab87dd815b6fc5df435efcac5d3a69b09b1840. Remote master was last verified unchanged at8a1546aadd3d1579f85c166cce421e7ce8fed914. Do not restart from the obsolete original Codex checkout or merge unverified work into master.
+This handover adds documentation and saved trailer media on top of32dc410, with no production-code changes. Use the branch tip containing this file. Its exact final ordinary-push/delivery receipt is `../drillity-coordination/claude-handover-delivery-2026-09-08.json`. `research/CLAUDE_HANDOVER_STATE_2026-09-08.json` records preparation-time refs, all Git worktrees, untracked paths and prior-document identity. The prior handover remains byte-for-byte in `research/handover-before-claude-2026-09-08.md.gz`.
 
-Read ASTRA.md and the newest append in `../drillity-coordination/codex-resume-2026-09-08.md`. That directory holds `agent-resume-rules-2026-09-08.md`, dependency snapshots and explicit delta/hash manifests. All agents worked in this same task, not new sidebar tasks. Root alone integrates production. Preserve every worktree and raw artifact. Use explicit staging paths. Protect unowned services, particularly5178 and5180; serialize GPU work via `../drillity-coordination/gpu-owner.txt`. Freeze served inputs and quiet heavy CPU tasks during timings.
+**Codex development stopped at the user's20% weekly reserve (80% used).** Heartbeat `drillity-overnight-build` is PAUSED. The later trailer and this handover are separate bounded requests. No development workers retain file claims. Claude can take over under the owner's standing game-work instructions and its applicable limits; this handover does not resume Codex development.
 
-## Implemented in the pushed source
+Read `ASTRA.md` owner rules, this file, then `research/GAME_COMPLETION_AUDIT_2026-09-08.md`. ASTRA's September5–6 branch/status/percentage paragraphs are historical. Its rules still apply; old defect lists do not override current evidence. Your incoming coordination handover was read and its branch claim verified.
 
-- Native activation and locked controls; actual modal focus, pause lifecycle and stale-action invalidation.
-- Working skill consumers, warning priority, contract slots, truthful programme and maximum-level XP displays.
-- Save feedback, debounced settings, protected newer/unreadable saves and explicit recovery; Field Regrind with persisted per-bit limits.
-- Single jam accounting writer; canonical rescue settlement with the authored final net floor only for fully delivered qualifying callouts; Nordic home selection stable under reordered saved region lists.
-- Unsupported vibro containment and legacy removal. Matched NQ default set and sonic casing pipe, with truthful unavailable catalogue recommendations and simulator start/change-bit guards.
-- Core capacity stop → wireline retrieval → box/log; sonic casing → extraction → sleeve/label. Final handling gates completion/payment. Immutable validated receipts retain bore intervals and capacity provenance. **This is not measured material recovery, TCR/RQD or a finished sampling quality product.** Sonic3m is explicitly a game run limit; usable inner capacity is NOT SOURCED. The later nominal core-tender correction is described below; sonic physical compatibility remains unresolved.
-- Paint/steel ORM corrections, clearer Sahara haze, full-feed orbit framing, reduced motion and far-field Contact AO exclusion. Steel mast glare improves in the reviewed controls; glazing, underground silhouettes and broader visual separation remain unfinished.
-- Piling impact-ram displacement follows actual public blow phase and existing authored stroke. This pushed source also corrects carriage travel using authored offsets and continuous penetration. Independent CPU checks pass; rendered acceptance remains open.
+## Delivered since your branch
 
-## Five-feature increment in this checkpoint
+Five commits after3aab87d precede this handover: `1f2d285`, `a47de8a`, `859fde2`, `102338b`, `32dc410`. MAIN contains:
 
-Root integrated and committed five independently reviewed changes into MAIN. All combined CPU gates and the source/assets build checkpoint pass. Final reach and bandshare pass; the Site DOM matrix is incomplete after the deliberate budget stop. A new compound full build remains unrun. Candidate/browser reports retain their source scope; a CPU/build pass does not become a visual pass.
+- Supported driven-pile default; unsupported vibro equipment withheld from purchase/fitting while legacy owned items remain removable/sellable. Simulator refusal remains intact. No working vibratory physics was added.
+- Real contract CPU coverage/readiness/slots, canonical board provider, guarded abandonment, partial/final Results and stale-attempt/replay protection.
+- CPT actual-delivery settlement and authored dissipation time; pile delivered-unit payment follows founded/hard-refusal facts. Rejected-pile generic XP/metres/reputation policy remains open.
+- Debounced settings, save feedback, protected newer/unreadable saves, backup/retry recovery and persisted per-bit Field Regrind limits.
+- Native click exactly once, modal focus/inert background, locked controls, pause/action lifecycle, shared notifications and reduced-motion behavior. Reviewed skill effects have real consumers; heat-rate and rescue-clear-speed consumer/behavior acceptance remains open. Programme/scoring and maximum-level feedback are more truthful.
+- Core capacity stop → timed wireline retrieval → box/log, and sonic casing → extraction → sleeve/label. Final handling gates payment; immutable interval receipts preserve provenance. These are handling workflows, not measured material recovery or finished sampling quality.
+- Narrow paint/steel response, Sahara haze, oil orbit framing, far-field Contact AO exclusion, continuous piling-carriage placement and public impact-ram motion. Broader graphics and visible mechanism acceptance remain open.
 
-- New core offers use the supported NQ/NWL system's sourced **75.7 mm nominal bore**, and preflight/start reject conflicting nominal sizes. Newly accepted paid terms are detached and frozen; narrowly recognized legacy accepted jobs preserve their existing terms across reload. This is nominal system matching, not exact crown-OD/clearance or physical approval of legacy mismatches. New tender quotes may change through the existing pricing formula at the corrected size. `research/CORE_TENDER_FIT_2026-09-08.md`.
-- Core/sonic intervals now retain operating-condition exposure under existing authored simulation thresholds, shown in Site/Results and saved receipts. It records cutting play time, low flush where defined, overheating and overtorque. **No material recovery, TCR/RQD, sample integrity grade or quality-based payment is implemented.** Older records remain Unrecorded; sonic has no claimed low-flow limit. `research/SAMPLE_OPERATING_CONDITIONS_2026-09-08.md` and `SAMPLE_CONDITIONS_CRITIC_2026-09-08.md`.
-- Real accepted canonical rescue and validated ordinary soil-only auger contracts supply their frozen column to actual geology. Live identity/context checks retain regional generation outside that boundary. The candidate's actual three-hole rescue completed from zero funds to €453; a slow independently reviewed route reached the existing €400 floor through final-only support. This closes the demonstrated ignored-column defect within the reviewed scope, not every human recovery scenario. `research/rescue-geology-2026-09-08.md` and its critic.
-- CFA/cased-CFA quantity integration now clips the final withdrawal interval to the actual remaining lift. Geometry and delivered-volume endpoint accounting agree within the existing model. **Actual-volume material pricing, cage/casing allocation and stationary-pump semantics remain unresolved.** `research/CONCRETE_VOLUME_CRITIC_2026-09-08.md`.
-- Shell haptics use the single existing event dispatcher. The duplicate direct actuator is removed, preserving capture silence, preference and motor-budget rules. CPU composition is independently approved; real-handset sensation, browser support and audio lifecycle remain open. `research/HAPTIC_DISPATCH_FIX_2026-09-08.md` and its critic.
+The final five-feature increment in102338b:
 
-## Earned career evidence and its boundary
+| Change | Fixed behavior | Remaining boundary |
+| --- | --- | --- |
+| Core nominal tender fit | New offers use sourced75.7mm NQ/NWL nominal bore; shared guards reject incompatible new offers; paid accepted terms are detached/frozen. Narrow legacy accepted-save exceptions retain original prices/workloads. | Exact crown OD/clearance, physical approval of old mismatches, sonic compatibility |
+| Sample operating records | Immutable intervals retain actual cutting play time and existing low-flush/overheat/overtorque exposure; Site/Results/saves consume them. Old data stays Unrecorded; sonic low-flush stays null. | Material recovery, TCR/SCR/RQD, sample integrity and quality-based payment |
+| Accepted auger/rescue geology | Validated actual accepted soil columns reach real geology with live contract/run identity; ordinary regional generation remains outside that boundary. | Every human recovery scenario or complete career approval |
+| CFA endpoint volume | Last withdrawal increment is clipped to remaining length, preventing endpoint quantity overshoot. | Actual-volume pricing, stationary pumping, cage/casing allocation and flighting rate reconciliation |
+| Single haptic dispatch | Shell emits the existing event once; audio owns actuator, mute/capture rules and budget. | Actual handset support/sensation and Web Audio lifecycle |
 
-The independent career candidate `../drillity-next-career-playthrough` starts from the frozen 300-file resume snapshot and consumes geology `faeb7e7b…`. It is historical candidate evidence, not a replay of the five-patch MAIN assembly. Its 102 persisted successful auger jobs deliver 414 holes / 7,327.2 m, earn 31,407 XP (level 18) and leave €82,538. Independent raw-save/receipt/wallet review reconciles €290,487 revenue, €184,166 running costs and €28,283 in 37 public replacement purchases against the initial €4,500.
+Full CPU testing exposed a real unsupported-vibro startup-order regression and it was corrected: resolve proposed method/equipment before reading progression, then resolve again after canonical core terms. Preserve that ordering. Final original simulator file SHA256: `17c164f5cbe8f50c51e2ca0cdd312fc38944854b91076974285559f76a74b324`. Hash original artifact bytes when reproducing; Git line-ending conversion can affect byte hashes.
 
-Actual public core purchase refuses the €285,000 rig with a €202,462 deficit. Actual core preview/acceptance first refuses `missing-core-bit`, with no charge or serialized-state change. This starter-auger-only policy buys no skills/certificates and does not establish the fastest route or general economic impossibility. No core job or level 60 completion was played. Successful-path completion clocks sum to 58,165.9 seconds (about 16.16 hours), distinct from 682.29 billed in-game hours. An old controller failed job 12 without payment/save; the accepted continuation restores exact job 11 after a controller repair. Failed diagnostic time is excluded. `JAM_CLEARED` was not recorded, so the saved 11,739 jam counter is not independently verified, although all money/XP reconcile without extra jam rewards.
+## Verification and its limits
 
-Exact source hashes, restored-checkpoint limits and commands are in the candidate's `research/CAREER_PLAYTHROUGH_2026-09-08.md` and `EARNED_CAREER_INDEPENDENT_REVIEW_2026-09-08.md`. Original raw files and failed attempts remain intact. Their lossless MAIN package is `research/career-artifacts-2026-09-08`, with exact original/compressed hashes and decompression verification.
+| Evidence | Recorded outcome | Scope |
+| --- | --- | --- |
+| `npm run check:cpu`, run03 | PASS | Complete latest composed CPU gate |
+| CPU run01 | FAIL, preserved | Test adapter omitted actual geology dependency; repaired |
+| CPU run02 | FAIL, preserved | Real vibro startup-order regression; repaired before03 |
+| `node tools/buildcheckpoint.mjs` | PASS |117 unchanged inputs,65 outputs,19 rigs,64 public assets,69,874,753 public bytes; assets consumed, not regenerated |
+| Final `npm run check:reach` | PASS | Five methods; recorded touch/reach checks |
+| Final HUD bandshare | PASS | Six phone sizes × five methods; overlap/44px/renderer-share checks |
+| Final Site DOM matrix | INCOMPLETE / failed report | Deliberate budget stop at376/612 cases, zero assertion failures, browser-closure fatal; GPU/WebGL disabled |
+| Final compound `npm run check:hud` | Exit1 | Incomplete DOM matrix is not a pass |
+| Latest compound `npm run build` | NOT RUN on102338b | CPU/buildcheckpoint constituents passed; full build04 belongs to859fde2 |
+| Native sampling final02 | FAIL: real320px caption truncation | Retrieval evidenced; later workflow stages not exercised |
+| Phone/Safari/full career | NOT ACCEPTED | Desktop emulation and CPU fixtures are insufficient |
 
-## Verification and retained failures
+CPU/build originals and hashes: `research/verification-next-2026-09-08/manifest.json`. Final reach/HUD logs, partial9.9MB DOM report and stop record are compressed under its `final-layout-manifest.json`. `research/CURRENT_BUILD_ASSETS.json` identifies build inputs/outputs. Original logs remain in `evidence/verification/`; no failed attempt was relabelled passing.
 
-For this five-feature increment, complete `npm run check:cpu` passes in `evidence/verification/cpu-next-gameplay-03.log`. Run01 failed a fixture adapter import; run02 exposed a real vibro start-order regression, both retained. The three-line early-resolution correction passed23 core and10 vibro critic cases (final simulator source17c164f5…; exact identities are in the reports), then the full CPU run03 passed. The independent condition gate now passes17 groups on stable source.
+Earlier Chrome evidence covers17 author/eight critic modal cases,11 native activation cases, Site76 smoke, production-font save recovery and612 DOM cases at their own source snapshots. They do not become fresh acceptance for later sampling/notification composition. Read the35-item completion audit for each captured source and remaining device acceptance.
 
-`node tools/buildcheckpoint.mjs` passes in `evidence/verification/build-next-gameplay-01.log`, recording117 unchanged build inputs and65 outputs,19 rigs/64 public assets/69,874,753bytes in `research/CURRENT_BUILD_ASSETS.json`. This is source/assets build verification. Final reach and bandshare pass; the Site DOM matrix was deliberately stopped after376/612 cases and the compound HUD command exited1. Exact logs, partial report and stop record are losslessly preserved under `research/verification-next-2026-09-08/final-layout-manifest.json`. A new compound full build and complete new sampling browser acceptance remain open.
+## First concrete repair: sampling captions
 
-`research/VERIFICATION_CHECKPOINT_2026-09-08.json` records commands, statuses and hashes. CPU06 exited0 before the final integrations. On the earlier assembled production source, CPU07 passed through controls, then failed because its extracted pause fixture did not include the new notification helper. The fixture now executes the actual helper with tree semantics and passes9 author/13 critic cases. A passive-cadence fixture also needed the actual sampling consumer's non-sampling return. All remaining commands from skills through sampling passed in `cpu-assembled-07-final-suffix.log`. **All CPU commands are covered by the preserved prefix and corrected suffixes; the original failed runs are not labelled exit0.** Historical baseline tests now pin1f2d285 instead of moving with HEAD.
+At320×568 the card ellipsizes **INNER TUBE CAPACITY** and **MATERIAL RECOVERY**;390px captions fit. The card,44px actions and two-line operating note fit. Preserve the information and target sizes; do not hide labels or weaken clipping assertions.
 
-Direct Vite build plus checkbuild exited 0: 19 shipped rigs, 64 public assets, 69,874,753 bytes. Compound `npm run build` run02 was interrupted during CPU to prevent its automatic headed stages overlapping a graphics lease; that compound run is not a pass. Its constituent CPU, build/assets and required reach/HUD checks were completed separately. After the narrow piling placement correction, `node tools/buildcheckpoint.mjs` exited 0 and recorded 117 unchanged build inputs and 65 output files in `research/CURRENT_BUILD_ASSETS.json`. The parent commit and uncommitted status are explicit; actual input hashes identify the build. Public assets were consumed, not regenerated. Buildfinal03 failed at a second obsolete test oracle: hero framing still used the former piling endpoints and did not select the driven-pile method. Its repaired independent oracle passes 3,006 checks and 354 vertex cases on all 19 rigs, with unchanged margins and negative controls. **Buildfinal04 completed with exit 0:** full CPU, headed reach, headless bandshare, all 612 Site DOM cases, Vite and build-artifact checks. Exact log: `evidence/verification/build-assembled-final-04.log`; compressed evidence is committed with this checkpoint. The Site DOM matrix disables GPU/WebGL and does not establish rendered 3D or phone performance. Every build04 input/output hash was rechecked after that build. This remains historical pushed859fde2 compound-build evidence. The new increment has its own complete CPU and buildcheckpoint passes above, but no new compound full-build or complete HUD pass; final reach and bandshare passed and the Site DOM matrix remains incomplete.
+Native final02 evidenced real75.7mm core acceptance, the1.5m capacity stop, unchanged waiting state, low-flush exposure and one timed retrieval with repeat/early-payment guards. It failed before handling, final settlement, Results, reload or sonic. Final01 was a harness accessible-name mismatch; the reviewed locator/CSS-case correction did not weaken semantics.
 
-The earlier assembled Site smoke76 passed with matching source hashes, including real confirmation/abandonment and notification-host movement. Headed reach passed five methods. Headed HUD passed all existing checks: no tested overlap, clipping, small targets, browser errors or navigation growth; stage share65.2–72.7%. See `evidence/ui-acceptance/final-summary.json` and `.hudqa/assembled-final-report.json`. Earlier612-case Site,25-modal and other detailed runs retain their earlier source scope. These are browser layout checks, not real-phone/full-career certification.
+`research/sampling-browser-artifacts-2026-09-08/sampling-evidence.zip` preserves75 exact original files: eight PNGs,38 composed JS files, styles/index/lock, both failures and independent review. Its renderer-free DOM fixture intentionally has a blank stage. Read its README and archive manifest before extraction.
 
-The corrected notification candidate passed33 states,60 whole-viewport geometry captures,33 production-font proofs and independent review of12 screenshots. Native regrind success feedback survives Back and expires through real UI time. Newly arriving faults when the persistent notice is offscreen and clean-Menu standalone geometry were not captured. The original33-case functional pass had missed real overlaps and must not be presented as whole-screen approval.
+Original candidate: `../drillity-next-sampling-browser`. Runner SHA256: `e949da00097c8256e656560fc30fd7b767f522e757986bdad4e832ee4a6c268f`. Prior command:
 
-Important raw evidence is preserved byte-for-byte in `research/artifacts-2026-09-08/*.gz`, with compressed/uncompressed hashes in its manifest. This includes accepted FPS captures, rejected probes, piling report and CPU logs. Original files and all screenshots remain on disk. Compression never changes validity.
+```powershell
+node tools/checksampling-browser.mjs --port 5252 --lease sampling-browser --output evidence/sampling-browser-final-02
+```
 
-## What the FPS investigation actually found
+Next run: use a fresh output directory, owned port and required lease. Bring the candidate to current source deliberately; its base commit alone does not describe overlaid files. Complete handling/settlement/Results/reload/sonic before claiming the sampling product works end-to-end.
 
-The accepted live oil pair used real purchases, compatible equipment, canonical paid acceptance and actual geology. Drilling GPU median14.068ms versus5.550ms during rod-add; render CPU means2.746/2.627ms and simulation0.130/0.096ms. Instrumented/control drilling RAF means16.536/17.274ms versus rod-add9.009/9.034ms. This supports investigating drilling-associated GPU cost. Initial orbit differs about26degrees and initial dt/state differs, so it is not an exact instrumentation-overhead A/B.
+## FPS: findings and next experiment
 
-A four-particle-layer draw-only probe passed122 independent harness checks. Both actual attempts were rejected by the current validator for negative CDP time deltas (four, then five). Their live/mask/GPU subsets pass their own integrity checks, but show no consistent useful saving. Adaptive workload differences and sparse matched bins further prevent causal claims. No off-first run or accepted FPS repair followed. The original historical sustained34FPS cause is still unresolved.
+The sustained low-FPS cause is **unresolved**. Your historical oil-derrick34.4/oil-rotary39.7/longhole47.4 warm RTX4070 figures remain observations. Current live work did not reproduce sustained34.4FPS and has produced no accepted causal FPS fix.
 
-The next bounded isolation targeted `vfx:heatShimmer`, a separate full-band quad. Its first pair is invalid because material bookkeeping did not establish the intended isolation. Corrected capture02 passes recording integrity:24 complete pairs and seven natural rod connections. However19/24 second submissions were slower, with median +20.859392ms, and on-first/off-first differences reverse direction. No isolated shimmer benefit or production graphics fix follows. The complete evidence is in `research/fps-artifacts-next-2026-09-08/README.md`. `src/sim/vfx.js` computes its strength from engine load/heat/ROP, and its shader computes several noise fields before mask discard. That is a **source-backed hypothesis**, not a measured cause. Research proper CDP timestamp semantics before changing validation; do not simply drop negative samples. See `research/FPS_INVESTIGATION_2026-09-08.md` and `LIVE_PROFILER_CRITIC_2026-09-08.md` for exact commands, hashes, accepted and rejected results.
+The accepted live oil pair uses real purchases, compatible equipment, canonical paid mud acceptance, actual geology and seven natural rod connections. During drilling, renderer GPU median was14.068ms versus5.550ms during rod-add. Inclusive render CPU means were2.746/2.627ms; simulation0.130/0.096ms. Instrumented drilling/rod-add rAF means were16.536/9.009ms; control17.274/9.034ms. This supports investigating drilling-associated GPU work. Initial camera/dt/state differ, so it is not an exact instrumentation-overhead comparison.
 
-## Piling and graphics observations for Claude
+Two four-particle-layer probes were rejected by their then-current validator for negative CDP intervals and show no consistent useful saving. Preserve rejected status. Later primary-source/CDP work retains signed intervals and sample/timestamp pairs under verified ordering semantics; it does not discard negatives. Do not turn that correction into retroactive acceptance of old recordings.
 
-The historical pre-placement piling browser attempt is CAPTURE_FAILED. Hero ram masks contain188–200pixels; eight non-paused orbit captures contain zero, with a nearby site building obscuring most of the rig. Four held-frame identities drifted by1–3 simulation ticks; the harness also misclassified Vite source-image URLs as public assets. Actual UI pauses were stable. No clearance/cadence approval. Root viewed hero peak/bottom and orbit peak and observed the large hammer assembly apparently detached above the leader. Exact current images, report and reproducer are in `evidence/pile-motion-browser-final-01/REVIEW.md`.
+Heat-shimmer capture01 failed material bookkeeping. Corrected02 passes recording integrity:24 complete pairs,48 diagnostic queries,458 normal queries,2,744 live frames, seven natural connections and exact input manifests. **19/24 second renders were slower, median +20.859392ms; on-first/off-first effects reverse direction.** Submission order dominates; no isolated shimmer saving or runtime fix is approved.
 
-Independent source attribution: the new adapter moves only `slide:hammer-ram` and its sole `hammer_ram` mesh. Housing, jaws, ports and drive cap are sibling descendants of `slide:carriage`. The captured carriage Y of 29.113206926 m exactly matches generic feed using the authored 14.6 m rest plus the 15.12 m travel span, ignoring authored lower/upper offsets of −13.2/+1.92 m. This identifies the parent-placement path; it does not prove a screenshot regression or pre-existing appearance without a matched baseline.
+Next useful protocol: **one original render per frame**, an identical-mask sham first, then balanced/reversed on/off blocks only after controlling camera, state, workload and adaptive feedback. Preserve normal simulation/update accounting. Diagnose queue/cache/submission bias before blaming the shader. Verify Chrome/GPU/focus/warm-up and served-input identities; quiet heavy CPU work. Desktop GPU findings cannot certify phones.
 
-The narrow placement correction is now in main. It validates that exact legacy metadata contract and follows actual penetration continuously from the authored rest, clamping at authored endpoints. It removes the old three-metre feed reset. At the captured depth of 0.120395527 m, the corrected carriage Y is 14.479604855 m. No physical dimension or mesh was invented. See `research/PILE_PLACEMENT_HANDOVER_2026-09-08.md` and its author/critic JSON reports.
+Read `research/FPS_INVESTIGATION_2026-09-08.md`, `LIVE_PROFILER_CRITIC_2026-09-08.md` and `research/fps-artifacts-next-2026-09-08/README.md`. That package holds raw captures, exact300-file snapshot, profiler/helper, adversarial controls and pinned V8/DevTools evidence. `python verify-package.py` verifies40 logical files,14 raw members and300 snapshot files, including gzip-stored patches. Original candidate: `../drillity-next-heat-shimmer`. Oil-rotary missing-FLUSH_MEDIUM/wrong-air-plume warnings remain visible in its raw run; inspect current producers before fixing.
 
-The first combined gate correctly exposed an obsolete ram-only test: it required every non-ram transform to equal the old upward carriage placement. The revised independent test retains its historical baseline, reads the actual GLB/Python rest and endpoint contract, checks penetration at 540 real simulator frames, and recomposes every expected descendant world matrix through the corrected parent. No descendant is skipped. The full critic passes; separate negative controls reject missing ram motion and the former incorrect carriage placement. See `research/pile-placement-combined-review.md`. The rejected first gate remains in `evidence/verification/pile-placement-assembled-01.log`. Static pile penetration, ropes, cap/casing clearance, site occlusion and visible cadence are still unapproved. The corrected capture retained20 stable frame identities and visible masks for all10 hero samples, but three orbit samples were hidden. Irrelevant source-origin URLs were discarded from asset mapping. It remains CAPTURE_FAILED for full visibility, not overall clearance/cadence acceptance. The normal Site uses hero; supplemental orbit occlusion does not prove ordinary gameplay hides the action. `research/pile-visual-artifacts-2026-09-08/README.md` preserves all images, masks and independent review.
+## Graphics and machinery: what I saw
 
-Steel corrected capture02 includes real site clones; three cases repeat exactly, while slight Nordic orbit pixel drift makes that case supplemental. Nordic fog remains **unmerged**: all ten first-set images were preserved, but hero/Sahara lens differences and opposite orbit angles invalidate matched acceptance. Qualitatively improved color is not enough. The newer fog02 capture matches camera exactly but has mismatched VFX state, so it also fails matched acceptance and remains unmerged. A camera match alone cannot attribute the visual difference to fog. Glass often shares materials with lenses/screens; no blanket tint was approved. No fog03 run followed; fog is still unaccepted/unmerged. Cab-glass capture is INVALID: oil panes are occluded, piling exposes only a sliver, CFA returned a stub, SI was not run and repeated-image limits remain. Its unintegrated candidate/evidence are in `research/cab-glass-artifacts-2026-09-08`. Sampling final02 failed the320px label-readability check after successful native core retrieval. Handling, settlement, Results, reload and sonic browser acceptance remain open. Both failures and exact final source/harness are preserved in research/sampling-browser-artifacts-2026-09-08.
+The user's complaint remains active: bright rigs and similar ground/sky/material colors reduce separation. Approved steel changes help the Nordic mast but are not a general exposure cure. The trailer still shows strong oil glare, pale cab areas, dark underground silhouettes and foreground occlusion in some angles. These are observations, not newly isolated causes.
 
-## Remaining work and preserved candidates
+| Area | Current evidence | Remaining work |
+| --- | --- | --- |
+| Steel/paint | Integrated narrow ORM/scalar corrections; steel02 includes real site clones. Three cases repeat exactly; slight Nordic orbit drift is supplemental. | Representative scenes and all Garage identities; no all-glare-fixed claim |
+| Terrain AO | Only far-field excluded; matched stills remove fine horizon stripes. | Near-ground weave/fog cast and broader geology separation |
+| Nordic fog | Six-line isolated candidate.01 mismatches camera/lens;02 matches camera but differs in VFX. | Final reviewed harness controls retained VFX seed/private FPS counters but03 never ran.58 negative controls are preflight only |
+| Cab glass | CPU-reviewed three actual cab-only buckets, unintegrated. | INVALID capture: oil occluded, piling630px sliver, longhole repeat drift, CFA stub, SI unrun. Use pane normals and clear views; do not alter shared screen/lens glass |
+| Piling | Ram adapter and continuous authored placement integrated;20 corrected frame identities stable;10 hero ram samples visible. | Three orbit views hidden; cap/casing/rope/pile clearance, cadence and actual draw calls unapproved |
 
-The 35-item `research/GAME_COMPLETION_AUDIT_2026-09-08.md` is an acceptance backlog. Prior 65–70% completion was subjective. Remaining product areas include sourced sonic clearance/capacity, material sampling quality, anchor/grout products, specialized machine mechanisms, broader recovery/player and post-level 18 career acceptance, graphics readability, sustained mobile FPS, iPhone/Safari/full-career play, audio/haptics/accessibility and a verified release. The nominal core-tender and accepted-ground repairs are assembled; their combined CPU and source/assets build gates pass; root is preparing this checkpoint. New compound/headed/browser acceptance remains separate. The build inventory now records this increment's successful build-next-gameplay-01 with exact input/output identities. It is not proof of regenerated assets, complete game or target devices. Master integration remains outstanding.
+The piling correction follows authored rest minus penetration, clamped to authored offsets. At0.120395527m penetration the old generic feed put carriage Y at29.113206926m; corrected Y is14.479604855m. It removes a generic3m reset without inventing dimensions. Combined independent review recomposes every descendant over540 actual simulator frames; missing-ram/old-carriage negative controls fail. A stable hero image does not certify clearances. Normal Site uses hero; supplemental orbit occlusion alone does not prove ordinary play hides the action.
 
-Ordinary Nordic-first careers already have zero-fee travel home; the earlier general stranded-abroad warning was wrong. The historical rescue column mismatch is repaired in the newly assembled accepted-ground patch, with actual candidate completion evidence described above. Earlier adaptive boulder stalls remain historical observations, not proof a human cannot finish. Claude resolved the four original handoff items; do not redo RC geometry. Defend physical values using committed artifacts and regeneration commands.
+Read `research/PILE_PLACEMENT_HANDOVER_2026-09-08.md`, `pile-placement-combined-review.md`, and README/manifests under the pile/fog/glass artifact directories. **Fog and cab glass remain unintegrated. Do not merge their entire worktrees.** No blanket tint, exposure adjustment, transmission or invented dimensions follows from an invalid comparison.
 
-Sibling worktrees preserved: `drillity-sample-gameplay`, `drillity-sample-loadouts`, `drillity-notification-flow`, `drillity-rig-glare`, `drillity-regional-fog`, `drillity-pile-motion`, `drillity-rescue-local-region`, plus the original user and Claude trees. Integrated candidates retain their raw independent evidence. Rejected local-region rescue work must not be integrated. The coordination record has exact owners and manifests. No inbox connector was callable; this file is the briefing, not a claim that Claude received a message.
+## What remains for a complete game
 
-At 80% used: stop new assignments, finish/checkpoint atomic work, collect candidate paths/hashes, close owned resources, update this status, commit explicit reviewed paths, ordinary-push and verify remote HEAD, then pause the same heartbeat. Never force push or silently discard WIP.
+The35-item completion audit is an acceptance backlog. Earlier65–70% was subjective, not a measured score. Counts of21 methods,19 rigs,10 sites, eight regions and60 levels do not establish completion.
 
-## Active continuation after the budget extension
+- Material sampling recovery/loss/integrity and truthful quality outcomes. Operating records only describe conditions.
+- Sourced sonic dimensions/clearance/usable inner capacity. Its3m stop is explicitly a gameplay limit; nominal100/150mm labels and family matching do not prove fit.
+- Anchor installation/grout: the promised installed product, visible success/failure/recovery and consumable handling.
+- CFA actual-consumption economics, sourced ready-mix/cage/casing allocation without double charging, stationary pumping and compatible rate/rotation/pitch before flighting consequences. Do not derive an invented concrete rate from bundled92/122€/m prices.
+- Rejected-pile XP/metres/reputation, stored-level/XP consistency and explicit mid-hole reload policy. Current reload restarts physical attempts while retaining completed work. Preserve stale-settlement protection.
+- Heat-rate and rescue-clear-speed skill effects need their own consumer/behavior acceptance (completion audit item17). Corrected rank decoding and other skill consumers do not certify every purchased skill or its full career/UI behavior.
+- RC2.852m travel versus sourced3.00m pipe/game3.05m rod: select an evidenced coherent configuration. Its working axis is fixed; do not move it.
+- Cable-percussion spudder-versus-tripod identity and designation/naming decisions with coherent plates/fallback names. Prefix research exists; the old never-researched17-prefix statement is stale. Research is not legal clearance.
+- Visible rod handling, SPT/clamps, jumbo second feed, ring-fan/bolting and complete attachment acceptance. `--tool-selection-only` does not certify string gaps or clearance.
+- Achievable HUD requirements consistent with simultaneous controls. The old~82% sketch contradicts required chrome; do not solve it by removing44px targets or information.
+- Final real-player/device acceptance: supported iPhone/Safari and Android/Chrome, safe areas/browser bars, fonts, touch/assistive activation, audio unlock/mute, haptics, background-return, thermal pacing and sustained play.
 
-`../drillity-coordination/resume-70-baseline-2026-09-08/manifest.json` freezes 300 source/tool/Blender/config files from that earlier baseline, including the approved piling and hero-test corrections. New detached candidates under `drillity-next-*` start from that exact snapshot; earlier candidate worktrees remain preserved. Root alone integrates. Five reviewed source changes from these candidates are now committed in102338b and pass complete CPU/buildcheckpoint as listed above; the earned-career candidate has bounded independent approval. Shimmer02 integrity passes but render-order effects prevent a feature-benefit claim; fog and cab-glass remain unaccepted, piling remains visibility-limited, and sampling final02 failed320px label readability after native core retrieval. Actual-consumption CFA pricing was not implemented. The source checkpoint102338b is pushed. Final reach and bandshare passed; the Site DOM matrix was deliberately stopped at376/612 cases and is incomplete. The new compound full build remains unrun. The coordination record owns the exact paths and file boundaries. GPU use remains serialized and requires a root grant.
+Earned career evidence: an independently reviewed candidate completed102 successful starter-auger jobs,414 holes/7,327.2m,31,407XP (level18), €82,538. Wallet reconciliation: initial€4,500 +€290,487 revenue −€184,166 running costs −€28,283 purchases. Actual public purchase refuses the€285,000 core rig with€202,462 deficit. This conservative auger-only policy bought no skills/certificates; it proves neither the optimal route nor economic impossibility. No core job or level60 completion was played.
 
-## Evidence packages and next authorized work
+Successful-path clocks sum to58,165.9s (~16.16h), excluding a failed controller attempt restored from exact job11. The saved11,739 jam count lacks independent event certification; money/XP reconcile without extra jam rewards. `research/career-artifacts-2026-09-08` contains all102 saves,414 receipts and1,068 wallet events, including controller failures and independent review.
 
-Reviewed gameplay deltas and both failed/passing raw evidence are packaged in `research/gameplay-artifacts-2026-09-08`. Separate exact-byte packages are `research/career-artifacts-2026-09-08`, `research/fps-artifacts-next-2026-09-08`, `research/fog-artifacts-next-2026-09-08`, `research/cab-glass-artifacts-2026-09-08` and `research/pile-visual-artifacts-2026-09-08`. Read each README/manifest; packaging does not promote a rejected capture to acceptance. Original candidates remain preserved.
+Accepted-ground rescue evidence: actual three8m holes from€0 to€453. A slow independently reviewed D-grade route netted−€148 before€548 final support, ending at the existing€400 floor. This fixes the demonstrated ignored-column issue, not every human recovery path. Nordic-first careers already travel home free. Do not integrate the rejected local-region rescue candidate or revive the universal stranded-abroad warning.
 
-After the clean stop and a new work authorization: record sampling final02's actual outcome, run the new compound/full headed reach/HUD gates on the exact checkpoint, then prioritize valid visual acceptance and reproducible GPU isolation. Continue material sampling quality, sourced sonic fit/capacity, anchor/grout and CFA pricing semantics; extend earned play beyond the level18 starter-only checkpoint through real core delivery and later career. Finish actual-phone/audio/haptic/assistive acceptance before release/master integration. Preserve all failed evidence and do not repeat old completed repairs.
+## Recommended next work and parallel ownership
+
+The owner wants useful parallel agents in one game context, clear ownership and harsh independent review. They do not want new sidebar projects or routine permission prompts. Give every worker ASTRA §1 verbatim. Use available concurrency for independent tasks; one coordinator integrates shared files and GPU work stays serialized.
+
+1. Repair sampling captions, finish native workflow and remaining DOM coverage. Keep distinct headed contract acceptance (`npm run qa:contracts`) and a new compound build in the queue.
+2. In parallel, author/critic-review the one-render FPS protocol and repair fog/glass capture validity. Run GPU captures one at a time without heavy concurrent CPU jobs.
+3. Finish sourced products and settlement/economics; extend naturally earned play to actual core delivery and later career choices, not senior-resource fixtures.
+4. Complete visible mechanisms and representative graphics, then real phones/audio/haptics/assistive and sustained-play acceptance.
+5. Integrate reviewed work to master with relevant passing gates and a truthful release record. A green CPU suite is not complete-game approval.
+
+Possible20-worker allocation: sampling UI author/critic; FPS protocol author/critic; glass author/critic; fog author/critic; pile visual author/critic; sonic researcher/compatibility critic; material-sampling author/critic; anchor/grout author/critic; CFA economics author/critic; earned-career controller/reviewer. This is a suggested allocation, not active assignments. Isolate overlapping `drilling.js`, `progression.js`, `env.js` and Site deltas and use one integrator.
+
+## Workspace, runtime and safe continuation
+
+Original user checkout `C:/Users/henri/Downloads/drillity-the-game` stays on obsolete2c3b0f7 with user WIP; do not reset it. Claude checkout `../drillity-claude-sites` stays on3aab87d. All siblings/raw evidence remain intact. Exact worktree/HEAD and untracked-path inventory is in `research/CLAUDE_HANDOVER_STATE_2026-09-08.json`.
+
+| Candidate under `Downloads/threads` | Status |
+| --- | --- |
+| `drillity-next-sampling-fit`, `drillity-next-sample-quality` | Reviewed changes integrated; raw evidence retained |
+| `drillity-next-rescue-geology`, `drillity-next-concrete-cost`, `drillity-next-haptic-dispatch` | Narrow reviewed changes integrated; broader policy gaps remain |
+| `drillity-next-sampling-browser` | Failed native acceptance; next caption fix |
+| `drillity-next-career-playthrough` |102-job candidate evidence, not final MAIN replay |
+| `drillity-next-heat-shimmer` | Diagnostic-only; valid recording/order interference, no runtime fix |
+| `drillity-next-nordic-fog`, `drillity-next-glass-readability` | Unaccepted, unintegrated graphics candidates |
+| `drillity-next-pile-visual` | Stable post-correction hero capture; visibility/clearance incomplete |
+
+Several detached candidates show HEADa47de8a but received a frozen300-file overlay containing later fixes. Use source manifests/archives, not HEAD alone, to reproduce them. Some public directories are junctions to MAIN/public: **never export through them**.
+
+MAIN now has its own node_modules; the former shared junction target was not deleted. Exact `@napi-rs/canvas0.1.100` was declared for real CPU geology. The lock now also includes the already-declared glTF CLI graph; zero existing locked package versions changed. Recorded Three0.169.0, Vite5.4.21 and Playwright1.49.1 stayed fixed. Use the committed lock; do not broaden dependency changes.
+
+Generated GLBs are ignored build outputs. They exist locally and were hashed, not regenerated, during final verification. A fresh clone requires the matching asset build or preserved exact inputs. Blender is `C:/Program Files/Blender Foundation/Blender 5.2/blender.exe`, driven by Python scripts; no connector is required. Preserve named motion nodes, world transforms, material names, joins and rig-ID filenames. Transmission stays0; rig draw calls≤70. Physical values require committed provenance or `NOT SOURCED`.
+
+Safe inspection:
+
+```powershell
+git -C C:/Users/henri/Downloads/threads/drillity-fps-investigation fetch origin
+git -C C:/Users/henri/Downloads/threads/drillity-fps-investigation status --short
+git -C C:/Users/henri/Downloads/threads/drillity-fps-investigation merge-base --is-ancestor 3aab87dd815b6fc5df435efcac5d3a69b09b1840 origin/codex/fps-investigation
+```
+
+Create an owned branch/worktree from that fetched tip if needed; preserve user/Claude WIP. Do not blindly cherry-pick all candidates. Stage explicit paths, never `git add -A`.
+
+Future validation commands from the intended checkout, after checking resource ownership:
+
+```powershell
+npm run check:cpu
+node tools/buildcheckpoint.mjs
+npm run check:reach
+node .hudqa/bandshare.mjs check 5209
+node tools/checkdrillingviewspace.mjs --tag claude-resume --out shots/drilling-view-space-claude-resume
+```
+
+These were not rerun during handover. The DOM command uses fresh outputs. Package reach/HUD use5209; `qa:contracts` is a distinct headed path. A new `npm run build` remains due when source is ready. Preserve earlier logs/failed reports.
+
+`../drillity-coordination/gpu-owner.txt` is `idle` after trailer cleanup. Protect unowned services, especially5178 and5180. Acquire a named lease for headed/GPU work; verify actual GPU, visible/focused page and warm workload. Freeze served inputs during capture and quiet heavy CPU work during timing. Close only owned processes/ports and verify cleanup before releasing the lease. Never kill all Chrome/Node. Stubs, missing coverage and invalid timing are failures even if a screenshot looks good.
+
+## Evidence packages and trailer
+
+All directories below are committed under `research/`. Their README/manifests define extraction and validity:
+
+| Directory | Contents |
+| --- | --- |
+| `artifacts-2026-09-08` | Earlier raw FPS/CPU/pile evidence and historical build04 |
+| `gameplay-artifacts-2026-09-08` | Gameplay author/critic failures and passes |
+| `verification-next-2026-09-08` | CPU01/02/03, buildcheckpoint, final reach/HUD closure |
+| `sampling-browser-artifacts-2026-09-08` | Both failed native runs, exact source and eight PNGs |
+| `career-artifacts-2026-09-08` | Earned saves, receipts/wallets and independent review |
+| `fps-artifacts-next-2026-09-08` | Shimmer recordings, source snapshot and controls |
+| `fog-artifacts-next-2026-09-08` | Two rejected pairs, reviewed but unrun next harness |
+| `cab-glass-artifacts-2026-09-08` | Unintegrated candidate and invalid visual evidence |
+| `pile-visual-artifacts-2026-09-08` |40 original PNGs and stable/occluded capture evidence |
+| `trailer-artifacts-2026-09-08` | Delivered MP4 and26 source/evidence files in a lossless archive |
+
+Large reports use gzip/ZIP with original and compressed hashes. Standalone patches use `.patch.gz` to retain intentional diff-context spaces without weakening whitespace gates. Decompress before applying. Compression never improves validity. Untracked originals remain deliberately preserved; do not delete them merely to make Git status look clean.
+
+Trailer:15.000s,1080×1920 portrait,30fps/450 frames, H264/AAC stereo. Faststart and full video/audio decoding verified. It shows DTH crawler, RC rig, oil derrick, longhole rig and piling leader, two actual gameplay views each. Source102338b and five GLBs stayed unchanged. Only recorder padding was removed; the full390×844 HUD viewport was upscaled. The quiet mechanical bed is original synthesized editorial audio, not recorded engine sound.
+
+Local file: `C:/Users/henri/Downloads/threads/drillity-trailer/Drillity-Trailer-15s.mp4`. Git copy: `research/trailer-artifacts-2026-09-08/Drillity-Trailer-15s.mp4`. SHA256: `4b698345894379252d035fbbc3e52e0849c6bf3aab14b0a18d5249b994dcef68`. The archive includes five named raw WebMs, ten source PNGs, two contact sheets, capture/edit scripts, inputs and QA. Encoder binaries, duplicate recorder copies and failed padding/intermediate exports stay local. Read the README for path remapping/tool requirements. No recapture/re-encode occurred during handover.
+
+## Bridge and the lesson to retain
+
+The registered bridge server at `C:/Users/henri/agent-bridge/bridge_mcp.py` cannot start in configured Python because `mcp` is missing. Its existing shared SQLite mailbox was inspected without changing server configuration. Unread Claude messages3/4/5 were read as historical leads, including the branch/GPU briefing; they are not fresh ownership claims. After final push, Codex places this handover in that existing mailbox and records the actual delivery outcome in the coordination receipt. Queued delivery is not acknowledgement or an idle-Claude wake-up.
+
+Your RC warning was correct: **defend a number with a committed artifact and the command that regenerates it.** Do not invent citations, compensate geometry for misunderstood primitives, rewrite facts to fit code, or trust agent prose over source. Working RC axis, CFA concreting, vibro refusal, driven-pile default and contract CPU coverage are repaired. The useful next work is the remaining player-visible product and acceptance above.

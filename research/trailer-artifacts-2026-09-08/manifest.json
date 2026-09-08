@@ -1,0 +1,147 @@
+{
+  "sourceRoot": "C:\\Users\\henri\\Downloads\\threads\\drillity-trailer",
+  "sourceCommit": "102338b81f5088377806d19f395a7d7df902f3b3",
+  "files": [
+    {
+      "path": "capture-gameplay.mjs",
+      "bytes": 12849,
+      "sha256": "1dec91da17d7026e497bfd542447fa2becde5b925f69b196c98fd9d965d53f57"
+    },
+    {
+      "path": "capture-preflight.json",
+      "bytes": 11115,
+      "sha256": "cda1024cf7a1fb2f152880723aae7f973acd83f94f5dc0f371cc8ba41a88650f"
+    },
+    {
+      "path": "capture-report.json",
+      "bytes": 215888,
+      "sha256": "fe2f70883318dab963200b88695e1e9a911db75c97cebf6c7ecb4c38f64d9844"
+    },
+    {
+      "path": "capture-cleanup.json",
+      "bytes": 197,
+      "sha256": "556d0e4d709787b2209ddd5ef156451d127521ec012a2708291a62e25852b685"
+    },
+    {
+      "path": "edit-trailer.py",
+      "bytes": 10771,
+      "sha256": "2f9f0feda22fa43e714a8df3e9e7a016b412701e383d0c796a5ca8914aab3bd1"
+    },
+    {
+      "path": "EDIT_PIPELINE.md",
+      "bytes": 3728,
+      "sha256": "ca649883f33acb892d51bc3a1903090f04e91fcbdb1cde6ce55fcaaab56ec61b"
+    },
+    {
+      "path": "trailer-inputs.json",
+      "bytes": 4352,
+      "sha256": "df7fbbbaad0ac2415ac065edaf34a41e3bb1ffdd3116a916a19b28d7b8979962"
+    },
+    {
+      "path": "trailer-edit-report.json",
+      "bytes": 8377,
+      "sha256": "8e387cfa38bce2925ba39d1ba6854f0860e5727d3e88cd4a08c98db685c02832"
+    },
+    {
+      "path": "trailer-qa.json",
+      "bytes": 2980,
+      "sha256": "eea8768671c2a787615a356520addbe61acacceb4efcf83057b00fcbd4479617"
+    },
+    {
+      "path": "Trailer-Contact-Sheet.jpg",
+      "bytes": 247544,
+      "sha256": "42bac85a9f1cc2ba8dcfcfbf99fb7f1379dcf204fa111eb8afe63867b4044646"
+    },
+    {
+      "path": "Trailer-Second-Views.jpg",
+      "bytes": 250253,
+      "sha256": "33ecc085df1ccf231cbe7c9f39203463ec64d4de81e1f77027ee257e3c4f1555"
+    },
+    {
+      "path": "capture-raw/dth-crawler.webm",
+      "bytes": 2876828,
+      "sha256": "f190e60127d0d9157ab44ed2f41c9165dcb15598a08a07559cedd2446ad6b59e"
+    },
+    {
+      "path": "capture-raw/dth-crawler-hero.png",
+      "bytes": 1243644,
+      "sha256": "51d137d2ec2a8cad98036754a7325d42082163aa84655a2b0fba36dc8faffca0"
+    },
+    {
+      "path": "capture-raw/dth-crawler-orbit.png",
+      "bytes": 1267384,
+      "sha256": "34b922724c8bb9c0cf36168f3e9882a2b40e39061c97f3ae60aca8bfc54fe84c"
+    },
+    {
+      "path": "capture-raw/rc-rig.webm",
+      "bytes": 3645136,
+      "sha256": "564779ad910f33d0c36d64f63c3849b2b5639fc573205dc9b4aea99ad47f1d44"
+    },
+    {
+      "path": "capture-raw/rc-rig-hero.png",
+      "bytes": 1314284,
+      "sha256": "6749e42ea8706c1f73cdd5306df72f3af6f340a6059c214d93bd9f24847f856b"
+    },
+    {
+      "path": "capture-raw/rc-rig-orbit.png",
+      "bytes": 1380701,
+      "sha256": "cb83eac1cd55fe2dc7e803b24ac79aecb819ad4dbc7c6c219a9992c589fc5973"
+    },
+    {
+      "path": "capture-raw/oil-derrick.webm",
+      "bytes": 3794072,
+      "sha256": "812c14aaf36c17effb495bdaf3a808c8a68c9335417170c736d06c7c5bac7af0"
+    },
+    {
+      "path": "capture-raw/oil-derrick-hero.png",
+      "bytes": 1060841,
+      "sha256": "1cfb243f278ef23f01e17579760f9093866be4ba109a67acb3daf78fa3247129"
+    },
+    {
+      "path": "capture-raw/oil-derrick-orbit.png",
+      "bytes": 1088592,
+      "sha256": "f77d6c697ead350a4ef1e1636352857a2594ee7e9fca2f1ad50a0c625e8001d2"
+    },
+    {
+      "path": "capture-raw/longhole-rig.webm",
+      "bytes": 4008559,
+      "sha256": "feb8a5ac270d910b7145e93b5e0c2108cb4afc1442a530978bf434a7017842b3"
+    },
+    {
+      "path": "capture-raw/longhole-rig-hero.png",
+      "bytes": 1403587,
+      "sha256": "13fe3875ef823d3568e0580a9478d8ed1bf446205be8c38b741a2f6e2f7c10d2"
+    },
+    {
+      "path": "capture-raw/longhole-rig-orbit.png",
+      "bytes": 1389044,
+      "sha256": "db1a641bdad3ed513d569aab684bbfd0b2fa49f2244b7588e738315cc4253626"
+    },
+    {
+      "path": "capture-raw/piling-leader.webm",
+      "bytes": 4690267,
+      "sha256": "b83fc898c602db42287af68cb6d847cd807fdf0e01a2e1ebed808ca34f030092"
+    },
+    {
+      "path": "capture-raw/piling-leader-hero.png",
+      "bytes": 1137173,
+      "sha256": "f7e62adcc8077c099a51b7775b288d635ccbb0aebf5fa71d35d3617173729391"
+    },
+    {
+      "path": "capture-raw/piling-leader-orbit.png",
+      "bytes": 1073576,
+      "sha256": "d55c591e992c84be8fc69dd391deee51763d1f519f57c4f53f353deca01fa17d"
+    }
+  ],
+  "video": {
+    "file": "Drillity-Trailer-15s.mp4",
+    "bytes": 8333561,
+    "sha256": "4b698345894379252d035fbbc3e52e0849c6bf3aab14b0a18d5249b994dcef68"
+  },
+  "archive": {
+    "file": "trailer-source-evidence.zip",
+    "bytes": 31269300,
+    "sha256": "0ea431752406ddfcee12e4f5038e6585e749010da8d797a6ff8be5a5b49d0ee3"
+  },
+  "excluded": "Downloaded encoder binary/wheel, duplicate anonymous recorder copies, failed padding export and temporary edit intermediates remain local. All five named raw WebMs, ten source PNGs, final contact sheets, scripts, source proof and final QA are preserved."
+}
