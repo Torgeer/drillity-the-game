@@ -1,0 +1,585 @@
+{
+  "scope": "Real CPU simulation/progression. Short synthetic contracts are boundary fixtures; no rendered UI or phone proof.",
+  "initialHashes": {
+    "src/core/contract.js": "dfb40a897139a7a67fc9d62a2d17a473096a51f42513becca6e3391767e3cf53",
+    "src/game/data.js": "9b40e3e60237882f72d3573e1425b6a0cffa64a25c0a3a38eaa61445584feab3",
+    "src/game/equipment-support.js": "f4fbb68c439cd2ceb210c9305e4da3479f4c5784a1db7029cca6842df3348666",
+    "src/game/progression.js": "75489bd63d38daad3082a138c7516b35014950ee074045b4706184bedb39c991",
+    "src/sim/drilling.js": "da4a5f214e02f128b6ed8beecf9b14637bde46799f9b4860724b34acbf09c0ec",
+    "src/sim/sample-ledger.js": "6d17b4da3b4906f12c1d1fc7c0f272a83ab701b1ebd5392bc1194ff8dd73f45e",
+    "src/sim/sample-product.js": "29992d3fd17348722a8b4c583da59bc82b757a6078406903a4a6450c131d0f0d",
+    "src/ui/screens/site.js": "e836a292f85a616894dfdc401d373610162462089fe72109fbb5d1f86729e6ff",
+    "src/ui/screens/results.js": "373591702151714496206bfc79a25fc6d1e4334f1e8399cab703177967668497"
+  },
+  "finalHashes": {
+    "src/core/contract.js": "dfb40a897139a7a67fc9d62a2d17a473096a51f42513becca6e3391767e3cf53",
+    "src/game/data.js": "9b40e3e60237882f72d3573e1425b6a0cffa64a25c0a3a38eaa61445584feab3",
+    "src/game/equipment-support.js": "f4fbb68c439cd2ceb210c9305e4da3479f4c5784a1db7029cca6842df3348666",
+    "src/game/progression.js": "75489bd63d38daad3082a138c7516b35014950ee074045b4706184bedb39c991",
+    "src/sim/drilling.js": "da4a5f214e02f128b6ed8beecf9b14637bde46799f9b4860724b34acbf09c0ec",
+    "src/sim/sample-ledger.js": "6d17b4da3b4906f12c1d1fc7c0f272a83ab701b1ebd5392bc1194ff8dd73f45e",
+    "src/sim/sample-product.js": "29992d3fd17348722a8b4c583da59bc82b757a6078406903a4a6450c131d0f0d",
+    "src/ui/screens/site.js": "e836a292f85a616894dfdc401d373610162462089fe72109fbb5d1f86729e6ff",
+    "src/ui/screens/results.js": "373591702151714496206bfc79a25fc6d1e4334f1e8399cab703177967668497"
+  },
+  "sourceStable": true,
+  "passed": 20,
+  "total": 20,
+  "results": [
+    {
+      "name": "core and sonic finish only after real final retrieval and handling; exact intervals reach settlement",
+      "ok": true
+    },
+    {
+      "name": "waiting at the actual barrel boundary cannot drill, wear, extend rods or pay",
+      "ok": true
+    },
+    {
+      "name": "first-step tiny final slice charges wear for accepted drilling without overshooting bore coordinates",
+      "ok": true
+    },
+    {
+      "name": "sonic retrieval refuses uncased interval and a sample start never yields an immediate product",
+      "ok": true
+    },
+    {
+      "name": "pause freezes each real sampling operation and refuses actions without accumulating catch-up",
+      "ok": true
+    },
+    {
+      "name": "abort and same-contract replacement attempt cannot finish old timed sampling work",
+      "ok": true
+    },
+    {
+      "name": "duplicate actual completion preserves every player total and the saved sample product",
+      "ok": true
+    },
+    {
+      "name": "missing, pending, wrong-identity and malformed product completions cannot consume a real attempt",
+      "ok": true
+    },
+    {
+      "name": "a completed sample product survives actual progression JSON save and reload",
+      "ok": true
+    },
+    {
+      "name": "actual mid-hole save reload restarts a fresh physical attempt without inherited sample intervals",
+      "ok": true
+    },
+    {
+      "name": "actual Site callbacks distinguish started retrieval from completed custody and do not lose a handled row between polls",
+      "ok": true
+    },
+    {
+      "name": "actual Site sampling observer rejects stale prior-attempt or unmounted-screen snapshots",
+      "ok": true
+    },
+    {
+      "name": "actual Results summary uses only its authenticated product receipt; preview and stale payload stay unmeasured",
+      "ok": true
+    },
+    {
+      "name": "malformed saved sample geometry is rejected while a real compatible backup still restores the settled record",
+      "ok": true
+    },
+    {
+      "name": "core barrel handling does not add a rod; the separate coincident rod boundary still needs a connection",
+      "ok": true
+    },
+    {
+      "name": "incompatible mid-hole bit changes reject before trip, while compatible and default trips preserve current sample evidence",
+      "ok": true
+    },
+    {
+      "name": "unmodified generated core and sonic contract holes produce authenticated handled interval receipts",
+      "ok": true
+    },
+    {
+      "name": "capacity provenance survives live telemetry, completion, settlement, Results and JSON reload without promoting sonic to measured capacity",
+      "ok": true
+    },
+    {
+      "name": "wrong or missing capacity provenance rejects a genuinely completed new sampling receipt before payment",
+      "ok": true
+    },
+    {
+      "name": "older settled product without capacity basis remains unrecorded on load while a wrong recorded basis is rejected",
+      "ok": true
+    }
+  ],
+  "observations": [
+    {
+      "method": "core",
+      "target": 0.5,
+      "intervals": 1,
+      "rods": 0,
+      "timeSec": 7.6,
+      "product": {
+        "version": 1,
+        "methodId": "core",
+        "runId": 1,
+        "attemptId": 2,
+        "targetDepthM": 0.5,
+        "barrelCapacityM": 1.5,
+        "drilledDepthM": 0.5,
+        "casedDepthM": 0,
+        "intervals": [
+          {
+            "index": 1,
+            "fromM": 0,
+            "toM": 0.5,
+            "retrieval": {
+              "provenance": "wireline-inner-tube",
+              "sequence": 193
+            },
+            "handling": {
+              "container": "box",
+              "sequence": 194
+            }
+          }
+        ],
+        "lastEvent": {
+          "type": "handle",
+          "runId": 1,
+          "attemptId": 2,
+          "sequence": 194,
+          "intervalIndex": 1,
+          "container": "box"
+        }
+      }
+    },
+    {
+      "method": "core",
+      "target": 3,
+      "intervals": 2,
+      "rods": 0,
+      "timeSec": 22,
+      "product": {
+        "version": 1,
+        "methodId": "core",
+        "runId": 3,
+        "attemptId": 4,
+        "targetDepthM": 3,
+        "barrelCapacityM": 1.5,
+        "drilledDepthM": 3,
+        "casedDepthM": 0,
+        "intervals": [
+          {
+            "index": 1,
+            "fromM": 0,
+            "toM": 1.5,
+            "retrieval": {
+              "provenance": "wireline-inner-tube",
+              "sequence": 594
+            },
+            "handling": {
+              "container": "box",
+              "sequence": 595
+            }
+          },
+          {
+            "index": 2,
+            "fromM": 1.5,
+            "toM": 3,
+            "retrieval": {
+              "provenance": "wireline-inner-tube",
+              "sequence": 1199
+            },
+            "handling": {
+              "container": "box",
+              "sequence": 1200
+            }
+          }
+        ],
+        "lastEvent": {
+          "type": "handle",
+          "runId": 3,
+          "attemptId": 4,
+          "sequence": 1200,
+          "intervalIndex": 2,
+          "container": "box"
+        }
+      }
+    },
+    {
+      "method": "core",
+      "target": 3.25,
+      "intervals": 3,
+      "rods": 1,
+      "timeSec": 31.2,
+      "product": {
+        "version": 1,
+        "methodId": "core",
+        "runId": 5,
+        "attemptId": 6,
+        "targetDepthM": 3.25,
+        "barrelCapacityM": 1.5,
+        "drilledDepthM": 3.25,
+        "casedDepthM": 0,
+        "intervals": [
+          {
+            "index": 1,
+            "fromM": 0,
+            "toM": 1.5,
+            "retrieval": {
+              "provenance": "wireline-inner-tube",
+              "sequence": 594
+            },
+            "handling": {
+              "container": "box",
+              "sequence": 595
+            }
+          },
+          {
+            "index": 2,
+            "fromM": 1.5,
+            "toM": 3,
+            "retrieval": {
+              "provenance": "wireline-inner-tube",
+              "sequence": 1199
+            },
+            "handling": {
+              "container": "box",
+              "sequence": 1200
+            }
+          },
+          {
+            "index": 3,
+            "fromM": 3,
+            "toM": 3.25,
+            "retrieval": {
+              "provenance": "wireline-inner-tube",
+              "sequence": 1302
+            },
+            "handling": {
+              "container": "box",
+              "sequence": 1303
+            }
+          }
+        ],
+        "lastEvent": {
+          "type": "handle",
+          "runId": 5,
+          "attemptId": 6,
+          "sequence": 1303,
+          "intervalIndex": 3,
+          "container": "box"
+        }
+      }
+    },
+    {
+      "method": "core",
+      "target": 6.5,
+      "intervals": 5,
+      "rods": 2,
+      "timeSec": 55.9,
+      "product": {
+        "version": 1,
+        "methodId": "core",
+        "runId": 7,
+        "attemptId": 8,
+        "targetDepthM": 6.5,
+        "barrelCapacityM": 1.5,
+        "drilledDepthM": 6.5,
+        "casedDepthM": 0,
+        "intervals": [
+          {
+            "index": 1,
+            "fromM": 0,
+            "toM": 1.5,
+            "retrieval": {
+              "provenance": "wireline-inner-tube",
+              "sequence": 594
+            },
+            "handling": {
+              "container": "box",
+              "sequence": 595
+            }
+          },
+          {
+            "index": 2,
+            "fromM": 1.5,
+            "toM": 3,
+            "retrieval": {
+              "provenance": "wireline-inner-tube",
+              "sequence": 1199
+            },
+            "handling": {
+              "container": "box",
+              "sequence": 1200
+            }
+          },
+          {
+            "index": 3,
+            "fromM": 3,
+            "toM": 4.5,
+            "retrieval": {
+              "provenance": "wireline-inner-tube",
+              "sequence": 1797
+            },
+            "handling": {
+              "container": "box",
+              "sequence": 1798
+            }
+          },
+          {
+            "index": 4,
+            "fromM": 4.5,
+            "toM": 6,
+            "retrieval": {
+              "provenance": "wireline-inner-tube",
+              "sequence": 2351
+            },
+            "handling": {
+              "container": "box",
+              "sequence": 2352
+            }
+          },
+          {
+            "index": 5,
+            "fromM": 6,
+            "toM": 6.5,
+            "retrieval": {
+              "provenance": "wireline-inner-tube",
+              "sequence": 2554
+            },
+            "handling": {
+              "container": "box",
+              "sequence": 2555
+            }
+          }
+        ],
+        "lastEvent": {
+          "type": "handle",
+          "runId": 7,
+          "attemptId": 8,
+          "sequence": 2555,
+          "intervalIndex": 5,
+          "container": "box"
+        }
+      }
+    },
+    {
+      "method": "sonic",
+      "target": 0.5,
+      "intervals": 1,
+      "rods": 0,
+      "timeSec": 9.6,
+      "product": {
+        "version": 1,
+        "methodId": "sonic",
+        "runId": 9,
+        "attemptId": 10,
+        "targetDepthM": 0.5,
+        "barrelCapacityM": 3,
+        "drilledDepthM": 0.5,
+        "casedDepthM": 0.5,
+        "intervals": [
+          {
+            "index": 1,
+            "fromM": 0,
+            "toM": 0.5,
+            "retrieval": {
+              "provenance": "sonic-barrel-extraction",
+              "sequence": 72
+            },
+            "handling": {
+              "container": "sleeve",
+              "sequence": 73
+            }
+          }
+        ],
+        "lastEvent": {
+          "type": "handle",
+          "runId": 9,
+          "attemptId": 10,
+          "sequence": 73,
+          "intervalIndex": 1,
+          "container": "sleeve"
+        }
+      }
+    },
+    {
+      "method": "sonic",
+      "target": 3,
+      "intervals": 1,
+      "rods": 0,
+      "timeSec": 12.6,
+      "product": {
+        "version": 1,
+        "methodId": "sonic",
+        "runId": 11,
+        "attemptId": 12,
+        "targetDepthM": 3,
+        "barrelCapacityM": 3,
+        "drilledDepthM": 3,
+        "casedDepthM": 3,
+        "intervals": [
+          {
+            "index": 1,
+            "fromM": 0,
+            "toM": 3,
+            "retrieval": {
+              "provenance": "sonic-barrel-extraction",
+              "sequence": 427
+            },
+            "handling": {
+              "container": "sleeve",
+              "sequence": 428
+            }
+          }
+        ],
+        "lastEvent": {
+          "type": "handle",
+          "runId": 11,
+          "attemptId": 12,
+          "sequence": 428,
+          "intervalIndex": 1,
+          "container": "sleeve"
+        }
+      }
+    },
+    {
+      "method": "sonic",
+      "target": 3.25,
+      "intervals": 2,
+      "rods": 1,
+      "timeSec": 24.2,
+      "product": {
+        "version": 1,
+        "methodId": "sonic",
+        "runId": 13,
+        "attemptId": 14,
+        "targetDepthM": 3.25,
+        "barrelCapacityM": 3,
+        "drilledDepthM": 3.25,
+        "casedDepthM": 3.25,
+        "intervals": [
+          {
+            "index": 1,
+            "fromM": 0,
+            "toM": 3,
+            "retrieval": {
+              "provenance": "sonic-barrel-extraction",
+              "sequence": 427
+            },
+            "handling": {
+              "container": "sleeve",
+              "sequence": 428
+            }
+          },
+          {
+            "index": 2,
+            "fromM": 3,
+            "toM": 3.25,
+            "retrieval": {
+              "provenance": "sonic-barrel-extraction",
+              "sequence": 465
+            },
+            "handling": {
+              "container": "sleeve",
+              "sequence": 466
+            }
+          }
+        ],
+        "lastEvent": {
+          "type": "handle",
+          "runId": 13,
+          "attemptId": 14,
+          "sequence": 466,
+          "intervalIndex": 2,
+          "container": "sleeve"
+        }
+      }
+    },
+    {
+      "method": "sonic",
+      "target": 6.5,
+      "intervals": 3,
+      "rods": 2,
+      "timeSec": 39.4,
+      "product": {
+        "version": 1,
+        "methodId": "sonic",
+        "runId": 15,
+        "attemptId": 16,
+        "targetDepthM": 6.5,
+        "barrelCapacityM": 3,
+        "drilledDepthM": 6.5,
+        "casedDepthM": 6.5,
+        "intervals": [
+          {
+            "index": 1,
+            "fromM": 0,
+            "toM": 3,
+            "retrieval": {
+              "provenance": "sonic-barrel-extraction",
+              "sequence": 427
+            },
+            "handling": {
+              "container": "sleeve",
+              "sequence": 428
+            }
+          },
+          {
+            "index": 2,
+            "fromM": 3,
+            "toM": 6,
+            "retrieval": {
+              "provenance": "sonic-barrel-extraction",
+              "sequence": 861
+            },
+            "handling": {
+              "container": "sleeve",
+              "sequence": 862
+            }
+          },
+          {
+            "index": 3,
+            "fromM": 6,
+            "toM": 6.5,
+            "retrieval": {
+              "provenance": "sonic-barrel-extraction",
+              "sequence": 933
+            },
+            "handling": {
+              "container": "sleeve",
+              "sequence": 934
+            }
+          }
+        ],
+        "lastEvent": {
+          "type": "handle",
+          "runId": 15,
+          "attemptId": 16,
+          "sequence": 934,
+          "intervalIndex": 3,
+          "container": "sleeve"
+        }
+      }
+    },
+    {
+      "generated": true,
+      "method": "sonic",
+      "target": 33,
+      "contractId": "ct-nordic-sonic-9nb6i",
+      "holesInContract": 9,
+      "testedHole": 1,
+      "intervals": 11
+    },
+    {
+      "generated": true,
+      "method": "core",
+      "target": 205.8,
+      "contractId": "ct-nordic-core-3cf1g",
+      "holesInContract": 3,
+      "testedHole": 1,
+      "intervals": 138
+    }
+  ],
+  "warnings": [
+    "[progression] state.contract cleared (settled) while the world is still rendering the site (scene: site) — consumers that describe the SITE must read state.world.site, not state.contract sampling-critic-core-1",
+    "[progression] HOLE_COMPLETE with no contract anywhere — the hole is not settled: no money, no XP, no wear, no reputation [object Object]",
+    "[progression] primary save was unreadable — restored from backup"
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "passed": 12,
+  "reports": [
+    {
+      "method": "core",
+      "depth": 1,
+      "intervals": 1,
+      "rods": 0,
+      "grade": "B",
+      "timeSec": 9.3
+    },
+    {
+      "method": "core",
+      "depth": 3,
+      "intervals": 2,
+      "rods": 0,
+      "grade": "B",
+      "timeSec": 22
+    },
+    {
+      "method": "core",
+      "depth": 3.25,
+      "intervals": 3,
+      "rods": 1,
+      "grade": "B",
+      "timeSec": 31.2
+    },
+    {
+      "method": "core",
+      "depth": 6.5,
+      "intervals": 5,
+      "rods": 2,
+      "grade": "A",
+      "timeSec": 56
+    },
+    {
+      "method": "sonic",
+      "depth": 1,
+      "intervals": 1,
+      "rods": 0,
+      "grade": "A",
+      "timeSec": 10.2
+    },
+    {
+      "method": "sonic",
+      "depth": 3,
+      "intervals": 1,
+      "rods": 0,
+      "grade": "A",
+      "timeSec": 12.6
+    },
+    {
+      "method": "sonic",
+      "depth": 3.25,
+      "intervals": 2,
+      "rods": 1,
+      "grade": "A",
+      "timeSec": 24.2
+    },
+    {
+      "method": "sonic",
+      "depth": 6.5,
+      "intervals": 3,
+      "rods": 2,
+      "grade": "A",
+      "timeSec": 39.5
+    },
+    {
+      "method": "core",
+      "generated": true,
+      "contractId": "ct-nordic-core-5e3vi",
+      "targetDepth": 68.2,
+      "holesInTender": 1,
+      "completedHoles": 1,
+      "intervals": 46
+    },
+    {
+      "method": "sonic",
+      "generated": true,
+      "contractId": "ct-nordic-sonic-5e3vi",
+      "targetDepth": 12.7,
+      "holesInTender": 8,
+      "completedHoles": 1,
+      "intervals": 5
+    }
+  ],
+  "limits": "CPU public gameplay and factual UI helpers; browser/mobile and material quality economics remain unverified."
+}

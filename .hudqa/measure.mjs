@@ -144,8 +144,10 @@ if (REMOVE) {
    was given ../tools/devserver.mjs for exactly this and the file's own header
    names this harness as the other caller. If the port already answers that
    server is used and nothing is started. */
-const SERVER = await ensureServer(PORT, (s) => console.log(s));
-const b = await chromium.launch({ args: ['--mute-audio'], headless: false, channel: 'chrome' });
+let SERVER, b, runFailure;
+try {
+SERVER = await ensureServer(PORT, (s) => console.log(s));
+b = await chromium.launch({ args: ['--mute-audio'], headless: false, channel: 'chrome' });
 const c = await b.newContext({
   ...devices['iPhone 13 Pro'],
   viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true,
@@ -558,5 +560,17 @@ if (REMOVE) {
 json.gatesFailed = failed;
 writeFileSync(resolve(HERE, `${TAG}-report.txt`), out.join('\n'), 'utf8');
 if (AS_JSON) writeFileSync(resolve(HERE, `${TAG}-report.json`), JSON.stringify(json, null, 2), 'utf8');
-await b.close();
-SERVER.stop();
+} catch (error) {
+  runFailure = error;
+  throw error;
+} finally {
+  // Release only resources this invocation acquired, including on a failed
+  // launch, boot or measurement. A reused developer server stays running.
+  const cleanupFailures = [];
+  try { await b?.close(); } catch (error) { cleanupFailures.push(error); }
+  try { if (SERVER?.spawned) await SERVER.stop(); } catch (error) { cleanupFailures.push(error); }
+  if (cleanupFailures.length) {
+    throw new AggregateError([...(runFailure ? [runFailure] : []), ...cleanupFailures],
+      'HUD measurement resource cleanup failed', { cause: runFailure || cleanupFailures[0] });
+  }
+}

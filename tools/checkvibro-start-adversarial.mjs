@@ -73,8 +73,8 @@ async function career(store = memoryStorage(), restore = false, accept = true) {
     state.garage.rigId=RIGS.find(r=>r.methods.includes('driven-pile')).id;
     state.garage.owned.push(VIBRO,IMPACT,'dolly-hardwood','precast-pile-350');
     state.garage.loadout={hammer:accept ? IMPACT : VIBRO,dolly:'dolly-hardwood',install:'precast-pile-350'};
-    // Existing jobs can predate containment, or equipment can change after a
-    // supported acceptance. Preserve that recovery path without evading preflight.
+    // Existing jobs can predate containment. Direct assignment here represents
+    // older save data; the public fit API must now refuse this unsupported item.
     if(accept)assert.equal(progression.acceptContract(structuredClone(contract)).ok,true);
     state.garage.loadout.hammer=VIBRO;
   }
@@ -127,7 +127,14 @@ test('restored accepted vibro loadout is retained but cannot start a paid impact
   const initial=await career();initial.sim.dispose();
   const f=await career(initial.store,true);
   try{assert.equal(f.state.garage.loadout.hammer,VIBRO);assert.ok(f.progression.run);
-    reject(f,undefined);assert.equal(f.progression.run.attemptId,null);}
+    reject(f,undefined);assert.equal(f.progression.run.attemptId,null);
+    const money=f.state.player.money,owned=[...f.state.garage.owned],runId=f.progression.run.runId;
+    assert.equal(f.progression.equip('hammer',null).ok,true,'restored unsupported item remains removable');
+    assert.equal(f.state.garage.loadout.hammer,null);assert.deepEqual(f.state.garage.owned,owned);
+    assert.equal(f.progression.equip('hammer',IMPACT).ok,true);
+    assert.equal(f.state.player.money,money,'public recovery fits owned equipment without a charge');
+    assert.equal(f.progression.run.runId,runId,'recovery preserves the accepted job');
+    assert.equal(f.sim.startHole(f.state.contract).programme.hammerItemId,IMPACT);}
   finally{f.sim.dispose();}
 });
 
@@ -182,19 +189,18 @@ test('foreign unsupported preflight and acceptance preserve all money, identity 
   }finally{f.sim.dispose();}
 });
 
-test('public equip after ready quote is rechecked before mobilisation; fitting impact recovers',async()=>{
+test('unavailable public fit preserves a ready impact quote and charges only once on acceptance',async()=>{
   const f=await career(undefined,false,false),c={...contract,regionId:'german-site'};
   try{
     assert.equal(f.progression.equip('hammer',IMPACT).ok,true);
     const ready=f.progression.previewContract(c);assert.equal(ready.ok,true);assert.ok(ready.mobilisation>0);
-    assert.equal(f.progression.equip('hammer',VIBRO).ok,true);assert.equal(f.progression.save(),true);
-    const before=snapshot(f),refused=f.progression.acceptContract(c);
+    const before=snapshot(f),refused=f.progression.equip('hammer',VIBRO);
     assert.equal(refused.ok,false);assert.equal(refused.code,'unsupported-piling-hammer');assert.equal(snapshot(f),before);
-    assert.equal(f.progression.equip('hammer',IMPACT).ok,true);const money=f.state.player.money;
+    assert.equal(f.state.garage.loadout.hammer,IMPACT);const money=f.state.player.money;
     const accepted=f.progression.acceptContract(c);assert.equal(accepted.ok,true);
     assert.equal(accepted.mobilisation,ready.mobilisation);assert.equal(f.state.player.money,money-ready.mobilisation);
     assert.equal(f.sim.startHole(c).programme.hammerItemId,IMPACT);
-    measurements.push({case:'foreign charge only after support recovery',mobilisation:accepted.mobilisation});
+    measurements.push({case:'foreign charge only after accepted supported fit',mobilisation:accepted.mobilisation});
   }finally{f.sim.dispose();}
 });
 

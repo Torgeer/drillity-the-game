@@ -7,6 +7,7 @@ import assert from 'node:assert/strict';
 import { createGameState, createBus, makeRandom, EVENTS } from '../src/core/contract.js';
 import { createProgression } from '../src/game/progression.js';
 import { createDrillSim } from '../src/sim/drilling.js';
+import { emergencyContract } from '../src/game/economy.js';
 
 const originalStorage = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
 const cases = [];
@@ -107,10 +108,10 @@ test('a borrowed rescue identity in another zero-fee region is refused', async (
 test('rescue with positive mobilisation remains unaffordable in debt', async () => {
   const f = await fixture();
   try {
-    // Rescue uses the first saved unlocked region. A restored ordering can
-    // target a paid destination; returning to Nordic itself is priced at zero.
+    // Use an explicit foreign posting: the normal rescue provider deliberately
+    // keeps Nordic home even if the saved unlocked list has another order.
     f.state.unlocked.regions = ['german-site', 'nordic'];
-    const quote = assertRefusedWithoutMutation(f, f.progression.rescueContract(), /Mobilisation/);
+    const quote = assertRefusedWithoutMutation(f, emergencyContract(f.state.player.level, 'german-site'), /Mobilisation/);
     assert.ok(quote.mobilisation > 0, 'a real cross-region fee was measured');
   } finally { f.close(); }
 });

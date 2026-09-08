@@ -18,6 +18,7 @@
  */
 import { EVENTS, SCENES, clamp } from '../../core/contract.js';
 import { allRoles, allCerts, roleAt, regionInfo } from './catalog.js';
+import { xpDisplay } from '../xp-display.js';
 
 const TAB_CERTS = 'certs', TAB_SKILLS = 'skills', TAB_LADDER = 'ladder';
 
@@ -339,7 +340,11 @@ export function createCareerScreen(app) {
 
   /* ── Role ladder + the Talent posting fields ──────────────────────────── */
   function renderLadder() {
-    const lvl = level();
+    const p = state.player || {};
+    const xpp = xpDisplay(app, p.xp, level());
+    // Match the role and level label to the curve, including level-up events
+    // that arrive before progression updates the stored level field.
+    const lvl = xpp.level;
     const now = roleAt(lvl);
     const wrap = C.h('div');
 
@@ -406,7 +411,6 @@ export function createCareerScreen(app) {
     C.stagger(ladder.children);
     wrap.appendChild(ladder);
 
-    const p = state.player || {};
     /* `p.xp / app.xpForLevel(lvl)` used to draw this bar, and it divides a
        CUMULATIVE lifetime XP total by ONE level's increment — the ratio passes
        1 during level 2 and the bar is pinned full for the rest of the game,
@@ -416,19 +420,25 @@ export function createCareerScreen(app) {
        shell stopped inventing one (app.xpForLevel). An empty bar and the XP
        total on its own, rather than a fraction of an unpublished denominator
        and a caption naming it. */
-    const xpp = app.xpProgress(p.xp, lvl);
-    const bar = C.Bar({ kind: 'amber', value: xpp.frac ?? 0 });
+    const atLevelCap = xpp.capped;
+    const bar = C.Bar({ kind: 'amber', value: xpp.frac ?? 0, label: 'Career level progress' });
+    if (atLevelCap) bar.el.setAttribute('aria-valuetext', `Level ${xpp.level}: maximum level reached`);
     bar.el.classList.add('bar--tall', 'bar--smooth');
     if (xpp.frac === null) { bar.el.removeAttribute('role'); bar.el.setAttribute('aria-hidden', 'true'); }
     wrap.appendChild(C.SectionTitle('Progress'));
     wrap.appendChild(C.h('div.panel.panel--pad', C.h('div.panel__body',
       C.h('div.rxp__head', C.h('span.label', { text: `LVL ${lvl}` }),
         C.h('span.label', {
-          text: xpp.need === null
-            ? `${Math.round(xpp.into)} XP`
-            : `${Math.round(xpp.into)} / ${Math.round(xpp.need)} XP`,
+          text: xpp.into === null ? 'XP unavailable'
+            : atLevelCap ? 'Maximum level reached'
+            : xpp.need === null ? `${Math.round(xpp.into)} XP`
+              : `${Math.round(xpp.into)} / ${Math.round(xpp.need)} XP`,
         })),
       bar.el,
+      atLevelCap ? C.h('p.cdetail__brief', {
+        text: 'Contracts continue at the maximum level. You can renew certificates, spend remaining skill points and improve your equipment.',
+        style: { 'margin-top': '12px' },
+      }) : null,
       C.h('dl.specs', { style: { 'margin-top': '12px' } },
         C.SpecRow('Metres drilled', Math.round(p.stats?.metresDrilled || 0).toLocaleString('en-US') + ' m'),
         C.SpecRow('Holes completed', p.stats?.holesDone || 0),

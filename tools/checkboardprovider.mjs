@@ -54,8 +54,12 @@ function rescueOn(board) {
 function select(fixture, contract) {
   const result = fixture.progression.acceptContract(contract);
   assert.equal(result.ok, true, result.reason);
-  assert.equal(fixture.state.contract, contract, 'Selection accepts the displayed raw contract');
-  assert.equal(fixture.progression.run.contract, contract);
+  assert.deepEqual(fixture.state.contract, contract, 'Selection accepts the displayed work and economics');
+  assert.equal(fixture.progression.run.contract, fixture.state.contract, 'State and run share the accepted snapshot');
+  if (contract.emergency === true) {
+    assert.notEqual(fixture.state.contract, contract, 'A recovery posting is snapshotted before acceptance');
+    assert.equal(Object.isFrozen(fixture.state.contract), true, 'Accepted recovery terms are immutable');
+  }
   return result;
 }
 

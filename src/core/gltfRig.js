@@ -826,6 +826,20 @@ export function createGltfRigs(ctx) {
     const spindle = nodes.pivots.get('spindle');
     if (spindle) dyn.spindle = spindle;
 
+    if (prep.id === 'piling-leader') {
+      const ram = nodes.slides.get('hammer-ram');
+      const strokeM = ram?.userData?.stroke_m;
+      if (!ram || ram.parent !== carriage || !Number.isFinite(strokeM) || strokeM <= 0)
+        throw new Error('piling-leader: hammer-ram requires its authored carriage parent and positive stroke_m');
+      // blender/piling_leader.py creates this joint on local +Z and publishes
+      // RAM_STROKE from the cited hammer brochure. blender/lib/rig.py exports
+      // Y-up, so the actual GLB parent-local lift is +Y. The legacy axis:'z'
+      // extra remains Blender-space; do not interpret it as a runtime axis.
+      // Separate from procedural pileHammer: its shock/dolly helpers assume
+      // different carriage coordinates and different pile parenting.
+      dyn.impactRam = { node: ram, rest: ram.position.clone(), axis: 'y', strokeM };
+    }
+
     /* The clip player. Code drives continuous state (rpm, feed); clips drive
        choreography (a rod change). They overlap on a small known set and are
        settled by ordering plus a per-channel blend FROM THE LIVE VALUE, so no

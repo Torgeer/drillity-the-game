@@ -14,8 +14,10 @@ import {
   SCENES, EVENTS, GROUND, fmtMoney, fmtDepth, clamp,
 } from '../core/contract.js';
 import * as C from './components.js';
+import { createModalFocus } from './modal-focus.js';
 import { DUR, dur } from '../core/motion.js';
 import * as CAT from './screens/catalog.js';
+import { subscribeSaveFeedback } from './save-status.js';
 
 import { createBootScreen }      from './screens/boot.js';
 import { createMenuScreen }      from './screens/menu.js';
@@ -137,6 +139,7 @@ export function createUI(ctx) {
   const unsubs = [];
   const toasts = [];              // { el, life }
   let overlayStack = [];
+  const modalFocus = createModalFocus({ getStack: () => overlayStack, fallback: () => current?.inst.el || root });
   let reduced = false;
   let viewport = { w: window.innerWidth, h: window.innerHeight, dpr: window.devicePixelRatio || 1 };
   let boardCache = null;
@@ -262,6 +265,26 @@ export function createUI(ctx) {
     return kind === 'success' ? 'check'
       : (kind === 'danger' || kind === 'warn') ? 'alert' : 'info';
   }
+  function placeNotifications() {
+    if (disposed) return;
+    const overlay = overlayStack.at(-1);
+    const menuHost = !overlay && current?.inst.notificationHost;
+    const garageHost = !overlay && current?.id === SCENES.GARAGE ? current.inst.el : null;
+    const host = overlay?.box || menuHost || garageHost || stage;
+    const anchor = overlay?.notificationAnchor || (menuHost
+      ? [...menuHost.children].find(el => el !== toastsEl)
+      : host === stage ? overlayEl : null);
+    if (toastsEl.parentElement !== host || (anchor && toastsEl.nextSibling !== anchor)
+      || (!anchor && host.lastElementChild !== toastsEl)) host.insertBefore(toastsEl, anchor || null);
+    toastsEl.classList.toggle('toasts--embedded', host !== stage);
+    // The persistent notice is the complete save-status message. Keep money
+    // and other feedback, but do not tell someone already in Settings to open
+    // Settings again. Reconcile after subscribers render the current notice.
+    const noticeHosts = [current?.inst.el, ...overlayStack.map(rec => rec.box)];
+    const hasSaveNotice = noticeHosts.some(el => el?.querySelector('.save-notice:not([hidden])'));
+    for (const el of toastsEl.children) el.hidden = el.dataset.notificationKey === 'save-status' && hasSaveNotice;
+    toastsEl.hidden = ![...toastsEl.children].some(el => !el.hidden);
+  }
   function toast(msg, kind = 'info', opts = {}) {
     const text = String(msg);
     const key = opts.key || text;
@@ -280,6 +303,7 @@ export function createUI(ctx) {
       // to a different slot just because its text was refreshed.
       toasts.splice(toasts.indexOf(live), 1);
       toasts.push(live);
+      placeNotifications(); queueMicrotask(placeNotifications);
       return live;
     }
 
@@ -288,10 +312,12 @@ export function createUI(ctx) {
       C.Icon(toastIcon(kind), 16),
       label,
     );
+    t.dataset.notificationKey = key;
     toastsEl.appendChild(t);
     const rec = { el: t, label, key, kind, life };
     toasts.push(rec);
     while (toasts.length > TOAST_MAX) killToast(toasts[0]);
+    placeNotifications(); queueMicrotask(placeNotifications);
     return rec;
   }
   function killToast(rec) {
@@ -299,19 +325,17 @@ export function createUI(ctx) {
     if (i < 0) return;
     toasts.splice(i, 1);
     rec.el.classList.add('is-out');
-    setTimeout(() => rec.el.remove(), dur(DUR.d3, reduced) * 1000 + 1000 / 60);
+    setTimeout(() => { rec.el.remove(); placeNotifications(); }, dur(DUR.d3, reduced) * 1000 + 1000 / 60);
   }
 
-  function closeOverlay(o) {
+  function closeOverlay(o, { restore = true } = {}) {
     const i = overlayStack.indexOf(o);
-    if (i >= 0) overlayStack.splice(i, 1);
+    if (i < 0) return;
+    overlayStack.splice(i, 1);
     o.el.classList.add('is-out');
-    setTimeout(() => {
-      o.el.remove();
-      const screen = o.returnFocus?.closest('.screen');
-      const screenLeaving = screen && (screen.hidden || screen.classList.contains('is-leaving') || screen.classList.contains('is-leaving--back'));
-      if (!overlayStack.length && !screenLeaving && o.returnFocus?.isConnected) o.returnFocus.focus();
-    }, dur(DUR.d3, reduced) * 1000 + 1000 / 60);
+    placeNotifications();
+    modalFocus.close(o, { restore });
+    setTimeout(() => o.el.remove(), dur(DUR.d3, reduced) * 1000 + 1000 / 60);
     o.onClose && o.onClose();
   }
 
@@ -334,11 +358,14 @@ export function createUI(ctx) {
       o.actions && o.actions.length ? C.h('div.sheet__actions', ...o.actions) : null,
     );
     const el = C.h('div.sheet', scrim, box);
-    const rec = { el, onClose: o.onClose, close: () => closeOverlay(rec) };
+    const rec = { el, box, notificationAnchor: body, initialFocus: closeBtn, returnFocus: document.activeElement,
+      onClose: o.onClose, close: () => closeOverlay(rec) };
     C.tap(scrim, () => closeOverlay(rec));
     C.tap(closeBtn, () => closeOverlay(rec));
     overlayEl.appendChild(el);
     overlayStack.push(rec);
+    placeNotifications();
+    modalFocus.open(rec);
     return rec;
   }
 
@@ -361,15 +388,14 @@ export function createUI(ctx) {
         ),
       );
       const el = C.h('div.modal', scrim, box);
-      const rec = { el, returnFocus, onClose: () => {
+      const rec = { el, box, notificationAnchor: box.querySelector('.modal__a'), initialFocus: box.querySelector('.btn--quiet'), returnFocus, onClose: () => {
         if (!settled) { settled = true; resolve(false); }
       } };
       C.tap(scrim, () => done(false));
       overlayEl.appendChild(el);
       overlayStack.push(rec);
-      requestAnimationFrame(() => {
-        if (overlayStack.at(-1) === rec) box.querySelector('.btn--quiet')?.focus();
-      });
+      placeNotifications();
+      modalFocus.open(rec);
     });
   }
 
@@ -578,6 +604,11 @@ export function createUI(ctx) {
     const inst = instantiate(sceneId);
     if (!inst) return;
 
+    // Overlays belong to the screen that opened them. Navigation must not keep
+    // its dialog active, or later send focus back to a retired screen.
+    const dismissedOverlay = overlayStack.length > 0;
+    for (const overlay of [...overlayStack].reverse()) closeOverlay(overlay, { restore: false });
+
     // Retire whatever is on screen.
     if (leaving) { finishLeave(); }
     if (current) {
@@ -600,6 +631,8 @@ export function createUI(ctx) {
 
     try { inst.mount?.(params || {}); } catch (e) { console.error(`[ui] mount ${sceneId}`, e); }
     try { inst.resize?.(viewport.w, viewport.h, viewport.dpr); } catch (e) { console.error(e); }
+    placeNotifications();
+    if (dismissedOverlay) modalFocus.focusFallback();
 
     if (state.scene !== sceneId) {
       state.scene = sceneId;
@@ -662,6 +695,7 @@ export function createUI(ctx) {
   }
 
   function back() {
+    if (current?.inst.onBack) { current.inst.onBack(); return; }
     const target = current ? PARENT[current.id] : null;
     show(target || SCENES.MENU);
   }
@@ -846,6 +880,7 @@ export function createUI(ctx) {
       CAT.useGameData(ctx.game || null);
       syncMotion();
       wire();
+      unsubs.push(subscribeSaveFeedback(ctx.progression, toast));
       window.addEventListener('keydown', onKey);
       unsubs.push(() => window.removeEventListener('keydown', onKey));
       // Boot is always first; the shell holds it until systems have settled.
@@ -914,6 +949,8 @@ ${(e && e.stack) || ''}`);
 
     dispose() {
       disposed = true;
+      for (const overlay of [...overlayStack].reverse()) closeOverlay(overlay, { restore: false });
+      modalFocus.dispose();
       // The entrance settle holds a listener and a timer on a live screen.
       clearSettle();
       if (leaving) finishLeave();
@@ -940,6 +977,12 @@ ${(e && e.stack) || ''}`);
     },
     /** Escape hatch for the integrator / QA harness. */
     get currentScene() { return current ? current.id : null; },
+    // A live hole stays accepted while its controls are unavailable. Derive
+    // this from the entire stack so closing one nested dialog cannot resume it.
+    get gameplayPaused() {
+      return disposed || current?.id !== SCENES.SITE || overlayStack.length > 0
+        || document.visibilityState === 'hidden';
+    },
     get element() { return root; },
   };
 }

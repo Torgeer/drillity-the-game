@@ -3,9 +3,10 @@ import * as C from '../../src/ui/components.js';
 import * as game from '../../src/game/data.js';
 import { useGameData, SITE_ACTIONS } from '../../src/ui/screens/catalog.js';
 import { DUR, dur } from '../../src/core/motion.js';
-import { fmtMoney } from '../../src/core/contract.js';
+import { fmtMoney, createGameState, createBus, EVENTS, SCENES } from '../../src/core/contract.js';
 import '../../src/ui/styles.css';
-import { makeConfirmation } from 'fixture:confirmation';
+import { makeConfirmation, makeToastHost } from 'fixture:confirmation';
+import { attachAcceptedCareer, careerSnapshot } from './drilling-view-career.js';
 
 // No renderer or simulation is imported. The real catalogue transitively imports
 // static tool definitions; no geometry builders or asset loaders are called.
@@ -14,16 +15,19 @@ useGameData(game);
 const root = C.h('div.ui-root', C.h('div.ui-letterbox'));
 const stage = C.h('div.ui-stage.is-site');
 const screens = C.h('div.screens');
+// This status host is created from the actual shell declaration. Its placement
+// during confirmations is governed by the extracted production helper.
+const toastsEl = makeToastHost(C);
 const overlayEl = C.h('div.overlays');
-stage.append(screens, overlayEl); root.append(stage); document.body.append(root);
+stage.append(screens, toastsEl, overlayEl); root.append(stage); document.body.append(root);
 let reduced = false, screen = null, app = null, telemetry = null;
 let ownedFrame=0,lastFrame=performance.now();
 // The production main loop clamps dt to [0,1/15] (src/main.js). Run the
 // actual screen every browser frame while fixtures settle or await input.
 function frame(now){const dt=Math.max(0,Math.min((now-lastFrame)/1000,1/15));lastFrame=now;if(screen?.el.isConnected)screen.update(dt);ownedFrame=requestAnimationFrame(frame);}
 ownedFrame=requestAnimationFrame(frame);
-const effects = { aborts: [], nav: [], inputs: [], actions: [] };
-const confirmation = makeConfirmation(C, DUR, dur, overlayEl, () => reduced);
+const effects = { aborts: [], nav: [], inputs: [], actions: [], abandonments: [], saves: [], toasts: [] };
+const confirmation = makeConfirmation(C, DUR, dur, overlayEl, () => reduced, { stage, toastsEl, SCENES });
 const programmes = {
   rc: {kind:'rc', bagsCut:1, lastBag:{index:1,fromM:0,toM:1,massKg:15.12,recovery01:.91,contam01:.02,rating:'good'}},
   jumbo: {kind:'jumbo',roundIndex:1,holesDone:8,holesPerRound:12,roundsFired:0,pull01:.92,overbreak:.08,halfBarrel01:.74,advanceM:3.1},
@@ -41,7 +45,7 @@ const cases = [
 function step(dt=.13) { screen.update(dt); }
 async function settle() { await new Promise(requestAnimationFrame); await new Promise(requestAnimationFrame); }
 async function mount(family, mode='steady', motion=false, options={}) {
-  if(screen) {screen.unmount();screen.destroy();screen.el.remove();}
+  if(screen) {screen.unmount();screen.destroy();screen.el.remove();app.ctx.progression?.dispose();}
   reduced=motion;root.classList.toggle('reduced-motion',reduced);
   const mid=cases.find(c=>c[0]===family)?.[1];
   const method=game.METHODS.find(m=>m.id===mid);
@@ -56,16 +60,20 @@ async function mount(family, mode='steady', motion=false, options={}) {
   if(family==='cpt') telemetry.actions=[{id:'dissipation',label:'DISSIPATION TEST'},{id:'terminate',label:'TERMINATE'}];
   if(family==='spt') telemetry.actions=[{id:'strike',label:'RELEASE'},{id:'cleanOut',label:'CLEAN OUT'}];
   telemetry.gauge=family==='pile'?{axis:'set',label:'SET',unit:'mm/blow',real:3,max:30,value:.5,display:.5}:family==='cpt'?{axis:'push-rate',label:'PUSH RATE',unit:'mm/s',real:20,max:34,value:.588,display:.588}:family==='twoStage'?{axis:'pull',label:'PULL',unit:'',real:.7,max:1.25,value:.7,display:.7}:{axis:'torque',label:'TORQUE',unit:'',real:.57,max:1.25,value:.57,display:.57};
-  const state={scene:'site',player:{money:123456,level:60},settings:{reducedMotion:reduced},world:{regionId:'nordic',strata:[]},drill:{active:true,depth:12.3,target:100,wob:.5,rpm:.5,flush:.5}};
+  const state=createGameState();state.scene='site';
+  Object.assign(state.player,{money:123456,level:60});Object.assign(state.settings,{reducedMotion:reduced});
+  Object.assign(state.world,{regionId:'nordic',strata:[]});Object.assign(state.drill,{active:true,depth:12.3,target:100,wob:.5,rpm:.5,flush:.5});
   if(options.input01!==undefined)for(const key of ['wob','rpm','flush']){telemetry[key]=options.input01;state.drill[key]=options.input01;}
-  const contract={id:'fixture-'+family,methodId:mid,regionId:'nordic',targetDepth:100,title:'DOM fixture'};state.contract=contract;
-  const bus={emit(){},on(){return()=>{};}};
+  const contract={id:'fixture-'+family,methodId:mid,regionId:'nordic',targetDepth:options.career?24:100,holes:1,payout:1000,title:'DOM fixture'};
+  if(!options.career)state.contract=contract;
+  const bus=createBus();
   let telemetryReady=!options.delayedTelemetry;
-  const sim={active:true,getTelemetry:()=>telemetryReady?telemetry:null,getSweetSpot:()=>[.45,.65],getForecast:()=>[],abortHole:reason=>{effects.aborts.push(reason);state.drill.active=false;},setInput:(k,v)=>effects.inputs.push([k,v]),pulse:(...v)=>effects.actions.push(v)};
+  const sim={active:true,getTelemetry:()=>telemetryReady?telemetry:null,getSweetSpot:()=>[.45,.65],getForecast:()=>[],abortHole:reason=>{effects.aborts.push(reason);sim.active=false;telemetry.active=false;state.drill.active=false;bus.emit(EVENTS.DRILL_STOP,{reason});},setInput:(k,v)=>effects.inputs.push([k,v]),pulse:(...v)=>effects.actions.push(v)};
   const ctx={state,bus,sim,game,hudWrites:[]};let hudValue;
+  if(options.career){attachAcceptedCareer(ctx,contract,effects);Object.assign(telemetry,{runId:ctx.progression.run.runId,attemptId:ctx.progression.run.attemptId,target:contract.targetDepth,progress01:telemetry.depth/contract.targetDepth});state.drill.depth=telemetry.depth;}
   Object.defineProperty(ctx,'hud',{get(){return hudValue;},set(v){hudValue=v;const d=screens.querySelector('.sitedock'),cs=d?getComputedStyle(d):null;ctx.hudWrites.push({time:performance.now(),value:{...v},class:d?.className,height:d?.offsetHeight,cssHeight:cs?.height,transitionProperty:cs?.transitionProperty,transitionDuration:cs?.transitionDuration});}});
-  app={C,state,ctx,bus,fmtMoney,viewport:{w:innerWidth,h:innerHeight,dpr:1},get reducedMotion(){return reduced;},haptic(){},strataFor:()=>[],confirm:confirmation.confirm,nav:scene=>{effects.nav.push(scene);state.scene=scene;}};
-  screen=createSiteScreen(app);screen.el.classList.add('screen','screen--site');screens.append(screen.el);screen.mount({contract});step();await settle();telemetryReady=true;if(!options.noExplicitResize)screen.resize();step();await settle();
+  app={C,state,ctx,bus,fmtMoney,viewport:{w:innerWidth,h:innerHeight,dpr:1},get reducedMotion(){return reduced;},haptic(){},strataFor:()=>[],confirm:confirmation.confirm,toast:(...args)=>effects.toasts.push(args),nav:scene=>{effects.nav.push(scene);state.scene=scene;}};
+  screen=createSiteScreen(app);screen.el.classList.add('screen','screen--site');screens.append(screen.el);confirmation.setScreen(screen);screen.mount({contract});step();await settle();telemetryReady=true;if(!options.noExplicitResize)screen.resize();step();await settle();
   if(mode==='card') {
     const p=telemetry.programme;if(!p)throw Error('No card programme '+family);
     const stamp={rc:'bagsCut',jumbo:'roundsFired',longhole:'holeIndex',bolt:'boltIndex',cpt:'dissipations',spt:'testIndex',twoStage:'stage'}[family];
@@ -91,4 +99,4 @@ async function mount(family, mode='steady', motion=false, options={}) {
   window.__DRILLITY=ctx;
   return {family,mode,method:mid,input01:telemetry.wob,programme:telemetry.programme?.kind||null,actions:telemetry.actions.filter(a=>a.enabled!==false).length};
 }
-window.fixture={cases,actionLabels:Object.fromEntries(Object.entries(SITE_ACTIONS).map(([k,v])=>[k,v.label])),cardFamilies:Object.keys(programmes),mount,effects,step,get app(){return app;},get screen(){return screen;},get telemetry(){return telemetry;},dispose(){cancelAnimationFrame(ownedFrame);screen?.destroy();confirmation.dispose();}};
+window.fixture={cases,actionLabels:Object.fromEntries(Object.entries(SITE_ACTIONS).map(([k,v])=>[k,v.label])),cardFamilies:Object.keys(programmes),mount,effects,step,career:()=>careerSnapshot(app.ctx),get app(){return app;},get screen(){return screen;},get telemetry(){return telemetry;},dispose(){cancelAnimationFrame(ownedFrame);screen?.destroy();app?.ctx.progression?.dispose();confirmation.dispose();}};

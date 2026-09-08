@@ -5696,6 +5696,10 @@ export function createTerrain(ctx) {
     farField.castShadow = false;
     farField.receiveShadow = false;
     farField.name = 'far-field';
+    // Contact AO turns this distant backdrop into
+    // horizontal stippling. Keep it in the color pass, outside the AO prepass;
+    // nearby ground, rigs and the subsurface section still receive contact AO.
+    farField.userData.noAO = true;
     root.add(farField);
   }
 

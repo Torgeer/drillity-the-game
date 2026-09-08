@@ -74,14 +74,26 @@ for (const level of [33, 36, 37, 60]) {
   }
 }
 
-test('actual previous failure injected into a suggestion is detected at career acceptance', async () => {
+test('price-only suggestion is refused by public fit and an older fitted save is refused at career/start', async () => {
   const f = await fixture();
   try {
     const faultySuggestion = { ...defaultLoadoutFor(methodId, 60), hammer: VIBRO };
-    assert.equal(f.progression.equip('hammer', faultySuggestion.hammer).ok, true);
+    const beforeFit = snapshot(f), fit = f.progression.equip('hammer', faultySuggestion.hammer);
+    assert.equal(fit.ok, false);assert.equal(fit.code, 'unsupported-piling-hammer');
+    assert.equal(snapshot(f), beforeFit, 'faulty suggestion cannot charge, equip, save, or emit');
+    // Represent the old supported-by-catalogue fitting in a real serialized save.
+    // Do not make the now-refused public API pretend to equip it.
+    f.state.garage.loadout.hammer = VIBRO;
+    assert.equal(f.progression.save(), true);
+    f.state.garage.loadout.hammer = IMPACT;
+    assert.equal(f.progression.load(), true);
+    assert.equal(f.state.garage.loadout.hammer, VIBRO, 'load preserves an older fitted item');
+    const beforeRefusal = snapshot(f);
     assert.throws(() => requireAcceptedImpact(f), /cannot start this drive/,
       'the end-to-end acceptance probe must reject the original defect');
     assert.equal(f.progression.run, null);
+    assert.throws(() => f.sim.startHole(contract), error => error.code === 'unsupported-piling-hammer');
+    assert.equal(snapshot(f), beforeRefusal, 'legacy acceptance and start refusal have no side effects');
   } finally { f.close(); }
 });
 
@@ -131,15 +143,21 @@ test('unsupported-only fitted inventory is preserved and still refused without s
     assert.equal(refused.code, 'unsupported-piling-hammer');
     assert.throws(() => f.sim.startHole(contract), error => error.code === refused.code);
     assert.equal(snapshot(f), before);
+    const money = f.state.player.money, owned = [...f.state.garage.owned];
+    assert.equal(f.progression.equip('hammer', null).ok, true, 'legacy fitted item remains removable');
+    assert.equal(f.state.garage.loadout.hammer, null);
+    assert.deepEqual(f.state.garage.owned, owned);assert.equal(f.state.player.money, money);
   } finally { f.close(); }
 });
 
-test('manual selection remains explicit and wrong bays or methods still refuse', async () => {
+test('public unsupported fitting and wrong bays or methods refuse without replacing impact', async () => {
   const f = await fixture({ hammer: IMPACT });
   try {
-    assert.equal(f.progression.equip('hammer', VIBRO).ok, true);
-    assert.equal(f.state.garage.loadout.hammer, VIBRO);
     const before = snapshot(f);
+    const refused = f.progression.equip('hammer', VIBRO);
+    assert.equal(refused.ok, false);assert.equal(refused.code, 'unsupported-piling-hammer');
+    assert.equal(f.state.garage.loadout.hammer, IMPACT);
+    assert.equal(snapshot(f), before);
     assert.equal(f.progression.equip('install', IMPACT).ok, false);
     const foreign = ITEMS.find(item => item.slot === 'hammer' && !item.methods.includes(methodId));
     assert.ok(foreign, 'non-piling hammer negative control exists');

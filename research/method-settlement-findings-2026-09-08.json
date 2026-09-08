@@ -1,0 +1,6795 @@
+{
+  "schema": 1,
+  "generatedAt": "2026-09-08T07:37:50.019Z",
+  "command": "node tools/auditmethodsettlement.mjs",
+  "baseCommit": "3aab87dd815b6fc5df435efcac5d3a69b09b1840",
+  "sourceHashes": {
+    "src/sim/drilling.js": "4ca6eb284aadb2000ee3e5ea77da0bb8e9b6de16292000124c7be50a5e6a330e",
+    "src/game/progression.js": "c87f40882f260d3c3693ba1bf6a1dfffb6333d54a31f14cc1f1ac2ce1be39f03",
+    "src/game/economy.js": "2bf90cd24bcf29629b328ddd889a8efb56d64bd1ce5c10f339f7dffcdcbb658a",
+    "src/game/data.js": "868ddf9e6eb5122c6cec7e8115cceaa708f6446cfde8f2d0f8108d37d8a3ca6d"
+  },
+  "sourceHashesAfter": {
+    "src/sim/drilling.js": "4ca6eb284aadb2000ee3e5ea77da0bb8e9b6de16292000124c7be50a5e6a330e",
+    "src/game/progression.js": "c87f40882f260d3c3693ba1bf6a1dfffb6333d54a31f14cc1f1ac2ce1be39f03",
+    "src/game/economy.js": "2bf90cd24bcf29629b328ddd889a8efb56d64bd1ce5c10f339f7dffcdcbb658a",
+    "src/game/data.js": "868ddf9e6eb5122c6cec7e8115cceaa708f6446cfde8f2d0f8108d37d8a3ca6d"
+  },
+  "sourceStable": true,
+  "scope": "Production simulation/progression/bus; bounded deterministic CPU fixture. Not phone/UI certification.",
+  "fixtureLimits": "Owned/unlocked level60 fixture, authored10m CPT/8m pile contracts with explicit ground; no invented completion, debug-state writes, godMode or setDepth. CPU fixed-step API only.",
+  "cases": [
+    {
+      "name": "cpt-immediate",
+      "fixture": {
+        "id": "method-settlement-cpt-immediate",
+        "title": "Diagnostic cpt-immediate",
+        "methodId": "site-investigation",
+        "regionId": "nordic",
+        "applicationId": "site-investigation",
+        "archetypeId": "urban-plot",
+        "targetDepth": 10,
+        "holes": 1,
+        "metres": 10,
+        "holeDia": 100,
+        "payout": 10000,
+        "bonus": {
+          "time": 1000,
+          "quality": 1000
+        },
+        "deadlineHours": 24,
+        "reputationReward": 10,
+        "requiredCerts": [],
+        "difficulty": 1,
+        "hardness": 0.2,
+        "abrasivity": 0.2,
+        "seed": 194,
+        "ground": [
+          {
+            "id": "clay",
+            "top": 0,
+            "bottom": 100
+          }
+        ],
+        "flushMedium": "water"
+      },
+      "preflight": {
+        "ok": true,
+        "reason": "",
+        "mobilisation": 0,
+        "rigId": "cpt-unit"
+      },
+      "loadout": {
+        "bit": "auger-flight-std",
+        "probe": "cpt-cone-piezo",
+        "rod": "push-rod-1m",
+        "workshop": "liner-sampler-set"
+      },
+      "ticks": 0,
+      "beforeAction": {
+        "active": true,
+        "phase": "drilling",
+        "reason": null,
+        "runId": 1,
+        "attemptId": 2,
+        "methodId": "site-investigation",
+        "method": {
+          "id": "site-investigation",
+          "name": "Site investigation (CPT)",
+          "kind": "push"
+        },
+        "flushMedium": "water",
+        "contractId": "method-settlement-cpt-immediate",
+        "difficulty": 1,
+        "timeSec": 0,
+        "drillSec": 0,
+        "parSec": 39.13397945610295,
+        "jobHours": 0,
+        "depth": 0,
+        "depthDisplay": 0,
+        "target": 10,
+        "progress01": 0,
+        "rop": 0,
+        "ropDisplay": 0,
+        "ropPotential": 0,
+        "torque": 0.1323529411764706,
+        "torqueDisplay": 0.1323529411764706,
+        "torqueJitter": 0,
+        "torqueLimit": 1,
+        "overtorque": false,
+        "wear": 0,
+        "wearDisplay": 0,
+        "wearKnown": true,
+        "wearTrue": 0,
+        "wearBook": 0,
+        "heat": 0,
+        "heatDisplay": 0,
+        "glazed": false,
+        "load": 0,
+        "loadDisplay": 0,
+        "returns": 1,
+        "stability": 1,
+        "stabilityDisplay": 0.55,
+        "wob": 0.5882352941176471,
+        "rpm": 0,
+        "flush": 0,
+        "wobCmd": 0.5882352941176471,
+        "rpmCmd": 0,
+        "flushCmd": 0,
+        "optimal": {
+          "wob": 0.5882352941176471,
+          "rpm": 0,
+          "flush": 0
+        },
+        "combo": 1,
+        "comboDisplay": 1,
+        "inGreenBand": false,
+        "greenBandTime": 0,
+        "grooveUptime01": 0,
+        "sweetSpot": {
+          "center01": 0.5882352941176471,
+          "halfWidth01": 0.14705882352941177,
+          "axis": "torque",
+          "display01": 0.5882352941176471,
+          "inBand": false,
+          "combo": 1,
+          "jumped": false
+        },
+        "hasDrillString": true,
+        "rods": 1,
+        "bailingRuns": 0,
+        "rodLength": 1,
+        "rodLengthMeans": "rod length",
+        "nextRodDepth": 1,
+        "rodAdd": null,
+        "rodFatigue": 0,
+        "bit": {
+          "id": "auger-flight-std",
+          "name": "Auger Flight",
+          "kind": "auger",
+          "carbide": 0.8,
+          "wear": 0,
+          "life01": 1,
+          "fits": true
+        },
+        "bitsUsed": 0,
+        "casingOn": false,
+        "casingArmed": false,
+        "casedDepth": 0,
+        "canCase": true,
+        "well": null,
+        "foundered": false,
+        "twistOffs": 0,
+        "fishing": false,
+        "jam": {
+          "state": "free",
+          "bind01": 0,
+          "raw": 0,
+          "stuckSec": 0,
+          "loseSec": 26,
+          "warnSec": 18,
+          "rescue": {
+            "phase01": 0,
+            "window": 0.28,
+            "goodNow": true
+          }
+        },
+        "kickReady": true,
+        "kickCooldown": 0,
+        "stratum": {
+          "id": "clay",
+          "name": "Clay",
+          "ucs": 0.4,
+          "abrasivity": 0.08,
+          "stability": 0.55,
+          "water": 0.15,
+          "index": 0,
+          "top": 0,
+          "bottom": 100,
+          "boulder": null,
+          "cavity": null,
+          "fracture": null
+        },
+        "stratumIndex": 0,
+        "warning": null,
+        "hazards": [],
+        "flags": {
+          "lostCirculation": false,
+          "waterInflow": 0,
+          "waterFlowLpm": 0,
+          "overheat": false,
+          "collapsing": false,
+          "drag": 0
+        },
+        "gauge": {
+          "axis": "push-rate",
+          "label": "PUSH RATE",
+          "unit": "mm/s",
+          "value": 0,
+          "display": 0,
+          "band": {
+            "center01": 0.5882352941176471,
+            "halfWidth01": 0.14705882352941177,
+            "axis": "torque",
+            "display01": 0.5882352941176471,
+            "inBand": false,
+            "combo": 1,
+            "jumped": false
+          },
+          "real": 0,
+          "max": 34
+        },
+        "stage": 0,
+        "stageId": "bore",
+        "stageName": "Bore",
+        "stageCount": 1,
+        "stageProgress": 0,
+        "stageReverse": false,
+        "actionDepth": 0,
+        "progress01Overall": 0,
+        "holeDepth": 0,
+        "stringDepth": 0,
+        "programme": {
+          "kind": "cpt",
+          "unit": "reading",
+          "mode": "cpt",
+          "pushRateMmS": 0,
+          "targetMmS": 20,
+          "toleranceMmS": 5,
+          "inTolerance01": 1,
+          "readings": 0,
+          "resolutionMm": 50,
+          "latest": null,
+          "trace": [],
+          "saturated": true,
+          "dissipations": 0,
+          "inclinationDeg": 0,
+          "inclinationLimitDeg": 8,
+          "baselineDrift": 0,
+          "baselineTol": 0.03,
+          "coneDamage01": 0,
+          "terminated": false,
+          "rotationLocked": true,
+          "flushLocked": true,
+          "lockNote": "the cone does not turn"
+        },
+        "beat": null,
+        "actions": [
+          {
+            "id": "dissipation",
+            "label": "DISSIPATION TEST",
+            "enabled": true
+          },
+          {
+            "id": "terminate",
+            "label": "TERMINATE",
+            "enabled": true
+          }
+        ],
+        "blowHz": 0,
+        "impactIntensity": 0.0984375,
+        "deviation": 0,
+        "straightness01": 1,
+        "safetyEvents": 0,
+        "jamIncidents": 0,
+        "hazardsSeen": 0,
+        "hazardsClean": 0,
+        "score": {
+          "grade": "A",
+          "total": 0.9,
+          "weights": {
+            "time": 0.08,
+            "groove": 0.1,
+            "bit": 0.04,
+            "straight": 0.02,
+            "hazard": 0.08,
+            "safety": 0.08,
+            "quality": 0.6
+          },
+          "quality": {
+            "axis": "SOUNDING",
+            "score": 1,
+            "mode": "cpt",
+            "readings": 0,
+            "inTolerance01": 1,
+            "inclinationDeg": 0,
+            "baselineDrift": 0,
+            "saturated": true,
+            "dissipations": 0,
+            "terminated": false,
+            "coneDamage01": 0,
+            "trace": []
+          },
+          "time": {
+            "parSec": 39.1,
+            "actualSec": 0,
+            "score": 1
+          },
+          "groove": {
+            "uptime01": 0,
+            "bestCombo": 1,
+            "score": 0
+          },
+          "bit": {
+            "consumed01": 0,
+            "bitsUsed": 0,
+            "endWear": 0,
+            "score": 1
+          },
+          "straightness": {
+            "deviation": 0,
+            "score": 1
+          },
+          "hazards": {
+            "seen": 0,
+            "clean": 0,
+            "log": [],
+            "score": 1
+          },
+          "safety": {
+            "events": 0,
+            "jams": 0,
+            "score": 1
+          },
+          "rods": {
+            "added": 0,
+            "perfect": 0
+          },
+          "well": null
+        }
+      },
+      "action": {
+        "ok": true,
+        "kind": "terminate",
+        "depthM": 0
+      },
+      "beforeTerminalStep": null,
+      "completion": {
+        "depth": 10,
+        "timeSec": 0,
+        "grade": "A",
+        "breakdown": {
+          "grade": "A",
+          "total": 0.9,
+          "weights": {
+            "time": 0.08,
+            "groove": 0.1,
+            "bit": 0.04,
+            "straight": 0.02,
+            "hazard": 0.08,
+            "safety": 0.08,
+            "quality": 0.6
+          },
+          "quality": {
+            "axis": "SOUNDING",
+            "score": 1,
+            "mode": "cpt",
+            "readings": 0,
+            "inTolerance01": 1,
+            "inclinationDeg": 0,
+            "baselineDrift": 0,
+            "saturated": true,
+            "dissipations": 0,
+            "terminated": true,
+            "coneDamage01": 0,
+            "trace": []
+          },
+          "time": {
+            "parSec": 39.1,
+            "actualSec": 0,
+            "score": 1
+          },
+          "groove": {
+            "uptime01": 0,
+            "bestCombo": 1,
+            "score": 0
+          },
+          "bit": {
+            "consumed01": 0,
+            "bitsUsed": 0,
+            "endWear": 0,
+            "score": 1
+          },
+          "straightness": {
+            "deviation": 0,
+            "score": 1
+          },
+          "hazards": {
+            "seen": 0,
+            "clean": 0,
+            "log": [],
+            "score": 1
+          },
+          "safety": {
+            "events": 0,
+            "jams": 0,
+            "score": 1
+          },
+          "rods": {
+            "added": 0,
+            "perfect": 0
+          },
+          "well": null
+        },
+        "methodId": "site-investigation",
+        "bitId": "auger-flight-std",
+        "bitWear": 0,
+        "bitWearBook": 0,
+        "bitBearing": 0,
+        "contract": {
+          "id": "method-settlement-cpt-immediate",
+          "title": "Diagnostic cpt-immediate",
+          "methodId": "site-investigation",
+          "regionId": "nordic",
+          "applicationId": "site-investigation",
+          "archetypeId": "urban-plot",
+          "targetDepth": 10,
+          "holes": 1,
+          "metres": 10,
+          "holeDia": 100,
+          "payout": 10000,
+          "bonus": {
+            "time": 1000,
+            "quality": 1000
+          },
+          "deadlineHours": 24,
+          "reputationReward": 10,
+          "requiredCerts": [],
+          "difficulty": 1,
+          "hardness": 0.2,
+          "abrasivity": 0.2,
+          "seed": 194,
+          "ground": [
+            {
+              "id": "clay",
+              "top": 0,
+              "bottom": 100
+            }
+          ],
+          "flushMedium": "water"
+        },
+        "runId": 1,
+        "attemptId": 2
+      },
+      "settlement": {
+        "contractId": "method-settlement-cpt-immediate",
+        "runId": 1,
+        "attemptId": 2,
+        "hole": 1,
+        "of": 1,
+        "depth": 10,
+        "grade": "A",
+        "revenue": 13509,
+        "costs": {
+          "consumables": 26,
+          "flushing": 0,
+          "materials": 140,
+          "fuel": 45,
+          "upkeep": 115,
+          "insurance": 2,
+          "depreciation": 69,
+          "crew": 139,
+          "setup": 1755,
+          "travel": 0,
+          "overhead": 588,
+          "total": 2879
+        },
+        "net": 10630,
+        "xp": 444,
+        "reputation": 13,
+        "hours": 3.69,
+        "worn": [
+          {
+            "itemId": "auger-flight-std",
+            "slot": "bit",
+            "name": "Flight Auger Head, 305 mm",
+            "from": 1,
+            "to": 0.975,
+            "wear": 0.025
+          },
+          {
+            "itemId": "push-rod-1m",
+            "slot": "rod",
+            "name": "CPT Push Rod, 44.5 mm x 1 m",
+            "from": 1,
+            "to": 0.999,
+            "wear": 0.001
+          },
+          {
+            "itemId": "liner-sampler-set",
+            "slot": "workshop",
+            "name": "Drive & Liner Sampler Set",
+            "from": 1,
+            "to": 0.986,
+            "wear": 0.014
+          }
+        ],
+        "complete": true
+      },
+      "playerStatsDelta": {
+        "metresDrilled": 10,
+        "money": 10630,
+        "xp": 444
+      },
+      "observedProgramme": {
+        "kind": "cpt",
+        "unit": "reading",
+        "mode": "cpt",
+        "pushRateMmS": 0,
+        "targetMmS": 20,
+        "toleranceMmS": 5,
+        "inTolerance01": 1,
+        "readings": 0,
+        "resolutionMm": 50,
+        "latest": null,
+        "trace": [],
+        "saturated": true,
+        "dissipations": 0,
+        "inclinationDeg": 0,
+        "inclinationLimitDeg": 8,
+        "baselineDrift": 0,
+        "baselineTol": 0.03,
+        "coneDamage01": 0,
+        "terminated": true,
+        "rotationLocked": true,
+        "flushLocked": true,
+        "lockNote": "the cone does not turn"
+      },
+      "expectedDepthBasis": 0,
+      "lastMeasuredDepthM": null,
+      "reportedDepthExceedsDelivered": true
+    },
+    {
+      "name": "cpt-partial",
+      "fixture": {
+        "id": "method-settlement-cpt-partial",
+        "title": "Diagnostic cpt-partial",
+        "methodId": "site-investigation",
+        "regionId": "nordic",
+        "applicationId": "site-investigation",
+        "archetypeId": "urban-plot",
+        "targetDepth": 10,
+        "holes": 1,
+        "metres": 10,
+        "holeDia": 100,
+        "payout": 10000,
+        "bonus": {
+          "time": 1000,
+          "quality": 1000
+        },
+        "deadlineHours": 24,
+        "reputationReward": 10,
+        "requiredCerts": [],
+        "difficulty": 1,
+        "hardness": 0.2,
+        "abrasivity": 0.2,
+        "seed": 194,
+        "ground": [
+          {
+            "id": "clay",
+            "top": 0,
+            "bottom": 100
+          }
+        ],
+        "flushMedium": "water"
+      },
+      "preflight": {
+        "ok": true,
+        "reason": "",
+        "mobilisation": 0,
+        "rigId": "cpt-unit"
+      },
+      "loadout": {
+        "bit": "auger-flight-std",
+        "probe": "cpt-cone-piezo",
+        "rod": "push-rod-1m",
+        "workshop": "liner-sampler-set"
+      },
+      "ticks": 723,
+      "beforeAction": {
+        "active": true,
+        "phase": "drilling",
+        "reason": null,
+        "runId": 3,
+        "attemptId": 4,
+        "methodId": "site-investigation",
+        "method": {
+          "id": "site-investigation",
+          "name": "Site investigation (CPT)",
+          "kind": "push"
+        },
+        "flushMedium": "water",
+        "contractId": "method-settlement-cpt-partial",
+        "difficulty": 1,
+        "timeSec": 6.025000000000089,
+        "drillSec": 6.025000000000089,
+        "parSec": 39.13397945610295,
+        "jobHours": 0.02811666666666677,
+        "depth": 2.0014575846511837,
+        "depthDisplay": 0,
+        "target": 10,
+        "progress01": 0.20014575846511837,
+        "rop": 71.18402790697675,
+        "ropDisplay": 0,
+        "ropPotential": 72,
+        "torque": 0.1360172049241192,
+        "torqueDisplay": 0.1323529411764706,
+        "torqueJitter": 0,
+        "torqueLimit": 1,
+        "overtorque": false,
+        "wear": 0,
+        "wearDisplay": 0,
+        "wearKnown": true,
+        "wearTrue": 0,
+        "wearBook": 0,
+        "heat": 0,
+        "heatDisplay": 0,
+        "glazed": false,
+        "load": 0,
+        "loadDisplay": 0,
+        "returns": 1,
+        "stability": 1,
+        "stabilityDisplay": 0.55,
+        "wob": 0.5882352941176471,
+        "rpm": 0,
+        "flush": 0,
+        "wobCmd": 0.5882352941176471,
+        "rpmCmd": 0,
+        "flushCmd": 0,
+        "optimal": {
+          "wob": 0.5882352941176471,
+          "rpm": 0,
+          "flush": 0
+        },
+        "combo": 2.2,
+        "comboDisplay": 1,
+        "inGreenBand": true,
+        "greenBandTime": 6,
+        "grooveUptime01": 1,
+        "sweetSpot": {
+          "center01": 0.5882352941176471,
+          "halfWidth01": 0.14705882352941177,
+          "axis": "torque",
+          "display01": 0.5882352941176471,
+          "inBand": true,
+          "combo": 2.2,
+          "jumped": false
+        },
+        "hasDrillString": true,
+        "rods": 3,
+        "bailingRuns": 0,
+        "rodLength": 1,
+        "rodLengthMeans": "rod length",
+        "nextRodDepth": 3,
+        "rodAdd": null,
+        "rodFatigue": 0,
+        "bit": {
+          "id": "auger-flight-std",
+          "name": "Auger Flight",
+          "kind": "auger",
+          "carbide": 0.8,
+          "wear": 0,
+          "life01": 1,
+          "fits": true
+        },
+        "bitsUsed": 0,
+        "casingOn": false,
+        "casingArmed": false,
+        "casedDepth": 0,
+        "canCase": true,
+        "well": null,
+        "foundered": false,
+        "twistOffs": 0,
+        "fishing": false,
+        "jam": {
+          "state": "free",
+          "bind01": 0,
+          "raw": 0,
+          "stuckSec": 0,
+          "loseSec": 26,
+          "warnSec": 18,
+          "rescue": {
+            "phase01": 0,
+            "window": 0.28,
+            "goodNow": true
+          }
+        },
+        "kickReady": true,
+        "kickCooldown": 0,
+        "stratum": {
+          "id": "clay",
+          "name": "Clay",
+          "ucs": 0.4,
+          "abrasivity": 0.08,
+          "stability": 0.55,
+          "water": 0.15,
+          "index": 0,
+          "top": 0,
+          "bottom": 100,
+          "boulder": null,
+          "cavity": null,
+          "fracture": null
+        },
+        "stratumIndex": 0,
+        "warning": null,
+        "hazards": [],
+        "flags": {
+          "lostCirculation": false,
+          "waterInflow": 0,
+          "waterFlowLpm": 0,
+          "overheat": false,
+          "collapsing": false,
+          "drag": 0
+        },
+        "gauge": {
+          "axis": "push-rate",
+          "label": "PUSH RATE",
+          "unit": "mm/s",
+          "value": 0.5815688554491565,
+          "display": 0,
+          "band": {
+            "center01": 0.5882352941176471,
+            "halfWidth01": 0.14705882352941177,
+            "axis": "torque",
+            "display01": 0.5882352941176471,
+            "inBand": true,
+            "combo": 2.2,
+            "jumped": false
+          },
+          "real": 19.8,
+          "max": 34
+        },
+        "stage": 0,
+        "stageId": "bore",
+        "stageName": "Bore",
+        "stageCount": 1,
+        "stageProgress": 0,
+        "stageReverse": false,
+        "actionDepth": 2.0014575846511837,
+        "progress01Overall": 0.20014575846511837,
+        "holeDepth": 2.0014575846511837,
+        "stringDepth": 2.0014575846511837,
+        "programme": {
+          "kind": "cpt",
+          "unit": "reading",
+          "mode": "cpt",
+          "pushRateMmS": 19.8,
+          "targetMmS": 20,
+          "toleranceMmS": 5,
+          "inTolerance01": 1,
+          "readings": 40,
+          "resolutionMm": 50,
+          "latest": {
+            "depthM": 1.95,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          "trace": [
+            {
+              "depthM": 0,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 0.05,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 0.1,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 0.15,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 0.2,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 0.25,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 0.3,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 0.35,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 0.4,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 0.45,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 0.5,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 0.55,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 0.6,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 0.65,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 0.7,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 0.75,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 0.8,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 0.85,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 0.9,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 0.95,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 1,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 1.05,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 1.1,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 1.15,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 1.2,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 1.25,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 1.3,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 1.35,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 1.4,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 1.45,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 1.5,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 1.55,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 1.6,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 1.65,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 1.7,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 1.75,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 1.8,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 1.85,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 1.9,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 1.95,
+              "qcMpa": 1.671,
+              "qtMpa": 1.683,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 0,
+              "u2Kpa": 61.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            }
+          ],
+          "saturated": true,
+          "dissipations": 0,
+          "inclinationDeg": 0,
+          "inclinationLimitDeg": 8,
+          "baselineDrift": 0.0004,
+          "baselineTol": 0.03,
+          "coneDamage01": 0,
+          "terminated": false,
+          "rotationLocked": true,
+          "flushLocked": true,
+          "lockNote": "the cone does not turn"
+        },
+        "beat": null,
+        "actions": [
+          {
+            "id": "dissipation",
+            "label": "DISSIPATION TEST",
+            "enabled": true
+          },
+          {
+            "id": "terminate",
+            "label": "TERMINATE",
+            "enabled": true
+          }
+        ],
+        "blowHz": 0,
+        "impactIntensity": 0.525,
+        "deviation": 0,
+        "straightness01": 1,
+        "safetyEvents": 0,
+        "jamIncidents": 0,
+        "hazardsSeen": 0,
+        "hazardsClean": 0,
+        "score": {
+          "grade": "S",
+          "total": 1,
+          "weights": {
+            "time": 0.08,
+            "groove": 0.1,
+            "bit": 0.04,
+            "straight": 0.02,
+            "hazard": 0.08,
+            "safety": 0.08,
+            "quality": 0.6
+          },
+          "quality": {
+            "axis": "SOUNDING",
+            "score": 1,
+            "mode": "cpt",
+            "readings": 40,
+            "inTolerance01": 1,
+            "inclinationDeg": 0,
+            "baselineDrift": 0.0004,
+            "saturated": true,
+            "dissipations": 0,
+            "terminated": false,
+            "coneDamage01": 0,
+            "trace": [
+              {
+                "depthM": 1.6,
+                "qcMpa": 1.671,
+                "qtMpa": 1.683,
+                "fsKpa": 67.9,
+                "rfPct": 4.06,
+                "u0Kpa": 0,
+                "u2Kpa": 61.5,
+                "hasU2": true,
+                "isbt": 2.9,
+                "sbt": "Silt mixture",
+                "inTolerance": true
+              },
+              {
+                "depthM": 1.65,
+                "qcMpa": 1.671,
+                "qtMpa": 1.683,
+                "fsKpa": 67.9,
+                "rfPct": 4.06,
+                "u0Kpa": 0,
+                "u2Kpa": 61.5,
+                "hasU2": true,
+                "isbt": 2.9,
+                "sbt": "Silt mixture",
+                "inTolerance": true
+              },
+              {
+                "depthM": 1.7,
+                "qcMpa": 1.671,
+                "qtMpa": 1.683,
+                "fsKpa": 67.9,
+                "rfPct": 4.06,
+                "u0Kpa": 0,
+                "u2Kpa": 61.5,
+                "hasU2": true,
+                "isbt": 2.9,
+                "sbt": "Silt mixture",
+                "inTolerance": true
+              },
+              {
+                "depthM": 1.75,
+                "qcMpa": 1.671,
+                "qtMpa": 1.683,
+                "fsKpa": 67.9,
+                "rfPct": 4.06,
+                "u0Kpa": 0,
+                "u2Kpa": 61.5,
+                "hasU2": true,
+                "isbt": 2.9,
+                "sbt": "Silt mixture",
+                "inTolerance": true
+              },
+              {
+                "depthM": 1.8,
+                "qcMpa": 1.671,
+                "qtMpa": 1.683,
+                "fsKpa": 67.9,
+                "rfPct": 4.06,
+                "u0Kpa": 0,
+                "u2Kpa": 61.5,
+                "hasU2": true,
+                "isbt": 2.9,
+                "sbt": "Silt mixture",
+                "inTolerance": true
+              },
+              {
+                "depthM": 1.85,
+                "qcMpa": 1.671,
+                "qtMpa": 1.683,
+                "fsKpa": 67.9,
+                "rfPct": 4.06,
+                "u0Kpa": 0,
+                "u2Kpa": 61.5,
+                "hasU2": true,
+                "isbt": 2.9,
+                "sbt": "Silt mixture",
+                "inTolerance": true
+              },
+              {
+                "depthM": 1.9,
+                "qcMpa": 1.671,
+                "qtMpa": 1.683,
+                "fsKpa": 67.9,
+                "rfPct": 4.06,
+                "u0Kpa": 0,
+                "u2Kpa": 61.5,
+                "hasU2": true,
+                "isbt": 2.9,
+                "sbt": "Silt mixture",
+                "inTolerance": true
+              },
+              {
+                "depthM": 1.95,
+                "qcMpa": 1.671,
+                "qtMpa": 1.683,
+                "fsKpa": 67.9,
+                "rfPct": 4.06,
+                "u0Kpa": 0,
+                "u2Kpa": 61.5,
+                "hasU2": true,
+                "isbt": 2.9,
+                "sbt": "Silt mixture",
+                "inTolerance": true
+              }
+            ]
+          },
+          "time": {
+            "parSec": 39.1,
+            "actualSec": 6,
+            "score": 1
+          },
+          "groove": {
+            "uptime01": 1,
+            "bestCombo": 1,
+            "score": 1
+          },
+          "bit": {
+            "consumed01": 0,
+            "bitsUsed": 0,
+            "endWear": 0,
+            "score": 1
+          },
+          "straightness": {
+            "deviation": 0,
+            "score": 1
+          },
+          "hazards": {
+            "seen": 0,
+            "clean": 0,
+            "log": [],
+            "score": 1
+          },
+          "safety": {
+            "events": 0,
+            "jams": 0,
+            "score": 1
+          },
+          "rods": {
+            "added": 2,
+            "perfect": 0
+          },
+          "well": null
+        }
+      },
+      "action": {
+        "ok": true,
+        "kind": "terminate",
+        "depthM": 2
+      },
+      "beforeTerminalStep": {
+        "active": true,
+        "depth": 1.998689316899246,
+        "timeSec": 6.016666666666755,
+        "phase": "drilling",
+        "toeDepthM": null,
+        "headDepthM": null
+      },
+      "completion": {
+        "depth": 10,
+        "timeSec": 6,
+        "grade": "S",
+        "breakdown": {
+          "grade": "S",
+          "total": 1,
+          "weights": {
+            "time": 0.08,
+            "groove": 0.1,
+            "bit": 0.04,
+            "straight": 0.02,
+            "hazard": 0.08,
+            "safety": 0.08,
+            "quality": 0.6
+          },
+          "quality": {
+            "axis": "SOUNDING",
+            "score": 1,
+            "mode": "cpt",
+            "readings": 40,
+            "inTolerance01": 1,
+            "inclinationDeg": 0,
+            "baselineDrift": 0.0004,
+            "saturated": true,
+            "dissipations": 0,
+            "terminated": true,
+            "coneDamage01": 0,
+            "trace": [
+              {
+                "depthM": 1.6,
+                "qcMpa": 1.671,
+                "qtMpa": 1.683,
+                "fsKpa": 67.9,
+                "rfPct": 4.06,
+                "u0Kpa": 0,
+                "u2Kpa": 61.5,
+                "hasU2": true,
+                "isbt": 2.9,
+                "sbt": "Silt mixture",
+                "inTolerance": true
+              },
+              {
+                "depthM": 1.65,
+                "qcMpa": 1.671,
+                "qtMpa": 1.683,
+                "fsKpa": 67.9,
+                "rfPct": 4.06,
+                "u0Kpa": 0,
+                "u2Kpa": 61.5,
+                "hasU2": true,
+                "isbt": 2.9,
+                "sbt": "Silt mixture",
+                "inTolerance": true
+              },
+              {
+                "depthM": 1.7,
+                "qcMpa": 1.671,
+                "qtMpa": 1.683,
+                "fsKpa": 67.9,
+                "rfPct": 4.06,
+                "u0Kpa": 0,
+                "u2Kpa": 61.5,
+                "hasU2": true,
+                "isbt": 2.9,
+                "sbt": "Silt mixture",
+                "inTolerance": true
+              },
+              {
+                "depthM": 1.75,
+                "qcMpa": 1.671,
+                "qtMpa": 1.683,
+                "fsKpa": 67.9,
+                "rfPct": 4.06,
+                "u0Kpa": 0,
+                "u2Kpa": 61.5,
+                "hasU2": true,
+                "isbt": 2.9,
+                "sbt": "Silt mixture",
+                "inTolerance": true
+              },
+              {
+                "depthM": 1.8,
+                "qcMpa": 1.671,
+                "qtMpa": 1.683,
+                "fsKpa": 67.9,
+                "rfPct": 4.06,
+                "u0Kpa": 0,
+                "u2Kpa": 61.5,
+                "hasU2": true,
+                "isbt": 2.9,
+                "sbt": "Silt mixture",
+                "inTolerance": true
+              },
+              {
+                "depthM": 1.85,
+                "qcMpa": 1.671,
+                "qtMpa": 1.683,
+                "fsKpa": 67.9,
+                "rfPct": 4.06,
+                "u0Kpa": 0,
+                "u2Kpa": 61.5,
+                "hasU2": true,
+                "isbt": 2.9,
+                "sbt": "Silt mixture",
+                "inTolerance": true
+              },
+              {
+                "depthM": 1.9,
+                "qcMpa": 1.671,
+                "qtMpa": 1.683,
+                "fsKpa": 67.9,
+                "rfPct": 4.06,
+                "u0Kpa": 0,
+                "u2Kpa": 61.5,
+                "hasU2": true,
+                "isbt": 2.9,
+                "sbt": "Silt mixture",
+                "inTolerance": true
+              },
+              {
+                "depthM": 1.95,
+                "qcMpa": 1.671,
+                "qtMpa": 1.683,
+                "fsKpa": 67.9,
+                "rfPct": 4.06,
+                "u0Kpa": 0,
+                "u2Kpa": 61.5,
+                "hasU2": true,
+                "isbt": 2.9,
+                "sbt": "Silt mixture",
+                "inTolerance": true
+              }
+            ]
+          },
+          "time": {
+            "parSec": 39.1,
+            "actualSec": 6,
+            "score": 1
+          },
+          "groove": {
+            "uptime01": 1,
+            "bestCombo": 1,
+            "score": 1
+          },
+          "bit": {
+            "consumed01": 0,
+            "bitsUsed": 0,
+            "endWear": 0,
+            "score": 1
+          },
+          "straightness": {
+            "deviation": 0,
+            "score": 1
+          },
+          "hazards": {
+            "seen": 0,
+            "clean": 0,
+            "log": [],
+            "score": 1
+          },
+          "safety": {
+            "events": 0,
+            "jams": 0,
+            "score": 1
+          },
+          "rods": {
+            "added": 2,
+            "perfect": 0
+          },
+          "well": null
+        },
+        "methodId": "site-investigation",
+        "bitId": "auger-flight-std",
+        "bitWear": 0,
+        "bitWearBook": 0,
+        "bitBearing": 0,
+        "contract": {
+          "id": "method-settlement-cpt-partial",
+          "title": "Diagnostic cpt-partial",
+          "methodId": "site-investigation",
+          "regionId": "nordic",
+          "applicationId": "site-investigation",
+          "archetypeId": "urban-plot",
+          "targetDepth": 10,
+          "holes": 1,
+          "metres": 10,
+          "holeDia": 100,
+          "payout": 10000,
+          "bonus": {
+            "time": 1000,
+            "quality": 1000
+          },
+          "deadlineHours": 24,
+          "reputationReward": 10,
+          "requiredCerts": [],
+          "difficulty": 1,
+          "hardness": 0.2,
+          "abrasivity": 0.2,
+          "seed": 194,
+          "ground": [
+            {
+              "id": "clay",
+              "top": 0,
+              "bottom": 100
+            }
+          ],
+          "flushMedium": "water"
+        },
+        "runId": 3,
+        "attemptId": 4
+      },
+      "settlement": {
+        "contractId": "method-settlement-cpt-partial",
+        "runId": 3,
+        "attemptId": 4,
+        "hole": 1,
+        "of": 1,
+        "depth": 10,
+        "grade": "S",
+        "revenue": 15447,
+        "costs": {
+          "consumables": 26,
+          "flushing": 0,
+          "materials": 140,
+          "fuel": 18,
+          "upkeep": 67,
+          "insurance": 1,
+          "depreciation": 27,
+          "crew": 82,
+          "setup": 1755,
+          "travel": 0,
+          "overhead": 685,
+          "total": 2802
+        },
+        "net": 12645,
+        "xp": 459,
+        "reputation": 16,
+        "hours": 2.17,
+        "worn": [
+          {
+            "itemId": "auger-flight-std",
+            "slot": "bit",
+            "name": "Flight Auger Head, 305 mm",
+            "from": 1,
+            "to": 0.975,
+            "wear": 0.025
+          },
+          {
+            "itemId": "push-rod-1m",
+            "slot": "rod",
+            "name": "CPT Push Rod, 44.5 mm x 1 m",
+            "from": 1,
+            "to": 0.999,
+            "wear": 0.001
+          },
+          {
+            "itemId": "liner-sampler-set",
+            "slot": "workshop",
+            "name": "Drive & Liner Sampler Set",
+            "from": 1,
+            "to": 0.986,
+            "wear": 0.014
+          }
+        ],
+        "complete": true
+      },
+      "playerStatsDelta": {
+        "metresDrilled": 10,
+        "money": 12645,
+        "xp": 459
+      },
+      "observedProgramme": {
+        "kind": "cpt",
+        "unit": "reading",
+        "mode": "cpt",
+        "pushRateMmS": 19.8,
+        "targetMmS": 20,
+        "toleranceMmS": 5,
+        "inTolerance01": 1,
+        "readings": 40,
+        "resolutionMm": 50,
+        "latest": {
+          "depthM": 1.95,
+          "qcMpa": 1.671,
+          "qtMpa": 1.683,
+          "fsKpa": 67.9,
+          "rfPct": 4.06,
+          "u0Kpa": 0,
+          "u2Kpa": 61.5,
+          "hasU2": true,
+          "isbt": 2.9,
+          "sbt": "Silt mixture",
+          "inTolerance": true
+        },
+        "trace": [
+          {
+            "depthM": 0,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 0.05,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 0.1,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 0.15,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 0.2,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 0.25,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 0.3,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 0.35,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 0.4,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 0.45,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 0.5,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 0.55,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 0.6,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 0.65,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 0.7,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 0.75,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 0.8,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 0.85,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 0.9,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 0.95,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 1,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 1.05,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 1.1,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 1.15,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 1.2,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 1.25,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 1.3,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 1.35,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 1.4,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 1.45,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 1.5,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 1.55,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 1.6,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 1.65,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 1.7,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 1.75,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 1.8,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 1.85,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 1.9,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 1.95,
+            "qcMpa": 1.671,
+            "qtMpa": 1.683,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 0,
+            "u2Kpa": 61.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          }
+        ],
+        "saturated": true,
+        "dissipations": 0,
+        "inclinationDeg": 0,
+        "inclinationLimitDeg": 8,
+        "baselineDrift": 0.0004,
+        "baselineTol": 0.03,
+        "coneDamage01": 0,
+        "terminated": true,
+        "rotationLocked": true,
+        "flushLocked": true,
+        "lockNote": "the cone does not turn"
+      },
+      "expectedDepthBasis": 2.0014575846511837,
+      "lastMeasuredDepthM": 1.95,
+      "reportedDepthExceedsDelivered": true
+    },
+    {
+      "name": "cpt-target",
+      "fixture": {
+        "id": "method-settlement-cpt-target",
+        "title": "Diagnostic cpt-target",
+        "methodId": "site-investigation",
+        "regionId": "nordic",
+        "applicationId": "site-investigation",
+        "archetypeId": "urban-plot",
+        "targetDepth": 10,
+        "holes": 1,
+        "metres": 10,
+        "holeDia": 100,
+        "payout": 10000,
+        "bonus": {
+          "time": 1000,
+          "quality": 1000
+        },
+        "deadlineHours": 24,
+        "reputationReward": 10,
+        "requiredCerts": [],
+        "difficulty": 1,
+        "hardness": 0.2,
+        "abrasivity": 0.2,
+        "seed": 194,
+        "ground": [
+          {
+            "id": "clay",
+            "top": 0,
+            "bottom": 100
+          }
+        ],
+        "flushMedium": "water"
+      },
+      "preflight": {
+        "ok": true,
+        "reason": "",
+        "mobilisation": 0,
+        "rigId": "cpt-unit"
+      },
+      "loadout": {
+        "bit": "auger-flight-std",
+        "probe": "cpt-cone-piezo",
+        "rod": "push-rod-1m",
+        "workshop": "liner-sampler-set"
+      },
+      "ticks": 3613,
+      "beforeAction": {
+        "active": false,
+        "phase": "complete",
+        "reason": "complete",
+        "runId": 5,
+        "attemptId": 6,
+        "methodId": "site-investigation",
+        "method": {
+          "id": "site-investigation",
+          "name": "Site investigation (CPT)",
+          "kind": "push"
+        },
+        "flushMedium": "water",
+        "contractId": "method-settlement-cpt-target",
+        "difficulty": 1,
+        "timeSec": 30.108333333332265,
+        "drillSec": 30.108333333332265,
+        "parSec": 39.13397945610295,
+        "jobHours": 0.14050555555554547,
+        "depth": 10,
+        "depthDisplay": 0,
+        "target": 10,
+        "progress01": 1,
+        "rop": 71.18402790697675,
+        "ropDisplay": 0,
+        "ropPotential": 72,
+        "torque": 0.15068441022980258,
+        "torqueDisplay": 0.1323529411764706,
+        "torqueJitter": 0,
+        "torqueLimit": 1,
+        "overtorque": false,
+        "wear": 0,
+        "wearDisplay": 0,
+        "wearKnown": true,
+        "wearTrue": 0,
+        "wearBook": 0,
+        "heat": 0,
+        "heatDisplay": 0,
+        "glazed": false,
+        "load": 0,
+        "loadDisplay": 0,
+        "returns": 1,
+        "stability": 1,
+        "stabilityDisplay": 0.55,
+        "wob": 0.5882352941176471,
+        "rpm": 0,
+        "flush": 0,
+        "wobCmd": 0.5882352941176471,
+        "rpmCmd": 0,
+        "flushCmd": 0,
+        "optimal": {
+          "wob": 0.5882352941176471,
+          "rpm": 0,
+          "flush": 0
+        },
+        "combo": 2.2,
+        "comboDisplay": 1,
+        "inGreenBand": true,
+        "greenBandTime": 6,
+        "grooveUptime01": 1,
+        "sweetSpot": {
+          "center01": 0.5882352941176471,
+          "halfWidth01": 0.14705882352941177,
+          "axis": "torque",
+          "display01": 0.5882352941176471,
+          "inBand": true,
+          "combo": 2.2,
+          "jumped": false
+        },
+        "hasDrillString": true,
+        "rods": 11,
+        "bailingRuns": 0,
+        "rodLength": 1,
+        "rodLengthMeans": "rod length",
+        "nextRodDepth": 11,
+        "rodAdd": null,
+        "rodFatigue": 0,
+        "bit": {
+          "id": "auger-flight-std",
+          "name": "Auger Flight",
+          "kind": "auger",
+          "carbide": 0.8,
+          "wear": 0,
+          "life01": 1,
+          "fits": true
+        },
+        "bitsUsed": 0,
+        "casingOn": false,
+        "casingArmed": false,
+        "casedDepth": 0,
+        "canCase": true,
+        "well": null,
+        "foundered": false,
+        "twistOffs": 0,
+        "fishing": false,
+        "jam": {
+          "state": "free",
+          "bind01": 0,
+          "raw": 0,
+          "stuckSec": 0,
+          "loseSec": 26,
+          "warnSec": 18,
+          "rescue": {
+            "phase01": 0,
+            "window": 0.28,
+            "goodNow": true
+          }
+        },
+        "kickReady": true,
+        "kickCooldown": 0,
+        "stratum": {
+          "id": "clay",
+          "name": "Clay",
+          "ucs": 0.4,
+          "abrasivity": 0.08,
+          "stability": 0.55,
+          "water": 0.15,
+          "index": 0,
+          "top": 0,
+          "bottom": 100,
+          "boulder": null,
+          "cavity": null,
+          "fracture": null
+        },
+        "stratumIndex": 0,
+        "warning": null,
+        "hazards": [],
+        "flags": {
+          "lostCirculation": false,
+          "waterInflow": 0,
+          "waterFlowLpm": 0,
+          "overheat": false,
+          "collapsing": false,
+          "drag": 0
+        },
+        "gauge": {
+          "axis": "push-rate",
+          "label": "PUSH RATE",
+          "unit": "mm/s",
+          "value": 0.5815688554491565,
+          "display": 0,
+          "band": {
+            "center01": 0.5882352941176471,
+            "halfWidth01": 0.14705882352941177,
+            "axis": "torque",
+            "display01": 0.5882352941176471,
+            "inBand": true,
+            "combo": 2.2,
+            "jumped": false
+          },
+          "real": 19.8,
+          "max": 34
+        },
+        "stage": 0,
+        "stageId": "bore",
+        "stageName": "Bore",
+        "stageCount": 1,
+        "stageProgress": 0,
+        "stageReverse": false,
+        "actionDepth": 10,
+        "progress01Overall": 1,
+        "holeDepth": 10.00175138775121,
+        "stringDepth": 10.00175138775121,
+        "programme": {
+          "kind": "cpt",
+          "unit": "reading",
+          "mode": "cpt",
+          "pushRateMmS": 19.8,
+          "targetMmS": 20,
+          "toleranceMmS": 5,
+          "inTolerance01": 1,
+          "readings": 200,
+          "resolutionMm": 50,
+          "latest": {
+            "depthM": 9.95,
+            "qcMpa": 1.671,
+            "qtMpa": 1.699,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 78,
+            "u2Kpa": 139.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          "trace": [
+            {
+              "depthM": 8,
+              "qcMpa": 1.671,
+              "qtMpa": 1.695,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 58.9,
+              "u2Kpa": 120.4,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 8.05,
+              "qcMpa": 1.671,
+              "qtMpa": 1.695,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 59.4,
+              "u2Kpa": 120.9,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 8.1,
+              "qcMpa": 1.671,
+              "qtMpa": 1.695,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 59.8,
+              "u2Kpa": 121.4,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 8.15,
+              "qcMpa": 1.671,
+              "qtMpa": 1.695,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 60.3,
+              "u2Kpa": 121.9,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 8.2,
+              "qcMpa": 1.671,
+              "qtMpa": 1.695,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 60.8,
+              "u2Kpa": 122.4,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 8.25,
+              "qcMpa": 1.671,
+              "qtMpa": 1.695,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 61.3,
+              "u2Kpa": 122.9,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 8.3,
+              "qcMpa": 1.671,
+              "qtMpa": 1.695,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 61.8,
+              "u2Kpa": 123.3,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 8.35,
+              "qcMpa": 1.671,
+              "qtMpa": 1.696,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 62.3,
+              "u2Kpa": 123.8,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 8.4,
+              "qcMpa": 1.671,
+              "qtMpa": 1.696,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 62.8,
+              "u2Kpa": 124.3,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 8.45,
+              "qcMpa": 1.671,
+              "qtMpa": 1.696,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 63.3,
+              "u2Kpa": 124.8,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 8.5,
+              "qcMpa": 1.671,
+              "qtMpa": 1.696,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 63.8,
+              "u2Kpa": 125.3,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 8.55,
+              "qcMpa": 1.671,
+              "qtMpa": 1.696,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 64.3,
+              "u2Kpa": 125.8,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 8.6,
+              "qcMpa": 1.671,
+              "qtMpa": 1.696,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 64.7,
+              "u2Kpa": 126.3,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 8.65,
+              "qcMpa": 1.671,
+              "qtMpa": 1.696,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 65.2,
+              "u2Kpa": 126.8,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 8.7,
+              "qcMpa": 1.671,
+              "qtMpa": 1.696,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 65.7,
+              "u2Kpa": 127.3,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 8.75,
+              "qcMpa": 1.671,
+              "qtMpa": 1.696,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 66.2,
+              "u2Kpa": 127.8,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 8.8,
+              "qcMpa": 1.671,
+              "qtMpa": 1.696,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 66.7,
+              "u2Kpa": 128.2,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 8.85,
+              "qcMpa": 1.671,
+              "qtMpa": 1.697,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 67.2,
+              "u2Kpa": 128.7,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 8.9,
+              "qcMpa": 1.671,
+              "qtMpa": 1.697,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 67.7,
+              "u2Kpa": 129.2,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 8.95,
+              "qcMpa": 1.671,
+              "qtMpa": 1.697,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 68.2,
+              "u2Kpa": 129.7,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 9,
+              "qcMpa": 1.671,
+              "qtMpa": 1.697,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 68.7,
+              "u2Kpa": 130.2,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 9.05,
+              "qcMpa": 1.671,
+              "qtMpa": 1.697,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 69.2,
+              "u2Kpa": 130.7,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 9.1,
+              "qcMpa": 1.671,
+              "qtMpa": 1.697,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 69.7,
+              "u2Kpa": 131.2,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 9.15,
+              "qcMpa": 1.671,
+              "qtMpa": 1.697,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 70.1,
+              "u2Kpa": 131.7,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 9.2,
+              "qcMpa": 1.671,
+              "qtMpa": 1.697,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 70.6,
+              "u2Kpa": 132.2,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 9.25,
+              "qcMpa": 1.671,
+              "qtMpa": 1.697,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 71.1,
+              "u2Kpa": 132.7,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 9.3,
+              "qcMpa": 1.671,
+              "qtMpa": 1.697,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 71.6,
+              "u2Kpa": 133.2,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 9.35,
+              "qcMpa": 1.671,
+              "qtMpa": 1.698,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 72.1,
+              "u2Kpa": 133.6,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 9.4,
+              "qcMpa": 1.671,
+              "qtMpa": 1.698,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 72.6,
+              "u2Kpa": 134.1,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 9.45,
+              "qcMpa": 1.671,
+              "qtMpa": 1.698,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 73.1,
+              "u2Kpa": 134.6,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 9.5,
+              "qcMpa": 1.671,
+              "qtMpa": 1.698,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 73.6,
+              "u2Kpa": 135.1,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 9.55,
+              "qcMpa": 1.671,
+              "qtMpa": 1.698,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 74.1,
+              "u2Kpa": 135.6,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 9.6,
+              "qcMpa": 1.671,
+              "qtMpa": 1.698,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 74.6,
+              "u2Kpa": 136.1,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 9.65,
+              "qcMpa": 1.671,
+              "qtMpa": 1.698,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 75,
+              "u2Kpa": 136.6,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 9.7,
+              "qcMpa": 1.671,
+              "qtMpa": 1.698,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 75.5,
+              "u2Kpa": 137.1,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 9.75,
+              "qcMpa": 1.671,
+              "qtMpa": 1.698,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 76,
+              "u2Kpa": 137.6,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 9.8,
+              "qcMpa": 1.671,
+              "qtMpa": 1.698,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 76.5,
+              "u2Kpa": 138.1,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 9.85,
+              "qcMpa": 1.671,
+              "qtMpa": 1.699,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 77,
+              "u2Kpa": 138.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 9.9,
+              "qcMpa": 1.671,
+              "qtMpa": 1.699,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 77.5,
+              "u2Kpa": 139,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            },
+            {
+              "depthM": 9.95,
+              "qcMpa": 1.671,
+              "qtMpa": 1.699,
+              "fsKpa": 67.9,
+              "rfPct": 4.06,
+              "u0Kpa": 78,
+              "u2Kpa": 139.5,
+              "hasU2": true,
+              "isbt": 2.9,
+              "sbt": "Silt mixture",
+              "inTolerance": true
+            }
+          ],
+          "saturated": true,
+          "dissipations": 0,
+          "inclinationDeg": 0,
+          "inclinationLimitDeg": 8,
+          "baselineDrift": 0.0022,
+          "baselineTol": 0.03,
+          "coneDamage01": 0,
+          "terminated": false,
+          "rotationLocked": true,
+          "flushLocked": true,
+          "lockNote": "the cone does not turn"
+        },
+        "beat": null,
+        "actions": [
+          {
+            "id": "dissipation",
+            "label": "DISSIPATION TEST",
+            "enabled": false
+          },
+          {
+            "id": "terminate",
+            "label": "TERMINATE",
+            "enabled": true
+          }
+        ],
+        "blowHz": 0,
+        "impactIntensity": 0.525,
+        "deviation": 0,
+        "straightness01": 1,
+        "safetyEvents": 0,
+        "jamIncidents": 0,
+        "hazardsSeen": 0,
+        "hazardsClean": 0,
+        "score": {
+          "grade": "S",
+          "total": 1,
+          "weights": {
+            "time": 0.08,
+            "groove": 0.1,
+            "bit": 0.04,
+            "straight": 0.02,
+            "hazard": 0.08,
+            "safety": 0.08,
+            "quality": 0.6
+          },
+          "quality": {
+            "axis": "SOUNDING",
+            "score": 1,
+            "mode": "cpt",
+            "readings": 200,
+            "inTolerance01": 1,
+            "inclinationDeg": 0,
+            "baselineDrift": 0.0022,
+            "saturated": true,
+            "dissipations": 0,
+            "terminated": false,
+            "coneDamage01": 0,
+            "trace": [
+              {
+                "depthM": 9.6,
+                "qcMpa": 1.671,
+                "qtMpa": 1.698,
+                "fsKpa": 67.9,
+                "rfPct": 4.06,
+                "u0Kpa": 74.6,
+                "u2Kpa": 136.1,
+                "hasU2": true,
+                "isbt": 2.9,
+                "sbt": "Silt mixture",
+                "inTolerance": true
+              },
+              {
+                "depthM": 9.65,
+                "qcMpa": 1.671,
+                "qtMpa": 1.698,
+                "fsKpa": 67.9,
+                "rfPct": 4.06,
+                "u0Kpa": 75,
+                "u2Kpa": 136.6,
+                "hasU2": true,
+                "isbt": 2.9,
+                "sbt": "Silt mixture",
+                "inTolerance": true
+              },
+              {
+                "depthM": 9.7,
+                "qcMpa": 1.671,
+                "qtMpa": 1.698,
+                "fsKpa": 67.9,
+                "rfPct": 4.06,
+                "u0Kpa": 75.5,
+                "u2Kpa": 137.1,
+                "hasU2": true,
+                "isbt": 2.9,
+                "sbt": "Silt mixture",
+                "inTolerance": true
+              },
+              {
+                "depthM": 9.75,
+                "qcMpa": 1.671,
+                "qtMpa": 1.698,
+                "fsKpa": 67.9,
+                "rfPct": 4.06,
+                "u0Kpa": 76,
+                "u2Kpa": 137.6,
+                "hasU2": true,
+                "isbt": 2.9,
+                "sbt": "Silt mixture",
+                "inTolerance": true
+              },
+              {
+                "depthM": 9.8,
+                "qcMpa": 1.671,
+                "qtMpa": 1.698,
+                "fsKpa": 67.9,
+                "rfPct": 4.06,
+                "u0Kpa": 76.5,
+                "u2Kpa": 138.1,
+                "hasU2": true,
+                "isbt": 2.9,
+                "sbt": "Silt mixture",
+                "inTolerance": true
+              },
+              {
+                "depthM": 9.85,
+                "qcMpa": 1.671,
+                "qtMpa": 1.699,
+                "fsKpa": 67.9,
+                "rfPct": 4.06,
+                "u0Kpa": 77,
+                "u2Kpa": 138.5,
+                "hasU2": true,
+                "isbt": 2.9,
+                "sbt": "Silt mixture",
+                "inTolerance": true
+              },
+              {
+                "depthM": 9.9,
+                "qcMpa": 1.671,
+                "qtMpa": 1.699,
+                "fsKpa": 67.9,
+                "rfPct": 4.06,
+                "u0Kpa": 77.5,
+                "u2Kpa": 139,
+                "hasU2": true,
+                "isbt": 2.9,
+                "sbt": "Silt mixture",
+                "inTolerance": true
+              },
+              {
+                "depthM": 9.95,
+                "qcMpa": 1.671,
+                "qtMpa": 1.699,
+                "fsKpa": 67.9,
+                "rfPct": 4.06,
+                "u0Kpa": 78,
+                "u2Kpa": 139.5,
+                "hasU2": true,
+                "isbt": 2.9,
+                "sbt": "Silt mixture",
+                "inTolerance": true
+              }
+            ]
+          },
+          "time": {
+            "parSec": 39.1,
+            "actualSec": 30.1,
+            "score": 1
+          },
+          "groove": {
+            "uptime01": 1,
+            "bestCombo": 1,
+            "score": 1
+          },
+          "bit": {
+            "consumed01": 0,
+            "bitsUsed": 0,
+            "endWear": 0,
+            "score": 1
+          },
+          "straightness": {
+            "deviation": 0,
+            "score": 1
+          },
+          "hazards": {
+            "seen": 0,
+            "clean": 0,
+            "log": [],
+            "score": 1
+          },
+          "safety": {
+            "events": 0,
+            "jams": 0,
+            "score": 1
+          },
+          "rods": {
+            "added": 10,
+            "perfect": 0
+          },
+          "well": null
+        }
+      },
+      "action": null,
+      "beforeTerminalStep": {
+        "active": true,
+        "depth": 9.998983119999272,
+        "timeSec": 30.099999999998932,
+        "phase": "drilling",
+        "toeDepthM": null,
+        "headDepthM": null
+      },
+      "completion": {
+        "depth": 10,
+        "timeSec": 30.1,
+        "grade": "S",
+        "breakdown": {
+          "grade": "S",
+          "total": 1,
+          "weights": {
+            "time": 0.08,
+            "groove": 0.1,
+            "bit": 0.04,
+            "straight": 0.02,
+            "hazard": 0.08,
+            "safety": 0.08,
+            "quality": 0.6
+          },
+          "quality": {
+            "axis": "SOUNDING",
+            "score": 1,
+            "mode": "cpt",
+            "readings": 200,
+            "inTolerance01": 1,
+            "inclinationDeg": 0,
+            "baselineDrift": 0.0022,
+            "saturated": true,
+            "dissipations": 0,
+            "terminated": false,
+            "coneDamage01": 0,
+            "trace": [
+              {
+                "depthM": 9.6,
+                "qcMpa": 1.671,
+                "qtMpa": 1.698,
+                "fsKpa": 67.9,
+                "rfPct": 4.06,
+                "u0Kpa": 74.6,
+                "u2Kpa": 136.1,
+                "hasU2": true,
+                "isbt": 2.9,
+                "sbt": "Silt mixture",
+                "inTolerance": true
+              },
+              {
+                "depthM": 9.65,
+                "qcMpa": 1.671,
+                "qtMpa": 1.698,
+                "fsKpa": 67.9,
+                "rfPct": 4.06,
+                "u0Kpa": 75,
+                "u2Kpa": 136.6,
+                "hasU2": true,
+                "isbt": 2.9,
+                "sbt": "Silt mixture",
+                "inTolerance": true
+              },
+              {
+                "depthM": 9.7,
+                "qcMpa": 1.671,
+                "qtMpa": 1.698,
+                "fsKpa": 67.9,
+                "rfPct": 4.06,
+                "u0Kpa": 75.5,
+                "u2Kpa": 137.1,
+                "hasU2": true,
+                "isbt": 2.9,
+                "sbt": "Silt mixture",
+                "inTolerance": true
+              },
+              {
+                "depthM": 9.75,
+                "qcMpa": 1.671,
+                "qtMpa": 1.698,
+                "fsKpa": 67.9,
+                "rfPct": 4.06,
+                "u0Kpa": 76,
+                "u2Kpa": 137.6,
+                "hasU2": true,
+                "isbt": 2.9,
+                "sbt": "Silt mixture",
+                "inTolerance": true
+              },
+              {
+                "depthM": 9.8,
+                "qcMpa": 1.671,
+                "qtMpa": 1.698,
+                "fsKpa": 67.9,
+                "rfPct": 4.06,
+                "u0Kpa": 76.5,
+                "u2Kpa": 138.1,
+                "hasU2": true,
+                "isbt": 2.9,
+                "sbt": "Silt mixture",
+                "inTolerance": true
+              },
+              {
+                "depthM": 9.85,
+                "qcMpa": 1.671,
+                "qtMpa": 1.699,
+                "fsKpa": 67.9,
+                "rfPct": 4.06,
+                "u0Kpa": 77,
+                "u2Kpa": 138.5,
+                "hasU2": true,
+                "isbt": 2.9,
+                "sbt": "Silt mixture",
+                "inTolerance": true
+              },
+              {
+                "depthM": 9.9,
+                "qcMpa": 1.671,
+                "qtMpa": 1.699,
+                "fsKpa": 67.9,
+                "rfPct": 4.06,
+                "u0Kpa": 77.5,
+                "u2Kpa": 139,
+                "hasU2": true,
+                "isbt": 2.9,
+                "sbt": "Silt mixture",
+                "inTolerance": true
+              },
+              {
+                "depthM": 9.95,
+                "qcMpa": 1.671,
+                "qtMpa": 1.699,
+                "fsKpa": 67.9,
+                "rfPct": 4.06,
+                "u0Kpa": 78,
+                "u2Kpa": 139.5,
+                "hasU2": true,
+                "isbt": 2.9,
+                "sbt": "Silt mixture",
+                "inTolerance": true
+              }
+            ]
+          },
+          "time": {
+            "parSec": 39.1,
+            "actualSec": 30.1,
+            "score": 1
+          },
+          "groove": {
+            "uptime01": 1,
+            "bestCombo": 1,
+            "score": 1
+          },
+          "bit": {
+            "consumed01": 0,
+            "bitsUsed": 0,
+            "endWear": 0,
+            "score": 1
+          },
+          "straightness": {
+            "deviation": 0,
+            "score": 1
+          },
+          "hazards": {
+            "seen": 0,
+            "clean": 0,
+            "log": [],
+            "score": 1
+          },
+          "safety": {
+            "events": 0,
+            "jams": 0,
+            "score": 1
+          },
+          "rods": {
+            "added": 10,
+            "perfect": 0
+          },
+          "well": null
+        },
+        "methodId": "site-investigation",
+        "bitId": "auger-flight-std",
+        "bitWear": 0,
+        "bitWearBook": 0,
+        "bitBearing": 0,
+        "contract": {
+          "id": "method-settlement-cpt-target",
+          "title": "Diagnostic cpt-target",
+          "methodId": "site-investigation",
+          "regionId": "nordic",
+          "applicationId": "site-investigation",
+          "archetypeId": "urban-plot",
+          "targetDepth": 10,
+          "holes": 1,
+          "metres": 10,
+          "holeDia": 100,
+          "payout": 10000,
+          "bonus": {
+            "time": 1000,
+            "quality": 1000
+          },
+          "deadlineHours": 24,
+          "reputationReward": 10,
+          "requiredCerts": [],
+          "difficulty": 1,
+          "hardness": 0.2,
+          "abrasivity": 0.2,
+          "seed": 194,
+          "ground": [
+            {
+              "id": "clay",
+              "top": 0,
+              "bottom": 100
+            }
+          ],
+          "flushMedium": "water"
+        },
+        "runId": 5,
+        "attemptId": 6
+      },
+      "settlement": {
+        "contractId": "method-settlement-cpt-target",
+        "runId": 5,
+        "attemptId": 6,
+        "hole": 1,
+        "of": 1,
+        "depth": 10,
+        "grade": "S",
+        "revenue": 15424,
+        "costs": {
+          "consumables": 26,
+          "flushing": 0,
+          "materials": 140,
+          "fuel": 35,
+          "upkeep": 97,
+          "insurance": 2,
+          "depreciation": 53,
+          "crew": 117,
+          "setup": 1755,
+          "travel": 0,
+          "overhead": 683,
+          "total": 2907
+        },
+        "net": 12517,
+        "xp": 459,
+        "reputation": 16,
+        "hours": 3.11,
+        "worn": [
+          {
+            "itemId": "auger-flight-std",
+            "slot": "bit",
+            "name": "Flight Auger Head, 305 mm",
+            "from": 1,
+            "to": 0.975,
+            "wear": 0.025
+          },
+          {
+            "itemId": "push-rod-1m",
+            "slot": "rod",
+            "name": "CPT Push Rod, 44.5 mm x 1 m",
+            "from": 1,
+            "to": 0.999,
+            "wear": 0.001
+          },
+          {
+            "itemId": "liner-sampler-set",
+            "slot": "workshop",
+            "name": "Drive & Liner Sampler Set",
+            "from": 1,
+            "to": 0.986,
+            "wear": 0.014
+          }
+        ],
+        "complete": true
+      },
+      "playerStatsDelta": {
+        "metresDrilled": 10,
+        "money": 12517,
+        "xp": 459
+      },
+      "observedProgramme": {
+        "kind": "cpt",
+        "unit": "reading",
+        "mode": "cpt",
+        "pushRateMmS": 19.8,
+        "targetMmS": 20,
+        "toleranceMmS": 5,
+        "inTolerance01": 1,
+        "readings": 200,
+        "resolutionMm": 50,
+        "latest": {
+          "depthM": 9.95,
+          "qcMpa": 1.671,
+          "qtMpa": 1.699,
+          "fsKpa": 67.9,
+          "rfPct": 4.06,
+          "u0Kpa": 78,
+          "u2Kpa": 139.5,
+          "hasU2": true,
+          "isbt": 2.9,
+          "sbt": "Silt mixture",
+          "inTolerance": true
+        },
+        "trace": [
+          {
+            "depthM": 8,
+            "qcMpa": 1.671,
+            "qtMpa": 1.695,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 58.9,
+            "u2Kpa": 120.4,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 8.05,
+            "qcMpa": 1.671,
+            "qtMpa": 1.695,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 59.4,
+            "u2Kpa": 120.9,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 8.1,
+            "qcMpa": 1.671,
+            "qtMpa": 1.695,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 59.8,
+            "u2Kpa": 121.4,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 8.15,
+            "qcMpa": 1.671,
+            "qtMpa": 1.695,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 60.3,
+            "u2Kpa": 121.9,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 8.2,
+            "qcMpa": 1.671,
+            "qtMpa": 1.695,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 60.8,
+            "u2Kpa": 122.4,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 8.25,
+            "qcMpa": 1.671,
+            "qtMpa": 1.695,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 61.3,
+            "u2Kpa": 122.9,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 8.3,
+            "qcMpa": 1.671,
+            "qtMpa": 1.695,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 61.8,
+            "u2Kpa": 123.3,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 8.35,
+            "qcMpa": 1.671,
+            "qtMpa": 1.696,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 62.3,
+            "u2Kpa": 123.8,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 8.4,
+            "qcMpa": 1.671,
+            "qtMpa": 1.696,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 62.8,
+            "u2Kpa": 124.3,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 8.45,
+            "qcMpa": 1.671,
+            "qtMpa": 1.696,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 63.3,
+            "u2Kpa": 124.8,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 8.5,
+            "qcMpa": 1.671,
+            "qtMpa": 1.696,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 63.8,
+            "u2Kpa": 125.3,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 8.55,
+            "qcMpa": 1.671,
+            "qtMpa": 1.696,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 64.3,
+            "u2Kpa": 125.8,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 8.6,
+            "qcMpa": 1.671,
+            "qtMpa": 1.696,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 64.7,
+            "u2Kpa": 126.3,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 8.65,
+            "qcMpa": 1.671,
+            "qtMpa": 1.696,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 65.2,
+            "u2Kpa": 126.8,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 8.7,
+            "qcMpa": 1.671,
+            "qtMpa": 1.696,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 65.7,
+            "u2Kpa": 127.3,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 8.75,
+            "qcMpa": 1.671,
+            "qtMpa": 1.696,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 66.2,
+            "u2Kpa": 127.8,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 8.8,
+            "qcMpa": 1.671,
+            "qtMpa": 1.696,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 66.7,
+            "u2Kpa": 128.2,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 8.85,
+            "qcMpa": 1.671,
+            "qtMpa": 1.697,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 67.2,
+            "u2Kpa": 128.7,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 8.9,
+            "qcMpa": 1.671,
+            "qtMpa": 1.697,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 67.7,
+            "u2Kpa": 129.2,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 8.95,
+            "qcMpa": 1.671,
+            "qtMpa": 1.697,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 68.2,
+            "u2Kpa": 129.7,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 9,
+            "qcMpa": 1.671,
+            "qtMpa": 1.697,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 68.7,
+            "u2Kpa": 130.2,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 9.05,
+            "qcMpa": 1.671,
+            "qtMpa": 1.697,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 69.2,
+            "u2Kpa": 130.7,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 9.1,
+            "qcMpa": 1.671,
+            "qtMpa": 1.697,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 69.7,
+            "u2Kpa": 131.2,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 9.15,
+            "qcMpa": 1.671,
+            "qtMpa": 1.697,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 70.1,
+            "u2Kpa": 131.7,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 9.2,
+            "qcMpa": 1.671,
+            "qtMpa": 1.697,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 70.6,
+            "u2Kpa": 132.2,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 9.25,
+            "qcMpa": 1.671,
+            "qtMpa": 1.697,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 71.1,
+            "u2Kpa": 132.7,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 9.3,
+            "qcMpa": 1.671,
+            "qtMpa": 1.697,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 71.6,
+            "u2Kpa": 133.2,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 9.35,
+            "qcMpa": 1.671,
+            "qtMpa": 1.698,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 72.1,
+            "u2Kpa": 133.6,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 9.4,
+            "qcMpa": 1.671,
+            "qtMpa": 1.698,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 72.6,
+            "u2Kpa": 134.1,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 9.45,
+            "qcMpa": 1.671,
+            "qtMpa": 1.698,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 73.1,
+            "u2Kpa": 134.6,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 9.5,
+            "qcMpa": 1.671,
+            "qtMpa": 1.698,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 73.6,
+            "u2Kpa": 135.1,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 9.55,
+            "qcMpa": 1.671,
+            "qtMpa": 1.698,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 74.1,
+            "u2Kpa": 135.6,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 9.6,
+            "qcMpa": 1.671,
+            "qtMpa": 1.698,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 74.6,
+            "u2Kpa": 136.1,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 9.65,
+            "qcMpa": 1.671,
+            "qtMpa": 1.698,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 75,
+            "u2Kpa": 136.6,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 9.7,
+            "qcMpa": 1.671,
+            "qtMpa": 1.698,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 75.5,
+            "u2Kpa": 137.1,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 9.75,
+            "qcMpa": 1.671,
+            "qtMpa": 1.698,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 76,
+            "u2Kpa": 137.6,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 9.8,
+            "qcMpa": 1.671,
+            "qtMpa": 1.698,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 76.5,
+            "u2Kpa": 138.1,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 9.85,
+            "qcMpa": 1.671,
+            "qtMpa": 1.699,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 77,
+            "u2Kpa": 138.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 9.9,
+            "qcMpa": 1.671,
+            "qtMpa": 1.699,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 77.5,
+            "u2Kpa": 139,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          },
+          {
+            "depthM": 9.95,
+            "qcMpa": 1.671,
+            "qtMpa": 1.699,
+            "fsKpa": 67.9,
+            "rfPct": 4.06,
+            "u0Kpa": 78,
+            "u2Kpa": 139.5,
+            "hasU2": true,
+            "isbt": 2.9,
+            "sbt": "Silt mixture",
+            "inTolerance": true
+          }
+        ],
+        "saturated": true,
+        "dissipations": 0,
+        "inclinationDeg": 0,
+        "inclinationLimitDeg": 8,
+        "baselineDrift": 0.0022,
+        "baselineTol": 0.03,
+        "coneDamage01": 0,
+        "terminated": false,
+        "rotationLocked": true,
+        "flushLocked": true,
+        "lockNote": "the cone does not turn"
+      },
+      "expectedDepthBasis": 10,
+      "lastMeasuredDepthM": 9.95,
+      "reportedDepthExceedsDelivered": false
+    },
+    {
+      "name": "cpt-thrust-limit",
+      "fixture": {
+        "id": "method-settlement-cpt-thrust-limit",
+        "title": "Diagnostic cpt-thrust-limit",
+        "methodId": "site-investigation",
+        "regionId": "nordic",
+        "applicationId": "site-investigation",
+        "archetypeId": "urban-plot",
+        "targetDepth": 10,
+        "holes": 1,
+        "metres": 10,
+        "holeDia": 100,
+        "payout": 10000,
+        "bonus": {
+          "time": 1000,
+          "quality": 1000
+        },
+        "deadlineHours": 24,
+        "reputationReward": 10,
+        "requiredCerts": [],
+        "difficulty": 1,
+        "hardness": 0.2,
+        "abrasivity": 0.2,
+        "seed": 194,
+        "ground": [
+          {
+            "id": "sandstone",
+            "top": 0,
+            "bottom": 100
+          }
+        ],
+        "flushMedium": "water"
+      },
+      "preflight": {
+        "ok": true,
+        "reason": "",
+        "mobilisation": 0,
+        "rigId": "cpt-unit"
+      },
+      "loadout": {
+        "bit": "auger-flight-std",
+        "probe": "cpt-cone-piezo",
+        "rod": "push-rod-1m",
+        "workshop": "liner-sampler-set"
+      },
+      "ticks": 434,
+      "beforeAction": {
+        "active": false,
+        "phase": "complete",
+        "reason": "complete",
+        "runId": 7,
+        "attemptId": 8,
+        "methodId": "site-investigation",
+        "method": {
+          "id": "site-investigation",
+          "name": "Site investigation (CPT)",
+          "kind": "push"
+        },
+        "flushMedium": "water",
+        "contractId": "method-settlement-cpt-thrust-limit",
+        "difficulty": 1,
+        "timeSec": 3.6166666666666565,
+        "drillSec": 0,
+        "parSec": 13928.571428571431,
+        "jobHours": 0,
+        "depth": 10,
+        "depthDisplay": 0,
+        "target": 10,
+        "progress01": 1,
+        "rop": 0,
+        "ropDisplay": 0,
+        "ropPotential": 72,
+        "torque": 0.2799633824581876,
+        "torqueDisplay": 0.2799633824581876,
+        "torqueJitter": 0,
+        "torqueLimit": 1,
+        "overtorque": false,
+        "wear": 0,
+        "wearDisplay": 0,
+        "wearKnown": true,
+        "wearTrue": 0,
+        "wearBook": 0,
+        "heat": 0,
+        "heatDisplay": 0,
+        "glazed": false,
+        "load": 0,
+        "loadDisplay": 0,
+        "returns": 1,
+        "stability": 1,
+        "stabilityDisplay": 0.75,
+        "wob": 0.5882352941176471,
+        "rpm": 0,
+        "flush": 0,
+        "wobCmd": 0.5882352941176471,
+        "rpmCmd": 0,
+        "flushCmd": 0,
+        "optimal": {
+          "wob": 0.5882352941176471,
+          "rpm": 0,
+          "flush": 0
+        },
+        "combo": 1,
+        "comboDisplay": 1,
+        "inGreenBand": false,
+        "greenBandTime": 0,
+        "grooveUptime01": 0,
+        "sweetSpot": {
+          "center01": 0.5882352941176471,
+          "halfWidth01": 0.14705882352941177,
+          "axis": "torque",
+          "display01": 0.5882352941176471,
+          "inBand": false,
+          "combo": 1,
+          "jumped": false
+        },
+        "hasDrillString": true,
+        "rods": 1,
+        "bailingRuns": 0,
+        "rodLength": 1,
+        "rodLengthMeans": "rod length",
+        "nextRodDepth": 1,
+        "rodAdd": null,
+        "rodFatigue": 0,
+        "bit": {
+          "id": "auger-flight-std",
+          "name": "Auger Flight",
+          "kind": "auger",
+          "carbide": 0.8,
+          "wear": 0,
+          "life01": 1,
+          "fits": true
+        },
+        "bitsUsed": 0,
+        "casingOn": false,
+        "casingArmed": false,
+        "casedDepth": 0,
+        "canCase": true,
+        "well": null,
+        "foundered": false,
+        "twistOffs": 0,
+        "fishing": false,
+        "jam": {
+          "state": "free",
+          "bind01": 0,
+          "raw": 0,
+          "stuckSec": 0,
+          "loseSec": 26,
+          "warnSec": 18,
+          "rescue": {
+            "phase01": 0,
+            "window": 0.28,
+            "goodNow": true
+          }
+        },
+        "kickReady": true,
+        "kickCooldown": 0,
+        "stratum": {
+          "id": "sandstone",
+          "name": "Sandstone",
+          "ucs": 70,
+          "abrasivity": 0.8,
+          "stability": 0.75,
+          "water": 0.5,
+          "index": 0,
+          "top": 0,
+          "bottom": 100,
+          "boulder": null,
+          "cavity": null,
+          "fracture": null
+        },
+        "stratumIndex": 0,
+        "warning": null,
+        "hazards": [],
+        "flags": {
+          "lostCirculation": false,
+          "waterInflow": 0,
+          "waterFlowLpm": 0,
+          "overheat": false,
+          "collapsing": false,
+          "drag": 0
+        },
+        "gauge": {
+          "axis": "push-rate",
+          "label": "PUSH RATE",
+          "unit": "mm/s",
+          "value": 0,
+          "display": 0,
+          "band": {
+            "center01": 0.5882352941176471,
+            "halfWidth01": 0.14705882352941177,
+            "axis": "torque",
+            "display01": 0.5882352941176471,
+            "inBand": false,
+            "combo": 1,
+            "jumped": false
+          },
+          "real": 0,
+          "max": 34
+        },
+        "stage": 0,
+        "stageId": "bore",
+        "stageName": "Bore",
+        "stageCount": 1,
+        "stageProgress": 0,
+        "stageReverse": false,
+        "actionDepth": 10,
+        "progress01Overall": 1,
+        "holeDepth": 0,
+        "stringDepth": 0,
+        "programme": {
+          "kind": "cpt",
+          "unit": "reading",
+          "mode": "cpt",
+          "pushRateMmS": 0,
+          "targetMmS": 20,
+          "toleranceMmS": 5,
+          "inTolerance01": 0.55,
+          "readings": 1,
+          "resolutionMm": 50,
+          "latest": {
+            "depthM": 0,
+            "qcMpa": 60,
+            "qtMpa": 59.984,
+            "fsKpa": 330,
+            "rfPct": 0.55,
+            "u0Kpa": 0,
+            "u2Kpa": -80,
+            "hasU2": true,
+            "isbt": 1.18,
+            "sbt": "Gravelly sand",
+            "inTolerance": true
+          },
+          "trace": [
+            {
+              "depthM": 0,
+              "qcMpa": 60,
+              "qtMpa": 59.984,
+              "fsKpa": 330,
+              "rfPct": 0.55,
+              "u0Kpa": 0,
+              "u2Kpa": -80,
+              "hasU2": true,
+              "isbt": 1.18,
+              "sbt": "Gravelly sand",
+              "inTolerance": true
+            }
+          ],
+          "saturated": true,
+          "dissipations": 0,
+          "inclinationDeg": 0,
+          "inclinationLimitDeg": 8,
+          "baselineDrift": 0,
+          "baselineTol": 0.03,
+          "coneDamage01": 0,
+          "terminated": true,
+          "rotationLocked": true,
+          "flushLocked": true,
+          "lockNote": "the cone does not turn"
+        },
+        "beat": null,
+        "actions": [
+          {
+            "id": "dissipation",
+            "label": "DISSIPATION TEST",
+            "enabled": false
+          },
+          {
+            "id": "terminate",
+            "label": "TERMINATE",
+            "enabled": false
+          }
+        ],
+        "blowHz": 0,
+        "impactIntensity": 0.12784426759909207,
+        "deviation": 0,
+        "straightness01": 1,
+        "safetyEvents": 0,
+        "jamIncidents": 0,
+        "hazardsSeen": 1,
+        "hazardsClean": 0,
+        "score": {
+          "grade": "B",
+          "total": 0.685,
+          "weights": {
+            "time": 0.08,
+            "groove": 0.1,
+            "bit": 0.04,
+            "straight": 0.02,
+            "hazard": 0.08,
+            "safety": 0.08,
+            "quality": 0.6
+          },
+          "quality": {
+            "axis": "SOUNDING",
+            "score": 0.775,
+            "mode": "cpt",
+            "readings": 1,
+            "inTolerance01": 0.55,
+            "inclinationDeg": 0,
+            "baselineDrift": 0,
+            "saturated": true,
+            "dissipations": 0,
+            "terminated": true,
+            "coneDamage01": 0,
+            "trace": [
+              {
+                "depthM": 0,
+                "qcMpa": 60,
+                "qtMpa": 59.984,
+                "fsKpa": 330,
+                "rfPct": 0.55,
+                "u0Kpa": 0,
+                "u2Kpa": -80,
+                "hasU2": true,
+                "isbt": 1.18,
+                "sbt": "Gravelly sand",
+                "inTolerance": true
+              }
+            ]
+          },
+          "time": {
+            "parSec": 13928.6,
+            "actualSec": 3.6,
+            "score": 1
+          },
+          "groove": {
+            "uptime01": 0,
+            "bestCombo": 1,
+            "score": 0
+          },
+          "bit": {
+            "consumed01": 0,
+            "bitsUsed": 0,
+            "endWear": 0,
+            "score": 1
+          },
+          "straightness": {
+            "deviation": 0,
+            "score": 1
+          },
+          "hazards": {
+            "seen": 1,
+            "clean": 0,
+            "log": [
+              {
+                "kind": "thrust-limit",
+                "depth": 0,
+                "clean": false,
+                "at": 3.6166666666666565
+              }
+            ],
+            "score": 0
+          },
+          "safety": {
+            "events": 0,
+            "jams": 0,
+            "score": 1
+          },
+          "rods": {
+            "added": 0,
+            "perfect": 0
+          },
+          "well": null
+        }
+      },
+      "action": null,
+      "beforeTerminalStep": {
+        "active": true,
+        "depth": 0,
+        "timeSec": 3.608333333333323,
+        "phase": "drilling",
+        "toeDepthM": null,
+        "headDepthM": null
+      },
+      "completion": {
+        "depth": 10,
+        "timeSec": 3.6,
+        "grade": "B",
+        "breakdown": {
+          "grade": "B",
+          "total": 0.685,
+          "weights": {
+            "time": 0.08,
+            "groove": 0.1,
+            "bit": 0.04,
+            "straight": 0.02,
+            "hazard": 0.08,
+            "safety": 0.08,
+            "quality": 0.6
+          },
+          "quality": {
+            "axis": "SOUNDING",
+            "score": 0.775,
+            "mode": "cpt",
+            "readings": 1,
+            "inTolerance01": 0.55,
+            "inclinationDeg": 0,
+            "baselineDrift": 0,
+            "saturated": true,
+            "dissipations": 0,
+            "terminated": true,
+            "coneDamage01": 0,
+            "trace": [
+              {
+                "depthM": 0,
+                "qcMpa": 60,
+                "qtMpa": 59.984,
+                "fsKpa": 330,
+                "rfPct": 0.55,
+                "u0Kpa": 0,
+                "u2Kpa": -80,
+                "hasU2": true,
+                "isbt": 1.18,
+                "sbt": "Gravelly sand",
+                "inTolerance": true
+              }
+            ]
+          },
+          "time": {
+            "parSec": 13928.6,
+            "actualSec": 3.6,
+            "score": 1
+          },
+          "groove": {
+            "uptime01": 0,
+            "bestCombo": 1,
+            "score": 0
+          },
+          "bit": {
+            "consumed01": 0,
+            "bitsUsed": 0,
+            "endWear": 0,
+            "score": 1
+          },
+          "straightness": {
+            "deviation": 0,
+            "score": 1
+          },
+          "hazards": {
+            "seen": 1,
+            "clean": 0,
+            "log": [
+              {
+                "kind": "thrust-limit",
+                "depth": 0,
+                "clean": false,
+                "at": 3.6166666666666565
+              }
+            ],
+            "score": 0
+          },
+          "safety": {
+            "events": 0,
+            "jams": 0,
+            "score": 1
+          },
+          "rods": {
+            "added": 0,
+            "perfect": 0
+          },
+          "well": null
+        },
+        "methodId": "site-investigation",
+        "bitId": "auger-flight-std",
+        "bitWear": 0,
+        "bitWearBook": 0,
+        "bitBearing": 0,
+        "contract": {
+          "id": "method-settlement-cpt-thrust-limit",
+          "title": "Diagnostic cpt-thrust-limit",
+          "methodId": "site-investigation",
+          "regionId": "nordic",
+          "applicationId": "site-investigation",
+          "archetypeId": "urban-plot",
+          "targetDepth": 10,
+          "holes": 1,
+          "metres": 10,
+          "holeDia": 100,
+          "payout": 10000,
+          "bonus": {
+            "time": 1000,
+            "quality": 1000
+          },
+          "deadlineHours": 24,
+          "reputationReward": 10,
+          "requiredCerts": [],
+          "difficulty": 1,
+          "hardness": 0.2,
+          "abrasivity": 0.2,
+          "seed": 194,
+          "ground": [
+            {
+              "id": "sandstone",
+              "top": 0,
+              "bottom": 100
+            }
+          ],
+          "flushMedium": "water"
+        },
+        "runId": 7,
+        "attemptId": 8
+      },
+      "settlement": {
+        "contractId": "method-settlement-cpt-thrust-limit",
+        "runId": 7,
+        "attemptId": 8,
+        "hole": 1,
+        "of": 1,
+        "depth": 10,
+        "grade": "B",
+        "revenue": 11997,
+        "costs": {
+          "consumables": 26,
+          "flushing": 0,
+          "materials": 140,
+          "fuel": 18,
+          "upkeep": 67,
+          "insurance": 1,
+          "depreciation": 27,
+          "crew": 82,
+          "setup": 1755,
+          "travel": 0,
+          "overhead": 512,
+          "total": 2629
+        },
+        "net": 9368,
+        "xp": 435,
+        "reputation": 11,
+        "hours": 2.17,
+        "worn": [
+          {
+            "itemId": "auger-flight-std",
+            "slot": "bit",
+            "name": "Flight Auger Head, 305 mm",
+            "from": 1,
+            "to": 0.975,
+            "wear": 0.025
+          },
+          {
+            "itemId": "push-rod-1m",
+            "slot": "rod",
+            "name": "CPT Push Rod, 44.5 mm x 1 m",
+            "from": 1,
+            "to": 0.999,
+            "wear": 0.001
+          },
+          {
+            "itemId": "liner-sampler-set",
+            "slot": "workshop",
+            "name": "Drive & Liner Sampler Set",
+            "from": 1,
+            "to": 0.986,
+            "wear": 0.014
+          }
+        ],
+        "complete": true
+      },
+      "playerStatsDelta": {
+        "metresDrilled": 10,
+        "money": 9368,
+        "xp": 435
+      },
+      "observedProgramme": {
+        "kind": "cpt",
+        "unit": "reading",
+        "mode": "cpt",
+        "pushRateMmS": 0,
+        "targetMmS": 20,
+        "toleranceMmS": 5,
+        "inTolerance01": 0.55,
+        "readings": 1,
+        "resolutionMm": 50,
+        "latest": {
+          "depthM": 0,
+          "qcMpa": 60,
+          "qtMpa": 59.984,
+          "fsKpa": 330,
+          "rfPct": 0.55,
+          "u0Kpa": 0,
+          "u2Kpa": -80,
+          "hasU2": true,
+          "isbt": 1.18,
+          "sbt": "Gravelly sand",
+          "inTolerance": true
+        },
+        "trace": [
+          {
+            "depthM": 0,
+            "qcMpa": 60,
+            "qtMpa": 59.984,
+            "fsKpa": 330,
+            "rfPct": 0.55,
+            "u0Kpa": 0,
+            "u2Kpa": -80,
+            "hasU2": true,
+            "isbt": 1.18,
+            "sbt": "Gravelly sand",
+            "inTolerance": true
+          }
+        ],
+        "saturated": true,
+        "dissipations": 0,
+        "inclinationDeg": 0,
+        "inclinationLimitDeg": 8,
+        "baselineDrift": 0,
+        "baselineTol": 0.03,
+        "coneDamage01": 0,
+        "terminated": true,
+        "rotationLocked": true,
+        "flushLocked": true,
+        "lockNote": "the cone does not turn"
+      },
+      "expectedDepthBasis": 0,
+      "lastMeasuredDepthM": 0,
+      "reportedDepthExceedsDelivered": true
+    },
+    {
+      "name": "cpt-dissipation",
+      "fixture": {
+        "id": "method-settlement-cpt-dissipation",
+        "title": "Diagnostic cpt-dissipation",
+        "methodId": "site-investigation",
+        "regionId": "nordic",
+        "applicationId": "site-investigation",
+        "archetypeId": "urban-plot",
+        "targetDepth": 10,
+        "holes": 1,
+        "metres": 10,
+        "holeDia": 100,
+        "payout": 10000,
+        "bonus": {
+          "time": 1000,
+          "quality": 1000
+        },
+        "deadlineHours": 24,
+        "reputationReward": 10,
+        "requiredCerts": [],
+        "difficulty": 1,
+        "hardness": 0.2,
+        "abrasivity": 0.2,
+        "seed": 194,
+        "ground": [
+          {
+            "id": "clay",
+            "top": 0,
+            "bottom": 100
+          }
+        ],
+        "flushMedium": "water"
+      },
+      "preflight": {
+        "ok": true,
+        "reason": "",
+        "mobilisation": 0,
+        "rigId": "cpt-unit"
+      },
+      "action": {
+        "ok": true,
+        "kind": "dissipation"
+      },
+      "authoredDuration": 4,
+      "usedDurationFinite": false,
+      "usedDuration": "NaN",
+      "elapsedPlayerSeconds": 0.008333333333333333,
+      "beforeDissipations": 0,
+      "afterDissipations": 1,
+      "phaseAfterOneTick": "drilling"
+    },
+    {
+      "name": "pile-early-unfounded",
+      "fixture": {
+        "id": "method-settlement-pile-early-unfounded",
+        "title": "Diagnostic pile-early-unfounded",
+        "methodId": "driven-pile",
+        "regionId": "nordic",
+        "applicationId": "foundation-piling",
+        "archetypeId": "urban-plot",
+        "targetDepth": 8,
+        "holes": 1,
+        "metres": 8,
+        "holeDia": 400,
+        "payout": 10000,
+        "bonus": {
+          "time": 1000,
+          "quality": 1000
+        },
+        "deadlineHours": 24,
+        "reputationReward": 10,
+        "requiredCerts": [],
+        "difficulty": 1,
+        "hardness": 0.2,
+        "abrasivity": 0.2,
+        "seed": 194,
+        "ground": [
+          {
+            "id": "clay",
+            "top": 0,
+            "bottom": 100
+          }
+        ],
+        "flushMedium": "none"
+      },
+      "preflight": {
+        "ok": true,
+        "reason": "",
+        "mobilisation": 0,
+        "rigId": "piling-leader"
+      },
+      "loadout": {
+        "hammer": "impact-hammer-9t",
+        "dolly": "dolly-plastic",
+        "install": "precast-pile-350"
+      },
+      "ticks": 2720,
+      "beforeAction": {
+        "active": true,
+        "phase": "drilling",
+        "reason": null,
+        "runId": 11,
+        "attemptId": 12,
+        "methodId": "driven-pile",
+        "method": {
+          "id": "driven-pile",
+          "name": "Driven piling",
+          "kind": "impact"
+        },
+        "flushMedium": "none",
+        "contractId": "method-settlement-pile-early-unfounded",
+        "difficulty": 1,
+        "timeSec": 15.841666666666407,
+        "drillSec": 0.008333333333333333,
+        "parSec": 39.576494176041386,
+        "jobHours": 0.00006111111111111112,
+        "depth": 0,
+        "depthDisplay": 0,
+        "target": 8,
+        "progress01": 0,
+        "rop": 0,
+        "ropDisplay": 0,
+        "ropPotential": 80.34871516027462,
+        "torque": 0.05,
+        "torqueDisplay": 0.055760000000000004,
+        "torqueJitter": 0,
+        "torqueLimit": 1,
+        "overtorque": false,
+        "wear": 0,
+        "wearDisplay": 0,
+        "wearKnown": true,
+        "wearTrue": 0,
+        "wearBook": 0,
+        "heat": 0,
+        "heatDisplay": 0,
+        "glazed": false,
+        "load": 0,
+        "loadDisplay": 0,
+        "returns": 1,
+        "stability": 1,
+        "stabilityDisplay": 0.55,
+        "wob": 0.32,
+        "rpm": 0.8,
+        "flush": 0.5,
+        "wobCmd": 0.32,
+        "rpmCmd": 0.8,
+        "flushCmd": 0.5,
+        "optimal": {
+          "wob": 0.32,
+          "rpm": 0.8,
+          "flush": 0.5
+        },
+        "combo": 1,
+        "comboDisplay": 1,
+        "inGreenBand": false,
+        "greenBandTime": 0,
+        "grooveUptime01": 0,
+        "sweetSpot": {
+          "center01": 0.9632214129432259,
+          "halfWidth01": 0.1769257164913327,
+          "axis": "torque",
+          "display01": 0.9632214129432259,
+          "inBand": false,
+          "combo": 1,
+          "jumped": false
+        },
+        "hasDrillString": false,
+        "rods": 0,
+        "bailingRuns": 0,
+        "rodLength": 0,
+        "rodLengthMeans": null,
+        "nextRodDepth": null,
+        "rodAdd": null,
+        "rodFatigue": 0,
+        "bit": {
+          "id": "dolly-plastic",
+          "name": "Plastic Dolly, Phenolic Laminate",
+          "kind": "dolly",
+          "carbide": 1.15,
+          "wear": 0,
+          "life01": 1,
+          "fits": true
+        },
+        "bitsUsed": 0,
+        "casingOn": false,
+        "casingArmed": false,
+        "casedDepth": 0,
+        "canCase": false,
+        "well": null,
+        "foundered": false,
+        "twistOffs": 0,
+        "fishing": false,
+        "jam": {
+          "state": "free",
+          "bind01": 0,
+          "raw": 0,
+          "stuckSec": 0,
+          "loseSec": 26,
+          "warnSec": 18,
+          "rescue": {
+            "phase01": 0,
+            "window": 0.28,
+            "goodNow": true
+          }
+        },
+        "kickReady": true,
+        "kickCooldown": 0,
+        "stratum": {
+          "id": "clay",
+          "name": "Clay",
+          "ucs": 0.4,
+          "abrasivity": 0.08,
+          "stability": 0.55,
+          "water": 0.15,
+          "index": 0,
+          "top": 0,
+          "bottom": 100,
+          "boulder": null,
+          "cavity": null,
+          "fracture": null
+        },
+        "stratumIndex": 0,
+        "warning": null,
+        "hazards": [],
+        "flags": {
+          "lostCirculation": false,
+          "waterInflow": 0,
+          "waterFlowLpm": 0,
+          "overheat": false,
+          "collapsing": false,
+          "drag": 0
+        },
+        "gauge": {
+          "axis": "set",
+          "label": "SET",
+          "unit": "mm/blow",
+          "value": 0.9632214129432259,
+          "display": 0.9632214129432259,
+          "band": {
+            "center01": 0.9632214129432259,
+            "halfWidth01": 0.1769257164913327,
+            "axis": "torque",
+            "display01": 0.9632214129432259,
+            "inBand": false,
+            "combo": 1,
+            "jumped": false
+          },
+          "real": 27.83,
+          "max": 30
+        },
+        "stage": 0,
+        "stageId": "bore",
+        "stageName": "Bore",
+        "stageCount": 1,
+        "stageProgress": 0,
+        "stageReverse": false,
+        "actionDepth": 0,
+        "progress01Overall": 0,
+        "holeDepth": 0.0049101992597945605,
+        "stringDepth": 0,
+        "programme": {
+          "kind": "driven-pile",
+          "unit": "blow",
+          "blows": 0,
+          "setMmPerBlow": 27.83,
+          "blowsPer250": 9,
+          "designSetMm": 27.83,
+          "practicalBlows": 135,
+          "refusalBlows": 248,
+          "toeDepthM": 0,
+          "headDepthM": 0,
+          "bearingTopM": null,
+          "bearingPenM": 0,
+          "bearingPenRequiredM": 0.6,
+          "founded": false,
+          "hammerItemId": "impact-hammer-9t",
+          "ramKg": 9000,
+          "ratedEnergyKnm": 106,
+          "energyKnm": 33.8,
+          "dropM": 0.383,
+          "maxDropM": 1.2,
+          "blowRateBpm": 88,
+          "energyCeilingKnm": 80.1,
+          "ramCeilingKnm": 105.9,
+          "powerLimited": true,
+          "headDamage01": 0,
+          "toeDamage01": 0,
+          "rakeDeg": 0,
+          "rakeMaxDeg": 5,
+          "drivingStress01": 0,
+          "stressLimit01": 1,
+          "monitored": false,
+          "steel": false,
+          "dollyCondition01": 1,
+          "dollyChanges": 0,
+          "refused": false,
+          "hardRefused": false,
+          "setTaken": false,
+          "setSamples": [
+            {
+              "blow": 1,
+              "permanentMm": 27.83,
+              "temporaryMm": 30.26
+            },
+            {
+              "blow": 2,
+              "permanentMm": 27.83,
+              "temporaryMm": 30.26
+            },
+            {
+              "blow": 3,
+              "permanentMm": 27.83,
+              "temporaryMm": 30.26
+            },
+            {
+              "blow": 4,
+              "permanentMm": 27.83,
+              "temporaryMm": 30.26
+            },
+            {
+              "blow": 5,
+              "permanentMm": 27.83,
+              "temporaryMm": 30.26
+            },
+            {
+              "blow": 6,
+              "permanentMm": 27.83,
+              "temporaryMm": 30.26
+            },
+            {
+              "blow": 7,
+              "permanentMm": 27.83,
+              "temporaryMm": 30.26
+            },
+            {
+              "blow": 8,
+              "permanentMm": 27.83,
+              "temporaryMm": 30.26
+            },
+            {
+              "blow": 9,
+              "permanentMm": 27.83,
+              "temporaryMm": 30.26
+            },
+            {
+              "blow": 10,
+              "permanentMm": 27.83,
+              "temporaryMm": 30.26
+            }
+          ],
+          "blowLog": []
+        },
+        "beat": null,
+        "actions": [
+          {
+            "id": "takeSet",
+            "label": "TAKE THE SET",
+            "enabled": true
+          },
+          {
+            "id": "changeDolly",
+            "label": "CHANGE DOLLY",
+            "enabled": true
+          }
+        ],
+        "blowHz": 0,
+        "impactIntensity": 0.26043750000000004,
+        "deviation": 0,
+        "straightness01": 1,
+        "safetyEvents": 0,
+        "jamIncidents": 0,
+        "hazardsSeen": 0,
+        "hazardsClean": 0,
+        "score": {
+          "grade": "B",
+          "total": 0.6912,
+          "weights": {
+            "time": 0.1,
+            "groove": 0.1,
+            "bit": 0.06,
+            "straight": 0,
+            "hazard": 0.08,
+            "safety": 0.08,
+            "quality": 0.58
+          },
+          "quality": {
+            "axis": "PILE",
+            "score": 0.64,
+            "blows": 0,
+            "headDepthM": 0,
+            "toeDepthM": 0,
+            "bearingTopM": null,
+            "bearingPenM": 0,
+            "founded": false,
+            "measuredSetMm": 27.83,
+            "trueSetMm": 0,
+            "broomingMm": 0,
+            "designSetMm": 27.83,
+            "setInWindow": true,
+            "refused": false,
+            "hardRefused": false,
+            "headDamage01": 0,
+            "toeDamage01": 0,
+            "rakeDeg": 0,
+            "peakStress01": 0,
+            "monitored": false,
+            "steel": false,
+            "dollyChanges": 0,
+            "reDrives": 1,
+            "log": []
+          },
+          "time": {
+            "parSec": 39.6,
+            "actualSec": 15.8,
+            "score": 1
+          },
+          "groove": {
+            "uptime01": 0,
+            "bestCombo": 1,
+            "score": 0
+          },
+          "bit": {
+            "consumed01": 0,
+            "bitsUsed": 0,
+            "endWear": 0,
+            "score": 1
+          },
+          "straightness": {
+            "deviation": 0,
+            "score": 1
+          },
+          "hazards": {
+            "seen": 0,
+            "clean": 0,
+            "log": [],
+            "score": 1
+          },
+          "safety": {
+            "events": 0,
+            "jams": 0,
+            "score": 1
+          },
+          "rods": {
+            "added": 0,
+            "perfect": 0
+          },
+          "well": null
+        }
+      },
+      "action": [
+        {
+          "before": {
+            "active": true,
+            "phase": "drilling",
+            "reason": null,
+            "runId": 11,
+            "attemptId": 12,
+            "methodId": "driven-pile",
+            "method": {
+              "id": "driven-pile",
+              "name": "Driven piling",
+              "kind": "impact"
+            },
+            "flushMedium": "none",
+            "contractId": "method-settlement-pile-early-unfounded",
+            "difficulty": 1,
+            "timeSec": 3.0166666666666586,
+            "drillSec": 0.008333333333333333,
+            "parSec": 39.576494176041386,
+            "jobHours": 0.00006111111111111112,
+            "depth": 0,
+            "depthDisplay": 0,
+            "target": 8,
+            "progress01": 0,
+            "rop": 0,
+            "ropDisplay": 0,
+            "ropPotential": 80.34871516027462,
+            "torque": 0.05,
+            "torqueDisplay": 0.055760000000000004,
+            "torqueJitter": 0,
+            "torqueLimit": 1,
+            "overtorque": false,
+            "wear": 0,
+            "wearDisplay": 0,
+            "wearKnown": true,
+            "wearTrue": 0,
+            "wearBook": 0,
+            "heat": 0,
+            "heatDisplay": 0,
+            "glazed": false,
+            "load": 0,
+            "loadDisplay": 0,
+            "returns": 1,
+            "stability": 1,
+            "stabilityDisplay": 0.55,
+            "wob": 0.32,
+            "rpm": 0.8,
+            "flush": 0.5,
+            "wobCmd": 0.32,
+            "rpmCmd": 0.8,
+            "flushCmd": 0.5,
+            "optimal": {
+              "wob": 0.32,
+              "rpm": 0.8,
+              "flush": 0.5
+            },
+            "combo": 1,
+            "comboDisplay": 1,
+            "inGreenBand": false,
+            "greenBandTime": 0,
+            "grooveUptime01": 0,
+            "sweetSpot": {
+              "center01": 0.9632214129432259,
+              "halfWidth01": 0.1769257164913327,
+              "axis": "torque",
+              "display01": 0.9632214129432259,
+              "inBand": false,
+              "combo": 1,
+              "jumped": false
+            },
+            "hasDrillString": false,
+            "rods": 0,
+            "bailingRuns": 0,
+            "rodLength": 0,
+            "rodLengthMeans": null,
+            "nextRodDepth": null,
+            "rodAdd": null,
+            "rodFatigue": 0,
+            "bit": {
+              "id": "dolly-plastic",
+              "name": "Plastic Dolly, Phenolic Laminate",
+              "kind": "dolly",
+              "carbide": 1.15,
+              "wear": 0,
+              "life01": 1,
+              "fits": true
+            },
+            "bitsUsed": 0,
+            "casingOn": false,
+            "casingArmed": false,
+            "casedDepth": 0,
+            "canCase": false,
+            "well": null,
+            "foundered": false,
+            "twistOffs": 0,
+            "fishing": false,
+            "jam": {
+              "state": "free",
+              "bind01": 0,
+              "raw": 0,
+              "stuckSec": 0,
+              "loseSec": 26,
+              "warnSec": 18,
+              "rescue": {
+                "phase01": 0,
+                "window": 0.28,
+                "goodNow": true
+              }
+            },
+            "kickReady": true,
+            "kickCooldown": 0,
+            "stratum": {
+              "id": "clay",
+              "name": "Clay",
+              "ucs": 0.4,
+              "abrasivity": 0.08,
+              "stability": 0.55,
+              "water": 0.15,
+              "index": 0,
+              "top": 0,
+              "bottom": 100,
+              "boulder": null,
+              "cavity": null,
+              "fracture": null
+            },
+            "stratumIndex": 0,
+            "warning": null,
+            "hazards": [],
+            "flags": {
+              "lostCirculation": false,
+              "waterInflow": 0,
+              "waterFlowLpm": 0,
+              "overheat": false,
+              "collapsing": false,
+              "drag": 0
+            },
+            "gauge": {
+              "axis": "set",
+              "label": "SET",
+              "unit": "mm/blow",
+              "value": 0.9632214129432259,
+              "display": 0.9632214129432259,
+              "band": {
+                "center01": 0.9632214129432259,
+                "halfWidth01": 0.1769257164913327,
+                "axis": "torque",
+                "display01": 0.9632214129432259,
+                "inBand": false,
+                "combo": 1,
+                "jumped": false
+              },
+              "real": 27.83,
+              "max": 30
+            },
+            "stage": 0,
+            "stageId": "bore",
+            "stageName": "Bore",
+            "stageCount": 1,
+            "stageProgress": 0,
+            "stageReverse": false,
+            "actionDepth": 0,
+            "progress01Overall": 0,
+            "holeDepth": 0.0049101992597945605,
+            "stringDepth": 0,
+            "programme": {
+              "kind": "driven-pile",
+              "unit": "blow",
+              "blows": 0,
+              "setMmPerBlow": 27.83,
+              "blowsPer250": 9,
+              "designSetMm": 27.83,
+              "practicalBlows": 135,
+              "refusalBlows": 248,
+              "toeDepthM": 0,
+              "headDepthM": 0,
+              "bearingTopM": null,
+              "bearingPenM": 0,
+              "bearingPenRequiredM": 0.6,
+              "founded": false,
+              "hammerItemId": "impact-hammer-9t",
+              "ramKg": 9000,
+              "ratedEnergyKnm": 106,
+              "energyKnm": 33.8,
+              "dropM": 0.383,
+              "maxDropM": 1.2,
+              "blowRateBpm": 88,
+              "energyCeilingKnm": 80.1,
+              "ramCeilingKnm": 105.9,
+              "powerLimited": true,
+              "headDamage01": 0,
+              "toeDamage01": 0,
+              "rakeDeg": 0,
+              "rakeMaxDeg": 5,
+              "drivingStress01": 0,
+              "stressLimit01": 1,
+              "monitored": false,
+              "steel": false,
+              "dollyCondition01": 1,
+              "dollyChanges": 0,
+              "refused": false,
+              "hardRefused": false,
+              "setTaken": false,
+              "setSamples": [],
+              "blowLog": []
+            },
+            "beat": null,
+            "actions": [
+              {
+                "id": "takeSet",
+                "label": "TAKE THE SET",
+                "enabled": true
+              },
+              {
+                "id": "changeDolly",
+                "label": "CHANGE DOLLY",
+                "enabled": true
+              }
+            ],
+            "blowHz": 0,
+            "impactIntensity": 0.26043750000000004,
+            "deviation": 0,
+            "straightness01": 1,
+            "safetyEvents": 0,
+            "jamIncidents": 0,
+            "hazardsSeen": 0,
+            "hazardsClean": 0,
+            "score": {
+              "grade": "B",
+              "total": 0.6889,
+              "weights": {
+                "time": 0.1,
+                "groove": 0.1,
+                "bit": 0.06,
+                "straight": 0,
+                "hazard": 0.08,
+                "safety": 0.08,
+                "quality": 0.58
+              },
+              "quality": {
+                "axis": "PILE",
+                "score": 0.636,
+                "blows": 0,
+                "headDepthM": 0,
+                "toeDepthM": 0,
+                "bearingTopM": null,
+                "bearingPenM": 0,
+                "founded": false,
+                "measuredSetMm": 27.83,
+                "trueSetMm": 0,
+                "broomingMm": 0,
+                "designSetMm": 27.83,
+                "setInWindow": false,
+                "refused": false,
+                "hardRefused": false,
+                "headDamage01": 0,
+                "toeDamage01": 0,
+                "rakeDeg": 0,
+                "peakStress01": 0,
+                "monitored": false,
+                "steel": false,
+                "dollyChanges": 0,
+                "reDrives": 0,
+                "log": []
+              },
+              "time": {
+                "parSec": 39.6,
+                "actualSec": 3,
+                "score": 1
+              },
+              "groove": {
+                "uptime01": 0,
+                "bestCombo": 1,
+                "score": 0
+              },
+              "bit": {
+                "consumed01": 0,
+                "bitsUsed": 0,
+                "endWear": 0,
+                "score": 1
+              },
+              "straightness": {
+                "deviation": 0,
+                "score": 1
+              },
+              "hazards": {
+                "seen": 0,
+                "clean": 0,
+                "log": [],
+                "score": 1
+              },
+              "safety": {
+                "events": 0,
+                "jams": 0,
+                "score": 1
+              },
+              "rods": {
+                "added": 0,
+                "perfect": 0
+              },
+              "well": null
+            }
+          },
+          "result": {
+            "ok": true,
+            "kind": "takeSet",
+            "blows": 10,
+            "founded": false,
+            "bearingPenM": 0
+          }
+        },
+        {
+          "before": {
+            "active": true,
+            "phase": "drilling",
+            "reason": null,
+            "runId": 11,
+            "attemptId": 12,
+            "methodId": "driven-pile",
+            "method": {
+              "id": "driven-pile",
+              "name": "Driven piling",
+              "kind": "impact"
+            },
+            "flushMedium": "none",
+            "contractId": "method-settlement-pile-early-unfounded",
+            "difficulty": 1,
+            "timeSec": 15.841666666666407,
+            "drillSec": 0.008333333333333333,
+            "parSec": 39.576494176041386,
+            "jobHours": 0.00006111111111111112,
+            "depth": 0,
+            "depthDisplay": 0,
+            "target": 8,
+            "progress01": 0,
+            "rop": 0,
+            "ropDisplay": 0,
+            "ropPotential": 80.34871516027462,
+            "torque": 0.05,
+            "torqueDisplay": 0.055760000000000004,
+            "torqueJitter": 0,
+            "torqueLimit": 1,
+            "overtorque": false,
+            "wear": 0,
+            "wearDisplay": 0,
+            "wearKnown": true,
+            "wearTrue": 0,
+            "wearBook": 0,
+            "heat": 0,
+            "heatDisplay": 0,
+            "glazed": false,
+            "load": 0,
+            "loadDisplay": 0,
+            "returns": 1,
+            "stability": 1,
+            "stabilityDisplay": 0.55,
+            "wob": 0.32,
+            "rpm": 0.8,
+            "flush": 0.5,
+            "wobCmd": 0.32,
+            "rpmCmd": 0.8,
+            "flushCmd": 0.5,
+            "optimal": {
+              "wob": 0.32,
+              "rpm": 0.8,
+              "flush": 0.5
+            },
+            "combo": 1,
+            "comboDisplay": 1,
+            "inGreenBand": false,
+            "greenBandTime": 0,
+            "grooveUptime01": 0,
+            "sweetSpot": {
+              "center01": 0.9632214129432259,
+              "halfWidth01": 0.1769257164913327,
+              "axis": "torque",
+              "display01": 0.9632214129432259,
+              "inBand": false,
+              "combo": 1,
+              "jumped": false
+            },
+            "hasDrillString": false,
+            "rods": 0,
+            "bailingRuns": 0,
+            "rodLength": 0,
+            "rodLengthMeans": null,
+            "nextRodDepth": null,
+            "rodAdd": null,
+            "rodFatigue": 0,
+            "bit": {
+              "id": "dolly-plastic",
+              "name": "Plastic Dolly, Phenolic Laminate",
+              "kind": "dolly",
+              "carbide": 1.15,
+              "wear": 0,
+              "life01": 1,
+              "fits": true
+            },
+            "bitsUsed": 0,
+            "casingOn": false,
+            "casingArmed": false,
+            "casedDepth": 0,
+            "canCase": false,
+            "well": null,
+            "foundered": false,
+            "twistOffs": 0,
+            "fishing": false,
+            "jam": {
+              "state": "free",
+              "bind01": 0,
+              "raw": 0,
+              "stuckSec": 0,
+              "loseSec": 26,
+              "warnSec": 18,
+              "rescue": {
+                "phase01": 0,
+                "window": 0.28,
+                "goodNow": true
+              }
+            },
+            "kickReady": true,
+            "kickCooldown": 0,
+            "stratum": {
+              "id": "clay",
+              "name": "Clay",
+              "ucs": 0.4,
+              "abrasivity": 0.08,
+              "stability": 0.55,
+              "water": 0.15,
+              "index": 0,
+              "top": 0,
+              "bottom": 100,
+              "boulder": null,
+              "cavity": null,
+              "fracture": null
+            },
+            "stratumIndex": 0,
+            "warning": null,
+            "hazards": [],
+            "flags": {
+              "lostCirculation": false,
+              "waterInflow": 0,
+              "waterFlowLpm": 0,
+              "overheat": false,
+              "collapsing": false,
+              "drag": 0
+            },
+            "gauge": {
+              "axis": "set",
+              "label": "SET",
+              "unit": "mm/blow",
+              "value": 0.9632214129432259,
+              "display": 0.9632214129432259,
+              "band": {
+                "center01": 0.9632214129432259,
+                "halfWidth01": 0.1769257164913327,
+                "axis": "torque",
+                "display01": 0.9632214129432259,
+                "inBand": false,
+                "combo": 1,
+                "jumped": false
+              },
+              "real": 27.83,
+              "max": 30
+            },
+            "stage": 0,
+            "stageId": "bore",
+            "stageName": "Bore",
+            "stageCount": 1,
+            "stageProgress": 0,
+            "stageReverse": false,
+            "actionDepth": 0,
+            "progress01Overall": 0,
+            "holeDepth": 0.0049101992597945605,
+            "stringDepth": 0,
+            "programme": {
+              "kind": "driven-pile",
+              "unit": "blow",
+              "blows": 0,
+              "setMmPerBlow": 27.83,
+              "blowsPer250": 9,
+              "designSetMm": 27.83,
+              "practicalBlows": 135,
+              "refusalBlows": 248,
+              "toeDepthM": 0,
+              "headDepthM": 0,
+              "bearingTopM": null,
+              "bearingPenM": 0,
+              "bearingPenRequiredM": 0.6,
+              "founded": false,
+              "hammerItemId": "impact-hammer-9t",
+              "ramKg": 9000,
+              "ratedEnergyKnm": 106,
+              "energyKnm": 33.8,
+              "dropM": 0.383,
+              "maxDropM": 1.2,
+              "blowRateBpm": 88,
+              "energyCeilingKnm": 80.1,
+              "ramCeilingKnm": 105.9,
+              "powerLimited": true,
+              "headDamage01": 0,
+              "toeDamage01": 0,
+              "rakeDeg": 0,
+              "rakeMaxDeg": 5,
+              "drivingStress01": 0,
+              "stressLimit01": 1,
+              "monitored": false,
+              "steel": false,
+              "dollyCondition01": 1,
+              "dollyChanges": 0,
+              "refused": false,
+              "hardRefused": false,
+              "setTaken": false,
+              "setSamples": [
+                {
+                  "blow": 1,
+                  "permanentMm": 27.83,
+                  "temporaryMm": 30.26
+                },
+                {
+                  "blow": 2,
+                  "permanentMm": 27.83,
+                  "temporaryMm": 30.26
+                },
+                {
+                  "blow": 3,
+                  "permanentMm": 27.83,
+                  "temporaryMm": 30.26
+                },
+                {
+                  "blow": 4,
+                  "permanentMm": 27.83,
+                  "temporaryMm": 30.26
+                },
+                {
+                  "blow": 5,
+                  "permanentMm": 27.83,
+                  "temporaryMm": 30.26
+                },
+                {
+                  "blow": 6,
+                  "permanentMm": 27.83,
+                  "temporaryMm": 30.26
+                },
+                {
+                  "blow": 7,
+                  "permanentMm": 27.83,
+                  "temporaryMm": 30.26
+                },
+                {
+                  "blow": 8,
+                  "permanentMm": 27.83,
+                  "temporaryMm": 30.26
+                },
+                {
+                  "blow": 9,
+                  "permanentMm": 27.83,
+                  "temporaryMm": 30.26
+                },
+                {
+                  "blow": 10,
+                  "permanentMm": 27.83,
+                  "temporaryMm": 30.26
+                }
+              ],
+              "blowLog": []
+            },
+            "beat": null,
+            "actions": [
+              {
+                "id": "takeSet",
+                "label": "TAKE THE SET",
+                "enabled": true
+              },
+              {
+                "id": "changeDolly",
+                "label": "CHANGE DOLLY",
+                "enabled": true
+              }
+            ],
+            "blowHz": 0,
+            "impactIntensity": 0.26043750000000004,
+            "deviation": 0,
+            "straightness01": 1,
+            "safetyEvents": 0,
+            "jamIncidents": 0,
+            "hazardsSeen": 0,
+            "hazardsClean": 0,
+            "score": {
+              "grade": "B",
+              "total": 0.6912,
+              "weights": {
+                "time": 0.1,
+                "groove": 0.1,
+                "bit": 0.06,
+                "straight": 0,
+                "hazard": 0.08,
+                "safety": 0.08,
+                "quality": 0.58
+              },
+              "quality": {
+                "axis": "PILE",
+                "score": 0.64,
+                "blows": 0,
+                "headDepthM": 0,
+                "toeDepthM": 0,
+                "bearingTopM": null,
+                "bearingPenM": 0,
+                "founded": false,
+                "measuredSetMm": 27.83,
+                "trueSetMm": 0,
+                "broomingMm": 0,
+                "designSetMm": 27.83,
+                "setInWindow": true,
+                "refused": false,
+                "hardRefused": false,
+                "headDamage01": 0,
+                "toeDamage01": 0,
+                "rakeDeg": 0,
+                "peakStress01": 0,
+                "monitored": false,
+                "steel": false,
+                "dollyChanges": 0,
+                "reDrives": 1,
+                "log": []
+              },
+              "time": {
+                "parSec": 39.6,
+                "actualSec": 15.8,
+                "score": 1
+              },
+              "groove": {
+                "uptime01": 0,
+                "bestCombo": 1,
+                "score": 0
+              },
+              "bit": {
+                "consumed01": 0,
+                "bitsUsed": 0,
+                "endWear": 0,
+                "score": 1
+              },
+              "straightness": {
+                "deviation": 0,
+                "score": 1
+              },
+              "hazards": {
+                "seen": 0,
+                "clean": 0,
+                "log": [],
+                "score": 1
+              },
+              "safety": {
+                "events": 0,
+                "jams": 0,
+                "score": 1
+              },
+              "rods": {
+                "added": 0,
+                "perfect": 0
+              },
+              "well": null
+            }
+          },
+          "result": {
+            "ok": true,
+            "kind": "takeSet",
+            "blows": 10,
+            "founded": false,
+            "bearingPenM": 0
+          }
+        }
+      ],
+      "beforeTerminalStep": {
+        "active": true,
+        "depth": 0,
+        "timeSec": 22.65833333333269,
+        "phase": "take-set",
+        "toeDepthM": 0,
+        "headDepthM": 0
+      },
+      "completion": {
+        "depth": 8,
+        "timeSec": 22.7,
+        "grade": "B",
+        "breakdown": {
+          "grade": "B",
+          "total": 0.6912,
+          "weights": {
+            "time": 0.1,
+            "groove": 0.1,
+            "bit": 0.06,
+            "straight": 0,
+            "hazard": 0.08,
+            "safety": 0.08,
+            "quality": 0.58
+          },
+          "quality": {
+            "axis": "PILE",
+            "score": 0.64,
+            "blows": 0,
+            "headDepthM": 0,
+            "toeDepthM": 0,
+            "bearingTopM": null,
+            "bearingPenM": 0,
+            "founded": false,
+            "measuredSetMm": 27.83,
+            "trueSetMm": 0,
+            "broomingMm": 0,
+            "designSetMm": 27.83,
+            "setInWindow": true,
+            "refused": false,
+            "hardRefused": false,
+            "headDamage01": 0,
+            "toeDamage01": 0,
+            "rakeDeg": 0,
+            "peakStress01": 0,
+            "monitored": false,
+            "steel": false,
+            "dollyChanges": 0,
+            "reDrives": 1,
+            "log": []
+          },
+          "time": {
+            "parSec": 39.6,
+            "actualSec": 22.7,
+            "score": 1
+          },
+          "groove": {
+            "uptime01": 0,
+            "bestCombo": 1,
+            "score": 0
+          },
+          "bit": {
+            "consumed01": 0,
+            "bitsUsed": 0,
+            "endWear": 0,
+            "score": 1
+          },
+          "straightness": {
+            "deviation": 0,
+            "score": 1
+          },
+          "hazards": {
+            "seen": 0,
+            "clean": 0,
+            "log": [],
+            "score": 1
+          },
+          "safety": {
+            "events": 0,
+            "jams": 0,
+            "score": 1
+          },
+          "rods": {
+            "added": 0,
+            "perfect": 0
+          },
+          "well": null
+        },
+        "methodId": "driven-pile",
+        "bitId": "dolly-plastic",
+        "bitWear": 0,
+        "bitWearBook": 0,
+        "bitBearing": 0,
+        "contract": {
+          "id": "method-settlement-pile-early-unfounded",
+          "title": "Diagnostic pile-early-unfounded",
+          "methodId": "driven-pile",
+          "regionId": "nordic",
+          "applicationId": "foundation-piling",
+          "archetypeId": "urban-plot",
+          "targetDepth": 8,
+          "holes": 1,
+          "metres": 8,
+          "holeDia": 400,
+          "payout": 10000,
+          "bonus": {
+            "time": 1000,
+            "quality": 1000
+          },
+          "deadlineHours": 24,
+          "reputationReward": 10,
+          "requiredCerts": [],
+          "difficulty": 1,
+          "hardness": 0.2,
+          "abrasivity": 0.2,
+          "seed": 194,
+          "ground": [
+            {
+              "id": "clay",
+              "top": 0,
+              "bottom": 100
+            }
+          ],
+          "flushMedium": "none"
+        },
+        "runId": 11,
+        "attemptId": 12
+      },
+      "settlement": {
+        "contractId": "method-settlement-pile-early-unfounded",
+        "runId": 11,
+        "attemptId": 12,
+        "hole": 1,
+        "of": 1,
+        "depth": 8,
+        "grade": "B",
+        "revenue": 11926,
+        "costs": {
+          "consumables": 989,
+          "flushing": 0,
+          "materials": 208,
+          "fuel": 108,
+          "upkeep": 826,
+          "insurance": 4,
+          "depreciation": 123,
+          "crew": 853,
+          "setup": 17708,
+          "travel": 0,
+          "overhead": 0,
+          "total": 20820
+        },
+        "net": -8894,
+        "xp": 563,
+        "reputation": 11,
+        "hours": 5.65,
+        "worn": [
+          {
+            "itemId": "dolly-plastic",
+            "slot": "dolly",
+            "name": "Plastic Dolly, Phenolic Laminate",
+            "from": 1,
+            "to": 0.992,
+            "wear": 0.008
+          },
+          {
+            "itemId": "precast-pile-350",
+            "slot": "install",
+            "name": "Precast Concrete Pile, 350 mm x 14 m",
+            "from": 1,
+            "to": 0.429,
+            "wear": 0.571
+          }
+        ],
+        "complete": true
+      },
+      "playerStatsDelta": {
+        "metresDrilled": 8,
+        "money": -8894,
+        "xp": 563
+      },
+      "observedProgramme": {
+        "kind": "driven-pile",
+        "unit": "blow",
+        "blows": 0,
+        "setMmPerBlow": 27.83,
+        "blowsPer250": 9,
+        "designSetMm": 27.83,
+        "practicalBlows": 135,
+        "refusalBlows": 248,
+        "toeDepthM": 0,
+        "headDepthM": 0,
+        "bearingTopM": null,
+        "bearingPenM": 0,
+        "bearingPenRequiredM": 0.6,
+        "founded": false,
+        "hammerItemId": "impact-hammer-9t",
+        "ramKg": 9000,
+        "ratedEnergyKnm": 106,
+        "energyKnm": 33.8,
+        "dropM": 0.383,
+        "maxDropM": 1.2,
+        "blowRateBpm": 88,
+        "energyCeilingKnm": 80.1,
+        "ramCeilingKnm": 105.9,
+        "powerLimited": true,
+        "headDamage01": 0,
+        "toeDamage01": 0,
+        "rakeDeg": 0,
+        "rakeMaxDeg": 5,
+        "drivingStress01": 0,
+        "stressLimit01": 1,
+        "monitored": false,
+        "steel": false,
+        "dollyCondition01": 1,
+        "dollyChanges": 0,
+        "refused": false,
+        "hardRefused": false,
+        "setTaken": true,
+        "setSamples": [
+          {
+            "blow": 1,
+            "permanentMm": 27.83,
+            "temporaryMm": 30.26
+          },
+          {
+            "blow": 2,
+            "permanentMm": 27.83,
+            "temporaryMm": 30.26
+          },
+          {
+            "blow": 3,
+            "permanentMm": 27.83,
+            "temporaryMm": 30.26
+          },
+          {
+            "blow": 4,
+            "permanentMm": 27.83,
+            "temporaryMm": 30.26
+          },
+          {
+            "blow": 5,
+            "permanentMm": 27.83,
+            "temporaryMm": 30.26
+          },
+          {
+            "blow": 6,
+            "permanentMm": 27.83,
+            "temporaryMm": 30.26
+          },
+          {
+            "blow": 7,
+            "permanentMm": 27.83,
+            "temporaryMm": 30.26
+          },
+          {
+            "blow": 8,
+            "permanentMm": 27.83,
+            "temporaryMm": 30.26
+          },
+          {
+            "blow": 9,
+            "permanentMm": 27.83,
+            "temporaryMm": 30.26
+          },
+          {
+            "blow": 10,
+            "permanentMm": 27.83,
+            "temporaryMm": 30.26
+          }
+        ],
+        "blowLog": []
+      },
+      "qualityHasNestedDetail": false,
+      "deliveredPile": false,
+      "economyZeroUnitsControl": 0,
+      "paidWithoutDeliveredPile": true
+    },
+    {
+      "name": "pile-accepted-control",
+      "fixture": {
+        "id": "method-settlement-pile-accepted-control",
+        "title": "Diagnostic pile-accepted-control",
+        "methodId": "driven-pile",
+        "regionId": "nordic",
+        "applicationId": "foundation-piling",
+        "archetypeId": "urban-plot",
+        "targetDepth": 8,
+        "holes": 1,
+        "metres": 8,
+        "holeDia": 400,
+        "payout": 10000,
+        "bonus": {
+          "time": 1000,
+          "quality": 1000
+        },
+        "deadlineHours": 24,
+        "reputationReward": 10,
+        "requiredCerts": [],
+        "difficulty": 1,
+        "hardness": 0.2,
+        "abrasivity": 0.2,
+        "seed": 194,
+        "ground": [
+          {
+            "id": "sandstone",
+            "top": 0,
+            "bottom": 100
+          }
+        ],
+        "flushMedium": "none"
+      },
+      "preflight": {
+        "ok": true,
+        "reason": "",
+        "mobilisation": 0,
+        "rigId": "piling-leader"
+      },
+      "loadout": {
+        "hammer": "impact-hammer-9t",
+        "dolly": "dolly-plastic",
+        "install": "precast-pile-350"
+      },
+      "ticks": 5404,
+      "beforeAction": null,
+      "action": [],
+      "beforeTerminalStep": {
+        "active": true,
+        "depth": 8.000444406513695,
+        "timeSec": 45.02499999999809,
+        "phase": "take-set",
+        "toeDepthM": 3.1319319802613506,
+        "headDepthM": 8.000444406513695
+      },
+      "completion": {
+        "depth": 8,
+        "timeSec": 45,
+        "grade": "C",
+        "breakdown": {
+          "grade": "C",
+          "total": 0.5068,
+          "weights": {
+            "time": 0.1,
+            "groove": 0.1,
+            "bit": 0.06,
+            "straight": 0,
+            "hazard": 0.08,
+            "safety": 0.08,
+            "quality": 0.58
+          },
+          "quality": {
+            "axis": "PILE",
+            "score": 0.571,
+            "blows": 873,
+            "headDepthM": 8,
+            "toeDepthM": 3.13,
+            "bearingTopM": 0,
+            "bearingPenM": 3.13,
+            "founded": true,
+            "measuredSetMm": 10.9,
+            "trueSetMm": 3.48,
+            "broomingMm": 7.42,
+            "designSetMm": 3.72,
+            "setInWindow": false,
+            "refused": false,
+            "hardRefused": false,
+            "headDamage01": 0.058,
+            "toeDamage01": 1,
+            "rakeDeg": 0.26,
+            "peakStress01": 1.045,
+            "monitored": false,
+            "steel": false,
+            "dollyChanges": 0,
+            "reDrives": 0,
+            "log": [
+              {
+                "fromM": 7.75,
+                "toM": 7.775,
+                "incrementMm": 25,
+                "blows": 2,
+                "blowsPer250": 23,
+                "toeM": 3.06
+              },
+              {
+                "fromM": 7.775,
+                "toM": 7.8,
+                "incrementMm": 25,
+                "blows": 2,
+                "blowsPer250": 23,
+                "toeM": 3.068
+              },
+              {
+                "fromM": 7.8,
+                "toM": 7.825,
+                "incrementMm": 25,
+                "blows": 2,
+                "blowsPer250": 23,
+                "toeM": 3.076
+              },
+              {
+                "fromM": 7.825,
+                "toM": 7.85,
+                "incrementMm": 25,
+                "blows": 2,
+                "blowsPer250": 23,
+                "toeM": 3.084
+              },
+              {
+                "fromM": 7.85,
+                "toM": 7.875,
+                "incrementMm": 25,
+                "blows": 2,
+                "blowsPer250": 23,
+                "toeM": 3.092
+              },
+              {
+                "fromM": 7.875,
+                "toM": 7.9,
+                "incrementMm": 25,
+                "blows": 2,
+                "blowsPer250": 23,
+                "toeM": 3.101
+              },
+              {
+                "fromM": 7.9,
+                "toM": 7.925,
+                "incrementMm": 25,
+                "blows": 2,
+                "blowsPer250": 23,
+                "toeM": 3.108
+              },
+              {
+                "fromM": 7.925,
+                "toM": 7.95,
+                "incrementMm": 25,
+                "blows": 2,
+                "blowsPer250": 23,
+                "toeM": 3.116
+              },
+              {
+                "fromM": 7.95,
+                "toM": 7.975,
+                "incrementMm": 25,
+                "blows": 2,
+                "blowsPer250": 23,
+                "toeM": 3.124
+              },
+              {
+                "fromM": 7.975,
+                "toM": 8,
+                "incrementMm": 25,
+                "blows": 2,
+                "blowsPer250": 23,
+                "toeM": 3.132
+              }
+            ]
+          },
+          "time": {
+            "parSec": 137.9,
+            "actualSec": 45,
+            "score": 1
+          },
+          "groove": {
+            "uptime01": 0.157,
+            "bestCombo": 1,
+            "score": 0.157
+          },
+          "bit": {
+            "consumed01": 0.158,
+            "bitsUsed": 0,
+            "endWear": 0.158,
+            "score": 1
+          },
+          "straightness": {
+            "deviation": 0,
+            "score": 1
+          },
+          "hazards": {
+            "seen": 5,
+            "clean": 0,
+            "log": [
+              {
+                "kind": "obstruction",
+                "depth": 0.14666295854924521,
+                "clean": false,
+                "at": 8.966666666666798
+              },
+              {
+                "kind": "obstruction",
+                "depth": 1.0038345637080723,
+                "clean": false,
+                "at": 14.733333333333137
+              },
+              {
+                "kind": "obstruction",
+                "depth": 2.862311966802506,
+                "clean": false,
+                "at": 22.358333333332705
+              },
+              {
+                "kind": "obstruction",
+                "depth": 5.603298620605883,
+                "clean": false,
+                "at": 31.66666666666551
+              },
+              {
+                "kind": "obstruction",
+                "depth": 7.0607255441356624,
+                "clean": false,
+                "at": 36.599999999998566
+              }
+            ],
+            "score": 0
+          },
+          "safety": {
+            "events": 39,
+            "jams": 0,
+            "score": 0
+          },
+          "rods": {
+            "added": 0,
+            "perfect": 0
+          },
+          "well": null
+        },
+        "methodId": "driven-pile",
+        "bitId": "dolly-plastic",
+        "bitWear": 0.158,
+        "bitWearBook": 0.158,
+        "bitBearing": 0,
+        "contract": {
+          "id": "method-settlement-pile-accepted-control",
+          "title": "Diagnostic pile-accepted-control",
+          "methodId": "driven-pile",
+          "regionId": "nordic",
+          "applicationId": "foundation-piling",
+          "archetypeId": "urban-plot",
+          "targetDepth": 8,
+          "holes": 1,
+          "metres": 8,
+          "holeDia": 400,
+          "payout": 10000,
+          "bonus": {
+            "time": 1000,
+            "quality": 1000
+          },
+          "deadlineHours": 24,
+          "reputationReward": 10,
+          "requiredCerts": [],
+          "difficulty": 1,
+          "hardness": 0.2,
+          "abrasivity": 0.2,
+          "seed": 194,
+          "ground": [
+            {
+              "id": "sandstone",
+              "top": 0,
+              "bottom": 100
+            }
+          ],
+          "flushMedium": "none"
+        },
+        "runId": 13,
+        "attemptId": 14
+      },
+      "settlement": {
+        "contractId": "method-settlement-pile-accepted-control",
+        "runId": 13,
+        "attemptId": 14,
+        "hole": 1,
+        "of": 1,
+        "depth": 8,
+        "grade": "C",
+        "revenue": 10884,
+        "costs": {
+          "consumables": 989,
+          "flushing": 0,
+          "materials": 208,
+          "fuel": 76,
+          "upkeep": 776,
+          "insurance": 3,
+          "depreciation": 86,
+          "crew": 802,
+          "setup": 17708,
+          "travel": 0,
+          "overhead": 0,
+          "total": 20648
+        },
+        "net": -9764,
+        "xp": 557,
+        "reputation": 10,
+        "hours": 5.31,
+        "worn": [
+          {
+            "itemId": "dolly-plastic",
+            "slot": "dolly",
+            "name": "Plastic Dolly, Phenolic Laminate",
+            "from": 1,
+            "to": 0.992,
+            "wear": 0.008
+          },
+          {
+            "itemId": "precast-pile-350",
+            "slot": "install",
+            "name": "Precast Concrete Pile, 350 mm x 14 m",
+            "from": 1,
+            "to": 0.429,
+            "wear": 0.571
+          }
+        ],
+        "complete": true
+      },
+      "playerStatsDelta": {
+        "metresDrilled": 8,
+        "money": -9764,
+        "xp": 557
+      },
+      "observedProgramme": {
+        "kind": "driven-pile",
+        "unit": "blow",
+        "blows": 873,
+        "setMmPerBlow": 10.9,
+        "blowsPer250": 23,
+        "designSetMm": 3.72,
+        "practicalBlows": 135,
+        "refusalBlows": 248,
+        "toeDepthM": 3.13,
+        "headDepthM": 8,
+        "bearingTopM": 0,
+        "bearingPenM": 3.13,
+        "bearingPenRequiredM": 0.6,
+        "founded": true,
+        "hammerItemId": "impact-hammer-9t",
+        "ramKg": 9000,
+        "ratedEnergyKnm": 106,
+        "energyKnm": 87.3,
+        "dropM": 0.989,
+        "maxDropM": 1.2,
+        "blowRateBpm": 62,
+        "energyCeilingKnm": 105.9,
+        "ramCeilingKnm": 105.9,
+        "powerLimited": false,
+        "headDamage01": 0.058,
+        "toeDamage01": 1,
+        "rakeDeg": 0.26,
+        "rakeMaxDeg": 5,
+        "drivingStress01": 1.045,
+        "stressLimit01": 1,
+        "monitored": false,
+        "steel": false,
+        "dollyCondition01": 0.842,
+        "dollyChanges": 0,
+        "refused": false,
+        "hardRefused": false,
+        "setTaken": true,
+        "setSamples": [
+          {
+            "blow": 1,
+            "permanentMm": 10.9,
+            "temporaryMm": 16.8
+          },
+          {
+            "blow": 2,
+            "permanentMm": 10.9,
+            "temporaryMm": 16.8
+          },
+          {
+            "blow": 3,
+            "permanentMm": 10.9,
+            "temporaryMm": 16.8
+          },
+          {
+            "blow": 4,
+            "permanentMm": 10.9,
+            "temporaryMm": 16.8
+          },
+          {
+            "blow": 5,
+            "permanentMm": 10.9,
+            "temporaryMm": 16.8
+          },
+          {
+            "blow": 6,
+            "permanentMm": 10.9,
+            "temporaryMm": 16.8
+          },
+          {
+            "blow": 7,
+            "permanentMm": 10.9,
+            "temporaryMm": 16.8
+          },
+          {
+            "blow": 8,
+            "permanentMm": 10.9,
+            "temporaryMm": 16.8
+          },
+          {
+            "blow": 9,
+            "permanentMm": 10.9,
+            "temporaryMm": 16.8
+          },
+          {
+            "blow": 10,
+            "permanentMm": 10.9,
+            "temporaryMm": 16.8
+          }
+        ],
+        "blowLog": [
+          {
+            "fromM": 7.4,
+            "toM": 7.425,
+            "incrementMm": 25,
+            "blows": 2,
+            "blowsPer250": 23,
+            "toeM": 2.948
+          },
+          {
+            "fromM": 7.425,
+            "toM": 7.45,
+            "incrementMm": 25,
+            "blows": 2,
+            "blowsPer250": 23,
+            "toeM": 2.957
+          },
+          {
+            "fromM": 7.45,
+            "toM": 7.475,
+            "incrementMm": 25,
+            "blows": 2,
+            "blowsPer250": 23,
+            "toeM": 2.964
+          },
+          {
+            "fromM": 7.475,
+            "toM": 7.5,
+            "incrementMm": 25,
+            "blows": 2,
+            "blowsPer250": 23,
+            "toeM": 2.972
+          },
+          {
+            "fromM": 7.5,
+            "toM": 7.525,
+            "incrementMm": 25,
+            "blows": 2,
+            "blowsPer250": 23,
+            "toeM": 2.98
+          },
+          {
+            "fromM": 7.525,
+            "toM": 7.55,
+            "incrementMm": 25,
+            "blows": 2,
+            "blowsPer250": 23,
+            "toeM": 2.988
+          },
+          {
+            "fromM": 7.55,
+            "toM": 7.575,
+            "incrementMm": 25,
+            "blows": 2,
+            "blowsPer250": 23,
+            "toeM": 2.996
+          },
+          {
+            "fromM": 7.575,
+            "toM": 7.6,
+            "incrementMm": 25,
+            "blows": 2,
+            "blowsPer250": 23,
+            "toeM": 3.005
+          },
+          {
+            "fromM": 7.6,
+            "toM": 7.625,
+            "incrementMm": 25,
+            "blows": 2,
+            "blowsPer250": 23,
+            "toeM": 3.012
+          },
+          {
+            "fromM": 7.625,
+            "toM": 7.65,
+            "incrementMm": 25,
+            "blows": 2,
+            "blowsPer250": 23,
+            "toeM": 3.02
+          },
+          {
+            "fromM": 7.65,
+            "toM": 7.675,
+            "incrementMm": 25,
+            "blows": 2,
+            "blowsPer250": 23,
+            "toeM": 3.028
+          },
+          {
+            "fromM": 7.675,
+            "toM": 7.7,
+            "incrementMm": 25,
+            "blows": 2,
+            "blowsPer250": 23,
+            "toeM": 3.036
+          },
+          {
+            "fromM": 7.7,
+            "toM": 7.725,
+            "incrementMm": 25,
+            "blows": 2,
+            "blowsPer250": 23,
+            "toeM": 3.044
+          },
+          {
+            "fromM": 7.725,
+            "toM": 7.75,
+            "incrementMm": 25,
+            "blows": 2,
+            "blowsPer250": 23,
+            "toeM": 3.053
+          },
+          {
+            "fromM": 7.75,
+            "toM": 7.775,
+            "incrementMm": 25,
+            "blows": 2,
+            "blowsPer250": 23,
+            "toeM": 3.06
+          },
+          {
+            "fromM": 7.775,
+            "toM": 7.8,
+            "incrementMm": 25,
+            "blows": 2,
+            "blowsPer250": 23,
+            "toeM": 3.068
+          },
+          {
+            "fromM": 7.8,
+            "toM": 7.825,
+            "incrementMm": 25,
+            "blows": 2,
+            "blowsPer250": 23,
+            "toeM": 3.076
+          },
+          {
+            "fromM": 7.825,
+            "toM": 7.85,
+            "incrementMm": 25,
+            "blows": 2,
+            "blowsPer250": 23,
+            "toeM": 3.084
+          },
+          {
+            "fromM": 7.85,
+            "toM": 7.875,
+            "incrementMm": 25,
+            "blows": 2,
+            "blowsPer250": 23,
+            "toeM": 3.092
+          },
+          {
+            "fromM": 7.875,
+            "toM": 7.9,
+            "incrementMm": 25,
+            "blows": 2,
+            "blowsPer250": 23,
+            "toeM": 3.101
+          },
+          {
+            "fromM": 7.9,
+            "toM": 7.925,
+            "incrementMm": 25,
+            "blows": 2,
+            "blowsPer250": 23,
+            "toeM": 3.108
+          },
+          {
+            "fromM": 7.925,
+            "toM": 7.95,
+            "incrementMm": 25,
+            "blows": 2,
+            "blowsPer250": 23,
+            "toeM": 3.116
+          },
+          {
+            "fromM": 7.95,
+            "toM": 7.975,
+            "incrementMm": 25,
+            "blows": 2,
+            "blowsPer250": 23,
+            "toeM": 3.124
+          },
+          {
+            "fromM": 7.975,
+            "toM": 8,
+            "incrementMm": 25,
+            "blows": 2,
+            "blowsPer250": 23,
+            "toeM": 3.132
+          }
+        ]
+      },
+      "qualityHasNestedDetail": false,
+      "deliveredPile": true,
+      "economyZeroUnitsControl": 0,
+      "paidWithoutDeliveredPile": false
+    }
+  ],
+  "warnings": [
+    "[progression] contract has no archetype — world/terrain.js cannot tell this site apart from any other in the region method-settlement-cpt-immediate",
+    "[progression] HOLE_COMPLETE carried no breakdown.time — billing from the estimate, not from the run. Player performance is not being priced. Expected only from the QA bridge and the no-sim demo path. site-investigation"
+  ],
+  "errors": []
+}

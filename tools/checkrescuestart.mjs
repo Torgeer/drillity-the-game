@@ -62,7 +62,7 @@ try {
     passes++;
   } finally { f.dispose(); }
 
-  const f2 = await fixture(0);
+  const f2 = await fixture(-600);
   try {
     const contract = f2.progression.rescueContract();
     assert.equal(f2.progression.acceptContract(contract).ok, true);
@@ -77,7 +77,7 @@ try {
     }
     assert.equal(f2.state.contract, null);
     const debt = f2.state.player.money;
-    assert.ok(debt < 0, 'a supported slow rescue settlement really creates debt');
+    assert.equal(debt, -200, 'a slow full rescue earns the documented €400 toward existing debt');
     const recovery = f2.progression.rescueContract();
     assert.equal(f2.progression.previewContract(recovery).ok, true);
     assert.equal(f2.progression.acceptContract(recovery).ok, true);

@@ -24,8 +24,11 @@ import {
   EVENTS, GROUND,
   clamp, lerp, smoothstep, damp, makeRandom,
 } from '../core/contract.js';
-import { getItem } from '../game/data.js';
-import { checkEquipmentSupport } from '../game/equipment-support.js';
+import { getItem, SKILL_ALIASES } from '../game/data.js';
+import { resolveSkills } from '../game/economy.js';
+import { checkEquipmentSupport, checkSampleEquipment } from '../game/equipment-support.js';
+import { createSampleLedger, applySampleEvent, summariseSampleLedger } from './sample-ledger.js';
+import { MAX_SAMPLE_INTERVALS } from './sample-product.js';
 
 /* ═══════════════════════════════════════════════════════════════════════════
    OVER-FLIGHTING — the CFA bore's own gauge, and the one sourced number in
@@ -384,7 +387,6 @@ export const TUNING = {
     minHalfWidth: 0.022,      // never narrower than this
     wearNarrow: 0.45,         // band narrowing at full bit wear
     difficultyNarrow: 0.30,   // band narrowing at difficulty 5
-    skillWiden: 0.055,        // band widening per rank of the Operator groove skill
     driftAmp: [0.058, 0.034], // amplitude of the two drift sines — deliberately wider than
                               // the band half-width, so holding a fixed input drifts you out
     driftHz: [0.075, 0.026],  // frequency (Hz) of the two drift sines
@@ -862,23 +864,12 @@ export const TUNING = {
     ],
   },
 
-  /* ── skill hooks (Operator/Toolsmith branch ids; missing ranks read 0) ── */
-  /* Each entry is a list of candidate skill ids; the highest rank found wins.
-     The FIRST id in each list is the real id in game/data.js SKILLS — without
-     it none of these hooks ever fired, because every candidate here was a
-     spelling the skill tree does not use. The rest are kept as aliases. */
+  /* ── legacy rescue rhythm (other effects use the catalogue resolver) ── */
   skills: {
-    grooveWidth:  ['op.steady-hand', 'op-steady-hand', 'operator-groove', 'groove-width', 'steady-hand'],
-    feedControl:  ['op.feed-finesse', 'op-feed-control', 'operator-feed', 'feed-control'],
-    rodSpeed:     ['op.rod-handler', 'op-rod-handling', 'operator-rods', 'rod-speed'],
-    jamRescue:    ['op.jam-sense', 'op-jam-rescue', 'operator-rescue', 'jam-rescue'],
-    bitLife:      ['ts.carbide-care', 'ts-carbide', 'toolsmith-bit-life', 'bit-life'],
-    // Tripping IS rod handling — the same hands, the same racking board.
-    tripSpeed:    ['op.rod-handler', 'ts-quick-change', 'toolsmith-trip', 'trip-speed'],
-    perRank: {                // effect size per rank, all capped at 5 ranks
-      grooveWidth: 0.055, feedControl: 0.04, rodSpeed: 0.07,
-      jamRescue: 0.10, bitLife: 0.07, tripSpeed: 0.08,
-    },
+    jamRescue: ['op.jam-sense', ...SKILL_ALIASES['op.jam-sense']],
+    // Only the legacy rescue rhythm remains on its old tuning hook. The
+    // reconciled effects below read game/data.js through resolveSkills().
+    perRank: { jamRescue: 0.10 },
     maxRank: 5,
   },
 
@@ -990,7 +981,9 @@ export const TUNING = {
       optWob: 0.30, optRpm: 0.85, optFlush: 0.78,
       flushCritical: 0.45,                                  // below this the diamonds burn
       flushBurnHeat: 2.4, flushBurnWear: 3.0,
-      coreRun: 3.0,                                         // metres per inner-tube retrieval
+      // InHoleTools_Catalog.pdf, PDF p23: standard 3.0 m inner tube/run.
+      // Fitted compatible capacity comes from catalogue sampling metadata.
+      coreRun: 3.0,
       torque: { base: 0.05, wob: 0.22, cut: 0.55, abr: 0.20, depth: 0.045, wear: 0.26 },
       wearMul: 0.85, heatMul: 1.4, flushK: 1.05, erodeK: 0.6,
       bandMul: 0.85, driftMul: 1.15, casing: false, impact: 'grind',
@@ -2923,7 +2916,10 @@ export function ropModel(m, bit, ground, inp, env) {
     const drive = m.energyFromFlush ? flushEff : rpmEff;
     const rate = lerp(m.blowHz[0], m.blowHz[1], m.rateFromFlush ? flushEff : rpmEff);
     const energy = 0.25 + 0.75 * drive;
-    coupling = bellStall(wobEff, m.optWob, m.wobSigma, m.wobStallK, T.rop.couplingFloor);
+    // Feed Finesse widens this authored gameplay coupling curve. It does not
+    // change a machine's thrust capacity or a method's prescribed test rate.
+    const tolerance = Math.max(1, nz(env.wobTolerance, 1));
+    coupling = bellStall(wobEff, m.optWob, m.wobSigma * tolerance, m.wobStallK, T.rop.couplingFloor);
     if (m.indexMatch) {
       // Rotation has to index the buttons onto fresh rock between blows.
       const matched = clamp(nz(m.indexBase, 0.25) + nz(m.indexPerAir, 0.55) * flushEff, 0, 1);
@@ -3111,6 +3107,14 @@ export function createDrillSim(ctx = {}) {
   const bus = ctx.bus || { on: () => () => {}, emit: () => {} };
   const EV = EVENTS;
   const subs = [];
+  const pendingWorldEvents = [];
+  // The shell owns whether the player's controls are available. With no UI,
+  // headless simulation callers retain their explicit stepping semantics.
+  const isPaused = () => ctx.ui?.gameplayPaused === true;
+  function receiveWorldEvent(apply, payload) {
+    if (isPaused()) pendingWorldEvents.push(() => apply(payload));
+    else apply(payload);
+  }
   const H = 1 / T.sim.hz;                       // fixed physics step (player seconds)
 
   let rand = makeRandom(0xD121);
@@ -3239,6 +3243,11 @@ export function createDrillSim(ctx = {}) {
               stability: 1, depth: 0, combo: 1, bandCentre: 0.5 };
 
   /* ── skills ─────────────────────────────────────────────────────────── */
+  let resolvedSkillEffects = resolveSkills();
+  function refreshSkillEffects() {
+    resolvedSkillEffects = resolveSkills(ctx.state?.player?.skills);
+  }
+
   function skillRank(kind) {
     const sk = ctx.state?.player?.skills;
     if (!sk) return 0;
@@ -3249,8 +3258,16 @@ export function createDrillSim(ctx = {}) {
     }
     return clamp(best, 0, T.skills.maxRank);
   }
-  /** multiplicative skill bonus, 1.0 with no ranks */
-  const skillBonus = (kind) => 1 + skillRank(kind) * (T.skills.perRank[kind] || 0);
+  /** Convert authored effect units at their consumer, never per-rank constants.
+   * +15% life divides wear by 1.15; -12% time multiplies duration by .88.
+   * Rod handling retains its existing scope: connections, bailing and trips.
+   */
+  function skillBonus(kind) {
+    if (kind === 'grooveWidth') return resolvedSkillEffects.m('groove.width');
+    if (kind === 'bitLife') return resolvedSkillEffects.m('bit.life');
+    if (kind === 'rodSpeed' || kind === 'tripSpeed') return 1 / resolvedSkillEffects.m('rodAdd.time');
+    return 1 + skillRank(kind) * (T.skills.perRank[kind] || 0);
+  }
 
   /* ── ground sampling ────────────────────────────────────────────────── */
   function fallbackGround() {
@@ -3359,6 +3376,7 @@ export function createDrillSim(ctx = {}) {
       depth: S.stringDepth, load: S.load, wear: S.wear, heat: S.heat, returns: S.returns,
       stability: S.stability, drag: S.drag, bind: S.bind, combo: S.combo,
       casing: S.casingOn, torque01: S.torque, hazardTorque: hazardTorque(),
+      wobTolerance: resolvedSkillEffects.m('wob.tolerance'),
       // Read only by the methods that do not drill.
       dollyCond: S.prog && S.prog.kind === 'pile' ? clamp(1 - S.prog.dollyWear) : 1,
       embedM: S.prog && S.prog.kind === 'pile' ? S.prog.toeDepthM : S.stringDepth,
@@ -3458,6 +3476,11 @@ export function createDrillSim(ctx = {}) {
 
   /** Player seconds of beats a programme adds on top of the drilling. */
   function parBeatSeconds(m, target) {
+    if (isSampleProgramme()) {
+      const beats = sampleSeconds('sample-retrieve') + sampleSeconds('sample-handle')
+        + (S.prog.kind === 'sonicSample' ? sampleSeconds('sample-case') : 0);
+      return Math.ceil(target / S.prog.ledger.barrelCapacityM) * beats;
+    }
     if (m.round) return jumboParSchedule(m, target).beatSec;
     if (m.bolt) {
       const b = m.bolt;
@@ -3582,7 +3605,9 @@ export function createDrillSim(ctx = {}) {
     const rodLen = S.m.rodLength || 0;
     const rodFast = Math.max(0.05, nz(S.m.rodAddSecMul, 1));
     if (rodLen > 0 && S.m.rodAddBeat !== false) {
-      sec += Math.floor(target / rodLen) * T.rods.addSecPerfect * rodFast;
+      const connections = isSampleProgramme() ? Math.max(0, Math.ceil(target / rodLen) - 1)
+        : Math.floor(target / rodLen);
+      sec += connections * T.rods.addSecPerfect * rodFast;
     }
 
     // The programme's own beats: rounds charged and fired, bolts installed and
@@ -3810,6 +3835,17 @@ export function createDrillSim(ctx = {}) {
     // error, with no events, inventory changes or replacement default hammer.
     const methodId = resolveMethodId(c);
     const method = resolveMethod(methodId, { probeMode: resolveProbeMode(), hammerId: loadoutIds().hammer });
+    const samplingEquipment = checkSampleEquipment(methodId, loadoutIds(), getItem);
+    if (!samplingEquipment.ok) {
+      const error = new Error(samplingEquipment.reason);
+      Object.assign(error, samplingEquipment); throw error;
+    }
+    const requestedDepth = nz(c.targetDepth, nz(c.depth, 30));
+    if (samplingEquipment.sampleMode && (!(requestedDepth > 0)
+        || Math.ceil(requestedDepth / samplingEquipment.barrelCapacityM) > MAX_SAMPLE_INTERVALS)) {
+      const error = new Error('This sample interval log cannot represent the requested target.');
+      error.code = 'unsupported-sample-target'; throw error;
+    }
     const identity = typeof ctx.progression?.beginHole === 'function'
       ? ctx.progression.beginHole(c) : null;
     if (ctx.progression && !identity) {
@@ -3825,11 +3861,16 @@ export function createDrillSim(ctx = {}) {
         '[sim] no accepted contract run — starting an unpaid preview; '
         + 'completion cannot award money, XP or reputation.');
     }
+    pendingWorldEvents.length = 0;
+    accum = 0;
+    refreshSkillEffects();
     Object.assign(S, newRunState());
     S.contract = c;
     S.runId = identity?.runId ?? null;
     S.attemptId = identity?.attemptId ?? null;
     S.methodId = methodId;
+    S.samplingEquipment = samplingEquipment;
+    S.samplingLoadout = samplingEquipment.sampleMode ? Object.freeze({ ...loadoutIds() }) : null;
     // One method genuinely becomes a different machine depending on what is
     // fitted: with a piezocone in the probe slot, site investigation is not a
     // boring rig at all — the cone is pushed, nothing turns and nothing is
@@ -3839,7 +3880,7 @@ export function createDrillSim(ctx = {}) {
     S.bit = resolveBit();
     S.wear = S.bitStartWear;
     S.difficulty = clamp(nz(c.difficulty, 1), 0, 5);
-    S.target = Math.max(1, nz(c.targetDepth, nz(c.depth, 30)));
+    S.target = samplingEquipment.sampleMode ? requestedDepth : Math.max(1, requestedDepth);
     rand = makeRandom(((nz(c.seed, Date.now() & 0xffff) | 0) ^ 0x5EED) >>> 0 || 7);
 
     // Ground: geology if present, otherwise a synthetic stack so we still play.
@@ -3928,6 +3969,8 @@ export function createDrillSim(ctx = {}) {
 
   function abortHole(reason = 'aborted') {
     if (!S.active) return null;
+    pendingWorldEvents.length = 0;
+    accum = 0;
     const identity = { runId: S.runId, attemptId: S.attemptId };
     S.active = false;
     S.phase = 'aborted';
@@ -4125,7 +4168,7 @@ export function createDrillSim(ctx = {}) {
     let half = g.baseHalfWidth * (m.bandMul || 1);
     half *= 1 - g.wearNarrow * clamp(S.wear);
     half *= 1 - g.difficultyNarrow * (S.difficulty / 5);
-    half *= 1 + skillRank('grooveWidth') * g.skillWiden;
+    half *= skillBonus('grooveWidth');
     S.bandHalf = Math.max(g.minHalfWidth, half);
   }
 
@@ -4144,9 +4187,11 @@ export function createDrillSim(ctx = {}) {
       if (S.inBand && S.bandEnterGrace <= 0) { S.inBand = false; S.grooveJustLeft = true; }
       // Rod adds do not have to cost you the groove if you nail the stab.
       const keep = S.phase === 'rod-add' ? (S.rodAdd?.hit ? 0 : 0.5) : 1;
-      S.greenBandTime = Math.max(0, S.greenBandTime - dt * g.comboDecayMul * keep);
+      S.greenBandTime = Math.max(0, S.greenBandTime
+        - dt * g.comboDecayMul * keep * resolvedSkillEffects.m('combo.decay'));
     }
-    S.combo = 1 + (T.rop.comboMax - 1) * smoothstep(S.greenBandTime / g.comboRampSec);
+    const maxMult = T.rop.comboMax + resolvedSkillEffects.a('groove.maxMult');
+    S.combo = 1 + (maxMult - 1) * smoothstep(S.greenBandTime / g.comboRampSec);
     if (S.bandJumpT > 0) S.bandJumpT -= dt;
   }
 
@@ -5186,6 +5231,7 @@ export function createDrillSim(ctx = {}) {
     'pitch', 'take-set', 'dolly-change', 're-drive',
     'spt-drive', 'clean-out', 'dissipation', 'blow-down',
     'bailing-run', 'cutter-change',
+    'sample-case', 'sample-retrieve', 'sample-handle',
   ]);
 
   function beginBeat(phase, dur, opts = {}) {
@@ -5247,6 +5293,8 @@ export function createDrillSim(ctx = {}) {
       case 'dissipation':  finishDissipation(); break;
       case 'blow-down':    finishBlowDown(); break;
       case 'bail':         finishBailingRun(b); break;
+      case 'sample-case': case 'sample-retrieve': case 'sample-handle':
+        finishSampleAction(b); break;
       default: break;
     }
   }
@@ -5255,7 +5303,8 @@ export function createDrillSim(ctx = {}) {
 
   function startProgramme() {
     const m = S.m;
-    if (m.sample) S.prog = startRc();
+    if (S.methodId === 'core' || S.methodId === 'sonic') S.prog = startSample();
+    else if (m.sample) S.prog = startRc();
     else if (m.round) S.prog = startJumbo();
     else if (m.ring) S.prog = startLonghole();
     else if (m.bolt) S.prog = startBolt();
@@ -5292,6 +5341,7 @@ export function createDrillSim(ctx = {}) {
     const p = S.prog;
     if (!p) return dBore;
     switch (p.kind) {
+      case 'coreSample': case 'sonicSample': return stepSample(dBore);
       case 'rc':       return stepRc(dt, dtD, dBore);
       case 'jumbo':    return stepJumbo(dt, dtD, dBore);
       case 'longhole': return stepLonghole(dt, dtD, dBore);
@@ -5301,6 +5351,83 @@ export function createDrillSim(ctx = {}) {
       case 'twoStage': return stepTwoStage(dt, dtD, dBore);
       default:         return dBore;
     }
+  }
+
+  /** Compressed GAME PACING, NOT SOURCED as field winch speed, casing
+   * penetration speed or laboratory duration. UI reads the existing beat clock.
+   */
+  function sampleSeconds(phase) {
+    return phase === 'sample-handle' ? 2 : phase === 'sample-case' ? 3 : 4;
+  }
+
+  function isSampleProgramme() {
+    return S.prog?.kind === 'coreSample' || S.prog?.kind === 'sonicSample';
+  }
+
+  function startSample() {
+    // Unaccepted QA previews do not manufacture authenticated sample receipts.
+    if (!Number.isSafeInteger(S.runId) || !Number.isSafeInteger(S.attemptId)) return null;
+    const ledger = createSampleLedger({ methodId: S.methodId, runId: S.runId,
+      attemptId: S.attemptId, targetDepthM: S.target,
+      barrelCapacityM: S.samplingEquipment.barrelCapacityM });
+    const capacityBasis = S.samplingEquipment.capacityBasis;
+    return { kind: S.methodId === 'core' ? 'coreSample' : 'sonicSample', ledger, capacityBasis,
+      summary: Object.freeze({ ...summariseSampleLedger(ledger), capacityBasis }), sequence: 0 };
+  }
+
+  function sampleEvent(type, fields) {
+    const p = S.prog;
+    const result = applySampleEvent(p.ledger, { runId: S.runId, attemptId: S.attemptId,
+      sequence: p.sequence + 1, type, ...fields });
+    if (!result.ok) throw new Error(`sample programme: ${result.reason}`);
+    p.ledger = result.ledger;
+    p.sequence++;
+    p.summary = Object.freeze({ ...summariseSampleLedger(p.ledger), capacityBasis: p.capacityBasis });
+  }
+
+  function stepSample(dBore) {
+    if (dBore > 0) sampleEvent('advance', { toDepthM: S.holeDepth });
+    return dBore;
+  }
+
+  function sampleWaiting() {
+    return isSampleProgramme() && S.prog.summary.stage !== 'drill';
+  }
+
+  function beginSampleAction(name) {
+    if (!isSampleProgramme()) return { ok: false, reason: 'not-a-sampling-method' };
+    if (S.phase !== 'sample-wait' || S.jamState !== 'free') return { ok: false, reason: `busy:${S.phase}` };
+    const p = S.prog, q = p.summary;
+    const phase = { sampleCase: 'sample-case', sampleRetrieve: 'sample-retrieve',
+      sampleHandle: 'sample-handle' }[name];
+    const enabled = name === 'sampleCase' ? q.stage === 'case'
+      : name === 'sampleRetrieve' ? q.stage === 'retrieve' && q.canRetrieve
+        : name === 'sampleHandle' && q.canHandle;
+    if (!phase || !enabled) return { ok: false, reason: 'sample-stage-not-ready' };
+    beginBeat(phase, sampleSeconds(phase), { data: { runId: S.runId,
+      attemptId: S.attemptId, sequence: p.sequence, toDepthM: p.ledger.drilledDepthM,
+      intervalIndex: p.ledger.intervals.length } });
+    return { ok: true, kind: name, stage: 'started' };
+  }
+
+  function finishSampleAction(b) {
+    const p = S.prog, token = b.data;
+    if (!S.active || !isSampleProgramme() || !token || token.runId !== S.runId
+        || token.attemptId !== S.attemptId || token.sequence !== p.sequence) return;
+    if (b.kind === 'sample-case') {
+      sampleEvent('case', { toDepthM: token.toDepthM });
+      setCasedDepth(token.toDepthM);
+    } else if (b.kind === 'sample-retrieve') {
+      sampleEvent('retrieve', { toDepthM: token.toDepthM,
+        provenance: p.kind === 'coreSample' ? 'wireline-inner-tube' : 'sonic-barrel-extraction' });
+    } else sampleEvent('handle', { intervalIndex: token.intervalIndex,
+      container: p.kind === 'coreSample' ? 'box' : 'sleeve' });
+    if (p.summary.handlingComplete) { complete(); return; }
+    S.phase = sampleWaiting() ? 'sample-wait' : 'drilling';
+    // Handling does not extend a rod. A coincident rod boundary needs its
+    // independent connection before the next increment of bore advance.
+    if (S.phase === 'drilling' && S.stringDepth >= S.nextRodDepth) beginRodAdd();
+    haptic('success', true);
   }
 
   /* ═════════════════════════════════════════════════════════════════════
@@ -7554,6 +7681,7 @@ export function createDrillSim(ctx = {}) {
      Downhole physics uses dtD = dt × timeCompression.
      ═════════════════════════════════════════════════════════════════════ */
   function step(dt) {
+    if (isPaused()) return;
     const m = S.m;
     const dtD = dt * T.sim.timeCompression * (m.timeMul || 1);
     S.timeSec += dt;
@@ -7568,6 +7696,7 @@ export function createDrillSim(ctx = {}) {
     // A stuck string outranks everything: you cannot trip or case your way out of it.
     if (S.jamState === 'stuck' || S.phase === 'stuck') { stepStuck(dt, dtD); return; }
     if (S.phase !== 'drilling') { stepNonDrilling(dt, dtD); return; }
+    if (sampleWaiting()) { S.phase = 'sample-wait'; stepNonDrilling(dt, dtD); return; }
 
     /* ── 3. ground under the bit ──
        At the ACTION POINT, which on the way back up a raise is not the bottom
@@ -7669,7 +7798,13 @@ export function createDrillSim(ctx = {}) {
        serve a water bore and a tunnel face. `dBore` is the hole the bit made.
        `dDepth` is what the CONTRACT got for it — the same metre on a borehole,
        and on a jumbo 670 m of hole buying 4.1 m of tunnel, after the blast. */
-    const dBore = Math.max(0, ropEff / 3600) * dtD;
+    let dBore = Math.max(0, ropEff / 3600) * dtD;
+    if (isSampleProgramme()) {
+      // Bound the PHYSICAL increment before wear, hazards and depth accounting.
+      // Rod extension and barrel handling have independent stop coordinates.
+      const stop = Math.min(S.prog.summary.nextStopDepthM, S.nextRodDepth, S.target);
+      dBore = Math.min(dBore, Math.max(0, stop - S.holeDepth));
+    }
     if (dBore > 0) {
       S.holeDepth += dBore;
       S.drillSec += dt;
@@ -7790,7 +7925,11 @@ export function createDrillSim(ctx = {}) {
        connections are too frequent to be a beat (159 of them in a ring) counts
        them and lengthens the string without interrupting the player — the rod
        handling lives in the compressed clock, which is what it is for. */
-    if (S.stringDepth >= S.nextRodDepth && S.phase === 'drilling') {
+    if (sampleWaiting() && S.phase === 'drilling') {
+      S.phase = 'sample-wait'; S.phaseT = 0; S.rop = 0;
+    }
+    if (S.stringDepth >= S.nextRodDepth && S.phase === 'drilling'
+        && (!isSampleProgramme() || S.depth < S.target)) {
       if (m.rodAddBeat === false) {
         const rodLen = m.rodLength || T.rods.lengthDefault;
         S.rods++;
@@ -7800,7 +7939,7 @@ export function createDrillSim(ctx = {}) {
     }
     // A method whose unit of completion is not a depth says so; its programme
     // calls complete() when the work is actually finished.
-    if (!m.completeOnProgramme && S.depth >= S.target) complete();
+    if (!m.completeOnProgramme && !isSampleProgramme() && S.depth >= S.target) complete();
 
     /* ── 19. percussion beats ── */
     stepBeats(dt);
@@ -8076,6 +8215,10 @@ export function createDrillSim(ctx = {}) {
                  + j.relief * circulationNow() * S.returns
                  + j.reliefLowWob * Math.max(0, 0.35 - S.act.wob) / 0.35;
 
+    // This is a deterministic pressure accumulator, not a random jam roll.
+    // The catalogue's jam-risk modifier scales incoming binding pressure;
+    // relief and the published machine/method limits remain unchanged.
+    pressure *= resolvedSkillEffects.m('jam.risk');
     S.bind = clamp(S.bind + (pressure - relief * (S.bind > 0 ? 1 : 0)) * dt, 0, j.bindMax);
     advanceRescue(dt);
 
@@ -8123,7 +8266,6 @@ export function createDrillSim(ctx = {}) {
       S.phase = 'drilling';
       emit(EV.JAM_CLEARED, {});
       haptic('success', true);
-      if (ctx.state?.player?.stats) ctx.state.player.stats.jamsCleared++;
     } else if (S.stuckSec > nz(S.m.jamLoseSec, T.jam.loseSec) && !debug.godMode) {
       // A run made of MANY UNITS does not end because one of them jammed. On a
       // fan, a string stuck in hole seven costs hole seven: it is cut and left,
@@ -8277,7 +8419,7 @@ export function createDrillSim(ctx = {}) {
     }
   }
 
-  /* ── rod add (or core-run retrieval): nail the stab for a bonus ────── */
+  /* ── rod extension: independent of inner-tube retrieval ────────────── */
   function beginRodAdd() {
     const rodLen = S.m.rodLength || 0;
     if (rodLen <= 0) { S.nextRodDepth = Infinity; return; }
@@ -8297,7 +8439,7 @@ export function createDrillSim(ctx = {}) {
     S.phase = 'rod-add';
     S.phaseT = 0;
     S.rodAdd = {
-      kind: S.m.rodAddKind || (S.m.kind === 'core' ? 'core-run' : 'rod'),
+      kind: S.m.rodAddKind || 'rod',
       fast,
       dur: T.rods.addSec / fast,
       windowStart: T.rods.windowDelay / fast,
@@ -8396,7 +8538,11 @@ export function createDrillSim(ctx = {}) {
   }
 
   function beginTrip(itemId, emergency = false, fishing = false) {
-    S.pendingBit = itemId;
+    // A fallback spare on a sampler is the same compatible physical cutting
+    // assembly. Keep the existing spare-condition rule without replacing an
+    // NQ crown or sonic barrel with a generic untyped cutting tool.
+    S.pendingSampleSpare = isSampleProgramme() && itemId === '_spare';
+    S.pendingBit = S.pendingSampleSpare ? S.bit.id : itemId;
     S.emergencyTrip = emergency;
     S.fishing = !!fishing;
     S.phase = 'tripping-out';
@@ -8454,7 +8600,7 @@ export function createDrillSim(ctx = {}) {
       } else {
         S.bit = bitOf(S.pendingBit, S.m);
         const cond = ctx.state?.garage?.condition?.[S.pendingBit];
-        S.wear = S.pendingBit === '_spare' ? 0.25
+        S.wear = S.pendingBit === '_spare' || S.pendingSampleSpare ? 0.25
                : (typeof cond === 'number' ? clamp(1 - cond) : 0);
         S.bitStartWear = S.wear;
         S.bearing = 0;
@@ -8481,6 +8627,7 @@ export function createDrillSim(ctx = {}) {
      PLAYER ACTIONS
      ═════════════════════════════════════════════════════════════════════ */
   function setInput(name, value01) {
+    if (isPaused()) return false;
     const v = clamp(nz(value01, 0.5));
     if (name === 'feed' || name === 'wob') S.cmd.wob = v;
     else if (name === 'rotation' || name === 'rpm' || name === 'percussion') S.cmd.rpm = v;
@@ -8488,7 +8635,9 @@ export function createDrillSim(ctx = {}) {
   }
 
   function pulse(name) {
+    if (isPaused()) return { ok: false, reason: 'paused' };
     if (!S.active) return { ok: false, reason: 'idle' };
+    if (['sampleCase', 'sampleRetrieve', 'sampleHandle'].includes(name)) return beginSampleAction(name);
 
     if (name === 'jamRescue') {
       if (S.jamState === 'free') return { ok: false, reason: 'not-bound' };
@@ -8768,11 +8917,17 @@ export function createDrillSim(ctx = {}) {
   }
 
   function changeBit(itemId) {
+    if (isPaused()) return Promise.resolve({ ok: false, reason: 'paused' });
     if (!S.active) return Promise.resolve({ ok: false, reason: 'idle' });
     if (S.phase !== 'drilling' && S.phase !== 'stuck') {
       return Promise.resolve({ ok: false, reason: `busy:${S.phase}` });
     }
     if (S.jamState === 'stuck') return Promise.resolve({ ok: false, reason: 'stuck' });
+    if (isSampleProgramme()) {
+      const bitId = !itemId || itemId === '_spare' ? S.bit.id : itemId;
+      const support = checkSampleEquipment(S.methodId, { ...S.samplingLoadout, bit: bitId }, getItem);
+      if (!support.ok) return Promise.resolve(support);
+    }
     return new Promise((resolve) => {
       S.tripResolve = resolve;
       beginTrip(itemId || '_spare', false);
@@ -8780,6 +8935,7 @@ export function createDrillSim(ctx = {}) {
   }
 
   function setCasing(on) {
+    if (isPaused()) return { ok: false, reason: 'paused' };
     const want = !!on;
     if (!S.m.casing && !S.m.casingFollows) return { ok: false, reason: 'method-cannot-case' };
     S.casingArmed = want;
@@ -8865,7 +9021,7 @@ export function createDrillSim(ctx = {}) {
   }
 
   function complete() {
-    if (!S.active) return;
+    if (!S.active || (isSampleProgramme() && !S.prog.summary.handlingComplete)) return;
     // A synchronous completion listener may start the next hole. Its identity
     // must not leak into this attempt's later stop notification.
     const identity = { runId: S.runId, attemptId: S.attemptId };
@@ -8879,7 +9035,9 @@ export function createDrillSim(ctx = {}) {
     const breakdown = scoreBreakdown();
     writeState();
     emit(EV.HOLE_COMPLETE, {
-      depth: +S.depth.toFixed(2),
+      depth: isSampleProgramme() ? S.depth : +S.depth.toFixed(2),
+      ...(isSampleProgramme() ? { sampleProduct: S.prog.ledger,
+        sampleCapacityBasis: S.prog.capacityBasis } : {}),
       timeSec: +S.timeSec.toFixed(1),
       grade: breakdown.grade,
       breakdown,
@@ -8902,6 +9060,13 @@ export function createDrillSim(ctx = {}) {
 
   function update(dt, state) {
     void state;
+    // No elapsed time, phase timer, hazard, impact or display drift while the
+    // player cannot operate the rig. Paused wall time never becomes backlog.
+    if (isPaused()) { accum = 0; return; }
+    // Geology can announce the previous frame's depth crossing after a modal
+    // opens. Preserve that earned hazard and deliver it once on resumption.
+    while (pendingWorldEvents.length && !isPaused()) pendingWorldEvents.shift()();
+    if (isPaused()) { accum = 0; return; }
     const frameDt = clamp(nz(dt, 1 / 60), 0, 0.25);
     if (S.active || S.phase === 'stuck') {
       accum += frameDt;
@@ -8910,7 +9075,8 @@ export function createDrillSim(ctx = {}) {
         step(H);
         accum -= H;
         steps++;
-        if (!S.active && S.phase !== 'stuck') break;   // completed / aborted mid-frame
+        if (isPaused()) { accum = 0; return; }
+        if (!S.active && S.phase !== 'stuck') break; // completed / aborted mid-frame
       }
       if (steps >= T.sim.maxSubSteps) accum = 0;       // drop the backlog, never spiral
       S.kickCooldown = Math.max(0, S.kickCooldown - frameDt);
@@ -9133,6 +9299,12 @@ export function createDrillSim(ctx = {}) {
     const p = S.prog;
     const pd = {};
     switch (p ? p.kind : null) {
+      case 'coreSample': case 'sonicSample':
+        pd.programme = p.kind;
+        pd.sampleProduct = p.ledger;
+        pd.sampleCapacityBasis = p.capacityBasis;
+        pd.sampleStage = p.summary.stage;
+        break;
       case 'rc':
         pd.programme = 'rc';
         pd.sampleBags = p.index;               // bags cut
@@ -9248,6 +9420,12 @@ export function createDrillSim(ctx = {}) {
         pd.hammerDropM = h.dropM;
         pd.hammerBpm = h.bpm;
         pd.hammerPowerLimited = h.capped;
+        // Pose progress from the same clocks that produce real impacts. The
+        // set counts p0.setBlows across phaseDur; ordinary drilling advances
+        // blowPhase in stepBeats. Re-drive is only a preparation timer and
+        // emits no impacts, so it deliberately publishes no running cycle.
+        pd.hammerPhase01 = S.phase === 'drilling' ? S.blowPhase
+          : S.phase === 'take-set' ? ((S.phaseT / S.phaseDur) * p0.setBlows) % 1 : null;
         pd.headDamage = p.headDamage;
         pd.toeDamage = p.toeDamage;
         pd.rakeDeg = p.rake;
@@ -9538,6 +9716,14 @@ export function createDrillSim(ctx = {}) {
     const p = S.prog;
     if (!p) return null;
     switch (p.kind) {
+      case 'coreSample': case 'sonicSample':
+        return { kind: p.kind, unit: p.kind === 'coreSample' ? 'box' : 'sleeve',
+          stage: S.phase.startsWith('sample-') && S.phase !== 'sample-wait' ? S.phase : p.summary.stage,
+          summary: p.summary, intervals: p.ledger.intervals,
+          lastInterval: p.ledger.intervals.at(-1) ?? null, sequence: p.sequence,
+          lastCompletedInterval: p.ledger.intervals.at(-1)?.retrieval
+            ? p.ledger.intervals.at(-1) : p.ledger.intervals.at(-2) ?? null,
+          barrelCapacityM: p.ledger.barrelCapacityM, capacityBasis: p.capacityBasis };
       case 'rc': {
         const s = S.m.sample;
         const last = p.bags[p.bags.length - 1] || null;
@@ -9876,6 +10062,16 @@ export function createDrillSim(ctx = {}) {
     if (S.m.wellControl && S.hasLcm) out.push({ id: 'lcmPill', label: 'LCM PILL', enabled: !S.lcmUsed });
     if (!p) return out;
     switch (p.kind) {
+      case 'coreSample': case 'sonicSample': {
+        const ready = S.active && S.phase === 'sample-wait' && S.jamState === 'free';
+        if (p.kind === 'sonicSample') out.push({ id: 'sampleCase', label: 'ADVANCE CASING',
+          enabled: ready && p.summary.stage === 'case' });
+        out.push({ id: 'sampleRetrieve', label: p.kind === 'coreSample' ? 'RETRIEVE INNER TUBE' : 'EXTRACT BARREL',
+          enabled: ready && p.summary.stage === 'retrieve' && p.summary.canRetrieve });
+        out.push({ id: 'sampleHandle', label: p.kind === 'coreSample' ? 'BOX AND LOG' : 'SLEEVE AND LABEL',
+          enabled: ready && p.summary.canHandle });
+        break;
+      }
       case 'rc':
         out.push({ id: 'blowDown', label: 'BLOW DOWN', enabled: drilling
           && S.timeSec - p.lastBlowDown >= T.hazard.carryOver.blowDownCooldown });
@@ -9918,7 +10114,7 @@ export function createDrillSim(ctx = {}) {
     const rodLen = S.m.rodLength || 0;
     return {
       /* run */
-      active: S.active, phase: S.phase, reason: S.stopReason,
+      active: S.active, paused: isPaused(), phase: S.phase, reason: S.stopReason,
       runId: S.runId, attemptId: S.attemptId,
       methodId: S.methodId, method: { id: S.methodId, name: S.m.name, kind: S.m.kind },
       // Null when the contract did not carry one — never guessed. See
@@ -10082,12 +10278,18 @@ export function createDrillSim(ctx = {}) {
     };
   }
 
-  /** Upcoming strata for the drill log — with confidence, because it is a log. */
-  function getForecast(range = 20) {
+  /** Upcoming strata for the drill log. The live preview omits rate modelling
+   * and returns immediately without purchased ranks; the full log keeps rates. */
+  function getForecast(range = 20, { previewOnly = false } = {}) {
+    const previewRanks = resolvedSkillEffects.a('stratum.preview');
+    if (previewOnly && !previewRanks) return [];
     const list = strataList();
     if (!list.length) return [];
     const out = [];
-    const seismic = 12 + 8 * skillRank('feedControl');
+    // Preserve the existing forecast-distance tuning, but consume Strata
+    // Reader's authored preview ranks rather than the unrelated feed skill.
+    // This is game-log confidence, not a physical survey accuracy claim.
+    const seismic = 12 + 8 * previewRanks;
     for (const s of list) {
       const bottom = nz(s.bottom, 0);
       if (bottom <= S.depth) continue;
@@ -10101,16 +10303,18 @@ export function createDrillSim(ctx = {}) {
         stability: nz(s.stability, GROUND[s.id]?.stability ?? 0.7),
         water: nz(s.water, GROUND[s.id]?.water ?? 0.3),
       };
-      const inp = optimalInputs(S.m, g, top, S.bit);
-      const r = ropModel(S.m, S.bit, g, inp, {
+      const inp = previewOnly ? null : optimalInputs(S.m, g, top, S.bit);
+      const r = previewOnly ? null : ropModel(S.m, S.bit, g, inp, {
         depth: top, load: T.groove.targetLoad, wear: S.wear, heat: T.score.par.heat,
         returns: 1, stability: g.stability, combo: 1, casing: S.casingOn, torque01: T.score.par.torque,
+        wobTolerance: resolvedSkillEffects.m('wob.tolerance'),
       });
       out.push({
         ...g, top, bottom, thickness: bottom - top, distance: dist,
         current: dist <= 0.001 && bottom > S.depth,
         confidence: clamp(1 - dist / seismic, 0.2, 1),
-        expectedRopMh: +r.rop.toFixed(1),
+        previewRanks,
+        expectedRopMh: r ? +r.rop.toFixed(1) : null,
         optimal: inp,
         hint: groundHint(g),
       });
@@ -10133,31 +10337,40 @@ export function createDrillSim(ctx = {}) {
      LIFECYCLE
      ═════════════════════════════════════════════════════════════════════ */
   function init() {
+    refreshSkillEffects();
+    // Re-resolve only when ranks change, not in the 120 Hz physics loop.
+    subs.push(bus.on(EV.UNLOCK, (p) => {
+      if (p?.kind === 'skill') { refreshSkillEffects(); updateBand(0, true); }
+    }));
     // World events. Geology owns these when it is present; anything it fires
     // wins, and we stop self-generating that kind for the rest of the run.
-    subs.push(bus.on(EV.STRATUM_ENTER, (p) => {
+    const worldEvent = (event, apply) => subs.push(bus.on(event, p => {
+      if (!p || p.__sim || !S.active) return;
+      receiveWorldEvent(apply, p);
+    }));
+    worldEvent(EV.STRATUM_ENTER, (p) => {
       if (!p || p.__sim) return;
       S.externalGeology.stratum = true;
       S.bandJumpT = T.groove.stratumJumpFlashSec;
-    }));
-    subs.push(bus.on(EV.BOULDER, (p) => {
+    });
+    worldEvent(EV.BOULDER, (p) => {
       if (!p || p.__sim || !S.active) return;
       S.externalGeology.boulder = true;
       queueHazard('boulder', { depth: nz(p.depth, S.depth), hardness: nz(p.hardness, 0.6),
                                size: p.size, severity: clamp(nz(p.hardness, 0.6)) });
-    }));
-    subs.push(bus.on(EV.CAVITY, (p) => {
+    });
+    worldEvent(EV.CAVITY, (p) => {
       if (!p || p.__sim || !S.active) return;
       S.externalGeology.cavity = true;
       queueHazard('cavity', { depth: nz(p.depth, S.depth), height: nz(p.height, 1),
                               severity: clamp(nz(p.height, 1) / 3) });
-    }));
-    subs.push(bus.on(EV.WATER_STRIKE, (p) => {
+    });
+    worldEvent(EV.WATER_STRIKE, (p) => {
       if (!p || p.__sim || !S.active) return;
       S.externalGeology.water = true;
       queueHazard('water', { depth: nz(p.depth, S.depth), flowLpm: nz(p.flowLpm, 120),
                              severity: clamp(nz(p.flowLpm, 120) / 300) });
-    }));
+    });
     // A new loadout between holes should be picked up at the next start.
     subs.push(bus.on(EV.EQUIP, (p) => {
       if (!S.active && p?.slot === 'bit') { S.bit = bitOf(p.itemId, S.m); }
@@ -10167,6 +10380,8 @@ export function createDrillSim(ctx = {}) {
   function resize(w, h, dpr) { viewport = { w, h, dpr }; }
 
   function dispose() {
+    pendingWorldEvents.length = 0;
+    accum = 0;
     for (const off of subs) { try { off?.(); } catch { /* ignore */ } }
     subs.length = 0;
     if (S.tripResolve) { S.tripResolve({ ok: false, reason: 'disposed' }); S.tripResolve = null; }
@@ -10248,6 +10463,7 @@ export function createDrillSim(ctx = {}) {
     debug,
     get methodId() { return S.methodId; },
     get active() { return S.active; },
+    get paused() { return isPaused(); },
   };
 }
 

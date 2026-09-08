@@ -11,7 +11,14 @@
  *      mobilises is the whole point of the panel.
  */
 import { EVENTS, SCENES, clamp } from '../../core/contract.js';
+import { getItem, sampleItemSupport } from '../../game/data.js';
+import { checkEquipmentSupport, checkSampleEquipment } from '../../game/equipment-support.js';
 import { allSlots, allRigs, allItems, methodInfo, rigInfo, catLeaf } from './catalog.js';
+
+function itemSupport(id) {
+  const drive = checkEquipmentSupport('driven-pile', id, getItem);
+  return drive.ok ? sampleItemSupport(id) : drive;
+}
 
 /* ── Connections ──────────────────────────────────────────────────────────
    game/data.js carries the connection as a top-level `thread` string, which
@@ -351,6 +358,8 @@ export function createGarageScreen(app) {
   }
 
   function equipItem(slot, id) {
+    const support = itemSupport(id);
+    if (!support.ok) { app.toast(support.reason, 'warn'); app.haptic('fail'); return; }
     const res = app.ctx.progression?.equip?.(slot, id);
     if (res && res.ok === false) { app.toast(res.reason || 'Will not fit', 'warn'); app.haptic('fail'); return; }
     if (!res) {
@@ -375,17 +384,21 @@ export function createGarageScreen(app) {
     for (const it of list) {
       const isCur = it.id === currentId;
       const cond = condition(it.id);
+      const support = itemSupport(it.id);
       const name = C.h('p.slotcard__v', { style: { 'white-space': 'normal' }, text: it.name });
-      const row = C.Card({ class: 'slotcard', onTap: () => { sh.close(); equipItem(slot.id, it.id); } },
+      const row = C.Card({ class: 'slotcard', onTap: support.ok ? () => { sh.close(); equipItem(slot.id, it.id); } : undefined },
         C.h('span.slotcard__ico', C.Icon(slot.icon, 20)),
         C.h('div.slotcard__b',
           name,
           C.h('p.slotcard__k', { text: `${threadOf(it) || catLeaf(it.category) || '—'} · ${dutyOf(it)}` }),
+          !support.ok ? C.h('p.slotcard__k', { style: { 'white-space': 'normal' }, text: support.reason }) : null,
           (() => { const b = C.Bar({ kind: cond > 0.4 ? 'success' : cond > 0.15 ? 'warning' : 'danger', value: cond }); b.el.classList.add('slotcard__cond'); return b.el; })(),
         ),
-        isCur ? C.Pill('Fitted', 'success', 'check') : C.Icon('chevron', 16),
+        !support.ok ? C.Pill('Unavailable', 'warning', 'alert')
+          : isCur ? C.Pill('Fitted', 'success', 'check') : C.Icon('chevron', 16),
       );
       row.classList.add('slotcard');
+      if (!support.ok) row.setAttribute('aria-disabled', 'true');
       rows.appendChild(row);
     }
 
@@ -393,7 +406,7 @@ export function createGarageScreen(app) {
       title: slot.name, sub: slot.hint, body: rows,
       actions: [
         C.Button({ label: 'Close', kind: 'quiet', onTap: () => sh.close() }),
-        currentId && slot.id !== 'bit' && slot.id !== 'rod'
+        currentId && ((slot.id !== 'bit' && slot.id !== 'rod') || !itemSupport(currentId).ok)
           ? C.Button({ label: 'Remove', kind: 'danger', onTap: () => { sh.close(); equipItem(slot.id, null); } })
           : C.Button({ label: 'iMarket', kind: 'amber', icon: 'cart', onTap: () => { sh.close(); app.nav(SCENES.SHOP); } }),
       ],
@@ -403,6 +416,7 @@ export function createGarageScreen(app) {
   function slotCard(slot) {
     const id = state.garage?.loadout?.[slot.id] || null;
     const item = id ? app.itemById(id) : null;
+    const support = itemSupport(id);
     const cond = id ? condition(id) : 1;
     // The bay label comes from the fitted item's OWN taxonomy leaf: an auger
     // flight is an auger flight, not a "crown".
@@ -425,6 +439,7 @@ export function createGarageScreen(app) {
       C.h('div.slotcard__b',
         C.h('p.slotcard__k', { text: leaf || slot.name }),
         value,
+        !support.ok ? C.h('p.slotcard__k', { style: { 'white-space': 'normal' }, text: support.reason }) : null,
         life
           ? (() => {
             const b = C.Bar({ kind: cond > 0.4 ? 'success' : cond > 0.15 ? 'warning' : 'danger', value: cond });
@@ -521,12 +536,43 @@ export function createGarageScreen(app) {
     C.stagger(slots.children);
     body.appendChild(slots);
 
+    // The progression quote owns every eligibility rule and the live benefit.
+    const regrind = app.ctx.progression?.fieldRegrindQuote?.();
+    if (regrind) {
+      body.appendChild(C.SectionTitle('Field regrind'));
+      body.appendChild(C.h('div.panel.panel--pad', C.h('div.panel__body',
+        C.h('dl.specs',
+          C.SpecRow('Recovery', `Up to ${Math.round(regrind.recovery * 100)} condition points`),
+          C.SpecRow('Treatment', regrind.used ? 'Used for this bit' : 'One per bit'),
+          C.SpecRow('Time', '20 in-game minutes'),
+        ),
+        C.h('p', { text: regrind.ok
+          ? `Condition ${Math.round(regrind.condition * 100)}% → ${Math.round(regrind.after * 100)}%. No cash charge.`
+          : regrind.reason }),
+        C.Button({ label: 'Regrind fitted bit', kind: 'amber', block: true,
+          disabled: !regrind.ok,
+          onTap: () => {
+            const result = app.ctx.progression.fieldRegrind(regrind.itemId);
+            app.toast(result.ok
+              ? `Bit regrind complete · ${Math.round(result.after * 100)}% condition`
+              : result.reason, result.ok ? 'success' : 'warn');
+            render();
+          },
+        }),
+      )));
+    }
+
     // Compatibility read-out.
     const bit = state.garage?.loadout?.bit ? app.itemById(state.garage.loadout.bit) : null;
     const rod = state.garage?.loadout?.rod ? app.itemById(state.garage.loadout.rod) : null;
     const bitThread = threadOf(bit);
     const rodThread = threadOf(rod);
-    const verdict = stringVerdict(bit, rod);
+    const sampleMethod = state.contract?.methodId || rig.methods?.[0];
+    const sampling = checkSampleEquipment(sampleMethod, state.garage?.loadout, getItem);
+    const verdict = !sampling.ok ? { level: 'bad', msg: sampling.reason }
+      : sampling.sampleMode === 'core' ? { level: 'ok', msg: `${sampling.family} bit and barrel have matching core and hole sizes.` }
+      : sampling.sampleMode === 'sonic' ? { level: 'note', msg: 'Sonic barrel, right-hand drill rod and left-hand override casing are fitted.' }
+      : stringVerdict(bit, rod);
     const methodWarn = methodVerdict(rig, bit);
     const casingNote = (isCasingJoint(bitThread) || isCasingJoint(rodThread))
       ? 'Casing joints are cut left-hand, so advancing the casing cannot unscrew them.'

@@ -6,7 +6,7 @@ import { createGameState, createBus, makeRandom, EVENTS } from '../src/core/cont
 import { createProgression } from '../src/game/progression.js';
 import {
   METHODS, REGIONS, CERTS, MAX_LEVEL, RIGS, DEPTH_IS_VERTICAL,
-  makeContract, rigDepthCapacity,
+  makeContract, rigDepthCapacity, defaultLoadoutFor,
 } from '../src/game/data.js';
 
 const originals = new Map();
@@ -24,7 +24,7 @@ function contract(methodId, targetDepth) {
   return { ...structuredClone(originals.get(methodId)), targetDepth };
 }
 
-async function fixture(owned, selected = owned[0]) {
+async function fixture(owned, selected = owned[0], methodId = null) {
   const store = {
     values: new Map(), writes: 0,
     getItem(k) { return this.values.get(k) ?? null; },
@@ -43,6 +43,14 @@ async function fixture(owned, selected = owned[0]) {
   state.unlocked.regions = REGIONS.map(r => r.id);
   state.unlocked.rigs = [...owned];
   state.garage.rigId = selected;
+  if (methodId === 'core' || methodId === 'sonic') {
+    // Isolate the depth boundary using actual, publicly purchased sample stock.
+    for (const [slot, id] of Object.entries(defaultLoadoutFor(methodId, MAX_LEVEL))) {
+      if (!id) continue;
+      assert.equal(progression.purchase(id).ok, true, `purchase depth fixture ${id}`);
+      assert.equal(progression.equip(slot, id).ok, true, `equip depth fixture ${id}`);
+    }
+  }
   progression.save();
   const events = [];
   for (const event of new Set(Object.values(EVENTS))) bus.on(event, payload => events.push({ event, payload }));
@@ -132,9 +140,9 @@ test('every advertised vertical rig/method accepts its exact known limit and rej
     if (!DEPTH_IS_VERTICAL.includes(methodId)) continue;
     const depth = rigDepthCapacity(rig, methodId);
     if (depth === null) continue;
-    const above = await fixture([rig.id]);
+    const above = await fixture([rig.id], rig.id, methodId);
     refusesUnchanged(above, contract(methodId, depth + 0.01), /depth|m/i);
-    const exact = await fixture([rig.id]);
+    const exact = await fixture([rig.id], rig.id, methodId);
     assert.equal(exact.progression.acceptContract(contract(methodId, depth)).ok, true, `${rig.id}/${methodId} exact limit`);
     checked++;
   }

@@ -218,6 +218,8 @@ const n = (v) => (Number.isFinite(+v) ? +v : 0);
    is there because "bolt 12 of 40" is the answer to "how far through am I",
    which is the one question a status line exists to answer. */
 const STATUS_UNIT = {
+  coreSample: sampleStatus,
+  sonicSample: sampleStatus,
   rc: (p) => ['Bags', `${int(p.bagsCut)}`],
   jumbo: (p) => ['Round', `${int(p.roundIndex)} · ${int(p.holesDone)}/${int(p.holesPerRound)}`],
   longhole: (p) => ['Hole', `${int(p.holeIndex)}/${int(p.holesTotal)}`],
@@ -225,8 +227,80 @@ const STATUS_UNIT = {
   pile: (p) => ['Blows', `${int(p.blows)}`],
   'probe:cpt': (p) => ['Sounding', `${num(p.pushRateMmS, 0)} mm/s`],
   'probe:spt': (p) => ['Test', `${int(p.testIndex)}`],
-  twoStage: (p) => [p.reverse ? 'Ream' : 'Pilot', `${num(p.passM, 0)}/${num(p.passTargetM, 0)} m`],
+  twoStage: twoStageStatus,
 };
+
+// The programme's passM accumulator starts on the return pass. The outbound
+// distance is the simulation's actual depth, not that still-zero accumulator.
+const passDistance = (p, tl) => p.reverse ? p.passM : tl?.depth;
+
+/** Stage names come from the active simulation stage, including concrete/jet lifts. */
+export function twoStageStatus(p, tl) {
+  const metres = (v) => num(v, 1).replace(/\.0$/, '');
+  return [p.stageName || 'Pass', `${metres(passDistance(p, tl))}/${metres(p.passTargetM)} m`];
+}
+
+/** Labels describe completed operations or the next required operation. */
+export function sampleStatus(p) {
+  const label = { drill: 'Sample', case: 'Case', retrieve: 'Retrieve', handle: 'Log',
+    complete: 'Logged', 'sample-case': 'Casing', 'sample-retrieve': 'Retrieving',
+    'sample-handle': 'Logging' }[p.stage] || 'Sample';
+  const row = p.lastInterval;
+  return [label, row ? `${num(row.fromM, 1)}–${num(row.toM, 1)} m` : '0 m'];
+}
+
+export function sampleUnitCard(p) {
+  const row = p.lastCompletedInterval || p.lastInterval;
+  if (!row?.retrieval) return null;
+  const core = p.kind === 'coreSample', handled = !!row.handling;
+  return { title: handled ? (core ? 'Core boxed and logged' : 'Sample sleeved and labelled')
+      : (core ? 'Inner tube retrieved' : 'Barrel extracted'), tone: handled ? 'good' : 'warn',
+    rows: [['Interval', `${num(row.fromM, 1)}–${num(row.toM, 1)} m`],
+      ['Container', handled ? `${core ? 'Box' : 'Sleeve'} ${row.index}` : 'Handling due'],
+      [p.capacityBasis === 'inner-tube-length' ? 'Inner tube capacity' : 'Sampling run limit',
+        `${num(p.barrelCapacityM, 1)} m${p.capacityBasis === 'gameplay-run-limit' ? ' · game setting' : ''}`],
+      ['Material recovery', 'Unmeasured']],
+    note: p.capacityBasis === 'gameplay-run-limit'
+      ? 'The run limit is a game setting. Usable inner capacity and recovered material length are unmeasured.'
+      : 'The interval identifies the bore section. It does not measure recovered material length.' };
+}
+
+/** Only display the measurements the active pass publishes. */
+export function twoStageUnitCard(p, tl) {
+  const along = ['Along', `${num(passDistance(p, tl), 1)} / ${num(p.passTargetM, 1)} m`];
+  if (p.concrete) {
+    return {
+      title: p.stageName || 'Concrete placement', tone: 'good',
+      rows: [along,
+        // The sim caps this KPI at ground take-up and adjusts it for
+        // rotation. It is not the raw pump-supply / bore-demand quotient.
+        ['Effective volume', `${num(p.concrete.ratio, 2)}×`],
+        ['Concrete placed', `${num(p.concrete.placedM3, 2)} m³`],
+        ['Dry lift', `${num(p.concrete.dryM, 1)} m`],
+      ],
+      note: `Aim for an effective volume ratio of ${num(p.concrete.targetLo, 2)}–${num(p.concrete.targetHi, 2)}×. Keep rotation low during extraction.`,
+    };
+  }
+  if (p.jet) {
+    return {
+      title: p.stageName || 'Jetting lift', tone: 'good',
+      rows: [along,
+        ['Jet pressure', `${num(p.jet.bar, 0)} bar`],
+        ['Column index', pct01(p.jet.column01)],
+        ['Return lost', `${num(p.jet.lostM, 1)} m`],
+      ],
+      note: 'Maintain jet pressure and spoil return. The column index is not a diameter.',
+    };
+  }
+  return {
+    title: p.stageName || 'Pass', tone: 'good',
+    rows: [along, ['Cutters', pct01(1 - n01(p.cutterWear01))], ['Stalls', int(p.stalls)]],
+    note: p.mucksByGravity
+      ? 'A raise mucks by gravity — there is nothing to circulate on the way up.'
+      : p.reverse ? 'The constraint on the way back is pull, not rate.'
+        : 'Pilot alignment carries through to the return pass.',
+  };
+}
 
 /* ═══ THE UNIT CARD ═════════════════════════════════════════════════════
    Every method has a natural unit boundary — a bag, a round, a ring hole, a
@@ -280,6 +354,10 @@ export function boltUnitCard(p, tl = {}) {
 }
 
 const UNIT_VIEWS = {
+  coreSample: { stamp: (p) => (p.lastCompletedInterval?.retrieval?.sequence || 0)
+      + (p.lastCompletedInterval?.handling?.sequence || 0), card: sampleUnitCard },
+  sonicSample: { stamp: (p) => (p.lastCompletedInterval?.retrieval?.sequence || 0)
+      + (p.lastCompletedInterval?.handling?.sequence || 0), card: sampleUnitCard },
   rc: {
     stamp: (p) => p.bagsCut,
     card: (p, tl) => {
@@ -388,18 +466,7 @@ const UNIT_VIEWS = {
   },
   twoStage: {
     stamp: (p) => p.stage,
-    card: (p) => ({
-      title: `${p.stageName || 'Pass'} · ${p.reverse ? 'coming back' : 'going down'}`,
-      tone: 'good',
-      rows: [
-        ['Along', `${num(p.passM, 1)} / ${num(p.passTargetM, 1)} m`],
-        ['Cutters', pct01(1 - n01(p.cutterWear01))],
-        ['Stalls', int(p.stalls)],
-      ],
-      note: p.mucksByGravity
-        ? 'A raise mucks by gravity — there is nothing to circulate on the way up.'
-        : 'The constraint on the way back is pull, not rate.',
-    }),
+    card: twoStageUnitCard,
   },
 };
 
@@ -438,6 +505,10 @@ function assayNote(bag) {
    something is running. Keyed on the sim's own beat vocabulary
    (`BEAT_PHASES` in sim/drilling.js). */
 const BEAT_COPY = {
+  'sample-case': ['Advancing casing', 'Protecting the drilled interval before extraction'],
+  'sample-retrieve': ['Retrieving sample barrel', 'Interval handling follows extraction'],
+  'sample-handle': ['Handling sample', 'Recording the interval and its container'],
+  'sample-wait': ['Sampling step due', 'Use the sample action to continue'],
   'boom-setup':   ['Boom setting up', 'Lining up on the next hole group'],
   charging:       ['Charging the round', 'The score was settled before this'],
   firing:         ['Firing', 'Face is clear'],
@@ -488,6 +559,9 @@ export function resinInstallStep(programme) {
 
 /** One-line captions for the sim's pulse verbs. The label is the sim's. */
 const PULSE_SUB = {
+  sampleCase: 'Casing advance started',
+  sampleRetrieve: 'Retrieval started; handling follows',
+  sampleHandle: 'Container handling and interval logging started',
   blowDown:   'Clear the sample train before the next bag',
   shortRound: 'Take the round the ground class allows',
   redrill:    'Pull back and start the hole again',
@@ -553,6 +627,21 @@ function controlFamily(method, kindHint, progHint) {
 
 /** A short head label for a data-supplied control that carries no `short`. */
 const shortOf = (label) => String(label || '').split(/[\s,]+/)[0].toUpperCase().slice(0, 9);
+
+/** A game-log index, not a probability or a measured survey accuracy. The
+ * simulation owns both confidence and the purchased preview effect. */
+export function stratumForecastReadout(rows) {
+  const next = Array.isArray(rows) && rows.find(f => f && f.previewRanks > 0
+    && !f.current && Number.isFinite(f.distance) && f.distance > 0
+    && Number.isFinite(f.top) && Number.isFinite(f.confidence));
+  if (!next) return null;
+  return {
+    key: `${next.id}:${next.top}:${next.previewRanks}`,
+    depth: next.top,
+    title: `${next.name} ahead`,
+    sub: `${num(next.distance)} m · log confidence ${Math.round(clamp(next.confidence, 0, 1) * 100)}/100`,
+  };
+}
 
 export function createSiteScreen(app) {
   const { C, state, fmtMoney } = app;
@@ -722,18 +811,62 @@ export function createSiteScreen(app) {
     if (runLog.length > LOG_MAX) runLog.shift();
   }
 
+  let sampleLogAttempt = '', sampleLogSequence = 0;
+  function observeSampleProduct(p) {
+    if (!p || !['coreSample', 'sonicSample'].includes(p.kind)) return;
+    if (state.scene !== SCENES.SITE || p.summary.runId !== state.drill?.sampleProduct?.runId
+        || p.summary.attemptId !== state.drill?.sampleProduct?.attemptId) return;
+    const key = `${p.summary.runId}:${p.summary.attemptId}`;
+    if (key !== sampleLogAttempt) { sampleLogAttempt = key; sampleLogSequence = 0; }
+    // Handling can finish and a new interval open between 8 Hz UI updates.
+    // Consume every unseen completed record, not just the current barrel.
+    for (const row of p.intervals) {
+      const interval = `${num(row.fromM, 1)}–${num(row.toM, 1)} m`;
+      if (row.retrieval && row.retrieval.sequence > sampleLogSequence) {
+        log(row.toM, `${p.kind === 'coreSample' ? 'Inner tube retrieved' : 'Barrel extracted'} · ${interval}`);
+        sampleLogSequence = row.retrieval.sequence;
+      }
+      if (row.handling && row.handling.sequence > sampleLogSequence) {
+        log(row.toM, `${p.kind === 'coreSample' ? 'Box' : 'Sleeve'} ${row.index} logged · ${interval}`);
+        sampleLogSequence = row.handling.sequence;
+      }
+    }
+  }
+
+  let forecastStamp = '', pendingForecast = null;
+  function refreshForecast() {
+    const rows = ctx.sim?.active && ctx.sim.getForecast?.(20, { previewOnly: true });
+    const card = stratumForecastReadout(rows);
+    // A changed contact/rank or ended run invalidates an already visible
+    // preview, without disturbing any genuine struck-hazard message.
+    if (alertMode === 'forecast' && (!card || card.key !== forecastStamp)) clearAlert();
+    if (!card) { pendingForecast = null; forecastStamp = ''; return; }
+    // A newly learned preview rank or the next contact earns one short notice.
+    // Distance changes refresh a queued notice without monopolising the strip.
+    if (card.key !== forecastStamp || pendingForecast) pendingForecast = card;
+  }
+  function presentForecast() {
+    if (!pendingForecast) return;
+    say(pendingForecast.title, pendingForecast.sub, 'info', 'forecast');
+    log(pendingForecast.depth, `${pendingForecast.title} · ${pendingForecast.sub}`);
+    forecastStamp = pendingForecast.key;
+    pendingForecast = null;
+  }
+
   /* ── The alert channel ──────────────────────────────────────────────────
-     Two modes on one face:
+     Three modes on one face:
        telegraph — the sim's forecast, with the countdown rule filling toward
                    the strike. Re-asserted every frame while it stands,
        strike    — something that has happened. Outranks a telegraph and holds
-                   the strip for its own few seconds.
+                   the strip for its own few seconds,
+       forecast  — an informational strata preview. Its hold ends immediately
+                   when the sim publishes a warning or well-control alarm.
      Severity is encoded HERE and nowhere else, so the same boulder can no
      longer be amber in one place and red in another. */
   const ALERT_SEC = { danger: 3.4, warn: 3.0, info: 2.4, good: 2.0 };
   const ALERT_ICON = { danger: 'alert', warn: 'alert', info: 'info', good: 'check' };
-  let alertHold = 0;          // >0 while a struck message holds the strip
-  let alertMode = null;       // 'strike' | 'telegraph' | null
+  let alertHold = 0;          // >0 while a transient message holds the strip
+  let alertMode = null;       // 'strike' | 'telegraph' | 'forecast' | null
   let alertKind = '';
   let alertIcoKind = '';
   let alertTitle = '';
@@ -784,9 +917,10 @@ export function createSiteScreen(app) {
    * @param {string} title  the subject, in two or three words
    * @param {string} sub    the instruction or the consequence
    * @param {'danger'|'warn'|'info'|'good'} kind
+   * @param {'strike'|'forecast'} mode  preview notices yield to live warnings
    */
-  function say(title, sub, kind = 'info') {
-    paintAlert(title, sub || '', kind, 'strike', 0);
+  function say(title, sub, kind = 'info', mode = 'strike') {
+    paintAlert(title, sub || '', kind, mode, 0);
     alertHold = ALERT_SEC[kind] || 2.6;
     app.haptic(kind === 'danger' ? 'heavy' : kind === 'warn' ? 'medium' : 'light');
   }
@@ -1072,7 +1206,7 @@ export function createSiteScreen(app) {
 
   function setSliderLabel(sl, nameEl, pair, role) {
     if (nameEl && nameEl.textContent !== pair[1]) nameEl.textContent = pair[1];
-    sl.el.setAttribute('aria-label', `${pair[0]} — ${pair[2] || CONTROL_ROLE[role]}`);
+    sl.setLabel(`${pair[0]} — ${pair[2] || CONTROL_ROLE[role]}`);
   }
 
   /* ── Locked controls ──────────────────────────────────────────────────
@@ -1082,14 +1216,8 @@ export function createSiteScreen(app) {
      reason. A slider that still moves while the machine ignores it is the same
      class of lie as a gauge reading 0 % because nobody mirrored the value, so
      the control is visibly stood down and says why. */
-  function setSliderLock(sl, nameEl, locked, note) {
-    if (sl.__locked === locked && sl.__note === note) return;
-    sl.__locked = locked; sl.__note = note;
-    sl.el.classList.toggle('is-locked', !!locked);
-    sl.el.setAttribute('aria-disabled', locked ? 'true' : 'false');
-    if (locked) {
-      sl.el.setAttribute('aria-label', `${nameEl ? nameEl.textContent : 'Control'} — not on this machine: ${note}`);
-    }
+  function setSliderLock(sl, locked, note) {
+    sl.setDisabled(locked, note);
   }
 
   /* Only ever re-labels when the method, its kind, its programme or its
@@ -1158,34 +1286,128 @@ export function createSiteScreen(app) {
    * belongs on the big button rather than in the rail with the machine
    * actions. `bail` is the stringless cadence and has no pulse of its own.
    */
-  const PULSE = { rod: 'rodStab', jam: 'jamRescue', kick: 'kick', beat: 'stab', release: 'strike' };
+  const PULSE = { rod: 'rodStab', bail: 'stab', jam: 'jamRescue', kick: 'kick', beat: 'stab', release: 'strike' };
+
+  // An action belongs to this mounted physical attempt. Promise callbacks and
+  // timed casing feedback must never announce an old result on a new hole.
+  let actionEpoch = 0, pendingTrip = null, pendingCasing = null;
+
+  function invalidateActionOutcomes() {
+    actionEpoch++;
+    pendingTrip = null;
+    pendingCasing = null;
+  }
+
+  function actionContext() {
+    const sim = ctx.sim;
+    const tl = sim?.getTelemetry?.();
+    return { sim, epoch: actionEpoch, contract: state.contract, active: tl?.active, phase: tl?.phase,
+      runId: tl?.runId, attemptId: tl?.attemptId, depth: tl?.depth ?? state.drill?.depth };
+  }
+
+  function actionContextIsCurrent(token, tl) {
+    if (tl === undefined) {
+      try { tl = token.sim?.getTelemetry?.(); } catch { return false; }
+    }
+    return token.epoch === actionEpoch && ctx.sim === token.sim
+      && state.scene === SCENES.SITE && state.contract === token.contract
+      && tl && tl.active === token.active && tl.runId === token.runId && tl.attemptId === token.attemptId;
+  }
+
+  function actionRefused(result) {
+    const why = result?.reason;
+    const message = PULSE_REFUSAL[why]
+      || (typeof why === 'string' && why.startsWith('busy:') ? 'The machine is busy' : null)
+      || (why === 'stuck' ? 'Free the string before changing the bit' : null)
+      || (why === 'idle' ? 'No hole is running' : null)
+      || (why === 'method-cannot-case' ? 'This method cannot run casing' : null)
+      || 'The action could not be completed';
+    say('Not yet', message, 'info');
+  }
+
+  function startBitChange(sim, token) {
+    if (pendingTrip && actionContextIsCurrent(pendingTrip)) {
+      say('Not yet', 'A bit change is already in progress', 'info');
+      return;
+    }
+    if (typeof sim.changeBit !== 'function') { actionRefused(); return; }
+    const outcome = sim.changeBit();
+    pendingTrip = token;
+    const started = sim.getTelemetry?.();
+    // A trip already in progress can return a busy promise. Only this call's
+    // transition into a trip acknowledges that it actually started new work.
+    if (actionContextIsCurrent(token, started)
+      && started.phase !== token.phase
+      && ['tripping-out', 'bit-swap', 'tripping-in'].includes(started.phase)) {
+      log(token.depth, 'Bit change started', null);
+      say('Changing bit', 'Wait for the trip to finish', 'info');
+      setAction('idle'); actionTimer = 0;
+    }
+    return Promise.resolve(outcome).then((result) => {
+      if (pendingTrip !== token || !actionContextIsCurrent(token)) return;
+      if (!result?.ok) { actionRefused(result); return; }
+      log(token.depth, 'Replacement bit fitted', null);
+      say('Bit change complete', 'Back in the hole', 'good');
+    }).catch((error) => {
+      console.error('[ui] bit change', error);
+      if (pendingTrip === token && actionContextIsCurrent(token)) actionRefused();
+    }).finally(() => { if (pendingTrip === token) pendingTrip = null; });
+  }
+
+  function settleActionOutcomes(tl) {
+    const pending = pendingCasing;
+    if (!pending) return;
+    if (!actionContextIsCurrent(pending, tl)) { pendingCasing = null; return; }
+    if (tl.phase === 'casing-run') return;
+    pendingCasing = null;
+    if (tl.casingOn && Number.isFinite(tl.casedDepth) && tl.casedDepth >= pending.depth) {
+      log(pending.depth, 'Casing run complete', null);
+      say('Casing set', 'Casing run complete', 'good');
+    } else {
+      say('Casing interrupted', 'The casing run did not finish', 'warn');
+    }
+  }
 
   function doAction() {
-    const a = SITE_ACTIONS[actionMode] || SITE_ACTIONS.idle;
+    const mode = actionMode;
+    if (mode === 'idle') { say('Nothing to do', 'Keep it in the band', 'info'); return; }
+    const a = SITE_ACTIONS[mode] || SITE_ACTIONS.idle;
     const sim = ctx.sim;
     let res = null;
+    let token = null;
     if (sim) {
       try {
-        if (PULSE[actionMode] && typeof sim.pulse === 'function') res = sim.pulse(PULSE[actionMode]);
-        else if (actionMode === 'casing' && typeof sim.setCasing === 'function') sim.setCasing(true);
-        else if (actionMode === 'trip' && typeof sim.changeBit === 'function') Promise.resolve(sim.changeBit()).catch(() => {});
+        token = actionContext();
+        if (mode === 'trip') return startBitChange(sim, token);
+        if (PULSE[mode] && typeof sim.pulse === 'function') res = sim.pulse(PULSE[mode]);
+        else if (mode === 'casing' && typeof sim.setCasing === 'function') res = sim.setCasing(true);
         else if (typeof sim.pulse === 'function') res = sim.pulse(a.id);
-      } catch (e) { console.error('[ui] sim action', e); }
+      } catch (e) { console.error('[ui] sim action', e); actionRefused(); return; }
+      if (!res?.ok) { actionRefused(res); return; }
+      if (!actionContextIsCurrent(token)) return;
     }
 
     const d = state.drill || {};
-    switch (actionMode) {
+    switch (mode) {
       case 'rod':
-        if (!ctx.sim) { d.rods = (d.rods || 1) + 1; }
-        log(d.depth, `Rod ${d.rods || 1} stabbed`, null);
-        say('Rod in', 'A clean stab', 'good');
-        if (!ctx.sim) { setAction('idle'); actionTimer = 0; }
+        if (sim) {
+          log(token.depth, res.good ? 'Rod timing caught' : 'Rod timing missed', res.good ? null : 'warn');
+          say(res.good ? 'Timing caught' : 'Missed the window', 'Rod connection is still running', res.good ? 'good' : 'warn');
+        } else {
+          d.rods = (d.rods || 1) + 1;
+          log(d.depth, `Rod ${d.rods} inserted`, null);
+          say('Rod in', 'A clean stab', 'good');
+          setAction('idle'); actionTimer = 0;
+        }
         break;
       case 'bail':
-        // No rod, no stab. A spudder's beat is the bailer coming out full.
-        log(d.depth, 'Bailer run', null);
-        say('Bailer out', 'Cuttings lifted', 'good');
-        setAction('idle'); actionTimer = 0;
+        if (sim) {
+          say(res.good ? 'Timing caught' : 'Missed the window', 'Bailing run is still running', res.good ? 'good' : 'warn');
+        } else {
+          log(d.depth, 'Bailer run', null);
+          say('Bailer out', 'Cuttings lifted', 'good');
+          setAction('idle'); actionTimer = 0;
+        }
         break;
       case 'beat':
         if (res && res.ok) {
@@ -1208,9 +1430,18 @@ export function createSiteScreen(app) {
         setAction('idle'); actionTimer = 0;
         break;
       case 'casing':
-        if (!ctx.sim) { d.stability = Math.min(1, (d.stability || 0) + 0.45); }
-        log(d.depth, 'Casing set', null);
-        say('Casing driven', 'The hole is secured', 'good');
+        if (sim && res.runSec > 0) {
+          pendingCasing = token;
+          log(token.depth, 'Casing run started', null);
+          say('Running casing', 'Wait for the run to finish', 'info');
+        } else if (sim) {
+          log(token.depth, 'Casing following the bit', null);
+          say('Casing engaged', 'Following the bit as it advances', 'info');
+        } else {
+          d.stability = Math.min(1, (d.stability || 0) + 0.45);
+          log(d.depth, 'Casing set', null);
+          say('Casing set', 'Casing run complete', 'good');
+        }
         setAction('idle'); actionTimer = 0;
         break;
       case 'trip':
@@ -1250,20 +1481,27 @@ export function createSiteScreen(app) {
   function firePulse(id, a2) {
     if (!id) return;
     const sim = ctx.sim;
-    if (!sim || typeof sim.pulse !== 'function') return;
-    let r = null;
-    try { r = sim.pulse(id); } catch (e) { console.error('[ui] pulse', id, e); return; }
+    if (!sim || typeof sim.pulse !== 'function') { actionRefused(); return; }
+    let r = null, token = null;
+    try { token = actionContext(); r = sim.pulse(id); }
+    catch (e) {
+      console.error('[ui] pulse', id, e);
+      if (token ? actionContextIsCurrent(token) : state.scene === SCENES.SITE) actionRefused();
+      return;
+    }
+    // Some pulses finish the hole synchronously. Its completion listeners may
+    // already have mounted results or another attempt before pulse returns.
+    if (!actionContextIsCurrent(token)) return;
     if (!r || !r.ok) {
-      const why = r && r.reason;
-      const msg = PULSE_REFUSAL[why]
-        || (typeof why === 'string' && why.startsWith('busy:') ? 'The machine is busy' : null);
-      if (msg) say('Not yet', msg, 'info');
+      actionRefused(r);
       return;
     }
     const d = state.drill || {};
     const sub = PULSE_SUB[id] || '';
     switch (id) {
-      case 'blowDown': log(d.depth, 'String blown down', null); say('Blown down', 'The sample train is clear', 'good'); break;
+      case 'sampleCase': case 'sampleRetrieve': case 'sampleHandle':
+        log(d.depth, sub, null); break;
+      case 'blowDown': log(d.depth, 'Blow-down started', null); say('Blowing down', 'Clearing the sample train', 'info'); break;
       case 'shortRound': log(d.depth, `Round shortened to ${num(r.roundLengthM, 2)} m`, 'warn');
         say('Round shortened', `Taken down to ${num(r.roundLengthM, 2)} m`, 'warn'); break;
       case 'redrill': log(d.depth, 'Re-drilling the hole', 'warn'); break;
@@ -1272,9 +1510,9 @@ export function createSiteScreen(app) {
         log(d.depth, `Modelled slot closure ${num(r.slotClosureIn, 4)} in`, r.closedFully ? null : 'warn');
         say('Slot inspected', 'Check anchorage with a pull test', 'info');
         break;
-      case 'torqueTest': log(d.depth, 'Torque test taken', null); break;
-      case 'reamHole': log(d.depth, 'Hole reamed open', null); break;
-      case 'changeDolly': log(d.depth, 'Dolly changed', null); say('Dolly changed', 'New packing under the helmet', 'good'); break;
+      case 'torqueTest': log(d.depth, 'Torque test started', null); break;
+      case 'reamHole': log(d.depth, 'Reaming started', null); break;
+      case 'changeDolly': log(d.depth, 'Dolly change started', null); say('Changing dolly', 'Replacing the packing', 'info'); break;
       case 'shutIn':
         if (r.flowing) {
           log(d.depth, 'Shut in on the kick', 'bad');
@@ -1289,7 +1527,7 @@ export function createSiteScreen(app) {
         say('Pill spotted', 'Across the thief zone', 'info');
         break;
       case 'takeSet': log(d.depth, `Taking the set over ${int(r.blows)} blows`, 'warn'); break;
-      case 'cleanOut': log(d.depth, 'Base cleaned out', null); break;
+      case 'cleanOut': log(d.depth, 'Base clean-out started', null); break;
       case 'dissipation': log(d.depth, 'Dissipation test', null); break;
       case 'terminate': log(r.depthM, 'Sounding terminated', 'warn');
         say('Terminated', 'At thrust capacity — a reportable result', 'warn'); break;
@@ -1928,6 +2166,12 @@ export function createSiteScreen(app) {
     const kind = b ? b.kind : tl.phase;
     const copy = BEAT_COPY[kind];
     if (!copy) return null;
+    if (kind === 'sample-retrieve') return tl.programme?.kind === 'coreSample'
+      ? ['Retrieving inner tube', 'The rod string stays in the hole']
+      : ['Extracting barrel', 'Protective casing is in place'];
+    if (kind === 'sample-handle') return tl.programme?.kind === 'coreSample'
+      ? ['Boxing and logging', 'Recording the actual bore interval']
+      : ['Sleeving and labelling', 'Recording the actual bore interval'];
     if (kind === 'bolt-install' && b && b.data) {
       if (b.data.type === 'resin') return ['Resin cure', 'Spin, stop, hold — in that order'];
       if (b.data.type === 'friction') return ['Friction bolt', 'Insert the bolt, then seat the plate'];
@@ -2148,6 +2392,13 @@ export function createSiteScreen(app) {
 
   /** The stringless cadence: the bailer coming out full. */
   function bailerBeat(p) {
+    if (ctx.sim) {
+      if (state.scene !== SCENES.SITE || !ctx.sim.active || typeof p?.perfect !== 'boolean') return;
+      log(p.depth ?? state.drill?.depth, `Bailing run ${p.count ?? ''} complete`.trim(), p.perfect ? null : 'warn');
+      say('Bailer out', p.perfect ? 'Cuttings lifted — clean timing' : 'Cuttings lifted after a missed window', p.perfect ? 'good' : 'warn');
+      setAction('idle'); actionTimer = 0;
+      return;
+    }
     setAction('bail'); actionTimer = 4.5;
     app.haptic('medium');
     const label = (p && p.label) || 'Bailing run';
@@ -2171,6 +2422,7 @@ export function createSiteScreen(app) {
     unitStamp = null; unitKind = '';
     hideUnit();
     pendingContact = null;
+    pendingForecast = null; forecastStamp = '';
     runLog.length = 0;
   }
 
@@ -2184,6 +2436,7 @@ export function createSiteScreen(app) {
   function paint(dt) {
     if (!tokens) readTokens();
     const d = telemetry() || state.drill || {};
+    settleActionOutcomes(simTel);
     const p = state.player || {};
 
     const prog = simTel ? simTel.programme : null;
@@ -2229,9 +2482,9 @@ export function createSiteScreen(app) {
          the drive is running, because between tests the same machine really is
          boring the hole with the feed. */
       const lockNote = (prog && prog.lockNote) || 'not on this machine';
-      setSliderLock(feedSl, feedName, !!(prog && prog.feedLocked && prog.driving), lockNote);
-      setSliderLock(rotSl, rotName, !!(prog && prog.rotationLocked), lockNote);
-      setSliderLock(flushSl, flushName, !!(prog && prog.flushLocked), lockNote);
+      setSliderLock(feedSl, !!(prog && prog.feedLocked && prog.driving), lockNote);
+      setSliderLock(rotSl, !!(prog && prog.rotationLocked), lockNote);
+      setSliderLock(flushSl, !!(prog && prog.flushLocked), lockNote);
     }
 
     /* ── The one status line.
@@ -2247,7 +2500,7 @@ export function createSiteScreen(app) {
     lvlEl.textContent = 'LVL ' + (p.level || 1);
     const dep = d.depth || 0;
     const unitFmt = prog ? STATUS_UNIT[pkey] : null;
-    const pair = unitFmt ? unitFmt(prog) : ['Depth / target', `${num(dep)} / ${num(d.target, 0)} m`];
+    const pair = unitFmt ? unitFmt(prog, simTel) : ['Depth / target', `${num(dep)} / ${num(d.target, 0)} m`];
     depthCell.hidden = depthDiv.hidden = false;
     timeCell.hidden = timeDiv.hidden = !unitFmt;
     if (depthKeyEl.textContent !== pair[0]) depthKeyEl.textContent = pair[0];
@@ -2347,21 +2600,27 @@ export function createSiteScreen(app) {
        that a telegraph stands for as long as the sim keeps publishing it. One
        channel, one severity encoding, and it costs the screen nothing. */
     const wellAlarm = paintWell(simTel);
+    const warn = simTel && simTel.warning ? simTel.warning : null;
+    const forecastInterrupted = alertMode === 'forecast' && (wellAlarm || (warn && warn.hint));
 
+    // A skill preview is information, so a newly arriving hazard must not
+    // wait for its reading time. Keep genuine struck-message holds intact.
+    if (forecastInterrupted) alertHold = 0;
     if (alertHold > 0) alertHold -= dt;
     if (alertHold <= 0) {
       alertHold = 0;
       if (wellAlarm) {
         paintAlert(wellAlarm.title, wellAlarm.sub, wellAlarm.kind,
           wellAlarm.telegraph ? 'telegraph' : 'strike', wellAlarm.p);
-      } else if (pendingContact) {
+      } else if (pendingContact && !forecastInterrupted) {
         say(pendingContact[0], pendingContact[1], 'info');
       } else {
-        const warn = simTel && simTel.warning ? simTel.warning : null;
         if (warn && warn.hint) {
           const cp = splitHint(warn.kind, warn.hint);
           paintAlert(cp.title, cp.sub, (warn.severity || 0) > 0.66 ? 'danger' : 'warn',
             'telegraph', warn.progress01 || 0);
+        } else if (pendingForecast) {
+          presentForecast();
         } else if (alertMode) {
           clearAlert();
         }
@@ -2382,8 +2641,10 @@ export function createSiteScreen(app) {
     progAccum += dt;
     if (progAccum >= 0.125) {
       progAccum = 0;
+      refreshForecast();
       paintRail(simTel);
       paintBlowChart(prog);
+      observeSampleProduct(prog);
       checkUnit(prog, simTel);
     }
 
@@ -2394,8 +2655,10 @@ export function createSiteScreen(app) {
   /* ═══ Screen interface ═════════════════════════════════════════════════ */
   return {
     el,
+    onBack: abandonFromSite,
 
     mount(params) {
+      invalidateActionOutcomes();
       const c = params?.contract || state.contract;
       const d = state.drill || (state.drill = {});
       /* game/data.js names these `targetDepth`, `regionId` and `methodId`;
@@ -2486,9 +2749,9 @@ export function createSiteScreen(app) {
          labels, which is honest, where inventing a method would not be. */
       const mid = (c ? (c.methodId || c.method) : null) ?? site?.methodId ?? null;
       syncControlLabels(mid || null, null, false, '');
-      setSliderLock(feedSl, feedName, false, '');
-      setSliderLock(rotSl, rotName, false, '');
-      setSliderLock(flushSl, flushName, false, '');
+      setSliderLock(feedSl, false, '');
+      setSliderLock(rotSl, false, '');
+      setSliderLock(flushSl, false, '');
 
       elapsed = 0; lastLoggedDepth = 0; lastStratumId = null;
       progAccum = 0; lastJobP = '';
@@ -2511,6 +2774,7 @@ export function createSiteScreen(app) {
           log(f.top || 0, `${f.name} ahead${f.expectedRopMh ? ` · ~${f.expectedRopMh} m/h` : ''}`);
         }
       }
+      refreshForecast();
       /* The run log has no card on the stage any more, so hand the reference
          to the state the results screen reads: the events still happened and
          the end of the contract is where they are worth reading. */
@@ -2534,6 +2798,7 @@ export function createSiteScreen(app) {
 
     unmount() {
       leaveGeneration++;
+      invalidateActionOutcomes();
       clearAlert();
       resetWell();
       resetProgramme();
@@ -2557,6 +2822,15 @@ export function createSiteScreen(app) {
       app.haptic('medium');
     },
     onRod(p) {
+      if (ctx.sim) {
+        // ROD_ADDED is emitted when the connection finishes, not when its
+        // timing window opens. The live phase exposes that earlier window.
+        if (state.scene !== SCENES.SITE || !ctx.sim.active || typeof p?.perfect !== 'boolean') return;
+        log(p.depth ?? state.drill?.depth, `Rod ${p.count ?? ''} connected`.trim(), p.perfect ? null : 'warn');
+        say('Rod connected', p.perfect ? 'Clean timing' : 'Connected after a missed window', p.perfect ? 'good' : 'warn');
+        setAction('idle'); actionTimer = 0;
+        return;
+      }
       // A method with no drill string has no rod to add. Never call the beat
       // a rod: `hasDrillString` decides, and the sim publishes it.
       if (simTel && simTel.hasDrillString === false) { bailerBeat(p); return; }
@@ -2579,7 +2853,6 @@ export function createSiteScreen(app) {
       setAction('idle');
       say('String free', 'Back to making hole', 'good');
       log(state.drill?.depth, 'String free');
-      const st = state.player?.stats; if (st) st.jamsCleared = (st.jamsCleared || 0) + 1;
     },
     onWater(p) {
       hazard('Water strike', `${p?.flowLpm ?? '?'} l/min inflow — raise flushing or case it`, 'info');
@@ -2603,9 +2876,9 @@ export function createSiteScreen(app) {
       const st = state.player?.stats; if (st) st.bitsBurned = (st.bitsBurned || 0) + 1;
     },
     onMoney() { moneyRoll.to(state.player?.money || 0, { instant: app.reducedMotion }); },
-    onDrillStop() { setAction('idle'); },
+    onDrillStop() { invalidateActionOutcomes(); setAction('idle'); },
 
-    destroy() { feedSl.dispose(); rotSl.dispose(); flushSl.dispose(); },
+    destroy() { invalidateActionOutcomes(); feedSl.dispose(); rotSl.dispose(); flushSl.dispose(); },
   };
 
   function sizeSpark() {

@@ -50,8 +50,17 @@ window.setup=async(kind,reduced)=>{
  // NOT SOURCED: fixed controlled QA contract, no physical calibration claim.
  const contract={id:'vibro-recovery-'+kind,methodId:'driven-pile',regionId:'german-site',targetDepth:14,holes:1,payout:12000,requiredCerts:[],archetype:'urban-plot',seed:123,title:'Controlled pile recovery',level:1};
  const accepted=progression.acceptContract(contract);if(!accepted.ok)throw Error(accepted.reason);
- if(kind==='drift'){if(!progression.equip('hammer',vibro).ok)throw Error('equip failed');}
- else state.garage.loadout.hammer=vibro;
+ let fitCheck=null;
+ if(kind==='blocked-fit'){
+  const before=JSON.stringify({state,save:progression.serialise()});
+  const result=progression.equip('hammer',vibro);
+  fitCheck={result,unchanged:JSON.stringify({state,save:progression.serialise()})===before};
+  if(result.ok||result.code!=='unsupported-piling-hammer'||!fitCheck.unchanged)throw Error('Unavailable fit mutated a supported loadout');
+ } else {
+  // Older accepted jobs can retain this fitted item; the public fit API can
+  // no longer create the state. The restored case saves and loads it below.
+  state.garage.loadout.hammer=vibro;
+ }
  progression.save();
  if(kind==='restored'&&!progression.load())throw Error('restore failed');
  const sim=createDrillSim(ctx);ctx.sim=sim;
@@ -59,7 +68,7 @@ window.setup=async(kind,reduced)=>{
  progression.beginHole=(...a)=>{begins++;return begin(...a);};
  bus.on(EVENTS.DRILL_START,()=>starts++);
  const ui=createUI(ctx);await ui.init();ui.resize(innerWidth,innerHeight,devicePixelRatio);
- f={state,bus,progression,sim,ui,get begins(){return begins;},get starts(){return starts;}};
+ f={state,bus,progression,sim,ui,fitCheck,get begins(){return begins;},get starts(){return starts;}};
  ui.setLoadingProgress(1);ui.update(1);await pause(650);ui.update(0);
  // Loading reconciles unlocks and can queue its own save. Settle that setup
  // before the start-refusal boundary whose additional writes are under test.
@@ -71,7 +80,7 @@ window.setup=async(kind,reduced)=>{
  f.synchronousScene=state.scene;await pause(650);ui.update(0);
  return window.inspect();
 };
-window.inspect=()=>({scene:f.state.scene,shell:f.ui.currentScene,active:f.sim.active,begins:f.begins,starts:f.starts,
+window.inspect=()=>({scene:f.state.scene,shell:f.ui.currentScene,active:f.sim.active,begins:f.begins,starts:f.starts,fitCheck:f.fitCheck,
  synchronousScene:f.synchronousScene,financialUnchanged:financial()===f.before,
  contractId:f.state.contract?.id,attemptId:f.progression.run?.attemptId,
  hammer:f.state.garage.loadout.hammer,impactName:game.getItem(impact).name,vibroName:game.getItem(vibro).name,
@@ -106,15 +115,24 @@ try{
  for(const reduced of [true,false]){
   const context=await browser.newContext({viewport:{width,height},reducedMotion:reduced?'reduce':'no-preference'});
   const page=await context.newPage();
+  await page.addInitScript(()=>{const original=HTMLCanvasElement.prototype.getContext;window.webglAttempts=[];HTMLCanvasElement.prototype.getContext=function(type,...args){if(/webgl/i.test(type)){window.webglAttempts.push(type);throw Error('Vibro DOM fixture forbids WebGL');}return original.call(this,type,...args);};});
   page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
   page.on('requestfailed',r=>network.push({url:r.url(),error:r.failure()?.errorText}));
   page.on('response',r=>{if(r.status()>=400)network.push({url:r.url(),status:r.status()});});
   await page.goto('http://127.0.0.1:'+port+'/vibro-recovery.html?mute');
   await page.waitForFunction(()=>window.fixtureReady,{timeout:20000});
-  for(const kind of ['preaccepted','restored','drift']){
+  for(const kind of ['preaccepted','restored','blocked-fit']){
    const result=await page.evaluate(({kind,reduced})=>window.setup(kind,reduced),{kind,reduced});
    const record={kind,reduced,refusal:result};cases.push(record);
    assert.equal(result.synchronousScene,'site','Real shell completes mount before queued navigation');
+   if(kind==='blocked-fit'){
+    assert.equal(result.fitCheck.result.code,'unsupported-piling-hammer');assert.equal(result.fitCheck.unchanged,true);
+    assert.equal(result.scene,'site');assert.equal(result.shell,'site');assert.equal(result.active,true);
+    assert.equal(result.begins,1);assert.equal(result.starts,1);assert.equal(result.hammer,'impact-hammer-9t');
+    assert.equal(result.programme.hammerItemId,'impact-hammer-9t');
+    await page.screenshot({path:resolve(out,kind+'-'+reduced+'-supported.png')});
+    continue;
+   }
    assert.equal(result.scene,'garage');assert.equal(result.shell,'garage');
    assert.equal(result.active,false);assert.equal(result.begins,0);assert.equal(result.starts,0);
    assert.equal(result.financialUnchanged,true,'Accepted contract, run, money and owned inventory retained');
@@ -129,6 +147,7 @@ try{
    await page.screenshot({path:resolve(out,kind+'-'+reduced+'-refused.png')});
    // Use the shipping Garage picker and shipping Menu Continue handler.
    await page.locator('.screen--garage .slotcard').filter({hasText:result.vibroName}).click();
+   assert.equal(await page.locator('.overlays .slotcard').filter({hasText:result.vibroName}).getAttribute('aria-disabled'),'true','Legacy vibro remains visible but cannot be fitted again');
    await page.locator('.overlays .slotcard').filter({hasText:result.impactName}).click();
    await page.waitForTimeout(300);
    assert.equal((await page.evaluate(()=>window.inspect())).hammer,'impact-hammer-9t');
@@ -143,6 +162,7 @@ try{
    assert.equal(record.recovery.contractId,result.contractId);assert.equal(record.recovery.money,result.money);
    assert.equal(record.recovery.programme.hammerItemId,'impact-hammer-9t');
   }
+  assert.deepEqual(await page.evaluate(()=>window.webglAttempts),[],'CPU DOM recovery must never request WebGL');
   await page.evaluate(()=>window.disposeFixture());await context.close();
  }
 }catch(e){failure=e.stack||String(e);}

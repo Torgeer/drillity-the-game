@@ -738,7 +738,8 @@ canvas { display: block; }
 /* ═══════════════════════════════════════════════════════════════════════════
    MENU
    ═══════════════════════════════════════════════════════════════════════════ */
-.menu { justify-content: space-between; }
+.menu { justify-content: space-between; overflow-y: auto; }
+.menu > * { flex-shrink: 0; }
 .menu::before {
   content: ''; position: absolute; inset: 0 0 auto 0; height: 42%; z-index: -1;
   background: var(--scrim-top);
@@ -763,11 +764,23 @@ canvas { display: block; }
   display: flex; flex-direction: column; gap: var(--s-3);
   background: linear-gradient(180deg, transparent, var(--c-bg) 12%);
 }
-.menu__nav { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-2); }
+.menu__nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-2); }
+.menu__nav .btn:not(.btn--lg) { min-width: 0; padding-inline: var(--s-3); }
 .menu__nav .btn--lg { grid-column: 1 / -1; }
 .menu__ver { text-align: center; font-size: var(--t-2xs); color: var(--c-fg-dim); letter-spacing: var(--tr-label); text-transform: uppercase; }
 
-.pcard { display: flex; align-items: center; gap: var(--s-3); padding: var(--s-3); }
+/* Save problems occupy normal layout space, never a floating HUD banner. */
+.menu--save-notice { overflow-y: auto; }
+.menu--save-notice > * { flex-shrink: 0; }
+.save-notice { display: grid; gap: var(--s-2); padding: var(--s-3); border: 1px solid var(--c-amber); border-radius: var(--r); background: var(--c-bg); }
+.save-notice[hidden] { display: none; }
+.save-notice strong { color: var(--c-amber); font-size: var(--t-sm); }
+.save-notice p { margin: var(--s-1) 0 0; font-size: var(--t-xs); line-height: 1.45; }
+.save-notice .btn { min-height: 44px; white-space: normal; }
+
+.pcard { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--s-3); padding: var(--s-3); }
+.pcard > .pcard__stats { grid-column: 1 / -1; min-width: 0; margin-top: 0; }
+.pcard__stats .pill { max-width: 100%; white-space: normal; }
 .pcard__id { flex: 1 1 auto; min-width: 0; }
 .pcard__name { font-size: var(--t-lg); font-weight: 750; letter-spacing: var(--tr-tight); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pcard__role { font-size: var(--t-2xs); font-weight: 700; letter-spacing: var(--tr-label); text-transform: uppercase; color: var(--c-amber); }
@@ -2052,6 +2065,18 @@ canvas { display: block; }
 /* The toast stack was moved off the results grade and landed on the only CTA.
    Mirror the site override; .results .scroll already reserves 126px. */
 .ui-stage.is-results .toasts { bottom: calc(var(--sa-b) + 92px + var(--s-4)); }
+
+/* Menu, Garage and active dialogs give feedback its own layout space. The
+   scrollable content shrinks around this rail; no message paints over it. */
+.ui-stage .toasts.toasts--embedded {
+  position: static; inset: auto; align-self: stretch; flex: none;
+  max-height: 24vh; overflow-y: auto; scrollbar-width: thin;
+  padding: var(--s-3) var(--s-4); pointer-events: auto;
+}
+.toasts--embedded .toast { flex: none; border-radius: var(--r); }
+.toast > span { min-width: 0; overflow-wrap: anywhere; }
+.toasts[hidden], .toast[hidden] { display: none; }
+.modal__box { max-height: 100%; overflow-y: auto; }
 
 /* No hero stat may break its row, whatever number reaches it. */
 .rmetric__v { white-space: nowrap; }

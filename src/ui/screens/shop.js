@@ -19,6 +19,8 @@
  * and fall back to an authored procedural card. Never a broken image.
  */
 import { EVENTS, SCENES } from '../../core/contract.js';
+import { getItem, sampleItemSupport } from '../../game/data.js';
+import { checkEquipmentSupport } from '../../game/equipment-support.js';
 import {
   shopTree, shopListings, listingsInSub, slotInfo, methodInfo, rigInfo,
   CONDITIONS, LISTING_TYPES, DUTIES, listingTypeName, dutyName,
@@ -200,6 +202,16 @@ export function createShopScreen(app) {
   const isEquipped = (l) => equippedIn(l.slot) === l.itemId;
   const level = () => state.player?.level || 1;
   const isLocked = (l) => (l.unlockLevel || 1) > level();
+  const supportFor = (listing) => {
+    const drive = checkEquipmentSupport('driven-pile', listing.itemId, getItem);
+    return drive.ok ? sampleItemSupport(listing.itemId) : drive;
+  };
+  function refuseUnavailable(listing) {
+    const support = supportFor(listing);
+    if (support.ok) return false;
+    app.toast(support.reason, 'warn'); app.haptic('fail');
+    return true;
+  }
 
   /** What this player pays, after markup, reputation and Toolsmith discounts. */
   function price(listing) {
@@ -237,6 +249,7 @@ export function createShopScreen(app) {
   }
 
   async function buy(listing) {
+    if (refuseUnavailable(listing)) return;
     const cost = price(listing);
     if (isLocked(listing)) {
       app.toast(`Unlocks at level ${listing.unlockLevel}`, 'warn'); app.haptic('fail'); return;
@@ -257,6 +270,8 @@ export function createShopScreen(app) {
       confirmLabel: 'Buy',
     });
     if (!ok) return;
+    // Used/refurbished listings settle locally, so recheck their support too.
+    if (refuseUnavailable(listing)) return;
 
     const prog = app.ctx.progression;
     if (listing.condition === 'new') {
@@ -285,6 +300,7 @@ export function createShopScreen(app) {
   }
 
   function equip(listing) {
+    if (refuseUnavailable(listing)) return;
     const prog = app.ctx.progression;
     if (listing.slot === 'rig') {
       const res = prog?.selectRig?.(listing.itemId);
@@ -491,13 +507,16 @@ export function createShopScreen(app) {
     const has = owned(listing.itemId);
     const fitted = isEquipped(listing);
     const locked = isLocked(listing);
+    const support = supportFor(listing);
     const cost = price(listing);
     const poor = app.money() < cost;
 
     // Buy → Fit → Restock. A consumable you already own must still be
     // re-orderable: fresh carbide is the money sink the game runs on.
     const actions = C.h('div', { style: { display: 'flex', gap: '8px' } });
-    if (locked && !has) {
+    if (!support.ok) {
+      actions.appendChild(C.Button({ label: 'Unavailable', kind: 'quiet', size: 'sm', disabled: true }));
+    } else if (locked && !has) {
       actions.appendChild(C.Button({ label: `Level ${listing.unlockLevel}`, kind: 'quiet', size: 'sm', icon: 'lock', disabled: true }));
     } else if (!has) {
       actions.appendChild(C.Button({ label: 'Buy', kind: poor ? 'quiet' : 'amber', size: 'sm', icon: 'cart', onTap: () => buy(listing) }));
@@ -526,7 +545,8 @@ export function createShopScreen(app) {
           ),
         ),
       ),
-      deltaChips(listing),
+      support.ok ? deltaChips(listing)
+        : C.h('div.ccard__lock', C.Icon('alert', 14), C.h('span', { text: support.reason })),
       C.h('div.icard__foot',
         C.h('span.icard__price' + (poor && !has ? '.is-poor' : ''), {
           text: has && !listing.consumable ? 'In inventory' : eur(cost),
@@ -541,6 +561,7 @@ export function createShopScreen(app) {
   }
 
   function openDetail(listing) {
+    const support = supportFor(listing);
     const canvas = C.h('canvas', { style: { width: '100%', height: '100%' } });
     // A SQUARE well. The live turntable renders square and blits cover-fit, so
     // a wide well would crop the tool's ends off — which on a 3 m rod or a
@@ -567,9 +588,10 @@ export function createShopScreen(app) {
       const names = listing.methods.map((m) => methodInfo(m)?.name).filter(Boolean).join(', ');
       if (names) row('Drilling methods', names);
     }
-    row('Unlocks at', `Level ${listing.unlockLevel}`);
+    if (support.ok) row('Unlocks at', `Level ${listing.unlockLevel}`);
+    else row('Availability', 'Unavailable');
     row('List price', eur(listing.basePrice));
-    for (const [label, value] of statRows(listing)) row(label, value);
+    if (support.ok) for (const [label, value] of statRows(listing)) row(label, value);
 
     const bodyEl = C.h('div', { style: { display: 'flex', 'flex-direction': 'column', gap: '16px' } },
       prev,
@@ -577,7 +599,8 @@ export function createShopScreen(app) {
       listing.condition !== 'new'
         ? C.h('div.ccard__lock', C.Icon('alert', 14), C.h('span', { text: listing.conditionNote }))
         : null,
-      C.h('div', C.SectionTitle('Versus fitted'), deltaChips(listing)),
+      support.ok ? C.h('div', C.SectionTitle('Versus fitted'), deltaChips(listing))
+        : C.h('div.ccard__lock', C.Icon('alert', 14), C.h('span', { text: support.reason })),
       C.h('div', C.SectionTitle('Specification'), specRows),
     );
 
@@ -589,7 +612,9 @@ export function createShopScreen(app) {
       onClose: () => { try { sp?.clearLive?.(); } catch (_) { /* preview already gone */ } },
       actions: [
         C.Button({ label: 'Close', kind: 'quiet', onTap: () => sh.close() }),
-        has && isEquipped(listing) && listing.consumable
+        !support.ok
+          ? C.Button({ label: 'Unavailable', kind: 'quiet', disabled: true })
+          : has && isEquipped(listing) && listing.consumable
           ? C.Button({ label: 'Restock', kind: 'amber', icon: 'cart', onTap: () => { sh.close(); buy(listing); } })
           : has
             ? C.Button({
@@ -764,6 +789,7 @@ export function createShopScreen(app) {
     const scored = [];
 
     for (const l of all) {
+      if (!supportFor(l).ok) continue;                    // never recommend a drive that cannot start
       if (l.slot === 'rig') continue;                       // machines have their own aisle
       if (l.listingType === 'service') continue;            // a shelf of stock, not of crews
       if (l.condition !== 'new') continue;                  // a shop window, not the bargain bin

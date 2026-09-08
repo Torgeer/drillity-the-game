@@ -33,6 +33,8 @@ const unmount = extract(site, n => n.type === 'Property' && n.method && n.key?.n
 const makeSite = new Function('app', 'SCENES', 'EVENTS', `const ctx=app.ctx,state=ctx.state;
 const say=(...args)=>app.notices.push(args),clearAlert=()=>{},resetWell=()=>{},resetProgramme=()=>{};
 ${declaration(site, 'leavePending')}
+${declaration(site, 'actionEpoch')}
+${method(site, 'invalidateActionOutcomes')}
 ${method(site, 'abandonFromSite')}
 return {leave:abandonFromSite,unmount:({${unmount}}).unmount};`);
 const makeResults = new Function('app', 'SCENES', `const state=app.ctx.state,labels={textContent:''},attrs={};
@@ -54,7 +56,7 @@ ${siteMount.slice(startAt, stopAt)}`);
 
 const previousStorage = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
 const realWarn = console.warn, realError = console.error;
-const diagnostics = [], all = [], cases = [], remainingGaps = [];
+const diagnostics = [], all = [], cases = [];
 function generated(holes = 3, ordinal = 0) { const rand = makeRandom(20260906); let matched = 0;
   for (let i = 0; i < 1000; i++) { const c = makeContract('nordic', 1, rand); if (c.holes === holes && matched++ === ordinal) return c; }
   throw Error('Production generator did not provide required contract'); }
@@ -172,6 +174,22 @@ test('after partial pay, double confirmed abandonment preserves ledger and penal
   assert.equal(f.state.contract, null); assert.equal(f.app.navigations.length, 1); assert.deepEqual(career(f), after);
 });
 
+test('Escape invokes the actual guarded Site action instead of navigating directly', async () => {
+  const f = await fresh(); start(f); const shell = 'src/ui/shell.js';
+  const onBack = extract(site, n => n.type === 'Property' && n.key?.name === 'onBack');
+  let pending;
+  const key = new Function('SCENES', 'show', 'abandonFromSite', `${declaration(shell, 'PARENT')}
+const current={id:SCENES.SITE,inst:{${onBack}}},overlayStack=[];
+${method(shell, 'back')}
+${method(shell, 'onKey')}
+return onKey;`)(SCENES, () => { throw Error('Escape bypassed the Site decision'); }, () => { pending = f.site.leave(); });
+  let prevented = false; key({ key: 'Escape', preventDefault() { prevented = true; } });
+  assert.equal(prevented, true); assert.equal(f.app.confirms, 1);
+  assert.equal(f.state.scene, SCENES.SITE); assert.equal(f.sim.active, true);
+  f.app.resolutions.shift()(false); await pending;
+  assert.equal(f.state.scene, SCENES.SITE); assert.equal(f.app.navigations.length, 0);
+});
+
 let failures = 0;
 console.warn = (...args) => diagnostics.push(args.map(String).join(' '));
 console.error = (...args) => diagnostics.push(args.map(String).join(' '));
@@ -182,32 +200,6 @@ try {
     catch (error) { failures++; console.log('FAIL ' + c.name + '\n' + error.stack); }
     c.diagnostics = diagnostics.slice(startDiagnostic);
   }
-  // Observe the requested remaining shell/pause gaps rather than classifying
-  // their unchanged behavior as acceptance tests for this narrow callback fix.
-  {
-    const f = await fresh(); start(f); const waiting = f.site.leave();
-    const before = f.sim.debug.state.timeSec; f.sim.update(1 / 30, f.state);
-    remainingGaps.push({ gap: 'Leave confirmation does not pause simulation',
-      observed: f.sim.active && f.sim.debug.state.timeSec > before,
-      beforeTimeSec: before, afterTimeSec: f.sim.debug.state.timeSec });
-    f.app.resolutions.shift()(false); await waiting;
-  }
-  {
-    const f = await fresh(); start(f); const shell = 'src/ui/shell.js';
-    // Execute actual onKey/back and PARENT. show is the navigation boundary:
-    // actual shell show invokes the tested Site unmount and publishes scene.
-    const key = new Function('SCENES', 'show', `${declaration(shell, 'PARENT')}
-const current={id:SCENES.SITE},overlayStack=[];
-${method(shell, 'back')}
-${method(shell, 'onKey')}
-return onKey;`)(SCENES, scene => { f.site.unmount(); f.app.nav(scene); });
-    let prevented = false; key({ key: 'Escape', preventDefault() { prevented = true; } });
-    const before = f.sim.debug.state.timeSec; f.sim.update(1 / 30, f.state);
-    remainingGaps.push({ gap: 'Escape navigates off Site while simulation stays active',
-      observed: f.state.scene === SCENES.CONTRACTS && f.sim.active && f.sim.debug.state.timeSec > before,
-      scene: f.state.scene, active: f.sim.active, prevented,
-      beforeTimeSec: before, afterTimeSec: f.sim.debug.state.timeSec });
-  }
 } finally {
   for (const f of all) { f.sim.dispose(); f.progression.dispose(); }
   console.warn = realWarn; console.error = realError;
@@ -216,6 +208,5 @@ return onKey;`)(SCENES, scene => { f.site.unmount(); f.app.nav(scene); });
 for (const p of sourcePaths) assert.equal(hash(readFileSync(new URL(p, root), 'utf8')), hashes[p], 'Source stayed frozen: ' + p);
 console.log(JSON.stringify({ passed: cases.length - failures, failed: failures, sourceHashes: hashes,
   limits: 'Exact callback CPU execution; no shell DOM/browser/GPU or offscreen-pause acceptance.',
-  remainingGaps,
   cases: cases.map(c => ({ name: c.name, diagnostics: c.diagnostics })) }));
 process.exitCode = failures ? 1 : 0;

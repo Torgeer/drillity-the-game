@@ -187,7 +187,15 @@ test('every shipped impact configuration keeps exact baseline drive behavior',()
     try {
       sim.startHole(contract); sim.setInput('feed',energy); sim.setInput('rotation',rate); sim.setInput('flush',.5);
       sim.debug.stepFixed(800); sim.update(0);
-      return structuredClone({programme:sim.getTelemetry().programme,drill:state.drill});
+      const snapshot = structuredClone({programme:sim.getTelemetry().programme,drill:state.drill});
+      // The ram adapter adds presentation phase after this physics baseline.
+      // Validate the additive channel, then compare every pre-existing field.
+      if (factory === createDrillSim) {
+        assert.equal(Object.hasOwn(snapshot.drill, 'hammerPhase01'), true);
+        assert.equal(snapshot.drill.hammerPhase01, sim.debug.state.blowPhase);
+      }
+      delete snapshot.drill.hammerPhase01;
+      return snapshot;
     } finally {sim.dispose();}
   }
   for (const item of impacts) for (const install of ['precast-pile-350','sheet-pile-z-630']) {

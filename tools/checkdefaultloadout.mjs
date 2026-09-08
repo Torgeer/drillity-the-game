@@ -11,6 +11,7 @@ import {
 } from '../src/game/data.js';
 import { checkMethodEquipment, resolveMethod } from '../src/sim/drilling.js';
 import { createProgression } from '../src/game/progression.js';
+import { checkSampleEquipment } from '../src/game/equipment-support.js';
 
 const piling = 'driven-pile';
 const impact = 'impact-hammer-9t';
@@ -32,6 +33,10 @@ function requireSupportedDefault(select, methodId, level) {
   assert.equal(support.ok, true,
     `${methodId} level ${level}: default ${loadout.hammer} refused by runtime`);
   assert.doesNotThrow(() => resolveMethod(methodId, options));
+  if (['core', 'sonic'].includes(methodId) && level >= getMethod(methodId).unlockLevel) {
+    const sampling = checkSampleEquipment(methodId, loadout, getItem);
+    assert.equal(sampling.ok, true, `${methodId} level ${level}: refused sampling set: ${sampling.reason}`);
+  }
   return loadout;
 }
 
@@ -39,6 +44,8 @@ assert.ok(getItem(vibro).price < getItem(impact).price, 'negative control requir
 assert.equal(priceOnlyDefault(piling, MAX_LEVEL).hammer, vibro);
 assert.throws(() => requireSupportedDefault(priceOnlyDefault, piling, MAX_LEVEL),
   /refused by runtime/, 'gate must reject the actual previous selector');
+for (const id of ['core', 'sonic']) assert.throws(() => requireSupportedDefault(priceOnlyDefault, id, MAX_LEVEL),
+  /refused sampling set/, `gate must reject the old independent ${id} bay selector`);
 
 const catalogueBefore = JSON.stringify(ITEMS);
 let selections = 0;
@@ -56,7 +63,9 @@ for (const method of METHODS) {
       } else {
         assert.equal(loadout[slot], null);
       }
-      if (method.id !== piling || slot !== 'hammer') {
+      const changedSampleSlot = method.id === 'core' && ['bit', 'rod'].includes(slot)
+        || method.id === 'sonic' && ['bit', 'rod', 'casing'].includes(slot);
+      if ((method.id !== piling || slot !== 'hammer') && !changedSampleSlot) {
         assert.equal(loadout[slot], previous[slot], `${method.id}/${slot} level ${level} unchanged`);
       }
     }
@@ -72,7 +81,8 @@ assert.deepEqual(defaultLoadoutFor('no-such-method', MAX_LEVEL), {});
 assert.equal(defaultLoadoutFor(piling).hammer, null, 'omitted level retains level-one semantics');
 assert.equal(JSON.stringify(ITEMS), catalogueBefore, 'catalogue, prices, and stats stay unchanged');
 
-// A suggestion is not consent to replace an explicitly selected owned hammer.
+// A suggestion must not erase an owned hammer retained by an older save. Static
+// catalogue compatibility remains separate from the public fit/start support guard.
 const state = createGameState();
 state.player.level = MAX_LEVEL;
 state.player.money = 250000;
@@ -80,7 +90,7 @@ state.garage.rigId = 'piling-leader';
 state.garage.owned = [impact, vibro];
 state.garage.loadout.hammer = vibro;
 const before = structuredClone(state);
-assert.equal(canEquip(state, 'hammer', vibro).ok, true, 'manual compatibility is preserved');
+assert.equal(canEquip(state, 'hammer', vibro).ok, true, 'static bay/method compatibility is preserved');
 assert.equal(defaultLoadoutFor(piling, state.player.level).hammer, impact);
 assert.deepEqual(state, before, 'query does not equip, purchase, or mutate existing savings');
 assert.equal(itemsForMethod(piling, { level: MAX_LEVEL, slot: 'hammer' }).some(item => item.id === vibro), true,
@@ -96,9 +106,11 @@ try {
   assert.equal(state.garage.loadout.hammer, impact, 'auto-fit chooses supported owned impact');
   assert.deepEqual(state.garage.owned, before.garage.owned, 'auto-fit retains owned vibro');
   assert.equal(state.player.money, before.player.money, 'auto-fit makes no purchase');
-  assert.equal(progression.equip('hammer', vibro).ok, true, 'manual fitting remains available');
-  assert.equal(state.garage.loadout.hammer, vibro);
-  assert.equal(checkMethodEquipment(piling, { hammerId: state.garage.loadout.hammer }).ok, false);
+  const fittedImpact = structuredClone(state), refused = progression.equip('hammer', vibro);
+  assert.equal(refused.ok, false, 'public fitting refuses the unimplemented programme');
+  assert.equal(refused.code, 'unsupported-piling-hammer');
+  assert.deepEqual(state, fittedImpact, 'refused fit changes neither equipped impact, ownership nor money');
+  assert.equal(checkMethodEquipment(piling, { hammerId: state.garage.loadout.hammer }).ok, true);
 
   state.garage.owned = [vibro];
   state.garage.loadout.hammer = null;
@@ -108,14 +120,18 @@ try {
   assert.deepEqual(state.garage.owned, [vibro]);
   assert.equal(state.player.money, before.player.money);
 
-  // No supported owned replacement exists: retain explicit equipment and the
-  // start guard's actionable refusal instead of deleting it from the save.
-  assert.equal(progression.equip('hammer', vibro).ok, true);
+  // An older save can still contain a fitted vibro. This explicit test input
+  // bypasses the new public fit API; automatic selection must not delete it.
+  state.garage.loadout.hammer = vibro;
   progression.autoLoadout(piling);
   assert.equal(state.garage.loadout.hammer, vibro);
   assert.equal(checkMethodEquipment(piling, { hammerId: state.garage.loadout.hammer }).ok, false);
+  assert.equal(progression.equip('hammer', null).ok, true, 'legacy unsupported equipment remains removable');
+  assert.equal(state.garage.loadout.hammer, null);
+  assert.deepEqual(state.garage.owned, [vibro], 'removal retains legacy ownership');
+  assert.equal(state.player.money, before.player.money, 'removal and refusal charge nothing');
 } finally {
   progression.dispose();
 }
 
-console.log(`Default loadout: PASS ${selections} method/level selections; price-only negative control rejected; auto-fit support and manual selection preserved.`);
+console.log(`Default loadout: PASS ${selections} method/level selections; piling/core/sonic price-only controls rejected; unsupported public fit refused and legacy ownership/removal preserved.`);

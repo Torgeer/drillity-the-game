@@ -21,7 +21,10 @@ const abandon=extract(site,n=>n.type==='FunctionDeclaration'&&n.id?.name==='aban
 assert.equal(nodes(site,n=>n.type==='CallExpression'&&n.callee?.object?.name==='C'&&n.callee?.property?.name==='tap'&&n.arguments[0]?.name==='pauseBtn'&&n.arguments[1]?.name==='abandonFromSite').length,1,'Native exit binds tested handler');
 const siteUnmount=extract(site,n=>n.type==='Property'&&n.method&&n.key?.name==='unmount');
 const leaveState=extract(site,n=>n.type==='VariableDeclaration'&&n.declarations.some(d=>d.id?.name==='leavePending'));
+const actionState=extract(site,n=>n.type==='VariableDeclaration'&&n.declarations.some(d=>d.id?.name==='actionEpoch'));
+const invalidateActions=extract(site,n=>n.type==='FunctionDeclaration'&&n.id?.name==='invalidateActionOutcomes');
 const siteFactory=new Function('app','SCENES','EVENTS',`const ctx=app.ctx,state=ctx.state;${leaveState}
+${actionState};${invalidateActions};
 const say=(...a)=>app.notices.push(a),clearAlert=()=>{},resetWell=()=>{},resetProgramme=()=>{};
 ${abandon};return {leave:abandonFromSite,unmount:({${siteUnmount}}).unmount};`);
 const buttonSource=extract(results,n=>n.type==='VariableDeclaration'&&n.declarations.some(d=>d.id?.name==='againBtn'));

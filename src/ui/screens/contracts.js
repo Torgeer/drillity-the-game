@@ -40,15 +40,7 @@ export function createContractsScreen(app) {
   let cardViews = [], detailView = null;
   const previewErrors = new WeakSet();
 
-  // Shared tap handles pointer/keyboard events. Also accept the native click
-  // used by assistive technology; ordinary pointer clicks already ran on tap.
-  function action(options) {
-    const button = C.Button(options);
-    button.addEventListener('click', (event) => {
-      if (event.detail === 0 && !button.disabled) options.onTap?.(event);
-    });
-    return button;
-  }
+  const action = (options) => C.Button(options);
   const methodStrip = C.h('div.contracts-board__filter-group', { role: 'group', 'aria-label': 'Method' });
   const regionStrip = C.h('div.contracts-board__filter-group', { role: 'group', 'aria-label': 'Region' });
   const filterSummary = C.h('summary.contracts-board__filter-toggle', { text: 'Filters' });
@@ -68,9 +60,6 @@ export function createContractsScreen(app) {
     right: C.h('span.shead__spacer'),
   });
   const headerSub = header.querySelector('.shead__s');
-  header.querySelector('.shead__back')?.addEventListener('click', (event) => {
-    if (event.detail === 0) app.nav(SCENES.MENU);
-  });
   // One scroller keeps expanded filters from squeezing the job list to zero.
   const el = C.h('div.contracts-board.scroll', header,
     C.h('div.contracts-board__controls', sortControl, filters, reset), list);
@@ -134,7 +123,6 @@ export function createContractsScreen(app) {
   function filterChip(label, id, active, onTap, count) {
     const chip = C.Chip({ label, active, onTap, count });
     chip.dataset.filterId = id;
-    chip.addEventListener('click', (event) => { if (event.detail === 0) onTap(); });
     return chip;
   }
   function buildFilters() {
@@ -376,20 +364,9 @@ export function createContractsScreen(app) {
       onClose: () => { if (detailView?.sheet === sheet) detailView = null; } });
     detailView = { contract: c, refresh, sheet }; refresh(initialCheck);
     sheet.el.classList.add('contracts-detail'); sheet.returnFocus = opener;
-    sheet.el.querySelector('.sheet__x')?.addEventListener('click', (event) => {
-      if (event.detail === 0) sheet.close();
-    });
-    const dialog = sheet.el.querySelector('[role="dialog"]');
-    dialog.addEventListener('keydown', (event) => {
-      if (event.key !== 'Tab') return;
-      const controls = [...dialog.querySelectorAll('button:not([disabled]), [href], input, select, textarea, [tabindex="0"]')];
-      const first = controls[0], last = controls[controls.length - 1];
-      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
-      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
-    });
     requestAnimationFrame(() => {
       if (!sheet.el.isConnected) return;
-      column.resize(44, 196, app.viewport.dpr); sheet.el.querySelector('.sheet__x')?.focus();
+      column.resize(44, 196, app.viewport.dpr);
     });
   }
 

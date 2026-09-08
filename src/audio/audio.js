@@ -6758,6 +6758,9 @@ export function createAudio(ctx) {
   function ingest(srcObj) {
     if (!srcObj) return;
     for (let i = 0; i < TEL_KEYS.length; i++) telWrite(TEL_KEYS[i], srcObj[TEL_KEYS[i]]);
+    // Pausing preserves the physical attempt; continuous drilling voices use
+    // operation state, so they must idle until the controls are available again.
+    if (srcObj.paused === true) tel.active = false;
     // Alias pass. The canonical spelling always wins: an alias is only read if
     // the field it maps to was not written above, which is why this loop runs
     // second and checks for undefined on the SOURCE object, not on tel.

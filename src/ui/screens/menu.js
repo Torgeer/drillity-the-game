@@ -4,6 +4,8 @@
  */
 import { SCENES, EVENTS } from '../../core/contract.js';
 import { roleAt, regionInfo, methodInfo } from './catalog.js';
+import { createSaveNotice } from '../save-status.js';
+import { xpDisplay } from '../xp-display.js';
 
 export function createMenuScreen(app) {
   const { C, state, fmtMoney } = app;
@@ -24,8 +26,9 @@ export function createMenuScreen(app) {
 
   const pcard = C.h('div.panel.pcard',
     ring.el,
-    C.h('div.pcard__id', nameEl, roleEl, statsEl),
+    C.h('div.pcard__id', nameEl, roleEl),
     C.h('div.pcard__money', moneyEl, C.h('span.label', { text: 'Balance' })),
+    statsEl,
   );
 
   /* ── Navigation ───────────────────────────────────────────────────────── */
@@ -65,18 +68,21 @@ export function createMenuScreen(app) {
     },
   });
 
+  let menuEl;
+  const settingsSaveNotices = new Set();
+  const saveNotice = createSaveNotice(app, (visible) => menuEl?.classList.toggle('menu--save-notice', visible));
+  const footer = C.h('div.menu__foot', saveNotice.el, pcard, nav,
+    C.h('p.menu__ver', { text: 'v1.0' }));
   const el = C.h('div.menu',
     C.h('div.menu__hero', { style: { position: 'relative' } },
       heroScrim,
       C.Wordmark({ size: 50, tagline: true }),
       C.h('p.menu__tag', { text: 'The Game' }),
     ),
-    C.h('div.menu__foot',
-      pcard,
-      nav,
-      C.h('p.menu__ver', { text: 'v1.0' }),
-    ),
+    footer,
   );
+  menuEl = el;
+  el.classList.toggle('menu--save-notice', !saveNotice.el.hidden);
 
   /* ── Settings sheet ───────────────────────────────────────────────────── */
   function openSettings() {
@@ -90,6 +96,9 @@ export function createMenuScreen(app) {
       app.ctx.progression?.requestSave?.();
     }
     const body = C.h('div', { style: { display: 'flex', 'flex-direction': 'column', gap: '20px' } });
+    const settingsSaveNotice = createSaveNotice(app);
+    settingsSaveNotices.add(settingsSaveNotice);
+    body.appendChild(settingsSaveNotice.el);
 
     body.appendChild(C.h('div',
       C.h('p.label', { text: 'Graphics quality' }),
@@ -142,7 +151,10 @@ export function createMenuScreen(app) {
       ),
     ));
 
-    const sh = app.sheet({ title: 'Settings', sub: 'Drillity I The Game', body });
+    const sh = app.sheet({ title: 'Settings', sub: 'Drillity I The Game', body, onClose() {
+      settingsSaveNotice.destroy();
+      settingsSaveNotices.delete(settingsSaveNotice);
+    } });
     return sh;
   }
 
@@ -192,7 +204,10 @@ export function createMenuScreen(app) {
   /* ── Live sync ────────────────────────────────────────────────────────── */
   function refresh() {
     const p = state.player || {};
-    const lvl = p.level || 1;
+    const xpp = xpDisplay(app, p.xp, p.level);
+    // XP notifications precede the stored level update. Read both the label
+    // and the fraction from the same curve result during that transition.
+    const lvl = xpp.level;
     nameEl.textContent = p.name || 'Rookie';
     // No ladder means game/data.js is not mounted. Say so rather than
     // inventing a job title for the player.
@@ -203,7 +218,12 @@ export function createMenuScreen(app) {
        that ratio held this ring at a full circle from level 2 onward. */
     // `frac` is null when no system owns an XP curve: an empty ring, not a
     // full one drawn against a denominator the shell used to invent.
-    ring.setValue(app.xpProgress(p.xp, lvl).frac ?? 0);
+    const atLevelCap = xpp.capped;
+    ring.setValue(xpp.frac ?? 0);
+    ring.el.setAttribute('aria-label', atLevelCap
+      ? `Level ${xpp.level}: maximum level reached`
+      : xpp.frac === null ? 'Experience progress unavailable' : 'Experience to next level');
+    if (atLevelCap && role) roleEl.textContent = `${role.title} \u00b7 Max level`;
     moneyRoll.to(p.money || 0);
 
     const rig = state.garage?.rigId;
@@ -229,6 +249,7 @@ export function createMenuScreen(app) {
 
   return {
     el,
+    notificationHost: footer,
     mount() {
       moneyRoll.setInstant(true);
       refresh();
@@ -245,5 +266,10 @@ export function createMenuScreen(app) {
     onRegion() { refresh(); },
     onRig() { refresh(); },
     resize() {},
+    destroy() {
+      saveNotice.destroy();
+      for (const notice of settingsSaveNotices) notice.destroy();
+      settingsSaveNotices.clear();
+    },
   };
 }

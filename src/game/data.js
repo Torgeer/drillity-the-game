@@ -27,7 +27,7 @@
  */
 
 import { GROUND, makeRandom, clamp } from '../core/contract.js';
-import { checkEquipmentSupport } from './equipment-support.js';
+import { checkEquipmentSupport, checkSampleEquipment } from './equipment-support.js';
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Freeze helper — every exported table is deeply immutable.
@@ -802,7 +802,7 @@ export const METHODS = deepFreeze([
     // for the cages, an auger cleaner. None of that is grass and spruce.
     archetypes: ['urban-plot', 'infrastructure-corridor'],
     nominalRop: 25, nominalDia: 600, rodLength: 35, threadFamily: 'Kelly-box / claw coupling',
-    sectionMode: 'vertical', primaryToolSlot: 'bit', scoredOn: 'metres drilled',
+    sectionMode: 'vertical', primaryToolSlot: 'bit', scoredOn: 'pile continuity and concrete supply',
   },
   {
     /* METHOD_IDS.md. Ground support is permanent, continuous and legally
@@ -936,7 +936,7 @@ export const METHODS = deepFreeze([
     // sourced ground cap is soft: it is not a quarry or a pit machine.
     archetypes: ['urban-plot', 'infrastructure-corridor'],
     nominalRop: 12, nominalDia: 750, rodLength: 30, threadFamily: 'Kelly-box / claw coupling',
-    sectionMode: 'vertical', primaryToolSlot: 'bit', scoredOn: 'metres drilled',
+    sectionMode: 'vertical', primaryToolSlot: 'bit', scoredOn: 'pile continuity and concrete supply',
   },
   {
     /* METHOD_IDS.md. The face advances horizontally, one blast round at a time,
@@ -997,7 +997,7 @@ export const METHODS = deepFreeze([
     // pad or on a deck.
     archetypes: ['infrastructure-corridor', 'urban-plot'],
     nominalRop: 12, nominalDia: 300, rodLength: 4.6, threadFamily: 'HDD box/pin / API IF',
-    sectionMode: 'profile', primaryToolSlot: 'bit', scoredOn: 'metres drilled',
+    sectionMode: 'profile', primaryToolSlot: 'bit', scoredOn: 'pilot alignment and pullback quality',
   },
   {
     /* METHOD_IDS.md. Rings and fans of long holes drilled out from a drive, and
@@ -1064,7 +1064,7 @@ export const METHODS = deepFreeze([
     // does not have.
     archetypes: ['urban-plot', 'infrastructure-corridor', 'tunnel-portal'],
     nominalRop: 4, nominalDia: 1200, rodLength: 3.0, threadFamily: 'HDI multi-tube box/pin / HP swivel',
-    sectionMode: 'vertical', primaryToolSlot: 'bit', scoredOn: 'metres drilled',
+    sectionMode: 'vertical', primaryToolSlot: 'bit', scoredOn: 'column continuity and spoil return',
   },
   {
     id: 'raise-boring', name: 'Raise Boring', shortName: 'Raise Bore', unlockLevel: 52,
@@ -1555,21 +1555,29 @@ const ITEMS_BITS = [
   // Core bits
   it({ id: 'bit-core-bq-surf', name: 'BQ Surface-Set Core Bit', category: CAT.coreBits, slot: 'bit',
     price: 186, unlockLevel: 18, methods: ['core'], thread: 'Wireline BQ (BWL)', material: 'carbide grade K10',
+    // Diamond Driller's Technical Book, PDF p35 / printed p69, BWL row.
+    sampling: { role: 'core-bit', family: 'BQ', coreDiameterMm: 36.5, holeDiameterMm: 60.0 },
     consumable: true,
     stats: { ropMult: 1.0, wearRate: 1.2, maxUCS: 120, abrasionRes: 0.5, life: 190 },
     description: 'Natural-diamond surface set. Cheap per bit, expensive per metre: use it to finish a hole, not to start one.' }),
   it({ id: 'bit-core-nq-imp', name: 'NQ Impregnated Core Bit, Series 7', category: CAT.coreBits, slot: 'bit',
     price: 486, unlockLevel: 18, methods: ['core'], thread: 'Wireline NQ (NWL)', material: 'carbide grade K20',
+    // Diamond Driller's Technical Book, PDF p35 / printed p69, NWL row.
+    sampling: { role: 'core-bit', family: 'NQ', coreDiameterMm: 47.6, holeDiameterMm: 75.7 },
     consumable: true,
     stats: { ropMult: 1.0, wearRate: 1.0, maxUCS: 260, abrasionRes: 0.8, life: 320 },
     description: 'Medium-hard matrix, twelve waterways. The industry default: it holds gauge, keeps the core round, and tells you when it is polished.' }),
   it({ id: 'bit-core-hq-imp', name: 'HQ Impregnated Core Bit, Series 5', category: CAT.coreBits, slot: 'bit',
     price: 692, unlockLevel: 22, methods: ['core'], thread: 'Wireline HQ (HWL)', material: 'carbide grade K20',
+    // Diamond Driller's Technical Book, PDF p35 / printed p69, HWL (not HWL3).
+    sampling: { role: 'core-bit', family: 'HQ', coreDiameterMm: 63.5, holeDiameterMm: 96.0 },
     consumable: true,
     stats: { ropMult: 1.06, wearRate: 0.92, maxUCS: 300, abrasionRes: 0.86, life: 380 },
     description: 'Softer matrix for hard, unbroken rock: it wears back fast enough to keep exposing fresh diamond in granite.' }),
   it({ id: 'bit-core-pq-imp-hd', name: 'PQ Impregnated Core Bit, HD Matrix', category: CAT.coreBits, slot: 'bit',
     price: 1060, unlockLevel: 28, methods: ['core'], thread: 'Wireline PQ (PWL)', material: 'carbide grade K25',
+    // Diamond Driller's Technical Book, PDF p35 / printed p69, PWL row.
+    sampling: { role: 'core-bit', family: 'PQ', coreDiameterMm: 85.0, holeDiameterMm: 122.6 },
     duty: 'HD', tier: 'prem', consumable: true,
     stats: { ropMult: 1.1, wearRate: 0.76, maxUCS: 310, abrasionRes: 0.92, life: 520 },
     description: 'Large-diameter geotechnical coring bit. Slow, expensive, and the only thing that brings a fracture zone up in one piece.' }),
@@ -2032,27 +2040,42 @@ const ITEMS_TRENCHLESS = [
   it({ id: 'sonic-core-barrel-100', name: 'Sonic Core Barrel, 100 mm x 3 m', category: CAT.coreRods, slot: 'bit',
     price: 3840, unlockLevel: 42, methods: ['sonic'],
     thread: 'sonic box/pin RH', material: '34CrNiMo6', consumable: true,
+    // Boart Longyear Sonic Equipment and Tooling (2012), printed pp4-6 and37:
+    // separate RH core barrel and listed 3 m metric barrel variant. The 3 m
+    // sampling run limit is authored gameplay, not measured usable capacity.
+    // Usable inner capacity, exact 100 mm diameter and clearance: NOT SOURCED.
+    sampling: { role: 'sonic-barrel', threadHand: 'RH', barrelCapacityM: 3, capacityBasis: 'gameplay-run-limit' },
     stats: { ropMult: 1.0, wearRate: 1.0, maxUCS: 30, abrasionRes: 0.6, life: 900 },
     description: 'Vibrated in, then extruded into a sleeve. Continuous, undisturbed and in order, which is exactly what the laboratory is paying for.' }),
   it({ id: 'sonic-casing-150', name: 'Sonic Override Casing, 150 mm x 3 m', category: CAT.casingPipes, slot: 'casing',
     price: 2640, unlockLevel: 42, methods: ['sonic'],
     thread: 'sonic casing box/pin LH', material: '34CrNiMo6', consumable: true,
+    // Boart Longyear Sonic catalogue (2012), printed pp5,38-39: casing is LH
+    // pipe, distinct from its shoe. Exact legacy 150 mm clearance: NOT SOURCED.
+    sampling: { role: 'sonic-casing', threadHand: 'LH' },
     stats: { wearRate: 0.9, torqueCap: 16, life: 3200 },
     description: 'Follows the core barrel down and holds the hole open behind it. Resonance welds nothing, but it does fatigue steel: inspect the joints.' }),
   it({ id: 'sonic-shoe-carbide', name: 'Sonic Carbide Drive Shoe', category: CAT.casingShoes, slot: 'casing',
     price: 748, unlockLevel: 42, methods: ['sonic'],
     thread: 'sonic casing box/pin LH', material: 'carbide grade K20', consumable: true,
+    sampling: { role: 'sonic-shoe', threadHand: 'LH' },
     stats: { ropMult: 1.08, wearRate: 0.9, maxUCS: 60, abrasionRes: 0.75, life: 900 },
     description: 'Brazed carbide on the leading edge lets the casing pass a cobble instead of stalling on it.' }),
 
   it({ id: 'barrel-nq-wl', name: 'NQ Wireline Core Barrel Assembly', category: CAT.coreBarrels, slot: 'rod',
     price: 2420, unlockLevel: 18, methods: ['core'],
     thread: 'Wireline NQ (NWL)', material: '42CrMo4(V)',
+    // InHoleTools_Catalog.pdf p23: select the 1.5 m inner-tube option; its
+    // length is the maximum core/run. Diamond Technical Book PDF35/p69: NWL.
+    sampling: { role: 'wireline-barrel', family: 'NQ', coreDiameterMm: 47.6, holeDiameterMm: 75.7, barrelCapacityM: 1.5, capacityBasis: 'inner-tube-length' },
     stats: { ropMult: 1.0, wearRate: 1.0, torqueCap: 2.4, life: 9000 },
     description: 'Inner tube retrieved on the wireline without tripping the rods. The single invention that made deep exploration drilling affordable.' }),
   it({ id: 'barrel-hq-wl-hd', name: 'HQ3 Wireline Core Barrel Assembly, HD', category: CAT.coreBarrels, slot: 'rod',
     price: 3380, unlockLevel: 24, methods: ['core'],
     thread: 'Wireline HQ (HWL)', material: '34CrNiMo6', duty: 'HD', tier: 'prem',
+    // InHoleTools_Catalog.pdf p23: 1.5 m option. Diamond Technical Book PDF35/
+    // printed p69: HWL3 has a 61.1 mm core, not the 63.5 mm of plain HWL.
+    sampling: { role: 'wireline-barrel', family: 'HQ3', coreDiameterMm: 61.1, holeDiameterMm: 96.0, barrelCapacityM: 1.5, capacityBasis: 'inner-tube-length' },
     stats: { ropMult: 1.14, wearRate: 0.7, torqueCap: 3.6, life: 20000 },
     description: 'Triple-tube with a split inner: broken ground arrives at surface in the order it was in the ground.' }),
   it({ id: 'shell-nq', name: 'NQ Reaming Shell, Diamond Set', category: CAT.reamingShells, slot: 'coupling',
@@ -2936,6 +2959,7 @@ const ITEMS_NEWMETHODS = [
   it({ id: 'sonic-rod-89', name: 'Sonic Drill Rod, 88.9 mm x 3 m', category: CAT.sonicRods, slot: 'rod',
     price: 880, unlockLevel: 42, methods: ['sonic'],
     thread: 'sonic box/pin RH', material: '4140 QT, one-piece upset forged',
+    sampling: { role: 'sonic-rod', threadHand: 'RH' },
     model: 'drill-rod', consumable: true, priceSourced: false,
     needs: 'OD, ID, mass, forging method and the right-hand thread are sourced (research/13 §4.2); the price is an estimate — no western sonic rod list price is published (§5).',
     stats: { ropMult: 1.0, wearRate: 1.0, torqueCap: 8, flushRate: 1.0, life: 7000 },
@@ -2943,6 +2967,7 @@ const ITEMS_NEWMETHODS = [
   it({ id: 'sonic-rod-108-hd', name: 'Sonic Drill Rod, 108 mm x 3 m HD', category: CAT.sonicRods, slot: 'rod',
     price: 1240, unlockLevel: 45, methods: ['sonic'], duty: 'HD', tier: 'prem',
     thread: 'sonic box/pin RH', material: '4140 QT, one-piece upset forged',
+    sampling: { role: 'sonic-rod', threadHand: 'RH' },
     model: 'drill-rod', consumable: true, priceSourced: false,
     needs: 'OD, ID, end wall and mass are sourced (research/13 §4.2); the price is an estimate — see §5.',
     stats: { ropMult: 1.08, wearRate: 0.72, torqueCap: 14, flushRate: 1.2, life: 15000 },
@@ -3768,6 +3793,17 @@ const sk = (branch, id, name, maxRank, costBase, minLevel, prereq, effects, desc
   cost: Array.from({ length: maxRank }, (_, i) => costBase + i),
 });
 
+/** Old simulation/save spellings. Accounting and simulation resolve the same
+ * highest rank, capped by SKILLS; aliases are never additional purchases.
+ */
+export const SKILL_ALIASES = deepFreeze({
+  'op.steady-hand': ['op-steady-hand', 'operator-groove', 'groove-width', 'steady-hand'],
+  'op.feed-finesse': ['op-feed-control', 'operator-feed', 'feed-control'],
+  'op.rod-handler': ['op-rod-handling', 'operator-rods', 'rod-speed', 'ts-quick-change', 'toolsmith-trip', 'trip-speed'],
+  'op.jam-sense': ['op-jam-rescue', 'operator-rescue', 'jam-rescue'],
+  'ts.carbide-care': ['ts-carbide', 'toolsmith-bit-life', 'bit-life'],
+});
+
 /** @type {readonly Skill[]} */
 export const SKILLS = deepFreeze([
   /* ── Operator: feed, rotation, the groove, rod handling ──────────────── */
@@ -3776,13 +3812,13 @@ export const SKILLS = deepFreeze([
     'The sweet spot on the torque gauge is wider for you than it is for anyone else on the crew.'),
   sk('operator', 'op.feed-finesse', 'Feed Finesse', 4, 1, 4, ['op.steady-hand'],
     [{ key: 'wob.tolerance', perRank: 0.1, kind: 'mult' }, { key: 'jam.risk', perRank: -0.06, kind: 'mult' }],
-    'You feel the bit load through the lever and back off before the gauge tells you to.'),
+    'A wider feed window for percussion drilling and less pressure building toward a jam. You feel the load before the gauge tells you to.'),
   sk('operator', 'op.percussion-rhythm', 'Percussion Rhythm', 5, 1, 7, ['op.steady-hand'],
     [{ key: 'rop.mult', perRank: 0.04, kind: 'mult' }],
     'Blow rate matched to the rock instead of to the throttle. Four percent a rank, and it compounds all day.'),
   sk('operator', 'op.rod-handler', 'Rod Handler', 4, 1, 10, ['op.feed-finesse'],
     [{ key: 'rodAdd.time', perRank: -0.12, kind: 'mult' }],
-    'Rod in, thread started, clamp released — without looking. Every joint you save is a metre you drill.'),
+    'Connections, bailing runs and tool trips take less time. Rod in, thread started, clamp released — without looking.'),
   sk('operator', 'op.jam-sense', 'Jam Sense', 3, 2, 14, ['op.feed-finesse'],
     [{ key: 'jam.risk', perRank: -0.15, kind: 'mult' }, { key: 'jam.clearSpeed', perRank: 0.18, kind: 'mult' }],
     'You hear a string starting to bind a full second before it does. That second is the whole skill.'),
@@ -3811,7 +3847,7 @@ export const SKILLS = deepFreeze([
     'Enough uphole velocity to lift the cuttings, not so much that you wash the hole out. The margin is narrow.'),
   sk('toolsmith', 'ts.field-regrind', 'Field Regrind', 3, 2, 17, ['ts.thread-doctor'],
     [{ key: 'regrind.recovery', perRank: 0.12, kind: 'add' }],
-    'A grinder in the back of the pickup means a dull bit becomes a working bit in twenty minutes, on site.'),
+    'With a fitted button bit grinder, restore 12 condition points per rank in twenty in-game minutes. One field treatment per bit, between contracts; worn-out bits need replacement.'),
   sk('toolsmith', 'ts.hammer-service', 'Hammer Service', 4, 2, 22, ['ts.flush-tuning'],
     [{ key: 'hammer.life', perRank: 0.15, kind: 'mult' }, { key: 'upkeep.cost', perRank: -0.04, kind: 'mult' }],
     'Strip it, measure the wear sleeve, replace the check valve. A hammer serviced on schedule never surprises you.'),
@@ -5147,6 +5183,12 @@ const ORE_STAGES = deepFreeze([
 /** "a jumbo" but "an oil rotary" — the copy has to read like a sentence. */
 const anArticle = (word) => `${/^[aeiou]/i.test(word) ? 'an' : 'a'} ${word}`;
 
+// Contract eligibility is balance data, not a test of player-facing prose.
+// Preserve the existing tight-tolerance pool when scoring descriptions change.
+const TOLERANCE_CONTRACT_METHODS = deepFreeze([
+  'site-investigation', 'core', 'rc', 'rockbolt', 'driven-pile', 'tunnel-jumbo', 'longhole',
+]);
+
 const CONSTRAINTS = deepFreeze([
   {
     id: 'none', label: 'Straightforward', weight: 3.2,
@@ -5207,9 +5249,7 @@ const CONSTRAINTS = deepFreeze([
   },
   {
     id: 'tolerance', label: 'Tight tolerance', weight: 2.0,
-    // Only where the client is buying something other than depth. Ten of the
-    // twenty-one methods say so themselves, in `scoredOn`.
-    when: (x) => x.method.scoredOn !== 'metres drilled',
+    when: (x) => TOLERANCE_CONTRACT_METHODS.includes(x.method.id),
     qualityBonusMul: 2.0, difficultyDelta: 1, deadlineMul: 1.08,
     clause: (x) => `Nobody is counting your metres. You are paid on ${x.method.scoredOn}, and it is checked.`,
   },
@@ -6380,6 +6420,55 @@ export function familiesIn(superGroup) {
   return [...set];
 }
 
+/** Select the sampling components together; no inventory or state mutation.
+ * owned limits selection to stock actually held. best preserves autofit's
+ * preference for higher authored performance; the public default minimizes
+ * the whole legal sampling set's purchase price, not each bay in isolation.
+ */
+export function sampleLoadoutFor(methodId, level = 1, { owned = null, best = false, requiredItemId = null } = {}) {
+  if (!['core', 'sonic'].includes(methodId)) return null;
+  const held = owned == null ? null : new Set(owned);
+  const required = requiredItemId == null ? null : getItem(requiredItemId);
+  if (requiredItemId != null && (!required || !required.methods.includes(methodId))) return null;
+  const slots = methodId === 'core' ? ['bit', 'rod'] : ['bit', 'rod', 'casing'];
+  if (required && !slots.includes(required.slot)) return null;
+  const options = slots.map(slot => itemsForMethod(methodId, { level, slot })
+    .filter(item => (!held || held.has(item.id)) && (required?.slot !== slot || item.id === required.id)));
+  const sets = [];
+  function visit(index, loadout, price, performance) {
+    if (index === slots.length) {
+      if (checkSampleEquipment(methodId, loadout, getItem).ok) sets.push({ loadout, price, performance });
+      return;
+    }
+    for (const item of options[index]) visit(index + 1, { ...loadout, [slots[index]]: item.id },
+      price + item.price, performance + item.stats.ropMult * (item.stats.life || 1));
+  }
+  visit(0, {}, 0, 0);
+  sets.sort((a, b) => best ? b.performance - a.performance || a.price - b.price : a.price - b.price);
+  return sets[0]?.loadout ?? null;
+}
+
+const _sampleItemSupport = new Map();
+/** Do not sell or recommend a sample component with no supported stocked mate.
+ * The catalogue is immutable, so this check is cached outside frame updates.
+ * Ownership is deliberately irrelevant: players may purchase a set in stages.
+ */
+export function sampleItemSupport(itemId) {
+  const item = getItem(itemId);
+  if (!item?.sampling) return { ok: true };
+  if (_sampleItemSupport.has(itemId)) return _sampleItemSupport.get(itemId);
+  const methodId = item.methods.includes('core') ? 'core' : 'sonic';
+  const matching = sampleLoadoutFor(methodId, MAX_LEVEL, { requiredItemId: itemId });
+  const result = matching ? { ok: true } : {
+    ok: false, code: 'unmatched-sample-component', methodId, itemId,
+    reason: item.sampling.role === 'sonic-shoe'
+      ? 'A drive shoe alone cannot support the hole. Fit sonic override casing pipe.'
+      : `No matching ${item.sampling.family} sampling set is available in this shop. Choose the NQ bit and barrel.`,
+  };
+  _sampleItemSupport.set(itemId, Object.freeze(result));
+  return _sampleItemSupport.get(itemId);
+}
+
 /** Cheapest unlocked, runtime-supported suggestions; does not buy or equip. */
 export function defaultLoadoutFor(methodId, level = 1) {
   const method = getMethod(methodId);
@@ -6390,6 +6479,12 @@ export function defaultLoadoutFor(methodId, level = 1) {
       .filter(item => slot !== 'hammer' || checkEquipmentSupport(methodId, item.id, getItem).ok)
       .sort((a, b) => a.price - b.price);
     out[slot] = options.length ? options[0].id : null;
+  }
+  if (['core', 'sonic'].includes(methodId)) {
+    const sample = sampleLoadoutFor(methodId, level);
+    for (const slot of methodId === 'core' ? ['bit', 'rod'] : ['bit', 'rod', 'casing']) {
+      out[slot] = sample?.[slot] ?? null;
+    }
   }
   return out;
 }

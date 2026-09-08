@@ -28,6 +28,7 @@
  * finishes inside 1.2 s.
  */
 import { SCENES, EVENTS, clamp } from '../../core/contract.js';
+import { readSampleProduct } from '../../sim/sample-product.js';
 import { GRADES, roleAt, regionInfo, methodInfo } from './catalog.js';
 
 /**
@@ -510,6 +511,7 @@ export function createResultsScreen(app) {
     let payout = null;
     let costs = null;
     let net = null;
+    let recoverySupport = 0;
     let xp = null;
     const items = [];
     let hours = null;
@@ -526,11 +528,13 @@ export function createResultsScreen(app) {
       const num = (v) => (Number.isFinite(v) ? Math.round(v) : null);
       payout = num(settle.revenue);
       costs = num(settle.costs?.total);
+      recoverySupport = Number.isFinite(settle.recoverySupport) && settle.recoverySupport > 0
+        ? Math.round(settle.recoverySupport) : 0;
       /* The subtraction survives, because gross and costs are both printed
          and a player can check it by eye. It is available only when BOTH
          are: a net derived from a missing half is the same invention with an
          extra step in front of it. */
-      net = num(settle.net) ?? (payout !== null && costs !== null ? payout - costs : null);
+      net = num(settle.net) ?? (payout !== null && costs !== null ? payout - costs + recoverySupport : null);
       xp = num(settle.xp);
       hours = Number.isFinite(settle.hours) ? settle.hours : null;
       /* Each line is rounded on its own and any line rounding to zero is
@@ -610,7 +614,7 @@ export function createResultsScreen(app) {
          producer that disagrees with itself put a "grade C" caption on a
          payout that was paid at B, and this row is where that showed. */
       paidGrade: settle && settle.grade ? String(settle.grade) : null,
-      payout, costs, net, xp, items, settled: !!settle,
+      payout, costs, net, recoverySupport, xp, items, settled: !!settle,
       wearFrom, wearTo, wearUsed,
       bitsChanged: Number.isFinite(bBit?.bitsUsed) ? bBit.bitsUsed : null,
       bitName: wornBit?.name || (bit ? bit.name : null),
@@ -618,6 +622,12 @@ export function createResultsScreen(app) {
       scores, evidence,
       parKnown: !!bTime,
       groove: bGroove, hazards: bHaz, rods: bRods,
+      // Only this completion's authoritative paid receipt supplies the log.
+      sampleProduct: settle?.sampleProduct ? readSampleProduct(settle.sampleProduct, {
+        methodId: c?.methodId, runId: settle.runId, attemptId: settle.attemptId, depth: settle.depth,
+        capacityBasis: settle.sampleCapacityBasis,
+      }) : null,
+      sampleCapacityBasis: settle?.sampleCapacityBasis ?? null,
     };
   }
 
@@ -860,6 +870,25 @@ export function createResultsScreen(app) {
            the sim to publish the target it was aiming at beside the depth it
            reached. */
         const fin = (x) => (typeof x === 'number' && Number.isFinite(x) ? x : null);
+        if (sm.sampleProduct) {
+          const product = sm.sampleProduct, core = product.methodId === 'core';
+          scoreList.appendChild(C.SpecRow('Sample log', `${product.intervals.length} ${core ? 'boxed' : 'sleeved'} intervals`));
+          scoreList.appendChild(C.SpecRow('Bore interval covered', `${product.drilledDepthM.toFixed(2)} m`));
+          scoreList.appendChild(C.SpecRow(sm.sampleCapacityBasis === 'inner-tube-length'
+            ? 'Inner tube capacity' : 'Sampling run limit',
+          `${product.barrelCapacityM.toFixed(1)} m · ${sm.sampleCapacityBasis === 'inner-tube-length'
+            ? 'inner-tube length' : sm.sampleCapacityBasis === 'gameplay-run-limit'
+              ? 'game setting; usable inner capacity unmeasured' : 'basis unrecorded'}`));
+          scoreList.appendChild(C.SpecRow('Material recovery', 'Unmeasured'));
+          const rows = C.h('dl.specs');
+          for (const row of product.intervals) rows.appendChild(C.SpecRow(
+            `${core ? 'Box' : 'Sleeve'} ${row.index}`, `${row.fromM.toFixed(2)}–${row.toM.toFixed(2)} m · logged`));
+          scoreList.appendChild(C.h('div', C.h('details',
+            C.h('summary', { style: { 'min-height': '44px', cursor: 'pointer' }, text: 'View sample interval log' }), rows)));
+        } else if (['core', 'sonic'].includes(sm.contract?.methodId)) {
+          scoreList.appendChild(C.SpecRow('Sample log', 'No settled interval record'));
+          scoreList.appendChild(C.SpecRow('Material recovery', 'Unmeasured'));
+        }
         const gUp = fin(sm.groove?.uptime01);
         if (gUp !== null) {
           /* `· best ×1.74` USED TO HANG OFF THIS ROW AND IT WAS NOT A BEST.
@@ -962,6 +991,9 @@ export function createResultsScreen(app) {
              "grade C" against money paid at B. */
           C.h('span.ritem__q', { text: sm.paidGrade ? `grade ${sm.paidGrade}` : 'ungraded' }),
           C.h('span.ritem__c.is-pos', { text: fmtMoney(sm.payout) }),
+        ));
+        if (sm.recoverySupport > 0) consumeList.appendChild(ledgerRow(
+          'Recovery support', 'All boreholes complete', '+' + fmtMoney(sm.recoverySupport),
         ));
         if (sm.net !== null) consumeList.appendChild(C.h('div.ritem.ritem--total',
           C.h('span.ritem__n', { text: 'Net paid' }),

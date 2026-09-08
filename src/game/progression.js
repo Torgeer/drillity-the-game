@@ -19,17 +19,19 @@
  */
 
 import { EVENTS, clamp, createGameState } from '../core/contract.js';
-import { checkEquipmentSupport } from './equipment-support.js';
+import { checkEquipmentSupport, checkSampleEquipment } from './equipment-support.js';
+import { readSampleProduct, sampleCapacityBasisMatches } from '../sim/sample-product.js';
 import {
-  METHODS, RIGS, REGIONS, CERTS, ROLES, SKILLS, LEVELS, MAX_LEVEL, CORE_SLOTS,
+  METHODS, RIGS, REGIONS, CERTS, ROLES, SKILLS, LEVELS, MAX_LEVEL, CORE_SLOTS, CAT,
   getMethod, getRig, getItem, getRegion, getCert, getSkill,
   levelForXP, xpProgress, xpToNext, unlockedAt, roleForLevel, nextRole, canEquip,
-  defaultLoadoutFor, makeContractBoard, SKILL_BRANCHES, estimateHours, estimateHoursBreakdown,
+  defaultLoadoutFor, sampleLoadoutFor, sampleItemSupport, makeContractBoard, SKILL_BRANCHES, estimateHours, estimateHoursBreakdown,
   rigDepthCapacity, DEPTH_IS_VERTICAL,
 } from './data.js';
 import {
   settleRun, xpForContract, priceWithMarkup, resaleValue, travelCost, certCost,
-  resolveSkills, emergencyContract, wearFromRun, rigServiceCost, rigWearPerHour,
+  resolveSkills, resolveSkillRank, emergencyContract, canonicalEmergencyContract, rescueRecoverySupport,
+  wearFromRun, rigServiceCost, rigWearPerHour,
   PAY_UNITS, BOLTS_PER_DRIVE_METRE, ropBasisFactor, holeMetresFor,
   materialsCoveredSlots, ECON,
 } from './economy.js';
@@ -39,7 +41,7 @@ import {
    ═══════════════════════════════════════════════════════════════════════════ */
 export const SAVE_KEY = 'drillity.save.v1';
 export const SAVE_BACKUP_KEY = 'drillity.save.v1.bak';
-export const SAVE_VERSION = 6;
+export const SAVE_VERSION = 7;
 
 // Live delayed handlers can outlast reset/load or a replacement progression
 // instance in this page. Never reuse an identity they may still be carrying.
@@ -110,6 +112,14 @@ export const MIGRATIONS = {
     p.version = 6;
     return p;
   },
+  // v6 -> v7: field grinding is limited to one treatment per physical bit.
+  6: (p) => {
+    p.player = p.player || {};
+    p.player.career = p.player.career || {};
+    p.player.career.fieldRegrinds = {};
+    p.version = 7;
+    return p;
+  },
 };
 
 /** Fresh, empty career branch. */
@@ -123,6 +133,7 @@ function makeCareer() {
     reputationTotal: 0,
     certExpiry: {},          // certId -> day index it lapses (0 = never)
     firstTimes: {},          // methodId -> true once run
+    fieldRegrinds: {},       // itemId -> true until the current bit is replaced
     ledger: [],              // last 24 settlements, newest first
     lastRegionId: 'nordic',
     lifetimeEarned: 0,
@@ -178,7 +189,28 @@ export function createProgression(ctx) {
   /** Autosave debounce, driven by update(dt) so it stays deterministic. */
   let saveTimer = 0;
   let savePending = false;
+  let saveBlockStatus = null;
+  let loadedSaveKey = null;
   const AUTOSAVE_DELAY = 1.2;   // seconds of quiet before a write
+  const saveListeners = new Set();
+  let saveStatus = Object.freeze({ pending: false, error: null, backupFailed: false, recovered: false, blocked: null });
+
+  // UI reads a stable snapshot and subscribes to transitions, never polls
+  // storage. A failed retry leaves the same notice in place.
+  function publishSaveStatus(change = {}) {
+    const next = { ...saveStatus, ...change, pending: savePending, blocked: saveBlockStatus };
+    if (Object.keys(next).every((key) => next[key] === saveStatus[key])) return;
+    saveStatus = Object.freeze(next);
+    for (const listener of saveListeners) {
+      try { listener(saveStatus); } catch (e) { console.warn('[progression] save status listener failed', e); }
+    }
+  }
+
+  function subscribeSaveStatus(listener) {
+    saveListeners.add(listener);
+    try { listener(saveStatus); } catch (e) { console.warn('[progression] save status listener failed', e); }
+    return () => saveListeners.delete(listener);
+  }
 
   /** The run currently in progress (one accepted contract). */
   let run = null;
@@ -339,7 +371,7 @@ export function createProgression(ctx) {
 
   function skills() { return state.player.skills || {}; }
 
-  function markDirty() { savePending = true; saveTimer = 0; }
+  function markDirty() { savePending = true; saveTimer = 0; publishSaveStatus(); }
 
   function allocateIdentity() {
     const next = Math.max(identitySequence, identityHighWater) + 1;
@@ -517,6 +549,12 @@ export function createProgression(ctx) {
   function purchase(itemId, quantity = 1) {
     const item = getItem(itemId);
     if (!item) return { ok: false, reason: 'No such item', price: 0 };
+    // Catalogue compatibility does not imply a working drive programme. Keep
+    // legacy ownership intact, but never charge for a hammer the start guard refuses.
+    const support = checkEquipmentSupport('driven-pile', itemId, getItem);
+    if (!support.ok) return { ...support, price: 0 };
+    const sampling = sampleItemSupport(itemId);
+    if (!sampling.ok) return { ...sampling, price: 0 };
     if (state.player.level < item.unlockLevel) {
       return { ok: false, reason: `Requires level ${item.unlockLevel}`, price: 0 };
     }
@@ -532,6 +570,7 @@ export function createProgression(ctx) {
     // A fresh purchase restores condition; buying spares tops it up above 1
     // is not allowed — spares simply mean the slot starts full again.
     state.garage.condition[itemId] = 1;
+    delete career().fieldRegrinds[itemId];
     unlock('tool', itemId, false);
     emit(EVENTS.PURCHASE, { itemId, price, quantity: qty });
     emit(EVENTS.HAPTIC, { pattern: 'medium' });
@@ -597,6 +636,7 @@ export function createProgression(ctx) {
     const price = resaleValue(item, state.garage.condition[itemId] ?? 1, skills());
     state.garage.owned.splice(idx, 1);
     delete state.garage.condition[itemId];
+    delete career().fieldRegrinds[itemId];
     addMoney(price, `Sold ${item.name}`);
     markDirty();
     return { ok: true, reason: '', price };
@@ -616,6 +656,10 @@ export function createProgression(ctx) {
     }
     const check = canEquip(state, slot, itemId);
     if (!check.ok) return check;
+    const support = checkEquipmentSupport('driven-pile', itemId, getItem);
+    if (!support.ok) return support;
+    const sampling = sampleItemSupport(itemId);
+    if (!sampling.ok) return sampling;
     state.garage.loadout[slot] = itemId;
     if (state.garage.condition[itemId] === undefined) state.garage.condition[itemId] = 1;
     emit(EVENTS.EQUIP, { slot, itemId });
@@ -640,7 +684,16 @@ export function createProgression(ctx) {
     const method = getMethod(methodId);
     if (!method) return {};
     const owned = new Set(state.garage.owned);
+    const sampleSlots = methodId === 'core' ? ['bit', 'rod'] : methodId === 'sonic' ? ['bit', 'rod', 'casing'] : [];
+    const sample = sampleSlots.length
+      ? sampleLoadoutFor(methodId, state.player.level, { owned, best: true }) : null;
     for (const slot of method.toolSlots) {
+      if (sampleSlots.includes(slot)) {
+        // Leave an incomplete legacy/manual set intact until a complete owned
+        // replacement exists. Never buy parts or silently replace them on load.
+        if (sample) equip(slot, sample[slot]);
+        continue;
+      }
       const candidates = state.garage.owned
         .map(getItem)
         .filter((i) => i && i.slot === slot && (i.methods.length === 0 || i.methods.includes(methodId))
@@ -653,7 +706,8 @@ export function createProgression(ctx) {
     const suggested = defaultLoadoutFor(methodId, state.player.level);
     const missing = {};
     for (const slot of Object.keys(suggested)) {
-      if (!state.garage.loadout[slot] && suggested[slot] && !owned.has(suggested[slot])) {
+      if ((!state.garage.loadout[slot] || (sampleSlots.includes(slot) && !sample))
+          && suggested[slot] && !owned.has(suggested[slot])) {
         missing[slot] = suggested[slot];
       }
     }
@@ -661,7 +715,7 @@ export function createProgression(ctx) {
   }
 
   /* ── skills ──────────────────────────────────────────────────────────── */
-  function skillRank(skillId) { return (state.player.skills || {})[skillId] || 0; }
+  function skillRank(skillId) { return resolveSkillRank(state.player.skills, skillId); }
 
   function skillCost(skillId) {
     const skill = getSkill(skillId);
@@ -745,18 +799,26 @@ export function createProgression(ctx) {
 
   /**
    * The live contract board for the region the player is standing in, plus the
-   * rescue job when they are broke. Cached until `refreshContracts()`.
+   * rescue job when they are broke. `count` may request a subset of the normal
+   * five unskilled offers; Contract Book adds its purchased slots before the
+   * rescue is added. Larger/invalid requests use the normal five-offer base.
+   * Cached until the region, level or offer count changes, or a refresh.
    */
+  const normalBoardCount = 5;
   let boardCache = null;
   let boardRegion = null;
   let boardLevel = 0;
-  function getContracts(count = 5) {
+  let boardCount = 0;
+  function getContracts(count = normalBoardCount) {
     const regionId = state.world.regionId;
-    if (!boardCache || boardRegion !== regionId || boardLevel !== state.player.level) {
-      boardCache = makeContractBoard(regionId, state.player.level, ctx.rand, count)
+    const baseCount = Number.isInteger(count) && count >= 0 && count <= normalBoardCount ? count : normalBoardCount;
+    const offerCount = baseCount + Math.max(0, Math.floor(getEffects().a('contract.slots')));
+    if (!boardCache || boardRegion !== regionId || boardLevel !== state.player.level || boardCount !== offerCount) {
+      boardCache = makeContractBoard(regionId, state.player.level, ctx.rand, offerCount)
         .filter((c) => hasCerts(c.requiredCerts) || true);   // locked jobs still show, greyed
       boardRegion = regionId;
       boardLevel = state.player.level;
+      boardCount = offerCount;
     }
     return isBroke() ? [rescueContract(), ...boardCache] : boardCache;
   }
@@ -791,6 +853,13 @@ export function createProgression(ctx) {
     }
     const equipment = checkEquipmentSupport(method.id, state.garage?.loadout?.hammer, getItem);
     if (!equipment.ok) return equipment;
+    const sampling = checkSampleEquipment(method.id, state.garage?.loadout, getItem);
+    if (!sampling.ok) return sampling;
+    for (const slot of sampling.requiredSlots || []) {
+      const id = state.garage.loadout[slot], item = getItem(id);
+      if (!state.garage.owned.includes(id)) return { ok: false, reason: `Buy and fit ${item.name} before starting this sampling job.` };
+      if (state.player.level < item.unlockLevel) return { ok: false, reason: `${item.name} requires level ${item.unlockLevel}.` };
+    }
     // Read validity without expiring certificates or creating career state:
     // rejected acceptance has no accounting or selection side effects.
     const currentCareer = state.player.career;
@@ -825,7 +894,7 @@ export function createProgression(ctx) {
     // safety net. Match the current call-out's identity, workload and payout:
     // tagging an ordinary card as an emergency must not exempt it.
     const rescue = contract.emergency === true && mobilisation === 0 ? rescueContract() : null;
-    const zeroCostRescue = rescue !== null
+    const zeroCostRescue = rescue !== null && canonicalEmergencyContract(contract) !== null
       && ['id', 'methodId', 'regionId', 'targetDepth', 'holes', 'payout']
         .every(key => contract[key] === rescue[key]);
     if (!canAfford(mobilisation) && !zeroCostRescue) {
@@ -849,6 +918,11 @@ export function createProgression(ctx) {
   }
 
   function openContract(contract, rig, mobilisation) {
+    // Recovery is an accepted canonical work order, not a mutable public card.
+    // Rebuild and freeze its nested values; UI-only additions and caller edits
+    // cannot turn it into different work after the affordability exemption.
+    const canonical = mobilisation === 0 ? canonicalEmergencyContract(contract) : null;
+    if (canonical) contract = freezeContractSnapshot(canonical);
     const c = career();
     if (state.garage.rigId !== rig.id) selectRig(rig.id);
     if (mobilisation > 0) {
@@ -1026,11 +1100,23 @@ export function createProgression(ctx) {
       if (payload.runId !== run.runId || payload.attemptId !== run.attemptId) return null;
     } else if ('runId' in payload || 'attemptId' in payload) return null;
     if (!run.holePending) return null;
+    // Auger completion means reaching the specified depth. Do not turn a zero,
+    // missing or partial rescue record into paid work by inferring the target.
+    if (canonicalEmergencyContract(contract) && payload.depth !== contract.targetDepth) return null;
 
-    return changeContract(() => settleHole(contract, payload));
+    const sampling = contract.methodId === 'core' || contract.methodId === 'sonic';
+    if (sampling && !sampleCapacityBasisMatches(contract.methodId, payload.sampleCapacityBasis)) return null;
+    const sampleProduct = sampling ? readSampleProduct(payload.sampleProduct, {
+      methodId: contract.methodId, runId: run.runId, attemptId: run.attemptId,
+      depth: contract.targetDepth, capacityBasis: payload.sampleCapacityBasis,
+    }) : null;
+    // A finished bore is not a delivered sampling job until its final interval
+    // has been retrieved and handled. This does not assign recovery or quality.
+    if (sampling && (!sampleProduct || payload.depth !== contract.targetDepth)) return null;
+    return changeContract(() => settleHole(contract, payload, sampleProduct));
   }
 
-  function settleHole(contract, payload) {
+  function settleHole(contract, payload, sampleProduct = null) {
     const sounding = contract.methodId === 'site-investigation'
       && payload.breakdown?.quality?.axis === 'SOUNDING';
     const depth = sounding
@@ -1123,6 +1209,21 @@ export function createProgression(ctx) {
       }) * deliveredFraction);
     }
 
+    // Only the final full hole unlocks recovery support. Earlier receipts must
+    // prove delivery too, including after reload; legacy partial records cannot
+    // become a completed recovery job merely because their hole count survived.
+    const fullPriorHoles = canonicalEmergencyContract(contract) && run.holesDone < contract.holes
+      && Array.from({ length: run.holesDone }, (_, i) => i + 1)
+      .every(hole => career().ledger.some(entry => entry.runId === run.runId
+        && entry.contractId === contract.id && entry.hole === hole
+        && Number.isFinite(entry.depth) && entry.depth >= contract.targetDepth));
+    const recoverySupport = fullPriorHoles ? rescueRecoverySupport(contract, {
+      holesCompleted: run.holesDone + 1,
+      revenue: run.revenue + result.revenue,
+      costs: run.costs + result.costs.total,
+      mobilisation: run.mobilisation,
+    }) : 0;
+
     // Consume before publishing any money, XP or scene event. The next hole
     // is armed by the sim/no-sim DRILL_START lifecycle and survives reload.
     run.holePending = false;
@@ -1133,6 +1234,7 @@ export function createProgression(ctx) {
     // ── money ────────────────────────────────────────────────────────────
     addMoney(result.revenue, `${contract.title || 'Contract'} — hole ${run.holesDone + 1}`);
     if (result.costs.total > 0) addMoney(-result.costs.total, 'Running costs');
+    if (recoverySupport > 0) addMoney(recoverySupport, 'Call-out recovery support — all boreholes complete');
 
     // ── xp, reputation, time ─────────────────────────────────────────────
     addXP(result.xp, firstTime ? `First ${getMethod(contract.methodId)?.shortName} hole` : 'Hole complete');
@@ -1171,10 +1273,13 @@ export function createProgression(ctx) {
       of: contract.holes,
       depth,
       ...(sounding ? { targetDepth: contract.targetDepth, deliveredFraction } : {}),
+      ...(sampleProduct ? { methodId: contract.methodId, sampleProduct,
+        sampleCapacityBasis: payload.sampleCapacityBasis } : {}),
       grade,
       revenue: result.revenue,
       costs: result.costs,
-      net: result.net,
+      net: result.net + recoverySupport,
+      ...(recoverySupport > 0 ? { recoverySupport } : {}),
       xp: result.xp,
       reputation: rep,
       hours: result.hours,
@@ -1227,6 +1332,57 @@ export function createProgression(ctx) {
 
   /** Condition of a rig or item, 0..1. */
   function conditionOf(id) { return state.garage.condition[id] ?? 1; }
+
+  /**
+   * A deliberately bounded game treatment, not a physical carbide/gauge model.
+   * Recovery is authored by SKILLS; its twenty minutes are in-game work time.
+   * Only replacement resets the allowance, never another hole or a reload.
+   */
+  function fieldRegrindQuote(itemId = state.garage.loadout.bit) {
+    const item = getItem(itemId);
+    const condition = state.garage.condition[itemId] ?? 1;
+    const recovery = getEffects().a('regrind.recovery');
+    const used = career().fieldRegrinds[itemId] === true;
+    const quote = { ok: false, reason: '', itemId, condition, recovery,
+      restored: 0, after: condition, used, hours: 20 / 60 };
+    const reject = (reason) => ({ ...quote, reason });
+    if (!item || item.slot !== 'bit'
+        || ![CAT.buttonBits, CAT.dthBits].includes(item.category)
+        || !item.methods.some((id) => id === 'top-hammer' || id === 'dth')) {
+      return reject('Fit a top-hammer or DTH button bit');
+    }
+    if (!state.garage.owned.includes(itemId)) return reject('The bit must be owned');
+    if (state.garage.loadout.bit !== itemId) return reject('Fit this bit before regrinding');
+    if (!(recovery > 0)) return reject('Requires the Field Regrind skill');
+    const grinderId = state.garage.loadout.workshop;
+    if (!['ws-grinding-kit', 'ws-bit-grinder-hd'].includes(grinderId)
+        || !state.garage.owned.includes(grinderId)) {
+      return reject('Own and fit a button bit grinder in the workshop slot');
+    }
+    if (state.contract || run || state.drill?.active || changingContract) {
+      return reject('Finish the current contract before regrinding');
+    }
+    if (!Number.isFinite(condition) || condition <= 0 || condition > 1) {
+      return reject('This bit needs replacement');
+    }
+    if (used) return reject('This bit has already had its field regrind');
+    if (condition >= 1) return reject('This bit is already at full condition');
+    quote.restored = Math.min(recovery, 1 - condition);
+    quote.after = condition + quote.restored;
+    return { ...quote, ok: true };
+  }
+
+  function fieldRegrind(itemId = state.garage.loadout.bit) {
+    const quote = fieldRegrindQuote(itemId);
+    if (!quote.ok) return quote;
+    // Close the allowance and apply the benefit before any event can re-enter.
+    career().fieldRegrinds[itemId] = true;
+    state.garage.condition[itemId] = quote.after;
+    advanceTime(quote.hours);
+    emit(EVENTS.HAPTIC, { pattern: 'medium' });
+    markDirty();
+    return { ...quote, used: true };
+  }
 
   /**
    * Wear every fitted consumable by the metres just drilled, replacing any
@@ -1297,7 +1453,10 @@ export function createProgression(ctx) {
 
          `consumed` is therefore a COUNT OF TOOLS DESTROYED, which is what
          `st.bitsBurned` wants, and nothing else reads it. */
-      while (after <= 0) { consumed += 1; after += 1; }
+      while (after <= 0) {
+        consumed += 1; after += 1;
+        delete career().fieldRegrinds[id];
+      }
       after = clamp(after, 0, 1);
       state.garage.condition[id] = after;
       lines.push({ itemId: id, slot, name: item.name, from: +before.toFixed(3), to: +after.toFixed(3), wear: +wear.toFixed(3) });
@@ -1322,7 +1481,8 @@ export function createProgression(ctx) {
       revenue: run.revenue,
       costs: run.costs,
       mobilisation: run.mobilisation,
-      net: run.revenue - run.costs - run.mobilisation,
+      net: run.revenue - run.costs - run.mobilisation + (lastSettlement.recoverySupport || 0),
+      ...(lastSettlement.recoverySupport > 0 ? { recoverySupport: lastSettlement.recoverySupport } : {}),
       xp: run.xp,
       reputation: run.reputation,
       hours: +run.hours.toFixed(2),
@@ -1351,11 +1511,27 @@ export function createProgression(ctx) {
   }
 
   /**
-   * The rescue job. Always available, always net-positive with the starter
-   * loadout, so a player can never be permanently bankrupted.
+   * The home-region rescue job. Nordic is the starter home and its destination
+   * mobilisation rate is zero, including a return from another region. Saved
+   * unlock ordering must not move that home. If Nordic is absent, retain the
+   * first valid saved region and its ordinary travel charge. Final recovery
+   * support still requires the full delivery receipts described in economy.js.
    */
   function rescueContract() {
-    return emergencyContract(state.player.level, state.unlocked.regions[0] || 'nordic');
+    const regions = state.unlocked.regions;
+    const home = regions.includes('nordic') ? 'nordic' : regions.find(id => getRegion(id)) || 'nordic';
+    return emergencyContract(state.player.level, home);
+  }
+
+  function freezeContractSnapshot(contract) {
+    const freeze = value => {
+      if (value && typeof value === 'object') {
+        for (const child of Object.values(value)) freeze(child);
+        Object.freeze(value);
+      }
+      return value;
+    };
+    return freeze(JSON.parse(JSON.stringify(contract)));
   }
 
   /**
@@ -1454,12 +1630,24 @@ export function createProgression(ctx) {
    */
   function save() {
     savePending = true;
-    if (changingContract) return false;
+    if (changingContract) { publishSaveStatus(); return false; }
     const store = storage();
-    if (!store) return false;
+    if (!store) { publishSaveStatus({ error: 'storage-unavailable' }); return false; }
     let json;
-    try { json = JSON.stringify(serialise()); } catch (e) { console.error('[progression] serialise failed', e); return false; }
+    try { json = JSON.stringify(serialise()); }
+    catch (e) {
+      console.error('[progression] serialise failed', e);
+      publishSaveStatus({ error: 'serialise-failed' });
+      return false;
+    }
+    let backupFailed = saveStatus.backupFailed;
     try {
+      inspectSaveProtection(store);
+      if (saveBlockStatus) {
+        warnOnce(`[progression] automatic saving blocked: ${saveBlockStatus.reason}; existing career bytes preserved`);
+        publishSaveStatus({ error: null });
+        return false;
+      }
       const prev = store.getItem(SAVE_KEY);
       // A recovered career must not replace its good backup with the corrupt
       // primary. Backup failure also must not prevent a possible primary write.
@@ -1467,16 +1655,18 @@ export function createProgression(ctx) {
         let valid = false;
         try { valid = validPayload(JSON.parse(prev)); } catch { /* corrupt */ }
         if (valid) {
-          try { store.setItem(SAVE_BACKUP_KEY, prev); }
-          catch (e) { console.warn('[progression] backup save failed', e && e.message); }
+          try { store.setItem(SAVE_BACKUP_KEY, prev); backupFailed = false; }
+          catch (e) { backupFailed = true; console.warn('[progression] backup save failed', e && e.message); }
         }
       }
       store.setItem(SAVE_KEY, json);
       savePending = false;
       saveTimer = 0;
+      publishSaveStatus({ error: null, backupFailed });
       return true;
     } catch (e) {
       console.warn('[progression] save failed', e && e.message);
+      publishSaveStatus({ error: 'save-failed', backupFailed });
       return false;
     }
   }
@@ -1497,13 +1687,68 @@ export function createProgression(ctx) {
     return p;
   }
 
-  function readPayload(store, key) {
-    try {
-      const raw = store.getItem(key);
-      if (!raw) return null;
-      const parsed = JSON.parse(raw);
-      return validPayload(parsed) ? parsed : null;
-    } catch { return null; }
+  /**
+   * Read both save slots before any write or backup rotation. A newer build's
+   * career must never be downgraded in place, even if an older backup loads.
+   * When neither slot is usable, keep the rejected data for recovery instead
+   * of replacing the only remaining career with the fresh in-memory defaults.
+   */
+  function inspectSaveStore(store) {
+    const entries = [SAVE_KEY, SAVE_BACKUP_KEY].map((key) => {
+      let raw;
+      try { raw = store.getItem(key); }
+      catch { return { key, raw: null, parsed: null, payload: null, readFailed: true }; }
+      let parsed = null;
+      if (raw) { try { parsed = JSON.parse(raw); } catch { /* preserved below */ } }
+      return { key, raw, parsed, payload: validPayload(parsed) ? parsed : null };
+    });
+    const unread = entries.filter(({ readFailed }) => readFailed);
+    const newer = entries.filter(({ parsed }) => {
+      const version = parsed?.version;
+      return (typeof version === 'number' || typeof version === 'string')
+        && Number(version) > SAVE_VERSION;
+    });
+    const rejected = entries.filter(({ raw, payload }) => raw && !payload);
+    const protectedEntries = unread.length ? [...unread, ...newer] : newer.length ? newer
+      : !entries.some(({ payload }) => payload) ? rejected : [];
+    const block = protectedEntries.length ? Object.freeze({
+      reason: unread.length ? 'storage-read-failed' : newer.length ? 'newer-save-version' : 'unreadable-save',
+      keys: Object.freeze(protectedEntries.map(({ key }) => key)),
+      versions: Object.freeze(protectedEntries.map(({ parsed }) => parsed?.version ?? null)),
+      loadedFrom: loadedSaveKey,
+    }) : null;
+    return { entries, block };
+  }
+
+  function setSaveBlockStatus(block) {
+    // Repeated failed autosaves must not notify listeners every frame/retry.
+    if (JSON.stringify(block) !== JSON.stringify(saveBlockStatus)) saveBlockStatus = block;
+  }
+
+  function inspectSaveProtection(store) {
+    const inspected = inspectSaveStore(store);
+    let block = inspected.block;
+    if (!block && saveBlockStatus && inspected.entries.some(({ payload }) => payload)) {
+      // A readable career may have been inaccessible at startup. Never replace
+      // it with this session's defaults (or an older backup) just because an
+      // automatic retry can now read storage. Only explicit load/reset clears it.
+      const available = inspected.entries.filter(({ payload }) => payload);
+      block = Object.freeze({ reason: 'saved-career-available',
+        keys: Object.freeze(available.map(({ key }) => key)),
+        versions: Object.freeze(available.map(({ payload }) => payload.version ?? null)),
+        loadedFrom: loadedSaveKey });
+    }
+    setSaveBlockStatus(block);
+    return inspected;
+  }
+
+  /** Recheck protected data without writing, loading or discarding this session. */
+  function checkSaveProtection() {
+    const store = storage();
+    if (!store) { publishSaveStatus({ error: 'storage-unavailable' }); return false; }
+    inspectSaveProtection(store);
+    publishSaveStatus({ error: null });
+    return !saveBlockStatus;
   }
 
   // Check consumed structure before applying anything. A parseable but broken
@@ -1511,6 +1756,7 @@ export function createProgression(ctx) {
   function validPayload(p) {
     const object = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
     if (!object(p) || !object(p.player)) return false;
+    if (p.version != null && (!Number.isInteger(p.version) || p.version < 0 || p.version > SAVE_VERSION)) return false;
     for (const key of ['unlocked', 'garage', 'world', 'settings']) {
       if (p[key] != null && !object(p[key])) return false;
     }
@@ -1523,16 +1769,25 @@ export function createProgression(ctx) {
     }
     for (const [branch, keys] of [
       [p.player, ['skills', 'stats', 'career']], [p.garage, ['loadout', 'condition']],
-      [p.player.career, ['reputation', 'certExpiry', 'firstTimes']],
+      [p.player.career, ['reputation', 'certExpiry', 'firstTimes', 'fieldRegrinds']],
     ]) {
       for (const key of keys) if (branch?.[key] != null && !object(branch[key])) return false;
     }
-    for (const key of ['ledger', 'reputation', 'certExpiry', 'firstTimes']) {
+    for (const key of ['ledger', 'reputation', 'certExpiry', 'firstTimes', 'fieldRegrinds']) {
       if (p.player.career?.[key] === null) return false;
     }
+    if (p.version >= 7 && !object(p.player.career?.fieldRegrinds)) return false;
+    if (p.player.career?.fieldRegrinds
+        && Object.values(p.player.career.fieldRegrinds).some((used) => used !== true)) return false;
     for (const key of ['daysElapsed', 'hoursWorked', 'contractsDone', 'holesThisContract',
       'reputationTotal', 'lifetimeEarned', 'lifetimeSpent']) {
       if (p.player.career?.[key] !== undefined && !Number.isFinite(p.player.career[key])) return false;
+    }
+    for (const entry of p.player.career?.ledger || []) {
+      if (entry?.sampleProduct !== undefined && !readSampleProduct(entry.sampleProduct, {
+        methodId: entry.methodId, runId: entry.runId, attemptId: entry.attemptId, depth: entry.depth,
+        capacityBasis: entry.sampleCapacityBasis,
+      })) return false;
     }
     if (p.settledContracts != null && !Array.isArray(p.settledContracts)) return false;
     if (p.contract != null && (!object(p.contract) || !p.contract.id
@@ -1552,16 +1807,34 @@ export function createProgression(ctx) {
    */
   function load() {
     const store = storage();
-    if (!store) return false;
-    let payload = readPayload(store, SAVE_KEY);
-    let usedBackup = false;
-    if (!payload) { payload = readPayload(store, SAVE_BACKUP_KEY); usedBackup = !!payload; }
-    if (!payload) return false;
+    if (!store) {
+      setSaveBlockStatus(Object.freeze({ reason: 'storage-read-failed',
+        keys: Object.freeze([SAVE_KEY, SAVE_BACKUP_KEY]),
+        versions: Object.freeze([null, null]), loadedFrom: loadedSaveKey }));
+      publishSaveStatus({ error: 'storage-unavailable' });
+      return false;
+    }
     try {
+      const inspected = inspectSaveStore(store);
+      const selected = inspected.entries.find(({ payload }) => payload);
+      loadedSaveKey = selected?.key ?? null;
+      setSaveBlockStatus(inspected.block
+        ? Object.freeze({ ...inspected.block, loadedFrom: loadedSaveKey }) : null);
+      publishSaveStatus({ error: null });
+      if (saveBlockStatus) {
+        warnOnce(`[progression] career data preserved: ${saveBlockStatus.reason}; automatic saving is blocked until a compatible save is restored or New Career is chosen`);
+      }
+      if (!selected) return false;
+      const payload = selected.payload;
+      const usedBackup = selected.key === SAVE_BACKUP_KEY;
       savePending = usedBackup;
       saveTimer = 0;
+      publishSaveStatus({ error: null });
       changeContract(() => applyPayload(migrate(payload)));
       if (usedBackup) console.warn('[progression] primary save was unreadable — restored from backup');
+      // Restored-contract observers can request a save and fail. Retain that
+      // failure instead of announcing durability merely because loading worked.
+      publishSaveStatus({ recovered: usedBackup });
       return true;
     } catch (e) {
       console.error('[progression] load failed', e);
@@ -1584,6 +1857,11 @@ export function createProgression(ctx) {
     state.player.skillPoints = Number(P.skillPoints) || 0;
     state.player.stats = { ...state.player.stats, ...(P.stats || {}) };
     state.player.career = { ...makeCareer(), ...(P.career || {}) };
+    state.player.career.ledger = state.player.career.ledger.slice(0, 24).map((entry) =>
+      entry?.sampleProduct === undefined ? entry : { ...entry,
+        sampleProduct: readSampleProduct(entry.sampleProduct, { methodId: entry.methodId,
+          runId: entry.runId, attemptId: entry.attemptId, depth: entry.depth,
+          capacityBasis: entry.sampleCapacityBasis }) });
     state.player.roleId = P.roleId && ROLES.some((r) => r.id === P.roleId)
       ? P.roleId : roleForLevel(state.player.level).id;
 
@@ -1616,7 +1894,9 @@ export function createProgression(ctx) {
        version that did not carry them leaves both null, which is the same
        state a fresh career is in — so this cannot break an old save, it can
        only stop losing a new one. */
-    const saved = p.contract && typeof p.contract === 'object' ? p.contract : null;
+    let saved = p.contract && typeof p.contract === 'object' ? p.contract : null;
+    const savedRecovery = saved && canonicalEmergencyContract(saved);
+    if (savedRecovery && (p.run?.mobilisation ?? 0) === 0) saved = freezeContractSnapshot(savedRecovery);
     state.contract = saved;
     lastContract = saved;
     adoptedContract = saved;
@@ -1703,8 +1983,10 @@ export function createProgression(ctx) {
   /** Wipe the save and return to a brand-new career. */
   function reset() {
     const store = storage();
+    loadedSaveKey = null;
     if (store) {
       try { store.removeItem(SAVE_KEY); store.removeItem(SAVE_BACKUP_KEY); } catch { /* ignore */ }
+      try { setSaveBlockStatus(inspectSaveStore(store).block); } catch { /* retain existing block */ }
     }
     // Use the actual starter inventory. A second copy here drifted back to
     // the R32 percussion rod that the starter auger cannot equip.
@@ -1724,6 +2006,7 @@ export function createProgression(ctx) {
     run = null;
     emit(EVENTS.MONEY_CHANGE, { delta: 0, balance: state.player.money, reason: 'reset' });
     markDirty();
+    publishSaveStatus({ recovered: false, backupFailed: false });
     return true;
   }
 
@@ -1868,6 +2151,8 @@ export function createProgression(ctx) {
       if (run.attemptId == null || p?.runId !== run.runId || p?.attemptId !== run.attemptId) return;
       if (run.holePending) { run.holePending = false; markDirty(); }
     }));
+    // Sole career counter writer: the sim emits each clearance and the Site
+    // observes it. Multiple clearances within one attempt each remain valid.
     unsubs.push(bus.on(EVENTS.JAM_CLEARED, () => { state.player.stats.jamsCleared += 1; markDirty(); }));
     if (typeof window !== 'undefined') {
       const flush = () => { if (savePending) save(); };
@@ -1907,6 +2192,7 @@ export function createProgression(ctx) {
     if (savePending) save();
     for (const u of unsubs) { try { u(); } catch { /* ignore */ } }
     unsubs.length = 0;
+    saveListeners.clear();
   }
 
   return {
@@ -1920,7 +2206,7 @@ export function createProgression(ctx) {
     purchase, purchaseRig, purchaseCert, sell, priceOf,
 
     // garage
-    equip, selectRig, autoLoadout, serviceRig, conditionOf,
+    equip, selectRig, autoLoadout, serviceRig, conditionOf, fieldRegrindQuote, fieldRegrind,
 
     // unlocks & skills
     unlock, spendSkillPoint, canSpendSkillPoint, skillRank, skillCost, getEffects,
@@ -1937,6 +2223,11 @@ export function createProgression(ctx) {
 
     // persistence
     save, load, reset, serialise, requestSave: markDirty,
+    getSaveStatus: () => saveStatus,
+    subscribeSaveStatus,
+    acknowledgeSaveRecovery: () => publishSaveStatus({ recovered: false }),
+    getSaveBlockStatus: () => saveBlockStatus,
+    checkSaveProtection,
 
     // ui bridge — the names ui/shell.js and the screens probe for
     getSummary,

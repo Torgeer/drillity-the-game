@@ -21,6 +21,7 @@ import { Pass } from 'three/examples/jsm/postprocessing/Pass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { SMAAPass } from 'three/examples/jsm/postprocessing/SMAAPass.js';
 import { BRAND, LAYOUT, QUALITY, EVENTS, SCENES, clamp, damp, TAU } from './contract.js';
+import { createOrbitFramer, keepOrbitOutsideRig } from './orbitFraming.js';
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Stage geometry — portrait, letterboxed on anything wider or taller.
@@ -174,7 +175,9 @@ const CAMERA_MODES = {
      within 2 px of hero's 491 and the same 56 % sky share, so one exposure
      now reads the same in both. Radius 13.0 kept: base y 751 clears the
      banner by 39 px, crown y 307. NOTE cfg.pos[1] is only the pre-orbit snap
-     - cfg.orbitY is what drives the live rig; they must stay in step. */
+     - cfg.orbitY drives the authored fallback. Loaded GLBs now use their
+     measured feed envelope through orbitFramer when this composition cannot
+     fit the full turn; the fallback values still stay in step. */
   orbit:    { pos: [0.00, 2.70, 13.0], look: [0.00, 3.05, 0.00], fov: 40, drift: 0.55, stiff: 0.75, orbit: 13.0, orbitSpeed: 0.055, orbitY: 2.70 },
   menu:     { pos: [10.8, 4.20, 12.6], look: [0.00, 2.90, 0.00], fov: 34, drift: 0.42, stiff: 0.55, orbit: 16.6, orbitSpeed: 0.017, orbitY: 4.2 },
 };
@@ -1167,6 +1170,13 @@ export function createRenderer(ctx) {
 
   let trauma = 0;
   let traumaDecay = 1.6;
+  // Match the UI's effective preference: either the game or the OS can reduce
+  // motion. Drop suppressed hits so switching back cannot replay old trauma.
+  const motionQuery = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+  const reducedMotion = (state) => !!state?.settings?.reducedMotion || !!motionQuery?.matches;
+  const onMotionPreference = () => { if (reducedMotion(ctx.state)) trauma = 0; };
+  if (motionQuery?.addEventListener) motionQuery.addEventListener('change', onMotionPreference);
+  else motionQuery?.addListener?.(onMotionPreference);
   let gradeExposure = 0.52;        // env.js solve() overwrites this every solve
   let time = 0;
 
@@ -1184,6 +1194,7 @@ export function createRenderer(ctx) {
   const lookTarget = new THREE.Vector3();
   const scratch = new THREE.Vector3();
   const heroFramer = createHeroFramer();
+  const orbitFramer = createOrbitFramer();
 
   /* Metres of borehole visible in the cut.
      createRenderer runs BEFORE createGeology, so ctx.sectionCamera already
@@ -1785,23 +1796,29 @@ export function createRenderer(ctx) {
 
   function updateSurfaceCamera(dt, state) {
     const cfg = modeConfig();
-    const reduced = !!(state && state.settings && state.settings.reducedMotion);
+    const reduced = reducedMotion(state);
+    if (reduced) trauma = 0;
 
     if (focus && focus.until > 0 && time > focus.until) focus = null;
 
     const targetFov = fovForBand((focus && focus.fov) ? focus.fov : cfg.fov);
     const heroFit = !focus && mode === 'hero' ? activeHeroFit(targetFov) : null;
+    const orbitFit = !focus && cfg.orbit ? orbitFramer.fit(ctx.rig, {
+      width: bands.surface.w, height: bands.surface.h, fov: Math.min(targetFov, fovCurrent),
+      clearanceFov: Math.max(targetFov, fovCurrent),
+      radius: cfg.orbit, eyeY: cfg.orbitY, look: cfg.look, near: camera.near, far: camera.far,
+    }) : null;
     if (focus) {
       posSpring.target.copy(focus.pos);
       lookSpring.target.copy(focus.look);
     } else if (cfg.orbit) {
       orbitAngle += dt * cfg.orbitSpeed * TAU;
       posSpring.target.set(
-        Math.sin(orbitAngle) * cfg.orbit,
-        cfg.orbitY,
-        Math.cos(orbitAngle) * cfg.orbit,
+        (orbitFit?.look[0] ?? 0) + Math.sin(orbitAngle) * (orbitFit?.radius ?? cfg.orbit),
+        orbitFit?.eyeY ?? cfg.orbitY,
+        (orbitFit?.look[2] ?? 0) + Math.cos(orbitAngle) * (orbitFit?.radius ?? cfg.orbit),
       );
-      lookSpring.target.set(cfg.look[0], cfg.look[1], cfg.look[2]);
+      lookSpring.target.fromArray(orbitFit?.look ?? cfg.look);
     } else if (heroFit) {
       posSpring.target.fromArray(heroFit.position);
       lookSpring.target.fromArray(heroFit.look);
@@ -1856,6 +1873,7 @@ export function createRenderer(ctx) {
     }
 
     camera.position.copy(posSpring.value).add(drift).add(shakeOffset);
+    keepOrbitOutsideRig(camera.position, orbitFit, orbitAngle);
 
     lookTarget.copy(lookSpring.value);
     lookTarget.x += drift.x * 0.35;
@@ -1989,13 +2007,11 @@ export function createRenderer(ctx) {
   }
 
   function registerBands(dt) {
-    /* The invariant is a property of the SITE screen: it is the only place
-       where both bands describe one hole. Elsewhere the section band is
-       backdrop behind a DOM overlay, and on `orbit` / `menu` the camera
-       revolves around the world origin — pinning the origin there would
-       cancel the orbit it exists to perform. Same gate as the HUD chrome, and
-       read live rather than from `chromeScene` so it cannot lag a frame. */
-    if (!registerBandsOn || !onSiteScene()) { clearRegistration(); return; }
+    /* Align the SITE's fixed views, where both bands describe one hole.
+       Orbit/menu instead frame the complete rotating machine: shifting that
+       symmetric frustum to pin the collar would crop the fitted bounds.
+       Read scene and camera mode live so neither can lag a frame. */
+    if (!registerBandsOn || !onSiteScene() || modeConfig().orbit) { clearRegistration(); return; }
 
     const band = bands.surface;
     const sect = bands.section;
@@ -2683,6 +2699,8 @@ export function createRenderer(ctx) {
     },
 
     dispose() {
+      if (motionQuery?.removeEventListener) motionQuery.removeEventListener('change', onMotionPreference);
+      else motionQuery?.removeListener?.(onMotionPreference);
       api.endTitle();
       disposePost();
       normalMaterial.dispose();
@@ -2713,8 +2731,17 @@ export function createRenderer(ctx) {
       mode = next;
       focus = null;
       if (CAMERA_MODES[next].orbit) {
-        // enter the orbit at the nearest angle so the move stays a glide
-        orbitAngle = Math.atan2(camera.position.x, camera.position.z);
+        // Enter at the nearest angle around the measured target, including
+        // rigs whose placed center is offset from the borehole/world origin.
+        const cfg = CAMERA_MODES[next];
+        const targetFov = fovForBand(cfg.fov);
+        const fit = orbitFramer.fit(ctx.rig, {
+          width: bands.surface.w, height: bands.surface.h, fov: Math.min(targetFov, fovCurrent),
+          clearanceFov: Math.max(targetFov, fovCurrent),
+          radius: cfg.orbit, eyeY: cfg.orbitY, look: cfg.look, near: camera.near, far: camera.far,
+        });
+        orbitAngle = Math.atan2(camera.position.x - (fit?.look[0] ?? 0),
+          camera.position.z - (fit?.look[2] ?? 0));
       }
     },
 
@@ -2723,6 +2750,7 @@ export function createRenderer(ctx) {
      * small one that lands on top of it.
      */
     shake(intensity = 0.3, duration = 0.4) {
+      if (reducedMotion(ctx.state)) { trauma = 0; return; }
       trauma = clamp(trauma + clamp(intensity, 0, 1), 0, 1);
       const decay = clamp(1 / Math.max(0.08, duration), 0.5, 8);
       traumaDecay = trauma > 0.55 ? Math.min(traumaDecay, decay) : decay;

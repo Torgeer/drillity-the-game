@@ -16,8 +16,8 @@
 
 import { clamp, makeRandom } from '../core/contract.js';
 import {
-  METHODS, RIGS, ITEMS, REGIONS, CERTS, ROLES, SKILLS, LEVELS, MAX_LEVEL,
-  getMethod, getRig, getItem, getRegion, getCert, roleForLevel,
+  METHODS, RIGS, ITEMS, REGIONS, CERTS, ROLES, SKILLS, SKILL_ALIASES, LEVELS, MAX_LEVEL,
+  getMethod, getRig, getItem, getRegion, getCert, getSkill, roleForLevel,
   groundHardness, groundAbrasivity, estimateHours, estimateHoursBreakdown, makeContract,
   levelForXP, defaultLoadoutFor, MATERIAL_DIA_EXPONENT,
 } from './data.js';
@@ -211,13 +211,35 @@ export function gradeBonusMultiplier(grade) {
    `m(key)` is a multiplier (1.0 when unskilled); `a(key)` is an additive term.
    ═══════════════════════════════════════════════════════════════════════════ */
 /**
- * @param {Record<string, number>} skills  skillId -> ranks
+ * One rank rule for effects, skill-tree display, prerequisites and purchases.
+ * Saved aliases represent the same purchase, so the highest value wins.
+ * Clamp and floor before indexing an authored per-rank cost array.
  */
+function savedSkillRank(value) {
+  // A JSON rank can be an object with hostile valueOf/toString fields. Never
+  // coerce objects, arrays or booleans into purchases; numeric strings remain
+  // compatible with older saves, while nonfinite values are invalid.
+  if (typeof value !== 'number' && typeof value !== 'string') return 0;
+  const rank = Number(value);
+  return Number.isFinite(rank) ? rank : 0;
+}
+
+export function resolveSkillRank(skills, skillId) {
+  const skill = getSkill(skillId);
+  if (!skill) return 0;
+  let highest = savedSkillRank(skills?.[skillId]);
+  for (const id of SKILL_ALIASES[skillId] || []) {
+    highest = Math.max(highest, savedSkillRank(skills?.[id]));
+  }
+  return Math.floor(clamp(highest, 0, skill.maxRank));
+}
+
+/** @param {Record<string, number>} skills  skillId -> ranks */
 export function resolveSkills(skills = {}) {
   const mult = new Map();
   const add = new Map();
   for (const s of SKILLS) {
-    const ranks = clamp(Number(skills?.[s.id]) || 0, 0, s.maxRank);
+    const ranks = resolveSkillRank(skills, s.id);
     if (ranks <= 0) continue;
     for (const e of s.effects) {
       const target = e.kind === 'mult' ? mult : add;
@@ -1811,13 +1833,50 @@ export function emergencyContract(level = 1, regionId = 'nordic') {
     reputationReward: 6,
     emergency: true,
     seed: 20260903,
-    description: 'Three shallow auger boreholes for the local authority — sample off the flights, log it, backfill it. It pays for a tank of diesel and a set of teeth, and it is always there.',
+    description: `Three shallow auger boreholes for the local authority — sample off the flights, log it, backfill it. For a local call-out with no mobilisation fee, complete all three to receive at least €${ECON.brokeBelow} after running costs. Recovery support is paid on the final hole; an unfinished job receives none.`,
   });
 }
 
+/** Canonical call-out economics, allowing the board's extra display fields.
+ * Accepted recovery jobs replace the caller's object with this canonical
+ * snapshot, so additional fields cannot change their work, cost or pay basis.
+ * Read the posting level from its ID: earning XP must not change an active job.
+ */
+export function canonicalEmergencyContract(contract) {
+  if (!contract || contract.emergency !== true || typeof contract.id !== 'string') return null;
+  const match = /^ct-callout-(.+)-(\d+)$/.exec(contract.id);
+  if (!match || !getRegion(match[1])) return null;
+  const level = Number(match[2]);
+  if (!Number.isSafeInteger(level) || level < 1 || level > MAX_LEVEL) return null;
+  const expected = emergencyContract(level, match[1]);
+  const equal = (a, b) => {
+    if (a === b) return true;
+    if (!a || !b || typeof a !== 'object' || typeof b !== 'object'
+        || Array.isArray(a) !== Array.isArray(b)) return false;
+    const keys = Object.keys(b);
+    return Object.keys(a).length === keys.length && keys.every(key => equal(a[key], b[key]));
+  };
+  // Text is presentation, not the accepted economic promise. Older saved
+  // postings may retain earlier copy; all workload and accounting fields match.
+  return Object.keys(expected).every(key => ['description', 'title', 'client'].includes(key)
+    || equal(contract[key], expected[key])) ? expected : null;
+}
+
+/** Game balancing policy, not a quoted real-world subsidy or operating price.
+ * A fully delivered local call-out earns at least the existing broke-board
+ * threshold in net cash. Keep the original cost and tender lines; disclose
+ * this completion-only support separately. No partial-job or travel refund.
+ */
+export function rescueRecoverySupport(contract, { holesCompleted, revenue, costs, mobilisation } = {}) {
+  if (!canonicalEmergencyContract(contract) || holesCompleted !== contract.holes || mobilisation !== 0
+      || !Number.isFinite(revenue) || !Number.isFinite(costs) || revenue < 0 || costs < 0) return 0;
+  return Math.max(0, Math.ceil(ECON.brokeBelow - (revenue - costs)));
+}
+
 /**
- * Proof that the emergency contract recovers a broke player: run it with the
- * starter loadout, a worst-case grade and zero cash.
+ * Base-rate estimate for the emergency contract at estimated job hours.
+ * This does not execute progression's per-hole receipts, actual performance
+ * ratio or final recovery support; checkrescueviability.mjs covers that policy.
  * @returns {{net:number, revenue:number, costs:number, safe:boolean}}
  */
 export function verifySafetyNet(opts = {}) {
@@ -2060,6 +2119,8 @@ export function simulateCareer(hours = 600, opts = {}) {
     }
 
     // Nothing runnable, or the wallet is empty: take the call-out job.
+    // This balancing loop prices a whole job in settleRun. It does not execute
+    // progression's accepted full-hole receipts or its final recovery support.
     if (!best || sim.money < ECON.brokeBelow) {
       const c = emergencyContract(sim.level, 'nordic');
       const loadout = { bit: 'auger-flight-std', rod: 'rod-r32' };

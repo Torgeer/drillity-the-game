@@ -1649,7 +1649,12 @@ export function createAssets(ctx = {}) {
         setKey: (d) => `${qc(d.color)}~${q2(d.wear)}~${q2(d.dirt)}~${d.seed & 7}`,
         fallback: (d) => ({ albedo: hexRGB(d.color), rough: 0.34, metal: 0.04, ao: 1 }),
         base: (d) => new THREE.MeshPhysicalMaterial({
-          color: 0xffffff, roughness: 0.34, metalness: 0.04,
+          // The ORM pixel program below authors the final roughness/metalness,
+          // including dull dirt and exposed metal in chips. Three multiplies
+          // those channels by these scalars: the old .34/.04 reduced clean
+          // paint roughness from ~.30 to ~.10 and a .70 metal chip to .028.
+          // Use each authored channel once; paintedDark inherits this response.
+          color: 0xffffff, roughness: 1.0, metalness: 1.0,
           clearcoat: d.hero ? 0.85 - d.wear * 0.4 : 0.35,
           clearcoatRoughness: 0.08 + d.wear * 0.22,
           envMapIntensity: 1.0, sheen: 0.0,
@@ -1758,8 +1763,9 @@ export function createAssets(ctx = {}) {
                +0.0074 of albedo (measured: mean flake 0.148 x 0.05), which is
                0.9 % of a paint[0] of 0.851 — three orders below the +0.123
                saturation correction the BRAND.amberPlant note above is about.
-               Mean roughness moves 0.295 -> 0.309 before the base material's
-               0.34 multiplier, i.e. 0.100 -> 0.105 effective. */
+               The map stores final roughness, so base() uses a neutral
+               multiplier. Clean paint remains a dielectric; the chip program
+               below is the only source of exposed-metal response. */
             const drift = fbm(u * 4, v * 4, 4, 4, s + 21, 3) * 0.045;
             const chalk = sstep(0.30, 0.92, fbm01(u * 5, v * 5, 5, 5, s + 33, 3)) * wear;
             let r = paint[0] * (1 + drift);
@@ -1871,7 +1877,10 @@ export function createAssets(ctx = {}) {
         }),
         setKey: (d) => `${qc(d.color)}~${d.blue.toFixed(1)}~${d.feed}~${d.seed & 3}`,
         fallback: (d) => ({ albedo: hexRGB(d.color), rough: 0.36, metal: 1, ao: 1 }),
-        base: () => new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.36, metalness: 1.0, envMapIntensity: 1.15 }),
+        // The ORM program below authors final roughness/metalness. Three
+        // multiplies those channels by these factors; using .36 here made
+        // the default machined finish ~.13. See checksteelresponse.mjs.
+        base: () => new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1.0, metalness: 1.0, envMapIntensity: 1.15 }),
         shade: (d) => {
           const base = hexRGB(d.color);
           const s = d.seed * 977 + 5;
@@ -1918,7 +1927,8 @@ export function createAssets(ctx = {}) {
         }),
         setKey: (d) => `${qc(d.color)}~${q2(d.rust)}~${q2(d.polish)}~${d.thread ? 1 : 0}~${d.seed & 3}`,
         fallback: (d) => ({ albedo: hexRGB(d.color), rough: 0.48, metal: 0.95, ao: 1 }),
-        base: () => new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.48, metalness: 0.95, envMapIntensity: 1.05 }),
+        // Preserve the authored polished/rusted/thread roughness in ORM.
+        base: () => new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1.0, metalness: 1.0, envMapIntensity: 1.05 }),
         shade: (d) => {
           const base = hexRGB(d.color);
           const s = d.seed * 613 + 29;
@@ -2040,7 +2050,9 @@ export function createAssets(ctx = {}) {
           wear: clamp01(p.wear === undefined ? 0.12 : p.wear) }),
         setKey: (d) => `${qc(d.color)}~${q2(d.wear)}~${d.seed & 3}`,
         fallback: (d) => ({ albedo: hexRGB(d.color), rough: 0.045, metal: 1, ao: 1 }),
-        base: () => new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.045, metalness: 1.0, envMapIntensity: 1.55 }),
+        // Multiplying ORM by .045 put the whole default texture below the
+        // installed Three shader's .0525 floor, erasing roughness variation.
+        base: () => new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1.0, metalness: 1.0, envMapIntensity: 1.55 }),
         shade: (d) => {
           const base = hexRGB(d.color);
           const s = d.seed * 787 + 7;

@@ -32,6 +32,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { buildTool, TOOL_UTILS, disposeToolLibrary } from './tools.js';
+import { ease } from '../core/motion.js';
 
 const {
   part, group, G, material, mergeStatic, disposeObject,
@@ -7752,6 +7753,7 @@ export function createRigSystem(ctx) {
     b.root.visible = true;
     // land the machine in its working pose
     const dyn = b.dyn;
+    if (dyn.impactRam) dyn.impactRam.node.position.copy(dyn.impactRam.rest);
     mastAnim = 1;
     outrigAnim = 1;
     driveOffset = 0;
@@ -8385,6 +8387,24 @@ export function createRigSystem(ctx) {
      A hydraulic hammer lifts a ram block and drops it on the drive cap. Blow
      rate and energy are both adjustable and both matter: you start soft and
      finish hard, and the set per blow is the whole measurement. */
+  function updateImpactRam(dyn, d) {
+    const H = dyn.impactRam;
+    if (!H) return;
+    H.node.position.copy(H.rest);
+    if (methodId !== 'driven-pile' || !d?.active || d.programme !== 'driven-pile'
+      || (d.phase !== 'drilling' && d.phase !== 'take-set')
+      || !Number.isFinite(d.hammerPhase01) || d.hammerPhase01 < 0 || d.hammerPhase01 >= 1
+      || !Number.isFinite(d.hammerDropM) || d.hammerDropM <= 0) return;
+    // The simulator owns phase, counted impacts and drop. No render-clock
+    // accumulator: a frozen sim frame holds exactly the same ram pose.
+    // Blender-authored reveal/dismiss curves shape a presentation lift/fall,
+    // split evenly within that cycle; this is not a hydraulic waveform model.
+    const phase = d.hammerPhase01;
+    const lift = phase < 0.5 ? ease('reveal', phase * 2)
+      : 1 - ease('dismiss', (phase - 0.5) * 2);
+    H.node.position[H.axis] += lift * Math.min(H.strokeM, d.hammerDropM);
+  }
+
   function updatePileHammer(dyn, dt, drilling, d) {
     const H = dyn.pileHammer;
     if (!H) return;
@@ -9302,6 +9322,7 @@ export function createRigSystem(ctx) {
         updateLeaderRopes(dyn);
         updateTrackSpread(dyn, outrigAnim);
       }
+      updateImpactRam(dyn, d);
       if (dyn.spudder) { updateSpudder(dyn, dt, drilling); updateSpudRope(dyn); }
       if (dyn.sptHammer) updateSPTHammer(dyn, dt, drilling, d);
       if (dyn.cptPush) updateCPTPush(dyn, dt, drilling, d);

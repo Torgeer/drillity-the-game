@@ -201,8 +201,12 @@ const REGIONS = {
     turbidity: 6.6, rayleigh: 1.70, mie: 0.0100, mieG: 0.780,
     skyTint: '#D6D2C2', ground: '#B79A66', hemi: 0.35,
     rim: '#EDC478', rimIntensity: 0.19, bounce: 0.36,
-    // 0.0072 -> 0.0062: a dune horizon still needs depth behind it.
-    fog: '#E4CFA0', fogDensity: 0.0062,
+    // Clear-day authoring value, not a measured atmospheric constant. The
+    // 67.7 m derrick's hero camera sees its base at view depth 187 m; 0.0062
+    // replaces 74% of its colour with haze before the grade. 0.0032 retains
+    // 70% of that near-field colour and still gives 81% haze at 400 m.
+    // Keep the established weather density for fog/rain/snow/overcast.
+    fog: '#E4CFA0', fogDensity: 0.0062, clearFogDensity: 0.0032,
     envIntensity: 0.56, exposure: 0.82,
     cloud: { coverage: 0.09, opacity: 0.30, scale: 0.00038, speed: 12, height: 1400 },
     grade: { saturation: 1.06, split: 0.66, vignette: 0.48 },
@@ -2511,7 +2515,9 @@ export function createEnvironment(ctx) {
     fogColor.set(recipe.fog);
     fogColor.lerp(_scratchColor.copy(sunColor), golden * 0.42);
     fogColor.multiplyScalar(lerp(0.16, 1, dayFactor));
-    const density = recipe.fogDensity * weather.fog * lerp(1.7, 1, dayFactor);
+    const baseFogDensity = weatherName === 'clear'
+      ? (recipe.clearFogDensity ?? recipe.fogDensity) : recipe.fogDensity;
+    const density = baseFogDensity * weather.fog * lerp(1.7, 1, dayFactor);
     if (scene.fog) {
       scene.fog.color.copy(fogColor);
       scene.fog.density = density;

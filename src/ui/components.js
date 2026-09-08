@@ -153,15 +153,20 @@ export function setHapticSink(fn) { hapticFn = fn; }
 export function haptic(pattern = 'light') { if (hapticFn) hapticFn(pattern); }
 
 /**
- * Attaches a pointer tap. Cancels if the pointer travels (so it never fights
- * a scroll). Returns a disposer.
+ * Attaches a pointer, keyboard or assistive-technology tap. Cancels if the
+ * pointer travels (so it never fights a scroll). Returns a disposer.
  */
 export function tap(node, fn, opts = {}) {
   const { pattern = 'light', slop = 12 } = opts;
   let id = null, sx = 0, sy = 0, moved = false;
+  const disabled = () => node.hasAttribute('disabled') || node.classList.contains('is-disabled');
+  const activate = (e) => {
+    if (disabled()) return;
+    haptic(pattern); fn(e);
+  };
 
   const down = (e) => {
-    if (node.hasAttribute('disabled') || node.classList.contains('is-disabled')) return;
+    if (disabled()) return;
     if (id !== null) return;
     id = e.pointerId; sx = e.clientX; sy = e.clientY; moved = false;
     node.classList.add('is-pressed');
@@ -177,17 +182,21 @@ export function tap(node, fn, opts = {}) {
     node.classList.remove('is-pressed');
     id = null;
     if (moved) return;
-    if (node.hasAttribute('disabled') || node.classList.contains('is-disabled')) return;
-    haptic(pattern);
-    fn(e);
+    activate(e);
   };
   const cancel = (e) => { if (e.pointerId === id) { id = null; node.classList.remove('is-pressed'); } };
   const key = (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      if (node.hasAttribute('disabled') || node.classList.contains('is-disabled')) return;
-      haptic(pattern); fn(e);
+      activate(e);
     }
+  };
+  const click = (e) => {
+    // Pointer gestures already activate on pointerup (or were cancelled by
+    // movement). Keyboard defaults are prevented above. A click without a
+    // pointer click-count is the native activation used by assistive tools
+    // and HTMLElement.click(), which may send no pointer/key events at all.
+    if (e.detail === 0) activate(e);
   };
 
   node.addEventListener('pointerdown', down);
@@ -196,6 +205,7 @@ export function tap(node, fn, opts = {}) {
   node.addEventListener('pointercancel', cancel);
   node.addEventListener('lostpointercapture', cancel);
   node.addEventListener('keydown', key);
+  node.addEventListener('click', click);
   if (!node.hasAttribute('tabindex') && node.tagName !== 'BUTTON') node.setAttribute('tabindex', '0');
 
   return () => {
@@ -205,6 +215,8 @@ export function tap(node, fn, opts = {}) {
     node.removeEventListener('pointercancel', cancel);
     node.removeEventListener('lostpointercapture', cancel);
     node.removeEventListener('keydown', key);
+    node.removeEventListener('click', click);
+    id = null; node.classList.remove('is-pressed');
   };
 }
 
@@ -935,13 +947,15 @@ export function StratumColumn(o = {}) {
 /**
  * @param {object} o
  *   label, short, value 0..1, kind ('feed'|'rot'|'flush'), detents:number,
- *   onChange(v), onCommit(v)
+ *   onChange(v), onCommit(v), disabled, disabledReason
  */
 export function VSlider(o = {}) {
   let value = clamp01(o.value ?? 0.5);
   const detents = o.detents || 10;
   let lastDetent = Math.round(value * detents);
   let pid = null;
+  let disabled = !!o.disabled, disabledReason = o.disabledReason || '';
+  let label = o.label || '';
 
   /* ONE ELEMENT PER PAINTED THING.
      This control used to stack four marks for one value: the fill area, a
@@ -973,6 +987,7 @@ export function VSlider(o = {}) {
     el.setAttribute('aria-valuenow', String(Math.round(value * 100)));
   }
   function apply(v, fromUser) {
+    if (fromUser && disabled) return;
     const nv = clamp01(v);
     if (nv === value) return;
     value = nv;
@@ -990,7 +1005,7 @@ export function VSlider(o = {}) {
   }
 
   const down = (e) => {
-    if (pid !== null) return;
+    if (disabled || pid !== null) return;
     pid = e.pointerId;
     track.setPointerCapture?.(pid);
     el.classList.add('is-active');
@@ -998,13 +1013,18 @@ export function VSlider(o = {}) {
     apply(fromEvent(e), true);
     e.preventDefault();
   };
-  const move = (e) => { if (e.pointerId !== pid) return; apply(fromEvent(e), true); e.preventDefault(); };
-  const up = (e) => {
-    if (e.pointerId !== pid) return;
-    try { track.releasePointerCapture(pid); } catch (_) { /* already released */ }
+  const move = (e) => { if (disabled || e.pointerId !== pid) return; apply(fromEvent(e), true); e.preventDefault(); };
+  function releaseDrag() {
+    if (pid !== null) {
+      try { track.releasePointerCapture(pid); } catch (_) { /* already released */ }
+    }
     pid = null;
     el.classList.remove('is-active');
-    o.onCommit && o.onCommit(value);
+  }
+  const up = (e) => {
+    if (e.pointerId !== pid) return;
+    releaseDrag();
+    if (!disabled) o.onCommit && o.onCommit(value);
   };
 
   track.addEventListener('pointerdown', down);
@@ -1012,24 +1032,53 @@ export function VSlider(o = {}) {
   track.addEventListener('pointerup', up);
   track.addEventListener('pointercancel', up);
 
-  el.addEventListener('keydown', (e) => {
+  const keydown = (e) => {
+    if (disabled) {
+      if (['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLeft', 'Home', 'End'].includes(e.key)) e.preventDefault();
+      return;
+    }
     const step = e.shiftKey ? 0.2 : 0.05;
     if (e.key === 'ArrowUp' || e.key === 'ArrowRight') { apply(value + step, true); e.preventDefault(); }
     else if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') { apply(value - step, true); e.preventDefault(); }
     else if (e.key === 'Home') { apply(0, true); e.preventDefault(); }
     else if (e.key === 'End') { apply(1, true); e.preventDefault(); }
-  });
+  };
+  el.addEventListener('keydown', keydown);
+
+  function paintAvailability() {
+    el.classList.toggle('is-locked', disabled);
+    el.setAttribute('aria-disabled', String(disabled));
+    el.setAttribute('aria-label', disabled && disabledReason ? `${label} — ${disabledReason}` : label);
+  }
 
   paint();
+  paintAvailability();
   return {
     el,
     get value() { return value; },
+    get disabled() { return disabled; },
+    // Authoritative state can still refresh a disabled control; player input cannot.
     set(v) { apply(v, false); },
+    setLabel(next) {
+      if (label === next) return;
+      label = next;
+      paintAvailability();
+    },
+    setDisabled(next, reason = '') {
+      const nextDisabled = !!next, nextReason = nextDisabled ? reason : '';
+      if (disabled === nextDisabled && disabledReason === nextReason) return;
+      disabled = nextDisabled; disabledReason = nextReason;
+      if (disabled) releaseDrag();
+      // Keep the slider focusable so its method-specific reason can be read.
+      paintAvailability();
+    },
     dispose() {
+      releaseDrag();
       track.removeEventListener('pointerdown', down);
       track.removeEventListener('pointermove', move);
       track.removeEventListener('pointerup', up);
       track.removeEventListener('pointercancel', up);
+      el.removeEventListener('keydown', keydown);
     },
   };
 }

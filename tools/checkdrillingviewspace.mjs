@@ -10,6 +10,7 @@ import { createHash } from 'node:crypto';
 import { resolve, relative, dirname, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ENUMERATE } from '../.hudqa/enumerate.js';
+import { parseAst } from 'vite';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const args=process.argv.slice(2), option=(n,d)=>args.includes(n)?args[args.indexOf(n)+1]:d;
 const tag=option('--tag','current'),baseline=option('--baseline','a3fb994'),out=resolve(root,option('--out','shots/drilling-view-space'));
@@ -27,13 +28,27 @@ const source=async path=>{
   sourceHashes[rel]=hash(data);const text=data.toString('utf8');sourceCache.set(rel,text);return text;
 };
 const shell=await source(resolve(root,'src/ui/shell.js'));
-const extract=(name,next)=>{const a=shell.indexOf('  function '+name+'('),b=shell.indexOf(next,a);assert(a>=0&&b>a,'Missing production '+name);return shell.slice(a,b);};
-const close=extract('closeOverlay','  /**');
-const confirm=extract('confirm','  /* ── The app facade');
-const keyboard=extract('onKey','  /* ── System interface');
+const nodes=(text,predicate)=>{const found=[];const walk=node=>{if(!node||typeof node!=='object')return;if(predicate(node))found.push(node);for(const value of Object.values(node)){if(Array.isArray(value))value.forEach(walk);else if(value&&typeof value==='object')walk(value);}};walk(parseAst(text));return found;};
+const extract=(text,name)=>{const found=nodes(text,n=>n.type==='FunctionDeclaration'&&n.id?.name===name);assert.equal(found.length,1,'Exactly one production '+name);return text.slice(found[0].start,found[0].end);};
+const close=extract(shell,'closeOverlay'),confirm=extract(shell,'confirm'),keyboard=extract(shell,'onKey');
+const notificationPlacement=/\bplaceNotifications\(/.test(close+confirm)?extract(shell,'placeNotifications'):'';
+const notificationSync=notificationPlacement?'placeNotifications();':'';
+const toastDeclarations=nodes(shell,n=>n.type==='VariableDeclaration'&&n.declarations.some(d=>d.id?.name==='toastsEl'));
+assert.equal(toastDeclarations.length,1,'Exactly one production notification host declaration');
+const toastHostDeclaration=shell.slice(toastDeclarations[0].start,toastDeclarations[0].end);
+const site=await source(resolve(root,'src/ui/screens/site.js'));
+const confirmCalls=nodes(site,n=>n.type==='CallExpression'&&n.callee?.object?.name==='app'&&n.callee?.property?.name==='confirm');
+assert.equal(confirmCalls.length,1,'Exactly one production site confirmation');
+const confirmationCopy=Object.fromEntries(confirmCalls[0].arguments[0].properties.filter(p=>['title','confirmLabel','cancelLabel'].includes(p.key?.name)).map(p=>[p.key.name,p.value.value]));
+for(const key of ['title','confirmLabel','cancelLabel'])assert.equal(typeof confirmationCopy[key]==='string'&&confirmationCopy[key].length>0,true,'Production confirmation '+key+' must be nonempty');
+const careerAbandonRequired=tag!=='baseline';
+if(careerAbandonRequired)assert.equal(nodes(site,n=>n.type==='FunctionDeclaration'&&n.id?.name==='abandonFromSite').length,1,'Current site must retain guarded contract abandonment');
+const modalFocusSource=shell.includes("from './modal-focus.js'")?(await source(resolve(root,'src/ui/modal-focus.js'))).replace('export function createModalFocus','function createModalFocus'):'';
+const modalFocusInit=modalFocusSource?'const modalFocus=createModalFocus({getStack:()=>overlayStack,fallback:()=>overlayEl.parentElement});':'';
+const modalFocusDispose=modalFocusSource?'modalFocus.dispose();':'';
 const bundle=await build({absWorkingDir:root,tsconfigRaw:{},entryPoints:[resolve(root,'tools/fixtures/drilling-view-space.js')],bundle:true,format:'esm',write:false,outdir:resolve(root,'.unused-fixture-output'),loader:{'.png':'dataurl'},logLevel:'silent',plugins:[{name:'frozen-source-and-real-confirmation',setup(b){
   b.onResolve({filter:/^fixture:confirmation$/},()=>({path:'confirmation',namespace:'fixture'}));
-  b.onLoad({filter:/.*/,namespace:'fixture'},()=>({loader:'js',contents:`export function makeConfirmation(C,DUR,dur,overlayEl,getReduced){let overlayStack=[],current=null;const PARENT={};const back=()=>{throw Error('Unexpected fixture back')};let reduced=getReduced();${close}${confirm}${keyboard}window.addEventListener('keydown',onKey);return{confirm(o){reduced=getReduced();return confirm(o)},dispose(){window.removeEventListener('keydown',onKey)}}}`}));
+  b.onLoad({filter:/.*/,namespace:'fixture'},()=>({loader:'js',contents:`${modalFocusSource}\nexport function makeToastHost(C){${toastHostDeclaration};return toastsEl;}\nexport function makeConfirmation(C,DUR,dur,overlayEl,getReduced,{stage,toastsEl,SCENES}){let overlayStack=[],current=null,disposed=false;const PARENT={};const back=()=>{throw Error('Unexpected fixture back')};${modalFocusInit}let reduced=getReduced();${notificationPlacement}${close}${confirm}${keyboard}window.addEventListener('keydown',onKey);return{setScreen(inst){current=inst?{id:SCENES.SITE,inst}:null;${notificationSync}},confirm(o){reduced=getReduced();return confirm(o)},dispose(){for(const rec of [...overlayStack].reverse())closeOverlay(rec,{restore:false});disposed=true;${modalFocusDispose}window.removeEventListener('keydown',onKey)}}}`}));
   b.onResolve({filter:/^(data:|https?:)/},a=>({path:a.path,external:true}));
   b.onResolve({filter:/^three$/},()=>({path:resolve(root,'node_modules/three/build/three.module.js'),namespace:'actual-source'}));
   b.onResolve({filter:/^three\//},a=>({path:resolve(root,'node_modules',a.path),namespace:'actual-source'}));
@@ -41,10 +56,19 @@ const bundle=await build({absWorkingDir:root,tsconfigRaw:{},entryPoints:[resolve
   b.onLoad({filter:/.*/,namespace:'actual-source'},async a=>({contents:a.path.endsWith('.png')?await readFile(a.path):await source(a.path),loader:a.path.endsWith('.png')?'dataurl':a.path.endsWith('.css')?'css':'js',resolveDir:dirname(a.path)}));
 }}]});
 const js=bundle.outputFiles.find(f=>f.path.endsWith('.js')).contents,css=bundle.outputFiles.find(f=>f.path.endsWith('.css')).contents;
+if(args.includes('--self-test')){
+ assert(js.length>0&&css.length>0,'Actual production fixture must bundle JS and CSS');
+ assert.throws(()=>extract('function other() {}','confirm'),/Exactly one production confirm/,'Missing extraction fails closed');
+ assert.throws(()=>extract('function confirm() {} function nested(){function confirm(){}}','confirm'),/Exactly one production confirm/,'Ambiguous extraction fails closed');
+ const {checkCareerFixture}=await import('./fixtures/drilling-view-career.js');
+ const result=await checkCareerFixture();
+ console.log(JSON.stringify({passed:true,evidence:'CPU source extraction, actual production bundle and real progression fixture; no browser/layout claim',confirmationCopy,modalFocus:!!modalFocusSource,notificationPlacement:!!notificationPlacement,career:result,sourceHashes}));
+ process.exit(0);
+}
 await mkdir(out,{recursive:true});
 const fontLink=(await readFile(resolve(root,'index.html'),'utf8')).match(/<link[^>]+href="https:\/\/fonts.googleapis.com\/css2[^>]+>/)?.[0]||'';
 const server=createServer((req,res)=>{if(req.url==='/fixture.js'){res.setHeader('Content-Type','text/javascript');res.end(js);}else if(req.url==='/fixture.css'){res.setHeader('Content-Type','text/css');res.end(css);}else if(req.url==='/favicon.ico'){res.writeHead(204);res.end();}else{res.setHeader('Content-Type','text/html');res.end(`<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1">${fontLink}<link rel="stylesheet" href="/fixture.css"><script type="module" src="/fixture.js"></script>`);}});
-const report={tag,baseline,head:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),evidence:'Actual production site DOM, styles, components and extracted shell confirmation; synthetic telemetry. CPU headless Chrome with GPU/WebGL disabled. DOM opportunity is not actual rendered visible3D. No FPS.',sourceHashes,fixtureHashes:{runner:hash(await readFile(fileURLToPath(import.meta.url))),fixture:hash(await readFile(resolve(root,'tools/fixtures/drilling-view-space.js'))),enumerator:hash(ENUMERATE)},cases:[],errors,requests,failures:[]};
+const report={tag,baseline,head:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),evidence:'Actual production site DOM, styles, components and extracted shell confirmation; synthetic telemetry. Current confirmation scenarios use real progression acceptance, abandonment and persistence. CPU headless Chrome with GPU/WebGL disabled. DOM opportunity is not actual rendered visible3D. No FPS.',sourceHashes,fixtureHashes:{runner:hash(await readFile(fileURLToPath(import.meta.url))),fixture:hash(await readFile(resolve(root,'tools/fixtures/drilling-view-space.js'))),career:hash(await readFile(resolve(root,'tools/fixtures/drilling-view-career.js'))),enumerator:hash(ENUMERATE)},confirmationCopy,careerAbandonRequired,cases:[],errors,requests,failures:[]};
 let browser;
 const snapshot=()=>{
  const rect=e=>{const r=e.getBoundingClientRect();return{x:r.x,y:r.y,w:r.width,h:r.height}};
@@ -107,22 +131,41 @@ try{
   if([280,320,375,390].includes(width)&&!reduced&&['rotary','cable','rc','bolt','pile','oil','cpt','twoStage','longhole','jet'].includes(family))await page.screenshot({path:resolve(out,tag+'-'+name+'.png')});
  }
  }console.log(tag,width+'x'+height,reduced?'reduced':'normal','cases='+report.cases.length,'failures='+report.failures.length);}}
- await page.setViewportSize({width:390,height:844});await page.evaluate(()=>window.fixture.mount('rotary','steady',false));
+ await page.setViewportSize({width:390,height:844});await page.evaluate(career=>window.fixture.mount('rotary','steady',false,{career}),careerAbandonRequired);
  const cdp=await context.newCDPSession(page);await cdp.send('DOM.enable');await cdp.send('CSS.enable');const dom=await cdp.send('DOM.getDocument');
  report.resolvedFonts=[];for(const selector of ['.sstrip__v','.vsl__name','.rop__v']){const {nodeId}=await cdp.send('DOM.querySelector',{nodeId:dom.root.nodeId,selector});report.resolvedFonts.push({selector,...await cdp.send('CSS.getPlatformFontsForNode',{nodeId})});}
- const initial=await page.evaluate(()=>structuredClone(window.fixture.effects));
- await page.locator('.site__leave').click();await page.getByRole('alertdialog',{name:'Leave the hole?'}).waitFor();await page.waitForTimeout(50);
- report.confirmation={initial,defaultFocus:await page.evaluate(()=>document.activeElement.textContent.trim()),pending:await page.evaluate(()=>structuredClone(window.fixture.effects))};
- await page.keyboard.press('Escape');await page.waitForTimeout(450);report.confirmation.escape=await page.evaluate(()=>({effects:structuredClone(window.fixture.effects),focus:document.activeElement.className,scene:window.fixture.app.state.scene}));
- await page.locator('.site__leave').click();await page.getByRole('button',{name:'Keep drilling',exact:true}).click();await page.waitForTimeout(450);report.confirmation.cancel=await page.evaluate(()=>({effects:structuredClone(window.fixture.effects),scene:window.fixture.app.state.scene}));
- await page.locator('.site__leave').click();await page.getByRole('button',{name:'Abandon',exact:true}).click();await page.waitForTimeout(450);report.confirmation.abandon=await page.evaluate(()=>({effects:structuredClone(window.fixture.effects),scene:window.fixture.app.state.scene}));
- fail(report.confirmation.defaultFocus==='Keep drilling','confirmation default focus');fail(report.confirmation.escape.effects.aborts.length===0&&report.confirmation.cancel.effects.aborts.length===0,'cancel/Escape aborted');fail(report.confirmation.abandon.effects.aborts.length===1&&report.confirmation.abandon.scene==='contracts','confirm did not abort exactly once');
- await page.emulateMedia({reducedMotion:'reduce'});await page.evaluate(()=>window.fixture.mount('rotary','steady',true));
- await page.locator('.site__leave').click();await page.getByRole('alertdialog',{name:'Leave the hole?'}).waitFor();await page.waitForTimeout(50);
- report.reducedConfirmation={defaultFocus:await page.evaluate(()=>document.activeElement.textContent.trim())};await page.keyboard.press('Escape');await page.waitForTimeout(100);report.reducedConfirmation.escape=await page.evaluate(()=>({focus:document.activeElement.className,scene:window.fixture.app.state.scene,aborts:window.fixture.effects.aborts.length}));
- await page.locator('.site__leave').click();await page.getByRole('button',{name:'Keep drilling',exact:true}).click();await page.waitForTimeout(100);report.reducedConfirmation.cancel=await page.evaluate(()=>({scene:window.fixture.app.state.scene,aborts:window.fixture.effects.aborts.length}));
- await page.locator('.site__leave').click();await page.getByRole('button',{name:'Abandon',exact:true}).click();await page.waitForTimeout(100);report.reducedConfirmation.abandon=await page.evaluate(()=>({scene:window.fixture.app.state.scene,aborts:window.fixture.effects.aborts.length}));
- fail(report.reducedConfirmation.defaultFocus==='Keep drilling'&&report.reducedConfirmation.escape.scene==='site'&&report.reducedConfirmation.escape.aborts===1&&report.reducedConfirmation.cancel.aborts===1&&report.reducedConfirmation.abandon.aborts===2&&report.reducedConfirmation.abandon.scene==='contracts','Reduced confirmation behavior');
+ for(const reduced of [false,true]){
+  await page.emulateMedia({reducedMotion:reduced?'reduce':'no-preference'});
+  if(reduced)await page.evaluate(career=>window.fixture.mount('rotary','steady',true,{career}),careerAbandonRequired);
+  const readConfirmation=()=>page.evaluate(()=>{const host=document.querySelector('.toasts');return {effects:structuredClone(window.fixture.effects),career:window.fixture.career(),focus:document.activeElement.className,scene:window.fixture.app.state.scene,notifications:{count:document.querySelectorAll('.toasts').length,role:host?.getAttribute('role'),parentRole:host?.parentElement?.getAttribute('role'),inStage:host?.parentElement?.classList.contains('ui-stage')}};});
+  const row={initial:await readConfirmation()};report[reduced?'reducedConfirmation':'confirmation']=row;
+  await page.locator('.site__leave').click();await page.getByRole('alertdialog',{name:confirmationCopy.title,exact:true}).waitFor();await page.waitForTimeout(50);
+  row.defaultFocus=await page.evaluate(()=>document.activeElement.textContent.trim());row.pending=await readConfirmation();
+  await page.keyboard.press('Escape');await page.waitForTimeout(reduced?100:450);row.escape=await readConfirmation();
+  await page.locator('.site__leave').click();await page.getByRole('button',{name:confirmationCopy.cancelLabel,exact:true}).click();await page.waitForTimeout(reduced?100:450);row.cancel=await readConfirmation();
+  await page.locator('.site__leave').click();await page.getByRole('button',{name:confirmationCopy.confirmLabel,exact:true}).click();await page.waitForTimeout(reduced?100:450);row.abandon=await readConfirmation();
+  fail(row.defaultFocus===confirmationCopy.cancelLabel,`${reduced}: confirmation default focus`);
+  if(notificationPlacement){
+   fail(row.pending.notifications.count===1&&row.pending.notifications.role==='status'&&row.pending.notifications.parentRole==='alertdialog',`${reduced}: actual notification host did not enter confirmation`);
+   fail(row.escape.notifications.inStage&&row.cancel.notifications.inStage&&row.abandon.notifications.inStage,`${reduced}: actual notification host did not return to stage`);
+  }
+  for(const kind of ['pending','escape','cancel']){
+   fail(JSON.stringify(row[kind].effects)===JSON.stringify(row.initial.effects),`${reduced}: ${kind} changed gameplay effects`);
+   fail(row[kind].scene==='site',`${reduced}: ${kind} navigated away`);
+   if(careerAbandonRequired)fail(row[kind].career.serialised===row.initial.career.serialised,`${reduced}: ${kind} changed real career`);
+  }
+  fail(row.escape.focus.includes('site__leave'),`${reduced}: Escape did not restore leave focus`);
+  fail(row.abandon.effects.aborts.length===row.initial.effects.aborts.length+1&&row.abandon.effects.aborts.at(-1)==='abandoned'&&row.abandon.scene==='contracts',`${reduced}: confirm did not abort exactly once and navigate`);
+  if(careerAbandonRequired){
+   fail(row.initial.career.runId!==null&&row.initial.career.attemptId!==null,`${reduced}: real accepted career identity missing`);
+   fail(row.abandon.career.contractId===null&&row.abandon.career.runId===null,`${reduced}: real accepted career remained open`);
+   fail(row.abandon.career.money===row.initial.career.money&&row.abandon.career.reputation<row.initial.career.reputation,`${reduced}: real abandonment accounting absent`);
+   fail(row.abandon.effects.abandonments.length===row.initial.effects.abandonments.length+1&&row.abandon.effects.abandonments.at(-1).ok===true,`${reduced}: real career abandon not called once`);
+   fail(row.abandon.effects.saves.length===row.initial.effects.saves.length+1&&row.abandon.effects.saves.at(-1).ok===true,`${reduced}: real career save not called once`);
+   row.reloaded=await page.evaluate(()=>({ok:window.fixture.app.ctx.progression.load(),career:window.fixture.career()}));
+   fail(row.reloaded.ok&&row.reloaded.career.contractId===null&&row.reloaded.career.runId===null,`${reduced}: persisted abandon reopened on reload`);
+  }
+ }
  await page.emulateMedia({reducedMotion:'no-preference'});await page.evaluate(()=>{document.documentElement.style.setProperty('--sa-t','47px');document.documentElement.style.setProperty('--sa-b','34px');});await page.evaluate(()=>window.fixture.mount('rc','steady',false));
  report.safeArea={injected:{top:47,bottom:34},geometry:await page.evaluate(snapshot),measurement:await page.evaluate(`(${ENUMERATE})({})`)};
  report.safeArea.reach=assessReach(report.safeArea.geometry.controls.map(c=>({...c,cls:c.class,isLeave:c.leave})));

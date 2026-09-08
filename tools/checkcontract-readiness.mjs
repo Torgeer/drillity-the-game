@@ -12,7 +12,7 @@ import { createHash } from 'node:crypto';
 import { createGameState, createBus, makeRandom, EVENTS } from '../src/core/contract.js';
 import { createProgression, SAVE_KEY } from '../src/game/progression.js';
 import { METHODS, REGIONS, CERTS, MAX_LEVEL, RIGS, DEPTH_IS_VERTICAL,
-  makeContract, rigDepthCapacity } from '../src/game/data.js';
+  makeContract, rigDepthCapacity, defaultLoadoutFor } from '../src/game/data.js';
 import { travelCost } from '../src/game/economy.js';
 
 const cases = [], measurements = { previews: 0, purityChecks: 0, ratedPairs: 0, observerSnapshots: 0 };
@@ -203,6 +203,16 @@ test('all known vertical owned rig/method limits are ready at the limit and refu
     const depth = rigDepthCapacity(rig, methodId);
     if (depth === null) continue;
     const f = await fresh([rig.id]);
+    if (['core', 'sonic'].includes(methodId)) {
+      // A depth-capacity probe needs an actual supported sampling string;
+      // starter auger stock must not stand in for a core barrel or casing.
+      for (const [slot, id] of Object.entries(defaultLoadoutFor(methodId, MAX_LEVEL))) {
+        if (!id) continue;
+        assert.equal(f.progression.purchase(id).ok, true);
+        assert.equal(f.progression.equip(slot, id).ok, true);
+      }
+      assert.equal(f.progression.save(), true);
+    }
     const exact = contract(methodId, { targetDepth: depth });
     assert.equal(purePreview(f, exact, 2).ok, true, `${rig.id}/${methodId} exact sourced limit`);
     refusal(f, contract(methodId, { targetDepth: depth + 0.01 }), /needs.*owned rigs are rated/);

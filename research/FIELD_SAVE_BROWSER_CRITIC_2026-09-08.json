@@ -1,0 +1,765 @@
+{
+  "reviewer": "field_save_visual_critic",
+  "date": "2026-09-08",
+  "functionalVerdict": "ACCEPTED_WITH_STATED_SCOPE",
+  "wholeScreenVisualVerdict": "BOUNDED_CANDIDATE_ACCEPTED_FOR_FV1_FV2_AND_ENUMERATED_STATES",
+  "acceptedReport": "evidence/field-save-browser/production-fonts/report.json",
+  "acceptedReportSha256": "3f252c99c26a5e7fcf3368e3b905bfa8ab3764f8b977019f6d1ca39e5f10db3c",
+  "sourceHashesAtCapture": {
+    "src/ui/motion.css": "8530c48cca764834b5f009d4359a712d82718a9ca98ba983d769ebe9eee19e57",
+    "src/ui/styles.css": "16b6177effdc44b8a549062843a57f5e983956dc58fb3474c3d04bbe9342f234",
+    "src/core/contract.js": "dfb40a897139a7a67fc9d62a2d17a473096a51f42513becca6e3391767e3cf53",
+    "src/ui/assets/logo-full.png": "3cafdde184e8897194a3c76732baf7e2e891ea3723cae7d5a04fa26050f1e7f4",
+    "src/ui/assets/logo-wordmark.png": "63683658ba08f65bb9aa64b47cecb803030eddf2efc9e4b55a6d987d1a3737dc",
+    "src/ui/components.js": "7443dc4755c83043b1ca9873271104f58aaa8b818ddd53fc2186c2e5091b4705",
+    "src/ui/modal-focus.js": "6b051f1a748f6448d1656a9f8fc9bbae232262968b47184dd0c09887306958ba",
+    "src/core/motion.js": "83131fb56d9e329b60d09a65972afad7ec6d076227b9915021ad2963a9cc545c",
+    "../../drillity-the-game/node_modules/three/build/three.module.js": "0a3368c165eea773490aec7b77c22de70e3eac288503409256fdbf4d12578416",
+    "../../drillity-the-game/node_modules/three/examples/jsm/utils/BufferGeometryUtils.js": "c25b7930e570e9ec56173cd3b866ec8d2e10016630db3937efb439daf1cedbf6",
+    "src/rig/tools.js": "1821620eee32c105c9966d762d143ecc6fc14705adb71a34476970ab06d9c32b",
+    "src/ui/screens/catalog.js": "d49f24548b8f1dd67f6936ad60f2647276c34cb11727ad6d0d7dd412fd80eae3",
+    "src/ui/save-status.js": "36b5359c6c62636a6dae6caa520fb666ce4df27d373d11753907cdb32b8fab12",
+    "src/ui/screens/boot.js": "3b02f5fee1a540c6cf2867f76822d7f96c96be946d10cf8f15295893c7c9fd50",
+    "src/ui/xp-display.js": "068439a985cd14d842bea9aac1fe7b35e0d8a96977fc938deb2b781268d114ae",
+    "src/ui/screens/menu.js": "b6e982c6831b7565a4dcf24a55bff651651deabd1abd3b15c92ec8e57f623270",
+    "src/ui/screens/contracts.css": "799b9abaacd67b1b9612d03ee5b4eb62cb980fa98bdf56601368f1486cfad2f8",
+    "src/ui/screens/contracts.js": "7b32d70896d8e5e43d01e0c3bce7ffee365e7547b8b7a440610bdd4055bd900f",
+    "src/ui/screens/site.js": "cbb6d205135da7d782ba8195a2d99c55cb41e9cb1681cab56aa9acf7362d7652",
+    "src/ui/screens/results.js": "17a8413fc6bf2c83bf92c13c60ddde243ea978651d9be70d3a21594ea0472ded",
+    "src/game/equipment-support.js": "12b6c6aa9b17bad42f38196a110a04d76a283a2f1ee2f813184d9e9be271822b",
+    "src/game/data.js": "0684cac453e80e70036ca34fb661226ca4798d9069c7d6c98413df03bf54cb2d",
+    "src/ui/screens/shop.js": "f392da49fa4bedeae5c043a4c494bc6d7b6127b2dc9fd58cadcdebef39159e21",
+    "src/ui/screens/career.js": "7513bad0eebcfa70b6bf236b53c29ef858d5448f1255d039e14487c019cb4529",
+    "src/ui/screens/garage.js": "13b05b5a927c071a86761d66d6fe08ae0673e4c892ce226981120e88e70e027b",
+    "src/ui/shell.js": "4b7ddb594128b13f7b769366e4b27fbb723ac30464a794cac389b93a15136944",
+    "src/game/economy.js": "ef98a6b8e7569f8542b541f9d8baad8e8c0f01193b088d2ef7ff3e433f7bcac6",
+    "src/game/progression.js": "c2a924ec309c6dd0fa86a00e5bd9c8ca2714c802b466a97255d3f6c43e194fd3",
+    "tools/fixtures/field-save-browser.js": "c0a5373daf21219e3da9c663a4493327c68ae95fe7522604d914bdc0f00c686a",
+    "tools/checkfieldsave-browser.mjs": "897f9ff635a6accf59c355d4c58787030946028dc8558ff09acba6c7190c946e",
+    "index.html": "80093df10d14000da429ff9ac9159dc55487d92769d539374872278e56f146a1"
+  },
+  "metrics": {
+    "cases": 33,
+    "passed": 33,
+    "geometryRecords": 54,
+    "loadedFontRecords": 33,
+    "minimumCheckedTargetWidth": 90.09375,
+    "minimumCheckedTargetHeight": 44,
+    "errors": 0,
+    "warningCount": 21,
+    "documentsServed": 36,
+    "cleanup": {
+      "browserClosed": true,
+      "serverClosed": true,
+      "errors": []
+    }
+  },
+  "screenshots": [
+    {
+      "path": "evidence/field-save-browser/production-fonts/320x568-future-menu.png",
+      "sha256": "6f70620d1acf74f25c6fb95fbb5bf0379fe11682245e7a6b4b1eee559857689e",
+      "manuallyViewed": true
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/320x568-future-settings.png",
+      "sha256": "faef777e90ac35f96f436b222b67701961e9a2cb679fb4e37f06b74567103164",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/320x568-grind-eligible.png",
+      "sha256": "5295fef14501a4476568bbdacfd2aef07c8f2b23ed55f67eafcb681cafcbe5f3",
+      "manuallyViewed": true
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/320x568-grind-exhausted.png",
+      "sha256": "0de87a1accab3b430678e5cd47deffb0dd196ddb16736f922a0f21aff957d77e",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/320x568-grind-no-grinder.png",
+      "sha256": "e251264d173058d2f6ff928b26968eacbeb4fc58f00c29f6b2ee38d1f463f8ba",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/320x568-grind-no-skill.png",
+      "sha256": "a8ad6cb12180d5c37f5bbfef333f2484d3e3e941cdbed4735e396f6d76963a49",
+      "manuallyViewed": true
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/320x568-grind-used.png",
+      "sha256": "c175832c9dc2b685c5e3eb3bc8b684ad3d6e08b0b5626806c878b82014b880b3",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/320x568-quota-menu.png",
+      "sha256": "4bee60822156dc82a97952787da537eeee6912abd4d8687d21601049e505ea0b",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/320x568-quota-settings.png",
+      "sha256": "fffe5ee4dfee27ce5e740ee8ea20b9a034d6dd7020a771d16a7f55b45f3c1628",
+      "manuallyViewed": true
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/320x568-read-failed-menu.png",
+      "sha256": "feb2825c4d4aa5fcb4d6fa74c6e0d45da9563434c94842e7ae5a371ecb64bd24",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/320x568-read-failed-settings.png",
+      "sha256": "20e76c88f229ad49a3f48b837a504243ee6995149602b5df1074f372511d1d35",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/320x568-recovered-menu.png",
+      "sha256": "b3db9343f9c96e6ad6a623622e1ece4f7aff1a3f30be3c1be4a0eaa02c2a5ae3",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/320x568-recovered-settings.png",
+      "sha256": "045408a18cb20217f49dcfcfd1cbab3e4020ff92aac7d2814c19b97a4c0ce190",
+      "manuallyViewed": true
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/320x568-reload-cancel.png",
+      "sha256": "b68caba258347304395fd4f5d592f3a2d0d5d25921bf034c51be7a09a8d7b9ff",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/320x568-reload-confirm.png",
+      "sha256": "b68caba258347304395fd4f5d592f3a2d0d5d25921bf034c51be7a09a8d7b9ff",
+      "manuallyViewed": true
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/320x568-saved-career-available.png",
+      "sha256": "fc3fa325f1352faecf01aee5e413e1b418c9db0c0ae8ef1473f3fc481870b23f",
+      "manuallyViewed": true
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/320x568-unreadable-menu.png",
+      "sha256": "82726b27d851333581005aaaf7efaacd0744bf309b730af2d0143c7e27f1f989",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/320x568-unreadable-settings.png",
+      "sha256": "d052008480d831d852e16bb5c044c38e4a0185a58327cf05e71e178c27065b9b",
+      "manuallyViewed": true
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/360x780-future-menu.png",
+      "sha256": "0bcf021fc676fccb23f0b6ba47a1002965e961566c748f283b0c41edf0ddc27d",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/360x780-future-settings.png",
+      "sha256": "cbf3679126a94c22a838e45e464926d73c6ade0e7dc81e9a24bb3d2617559be3",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/360x780-grind-eligible.png",
+      "sha256": "28119af1a5e20fad0f31823a9f42a95f28671c5f731f40c7017e2cc7caac3621",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/360x780-grind-exhausted.png",
+      "sha256": "d68bc74f5302ef395de2d9c7f475947ee03fb9b40ce2b87fc34e2b2cebefbacf",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/360x780-grind-no-grinder.png",
+      "sha256": "45e0b6cd2922ecddc2d39a0ea3ce68860ca15d93f3e320081488b4fd3ccf23a7",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/360x780-grind-no-skill.png",
+      "sha256": "7f4c92ea721d18a2bd596d14ee12ccffd25421988aa2d299242d6a70b75cb471",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/360x780-grind-used.png",
+      "sha256": "4b47cf622f022d045e210ce10a41e687b52ccfb76209a0f9b8b1f2f68f7378cd",
+      "manuallyViewed": true
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/360x780-quota-menu.png",
+      "sha256": "8cc6a13a76976a0a4b9b3b687a44cbdafe71f370ac150eacb95727bf93b29c23",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/360x780-quota-settings.png",
+      "sha256": "c23e211a1a88e4cae83443a9fb5191f4a13840360007ebc07401aeaa54c709cd",
+      "manuallyViewed": true
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/360x780-read-failed-menu.png",
+      "sha256": "f842713b51cd224cf51e441b854d57486bb0f7bacf714f56971a0f2ccd3fb9d3",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/360x780-read-failed-settings.png",
+      "sha256": "ea9eb75b2173cc8c9a0437a31674a47ec42485f4e0ca8c5cf9084902aae5457f",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/360x780-recovered-menu.png",
+      "sha256": "24a740c07520d354398530974504507be91e0fc2a06eea25dc24d375af0ad8e3",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/360x780-recovered-settings.png",
+      "sha256": "d54573ea1ffb849f9935f64b93f708ed8b8c8ea60393cb2b7b75e219ee78c26e",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/360x780-reload-cancel.png",
+      "sha256": "10aa5846abd3785d9a7c5f5a48b2cf1bc07458cad793e103af808bc0f39f3b8c",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/360x780-reload-confirm.png",
+      "sha256": "10aa5846abd3785d9a7c5f5a48b2cf1bc07458cad793e103af808bc0f39f3b8c",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/360x780-saved-career-available.png",
+      "sha256": "137d9ae363913e5456d30b7fda2958339e3e94b6304b00a8de462757bcf0f89b",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/360x780-unreadable-menu.png",
+      "sha256": "6f269e2099d0236e05ccdd5664ccb4271305151421c0af4c7c7bda79d0b8de5c",
+      "manuallyViewed": true
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/360x780-unreadable-settings.png",
+      "sha256": "9f02afa785a81c76fdac37fc6449ab9087a5cf058f116fa0382a9f9e44fe8da9",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/390x844-future-menu.png",
+      "sha256": "be59f86d840523b5e88e1eafc102c83bed2fa51cfc96f2c8d9de386df059fc72",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/390x844-future-settings.png",
+      "sha256": "20e483a9c34083618aed02a25aec77a54bbac4e0fcd8ea8cb00f02b50df53071",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/390x844-grind-eligible.png",
+      "sha256": "6d119f4a2936f35522f423aa51e462886bf2265c7f5e17bc93bb4a8d6ae7804e",
+      "manuallyViewed": true
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/390x844-grind-exhausted.png",
+      "sha256": "3bcf22b8d2db6b1fa7ecf514a882629f5a203f8d521d65288d852c1526727e2a",
+      "manuallyViewed": true
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/390x844-grind-no-grinder.png",
+      "sha256": "f515fbef3f183f29c053191bf12b832b12720bec794d0950b056c893f58eb305",
+      "manuallyViewed": true
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/390x844-grind-no-skill.png",
+      "sha256": "52531454dc497d2395860a94c9d116150e029eccfc43c4c3d304cbaa4d0074f2",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/390x844-grind-used.png",
+      "sha256": "db55f6516dd9c46fb8c52d12db732ecbb9acf5606ed17f5ae736785d7f2d55a2",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/390x844-quota-menu.png",
+      "sha256": "20e89e501786ea3e6f4aeb6a5570529b1981b30ab31320e9e0e9dab944d4a43a",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/390x844-quota-settings.png",
+      "sha256": "6ef328d8e1ad99e5abd379223ce8051c2d3838e2dc86bc1b9a12469b898a2a21",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/390x844-read-failed-menu.png",
+      "sha256": "8cbb489079b671f3a0ed730c6532bea4de01f82224839131b806e078add443bd",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/390x844-read-failed-settings.png",
+      "sha256": "292465feed35df58a861c5521bf05ff552eaf13daa5c1db8401aa0846b68821b",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/390x844-recovered-menu.png",
+      "sha256": "6649f58373c61d5a700ebb9d11450b839900a9b39221e857be14e955b5d2746e",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/390x844-recovered-settings.png",
+      "sha256": "be3397f0ee91072019d758428d9121f171efec947104a60980a0c78e19c2bb9a",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/390x844-reload-cancel.png",
+      "sha256": "4ecd1f741e9629f8f7fb10c953b8cc7ada38a902e55fd68512307867b3ca5d60",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/390x844-reload-confirm.png",
+      "sha256": "4ecd1f741e9629f8f7fb10c953b8cc7ada38a902e55fd68512307867b3ca5d60",
+      "manuallyViewed": true
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/390x844-saved-career-available.png",
+      "sha256": "e52f93671c7662b606bf9f4e9ca7ddb368a2ecf5652e0aac04bad89bc53959ad",
+      "manuallyViewed": true
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/390x844-unreadable-menu.png",
+      "sha256": "18aab8f219baf56ead0e88f3648b23c5261f0d25e1185913001567f37aee750e",
+      "manuallyViewed": false
+    },
+    {
+      "path": "evidence/field-save-browser/production-fonts/390x844-unreadable-settings.png",
+      "sha256": "5b872ae6c10c3e4f48fa72263415db060a613a1d8140c9abab0e2a06eea237f5",
+      "manuallyViewed": false
+    }
+  ],
+  "findings": [
+    {
+      "id": "FV-1",
+      "summary": "Painted notifications overlap visible Settings controls or career rows",
+      "coordinatesAre": "Approximate original PNG pixels, DPR1; not independent DOM measurements",
+      "examples": [
+        {
+          "image": "320x568-saved-career-available.png",
+          "warningToastApproxBounds": [
+            34,
+            430,
+            286,
+            506
+          ],
+          "rewardToastApproxBounds": [
+            110,
+            516,
+            210,
+            554
+          ]
+        },
+        {
+          "image": "320x568-quota-settings.png",
+          "warningToastApproxBounds": [
+            34,
+            477,
+            286,
+            553
+          ]
+        }
+      ],
+      "resolution": "Closed for enumerated after-capture states; original finding retained as before evidence"
+    },
+    {
+      "id": "FV-2",
+      "summary": "320px Menu region chip overlaps balance",
+      "coordinatesAre": "Approximate original PNG pixels, DPR1; not independent DOM measurements",
+      "examples": [
+        {
+          "image": "320x568-future-menu.png",
+          "balanceApproxBounds": [
+            212,
+            505,
+            270,
+            524
+          ],
+          "regionChipApproxBounds": [
+            111,
+            506,
+            257,
+            534
+          ]
+        }
+      ],
+      "resolution": "Closed for enumerated after-capture states; original finding retained as before evidence"
+    }
+  ],
+  "afterCapture": {
+    "candidateRoot": "C:/Users/henri/Downloads/threads/drillity-notification-flow",
+    "report": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/report.json",
+    "reportSha256": "f133d80b614c733dbdae1234a5f61702867c7db4fc60478800ca079fc8121a2c",
+    "startedAt": "2026-09-08T12:10:14.405Z",
+    "sourceHashes": {
+      "src/ui/motion.css": "8530c48cca764834b5f009d4359a712d82718a9ca98ba983d769ebe9eee19e57",
+      "src/ui/styles.css": "7ec4ee902e8b7127712945487f987a6a3b12b1810ec6ffdc6b2705e26e42b4e8",
+      "src/core/contract.js": "dfb40a897139a7a67fc9d62a2d17a473096a51f42513becca6e3391767e3cf53",
+      "src/ui/assets/logo-full.png": "3cafdde184e8897194a3c76732baf7e2e891ea3723cae7d5a04fa26050f1e7f4",
+      "src/ui/assets/logo-wordmark.png": "63683658ba08f65bb9aa64b47cecb803030eddf2efc9e4b55a6d987d1a3737dc",
+      "src/ui/components.js": "7443dc4755c83043b1ca9873271104f58aaa8b818ddd53fc2186c2e5091b4705",
+      "src/ui/modal-focus.js": "6b051f1a748f6448d1656a9f8fc9bbae232262968b47184dd0c09887306958ba",
+      "src/core/motion.js": "83131fb56d9e329b60d09a65972afad7ec6d076227b9915021ad2963a9cc545c",
+      "../../drillity-the-game/node_modules/three/build/three.module.js": "0a3368c165eea773490aec7b77c22de70e3eac288503409256fdbf4d12578416",
+      "../../drillity-the-game/node_modules/three/examples/jsm/utils/BufferGeometryUtils.js": "c25b7930e570e9ec56173cd3b866ec8d2e10016630db3937efb439daf1cedbf6",
+      "src/rig/tools.js": "1821620eee32c105c9966d762d143ecc6fc14705adb71a34476970ab06d9c32b",
+      "src/ui/screens/catalog.js": "d49f24548b8f1dd67f6936ad60f2647276c34cb11727ad6d0d7dd412fd80eae3",
+      "src/ui/save-status.js": "36b5359c6c62636a6dae6caa520fb666ce4df27d373d11753907cdb32b8fab12",
+      "src/ui/screens/boot.js": "3b02f5fee1a540c6cf2867f76822d7f96c96be946d10cf8f15295893c7c9fd50",
+      "src/ui/xp-display.js": "068439a985cd14d842bea9aac1fe7b35e0d8a96977fc938deb2b781268d114ae",
+      "src/ui/screens/menu.js": "8f62bfb011cf9fc2dbb035b041ddc32b60e6119e3350cd9c023860569df8bff1",
+      "src/ui/screens/contracts.css": "799b9abaacd67b1b9612d03ee5b4eb62cb980fa98bdf56601368f1486cfad2f8",
+      "src/ui/screens/contracts.js": "7b32d70896d8e5e43d01e0c3bce7ffee365e7547b8b7a440610bdd4055bd900f",
+      "src/ui/screens/site.js": "cbb6d205135da7d782ba8195a2d99c55cb41e9cb1681cab56aa9acf7362d7652",
+      "src/ui/screens/results.js": "17a8413fc6bf2c83bf92c13c60ddde243ea978651d9be70d3a21594ea0472ded",
+      "src/game/equipment-support.js": "12b6c6aa9b17bad42f38196a110a04d76a283a2f1ee2f813184d9e9be271822b",
+      "src/game/data.js": "0684cac453e80e70036ca34fb661226ca4798d9069c7d6c98413df03bf54cb2d",
+      "src/ui/screens/shop.js": "f392da49fa4bedeae5c043a4c494bc6d7b6127b2dc9fd58cadcdebef39159e21",
+      "src/ui/screens/career.js": "7513bad0eebcfa70b6bf236b53c29ef858d5448f1255d039e14487c019cb4529",
+      "src/ui/screens/garage.js": "13b05b5a927c071a86761d66d6fe08ae0673e4c892ce226981120e88e70e027b",
+      "src/ui/shell.js": "12a549edece76f1745caaa4fad6e0fc2b7c0bf46fd361f7a0002dc83ef930f21",
+      "src/game/economy.js": "ef98a6b8e7569f8542b541f9d8baad8e8c0f01193b088d2ef7ff3e433f7bcac6",
+      "src/game/progression.js": "98511563b7a80a03541f48497b0b1f21141b6b153aeb5405be3843bb77ba406e",
+      "tools/fixtures/field-save-browser.js": "d75651249190e1bd55516f32749bbb77c9388e6199cbdf4a2c8c0227ef30dd34",
+      "tools/checkfieldsave-browser.mjs": "9989be38f9bbbb5b10a0359c867a75d8469cb4144542d96963061bb77b7ea2b0",
+      "index.html": "80093df10d14000da429ff9ac9159dc55487d92769d539374872278e56f146a1"
+    },
+    "metrics": {
+      "caseCount": 33,
+      "casePassCount": 33,
+      "geometryRecordsInspected": 60,
+      "loadedFontRecords": 33,
+      "minimumCheckedTargetWidth": 90.09375,
+      "minimumCheckedTargetHeight": 44,
+      "localViolationCount": 0,
+      "viewportViolationCount": 0,
+      "errors": 0,
+      "requestFailures": 0,
+      "documentsServed": 36,
+      "cleanup": {
+        "browserClosed": true,
+        "serverClosed": true,
+        "errors": []
+      }
+    },
+    "screenshots": [
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/320x568-future-menu.png",
+        "sha256": "fdee8dc64e77a40cd468be2a5ef9dfd62037b1300d51034e65fcb9fadbce36b1",
+        "manuallyViewed": true
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/320x568-future-settings.png",
+        "sha256": "a16e9ce404cf8e7b3eebf7a86a4fb21f309e6261e81f12d4756cd9b997635c2e",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/320x568-grind-eligible.png",
+        "sha256": "5295fef14501a4476568bbdacfd2aef07c8f2b23ed55f67eafcb681cafcbe5f3",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/320x568-grind-exhausted.png",
+        "sha256": "0de87a1accab3b430678e5cd47deffb0dd196ddb16736f922a0f21aff957d77e",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/320x568-grind-no-grinder.png",
+        "sha256": "e251264d173058d2f6ff928b26968eacbeb4fc58f00c29f6b2ee38d1f463f8ba",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/320x568-grind-no-skill.png",
+        "sha256": "a8ad6cb12180d5c37f5bbfef333f2484d3e3e941cdbed4735e396f6d76963a49",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/320x568-grind-success-menu.png",
+        "sha256": "64aa7b5b848ae9faf22385b19b803d58a5fd9550cadebe4dde76d65a09142959",
+        "manuallyViewed": true
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/320x568-grind-success.png",
+        "sha256": "e66d0428a0ed2b150d513aabe9c48df274f4b45929c2e45246ab0bb220939814",
+        "manuallyViewed": true
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/320x568-grind-used.png",
+        "sha256": "c175832c9dc2b685c5e3eb3bc8b684ad3d6e08b0b5626806c878b82014b880b3",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/320x568-quota-menu.png",
+        "sha256": "e0e0e8bb191bb8f537be2f464a7a05fc4cd21b9f059eafec46eaf0adf3dc39f8",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/320x568-quota-settings.png",
+        "sha256": "1169d5cf99f35fa0a8c2fcb5c4e6568123a92669d38519452e1f931178d93add",
+        "manuallyViewed": true
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/320x568-read-failed-menu.png",
+        "sha256": "b40f16575ac6d894657b2cb2212c9cacefe608eff5d759e19cd8a6b64988c20b",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/320x568-read-failed-settings.png",
+        "sha256": "ab9af0668c02cea65b6490cdf09714fa83dca4fbc1fb25e5d4a1eab5f1f86f4a",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/320x568-recovered-menu.png",
+        "sha256": "30f4e1b0f03cacb9aab741bc0dfacfd2083304c69b65725f46da3a6e1921c908",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/320x568-recovered-settings.png",
+        "sha256": "23f1fb3a8bb05331e7b70ef3dde7c5a0d5e860ffc558204edbd576cafcd3c75b",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/320x568-reload-cancel.png",
+        "sha256": "0674b1d0075f6ff69cf295afd538d63ee2bbcdb6a3bc92b586c35a524c9a7efe",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/320x568-reload-confirm.png",
+        "sha256": "0674b1d0075f6ff69cf295afd538d63ee2bbcdb6a3bc92b586c35a524c9a7efe",
+        "manuallyViewed": true
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/320x568-saved-career-available.png",
+        "sha256": "9cba0368c2dee0f3c09bd011fdbab0eb47d9b90087550bf92048a527687ae7b5",
+        "manuallyViewed": true
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/320x568-unreadable-menu.png",
+        "sha256": "c48d1a4db8d6e7ef711bf56714fa69d03c0c8cbfad297188660b320551fe5649",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/320x568-unreadable-settings.png",
+        "sha256": "7edee8a5c5536b31105ff5576bdc88a905241b033b96160c0957564c1ecdaa94",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/360x780-future-menu.png",
+        "sha256": "b1991eb64dd80a09aa4fab7ef7fe85b92cf9565ac7e203520e21e2857d7bff54",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/360x780-future-settings.png",
+        "sha256": "dc64423a018717a32acb43fd6df67ad3abd2119cf9c0dc4f395715e34f14ee96",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/360x780-grind-eligible.png",
+        "sha256": "b6d7019be830eff6cbc498d5d0c24ea7b000ebbf33877b79a268db0904646393",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/360x780-grind-exhausted.png",
+        "sha256": "d68bc74f5302ef395de2d9c7f475947ee03fb9b40ce2b87fc34e2b2cebefbacf",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/360x780-grind-no-grinder.png",
+        "sha256": "45e0b6cd2922ecddc2d39a0ea3ce68860ca15d93f3e320081488b4fd3ccf23a7",
+        "manuallyViewed": true
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/360x780-grind-no-skill.png",
+        "sha256": "3250de4800ceb4b020fefe70be4cb1ec8840a82f5d645c10bea825476c199afe",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/360x780-grind-success-menu.png",
+        "sha256": "841c78e911b333faabef55d328b49757fb7d4dd3441ded4600e1356dbf026b5c",
+        "manuallyViewed": true
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/360x780-grind-success.png",
+        "sha256": "acecf7d72920c27789e59cfb58be8f10c0b6bc3d61a168cc4e22288d332445bd",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/360x780-grind-used.png",
+        "sha256": "70ec297e7ad6ace2645c033a5f3c51659cec51fa247ec6cf8f2d45be046ad3f3",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/360x780-quota-menu.png",
+        "sha256": "2ef3627cd7f78dfd1352420279c75fb7d370a0585e5b8b371ccaa9959e2e1351",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/360x780-quota-settings.png",
+        "sha256": "cc26f800873fbe4900d1bcc3f8ae429d62babce3aa330873e3ff1e558bac37b3",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/360x780-read-failed-menu.png",
+        "sha256": "5d73d406af44a6d7306c9d85419eb8da0594f763928078a7cd0de40fb8515ac4",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/360x780-read-failed-settings.png",
+        "sha256": "f2f39641b35fdd491df10137a73e69f204b8cea87085ede1e6bf3b1fad8a0375",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/360x780-recovered-menu.png",
+        "sha256": "ada4c9bc4c56d2262cd2f3d6cb7143786d5adf75af2ed0d3adfd81753423337b",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/360x780-recovered-settings.png",
+        "sha256": "7fcdfd40f11b1c2cf305fe9239e3f2e217547b0335f63d0146254fbc6f087d5b",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/360x780-reload-cancel.png",
+        "sha256": "4d8dc2972f7b73c8ac0fd0d4af850db64f72940438adcbd31c09bf5802df2b20",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/360x780-reload-confirm.png",
+        "sha256": "4d8dc2972f7b73c8ac0fd0d4af850db64f72940438adcbd31c09bf5802df2b20",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/360x780-saved-career-available.png",
+        "sha256": "701101d34965af5e25b4919df3ab8e3d46f8aebfdf6f863b9bfb05e45ea0e4c5",
+        "manuallyViewed": true
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/360x780-unreadable-menu.png",
+        "sha256": "144259ece784a800b52ef083cc4f7d46c156f86ca298beecb316986ca85ce452",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/360x780-unreadable-settings.png",
+        "sha256": "c1beed5be6efb66851fee34fbf7d4d3058e47ae3eada84ac56a8d36bef69e0ac",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/390x844-future-menu.png",
+        "sha256": "07b97a293bbf8f279f399e7b26e86e2a32c3355a9cb7b8e338c2b25bea0ee66c",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/390x844-future-settings.png",
+        "sha256": "a5f50dcc08d4d9a01cec4b726cc74524fb7511ee883925cd32db0be564a3bbb5",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/390x844-grind-eligible.png",
+        "sha256": "6d119f4a2936f35522f423aa51e462886bf2265c7f5e17bc93bb4a8d6ae7804e",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/390x844-grind-exhausted.png",
+        "sha256": "3bcf22b8d2db6b1fa7ecf514a882629f5a203f8d521d65288d852c1526727e2a",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/390x844-grind-no-grinder.png",
+        "sha256": "f515fbef3f183f29c053191bf12b832b12720bec794d0950b056c893f58eb305",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/390x844-grind-no-skill.png",
+        "sha256": "52531454dc497d2395860a94c9d116150e029eccfc43c4c3d304cbaa4d0074f2",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/390x844-grind-success-menu.png",
+        "sha256": "a3a72c4aa201b039ca9e2748c1db87501f9e0dcc5b555ea1a0337b34effaf163",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/390x844-grind-success.png",
+        "sha256": "916f1c8265433a912bc37ebec163e7d74095113e0e53862b38b900039933b3c5",
+        "manuallyViewed": true
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/390x844-grind-used.png",
+        "sha256": "db55f6516dd9c46fb8c52d12db732ecbb9acf5606ed17f5ae736785d7f2d55a2",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/390x844-quota-menu.png",
+        "sha256": "c335f58323b26d8c12c1333a83c0dcd9473eab0e96d5596bfafef3deff63af45",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/390x844-quota-settings.png",
+        "sha256": "16ad574971e14d1d63cc302ee0f0e8915e9e3e074505219fad56da67c8287e3a",
+        "manuallyViewed": true
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/390x844-read-failed-menu.png",
+        "sha256": "8226e4b05e265559ef8389a7c7368ee7e0d13a186c42256bae946dd12341788e",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/390x844-read-failed-settings.png",
+        "sha256": "127a213c3ec35bdd5a48f28134940dd61262247de75845320278ff6c3c26ccec",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/390x844-recovered-menu.png",
+        "sha256": "29abd6ab7745a19b0029de5f9abf56b873e5400f26913a9c851c3ca77f96d424",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/390x844-recovered-settings.png",
+        "sha256": "bee1e435d930c747a046f5146f4a4053055e2530e9ca509e937c476846b77f73",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/390x844-reload-cancel.png",
+        "sha256": "3d9802778b8f7ed5492b53a493128d96f14b4039fb2e0e47627ecf4a3fa90648",
+        "manuallyViewed": true
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/390x844-reload-confirm.png",
+        "sha256": "3d9802778b8f7ed5492b53a493128d96f14b4039fb2e0e47627ecf4a3fa90648",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/390x844-saved-career-available.png",
+        "sha256": "69dbf1404b4805498b8efcb192af2867e8cf1bcd72a0becea875d3dd8f0c4a74",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/390x844-unreadable-menu.png",
+        "sha256": "6891aed26675061269f0f9ceb6e7ab4bb4e5ea227ac68b95a41b59a59f3111dc",
+        "manuallyViewed": false
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/notification-flow/accepted/390x844-unreadable-settings.png",
+        "sha256": "d6cc89ca14d77940e8e59519cff91aa332446b6333190b8f8672616cbd2c6b5e",
+        "manuallyViewed": false
+      }
+    ],
+    "modalReports": [
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/modal-focus/report.json",
+        "sha256": "563a0bcf230ddd5885552bc652a0a7ee62bb8b10bbc5cdffbf1c901b0d82b5c2",
+        "status": "PASS",
+        "caseCount": 17
+      },
+      {
+        "path": "C:/Users/henri/Downloads/threads/drillity-notification-flow/evidence/modal-focus/adversarial-report.json",
+        "sha256": "2235e1acf2cbeb798119ff006d3167b44468c147e1e5b6519e5e4f1c98c81300",
+        "status": "PASS",
+        "caseCount": 8
+      }
+    ],
+    "limits": [
+      "Isolated candidate; no assertion that root integrated or committed it",
+      "Normal clean Menu case has no independent geometry capture",
+      "Save fault arriving when its notice is scrolled offscreen not exercised",
+      "No physical phone, Safari, assistive-device, WebGL background, contrast compliance or global game no-overlap claim"
+    ]
+  }
+}
