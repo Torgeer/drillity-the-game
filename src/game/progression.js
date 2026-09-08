@@ -28,7 +28,7 @@ import {
   rigDepthCapacity, DEPTH_IS_VERTICAL,
 } from './data.js';
 import {
-  settleRun, priceWithMarkup, resaleValue, travelCost, certCost,
+  settleRun, xpForContract, priceWithMarkup, resaleValue, travelCost, certCost,
   resolveSkills, emergencyContract, wearFromRun, rigServiceCost, rigWearPerHour,
   PAY_UNITS, BOLTS_PER_DRIVE_METRE, ropBasisFactor, holeMetresFor,
   materialsCoveredSlots, ECON,
@@ -635,7 +635,7 @@ export function createProgression(ctx) {
     return { ok: true, reason: '' };
   }
 
-  /** Fill every slot a method uses with the best owned item for it. */
+  /** Fill method slots with the best owned item supported by its runtime. */
   function autoLoadout(methodId) {
     const method = getMethod(methodId);
     if (!method) return {};
@@ -643,7 +643,8 @@ export function createProgression(ctx) {
     for (const slot of method.toolSlots) {
       const candidates = state.garage.owned
         .map(getItem)
-        .filter((i) => i && i.slot === slot && (i.methods.length === 0 || i.methods.includes(methodId)))
+        .filter((i) => i && i.slot === slot && (i.methods.length === 0 || i.methods.includes(methodId))
+          && (slot !== 'hammer' || checkEquipmentSupport(methodId, i.id, getItem).ok))
         .sort((a, b) => (b.stats.ropMult * (b.stats.life || 1)) - (a.stats.ropMult * (a.stats.life || 1)));
       if (candidates.length) equip(slot, candidates[0].id);
     }
@@ -820,7 +821,14 @@ export function createProgression(ctx) {
     const rig = able.find((r) => r.id === state.garage.rigId) || able[0];
     const from = currentCareer?.lastRegionId || state.world.regionId;
     const mobilisation = travelCost(from, contract.regionId, { rigId: rig.id, skills: skills() });
-    if (!canAfford(mobilisation)) {
+    // Debt cannot fund normal work, but it must not block the zero-cost
+    // safety net. Match the current call-out's identity, workload and payout:
+    // tagging an ordinary card as an emergency must not exempt it.
+    const rescue = contract.emergency === true && mobilisation === 0 ? rescueContract() : null;
+    const zeroCostRescue = rescue !== null
+      && ['id', 'methodId', 'regionId', 'targetDepth', 'holes', 'payout']
+        .every(key => contract[key] === rescue[key]);
+    if (!canAfford(mobilisation) && !zeroCostRescue) {
       return {
         ok: false,
         reason: `Mobilisation costs €${mobilisation}; need €${Math.ceil(mobilisation - state.player.money)} more`,
@@ -924,19 +932,19 @@ export function createProgression(ctx) {
    * below hands settleRun the bolts actually installed, and the base becomes
    * rate x units instead of a lump sum divided by a distance.
    */
-  function perHoleContract(contract, depth) {
+  function perHoleContract(contract, depth, deliveredFraction = 1) {
     const holes = Math.max(1, contract.holes || 1);
     return {
       ...contract,
       holes: 1,
       metres: depth,
-      payout: Math.round(contract.payout / holes),
+      payout: Math.round(Math.round(contract.payout / holes) * deliveredFraction),
       bonus: {
-        time: Math.round((contract.bonus?.time || 0) / holes),
-        quality: Math.round((contract.bonus?.quality || 0) / holes),
+        time: Math.round(Math.round((contract.bonus?.time || 0) / holes) * deliveredFraction),
+        quality: Math.round(Math.round((contract.bonus?.quality || 0) / holes) * deliveredFraction),
       },
       deadlineHours: Math.max(1, (contract.deadlineHours || 1) / holes),
-      reputationReward: Math.max(1, Math.round((contract.reputationReward || 10) / holes)),
+      reputationReward: Math.round(Math.max(1, Math.round((contract.reputationReward || 10) / holes)) * deliveredFraction),
     };
   }
 
@@ -945,7 +953,7 @@ export function createProgression(ctx) {
    * is sold by the unit — or null for the nineteen that are sold by the metre.
    *
    * The simulation publishes both of them and always has: `rockbolt` reports
-   * `boltIndex` / `boltsTotal` on `state.drill` and `quality.detail.bolts` in
+   * `boltIndex` / `boltsTotal` on `state.drill` and `quality.bolts` in
    * the completion breakdown, and `driven-pile` reports whether the pile was
    * `founded`. Nothing was reading either, so a bolter who left a third of the
    * pattern out was paid the same as one who did not.
@@ -955,7 +963,12 @@ export function createProgression(ctx) {
   function unitsFor(contract, payload) {
     const spec = PAY_UNITS[contract?.methodId];
     if (!spec) return null;
-    const detail = payload?.breakdown?.quality?.detail || null;
+    const quality = payload?.breakdown?.quality;
+    // Current simulation records are flat. Retain the older nested record
+    // shape for legacy callers, but never let it override explicit live facts.
+    const detail = quality && typeof quality === 'object' && !Array.isArray(quality)
+      ? (typeof quality.founded === 'boolean' || Number.isFinite(quality.bolts)
+        ? quality : quality.detail ?? quality) : null;
     if (contract.methodId === 'rockbolt') {
       const bolts = detail?.bolts ?? state.drill?.boltIndex;
       // No reading at all: fall back to the design pattern for the depth
@@ -973,7 +986,7 @@ export function createProgression(ctx) {
       // delivered what the ground allowed. A pile that simply stopped short of
       // both is not a pile the client asked for.
       if (detail && typeof detail.founded === 'boolean') {
-        return (detail.founded || detail.hardRefused) ? 1 : 0;
+        return (detail.founded || detail.hardRefused === true) ? 1 : 0;
       }
       return 1;
     }
@@ -1018,11 +1031,16 @@ export function createProgression(ctx) {
   }
 
   function settleHole(contract, payload) {
-    const depth = Math.max(0.1, Number(payload.depth) || contract.targetDepth || 1);
+    const sounding = contract.methodId === 'site-investigation'
+      && payload.breakdown?.quality?.axis === 'SOUNDING';
+    const depth = sounding
+      ? clamp(Number.isFinite(payload.depth) ? payload.depth : 0, 0, contract.targetDepth)
+      : Math.max(0.1, Number(payload.depth) || contract.targetDepth || 1);
+    const deliveredFraction = sounding ? depth / contract.targetDepth : 1;
     const grade = String(payload.grade || 'C').toUpperCase();
     const firstTime = !career().firstTimes[contract.methodId];
 
-    const slice = perHoleContract(contract, depth);
+    const slice = perHoleContract(contract, depth, deliveredFraction);
 
     /* ── HOW LONG DID THAT ACTUALLY TAKE? ──────────────────────────────────
        This read `payload.timeSec / 3600` and called the answer job hours. It
@@ -1058,7 +1076,11 @@ export function createProgression(ctx) {
         : estimateHours(contract.methodId, depth, contract.hardness ?? 0.5, 1)
           * ropBasisFactor(contract.methodId) * parRatio)
       : null;
-    if (parRatio == null) {
+    // Stopping a real sounding before its first tick has a valid zero clock.
+    // It retains estimated setup costs; it is not a missing-time payload.
+    const emptySounding = sounding && depth === 0 && par?.actualSec === 0
+      && Number.isFinite(par?.parSec) && par.parSec > 0;
+    if (parRatio == null && !emptySounding) {
       /* This is the ~48x under-charge coming back if it is ever the normal
          path. `hoursOverride: null` sends settleRun to its own estimate, which
          is a fair number for a hole but knows nothing about how the player
@@ -1092,6 +1114,14 @@ export function createProgression(ctx) {
       firstTime,
       hoursOverride: hours,
     });
+    if (sounding) {
+      // Economy owns XP, including the fixed per-hole and first-method terms.
+      // Evaluate the full one-hole award and prorate it once; evaluating on
+      // actual metres first would reduce the metre component twice.
+      result.xp = Math.round(xpForContract(perHoleContract(contract, contract.targetDepth), {
+        grade, holesCompleted: 1, skills: skills(), firstTime,
+      }) * deliveredFraction);
+    }
 
     // Consume before publishing any money, XP or scene event. The next hole
     // is armed by the sim/no-sim DRILL_START lifecycle and survives reload.
@@ -1110,7 +1140,7 @@ export function createProgression(ctx) {
     addReputation(contract.regionId, rep);
     advanceTime(result.hours);
 
-    career().firstTimes[contract.methodId] = true;
+    if (deliveredFraction > 0) career().firstTimes[contract.methodId] = true;
 
     // ── the machine gets tired too ───────────────────────────────────────
     wearRig(result.hours);
@@ -1140,6 +1170,7 @@ export function createProgression(ctx) {
       hole: run.holesDone,
       of: contract.holes,
       depth,
+      ...(sounding ? { targetDepth: contract.targetDepth, deliveredFraction } : {}),
       grade,
       revenue: result.revenue,
       costs: result.costs,
@@ -1905,7 +1936,7 @@ export function createProgression(ctx) {
     advanceTime, certDaysRemaining, hasCerts,
 
     // persistence
-    save, load, reset, serialise,
+    save, load, reset, serialise, requestSave: markDirty,
 
     // ui bridge — the names ui/shell.js and the screens probe for
     getSummary,

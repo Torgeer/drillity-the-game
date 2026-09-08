@@ -8735,7 +8735,7 @@ export function createDrillSim(ctx = {}) {
       const p = S.prog;
       if (!p || p.kind !== 'probe' || p.mode !== 'cpt') return { ok: false, reason: 'not-a-cpt' };
       if (S.phase !== 'drilling') return { ok: false, reason: `busy:${S.phase}` };
-      beginBeat('dissipation', S.m.probe.cpt.dissipationSec, { kind: 'dissipation' });
+      beginBeat('dissipation', T.hazard.coneDesat.dissipationSec, { kind: 'dissipation' });
       return { ok: true, kind: 'dissipation' };
     }
 
@@ -8869,7 +8869,10 @@ export function createDrillSim(ctx = {}) {
     // A synchronous completion listener may start the next hole. Its identity
     // must not leak into this attempt's later stop notification.
     const identity = { runId: S.runId, attemptId: S.attemptId };
-    S.depth = S.target;
+    // A terminated CPT sounding delivers the measured depth, including zero.
+    // Other programmes retain their own existing contract-completion unit.
+    const sounding = S.prog?.kind === 'probe' && S.prog.mode === 'cpt';
+    S.depth = sounding ? clamp(S.depth, 0, S.target) : S.target;
     S.active = false;
     S.phase = 'complete';
     S.stopReason = 'complete';

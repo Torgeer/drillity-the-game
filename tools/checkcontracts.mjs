@@ -3,7 +3,8 @@
  * Contract board DOM gate. Uses the production shell, screen, data and
  * progression in a DOM-only fixture: no renderer, audio or simulation loop.
  *
- *   node tools/checkcontracts.mjs --self-test
+ *   node tools/checkcontracts.mjs --cpu
+ *   node tools/checkcontracts.mjs --self-test  # also checks real contract data
  *   node tools/checkcontracts.mjs 5184 --headed
  *   node tools/checkcontracts.mjs 5184 --headed --gpu-owner <coordination/gpu-owner.txt>
  *   node tools/checkcontracts.mjs 5204 --headed --gpu-lease contract-readiness
@@ -13,14 +14,11 @@
  * Every generated value comes from game/data.js; fixture overrides label
  * exceptional states, and are test cases rather than economic claims.
  */
-import { chromium } from 'playwright';
-import { createServer } from 'vite';
 import { mkdir, writeFile, readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
 import { createHash } from 'node:crypto';
 import assert from 'node:assert/strict';
-import productionConfig from '../vite.config.js';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const args = process.argv.slice(2);
@@ -56,7 +54,7 @@ function layoutFailures(result) {
   return failures;
 }
 
-if (args.includes('--self-test')) {
+function checkLayoutVerdicts() {
   const valid = { targets: [{ w: 44, h: 44 }], textCount: 1, rootBox: { w: 320, h: 568 },
     clipped: [], overflow: [], overlaps: [], textOverlaps: [], externalOcclusion: [] };
   assert.deepEqual(layoutFailures(valid), []);
@@ -67,9 +65,91 @@ if (args.includes('--self-test')) {
   ];
   for (const fault of bad) assert.ok(layoutFailures({ ...valid, ...fault }).length, JSON.stringify(fault));
   console.log(`PASS: 1 valid layout and ${bad.length} rejected verdict fixtures; no browser launched`);
+}
+
+/** CPU coverage is real generated content, not a substitute for the headed
+ * DOM checks below. Keep --self-test as an alias so existing package scripts
+ * cannot accidentally run only the layout verdict fixtures again. */
+async function checkContractData() {
+  const dataPath = resolve(ROOT, 'src/game/data.js');
+  const dataHash = createHash('sha256').update(await readFile(dataPath)).digest('hex');
+  const [D, { makeRandom }] = await Promise.all([
+    import('../src/game/data.js'), import('../src/core/contract.js'),
+  ]);
+  assert.ok(D.METHODS.length && D.REGIONS.length, 'production contract tables must be nonempty');
+  assert.deepEqual(D.validateData(), [], 'production data.js validation');
+  const levels = [...new Set([1, D.MAX_LEVEL, ...D.METHODS.map((m) => m.unlockLevel),
+    ...D.REGIONS.map((r) => r.unlockLevel)])].sort((a, b) => a - b);
+  const seenMethods = new Set(), seenRegions = new Set();
+  let boards = 0, contracts = 0;
+  for (const region of D.REGIONS) for (const level of levels) {
+    if (level < region.unlockLevel) continue;
+    const available = new Set(D.methodsForRegion(region.id, level).map((m) => m.id));
+    assert.ok(available.size, `${region.id} level ${level}: no offerable methods`);
+    for (const seed of [64007, 9035, 20260905]) {
+      const context = `${region.id} level ${level} seed ${seed}`;
+      const board = D.makeContractBoard(region.id, level, makeRandom(seed), 5);
+      assert.ok(Array.isArray(board), `${context}: board must be an array`);
+      assert.equal(board.length, 5, `${context}: expected five real contracts`);
+      assert.deepEqual(board, D.makeContractBoard(region.id, level, makeRandom(seed), 5),
+        `${context}: generation must be deterministic`);
+      const ids = new Set();
+      for (const c of board) {
+        assert.ok(c && typeof c === 'object', `${context}: contract must be an object`);
+        const label = `${context} ${c.id}`;
+        for (const field of ['id', 'title', 'client', 'description', 'unitNoun']) {
+          assert.equal(typeof c[field], 'string', `${label}: ${field} must be text`);
+          assert.ok(c[field].trim(), `${label}: ${field} must not be blank`);
+          assert.doesNotMatch(c[field], /\b(?:undefined|NaN)\b/, `${label}: ${field} has unresolved content`);
+        }
+        assert.ok(!ids.has(c.id), `${label}: duplicate identity on board`);
+        ids.add(c.id);
+        assert.equal(c.regionId, region.id, `${label}: wrong region`);
+        assert.ok(available.has(c.methodId), `${label}: unavailable method ${c.methodId}`);
+        const method = D.getMethod(c.methodId), archetype = D.getArchetype(c.archetype);
+        assert.equal(c.requiredMethod, c.methodId, `${label}: required method disagrees`);
+        assert.ok(D.getApplication(c.applicationId), `${label}: unknown application`);
+        assert.ok(region.applications.includes(c.applicationId) && method.applications.includes(c.applicationId),
+          `${label}: application does not serve method and region`);
+        assert.ok(archetype && D.archetypesFor(c.methodId, c.regionId, c.applicationId).includes(c.archetype),
+          `${label}: invalid site archetype`);
+        assert.equal(c.sitePlane, archetype.plane, `${label}: site plane disagrees with archetype`);
+        assert.equal(c.flushMedium, method.flushMedium || null, `${label}: flush medium disagrees with method`);
+        for (const field of ['targetDepth', 'holeDia', 'metres', 'estimatedHours', 'deadlineHours']) {
+          assert.ok(Number.isFinite(c[field]) && c[field] > 0, `${label}: ${field} must be finite and positive`);
+        }
+        assert.ok(Number.isInteger(c.holes) && c.holes > 0, `${label}: holes must be a positive integer`);
+        assert.ok(Number.isFinite(c.payout) && c.payout >= 0, `${label}: payout must be finite and nonnegative`);
+        assert.equal(c.metres, +(c.targetDepth * c.holes).toFixed(1), `${label}: total metres disagree with scope`);
+        assert.ok(c.deadlineHours >= c.estimatedHours, `${label}: deadline precedes estimated completion`);
+        assert.ok(Number.isInteger(c.difficulty) && c.difficulty >= 1 && c.difficulty <= 5,
+          `${label}: difficulty must be 1 through 5`);
+        assert.ok(c.constraint?.id && c.constraint?.label?.trim(), `${label}: missing constraint`);
+        assert.ok(Array.isArray(c.requiredCerts), `${label}: required certificates must be an array`);
+        assert.equal(new Set(c.requiredCerts).size, c.requiredCerts.length, `${label}: duplicate required certificate`);
+        for (const cert of c.requiredCerts) assert.ok(D.getCert(cert), `${label}: unknown certificate ${cert}`);
+        seenMethods.add(c.methodId); seenRegions.add(c.regionId); contracts++;
+      }
+      boards++;
+    }
+  }
+  assert.deepEqual([...seenMethods].sort(), D.METHODS.map((m) => m.id).sort(), 'generated coverage includes every production method');
+  assert.deepEqual([...seenRegions].sort(), D.REGIONS.map((r) => r.id).sort(), 'generated coverage includes every production region');
+  assert.equal(createHash('sha256').update(await readFile(dataPath)).digest('hex'), dataHash,
+    'production data.js stayed unchanged during contract generation');
+  console.log(`PASS: production data.js sha256=${dataHash}; ${boards} boards, ${contracts} contracts, ${seenMethods.size} methods, ${seenRegions.size} regions`);
+  console.log('CPU contract data and verdict checks only; headed DOM/layout/interaction verification was not run.');
+}
+
+if (args.includes('--cpu') || args.includes('--self-test')) {
+  checkLayoutVerdicts();
+  await checkContractData();
   process.exit(0);
 }
 if (!headed) throw new Error('Use --headed with a granted contract-board GPU slot; headless results are not accepted.');
+const [{ chromium }, { createServer }, { default: productionConfig }] = await Promise.all([
+  import('playwright'), import('vite'), import('../vite.config.js'),
+]);
 const out = resolve(ROOT, '.contract-qa', baseline ? 'baseline' : 'current');
 await mkdir(out, { recursive: true });
 const findings = [];
@@ -305,7 +385,8 @@ async function measureTargetAccess(selector) {
 
 async function sourceHashes() {
   return Object.fromEntries(await Promise.all([
-    'src/game/progression.js', 'src/ui/screens/contracts.js', 'src/ui/screens/contracts.css', 'tools/checkcontracts.mjs',
+    'src/core/contract.js', 'src/game/data.js', 'src/game/progression.js',
+    'src/ui/screens/contracts.js', 'src/ui/screens/contracts.css', 'tools/checkcontracts.mjs',
   ].map(async (path) => [path, createHash('sha256').update(await readFile(resolve(ROOT, path))).digest('hex')])));
 }
 const verifiedSources = await sourceHashes();

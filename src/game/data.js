@@ -27,6 +27,7 @@
  */
 
 import { GROUND, makeRandom, clamp } from '../core/contract.js';
+import { checkEquipmentSupport } from './equipment-support.js';
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Freeze helper — every exported table is deeply immutable.
@@ -6379,13 +6380,15 @@ export function familiesIn(superGroup) {
   return [...set];
 }
 
-/** Default loadout for a method: the cheapest owned-or-startable valid item. */
+/** Cheapest unlocked, runtime-supported suggestions; does not buy or equip. */
 export function defaultLoadoutFor(methodId, level = 1) {
   const method = getMethod(methodId);
   const out = {};
   if (!method) return out;
   for (const slot of method.toolSlots) {
-    const options = itemsForMethod(methodId, { level, slot }).sort((a, b) => a.price - b.price);
+    const options = itemsForMethod(methodId, { level, slot })
+      .filter(item => slot !== 'hammer' || checkEquipmentSupport(methodId, item.id, getItem).ok)
+      .sort((a, b) => a.price - b.price);
     out[slot] = options.length ? options[0].id : null;
   }
   return out;

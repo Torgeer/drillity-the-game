@@ -53,7 +53,7 @@ const beds = (params) => {
 
 try {
   put('package.json', '{"type":"module"}');
-  for (const path of ['tools/checkbeds.mjs', 'tools/checkbuild.mjs',
+  for (const path of ['tools/checkbeds.mjs', 'tools/checkbuild.mjs', 'tools/servedSourceIdentity.mjs',
     'src/core/contract.js', 'vite.config.js']) copy(path);
   pass(beds());
   pass(beds({ vertical: true }));

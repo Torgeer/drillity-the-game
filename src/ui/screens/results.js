@@ -221,7 +221,18 @@ export function createResultsScreen(app) {
      to be a visible way off this screen in the first frame; the old sticky bar
      sat in the middle of the page (the content never overflowed) and stayed
      invisible for the best part of a second. */
-  const againBtn = C.Button({ label: 'Next contract', kind: 'amber', icon: 'play', onTap: () => app.nav(SCENES.CONTRACTS) });
+  const againBtn = C.Button({ label: 'Next contract', kind: 'amber', icon: 'play', onTap: () => {
+    const contract = state.contract;
+    app.nav(contract ? SCENES.SITE : SCENES.CONTRACTS, contract ? { contract } : undefined);
+  } });
+  let nextActionLabel = '';
+  function syncNextAction() {
+    const label = state.contract ? (app.ctx.sim?.active ? 'Resume hole' : 'Next hole') : 'Next contract';
+    if (label === nextActionLabel) return;
+    nextActionLabel = label;
+    againBtn.querySelector('.btn__label').textContent = label;
+    againBtn.setAttribute('aria-label', label);
+  }
   const shopBtn = C.Button({ label: 'iMarket', kind: 'ghost', icon: 'cart', onTap: () => app.nav(SCENES.SHOP) });
   const actionsEl = C.h('div.results__actions', shopBtn, againBtn);
 
@@ -635,6 +646,7 @@ export function createResultsScreen(app) {
     el,
 
     mount(params) {
+      syncNextAction();
       summary = buildSummary(params);
       const sm = summary;
       /* Handed in by ui/shell.js, which holds it across the settlement
@@ -1007,6 +1019,7 @@ export function createResultsScreen(app) {
     },
 
     update(dt) {
+      syncNextAction();
       clock += dt;
       for (const step of timeline) {
         if (!step.done && clock >= step.t) {

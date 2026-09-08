@@ -81,12 +81,20 @@ export function createMenuScreen(app) {
   /* ── Settings sheet ───────────────────────────────────────────────────── */
   function openSettings() {
     const s = state.settings || (state.settings = {});
+    function setSetting(key, value) {
+      if (s[key] === value) return;
+      s[key] = value;
+      // Share progression's debounce: dragging a volume slider updates live
+      // state immediately and queues one save. Its pagehide/visibility hooks
+      // flush the latest value even before the next frame.
+      app.ctx.progression?.requestSave?.();
+    }
     const body = C.h('div', { style: { display: 'flex', 'flex-direction': 'column', gap: '20px' } });
 
     body.appendChild(C.h('div',
       C.h('p.label', { text: 'Graphics quality' }),
       Segmented(['auto', 'low', 'medium', 'high'], s.quality || 'auto', (v) => {
-        s.quality = v;
+        setSetting('quality', v);
         app.bus.emit(EVENTS.QUALITY_CHANGE, { tier: v });
         app.toast(`Quality: ${v}`, 'info');
       }),
@@ -94,8 +102,8 @@ export function createMenuScreen(app) {
 
     body.appendChild(C.h('div',
       C.h('p.label', { text: 'Feel' }),
-      Toggle('Haptics', s.haptics !== false, (v) => { s.haptics = v; if (v) app.haptic('medium'); }),
-      Toggle('Reduced motion', !!s.reducedMotion, (v) => { s.reducedMotion = v; }),
+      Toggle('Haptics', s.haptics !== false, (v) => { setSetting('haptics', v); if (v) app.haptic('medium'); }),
+      Toggle('Reduced motion', !!s.reducedMotion, (v) => { setSetting('reducedMotion', v); }),
     ));
 
     /* ── The two volume sliders ────────────────────────────────────────────
@@ -118,8 +126,8 @@ export function createMenuScreen(app) {
        one reader. */
     body.appendChild(C.h('div',
       C.h('p.label', { text: 'Audio' }),
-      HSlider('Effects', s.sfx ?? 0.85, (v) => { s.sfx = v; }),
-      HSlider('Music', s.music ?? 0.5, (v) => { s.music = v; }),
+      HSlider('Effects', s.sfx ?? 0.85, (v) => { setSetting('sfx', v); }),
+      HSlider('Music', s.music ?? 0.5, (v) => { setSetting('music', v); }),
     ));
 
     const stats = state.player?.stats || {};

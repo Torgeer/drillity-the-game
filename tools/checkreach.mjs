@@ -386,7 +386,11 @@ const say = (s = '') => console.log(s);
    a gate nobody runs is the empty-set problem one level up. It now measures a
    dev server that is already up, or starts one for the run and stops it after.
    See ./devserver.mjs. */
-const SERVER = await ensureServer(PORT, say);
+const json = { model: { W, H, PX_PER_MM, PIVOT_OUT_MM, PIVOT_DOWN_MM, R_IN_MM, arc: ARC }, cases: {} };
+const fails = [];
+let SERVER, b, runFailure;
+try {
+SERVER = await ensureServer(PORT, say);
 /* ── --headless: OPT-IN, AND IT MEASURES THE SAME THING ────────────────────
    Every number this gate produces is a `getBoundingClientRect()` and a class
    name. None of it is a frame, a draw call or a pixel, so unlike
@@ -404,7 +408,7 @@ const SERVER = await ensureServer(PORT, say);
    which is the thing the flag exists to avoid. Layout is identical either
    way; if it ever is not, that difference is a finding and not a nuisance. */
 const HEADLESS = argv.includes('--headless');
-const b = await chromium.launch({
+b = await chromium.launch({
   headless: HEADLESS, channel: 'chrome',
   args: HEADLESS
     ? ['--mute-audio', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader']
@@ -429,10 +433,8 @@ const ORIGIN = SERVER.origin;
 try {
   await p.request.fetch(ORIGIN, { method: 'HEAD', timeout: 120000 });
 } catch (e) {
-  SERVER.stop();
-  console.error(`Cannot reach ${ORIGIN} — start the dev server first:\n\n    npm run dev\n\n  (${e.message.split('\n')[0]})`);
-  await b.close();
-  process.exit(2);
+  process.exitCode = 2;
+  throw new Error(`Cannot reach ${ORIGIN}: ${e.message.split('\n')[0]}`, { cause: e });
 }
 await p.goto(`${ORIGIN}/?quality=low&shot`, { waitUntil: 'domcontentloaded', timeout: 180000 });
 await p.waitForFunction(() => window.__DRILLITY?.ui?.show && window.__DRILLITY?.sim, null, { timeout: 240000 });
@@ -455,9 +457,6 @@ for (const hand of ['right', 'left']) {
   say(`  ${hand.padEnd(5)}        easy <= ${ARC[hand].easy.toFixed(0)} px, stretch <= ${ARC[hand].stretch.toFixed(0)} px`
     + '   (solved for 1/3 and 2/3 of the screen)');
 }
-
-const json = { model: { W, H, PX_PER_MM, PIVOT_OUT_MM, PIVOT_DOWN_MM, R_IN_MM, arc: ARC }, cases: {} };
-const fails = [];
 
 for (const m of CASES) {
   await p.evaluate(GOTO_SITE, m);
@@ -537,8 +536,21 @@ for (const m of CASES) {
 }
 
 await p.screenshot({ path: '.hudqa/reach-last.png' });
-await b.close();
-SERVER.stop();
+} catch (error) {
+  runFailure = error;
+  throw error;
+} finally {
+  // Close only handles this invocation acquired. No GPU lease is acquired
+  // here; the caller owns it. Never clear another run's lease or stop a
+  // reused developer server, including when launch or measurement fails.
+  const cleanupFailures = [];
+  try { await b?.close(); } catch (error) { cleanupFailures.push(error); }
+  try { if (SERVER?.spawned) await SERVER.stop(); } catch (error) { cleanupFailures.push(error); }
+  if (cleanupFailures.length) {
+    throw new AggregateError([...(runFailure ? [runFailure] : []), ...cleanupFailures],
+      'checkreach resource cleanup failed', { cause: runFailure || cleanupFailures[0] });
+  }
+}
 
 if (WANT_JSON) writeFileSync('.hudqa/reach-report.json', JSON.stringify(json, null, 2));
 

@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import { viteSingleFile } from 'vite-plugin-singlefile';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { servedSourceIdentityPlugin } from './tools/servedSourceIdentity.mjs';
 
 // Public files bypass Rollup's import graph. Emit them explicitly so the
 // pipeline proof stays available to developers without shipping to players.
@@ -77,7 +78,7 @@ export default defineConfig({
   base: './',
   // Its recommended config overwrites assetsInlineLimit with () => true.
   // Every required single-file option is explicit below; preserve our guard.
-  plugins: [gamePublicAssets(), viteSingleFile({ removeViteModuleLoader: true, useRecommendedBuildConfig: false })],
+  plugins: [servedSourceIdentityPlugin(), gamePublicAssets(), viteSingleFile({ removeViteModuleLoader: true, useRecommendedBuildConfig: false })],
   build: {
     target: 'es2020',
     assetsDir: '',

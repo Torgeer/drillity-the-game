@@ -232,20 +232,21 @@ const RENDER_STATE = () => {
 
 /* ── Run ─────────────────────────────────────────────────────────────────── */
 const say = (s = '') => console.log(s);
-const SERVER = await ensureServer(PORT, say);
+const rows = [];
+const consoleErrors = [];
+let SERVER, browser, runFailure;
+try {
+SERVER = await ensureServer(PORT, say);
 const ORIGIN = SERVER.origin;
 
 /* Headless, with ANGLE pointed at SwiftShader: this instrument must be
    runnable while another agent holds the discrete GPU. `channel: 'chrome'`
    because playwright's own headless shell is not installed on this machine
    and the installed Chrome is. */
-const browser = await chromium.launch({
+browser = await chromium.launch({
   headless: true, channel: 'chrome',
   args: ['--mute-audio', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'],
 });
-
-const rows = [];
-const consoleErrors = [];
 
 for (const phone of PHONES) {
   const ctx = await browser.newContext({
@@ -310,8 +311,20 @@ for (const phone of PHONES) {
   await ctx.close();
 }
 
-await browser.close();
-SERVER.stop();
+} catch (error) {
+  runFailure = error;
+  throw error;
+} finally {
+  // This runner acquires no GPU lease. Close only this browser and a server
+  // spawned for this invocation, even if launching or measuring throws.
+  const cleanupFailures = [];
+  try { await browser?.close(); } catch (error) { cleanupFailures.push(error); }
+  try { if (SERVER?.spawned) await SERVER.stop(); } catch (error) { cleanupFailures.push(error); }
+  if (cleanupFailures.length) {
+    throw new AggregateError([...(runFailure ? [runFailure] : []), ...cleanupFailures],
+      'bandshare resource cleanup failed', { cause: runFailure || cleanupFailures[0] });
+  }
+}
 
 const { failures, byPhone } = assess(rows);
 

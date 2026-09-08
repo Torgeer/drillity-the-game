@@ -390,10 +390,10 @@ export function createUI(ctx) {
     get preview() { return ctx.shopPreview || ctx.preview || null; },
 
     /**
-     * Contracts. Preference order:
-     *   ctx.game.contracts        a ready board
-     *   ctx.game.makeContractBoard(regionId, level, rand)   generated board
-     *   ctx.progression.getContracts()
+     * Progression owns the live board, including recovery work and career
+     * modifiers. Before that system is available, use the content module's
+     * ready or generated board. Never replace an empty/failed live career
+     * board with a different set of contracts from the content generator.
      *
      * There is no fourth option. game/data.js generates the board; with it
      * absent there is no work to offer, and the board shows that plainly
@@ -404,6 +404,14 @@ export function createUI(ctx) {
       return this._rawContracts().map(normalizeContract);
     },
     _rawContracts() {
+      if (typeof ctx.progression?.getContracts === 'function') {
+        try {
+          const board = ctx.progression.getContracts();
+          if (Array.isArray(board)) return board;
+          console.warn('[ui] progression.getContracts returned an invalid board');
+        } catch (e) { console.warn('[ui] progression.getContracts failed', e); }
+        return [];
+      }
       const g = ctx.game;
       if (g?.contracts?.length) return g.contracts;
       if (typeof g?.makeContractBoard === 'function') {
@@ -418,8 +426,6 @@ export function createUI(ctx) {
         }
         if (boardCache?.length) return boardCache;
       }
-      const fromProg = ctx.progression?.getContracts?.();
-      if (fromProg?.length) return fromProg;
       return [];
     },
     /** Drop the generated board so the next read regenerates it. */

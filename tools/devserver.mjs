@@ -24,11 +24,12 @@
  */
 import { spawn } from 'node:child_process';
 import { request as httpRequest } from 'node:http';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, resolve as resolvePath } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { setTimeout as sleep } from 'node:timers/promises';
+import { sourceIdentity, SOURCE_IDENTITY_PATH } from './servedSourceIdentity.mjs';
 
 const require = createRequire(import.meta.url);
 
@@ -72,55 +73,56 @@ function findViteBin() {
   return { bin };
 }
 
-/* This repository's root — the directory devserver.mjs's parent lives in.
-   Forward slashes and no trailing one: that is the shape vite's `/@fs/` wants,
-   on Windows too. `split`/`join` rather than a regex, because the separator
-   being escaped is the escape character. */
-const ROOT = fileURLToPath(new URL('..', import.meta.url))
-  .split('\\').join('/')
-  .replace(/\/+$/, '');
+const ROOT = fileURLToPath(new URL('..', import.meta.url));
 
 /**
- * Is the server on `origin` serving THIS tree?
- *
- * Vite serves any file under its own root, and `/@fs/<absolute path>` is how
- * it addresses one. So ask it for OUR package.json by absolute path and
- * compare what comes back with the file on disk. A server rooted somewhere
- * else answers that path with its own SPA index.html — status 200, wrong
- * body — which is why this compares CONTENT and not the status code.
- *
+ * Verify configured root and complete source inventory using the dev-only
+ * manifest endpoint. Installed Vite 5.4.21 may serve plain files or transformed
+ * HTML for root-relative ?raw requests under its fs checks. Never relax those
+ * checks or infer root ownership from /@fs/ access.
+ * Public/generated assets and dependencies are outside this source check;
+ * capture harnesses retain their asset inventories. An older server without
+ * this endpoint is refused and left running. The timeout can shorten the
+ * 8-second wall-clock HTTP deadline only.
  * @returns {Promise<{ok: true} | {ok: false, why: string}>}
  */
-async function servesThisTree(origin) {
-  let want;
-  try {
-    want = JSON.parse(readFileSync(resolvePath(ROOT, 'package.json'), 'utf8'));
-  } catch (e) {
-    return { ok: false, why: `cannot read this tree's own package.json: ${e.message}` };
+export async function servesThisTree(origin, { timeoutMs = 8000 } = {}) {
+  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0 || timeoutMs > 8000) {
+    throw new Error('Source identity timeout must be greater than 0 and at most 8000 ms');
   }
-  let text;
-  try {
-    const r = await httpGet(`${origin}/@fs/${ROOT}/package.json`, 8000);
-    if (r.status < 200 || r.status >= 300) {
-      return { ok: false, why: `it answered ${r.status} for this tree's package.json` };
-    }
-    text = r.body;
-  } catch (e) {
-    return { ok: false, why: `could not fetch this tree's package.json from it: ${e.message}` };
+  let want;
+  try { want = sourceIdentity(ROOT); }
+  catch (error) { return { ok: false, why: 'cannot inventory this checkout: ' + error.message }; }
+  let response;
+  try { response = await httpGet(origin + SOURCE_IDENTITY_PATH, timeoutMs); }
+  catch (error) { return { ok: false, why: 'could not fetch source identity: ' + error.message }; }
+  if (response.status !== 200) {
+    return { ok: false, why: 'source identity answered HTTP ' + response.status };
   }
   let got;
-  try {
-    // Served raw; the brace slice covers a vite that wraps it in a module
-    // instead. Either way the object is the thing being compared.
-    const i = text.indexOf('{');
-    const j = text.lastIndexOf('}');
-    got = JSON.parse(i >= 0 && j > i ? text.slice(i, j + 1) : text);
-  } catch (e) {
-    return { ok: false, why: 'it served something that is not a package.json at all' };
+  try { got = JSON.parse(response.body); }
+  catch { return { ok: false, why: 'source identity did not return a JSON manifest' }; }
+  if (!got || got.schema !== want.schema || typeof got.root !== 'string' || !Array.isArray(got.files)) {
+    return { ok: false, why: 'source identity manifest has an unsupported shape' };
   }
-  if (got.name !== want.name || got.version !== want.version) {
-    return { ok: false, why: `it is serving ${got.name || '(unnamed)'}@${got.version || '?'}, `
-      + `not ${want.name}@${want.version}` };
+  if (got.root !== want.root) {
+    return { ok: false, why: 'configured root differs from this checkout: ' + got.root };
+  }
+  if (got.files.length !== want.files.length) {
+    return { ok: false, why: 'source identity file count differs from this checkout' };
+  }
+  for (let i = 0; i < want.files.length; i++) {
+    const expected = want.files[i], actual = got.files[i];
+    if (!actual || actual.path !== expected.path) {
+      return { ok: false, why: 'source identity path inventory differs at ' + expected.path };
+    }
+    if (actual.bytes !== expected.bytes || actual.sha256 !== expected.sha256) {
+      return { ok: false, why: 'source identity differs for ' + expected.path };
+    }
+  }
+  const keys = (value) => Object.keys(value).sort().join(',');
+  if (keys(got) !== keys(want) || got.files.some((file) => keys(file) !== 'bytes,path,sha256')) {
+    return { ok: false, why: 'source identity manifest has unexpected fields' };
   }
   return { ok: true };
 }
@@ -173,14 +175,38 @@ async function alreadyServing(origin) {
  */
 function httpGet(url, ms = 4000) {
   return new Promise((resolve, reject) => {
+    let timer, settled = false;
+    const finish = (error, result) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      if (error) reject(error);
+      else resolve(result);
+    };
     const req = httpRequest(url, { agent: false, method: 'GET' }, (res) => {
-      let body = '';
+      let body = '', bytes = 0;
       res.setEncoding('utf8');
-      res.on('data', (d) => { if (body.length < 65536) body += d; });
-      res.on('end', () => resolve({ status: res.statusCode, body }));
+      res.on('data', (d) => {
+        bytes += Buffer.byteLength(d);
+        // Bound probe memory and fail explicitly; truncating can authenticate
+        // an accepted prefix while ignoring the rest of a response.
+        if (bytes > 2 * 1024 * 1024) {
+          req.destroy(new Error('response exceeded the 2 MiB probe limit'));
+          return;
+        }
+        body += d;
+      });
+      res.on('error', (error) => finish(error));
+      res.on('end', () => finish(null, { status: res.statusCode, body }));
     });
-    req.setTimeout(ms, () => req.destroy(new Error(`timed out after ${ms} ms`)));
-    req.on('error', reject);
+    // Wall-clock deadline, including connection and body. Socket inactivity
+    // timeouts alone can be extended forever by a server dripping bytes.
+    timer = setTimeout(() => {
+      const error = new Error(`wall-clock deadline exceeded after ${ms} ms`);
+      req.destroy(error);
+      finish(error);
+    }, ms);
+    req.on('error', (error) => finish(error));
     req.end();
   });
 }
@@ -216,13 +242,13 @@ export async function ensureServer(port, say = console.log) {
        There is no error and no gap: just a confident wrong answer. */
     const who = await servesThisTree(origin);
     if (who.ok) {
-      say(`  dev server on ${port} is already up and is this tree — using it`);
+      say(`  dev server on ${port} matches this checkout's root files and src JavaScript/CSS — using it`);
       return { origin, spawned: false, stop() {} };
     }
     throw new Error(`Something is serving ${origin}, but it is NOT this repository `
       + `(${who.why}). Refusing to measure it: a gate pointed at the wrong tree `
       + 'produces a confident wrong answer, which is worse than one that did not '
-      + `run. Stop whatever holds port ${port}, or pass a different port.`);
+      + `run. Leave that server running and pass a different port.`);
   }
 
   const found = findViteBin();
@@ -275,6 +301,11 @@ export async function ensureServer(port, say = console.log) {
       throw new Error(`vite exited before it served ${origin}:\n${log.slice(-1200)}`);
     }
     if (await answers(origin, 2000)) {
+      const who = await servesThisTree(origin);
+      if (!who.ok) {
+        stop();
+        throw new Error(`Started vite but could not verify this checkout at ${origin}: ${who.why}`);
+      }
       say(`  vite up on ${port} after ${((Date.now() - t0) / 1000).toFixed(1)} s`);
       return { origin, spawned: true, stop };
     }

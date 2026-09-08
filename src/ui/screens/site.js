@@ -656,23 +656,59 @@ export function createSiteScreen(app) {
   const sstrip = C.h('div.sstrip',
     stripSteady, stripAlert, C.h('i.sstrip__prog'), teleRule);
 
-  C.tap(pauseBtn, async () => {
-    const ok = await app.confirm({
-      title: 'Leave the hole?',
-      message: 'Abandoning a contract forfeits the payout and the metres already drilled.',
-      confirmLabel: 'Abandon',
-      cancelLabel: 'Keep drilling',
-      destructive: true,
-    });
-    if (!ok) return;
-    if (ctx.sim && typeof ctx.sim.abortHole === 'function') {
-      try { ctx.sim.abortHole('abandoned'); } catch (e) { console.error('[ui] abortHole', e); }
-    } else {
-      if (state.drill) state.drill.active = false;
-      app.bus.emit(EVENTS.DRILL_STOP, { reason: 'abandoned' });
-    }
-    app.nav(SCENES.CONTRACTS);
-  });
+  let leavePending = false, leaveGeneration = 0;
+  async function abandonFromSite() {
+    if (leavePending) return;
+    leavePending = true;
+    const contract = state.contract;
+    const runId = ctx.progression?.run?.runId;
+    const attemptId = ctx.progression?.run?.attemptId;
+    const generation = leaveGeneration;
+    const isCurrent = () => generation === leaveGeneration && state.scene === SCENES.SITE
+      && state.contract === contract && ctx.progression?.run?.runId === runId
+      && ctx.progression?.run?.attemptId === attemptId;
+    try {
+      const ok = await app.confirm({
+        title: 'Abandon contract?',
+        message: 'Unfinished work earns no payout. Completed holes stay paid; mobilisation is not refunded and reputation will fall.',
+        confirmLabel: 'Abandon contract',
+        cancelLabel: 'Keep drilling',
+        destructive: true,
+      });
+      // A delayed answer must not abandon a replacement job or the next hole.
+      if (!ok || !isCurrent()) return;
+      if (contract && typeof ctx.progression?.abandonContract !== 'function') {
+        say('Cannot abandon contract', 'Contract management is unavailable. Keep drilling or try again.', 'warn');
+        return;
+      }
+      if (ctx.sim && typeof ctx.sim.abortHole === 'function') {
+        ctx.sim.abortHole('abandoned');
+      } else {
+        if (state.drill) state.drill.active = false;
+        app.bus.emit(EVENTS.DRILL_STOP, { reason: 'abandoned' });
+      }
+      // DRILL_STOP listeners may change the accepted job synchronously.
+      if (!isCurrent()) return;
+      let saveFailed = false;
+      if (contract) {
+        const result = ctx.progression.abandonContract();
+        if (!result?.ok) {
+          say('Cannot abandon contract', result?.reason || 'The contract is still open. Try again.', 'warn');
+          return;
+        }
+        // Try to persist now; progression retains a failed write for retry.
+        saveFailed = ctx.progression.save() === false;
+      }
+      // An abandonment notification may already have opened another job.
+      if (state.contract || state.scene !== SCENES.SITE || generation !== leaveGeneration) return;
+      app.nav(SCENES.CONTRACTS);
+      if (saveFailed) app.toast('Contract abandoned. Saving failed; keep the game open while it retries.', 'warn');
+    } catch (error) {
+      console.error('[ui] abandon contract', error);
+      say('Could not leave the job', 'Try again before choosing another contract.', 'warn');
+    } finally { leavePending = false; }
+  }
+  C.tap(pauseBtn, abandonFromSite);
 
   /* ═══ THE RUN LOG ══════════════════════════════════════════════════════
      There is no standing drill-log card. What each event WAS still matters —
@@ -2497,6 +2533,7 @@ export function createSiteScreen(app) {
     resize() { resizeGauge(); sizeSpark(); if (blowOn) resizeBlow(); publishChrome(); },
 
     unmount() {
+      leaveGeneration++;
       clearAlert();
       resetWell();
       resetProgramme();

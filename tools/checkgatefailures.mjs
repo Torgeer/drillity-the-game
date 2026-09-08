@@ -29,7 +29,7 @@ const reject = (result, reason) => {
 };
 try {
   for (const path of ['tools/checkmodels.mjs', 'tools/checkbeds.mjs', 'tools/glbinfo.mjs', 'src/game/data.js',
-    'src/core/contract.js', 'src/core/assets.js', 'blender/build.py']) copy(path);
+    'src/core/contract.js', 'src/core/assets.js', 'src/game/equipment-support.js', 'blender/build.py']) copy(path);
   put('package.json', '{"type":"module"}');
   reject(run('tools/checkmodels.mjs'), /0 machines|0 machine|read 0|missing/);
   mkdirSync(join(fixture, 'public/models'), { recursive: true });
