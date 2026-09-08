@@ -1,0 +1,50 @@
+{
+  "recordedAt": "2026-09-08T14:45:56.596744+00:00",
+  "sourceCommit": "102338b81f5088377806d19f395a7d7df902f3b3",
+  "status": "Incomplete: intentional budget stop",
+  "reach": "PASS: five methods",
+  "bandshare": "PASS: six phone sizes by five methods",
+  "domMatrix": {
+    "completedCases": 376,
+    "plannedCases": 612,
+    "passed": false,
+    "fatal": "page.evaluate: Target page, context or browser has been closed\n    at C:\\Users\\henri\\Downloads\\threads\\drillity-fps-investigation\\tools\\checkdrillingviewspace.mjs:107:28",
+    "failures": []
+  },
+  "compoundHudExitCode": 1,
+  "limitation": "GPU/WebGL-disabled DOM checks do not certify rendered gameplay or phone performance.",
+  "files": [
+    {
+      "source": "evidence/verification/reach-next-gameplay-01.log",
+      "archive": "final-layout-reach-next-gameplay-01.log.gz",
+      "bytes": 1987,
+      "sha256": "227f1067e4729fcd40be651eab724607f6774ea0058a89b6c9fcb7bfe9366abe",
+      "archiveBytes": 579,
+      "archiveSha256": "617201520541756635205b6f09d1790176d5ab8aac523343e35c1cffc5aa6ed0"
+    },
+    {
+      "source": "evidence/verification/hud-next-gameplay-01.log",
+      "archive": "final-layout-hud-next-gameplay-01.log.gz",
+      "bytes": 5361,
+      "sha256": "a4c9d54b916e992bd50ed0abef27d3b0af22b3d5e9d4eab09ad36e63a96daee7",
+      "archiveBytes": 1319,
+      "archiveSha256": "bb724997f92aaae20a13845a5aa3a624abb1c97d6ca316fd99759d11aec74ee1"
+    },
+    {
+      "source": "evidence/verification/layout-budget-stop.json",
+      "archive": "final-layout-layout-budget-stop.json.gz",
+      "bytes": 337,
+      "sha256": "f22a9fe461ee0db00306c16745fe04452581a04482936e7f4c675ef5d805f88b",
+      "archiveBytes": 255,
+      "archiveSha256": "8259b84c36453757b1e4e7c33c984b4686e95319585d9d1b5b815d0e9377b20d"
+    },
+    {
+      "source": "shots/drilling-view-space/current.json",
+      "archive": "final-layout-current.json.gz",
+      "bytes": 9889038,
+      "sha256": "753513eb8a4010ac1bb7654c43a7f36963d49b8b2be7dee325c2af0d63f46361",
+      "archiveBytes": 339509,
+      "archiveSha256": "e8697858a667469c62aaa2c0d09936142b0bb320c292a47443c2c0358c744497"
+    }
+  ]
+}
