@@ -75,7 +75,7 @@
     "check:interactions": "node tools/checkjamaccounting.mjs && node tools/checkassembledinteractions.mjs",
     "check:rescue-viability": "node tools/checkrescueviability.mjs && node tools/checkrescueviability-adversarial.mjs && node tools/checkrescuehome-adversarial.mjs",
     "check:career-endgame": "node tools/checkcareerendgame.mjs && node tools/checkcareerendgame-adversarial.mjs",
-    "check:pile-motion": "node tools/checkpilemotion.mjs && node tools/checkpilemotion-adversarial.mjs",
+    "check:pile-motion": "node tools/checkpilemotion.mjs && node tools/checkpilemotion-adversarial.mjs && node tools/checkpileplacement.mjs && node tools/checkpilefeed-adversarial.mjs",
     "qa:field-save": "node tools/checkfieldsave-browser.mjs",
     "check:sampling": "node tools/checksampleledger.mjs && node tools/checksampleledger-adversarial.mjs && node tools/checksamplegameplay.mjs && node tools/checksamplegameplay-adversarial.mjs && node tools/checksampleloadouts.mjs && node tools/checksampleloadouts-adversarial.mjs --start --catalogue && node tools/checksamplecatalogue-adversarial.mjs"
   },

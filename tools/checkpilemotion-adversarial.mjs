@@ -67,6 +67,25 @@ function tree(root) {
     children: n.children.length, mesh: !!n.isMesh, vertices: n.geometry?.attributes?.position?.count || 0 }));
   return rows;
 }
+// Reconstruct the pinned scene with exactly two permitted local Y changes.
+// Every descendant keeps its pinned local transform; its expected world matrix
+// is recomposed through the corrected parent, never exempted from comparison.
+function expectedPileTree(root, carriage, carriageY, ram, ramY) {
+  const rows = [];
+  function visit(node, parentWorld) {
+    const position = node.position.clone();
+    if (node === carriage) position.y = carriageY;
+    if (node === ram) position.y = ramY;
+    const matrix = new THREE.Matrix4().compose(position, node.quaternion, node.scale);
+    const world = new THREE.Matrix4().multiplyMatrices(parentWorld, matrix);
+    rows.push({ name: node.name, local: [...position.toArray(), ...node.quaternion.toArray(), ...node.scale.toArray()],
+      world: world.elements.slice(), children: node.children.length, mesh: !!node.isMesh,
+      vertices: node.geometry?.attributes?.position?.count || 0 });
+    for (const child of node.children) visit(child, world);
+  }
+  visit(root, root.parent?.matrixWorld || new THREE.Matrix4());
+  return rows;
+}
 function compare(a, b, label, except = null) {
   ok(a.length === b.length, `${label}: scene-node count`);
   a.forEach((row, i) => {
@@ -301,19 +320,48 @@ try {
       const state = createGameState(), bus = createBus();
       state.garage.loadout = { hammer: 'impact-hammer-9t', dolly: 'dolly-hardwood', install: 'precast-pile-350' };
       const sim = createDrillSim({ state, bus });
-      const f = await build('piling-leader', 'driven-pile', process.argv.includes('--counterfactual'), sim, state, bus);
+      const f = await build('piling-leader', 'driven-pile', process.argv.includes('--placement-counterfactual'), sim, state, bus);
       const control = await build('piling-leader', 'driven-pile', true, sim, state, bus);
       try {
+        // Remove only the ram binding on the test instance. Keeping the new
+        // placement active allows the negative control to reach the ram-motion
+        // assertion instead of failing early on the intentionally fixed feed.
+        if (process.argv.includes('--counterfactual')) delete f.built.dyn.impactRam;
         const ram = f.built.root.getObjectByName('slide:hammer-ram');
         ok(!!ram, 'actual named ram exists');
         const authored = local(ram), positions = [], states = [];
-        const ignored = new Set(); ram.traverse(n => ignored.add(n.name));
+        const oldCarriage = control.built.root.getObjectByName('slide:carriage');
+        const oldRam = control.built.root.getObjectByName('slide:hammer-ram');
+        const carriage = f.built.root.getObjectByName('slide:carriage');
+        const bytes = readFileSync(resolve(ROOT, 'public/models/piling-leader.glb'));
+        const glb = JSON.parse(bytes.subarray(20, 20 + bytes.readUInt32LE(12)).toString());
+        const sourceCarriage = glb.nodes.find(n => n.name === 'slide:carriage');
+        const restY = sourceCarriage.translation[1];
+        const lowerY = restY + sourceCarriage.extras.travel_lo_m;
+        const upperY = restY + sourceCarriage.extras.travel_hi_m;
+        ok(Number.isFinite(lowerY) && Number.isFinite(upperY) && lowerY <= restY && restY <= upperY,
+          'authored piling offsets contain the exported rest');
+        // Python records endpoint minus HAMMER_BOT. The independent depth
+        // oracle uses that rest directly, not the runtime's range or modulo.
+        const python = readFileSync(resolve(ROOT, 'blender/piling_leader.py'), 'utf8');
+        assert.match(python, /ham\['travel_lo_m'\] = 1\.40 - HAMMER_BOT/);
+        assert.match(python, /ham\['travel_hi_m'\] = \(LEADER_TOP - 2\.60\) - HAMMER_L - HAMMER_BOT/);
+        const placementSamples = [];
         sim.startHole({ id: 'critic-pile-live', methodId: 'driven-pile', targetDepth: 14,
           flushMedium: 'none', seed: 123, holeDia: 350 });
         sim.setInput('feed', 0.65); sim.setInput('rotation', 0.7); sim.setInput('flush', 0.5);
         for (let frame = 0; frame < 540; frame++) {
           sim.update(1 / 60); f.update(); control.update();
-          compare(tree(control.built.root), tree(f.built.root), `piling-leader/live${frame}`, n => ignored.has(n));
+          const along = state.drill.actionDepth ?? state.drill.depth;
+          ok(Number.isFinite(along) && along >= 0, 'actual simulator supplies finite forward work depth');
+          const expectedY = Math.max(lowerY, Math.min(upperY, restY - along));
+          close(carriage.position.y, expectedY, 'carriage follows authored rest minus actual simulator depth');
+          close(f.built.dyn.carriageRange[0], upperY, 'authored upper endpoint');
+          close(f.built.dyn.carriageRange[1], lowerY, 'authored lower endpoint');
+          compare(expectedPileTree(control.built.root, oldCarriage, expectedY, oldRam, ram.position.y),
+            tree(f.built.root), `piling-leader/live${frame}`);
+          if (frame % 90 === 0) placementSamples.push({ frame, phase: state.drill.phase,
+            actionDepth: along, expectedY, actualY: carriage.position.y });
           if (state.drill.active && state.drill.phase === 'drilling') {
             positions.push(ram.position.toArray());
             close(ram.position.x, authored[0], 'ram off-axis X rest preserved');
@@ -336,7 +384,9 @@ try {
         for (let i = 0; i < 60; i++) f.update();
         local(ram).forEach((v, i) => close(v, authored[i], 'aborted job restores authored ram pose'));
         cases.push({ name: 'Real simulation sample evidence', passed: true, samples: positions.length,
-          positions: positions.filter((_, i) => i % 45 === 0), states: states.filter((_, i) => i % 45 === 0) });
+          positions: positions.filter((_, i) => i % 45 === 0), states: states.filter((_, i) => i % 45 === 0),
+          placement: { restY, lowerY, upperY, samples: placementSamples,
+            oracle: 'Authored rest minus actual simulator work depth, clamped to authored offset endpoints; all pinned local transforms preserved except carriage Y and independently checked ram Y; every world matrix recomposed and compared.' } });
       } finally { sim.dispose(); f.close(); control.close(); }
     });
   }
@@ -349,7 +399,8 @@ try {
 }
 for (const p of paths) assert.equal(sha(readFileSync(resolve(ROOT, p))), hashes[p], `source changed while reviewing ${p}`);
 const passed = cases.every(c => c.passed);
-console.log(JSON.stringify({ passed, counterfactual: process.argv.includes('--counterfactual'), generatedAt: new Date().toISOString(), baselineCommit: BASE,
+console.log(JSON.stringify({ passed, counterfactual: process.argv.includes('--counterfactual'),
+  placementCounterfactual: process.argv.includes('--placement-counterfactual'), generatedAt: new Date().toISOString(), baselineCommit: BASE,
   baselineHashes, hashes, assertions, cases, diagnostics,
   limits: ['CPU transforms only; no rendered visibility, clearance, cadence quality or draw-call approval.',
     'Pinned comparison is valid only for this bounded adapter review; future intentional rig changes require a new review baseline.'] }, null, 2));

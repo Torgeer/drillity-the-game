@@ -1,0 +1,379 @@
+{
+  "passed": true,
+  "counterfactual": false,
+  "placementCounterfactual": false,
+  "generatedAt": "2026-09-08T13:01:35.483Z",
+  "baselineCommit": "1f2d285f54ff71b9f05dac895bee0400aa9f61f7",
+  "baselineHashes": {
+    "src/core/gltfRig.js": "ee72536681660da912aaddf75bcf47cd893190708f7d1718fbe5a94d0952070a",
+    "src/rig/rigFactory.js": "bf88ab626c0b434a73c971fe28f2c28a25a3433c987403975aba14c92fa2cf43"
+  },
+  "hashes": {
+    "src/core/gltfRig.js": "ea7aa46ab87be5a0b2c04152bb959be5c227ed6f073762dc78d5d654c7a4b53b",
+    "src/rig/rigFactory.js": "7495aef8fd0d98ee7a3be9cd72dbf2f335a4a5d4b45b0de6403f72d964b78353",
+    "src/sim/drilling.js": "07ccd37ec9f74cf6030639053c6165fc0617876f7fbfca542e95fc5fbba5ab74",
+    "src/core/gltfAnim.js": "31317fa07cdfc9fd9e138cdfb776922c285941b75bb1c1e63822992a9e4693d1",
+    "src/core/contract.js": "dfb40a897139a7a67fc9d62a2d17a473096a51f42513becca6e3391767e3cf53",
+    "src/core/motion.js": "83131fb56d9e329b60d09a65972afad7ec6d076227b9915021ad2963a9cc545c",
+    "src/game/data.js": "bb207515d7c43b643a011f055848a95a7e9d3b3e262a5f2fc0729668fae24c2f",
+    "blender/piling_leader.py": "bb5b22ab0d8c7e8c65a30a281f09a672a91cf576aff08309946f779c479c9daf",
+    "blender/lib/rig.py": "b162741a7e6f032a3a3e817e4b33125069f70b9ed7d3f54a8cddaf371d7a8ed5",
+    "tools/checkpilemotion-adversarial.mjs": "0e73ea2c7b66a651bd4208ac396ff283c1247830f5085183459e442d6c15f875",
+    "public/models/crawler-lite.glb": "527c787a56415e70ad95ff8516c3886c9fc07fa4f4fcf750f9e2e175c06ef646",
+    "public/models/cable-percussion.glb": "f68d71596f4dc0ec2b66929629bba85525f6e8ccb0fbf71f8e5f1c44b8ed6106",
+    "public/models/crawler-th.glb": "58175e8ae042856225b435f9476dca99d94a15048d609973b4cffe0c42ac721d",
+    "public/models/dth-crawler.glb": "f0c5f8d6fd1c0238ee776336871e6698e5e078be2e4fe06daccacfc215232133",
+    "public/models/core-rig.glb": "7c4dd62969d71a1a6e30275fa870b14797b6fd6175e43d10260f474077a0e768",
+    "public/models/foundation-bg.glb": "9d91db06bd51226cab57200c04886aed43388d17056762040b1ec5adc6ba8331",
+    "public/models/cfa-rig.glb": "a10c16b3071c96926077271c1d8785637951989d082d9a3f5e1f5e2bf4bf7b35",
+    "public/models/oil-derrick.glb": "43d3275ae9355bd5afeff9a09db18b74f40a1870ddb0668a6a1ee8c7e874323a",
+    "public/models/hdd-rig.glb": "5207f3018a23d7fbc0507e7d569c6198a5cd864f920c4ed229ccf3e012adec11",
+    "public/models/sonic-truck.glb": "f9c5438581f43adbcdd04f8b04ee579c3c4353e45c6f60e289226d6407cc6763",
+    "public/models/rc-rig.glb": "302cb3ca36594ce5d8cd1b1cc3fc44d35758fe6c0b53c023a9851899f0669cc6",
+    "public/models/tunnel-jumbo.glb": "4059aaa715b389aa641b5a75256dece9ee48ab342e50b9de7484a9beaf1f6094",
+    "public/models/longhole-rig.glb": "1ad4ea071c94ec27a72ccf974b41481472a21a6e54945027d31a91639c96fcab",
+    "public/models/bolter.glb": "c3a29ca8d6da32eb87f39f8e207ebd3d3aa8da1685f50cb71708d89f0e32ed23",
+    "public/models/piling-leader.glb": "6a96b56031e3f8f05214940ed746de27dac9543382d51e505b543cd366daa5bd",
+    "public/models/pd55.glb": "e43cd487927282f9a591b0edf11f36a83a43ae7f7917763d88ed2c9f1f17201d",
+    "public/models/si-rig.glb": "17730b4a958137a6890eee86115972811a4a1aebfacd8548be2360092bb4b729",
+    "public/models/cpt-unit.glb": "f7858631bba0ead922fe04563813b829b6de3d3376714ee2c1306afce4bab0cb",
+    "public/models/raisebore.glb": "22107d2d616d1ab64e29de6055deffa26a5f693ecf39fb05c1527bb958f452a5"
+  },
+  "assertions": 9478753,
+  "cases": [
+    {
+      "name": "Fleet coverage",
+      "rigs": 18,
+      "pairs": 41,
+      "comparedNodes": 295872,
+      "passed": true
+    },
+    {
+      "name": "Other 18 actual GLBs retain every local and world transform across drilling, rod events, trip and inactivity",
+      "passed": true,
+      "assertions": 7992563
+    },
+    {
+      "name": "Actual GLB malformed ram stroke and parent metadata cannot produce an accepted rig",
+      "passed": true,
+      "assertions": 6
+    },
+    {
+      "name": "Compound parent transforms retain a strictly parent-local authored stroke and no sibling motion",
+      "passed": true,
+      "assertions": 98
+    },
+    {
+      "name": "Invalid programme, phase, activity and typed progress/drop telemetry cannot animate a ram",
+      "passed": true,
+      "assertions": 308
+    },
+    {
+      "name": "Real action timing evidence",
+      "passed": true,
+      "dollyFrames": 217,
+      "setFrames": 474,
+      "reDriveFrames": 360,
+      "configuredSetCount": 10,
+      "observedSetSamples": 10,
+      "completedSecondSet": true,
+      "restartedAtRest": true
+    },
+    {
+      "name": "Real take-set sample counts and re-drive/dolly preparation keep authoritative impact timing",
+      "passed": true,
+      "assertions": 6871
+    },
+    {
+      "name": "Real simulation sample evidence",
+      "passed": true,
+      "samples": 360,
+      "positions": [
+        [
+          0,
+          1.1000003814697266,
+          0
+        ],
+        [
+          0,
+          1.3167687991341746,
+          0
+        ],
+        [
+          0,
+          1.481795024298316,
+          0
+        ],
+        [
+          0,
+          1.6021348107982103,
+          0
+        ],
+        [
+          0,
+          1.6848439127815102,
+          0
+        ],
+        [
+          0,
+          1.7369780844719962,
+          0
+        ],
+        [
+          0,
+          1.7655930799395838,
+          0
+        ],
+        [
+          0,
+          1.7777446528660454,
+          0
+        ]
+      ],
+      "states": [
+        {
+          "phase": "drilling",
+          "timeSec": 3.0166666666666586,
+          "blowPhase": 0,
+          "bpm": 82.00000000000003,
+          "dropM": 0.6805317288646886
+        },
+        {
+          "phase": "drilling",
+          "timeSec": 3.766666666666656,
+          "blowPhase": 0.06000000000000538,
+          "bpm": 82.00000000000003,
+          "dropM": 0.6805317288646886
+        },
+        {
+          "phase": "drilling",
+          "timeSec": 4.516666666666681,
+          "blowPhase": 0.12000000000001076,
+          "bpm": 82.00000000000003,
+          "dropM": 0.6805317288646886
+        },
+        {
+          "phase": "drilling",
+          "timeSec": 5.266666666666718,
+          "blowPhase": 0.18000000000001615,
+          "bpm": 82.00000000000003,
+          "dropM": 0.6805317288646886
+        },
+        {
+          "phase": "drilling",
+          "timeSec": 6.016666666666755,
+          "blowPhase": 0.24000000000002153,
+          "bpm": 82.00000000000003,
+          "dropM": 0.6805317288646886
+        },
+        {
+          "phase": "drilling",
+          "timeSec": 6.766666666666793,
+          "blowPhase": 0.3000000000000269,
+          "bpm": 82.00000000000003,
+          "dropM": 0.6805317288646886
+        },
+        {
+          "phase": "drilling",
+          "timeSec": 7.51666666666683,
+          "blowPhase": 0.3600000000000322,
+          "bpm": 82.00000000000003,
+          "dropM": 0.6805317288646886
+        },
+        {
+          "phase": "drilling",
+          "timeSec": 8.266666666666838,
+          "blowPhase": 0.42000000000003757,
+          "bpm": 82.00000000000003,
+          "dropM": 0.6805317288646886
+        }
+      ],
+      "placement": {
+        "restY": 14.600000381469727,
+        "lowerY": 1.4000003814697273,
+        "upperY": 16.52000038146973,
+        "samples": [
+          {
+            "frame": 0,
+            "phase": "pitch",
+            "actionDepth": 0,
+            "expectedY": 14.600000381469727,
+            "actualY": 14.600000381469727
+          },
+          {
+            "frame": 90,
+            "phase": "pitch",
+            "actionDepth": 0,
+            "expectedY": 14.600000381469727,
+            "actualY": 14.600000381469727
+          },
+          {
+            "frame": 180,
+            "phase": "drilling",
+            "actionDepth": 0,
+            "expectedY": 14.600000381469727,
+            "actualY": 14.600000381469727
+          },
+          {
+            "frame": 270,
+            "phase": "drilling",
+            "actionDepth": 1.3930916518340393,
+            "expectedY": 13.206908729635687,
+            "actualY": 13.206908729635687
+          },
+          {
+            "frame": 360,
+            "phase": "drilling",
+            "actionDepth": 2.3795212657570346,
+            "expectedY": 12.220479115712692,
+            "actualY": 12.220479115712692
+          },
+          {
+            "frame": 450,
+            "phase": "drilling",
+            "actionDepth": 2.872889967035939,
+            "expectedY": 11.727110414433788,
+            "actualY": 11.727110414433788
+          }
+        ],
+        "oracle": "Authored rest minus actual simulator work depth, clamped to authored offset endpoints; all pinned local transforms preserved except carriage Y and independently checked ram Y; every world matrix recomposed and compared."
+      }
+    },
+    {
+      "name": "Actual simulator drives ram local motion; renderer time cannot advance a frozen simulator",
+      "passed": true,
+      "assertions": 1478907
+    }
+  ],
+  "diagnostics": [
+    "[gltfRig] \"crawler-lite\" 2482.9 kB \u00b7 24 primitives (draw-call floor) \u00b7 39172 tris \u00b7 1 pivots, 1 slides, 2 lamps (7 named nodes, 31 names un-sanitised) \u00b7 materials: castIron, chrome, glass, paintedDark, paintedSteel, rawSteel, rubber, safetyStripe, wornSteel \u00b7 fetch 27 ms, parse 17 ms",
+    "[gltfRig] \"crawler-lite\" 2482.9 kB \u00b7 24 primitives (draw-call floor) \u00b7 39172 tris \u00b7 1 pivots, 1 slides, 2 lamps (7 named nodes, 31 names un-sanitised) \u00b7 materials: castIron, chrome, glass, paintedDark, paintedSteel, rawSteel, rubber, safetyStripe, wornSteel \u00b7 fetch 5 ms, parse 4 ms",
+    "[gltfRig] \"crawler-lite\" 2482.9 kB \u00b7 24 primitives (draw-call floor) \u00b7 39172 tris \u00b7 1 pivots, 1 slides, 2 lamps (7 named nodes, 31 names un-sanitised) \u00b7 materials: castIron, chrome, glass, paintedDark, paintedSteel, rawSteel, rubber, safetyStripe, wornSteel \u00b7 fetch 3 ms, parse 4 ms",
+    "[gltfRig] \"crawler-lite\" 2482.9 kB \u00b7 24 primitives (draw-call floor) \u00b7 39172 tris \u00b7 1 pivots, 1 slides, 2 lamps (7 named nodes, 31 names un-sanitised) \u00b7 materials: castIron, chrome, glass, paintedDark, paintedSteel, rawSteel, rubber, safetyStripe, wornSteel \u00b7 fetch 3 ms, parse 3 ms",
+    "[gltfRig] \"crawler-lite\" 2482.9 kB \u00b7 24 primitives (draw-call floor) \u00b7 39172 tris \u00b7 1 pivots, 1 slides, 2 lamps (7 named nodes, 31 names un-sanitised) \u00b7 materials: castIron, chrome, glass, paintedDark, paintedSteel, rawSteel, rubber, safetyStripe, wornSteel \u00b7 fetch 3 ms, parse 5 ms",
+    "[gltfRig] \"crawler-lite\" 2482.9 kB \u00b7 24 primitives (draw-call floor) \u00b7 39172 tris \u00b7 1 pivots, 1 slides, 2 lamps (7 named nodes, 31 names un-sanitised) \u00b7 materials: castIron, chrome, glass, paintedDark, paintedSteel, rawSteel, rubber, safetyStripe, wornSteel \u00b7 fetch 3 ms, parse 3 ms",
+    "[gltfRig] \"crawler-lite\" 2482.9 kB \u00b7 24 primitives (draw-call floor) \u00b7 39172 tris \u00b7 1 pivots, 1 slides, 2 lamps (7 named nodes, 31 names un-sanitised) \u00b7 materials: castIron, chrome, glass, paintedDark, paintedSteel, rawSteel, rubber, safetyStripe, wornSteel \u00b7 fetch 2 ms, parse 3 ms",
+    "[gltfRig] \"crawler-lite\" 2482.9 kB \u00b7 24 primitives (draw-call floor) \u00b7 39172 tris \u00b7 1 pivots, 1 slides, 2 lamps (7 named nodes, 31 names un-sanitised) \u00b7 materials: castIron, chrome, glass, paintedDark, paintedSteel, rawSteel, rubber, safetyStripe, wornSteel \u00b7 fetch 2 ms, parse 4 ms",
+    "[gltfRig] \"crawler-lite\" 2482.9 kB \u00b7 24 primitives (draw-call floor) \u00b7 39172 tris \u00b7 1 pivots, 1 slides, 2 lamps (7 named nodes, 31 names un-sanitised) \u00b7 materials: castIron, chrome, glass, paintedDark, paintedSteel, rawSteel, rubber, safetyStripe, wornSteel \u00b7 fetch 3 ms, parse 4 ms",
+    "[gltfRig] \"crawler-lite\" 2482.9 kB \u00b7 24 primitives (draw-call floor) \u00b7 39172 tris \u00b7 1 pivots, 1 slides, 2 lamps (7 named nodes, 31 names un-sanitised) \u00b7 materials: castIron, chrome, glass, paintedDark, paintedSteel, rawSteel, rubber, safetyStripe, wornSteel \u00b7 fetch 3 ms, parse 4 ms",
+    "[gltfRig] \"cable-percussion\" 986.8 kB \u00b7 16 primitives (draw-call floor) \u00b7 15848 tris \u00b7 5 pivots, 1 slides, 2 lamps (13 named nodes, 29 names un-sanitised) \u00b7 materials: paintedSteel, wornSteel, castIron, rawSteel, paintedDark, rubber, safetyStripe \u00b7 fetch 2 ms, parse 2 ms",
+    "[gltfRig] \"cable-percussion\" 986.8 kB \u00b7 16 primitives (draw-call floor) \u00b7 15848 tris \u00b7 5 pivots, 1 slides, 2 lamps (13 named nodes, 29 names un-sanitised) \u00b7 materials: paintedSteel, wornSteel, castIron, rawSteel, paintedDark, rubber, safetyStripe \u00b7 fetch 2 ms, parse 2 ms",
+    "[gltfRig] \"crawler-th\" 2246.6 kB \u00b7 55 primitives (draw-call floor) \u00b7 37268 tris \u00b7 9 pivots, 5 slides, 8 lamps (31 named nodes, 86 names un-sanitised) \u00b7 materials: castIron, chrome, paintedDark, paintedSteel, rubber, glass, wornSteel, rawSteel, safetyStripe \u00b7 fetch 2 ms, parse 5 ms",
+    "[gltfRig] \"crawler-th\" 2246.6 kB \u00b7 55 primitives (draw-call floor) \u00b7 37268 tris \u00b7 9 pivots, 5 slides, 8 lamps (31 named nodes, 86 names un-sanitised) \u00b7 materials: castIron, chrome, paintedDark, paintedSteel, rubber, glass, wornSteel, rawSteel, safetyStripe \u00b7 fetch 2 ms, parse 4 ms",
+    "[gltfRig] \"crawler-th\" 2246.6 kB \u00b7 55 primitives (draw-call floor) \u00b7 37268 tris \u00b7 9 pivots, 5 slides, 8 lamps (31 named nodes, 86 names un-sanitised) \u00b7 materials: castIron, chrome, paintedDark, paintedSteel, rubber, glass, wornSteel, rawSteel, safetyStripe \u00b7 fetch 2 ms, parse 4 ms",
+    "[gltfRig] \"crawler-th\" 2246.6 kB \u00b7 55 primitives (draw-call floor) \u00b7 37268 tris \u00b7 9 pivots, 5 slides, 8 lamps (31 named nodes, 86 names un-sanitised) \u00b7 materials: castIron, chrome, paintedDark, paintedSteel, rubber, glass, wornSteel, rawSteel, safetyStripe \u00b7 fetch 2 ms, parse 4 ms",
+    "[gltfRig] \"crawler-th\" 2246.6 kB \u00b7 55 primitives (draw-call floor) \u00b7 37268 tris \u00b7 9 pivots, 5 slides, 8 lamps (31 named nodes, 86 names un-sanitised) \u00b7 materials: castIron, chrome, paintedDark, paintedSteel, rubber, glass, wornSteel, rawSteel, safetyStripe \u00b7 fetch 2 ms, parse 4 ms",
+    "[gltfRig] \"crawler-th\" 2246.6 kB \u00b7 55 primitives (draw-call floor) \u00b7 37268 tris \u00b7 9 pivots, 5 slides, 8 lamps (31 named nodes, 86 names un-sanitised) \u00b7 materials: castIron, chrome, paintedDark, paintedSteel, rubber, glass, wornSteel, rawSteel, safetyStripe \u00b7 fetch 3 ms, parse 11 ms",
+    "[gltfRig] \"crawler-th\" 2246.6 kB \u00b7 55 primitives (draw-call floor) \u00b7 37268 tris \u00b7 9 pivots, 5 slides, 8 lamps (31 named nodes, 86 names un-sanitised) \u00b7 materials: castIron, chrome, paintedDark, paintedSteel, rubber, glass, wornSteel, rawSteel, safetyStripe \u00b7 fetch 2 ms, parse 4 ms",
+    "[gltfRig] \"crawler-th\" 2246.6 kB \u00b7 55 primitives (draw-call floor) \u00b7 37268 tris \u00b7 9 pivots, 5 slides, 8 lamps (31 named nodes, 86 names un-sanitised) \u00b7 materials: castIron, chrome, paintedDark, paintedSteel, rubber, glass, wornSteel, rawSteel, safetyStripe \u00b7 fetch 2 ms, parse 6 ms",
+    "[gltfRig] \"dth-crawler\" 4019.4 kB \u00b7 46 primitives (draw-call floor) \u00b7 62252 tris \u00b7 9 pivots, 5 slides, 6 lamps (27 named nodes, 36 names un-sanitised) \u00b7 materials: paintedDark, rubber, castIron, chrome, wornSteel, paintedSteel, rawSteel, safetyStripe, glass \u00b7 fetch 4 ms, parse 6 ms",
+    "[gltfRig] \"dth-crawler\" 4019.4 kB \u00b7 46 primitives (draw-call floor) \u00b7 62252 tris \u00b7 9 pivots, 5 slides, 6 lamps (27 named nodes, 36 names un-sanitised) \u00b7 materials: paintedDark, rubber, castIron, chrome, wornSteel, paintedSteel, rawSteel, safetyStripe, glass \u00b7 fetch 3 ms, parse 7 ms",
+    "[gltfRig] \"dth-crawler\" 4019.4 kB \u00b7 46 primitives (draw-call floor) \u00b7 62252 tris \u00b7 9 pivots, 5 slides, 6 lamps (27 named nodes, 36 names un-sanitised) \u00b7 materials: paintedDark, rubber, castIron, chrome, wornSteel, paintedSteel, rawSteel, safetyStripe, glass \u00b7 fetch 4 ms, parse 5 ms",
+    "[gltfRig] \"dth-crawler\" 4019.4 kB \u00b7 46 primitives (draw-call floor) \u00b7 62252 tris \u00b7 9 pivots, 5 slides, 6 lamps (27 named nodes, 36 names un-sanitised) \u00b7 materials: paintedDark, rubber, castIron, chrome, wornSteel, paintedSteel, rawSteel, safetyStripe, glass \u00b7 fetch 4 ms, parse 7 ms",
+    "[gltfRig] \"core-rig\" 1353.3 kB \u00b7 33 primitives (draw-call floor) \u00b7 23052 tris \u00b7 7 pivots, 5 slides, 4 lamps (21 named nodes, 54 names un-sanitised) \u00b7 materials: castIron, chrome, glass, paintedDark, paintedSteel, rawSteel, rubber, wornSteel, safetyStripe \u00b7 fetch 2 ms, parse 3 ms",
+    "[gltfRig] \"core-rig\" 1353.3 kB \u00b7 33 primitives (draw-call floor) \u00b7 23052 tris \u00b7 7 pivots, 5 slides, 4 lamps (21 named nodes, 54 names un-sanitised) \u00b7 materials: castIron, chrome, glass, paintedDark, paintedSteel, rawSteel, rubber, wornSteel, safetyStripe \u00b7 fetch 2 ms, parse 3 ms",
+    "[gltfRig] \"core-rig\" 1353.3 kB \u00b7 33 primitives (draw-call floor) \u00b7 23052 tris \u00b7 7 pivots, 5 slides, 4 lamps (21 named nodes, 54 names un-sanitised) \u00b7 materials: castIron, chrome, glass, paintedDark, paintedSteel, rawSteel, rubber, wornSteel, safetyStripe \u00b7 fetch 2 ms, parse 4 ms",
+    "[gltfRig] \"core-rig\" 1353.3 kB \u00b7 33 primitives (draw-call floor) \u00b7 23052 tris \u00b7 7 pivots, 5 slides, 4 lamps (21 named nodes, 54 names un-sanitised) \u00b7 materials: castIron, chrome, glass, paintedDark, paintedSteel, rawSteel, rubber, wornSteel, safetyStripe \u00b7 fetch 1 ms, parse 4 ms",
+    "[gltfRig] \"core-rig\" 1353.3 kB \u00b7 33 primitives (draw-call floor) \u00b7 23052 tris \u00b7 7 pivots, 5 slides, 4 lamps (21 named nodes, 54 names un-sanitised) \u00b7 materials: castIron, chrome, glass, paintedDark, paintedSteel, rawSteel, rubber, wornSteel, safetyStripe \u00b7 fetch 2 ms, parse 4 ms",
+    "[gltfRig] \"core-rig\" 1353.3 kB \u00b7 33 primitives (draw-call floor) \u00b7 23052 tris \u00b7 7 pivots, 5 slides, 4 lamps (21 named nodes, 54 names un-sanitised) \u00b7 materials: castIron, chrome, glass, paintedDark, paintedSteel, rawSteel, rubber, wornSteel, safetyStripe \u00b7 fetch 2 ms, parse 3 ms",
+    "[gltfRig] \"foundation-bg\" 4386.5 kB \u00b7 33 primitives (draw-call floor) \u00b7 67892 tris \u00b7 3 pivots, 4 slides, 4 lamps (18 named nodes, 21 names un-sanitised) \u00b7 materials: castIron, paintedDark, rawSteel, rubber, safetyStripe, wornSteel, paintedSteel, chrome, glass \u00b7 fetch 4 ms, parse 5 ms",
+    "[gltfRig] \"foundation-bg\" 4386.5 kB \u00b7 33 primitives (draw-call floor) \u00b7 67892 tris \u00b7 3 pivots, 4 slides, 4 lamps (18 named nodes, 21 names un-sanitised) \u00b7 materials: castIron, paintedDark, rawSteel, rubber, safetyStripe, wornSteel, paintedSteel, chrome, glass \u00b7 fetch 4 ms, parse 8 ms",
+    "[gltfRig] \"foundation-bg\" 4386.5 kB \u00b7 33 primitives (draw-call floor) \u00b7 67892 tris \u00b7 3 pivots, 4 slides, 4 lamps (18 named nodes, 21 names un-sanitised) \u00b7 materials: castIron, paintedDark, rawSteel, rubber, safetyStripe, wornSteel, paintedSteel, chrome, glass \u00b7 fetch 4 ms, parse 4 ms",
+    "[gltfRig] \"foundation-bg\" 4386.5 kB \u00b7 33 primitives (draw-call floor) \u00b7 67892 tris \u00b7 3 pivots, 4 slides, 4 lamps (18 named nodes, 21 names un-sanitised) \u00b7 materials: castIron, paintedDark, rawSteel, rubber, safetyStripe, wornSteel, paintedSteel, chrome, glass \u00b7 fetch 3 ms, parse 6 ms",
+    "[gltfRig] \"foundation-bg\" 4386.5 kB \u00b7 33 primitives (draw-call floor) \u00b7 67892 tris \u00b7 3 pivots, 4 slides, 4 lamps (18 named nodes, 21 names un-sanitised) \u00b7 materials: castIron, paintedDark, rawSteel, rubber, safetyStripe, wornSteel, paintedSteel, chrome, glass \u00b7 fetch 3 ms, parse 4 ms",
+    "[gltfRig] \"foundation-bg\" 4386.5 kB \u00b7 33 primitives (draw-call floor) \u00b7 67892 tris \u00b7 3 pivots, 4 slides, 4 lamps (18 named nodes, 21 names un-sanitised) \u00b7 materials: castIron, paintedDark, rawSteel, rubber, safetyStripe, wornSteel, paintedSteel, chrome, glass \u00b7 fetch 4 ms, parse 5 ms",
+    "[gltfRig] \"cfa-rig\" 4408.0 kB \u00b7 39 primitives (draw-call floor) \u00b7 67468 tris \u00b7 7 pivots, 3 slides, 6 lamps (26 named nodes, 65 names un-sanitised) \u00b7 materials: paintedDark, wornSteel, castIron, glass, paintedSteel, rawSteel, rubber, safetyStripe, chrome \u00b7 fetch 4 ms, parse 11 ms",
+    "[gltfRig] \"cfa-rig\" 4408.0 kB \u00b7 39 primitives (draw-call floor) \u00b7 67468 tris \u00b7 7 pivots, 3 slides, 6 lamps (26 named nodes, 65 names un-sanitised) \u00b7 materials: paintedDark, wornSteel, castIron, glass, paintedSteel, rawSteel, rubber, safetyStripe, chrome \u00b7 fetch 4 ms, parse 6 ms",
+    "[gltfRig] \"cfa-rig\" 4408.0 kB \u00b7 39 primitives (draw-call floor) \u00b7 67468 tris \u00b7 7 pivots, 3 slides, 6 lamps (26 named nodes, 65 names un-sanitised) \u00b7 materials: paintedDark, wornSteel, castIron, glass, paintedSteel, rawSteel, rubber, safetyStripe, chrome \u00b7 fetch 4 ms, parse 4 ms",
+    "[gltfRig] \"cfa-rig\" 4408.0 kB \u00b7 39 primitives (draw-call floor) \u00b7 67468 tris \u00b7 7 pivots, 3 slides, 6 lamps (26 named nodes, 65 names un-sanitised) \u00b7 materials: paintedDark, wornSteel, castIron, glass, paintedSteel, rawSteel, rubber, safetyStripe, chrome \u00b7 fetch 5 ms, parse 5 ms",
+    "[gltfRig] \"cfa-rig\" 4408.0 kB \u00b7 39 primitives (draw-call floor) \u00b7 67468 tris \u00b7 7 pivots, 3 slides, 6 lamps (26 named nodes, 65 names un-sanitised) \u00b7 materials: paintedDark, wornSteel, castIron, glass, paintedSteel, rawSteel, rubber, safetyStripe, chrome \u00b7 fetch 4 ms, parse 4 ms",
+    "[gltfRig] \"cfa-rig\" 4408.0 kB \u00b7 39 primitives (draw-call floor) \u00b7 67468 tris \u00b7 7 pivots, 3 slides, 6 lamps (26 named nodes, 65 names un-sanitised) \u00b7 materials: paintedDark, wornSteel, castIron, glass, paintedSteel, rawSteel, rubber, safetyStripe, chrome \u00b7 fetch 5 ms, parse 5 ms",
+    "[gltfRig] \"cfa-rig\" 4408.0 kB \u00b7 39 primitives (draw-call floor) \u00b7 67468 tris \u00b7 7 pivots, 3 slides, 6 lamps (26 named nodes, 65 names un-sanitised) \u00b7 materials: paintedDark, wornSteel, castIron, glass, paintedSteel, rawSteel, rubber, safetyStripe, chrome \u00b7 fetch 4 ms, parse 4 ms",
+    "[gltfRig] \"cfa-rig\" 4408.0 kB \u00b7 39 primitives (draw-call floor) \u00b7 67468 tris \u00b7 7 pivots, 3 slides, 6 lamps (26 named nodes, 65 names un-sanitised) \u00b7 materials: paintedDark, wornSteel, castIron, glass, paintedSteel, rawSteel, rubber, safetyStripe, chrome \u00b7 fetch 4 ms, parse 6 ms",
+    "[gltfRig] \"oil-derrick\" 3220.1 kB \u00b7 19 primitives (draw-call floor) \u00b7 50384 tris \u00b7 3 pivots, 1 slides, 13 lamps (36 named nodes, 44 names un-sanitised) \u00b7 materials: castIron, rawSteel, chrome, paintedDark, paintedSteel, wornSteel, glass, rubber, safetyStripe \u00b7 fetch 3 ms, parse 3 ms",
+    "[gltfRig] \"oil-derrick\" 3220.1 kB \u00b7 19 primitives (draw-call floor) \u00b7 50384 tris \u00b7 3 pivots, 1 slides, 13 lamps (36 named nodes, 44 names un-sanitised) \u00b7 materials: castIron, rawSteel, chrome, paintedDark, paintedSteel, wornSteel, glass, rubber, safetyStripe \u00b7 fetch 3 ms, parse 4 ms",
+    "[gltfRig] \"hdd-rig\" 2747.4 kB \u00b7 51 primitives (draw-call floor) \u00b7 42904 tris \u00b7 5 pivots, 6 slides, 5 lamps (23 named nodes, 74 names un-sanitised) \u00b7 materials: castIron, chrome, paintedSteel, wornSteel, paintedDark, rawSteel, rubber, safetyStripe, glass \u00b7 fetch 3 ms, parse 4 ms",
+    "[gltfRig] \"hdd-rig\" 2747.4 kB \u00b7 51 primitives (draw-call floor) \u00b7 42904 tris \u00b7 5 pivots, 6 slides, 5 lamps (23 named nodes, 74 names un-sanitised) \u00b7 materials: castIron, chrome, paintedSteel, wornSteel, paintedDark, rawSteel, rubber, safetyStripe, glass \u00b7 fetch 3 ms, parse 9 ms",
+    "[gltfRig] \"sonic-truck\" 1152.9 kB \u00b7 33 primitives (draw-call floor) \u00b7 19308 tris \u00b7 3 pivots, 6 slides, 5 lamps (21 named nodes, 54 names un-sanitised) \u00b7 materials: castIron, paintedSteel, glass, paintedDark, rawSteel, rubber, wornSteel, chrome, safetyStripe \u00b7 fetch 2 ms, parse 3 ms",
+    "[gltfRig] \"sonic-truck\" 1152.9 kB \u00b7 33 primitives (draw-call floor) \u00b7 19308 tris \u00b7 3 pivots, 6 slides, 5 lamps (21 named nodes, 54 names un-sanitised) \u00b7 materials: castIron, paintedSteel, glass, paintedDark, rawSteel, rubber, wornSteel, chrome, safetyStripe \u00b7 fetch 2 ms, parse 2 ms",
+    "[gltfRig] \"sonic-truck\" 1152.9 kB \u00b7 33 primitives (draw-call floor) \u00b7 19308 tris \u00b7 3 pivots, 6 slides, 5 lamps (21 named nodes, 54 names un-sanitised) \u00b7 materials: castIron, paintedSteel, glass, paintedDark, rawSteel, rubber, wornSteel, chrome, safetyStripe \u00b7 fetch 1 ms, parse 3 ms",
+    "[gltfRig] \"sonic-truck\" 1152.9 kB \u00b7 33 primitives (draw-call floor) \u00b7 19308 tris \u00b7 3 pivots, 6 slides, 5 lamps (21 named nodes, 54 names un-sanitised) \u00b7 materials: castIron, paintedSteel, glass, paintedDark, rawSteel, rubber, wornSteel, chrome, safetyStripe \u00b7 fetch 1 ms, parse 2 ms",
+    "[gltfRig] \"rc-rig\" 4626.7 kB \u00b7 44 primitives (draw-call floor) \u00b7 70912 tris \u00b7 6 pivots, 5 slides, 7 lamps (29 named nodes, 191 names un-sanitised) \u00b7 materials: chrome, paintedSteel, castIron, paintedDark, rawSteel, wornSteel, rubber, safetyStripe \u00b7 fetch 4 ms, parse 6 ms",
+    "[gltfRig] \"rc-rig\" 4626.7 kB \u00b7 44 primitives (draw-call floor) \u00b7 70912 tris \u00b7 6 pivots, 5 slides, 7 lamps (29 named nodes, 191 names un-sanitised) \u00b7 materials: chrome, paintedSteel, castIron, paintedDark, rawSteel, wornSteel, rubber, safetyStripe \u00b7 fetch 4 ms, parse 9 ms",
+    "[gltfRig] \"rc-rig\" 4626.7 kB \u00b7 44 primitives (draw-call floor) \u00b7 70912 tris \u00b7 6 pivots, 5 slides, 7 lamps (29 named nodes, 191 names un-sanitised) \u00b7 materials: chrome, paintedSteel, castIron, paintedDark, rawSteel, wornSteel, rubber, safetyStripe \u00b7 fetch 4 ms, parse 6 ms",
+    "[gltfRig] \"rc-rig\" 4626.7 kB \u00b7 44 primitives (draw-call floor) \u00b7 70912 tris \u00b7 6 pivots, 5 slides, 7 lamps (29 named nodes, 191 names un-sanitised) \u00b7 materials: chrome, paintedSteel, castIron, paintedDark, rawSteel, wornSteel, rubber, safetyStripe \u00b7 fetch 4 ms, parse 7 ms",
+    "[gltfRig] \"tunnel-jumbo\" 1304.3 kB \u00b7 53 primitives (draw-call floor) \u00b7 24280 tris \u00b7 21 pivots, 9 slides, 11 lamps (53 named nodes, 105 names un-sanitised) \u00b7 materials: paintedDark, paintedSteel, rawSteel, rubber, safetyStripe, wornSteel, chrome \u00b7 fetch 2 ms, parse 5 ms",
+    "[gltfRig] \"tunnel-jumbo\" 1304.3 kB \u00b7 53 primitives (draw-call floor) \u00b7 24280 tris \u00b7 21 pivots, 9 slides, 11 lamps (53 named nodes, 105 names un-sanitised) \u00b7 materials: paintedDark, paintedSteel, rawSteel, rubber, safetyStripe, wornSteel, chrome \u00b7 fetch 2 ms, parse 4 ms",
+    "[gltfRig] \"tunnel-jumbo\" 1304.3 kB \u00b7 53 primitives (draw-call floor) \u00b7 24280 tris \u00b7 21 pivots, 9 slides, 11 lamps (53 named nodes, 105 names un-sanitised) \u00b7 materials: paintedDark, paintedSteel, rawSteel, rubber, safetyStripe, wornSteel, chrome \u00b7 fetch 2 ms, parse 4 ms",
+    "[gltfRig] \"tunnel-jumbo\" 1304.3 kB \u00b7 53 primitives (draw-call floor) \u00b7 24280 tris \u00b7 21 pivots, 9 slides, 11 lamps (53 named nodes, 105 names un-sanitised) \u00b7 materials: paintedDark, paintedSteel, rawSteel, rubber, safetyStripe, wornSteel, chrome \u00b7 fetch 1 ms, parse 3 ms",
+    "[gltfRig] \"longhole-rig\" 1229.2 kB \u00b7 44 primitives (draw-call floor) \u00b7 19208 tris \u00b7 9 pivots, 8 slides, 12 lamps (42 named nodes, 87 names un-sanitised) \u00b7 materials: castIron, chrome, glass, paintedDark, paintedSteel, rawSteel, rubber, safetyStripe, wornSteel \u00b7 fetch 2 ms, parse 3 ms",
+    "[gltfRig] \"longhole-rig\" 1229.2 kB \u00b7 44 primitives (draw-call floor) \u00b7 19208 tris \u00b7 9 pivots, 8 slides, 12 lamps (42 named nodes, 87 names un-sanitised) \u00b7 materials: castIron, chrome, glass, paintedDark, paintedSteel, rawSteel, rubber, safetyStripe, wornSteel \u00b7 fetch 2 ms, parse 5 ms",
+    "[gltfRig] \"longhole-rig\" 1229.2 kB \u00b7 44 primitives (draw-call floor) \u00b7 19208 tris \u00b7 9 pivots, 8 slides, 12 lamps (42 named nodes, 87 names un-sanitised) \u00b7 materials: castIron, chrome, glass, paintedDark, paintedSteel, rawSteel, rubber, safetyStripe, wornSteel \u00b7 fetch 2 ms, parse 4 ms",
+    "[gltfRig] \"longhole-rig\" 1229.2 kB \u00b7 44 primitives (draw-call floor) \u00b7 19208 tris \u00b7 9 pivots, 8 slides, 12 lamps (42 named nodes, 87 names un-sanitised) \u00b7 materials: castIron, chrome, glass, paintedDark, paintedSteel, rawSteel, rubber, safetyStripe, wornSteel \u00b7 fetch 1 ms, parse 3 ms",
+    "[gltfRig] \"bolter\" 2268.9 kB \u00b7 47 primitives (draw-call floor) \u00b7 36956 tris \u00b7 10 pivots, 7 slides, 13 lamps (45 named nodes, 55 names un-sanitised) \u00b7 materials: paintedDark, chrome, wornSteel, paintedSteel, rubber, galvanised, rawSteel, castIron, safetyStripe \u00b7 fetch 2 ms, parse 4 ms",
+    "[gltfRig] \"bolter\" 2268.9 kB \u00b7 47 primitives (draw-call floor) \u00b7 36956 tris \u00b7 10 pivots, 7 slides, 13 lamps (45 named nodes, 55 names un-sanitised) \u00b7 materials: paintedDark, chrome, wornSteel, paintedSteel, rubber, galvanised, rawSteel, castIron, safetyStripe \u00b7 fetch 2 ms, parse 4 ms",
+    "[gltfRig] \"bolter\" 2268.9 kB \u00b7 47 primitives (draw-call floor) \u00b7 36956 tris \u00b7 10 pivots, 7 slides, 13 lamps (45 named nodes, 55 names un-sanitised) \u00b7 materials: paintedDark, chrome, wornSteel, paintedSteel, rubber, galvanised, rawSteel, castIron, safetyStripe \u00b7 fetch 2 ms, parse 5 ms",
+    "[gltfRig] \"bolter\" 2268.9 kB \u00b7 47 primitives (draw-call floor) \u00b7 36956 tris \u00b7 10 pivots, 7 slides, 13 lamps (45 named nodes, 55 names un-sanitised) \u00b7 materials: paintedDark, chrome, wornSteel, paintedSteel, rubber, galvanised, rawSteel, castIron, safetyStripe \u00b7 fetch 2 ms, parse 4 ms",
+    "[gltfRig] \"pd55\" 4668.4 kB \u00b7 66 primitives (draw-call floor) \u00b7 71264 tris \u00b7 14 pivots, 9 slides, 4 lamps (33 named nodes, 99 names un-sanitised) \u00b7 materials: paintedSteel, chrome, glass, paintedDark, rubber, wornSteel, rawSteel, castIron, safetyStripe \u00b7 fetch 4 ms, parse 5 ms",
+    "[gltfRig] \"pd55\" 4668.4 kB \u00b7 66 primitives (draw-call floor) \u00b7 71264 tris \u00b7 14 pivots, 9 slides, 4 lamps (33 named nodes, 99 names un-sanitised) \u00b7 materials: paintedSteel, chrome, glass, paintedDark, rubber, wornSteel, rawSteel, castIron, safetyStripe \u00b7 fetch 4 ms, parse 7 ms",
+    "[gltfRig] \"pd55\" 4668.4 kB \u00b7 66 primitives (draw-call floor) \u00b7 71264 tris \u00b7 14 pivots, 9 slides, 4 lamps (33 named nodes, 99 names un-sanitised) \u00b7 materials: paintedSteel, chrome, glass, paintedDark, rubber, wornSteel, rawSteel, castIron, safetyStripe \u00b7 fetch 4 ms, parse 11 ms",
+    "[gltfRig] \"pd55\" 4668.4 kB \u00b7 66 primitives (draw-call floor) \u00b7 71264 tris \u00b7 14 pivots, 9 slides, 4 lamps (33 named nodes, 99 names un-sanitised) \u00b7 materials: paintedSteel, chrome, glass, paintedDark, rubber, wornSteel, rawSteel, castIron, safetyStripe \u00b7 fetch 4 ms, parse 7 ms",
+    "[gltfRig] \"si-rig\" 1483.7 kB \u00b7 39 primitives (draw-call floor) \u00b7 22024 tris \u00b7 2 pivots, 7 slides, 2 lamps (14 named nodes, 53 names un-sanitised) \u00b7 materials: glass, paintedDark, wornSteel, castIron, chrome, paintedSteel, rawSteel, rubber, safetyStripe \u00b7 fetch 2 ms, parse 3 ms",
+    "[gltfRig] \"si-rig\" 1483.7 kB \u00b7 39 primitives (draw-call floor) \u00b7 22024 tris \u00b7 2 pivots, 7 slides, 2 lamps (14 named nodes, 53 names un-sanitised) \u00b7 materials: glass, paintedDark, wornSteel, castIron, chrome, paintedSteel, rawSteel, rubber, safetyStripe \u00b7 fetch 2 ms, parse 3 ms",
+    "[gltfRig] \"si-rig\" 1483.7 kB \u00b7 39 primitives (draw-call floor) \u00b7 22024 tris \u00b7 2 pivots, 7 slides, 2 lamps (14 named nodes, 53 names un-sanitised) \u00b7 materials: glass, paintedDark, wornSteel, castIron, chrome, paintedSteel, rawSteel, rubber, safetyStripe \u00b7 fetch 3 ms, parse 5 ms",
+    "[gltfRig] \"si-rig\" 1483.7 kB \u00b7 39 primitives (draw-call floor) \u00b7 22024 tris \u00b7 2 pivots, 7 slides, 2 lamps (14 named nodes, 53 names un-sanitised) \u00b7 materials: glass, paintedDark, wornSteel, castIron, chrome, paintedSteel, rawSteel, rubber, safetyStripe \u00b7 fetch 3 ms, parse 7 ms",
+    "[gltfRig] \"si-rig\" 1483.7 kB \u00b7 39 primitives (draw-call floor) \u00b7 22024 tris \u00b7 2 pivots, 7 slides, 2 lamps (14 named nodes, 53 names un-sanitised) \u00b7 materials: glass, paintedDark, wornSteel, castIron, chrome, paintedSteel, rawSteel, rubber, safetyStripe \u00b7 fetch 3 ms, parse 4 ms",
+    "[gltfRig] \"si-rig\" 1483.7 kB \u00b7 39 primitives (draw-call floor) \u00b7 22024 tris \u00b7 2 pivots, 7 slides, 2 lamps (14 named nodes, 53 names un-sanitised) \u00b7 materials: glass, paintedDark, wornSteel, castIron, chrome, paintedSteel, rawSteel, rubber, safetyStripe \u00b7 fetch 2 ms, parse 5 ms",
+    "[gltfRig] \"cpt-unit\" 1850.8 kB \u00b7 27 primitives (draw-call floor) \u00b7 28134 tris \u00b7 0 pivots, 5 slides, 5 lamps (16 named nodes, 43 names un-sanitised) \u00b7 materials: castIron, paintedDark, paintedSteel, rawSteel, safetyStripe, wornSteel, chrome, glass, rubber \u00b7 fetch 3 ms, parse 4 ms",
+    "[gltfRig] \"cpt-unit\" 1850.8 kB \u00b7 27 primitives (draw-call floor) \u00b7 28134 tris \u00b7 0 pivots, 5 slides, 5 lamps (16 named nodes, 43 names un-sanitised) \u00b7 materials: castIron, paintedDark, paintedSteel, rawSteel, safetyStripe, wornSteel, chrome, glass, rubber \u00b7 fetch 3 ms, parse 5 ms",
+    "[gltfRig] \"raisebore\" 2279.7 kB \u00b7 21 primitives (draw-call floor) \u00b7 36880 tris \u00b7 1 pivots, 1 slides, 2 lamps (7 named nodes, 28 names un-sanitised) \u00b7 materials: castIron, chrome, paintedDark, paintedSteel, rawSteel, wornSteel, castConcrete, concrete, galvanised, glass, rubber, safetyStripe, timber \u00b7 fetch 3 ms, parse 5 ms",
+    "[gltfRig] \"raisebore\" 2279.7 kB \u00b7 21 primitives (draw-call floor) \u00b7 36880 tris \u00b7 1 pivots, 1 slides, 2 lamps (7 named nodes, 28 names un-sanitised) \u00b7 materials: castIron, chrome, paintedDark, paintedSteel, rawSteel, wornSteel, castConcrete, concrete, galvanised, glass, rubber, safetyStripe, timber \u00b7 fetch 3 ms, parse 4 ms",
+    "[gltfRig] \"piling-leader\" 1966.7 kB \u00b7 57 primitives (draw-call floor) \u00b7 31956 tris \u00b7 10 pivots, 13 slides, 5 lamps (37 named nodes, 41 names un-sanitised) \u00b7 materials: rawSteel, wornSteel, paintedDark, safetyStripe, rubber, chrome, castIron, glass, paintedSteel \u00b7 fetch 6 ms, parse 7 ms",
+    "[rig] glb build \"piling-leader\" failed \u2014 Error: piling-leader: hammer-ram requires its authored carriage parent and positive stroke_m",
+    "[gltfRig] \"piling-leader\" 1966.7 kB \u00b7 57 primitives (draw-call floor) \u00b7 31956 tris \u00b7 10 pivots, 13 slides, 5 lamps (37 named nodes, 41 names un-sanitised) \u00b7 materials: rawSteel, wornSteel, paintedDark, safetyStripe, rubber, chrome, castIron, glass, paintedSteel \u00b7 fetch 9 ms, parse 14 ms",
+    "[rig] glb build \"piling-leader\" failed \u2014 Error: piling-leader: hammer-ram requires its authored carriage parent and positive stroke_m",
+    "[gltfRig] \"piling-leader\" 1966.7 kB \u00b7 57 primitives (draw-call floor) \u00b7 31956 tris \u00b7 10 pivots, 13 slides, 5 lamps (37 named nodes, 41 names un-sanitised) \u00b7 materials: rawSteel, wornSteel, paintedDark, safetyStripe, rubber, chrome, castIron, glass, paintedSteel \u00b7 fetch 5 ms, parse 7 ms",
+    "[rig] glb build \"piling-leader\" failed \u2014 Error: piling-leader: hammer-ram requires its authored carriage parent and positive stroke_m",
+    "[gltfRig] \"piling-leader\" 1966.7 kB \u00b7 57 primitives (draw-call floor) \u00b7 31956 tris \u00b7 10 pivots, 13 slides, 5 lamps (37 named nodes, 41 names un-sanitised) \u00b7 materials: rawSteel, wornSteel, paintedDark, safetyStripe, rubber, chrome, castIron, glass, paintedSteel \u00b7 fetch 4 ms, parse 7 ms",
+    "[rig] glb build \"piling-leader\" failed \u2014 Error: piling-leader: hammer-ram requires its authored carriage parent and positive stroke_m",
+    "[gltfRig] \"piling-leader\" 1966.7 kB \u00b7 57 primitives (draw-call floor) \u00b7 31956 tris \u00b7 10 pivots, 13 slides, 5 lamps (37 named nodes, 41 names un-sanitised) \u00b7 materials: rawSteel, wornSteel, paintedDark, safetyStripe, rubber, chrome, castIron, glass, paintedSteel \u00b7 fetch 5 ms, parse 9 ms",
+    "[rig] glb build \"piling-leader\" failed \u2014 Error: piling-leader: hammer-ram requires its authored carriage parent and positive stroke_m",
+    "[gltfRig] \"piling-leader\" 1966.7 kB \u00b7 57 primitives (draw-call floor) \u00b7 31956 tris \u00b7 10 pivots, 13 slides, 5 lamps (37 named nodes, 41 names un-sanitised) \u00b7 materials: rawSteel, wornSteel, paintedDark, safetyStripe, rubber, chrome, castIron, glass, paintedSteel \u00b7 fetch 4 ms, parse 8 ms",
+    "[rig] glb build \"piling-leader\" failed \u2014 Error: piling-leader: hammer-ram requires its authored carriage parent and positive stroke_m",
+    "[gltfRig] \"piling-leader\" 1966.7 kB \u00b7 57 primitives (draw-call floor) \u00b7 31956 tris \u00b7 10 pivots, 13 slides, 5 lamps (37 named nodes, 41 names un-sanitised) \u00b7 materials: rawSteel, wornSteel, paintedDark, safetyStripe, rubber, chrome, castIron, glass, paintedSteel \u00b7 fetch 3 ms, parse 8 ms",
+    "[gltfRig] \"piling-leader\" 1966.7 kB \u00b7 57 primitives (draw-call floor) \u00b7 31956 tris \u00b7 10 pivots, 13 slides, 5 lamps (37 named nodes, 41 names un-sanitised) \u00b7 materials: rawSteel, wornSteel, paintedDark, safetyStripe, rubber, chrome, castIron, glass, paintedSteel \u00b7 fetch 3 ms, parse 8 ms",
+    "[gltfRig] \"piling-leader\" 1966.7 kB \u00b7 57 primitives (draw-call floor) \u00b7 31956 tris \u00b7 10 pivots, 13 slides, 5 lamps (37 named nodes, 41 names un-sanitised) \u00b7 materials: rawSteel, wornSteel, paintedDark, safetyStripe, rubber, chrome, castIron, glass, paintedSteel \u00b7 fetch 3 ms, parse 7 ms",
+    "[gltfRig] \"piling-leader\" 1966.7 kB \u00b7 57 primitives (draw-call floor) \u00b7 31956 tris \u00b7 10 pivots, 13 slides, 5 lamps (37 named nodes, 41 names un-sanitised) \u00b7 materials: rawSteel, wornSteel, paintedDark, safetyStripe, rubber, chrome, castIron, glass, paintedSteel \u00b7 fetch 3 ms, parse 6 ms",
+    "[gltfRig] \"piling-leader\" 1966.7 kB \u00b7 57 primitives (draw-call floor) \u00b7 31956 tris \u00b7 10 pivots, 13 slides, 5 lamps (37 named nodes, 41 names un-sanitised) \u00b7 materials: rawSteel, wornSteel, paintedDark, safetyStripe, rubber, chrome, castIron, glass, paintedSteel \u00b7 fetch 3 ms, parse 6 ms"
+  ],
+  "limits": [
+    "CPU transforms only; no rendered visibility, clearance, cadence quality or draw-call approval.",
+    "Pinned comparison is valid only for this bounded adapter review; future intentional rig changes require a new review baseline."
+  ],
+  "negativeControls": [
+    {
+      "flag": "--counterfactual",
+      "exitCode": 1,
+      "passed": false,
+      "toolHash": "0e73ea2c7b66a651bd4208ac396ff283c1247830f5085183459e442d6c15f875",
+      "failures": [
+        {
+          "name": "Actual simulator drives ram local motion; renderer time cannot advance a frozen simulator",
+          "error": "AssertionError [ERR_ASSERTION]: ram must change parent-local position, not only inherit carriage movement"
+        }
+      ]
+    },
+    {
+      "flag": "--placement-counterfactual",
+      "exitCode": 1,
+      "passed": false,
+      "toolHash": "0e73ea2c7b66a651bd4208ac396ff283c1247830f5085183459e442d6c15f875",
+      "failures": [
+        {
+          "name": "Actual simulator drives ram local motion; renderer time cannot advance a frozen simulator",
+          "error": "AssertionError [ERR_ASSERTION]: carriage follows authored rest minus actual simulator depth: 29.720000381469724 != 14.600000381469727"
+        }
+      ]
+    }
+  ]
+}

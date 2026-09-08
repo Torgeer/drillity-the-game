@@ -51,8 +51,9 @@ ${fn(sitePath, 'abandonFromSite')}
 return {leave:abandonFromSite,${unmount},${onBack}};`);
 const makeShell = new Function('ctx', 'SCENES', 'document', 'C', 'createModalFocus', `
 let current={id:SCENES.SITE,inst:{}},overlayStack=[],disposed=false;
-const root=C.h('div'),overlayEl=C.h('div'),reduced=false,DUR={d3:0};
-document.body.appendChild(root);root.appendChild(overlayEl);
+const root=C.h('div'),stage=C.h('div.ui-stage'),overlayEl=C.h('div'),reduced=false,DUR={d3:0};
+${variable(shellPath, 'toastsEl')}
+document.body.appendChild(root);root.appendChild(stage);stage.appendChild(toastsEl);stage.appendChild(overlayEl);
 ${variable(shellPath, 'modalFocus')}
 const dur=()=>0,requestAnimationFrame=fn=>fn(),setTimeout=fn=>{fn();return 0};
 ${variable(shellPath, 'PARENT')}
@@ -61,6 +62,7 @@ function show(scene) {
   current.inst.unmount?.(); current={id:scene,inst:{}}; ctx.state.scene=scene;
   if(dismissedOverlay) modalFocus.focusFallback();
 }
+${fn(shellPath, 'placeNotifications')}
 ${fn(shellPath, 'closeOverlay')}
 ${fn(shellPath, 'sheet')}
 ${fn(shellPath, 'confirm')}
@@ -96,11 +98,17 @@ function documentBoundary() {
   };
   function node(selector = 'div', ...values) {
     const attrs = new Map(), classes = new Set(selector.split('.').slice(1));
-    const el = { tagName: selector.split('.')[0].toUpperCase(), children: [], parentElement: null, style: {}, hidden: false,
+    const el = { tagName: selector.split('.')[0].toUpperCase(), children: [], parentElement: null, style: {}, dataset: {}, hidden: false,
       get isConnected() { return this === doc.body || !!this.parentElement?.isConnected; },
       get tabIndex() { return attrs.has('tabindex') ? Number(attrs.get('tabindex')) : this.tagName === 'BUTTON' ? 0 : -1; },
-      classList: { add(...v) { v.forEach(x => classes.add(x)); }, contains(v) { return classes.has(v); } },
+      classList: { add(...v) { v.forEach(x => classes.add(x)); }, contains(v) { return classes.has(v); },
+        toggle(v, force) { const on = force ?? !classes.has(v); if (on) classes.add(v); else classes.delete(v); return on; } },
+      get lastElementChild() { return this.children.at(-1) || null; },
+      get nextSibling() { return this.parentElement?.children[this.parentElement.children.indexOf(this) + 1] || null; },
       appendChild(child) { if (child?.children) { child.remove(); child.parentElement = this; this.children.push(child); } return child; },
+      insertBefore(child, anchor) { if (!anchor) return this.appendChild(child);
+        assert.equal(anchor.parentElement, this, 'Notification anchor belongs to its host');
+        child.remove(); child.parentElement = this; this.children.splice(this.children.indexOf(anchor), 0, child); return child; },
       remove() { if (this.parentElement) { const siblings = this.parentElement.children; siblings.splice(siblings.indexOf(this), 1); this.parentElement = null; } },
       contains(other) { return this === other || this.children.some(child => child.contains(other)); },
       hasAttribute(name) { return attrs.has(name); }, getAttribute(name) { return attrs.get(name) ?? null; },

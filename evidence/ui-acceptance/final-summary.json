@@ -1,0 +1,22 @@
+{
+  "scope": "Final assembled Site DOM smoke and required headed reach/HUD layout gates; no FPS or phone-device certification",
+  "site": {
+    "report": "evidence/ui-acceptance/site-final-smoke/current.json",
+    "cases": 76,
+    "passed": true,
+    "errors": [],
+    "source_hash_mismatches": []
+  },
+  "reach": {
+    "report": ".hudqa/reach-report.json",
+    "log": "evidence/ui-acceptance/reach-final.log",
+    "cases": 5,
+    "passed": true
+  },
+  "hud": {
+    "report": ".hudqa/assembled-final-report.json",
+    "text": ".hudqa/assembled-final-report.txt",
+    "gates_failed": [],
+    "passed": true
+  }
+}

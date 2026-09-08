@@ -81,7 +81,8 @@ function fixture(options = {}, make = VSlider) {
 }
 
 if (process.argv.includes('--baseline')) {
-  const baseline = execFileSync('git', ['show', 'HEAD:src/ui/components.js'], { cwd: root, encoding: 'utf8' });
+  // Pin the reproduced defect; committing its repair must not move this control.
+  const baseline = execFileSync('git', ['show', '1f2d285f54ff71b9f05dac895bee0400aa9f61f7:src/ui/components.js'], { cwd: root, encoding: 'utf8' });
   const { slider, changes } = fixture({}, loadSlider(baseline));
   // The shipping site applied only these two flags, leaving keyboard listeners live.
   slider.el.classList.add('is-locked'); slider.el.setAttribute('aria-disabled', 'true');

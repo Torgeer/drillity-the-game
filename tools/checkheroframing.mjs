@@ -32,7 +32,7 @@ const jsonPath = option('--json');
 const { createGltfRigs } = await import(pathToFileURL(resolve(rigRoot, 'src/core/gltfRig.js')));
 const sha = path => createHash('sha256').update(readFileSync(path)).digest('hex');
 const report = { instrument: 'Actual Three CPU projection; authored and runtime-driven GLB poses; no GPU',
-  rigRoot, checks: 0, cases: [], section: [], models: {}, failures: [],
+  rigRoot, checks: 0, cases: [], section: [], models: {}, failures: [], negativeControls: [],
   rendererSha256: sha(resolve(ROOT, 'src/core/renderer.js')),
   loaderSha256: sha(resolve(rigRoot, 'src/core/gltfRig.js')),
   factorySha256: sha(resolve(ROOT, 'src/rig/rigFactory.js')),
@@ -135,7 +135,15 @@ function geometryExtent(root, camera, view) {
   return extent;
 }
 
-function feedPoses(root) {
+function pileEndpoints(node) {
+  const { travel_lo_m: lo, travel_hi_m: hi, travel_m: span, axis } = node.userData;
+  assert.equal(axis, 'z', 'piling legacy metadata is authored in Blender Z');
+  assert.ok([lo, hi, span, node.position.y].every(Number.isFinite), 'piling offsets/rest must be finite');
+  assert.ok(lo <= 0 && hi >= 0 && lo < hi, 'piling offsets must bracket exported rest');
+  assert.ok(Math.abs((hi - lo) - span) < 1e-9, 'piling offset span agrees with authored travel');
+  return { min: node.position.y + lo, max: node.position.y + hi, rest: node.position.y };
+}
+function feedPoses(root, id) {
   const poses = [{ label: 'rest', apply: () => {} }];
   root.traverse(node => {
     if (!node.name.startsWith('slide:carriage')) return;
@@ -144,7 +152,11 @@ function feedPoses(root) {
     assert.ok(['x', 'y', 'z'].includes(axis), `${node.name} declares a glTF travel axis`);
     const rest = node.position[axis];
     let min = data.travel_min_m, max = data.travel_max_m;
-    if (!Number.isFinite(min) || !Number.isFinite(max)) {
+    if (id === 'piling-leader' && node.name === 'slide:carriage') {
+      // The author subtracts HAMMER_BOT from each endpoint. These are signed
+      // rest offsets; treating travel_m as an upward offset invents a pose.
+      ({ min, max } = pileEndpoints(node));
+    } else if (!Number.isFinite(min) || !Number.isFinite(max)) {
       if (!Number.isFinite(data.travel_m)) return;
       min = Math.min(rest, rest + data.travel_m);
       max = Math.max(rest, rest + data.travel_m);
@@ -269,9 +281,11 @@ try {
     report.models[id] = sha(resolve(rigRoot, `public/models/${id}.glb`));
   }
   await rig.init();
+  const originalMethod = rig.getMethodId();
   let previousRoot;
   for (const id of ids) {
     check(rig.setRig(id), `real rig system selects ${id}`);
+    rig.setMethod(id === 'piling-leader' ? 'driven-pile' : originalMethod);
     const spec = rig.getSpec();
     check(spec.source === 'glb' && spec.id === id, `${id}: selected actual GLB source`);
     const root = rig.group.children.find(child => child.visible && child.userData.spec === spec);
@@ -286,6 +300,20 @@ try {
     // classification, and apply the live placed rig root matrix to it.
     const unmerged = loader.builder(id)(THREE, ctx).root;
     const driven = loader.builder(id)(THREE, ctx).root;
+    let pile;
+    if (id === 'piling-leader') {
+      const pythonPath = resolve(rigRoot, 'blender/piling_leader.py');
+      const python = readFileSync(pythonPath, 'utf8');
+      assert.match(python, /ham\['travel_lo_m'\] = 1\.40 - HAMMER_BOT/);
+      assert.match(python, /ham\['travel_hi_m'\] = \(LEADER_TOP - 2\.60\) - HAMMER_L - HAMMER_BOT/);
+      assert.match(readFileSync(resolve(rigRoot, 'blender/lib/rig.py'), 'utf8'), /export_yup=True/);
+      pile = pileEndpoints(unmerged.getObjectByName('slide:carriage'));
+      report.pileAuthoring = { pythonSha256: sha(pythonPath), ...pile, method: rig.getMethodId() };
+      for (const patch of [{ travel_lo_m: undefined }, { travel_hi_m: NaN }, { travel_m: -1 }]) {
+        const node = unmerged.getObjectByName('slide:carriage');
+        assert.throws(() => pileEndpoints({ position: node.position, userData: { ...node.userData, ...patch } }), /piling/);
+      }
+    }
     unmerged.matrixAutoUpdate = false;
     unmerged.matrix.copy(root.matrixWorld);
     unmerged.updateMatrixWorld(true);
@@ -307,7 +335,7 @@ try {
       const sectionMetre = pixel(new THREE.Vector3(0, 1, 0), view.sectionCamera, view.section);
       const surfacePxPerM = origin.y - metre.y;
       const sectionPxPerM = sectionOrigin.y - sectionMetre.y;
-      for (const pose of feedPoses(unmerged)) {
+      for (const pose of feedPoses(unmerged, id)) {
         pose.apply();
         unmerged.updateMatrixWorld(true);
         const actual = geometryExtent(unmerged, camera, view);
@@ -319,30 +347,48 @@ try {
           surfacePxPerM, sectionPxPerM, scaleRatio: surfacePxPerM / sectionPxPerM });
         pose.restore?.();
       }
-      for (const load of [0, 1]) for (const u of [0, 0.5, 1 - 1e-9]) {
-        // The public update path wraps at a rod's exact end. Sample immediately
-        // before wrap; the exact declared endpoints are checked above and by
+      if (pile) {
+        const node = unmerged.getObjectByName('slide:carriage');
+        const rest = node.position.y;
+        node.position.y = rest + node.userData.travel_m;
+        unmerged.updateMatrixWorld(true);
+        const oldPose = geometryExtent(unmerged, camera, view);
+        const rejected = oldPose.top < view.surface.h * 0.06 - 1e-4;
+        check(rejected, 'piling old invented upper pose still fails unchanged crown threshold');
+        report.negativeControls.push({ id, viewport: view.viewport, kind: 'old-positive-span-pose',
+          coordinate: node.position.y, crownPx: oldPose.top, minimumCrownPx: view.surface.h * 0.06 - 1e-4, rejected });
+        node.position.y = rest; unmerged.updateMatrixWorld(true);
+      }
+      const depths = pile ? [0, 3 - 1e-9, 3, 3 + 1e-9, pile.rest - pile.min, pile.max - pile.min]
+        : [0, 0.5, 1 - 1e-9].map(u => u * 3);
+      for (const load of [0, 1]) for (const sampleDepth of depths) {
+        const u = sampleDepth / 3;
+        // Rod-feed paths wrap at a rod's exact end; sample before wrap. Piling
+        // instead probes continuity across that depth and its authored limit.
+        // The exact declared endpoints are checked above and by
         // checkrigmetadata's actual setCarriage driver. No flex or work-pose
         // transform is bypassed here. rpm/percussion are held at zero so this
         // is a feed/load probe, not a claim about arbitrary rotary envelopes.
         const state = { ...ctx.state, drill: { active: true, phase: 'drilling',
-          depth: u * 3, actionDepth: u * 3, rpm: 0, wob: load, torque: load, wear: 0 } };
+          depth: sampleDepth, actionDepth: sampleDepth, rpm: 0, wob: load, torque: load, wear: 0 } };
         for (let i = 0; i < 60; i++) rig.update(1 / 60, state);
         root.updateWorldMatrix(true, true);
         copyDrivenPose(root, driven);
         const drivenFit = framer.fit(rig, request);
         const drivenCamera = fittedCamera(drivenFit, view);
         const actual = geometryExtent(driven, drivenCamera, view);
-        const label = `runtime-feed-${u.toFixed(3)}-load-${load}`;
+        const label = pile ? `runtime-depth-${sampleDepth}-load-${load}` : `runtime-feed-${u.toFixed(3)}-load-${load}`;
         assertExtent(actual, view, `${id} ${label}`);
         const liveCarriage = root.getObjectByName('slide:carriage');
         const axis = liveCarriage?.userData.travel_axis || 'y';
-        const endpoints = feedPoses(unmerged).filter(p => p.label.startsWith('slide:carriage:'));
+        const endpoints = feedPoses(unmerged, id).filter(p => p.label.startsWith('slide:carriage:'));
         if (liveCarriage && endpoints.length === 2) {
           const lo = endpoints.find(p => p.label.endsWith(':min')).coordinate;
           const hi = endpoints.find(p => p.label.endsWith(':max')).coordinate;
           const direction = liveCarriage.userData.travel_direction || 'min';
-          near(liveCarriage.position[axis], direction === 'min' ? hi + (lo - hi) * u : lo + (hi - lo) * u,
+          const expected = pile ? Math.max(pile.min, Math.min(pile.max, pile.rest - sampleDepth))
+            : direction === 'min' ? hi + (lo - hi) * u : lo + (hi - lo) * u;
+          near(liveCarriage.position[axis], expected,
             `${id}: public update drives actual declared feed`, 1e-5);
         }
         report.cases.push({ id, pose: label, viewport: view.viewport, surface: view.surface,

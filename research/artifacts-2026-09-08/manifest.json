@@ -1,0 +1,191 @@
+[
+  {
+    "file": "research/artifacts-2026-09-08/oil-orbit-live-01-report.json.gz",
+    "source": "evidence/fps/oil-orbit-live-01/report.json",
+    "status": "accepted live capture",
+    "sourceBytes": 15880622,
+    "sourceSha256": "b514e6070cee0ee69a20b25c87783d7d306ac182881835119f39aa1d4f1e8e9e",
+    "gzipBytes": 929733,
+    "gzipSha256": "ce99a9ab1948345566e5e3c9b9b94d9b78941641a4c576db6b95f7053d4305ed"
+  },
+  {
+    "file": "research/artifacts-2026-09-08/oil-orbit-live-01-cpu-live.cpuprofile.gz",
+    "source": "evidence/fps/oil-orbit-live-01/cpu-live.cpuprofile",
+    "status": "accepted live capture",
+    "sourceBytes": 772999,
+    "sourceSha256": "4e9810df2cb3812e16058a75a66b0b676ace6eb4333dbc006fee062a229205d2",
+    "gzipBytes": 133648,
+    "gzipSha256": "7820f079607b38f4a33e6b2f0b10ce40f6ba997c3ff1966479170dbf724f8463"
+  },
+  {
+    "file": "research/artifacts-2026-09-08/oil-orbit-live-01-trace-live.json.gz",
+    "source": "evidence/fps/oil-orbit-live-01/trace-live.json",
+    "status": "accepted live capture",
+    "sourceBytes": 17454973,
+    "sourceSha256": "d6f90c13f7fe6847e09815a3169af2705513c5d779b2289e92172af57af4af20",
+    "gzipBytes": 1145346,
+    "gzipSha256": "b2ed160ab68e81483062319c0777ee870acee1985db4990c2feb5a3349f03634"
+  },
+  {
+    "file": "research/artifacts-2026-09-08/oil-orbit-live-uninstrumented-01-report.json.gz",
+    "source": "evidence/fps/oil-orbit-live-uninstrumented-01/report.json",
+    "status": "accepted uninstrumented control; not exact overhead A/B",
+    "sourceBytes": 10171928,
+    "sourceSha256": "133a4440b7d6ed8bf339050ff4d907589ecf30bddb9c75466f0794d842c57c3e",
+    "gzipBytes": 736326,
+    "gzipSha256": "8d077524ec17622536aac20495cf5d98bc531ee00c116598d2f70aa2360239df"
+  },
+  {
+    "file": "research/artifacts-2026-09-08/oil-vfx-on-first-01-report.json.gz",
+    "source": "evidence/fps/oil-vfx-on-first-01/report.json",
+    "status": "rejected by CDP timing gate",
+    "sourceBytes": 16401638,
+    "sourceSha256": "fa30b2be2100ba021c0ff0ace3e7e3a97d80f5bc211108b229b5ce207e2f004d",
+    "gzipBytes": 835235,
+    "gzipSha256": "8073b9dc5d41acfa2a03cb0e9d6013f379dbdf5e6a51a02b6bf75ee3015569ab"
+  },
+  {
+    "file": "research/artifacts-2026-09-08/oil-vfx-on-first-01-cpu-live.cpuprofile.gz",
+    "source": "evidence/fps/oil-vfx-on-first-01/cpu-live.cpuprofile",
+    "status": "rejected by CDP timing gate",
+    "sourceBytes": 790702,
+    "sourceSha256": "bf8eaaf6b3c94fd8793d04b31aa3122db6461f12f3356ea4dc7d7ec8bb94dd5b",
+    "gzipBytes": 129656,
+    "gzipSha256": "6ce76ed5557053c639b2e01f871d18b77ea7cf032dc2e72b57880343c4b0231e"
+  },
+  {
+    "file": "research/artifacts-2026-09-08/oil-vfx-on-first-01-trace-live.json.gz",
+    "source": "evidence/fps/oil-vfx-on-first-01/trace-live.json",
+    "status": "rejected by CDP timing gate",
+    "sourceBytes": 11914432,
+    "sourceSha256": "bfa69c181981e9948973c47f6dd3e26d4b5db4f412f709e0572a862347c536fa",
+    "gzipBytes": 766554,
+    "gzipSha256": "69931693551805f11ffc3a4048f81ea0e143649f056ce1a9e92d37b1baed7ba4"
+  },
+  {
+    "file": "research/artifacts-2026-09-08/oil-vfx-on-first-02-report.json.gz",
+    "source": "evidence/fps/oil-vfx-on-first-02/report.json",
+    "status": "rejected by CDP timing gate",
+    "sourceBytes": 18811471,
+    "sourceSha256": "89cee36f6af906eec507117e1914d69a73899783f52153eba62682dcfae28d04",
+    "gzipBytes": 948756,
+    "gzipSha256": "880c817c2a96336cc0c50af7630ff8fab131bfc197d9a6f0366eff052a09c552"
+  },
+  {
+    "file": "research/artifacts-2026-09-08/oil-vfx-on-first-02-cpu-live.cpuprofile.gz",
+    "source": "evidence/fps/oil-vfx-on-first-02/cpu-live.cpuprofile",
+    "status": "rejected by CDP timing gate",
+    "sourceBytes": 770633,
+    "sourceSha256": "4830ffdb43d86b90687b9cc5102b11f43ea33f2f325e221125404a0827351a86",
+    "gzipBytes": 128718,
+    "gzipSha256": "3315ae3664b4c15b8049fea3903fa7b137a51d8c51ef5534265aa5a8915c9aae"
+  },
+  {
+    "file": "research/artifacts-2026-09-08/oil-vfx-on-first-02-trace-live.json.gz",
+    "source": "evidence/fps/oil-vfx-on-first-02/trace-live.json",
+    "status": "rejected by CDP timing gate",
+    "sourceBytes": 13456264,
+    "sourceSha256": "5ac42bd15637beccf310f66e3fa7b0e76badb680f736cdb0927f8c3b47432d0e",
+    "gzipBytes": 866668,
+    "gzipSha256": "dac10e8db95b3fe90f2a2c5ccdcd751d4c359fd74beb08b5e80ba287da2bc0b1"
+  },
+  {
+    "file": "research/artifacts-2026-09-08/pile-motion-browser-final-01-report.json.gz",
+    "source": "evidence/pile-motion-browser-final-01/report.json",
+    "status": "rejected visibility/held-identity/asset checks",
+    "sourceBytes": 1985610,
+    "sourceSha256": "00bc674b6e20c817507c55706e6935da0a5b81cbf33a97fe86a9c6b192163bfd",
+    "gzipBytes": 171678,
+    "gzipSha256": "c05426dd4b68966cd3ecf2725ff74ed06932ad7848639f13abc3183736b07fa5"
+  },
+  {
+    "file": "research/artifacts-2026-09-08/cpu-assembled-07.log.gz",
+    "source": "evidence/verification/cpu-assembled-07.log",
+    "status": "CPU prefix/suffix evidence; failed intermediate runs retain their status",
+    "sourceBytes": 200583,
+    "sourceSha256": "80eff5b8266a8c7881840bff567590eb97bae09490c618a3db13f7522fc26d96",
+    "gzipBytes": 44781,
+    "gzipSha256": "3e735d00e3916c97f992d8eb7b247e8814c72641d88a61e62ce675fbc4ad0ba1"
+  },
+  {
+    "file": "research/artifacts-2026-09-08/cpu-assembled-07-suffix.log.gz",
+    "source": "evidence/verification/cpu-assembled-07-suffix.log",
+    "status": "CPU prefix/suffix evidence; failed intermediate runs retain their status",
+    "sourceBytes": 8499,
+    "sourceSha256": "e4efe8478929c5ca9447f7030822b80dcb1f6529bdcc48d96480f7e6be7215e1",
+    "gzipBytes": 3622,
+    "gzipSha256": "5605190fbc64590524aaff7e414cb94ca35c232bd2420d5fc86296bc2baad30e"
+  },
+  {
+    "file": "research/artifacts-2026-09-08/cpu-assembled-07-final-suffix.log.gz",
+    "source": "evidence/verification/cpu-assembled-07-final-suffix.log",
+    "status": "CPU prefix/suffix evidence; failed intermediate runs retain their status",
+    "sourceBytes": 99177,
+    "sourceSha256": "b29df2ea0efbd5b4548624358be324665044c8396e4a92aadde4667f0a1b84bf",
+    "gzipBytes": 20618,
+    "gzipSha256": "c61a7a52038d637532a9bc9b0969b3331f9b8587e232a1bb9c81d8ebf13090ea"
+  },
+  {
+    "file": "research/artifacts-2026-09-08/pile-placement-assembled-01.log.gz",
+    "source": "evidence/verification/pile-placement-assembled-01.log",
+    "status": "failed: historical ram-only carriage comparison; preserved before combined oracle repair",
+    "sourceBytes": 36022,
+    "sourceSha256": "efa510e0fbcfc30041175bb716a3e1857bfa39b4498b7033a003ad66914a2b88",
+    "gzipBytes": 4527,
+    "gzipSha256": "7da751c34b256cd74de55a2e25b13e199d99121f14b8481c23f3210dc42d2bfe"
+  },
+  {
+    "file": "research/artifacts-2026-09-08/build-assembled-final-03.log.gz",
+    "source": "evidence/verification/build-assembled-final-03.log",
+    "status": "failed in hero framing: old piling endpoint fixture; no headed stage reached",
+    "sourceBytes": 118834,
+    "sourceSha256": "ce26a1adbc8ebd50af3c830d09e328b77aee703430eb1ef516251d2c7ac5417f",
+    "gzipBytes": 28105,
+    "gzipSha256": "c4ef52673c112d1caf63fb74ea4b443b2481604016ea19d84482aec692f7e393"
+  },
+  {
+    "file": "research/artifacts-2026-09-08/build-checkpoint-04.log.gz",
+    "source": "evidence/verification/build-checkpoint-04.log",
+    "status": "passed: Vite/checkbuild and before/after input identity",
+    "sourceBytes": 10262,
+    "sourceSha256": "7390cc431ce6311288b26a0951d710dcddea2e2fa1468c908f30e2e24104676d",
+    "gzipBytes": 1458,
+    "gzipSha256": "e3b54aea2091cda297e84b9584ecc64e5d7fa2e01fbc91333ca29cb7a064c3fd"
+  },
+  {
+    "file": "research/artifacts-2026-09-08/site-final-smoke-current.json.gz",
+    "source": "evidence/ui-acceptance/site-final-smoke/current.json",
+    "status": "passed: 76 actual Site DOM smoke cases before later piling placement correction",
+    "sourceBytes": 2428317,
+    "sourceSha256": "57607072304fcaef2f538c9c17e671554031a9835691326a713425cceeccc801",
+    "gzipBytes": 118028,
+    "gzipSha256": "6a64e253671b97747173c4f5d2dabd473243edb6bd8e877caa3700d33ae9e94b"
+  },
+  {
+    "file": "research/artifacts-2026-09-08/build-assembled-final-04.log.gz",
+    "source": "evidence/verification/build-assembled-final-04.log",
+    "status": "passed:complete npm run build;allCPU,headed reach,headless bandshare,612 GPU-disabled Site DOM cases,Vite/checkbuild",
+    "sourceBytes": 323165,
+    "sourceSha256": "e9245bddc6a93333c27350c9f3b769ea0f2267e76087297897dc48761eb9ad01",
+    "gzipBytes": 69310,
+    "gzipSha256": "e416ca363ce53c917b299609dbaef28febc48f26ae2ccd3465f7e7728f27eae6"
+  },
+  {
+    "file": "research/artifacts-2026-09-08/site-dom-build-final-04.json.gz",
+    "source": "shots/drilling-view-space/current.json",
+    "status": "passed:612 actual Site DOM cases;GPU/WebGL disabled;not rendered3D or phone proof",
+    "sourceBytes": 16024074,
+    "sourceSha256": "89ec7ee55d0342cf30cb318c197f450b50c0cf2929bd15d3c8451341da6ad0cc",
+    "gzipBytes": 573892,
+    "gzipSha256": "4154b345f7f3abff0d39e640a23d26ccd027022cf1b0702a0475bdd73bd4f647"
+  },
+  {
+    "file": "research/artifacts-2026-09-08/assembled-final-report.txt.gz",
+    "source": ".hudqa/assembled-final-report.txt",
+    "status": "passed bounded headed HUD report before later piling placement; original generated whitespace preserved byte-for-byte",
+    "sourceBytes": 3778,
+    "sourceSha256": "d57b292cf63a50faf36f331649f6eba5c902b99422f97aa899c1477a5a34739f",
+    "gzipBytes": 977,
+    "gzipSha256": "38ca67a5d2e4f06897220b7f7035d3cd1262b1319315213f598d9c9acb7b6b52"
+  }
+]

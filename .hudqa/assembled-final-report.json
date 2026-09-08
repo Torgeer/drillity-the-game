@@ -1,0 +1,530 @@
+{
+  "tag": "assembled-final",
+  "cases": {
+    "rockbolt": {
+      "saidTwice": [],
+      "nothing": [],
+      "hudDrift": [],
+      "splitBad": [],
+      "painted": {
+        "max": 43,
+        "med": 43
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "smallTargets": [],
+      "targetsSeen": [
+        "actionbtn 80x68",
+        "railbtn 80x45",
+        "site__leave 80x45",
+        "vsl 80x68"
+      ],
+      "clipped": [],
+      "split": {
+        "surfPct": 54,
+        "sectPct": 46,
+        "stagePct": 65.2
+      },
+      "bands": {
+        "surface": {
+          "y": 40,
+          "h": 297
+        },
+        "section": {
+          "y": 337,
+          "h": 253
+        }
+      },
+      "dom": {
+        "screens": 3,
+        "liveNodes": 125,
+        "docNodes": 227,
+        "dockH": 254,
+        "stripH": 40,
+        "dockCount": 1,
+        "hud": {
+          "top": 40,
+          "bottom": 254
+        },
+        "perScreen": [
+          {
+            "className": "boot screen screen--boot",
+            "subtreeCount": 16,
+            "hidden": true
+          },
+          {
+            "className": "menu screen screen--menu",
+            "subtreeCount": 57,
+            "hidden": true
+          },
+          {
+            "className": "site screen screen--site",
+            "subtreeCount": 125,
+            "hidden": false
+          }
+        ],
+        "elsewhere": 26
+      }
+    },
+    "driven-pile": {
+      "saidTwice": [],
+      "nothing": [],
+      "hudDrift": [],
+      "splitBad": [],
+      "painted": {
+        "max": 38,
+        "med": 38
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "smallTargets": [],
+      "targetsSeen": [
+        "actionbtn 80x68",
+        "railbtn 80x45",
+        "site__leave 80x45",
+        "vsl 80x68"
+      ],
+      "clipped": [],
+      "split": {
+        "surfPct": 54,
+        "sectPct": 46,
+        "stagePct": 65.2
+      },
+      "bands": {
+        "surface": {
+          "y": 40,
+          "h": 297
+        },
+        "section": {
+          "y": 337,
+          "h": 253
+        }
+      },
+      "dom": {
+        "screens": 3,
+        "liveNodes": 125,
+        "docNodes": 227,
+        "dockH": 254,
+        "stripH": 40,
+        "dockCount": 1,
+        "hud": {
+          "top": 40,
+          "bottom": 254
+        },
+        "perScreen": [
+          {
+            "className": "boot screen screen--boot",
+            "subtreeCount": 16,
+            "hidden": true
+          },
+          {
+            "className": "menu screen screen--menu",
+            "subtreeCount": 57,
+            "hidden": true
+          },
+          {
+            "className": "site screen screen--site",
+            "subtreeCount": 125,
+            "hidden": false
+          }
+        ],
+        "elsewhere": 26
+      }
+    },
+    "rc": {
+      "saidTwice": [],
+      "nothing": [],
+      "hudDrift": [],
+      "splitBad": [],
+      "painted": {
+        "max": 39,
+        "med": 39
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "smallTargets": [],
+      "targetsSeen": [
+        "actionbtn 80x68",
+        "railbtn 80x45",
+        "site__leave 80x45",
+        "vsl 80x68"
+      ],
+      "clipped": [],
+      "split": {
+        "surfPct": 54,
+        "sectPct": 46,
+        "stagePct": 65.2
+      },
+      "bands": {
+        "surface": {
+          "y": 40,
+          "h": 297
+        },
+        "section": {
+          "y": 337,
+          "h": 253
+        }
+      },
+      "dom": {
+        "screens": 3,
+        "liveNodes": 125,
+        "docNodes": 227,
+        "dockH": 254,
+        "stripH": 40,
+        "dockCount": 1,
+        "hud": {
+          "top": 40,
+          "bottom": 254
+        },
+        "perScreen": [
+          {
+            "className": "boot screen screen--boot",
+            "subtreeCount": 16,
+            "hidden": true
+          },
+          {
+            "className": "menu screen screen--menu",
+            "subtreeCount": 57,
+            "hidden": true
+          },
+          {
+            "className": "site screen screen--site",
+            "subtreeCount": 125,
+            "hidden": false
+          }
+        ],
+        "elsewhere": 26
+      }
+    },
+    "dth": {
+      "saidTwice": [],
+      "nothing": [],
+      "hudDrift": [],
+      "splitBad": [],
+      "painted": {
+        "max": 36,
+        "med": 36
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "smallTargets": [],
+      "targetsSeen": [
+        "actionbtn 80x68",
+        "site__leave 80x45",
+        "vsl 80x68"
+      ],
+      "clipped": [],
+      "split": {
+        "surfPct": 54.1,
+        "sectPct": 45.9,
+        "stagePct": 72.7
+      },
+      "bands": {
+        "surface": {
+          "y": 40,
+          "h": 332
+        },
+        "section": {
+          "y": 372,
+          "h": 282
+        }
+      },
+      "dom": {
+        "screens": 3,
+        "liveNodes": 125,
+        "docNodes": 227,
+        "dockH": 190,
+        "stripH": 40,
+        "dockCount": 1,
+        "hud": {
+          "top": 40,
+          "bottom": 190
+        },
+        "perScreen": [
+          {
+            "className": "boot screen screen--boot",
+            "subtreeCount": 16,
+            "hidden": true
+          },
+          {
+            "className": "menu screen screen--menu",
+            "subtreeCount": 57,
+            "hidden": true
+          },
+          {
+            "className": "site screen screen--site",
+            "subtreeCount": 125,
+            "hidden": false
+          }
+        ],
+        "elsewhere": 26
+      }
+    },
+    "oil-rotary": {
+      "saidTwice": [],
+      "nothing": [],
+      "hudDrift": [],
+      "splitBad": [],
+      "painted": {
+        "max": 44,
+        "med": 44
+      },
+      "overlaps": 0,
+      "overlapList": [],
+      "onBand3D": [],
+      "smallTargets": [],
+      "targetsSeen": [
+        "actionbtn 80x68",
+        "railbtn 80x45",
+        "site__leave 80x45",
+        "vsl 80x68"
+      ],
+      "clipped": [],
+      "split": {
+        "surfPct": 54,
+        "sectPct": 46,
+        "stagePct": 65.2
+      },
+      "bands": {
+        "surface": {
+          "y": 40,
+          "h": 297
+        },
+        "section": {
+          "y": 337,
+          "h": 253
+        }
+      },
+      "dom": {
+        "screens": 3,
+        "liveNodes": 125,
+        "docNodes": 227,
+        "dockH": 254,
+        "stripH": 40,
+        "dockCount": 1,
+        "hud": {
+          "top": 40,
+          "bottom": 254
+        },
+        "perScreen": [
+          {
+            "className": "boot screen screen--boot",
+            "subtreeCount": 16,
+            "hidden": true
+          },
+          {
+            "className": "menu screen screen--menu",
+            "subtreeCount": 57,
+            "hidden": true
+          },
+          {
+            "className": "site screen screen--site",
+            "subtreeCount": 125,
+            "hidden": false
+          }
+        ],
+        "elsewhere": 26
+      }
+    }
+  },
+  "nav": [
+    {
+      "visit": 1,
+      "screens": 4,
+      "liveNodes": 125,
+      "docNodes": 865,
+      "dockH": 190,
+      "stripH": 40,
+      "dockCount": 1,
+      "hud": {
+        "top": 40,
+        "bottom": 190
+      },
+      "perScreen": [
+        {
+          "className": "boot screen screen--boot",
+          "subtreeCount": 16,
+          "hidden": true
+        },
+        {
+          "className": "menu screen screen--menu",
+          "subtreeCount": 57,
+          "hidden": true
+        },
+        {
+          "className": "site screen screen--site",
+          "subtreeCount": 125,
+          "hidden": false
+        },
+        {
+          "className": "screen screen--garage screen--solid",
+          "subtreeCount": 637,
+          "hidden": true
+        }
+      ],
+      "elsewhere": 26,
+      "overlaps": 0,
+      "painted": 32
+    },
+    {
+      "visit": 2,
+      "screens": 4,
+      "liveNodes": 125,
+      "docNodes": 865,
+      "dockH": 190,
+      "stripH": 40,
+      "dockCount": 1,
+      "hud": {
+        "top": 40,
+        "bottom": 190
+      },
+      "perScreen": [
+        {
+          "className": "boot screen screen--boot",
+          "subtreeCount": 16,
+          "hidden": true
+        },
+        {
+          "className": "menu screen screen--menu",
+          "subtreeCount": 57,
+          "hidden": true
+        },
+        {
+          "className": "site screen screen--site",
+          "subtreeCount": 125,
+          "hidden": false
+        },
+        {
+          "className": "screen screen--garage screen--solid",
+          "subtreeCount": 637,
+          "hidden": true
+        }
+      ],
+      "elsewhere": 26,
+      "overlaps": 0,
+      "painted": 32
+    },
+    {
+      "visit": 3,
+      "screens": 4,
+      "liveNodes": 125,
+      "docNodes": 865,
+      "dockH": 190,
+      "stripH": 40,
+      "dockCount": 1,
+      "hud": {
+        "top": 40,
+        "bottom": 190
+      },
+      "perScreen": [
+        {
+          "className": "boot screen screen--boot",
+          "subtreeCount": 16,
+          "hidden": true
+        },
+        {
+          "className": "menu screen screen--menu",
+          "subtreeCount": 57,
+          "hidden": true
+        },
+        {
+          "className": "site screen screen--site",
+          "subtreeCount": 125,
+          "hidden": false
+        },
+        {
+          "className": "screen screen--garage screen--solid",
+          "subtreeCount": 637,
+          "hidden": true
+        }
+      ],
+      "elsewhere": 26,
+      "overlaps": 0,
+      "painted": 32
+    },
+    {
+      "visit": 4,
+      "screens": 4,
+      "liveNodes": 125,
+      "docNodes": 865,
+      "dockH": 190,
+      "stripH": 40,
+      "dockCount": 1,
+      "hud": {
+        "top": 40,
+        "bottom": 190
+      },
+      "perScreen": [
+        {
+          "className": "boot screen screen--boot",
+          "subtreeCount": 16,
+          "hidden": true
+        },
+        {
+          "className": "menu screen screen--menu",
+          "subtreeCount": 57,
+          "hidden": true
+        },
+        {
+          "className": "site screen screen--site",
+          "subtreeCount": 125,
+          "hidden": false
+        },
+        {
+          "className": "screen screen--garage screen--solid",
+          "subtreeCount": 637,
+          "hidden": true
+        }
+      ],
+      "elsewhere": 26,
+      "overlaps": 0,
+      "painted": 32
+    },
+    {
+      "visit": 5,
+      "screens": 4,
+      "liveNodes": 125,
+      "docNodes": 865,
+      "dockH": 190,
+      "stripH": 40,
+      "dockCount": 1,
+      "hud": {
+        "top": 40,
+        "bottom": 190
+      },
+      "perScreen": [
+        {
+          "className": "boot screen screen--boot",
+          "subtreeCount": 16,
+          "hidden": true
+        },
+        {
+          "className": "menu screen screen--menu",
+          "subtreeCount": 57,
+          "hidden": true
+        },
+        {
+          "className": "site screen screen--site",
+          "subtreeCount": 125,
+          "hidden": false
+        },
+        {
+          "className": "screen screen--garage screen--solid",
+          "subtreeCount": 637,
+          "hidden": true
+        }
+      ],
+      "elsewhere": 26,
+      "overlaps": 0,
+      "painted": 32
+    }
+  ],
+  "errors": [],
+  "pageErrors": [],
+  "removedSelector": null,
+  "gatesFailed": []
+}

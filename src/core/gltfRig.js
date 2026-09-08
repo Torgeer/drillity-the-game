@@ -371,8 +371,8 @@ export function createGltfRigs(ctx) {
     return lifted;
   }
 
-  /** Explicit travel is in exported glTF parent coordinates, never guessed
-   * from a machine id or the older Blender-axis `axis` property. */
+  /** Explicit travel is in exported glTF parent coordinates. The piling
+   * legacy offset adapter below is tied to its committed authoring contract. */
   function travelContract(node, id) {
     const x = node.userData || {};
     const has = (key) => Object.prototype.hasOwnProperty.call(x, key);
@@ -382,6 +382,23 @@ export function createGltfRigs(ctx) {
     const fields = ['travel_min_m', 'travel_max_m', 'travel_space', 'travel_axis', 'travel_direction'];
     if (has('travel_m') && (typeof x.travel_m !== 'number' || !Number.isFinite(x.travel_m))) {
       fail('travel_m must be a finite number');
+    }
+    if (id === 'piling-leader' && node.name === 'slide:carriage') {
+      // piling_leader.py authors lo/hi as endpoint minus HAMMER_BOT, so these
+      // are offsets from the exported rest, not a positive stroke above it.
+      // Its Blender +Z rail becomes parent-local +Y via export_yup=True.
+      if (fields.some(has) || x.axis !== 'z') fail('piling legacy travel contract is ambiguous');
+      for (const key of ['travel_lo_m', 'travel_hi_m', 'travel_m']) {
+        if (!Number.isFinite(x[key])) fail(`${key} must be a finite number`);
+      }
+      const lo = x.travel_lo_m, hi = x.travel_hi_m, span = hi - lo;
+      if (!(lo < hi) || lo > 0 || hi < 0 || !Number.isFinite(span))
+        fail('piling travel offsets must contain the authored rest');
+      if (Math.abs(x.travel_m - span) > 1e-6 * Math.max(1, span, Math.abs(x.travel_m)))
+        fail('travel_m must equal the piling offset span');
+      const y = node.position.y;
+      if (![y, y + lo, y + hi].every(Number.isFinite)) fail('piling endpoints must be finite');
+      return { axis: 'y', range: [y + hi, y + lo], stationary: false };
     }
     if (!fields.some(has)) {
       const y = node.position.y;
@@ -806,6 +823,7 @@ export function createGltfRigs(ctx) {
       // Kelly selection must not inherit continuous feed merely from the rig ID.
       // This is an authored mechanism mapping, not a depth-capacity claim.
       if (prep.id === 'cfa-rig' && !travel.stationary) dyn.continuousAugerFeed = true;
+      if (prep.id === 'piling-leader') dyn.continuousPileFeed = true;
       dyn.mastHeight = prep.size.y;
       if (travel.stationary || travel.axis !== 'y') {
         // The existing flex driver bends a Y feed into Z. It must not erase

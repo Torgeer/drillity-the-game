@@ -9213,9 +9213,10 @@ export function createRigSystem(ctx) {
         if (dyn.kellyDriven && dyn.kelly) {
           dyn.kelly.setExt(clamp01(depth / Math.max(1, dyn.kelly.maxExt)));
           setCarriage(clamp01((depth % 3.0) / 3.0));
-        } else if ((dyn.continuousAugerFeed || dyn.augerDriven)
-          && (methodId === 'cfa' || methodId === 'cased-cfa')) {
-          // Continuous flight has no rod-length modulo. Consume metres of
+        } else if (((dyn.continuousAugerFeed || dyn.augerDriven)
+          && (methodId === 'cfa' || methodId === 'cased-cfa'))
+          || (dyn.continuousPileFeed && methodId === 'driven-pile')) {
+          // Continuous flight and driven pile have no rod-length modulo. Consume metres of
           // actual tool movement against the authored directed carriage span,
           // retaining its collared rest offset; no invented 14 m stroke and no
           // stretching a short machine to the contract's target. A GLB's rest

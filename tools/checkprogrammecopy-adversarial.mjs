@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/** Independent regression checks against committed HEAD and live telemetry.
+/** Independent regression checks against the pre-repair commit and live telemetry.
  * The uniform ground / short target are UI fixtures, not production-rate evidence.
  * Run: node tools/checkprogrammecopy-adversarial.mjs
  */
@@ -12,7 +12,8 @@ import { createDrillSim, methodOf } from '../src/sim/drilling.js';
 import { twoStageStatus, twoStageUnitCard } from '../src/ui/screens/site.js';
 
 const cwd = fileURLToPath(new URL('../', import.meta.url));
-const committed = execFileSync('git', ['show', 'HEAD:src/game/data.js'], { cwd, encoding: 'utf8' });
+// Keep the historical control reproducible after the repair itself is committed.
+const committed = execFileSync('git', ['show', '1f2d285f54ff71b9f05dac895bee0400aa9f61f7:src/game/data.js'], { cwd, encoding: 'utf8' });
 const dataUrl = new URL('../src/game/data.js', import.meta.url);
 const baselineSource = committed.replace(/from (['"])(\.[^'"]+)\1/g,
   (_, quote, path) => `from ${quote}${new URL(path, dataUrl).href}${quote}`);

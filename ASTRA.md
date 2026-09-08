@@ -1,10 +1,15 @@
 # ASTRA — handover
 
-**Current implementation checkpoint (2026-09-06):** read
-[`research/ASTRA-progress-2026-09-06.md`](research/ASTRA-progress-2026-09-06.md)
-for reviewed fixes, fresh measurements and active workstreams. The owner rules
-below remain in force. Historical gate results and open findings below must be
-reproduced against the current code before being treated as current failures.
+**Current implementation checkpoint (2026-09-08):** read
+[`handover.md`](handover.md) and the
+[`game completion audit`](research/GAME_COMPLETION_AUDIT_2026-09-08.md).
+The active integration branch is `codex/fps-investigation`, which contains
+Claude's complete `claude/merge-astra-sites` checkpoint `3aab87d` and the later
+reviewed work. Use the handover's current status and verification boundaries.
+The owner rules below remain in force. September 6 status, percentages and
+branch names below are historical; do not reopen repaired work from those
+paragraphs. The earlier [progress record](research/ASTRA-progress-2026-09-06.md)
+is preserved for its original evidence.
 
 ---
 

@@ -303,6 +303,8 @@ test('the actual programme-paint branch limits live preview refresh to at most e
   assert.ok(script.includes('refreshForecast()'), 'real branch must call the consumer');
   const clock = new Function(`let progAccum = 0, calls = 0;
     const simTel = null, prog = null;
+    // Execute the actual sampling consumer's non-sampling early return.
+    ${fn('observeSampleProduct')}
     function refreshForecast() { calls++; }
     function paintRail() {} function paintBlowChart() {} function checkUnit() {}
     return { step(dt) { ${script} }, calls: () => calls };`)();

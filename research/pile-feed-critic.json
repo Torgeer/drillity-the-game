@@ -1,0 +1,97 @@
+{
+  "passed": true,
+  "hashes": {
+    "src/core/gltfRig.js": "327251bbb066d2f1d1cc2b8612b57f70dc9e23a69d0a891dad970120f724d99f",
+    "src/rig/rigFactory.js": "1d70d64bb5de9274b7e6efd3db5460336e6dac228103d22857c85b0a8290c910",
+    "public/models/piling-leader.glb": "6a96b56031e3f8f05214940ed746de27dac9543382d51e505b543cd366daa5bd",
+    "blender/piling_leader.py": "bb5b22ab0d8c7e8c65a30a281f09a672a91cf576aff08309946f779c479c9daf",
+    "tools/checkpilefeed-adversarial.mjs": "6526a7485bd15aa3263b15e486c5b3b3ae510bff2ab83f74ed8d45f70ae11b70"
+  },
+  "checks": 31,
+  "mutations": [
+    "missing lower",
+    "missing upper",
+    "string lower",
+    "null upper",
+    "reversed",
+    "rest below span",
+    "rest above span",
+    "span mismatch",
+    "wrong legacy axis",
+    "mixed contracts"
+  ],
+  "authored": {
+    "rest": 14.600000381469727,
+    "lo": 1.4000003814697273,
+    "hi": 16.52000038146973,
+    "offsets": {
+      "travel_lo_m": -13.2,
+      "travel_hi_m": 1.92,
+      "travel_m": 15.12,
+      "axis": "z"
+    }
+  },
+  "rows": [
+    {
+      "depth": 0,
+      "expected": 14.600000381469727,
+      "observed": 14.600000381469727,
+      "capWorldY": 13.700000762939453
+    },
+    {
+      "depth": 0.12039552687581494,
+      "expected": 14.479604854593912,
+      "observed": 14.479604854593912,
+      "capWorldY": 13.579605236063639
+    },
+    {
+      "depth": 2.999,
+      "expected": 11.601000381469726,
+      "observed": 11.601000381469726,
+      "capWorldY": 10.701000762939453
+    },
+    {
+      "depth": 3,
+      "expected": 11.600000381469727,
+      "observed": 11.600000381469727,
+      "capWorldY": 10.700000762939453
+    },
+    {
+      "depth": 3.001,
+      "expected": 11.599000381469727,
+      "observed": 11.599000381469725,
+      "capWorldY": 10.699000762939452
+    },
+    {
+      "depth": 5,
+      "expected": 9.600000381469727,
+      "observed": 9.600000381469727,
+      "capWorldY": 8.700000762939453
+    },
+    {
+      "depth": 12,
+      "expected": 2.6000003814697266,
+      "observed": 2.6000003814697266,
+      "capWorldY": 1.7000007629394531
+    },
+    {
+      "depth": 13.2,
+      "expected": 1.4000003814697273,
+      "observed": 1.4000003814697273,
+      "capWorldY": 0.5000007629394538
+    },
+    {
+      "depth": 15,
+      "expected": 1.4000003814697273,
+      "observed": 1.4000003814697273,
+      "capWorldY": 0.5000007629394538
+    },
+    {
+      "depth": 25,
+      "expected": 1.4000003814697273,
+      "observed": 1.4000003814697273,
+      "capWorldY": 0.5000007629394538
+    }
+  ],
+  "limits": "No GPU visibility or clearance approval; sibling pile penetration and ropes are not certified."
+}

@@ -1,6 +1,6 @@
 # Live profiler independent review
 
-Status: the two recorded oil live captures now pass independent artifact
+Status: the original instrumented/control oil live captures pass independent artifact
 review as bounded diagnostics. Their phase association is credible; a
 specific rendering feature or the historical FPS cause remains unisolated.
 
@@ -260,3 +260,72 @@ from the probe: on/off GPU evidence, matched camera/depth/particle workload
 and the FPS-driven emission feedback still require review after capture.
 The earlier two raw live reports remain immutable evidence from the older
 `e3d94f5d…` profiler.
+
+## First actual particle probe: rejected evidence retained
+
+`evidence/fps/oil-vfx-on-first-01` is **overall invalid**. Independent reading
+confirms negative CPU profile time deltas at indices 15292, 25382, 25530 and
+28225: respectively −48, −38, −50 and −32 microseconds. These violate the
+existing CPU profile integrity rule. The values were not clamped or removed,
+and the gate was not relaxed. Their origin has not been established.
+
+The separate live and VFX mask assessors pass the recorded 1,801 frames.
+All 301 GPU queries completed and were deleted; none was discarded, pending
+or disjoint. The 448-entry source manifest remained unchanged and owned
+browser/server cleanup completed. Those facts preserve useful component
+diagnostics without promoting the failed run into accepted evidence.
+
+Among eligible drilling samples, on/off GPU medians are 25.298 / 26.085 ms
+(79 / 69 queries); RAF means are 31.665 / 31.808 ms. There is no useful
+observed four-layer reduction in this rejected series. LoadScale medians are
+0.530 / 0.532 and live particle medians 721 / 725.5. Rolling FPS medians are
+33.52 / 31.98, with substantially wider distributions; the adaptive workload
+and moving camera/depth remain part of the record. These are descriptive
+figures, not an accepted zero-cost result or proof that all VFX are cheap.
+
+The older baseline has a different source snapshot, camera and runtime
+trajectory. Its faster timings cannot establish that the new probe itself
+caused the later slowdown. The coordinator authorized one unchanged fresh
+retry, with an opposite-order run only if the retry passes all gates.
+
+| Rejected artifact | SHA-256 |
+| --- | --- |
+| `report.json` | `fa30b2be2100ba021c0ff0ace3e7e3a97d80f5bc211108b229b5ce207e2f004d` |
+| `cpu-live.cpuprofile` | `bf8eaaf6b3c94fd8793d04b31aa3122db6461f12f3356ea4dc7d7ec8bb94dd5b` |
+| `trace-live.json` | `bfa69c181981e9948973c47f6dd3e26d4b5db4f412f709e0572a862347c536fa` |
+
+## Final unchanged retry: rejected; capture work stopped
+
+`evidence/fps/oil-vfx-on-first-02` repeats the CPU-profile integrity failure.
+Independent reading confirms five negative time deltas: −58, −33, −31, −34
+and −52 microseconds at indices 19490, 23565, 29309, 29392 and 34586.
+Its **overall invalid classification is retained**. No opposite-order run
+was made, no sample was repaired, and no gate was relaxed.
+
+The separate live/mask checks pass 2,076 frames. All 346 GPU queries completed
+and were deleted; 96 on and 81 off query frames meet the predeclared
+eligibility rule. The source manifest is unchanged within the run and exactly
+matches the first rejected probe's manifest. Stable career/render setup also
+matches, but the actual initial camera does not. Both owned resources closed.
+
+Descriptively, eligible on/off GPU medians are 23.234 / 22.950 ms and RAF
+means 26.112 / 26.350 ms. The small GPU difference changes direction relative
+to the first probe, while RAF does not improve. On/off median loadScale is
+0.596 / 0.663 and median live particle count 797 / 831.5. Moving camera/depth,
+adaptive workload, only one ordering and failed overall integrity prevent a
+controlled savings claim. The two rejected runs neither establish a useful
+four-layer optimization nor prove those layers cost nothing.
+
+| Rejected retry artifact | SHA-256 |
+| --- | --- |
+| `report.json` | `89cee36f6af906eec507117e1914d69a73899783f52153eba62682dcfae28d04` |
+| `cpu-live.cpuprofile` | `4830ffdb43d86b90687b9cc5102b11f43ea33f2f325e221125404a0827351a86` |
+| `trace-live.json` | `5ac42bd15637beccf310f66e3fa7b0e76badb680f736cdb0927f8c3b47432d0e` |
+
+The coordinator stopped this experiment during the usage wind-down. A future
+separate hypothesis is the full-band `vfx:heatShimmer` quad and its framebuffer
+copy; it remained enabled in these particle probes and responds to engine /
+collar heat inputs. That is a source-derived candidate, not an isolated cost
+or a demonstrated FPS fix. The negative CPU sampling intervals also remain
+an unresolved diagnostic limitation. No further work or GPU run was started
+by this critic.
